@@ -1,0 +1,112 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "irsdk"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Jonathan Glanz", email = "jonathan.glanz@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  'PyYAML >= 5.3',
+  'folium >= 0.15',
+  'matplotlib >= 3.8.2',
+  'numpy',
+  'IPython',
+  'tabula-py',
+  'jpype1',
+  'pandas',
+  'click',
+  'protobuf',
+  "betterproto"
+]
+
+[project.urls]
+Documentation = "https://github.com/unknown/ir-data-playground-python#readme"
+Issues = "https://github.com/unknown/ir-data-playground-python/issues"
+Source = "https://github.com/unknown/ir-data-playground-python"
+
+[tool.hatch.version]
+path = "packages/python/irsdk/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "coverage[toml]>=6.5",
+  "pytest",
+  'jupyter',
+  "types-protobuf",
+
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+  "- coverage combine",
+  "coverage report",
+]
+cov = [
+  "test-cov",
+  "cov-report",
+]
+
+[tool.hatch.envs.proto]
+detached = true
+dependencies = [
+  "grpcio-tools",
+  "betterproto[compiler]",
+  "mypy-protobuf",
+]
+
+[tool.hatch.envs.proto.scripts]
+#protoc = """
+#python -m grpc_tools.protoc -I packages/proto --python_betterproto_out=packages/python/irsdk/models packages/proto/irsdk_models.proto
+#"""
+protoc = """
+python -m grpc_tools.protoc -I packages/proto --python_out=packages/python/irsdk/models --mypy_out=packages/python/irsdk/models packages/proto/irsdk_models.proto
+"""
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:packages/python/irsdk tests}"
+
+[tool.coverage.run]
+source_pkgs = ["irsdk", "tests"]
+branch = true
+parallel = true
+omit = [
+  "packages/python/irsdk/__about__.py",
+]
+
+[tool.coverage.paths]
+irsdk = ["irsdk", "*/ir-data-playground-python/packages/python/irsdk"]
+tests = ["tests", "*/ir-data-playground-python/packages/python-tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

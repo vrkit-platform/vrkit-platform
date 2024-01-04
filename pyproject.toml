@@ -52,7 +52,6 @@ dependencies = [
   "pytest",
   'jupyter',
   "types-protobuf",
-
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -85,12 +84,12 @@ python -m grpc_tools.protoc -I packages/proto --python_out=packages/python/irsdk
 [[tool.hatch.envs.all.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
-[tool.hatch.envs.types]
-dependencies = [
-  "mypy>=1.0.0",
-]
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:packages/python/irsdk tests}"
+#[tool.hatch.envs.types]
+#dependencies = [
+#  "mypy>=1.0.0",
+#]
+#[tool.hatch.envs.types.scripts]
+#check = "mypy --install-types --non-interactive {args:packages/python/irsdk tests}"
 
 [tool.coverage.run]
 source_pkgs = ["irsdk", "tests"]
@@ -101,12 +100,18 @@ omit = [
 ]
 
 [tool.coverage.paths]
-irsdk = ["irsdk", "*/ir-data-playground-python/packages/python/irsdk"]
-tests = ["tests", "*/ir-data-playground-python/packages/python-tests"]
+irsdk = ["irsdk", "*/packages/python/irsdk"]
+tests = ["tests", "*/packages/python-tests"]
 
 [tool.coverage.report]
 exclude_lines = [
   "no cov",
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  "packages/python/irsdk",
+  "packages/python/irsdk_tool"
 ]

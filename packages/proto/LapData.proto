@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+message LapMetadata {
+  uint32 lap = 1;
+  uint32 lap_time = 2;
+  uint32 incident_count = 3;
+  bool valid = 4;
+}
+
+message LapTrajectory  {
+  LapMetadata metadata = 1;
+
+  repeated LapTrajectoryPoint path = 10;
+}
+
+message LapTrajectoryPoint {
+
+  uint32 lap_time = 1;
+  float lap_percent_complete = 2;
+  float lap_distance = 3;
+
+  float latitude = 10;
+  float longitude = 11;
+  float altitude = 12;
+  float speed = 20;
+}

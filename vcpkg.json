@@ -1,0 +1,36 @@
+{
+  "name" : "irsdk-cpp",
+  "version" : "0.0.1",
+  "builtin-baseline" : "83972272512ce4ede5fc3b2ba98f6468b179f192",
+  "dependencies" : [ {
+    "name" : "fmt",
+    "version>=" : "10.1.1"
+  }, {
+    "name" : "openxr-loader",
+    "version>=" : "1.0.31"
+  }, {
+    "name" : "skia",
+    "version>=" : "0.38.2#2"
+  }, {
+    "name" : "vulkan-headers",
+    "version>=" : "1.3.268.0"
+  }, {
+    "name" : "magic-enum",
+    "version>=" : "0.9.5"
+  }, {
+    "name" : "directxtk",
+    "version>=" : "2023-12-31"
+  }, {
+    "name" : "protobuf",
+    "version>=" : "3.21.12"
+  }, {
+    "name" : "directxmath",
+    "version>=" : "2023-12-31"
+  }, {
+    "name" : "dxsdk-d3dx",
+    "version>=" : "9.29.952.8#6"
+  }, {
+    "name" : "effects11",
+    "version>=" : "11.29#3"
+  } ]
+}

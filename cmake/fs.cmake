@@ -1,0 +1,11 @@
+
+macro(LIST_SUBDIRS result parentDir)
+  file(GLOB childDirs RELATIVE ${parentDir} ${parentDir}/*)
+  set(dirs "")
+  foreach(childDir ${childDirs})
+    if(IS_DIRECTORY ${parentDir}/${childDir})
+      list(APPEND dirs "${parentDir}/${childDir}")
+    endif()
+  endforeach()
+  set(${result} ${dirs})
+endmacro()

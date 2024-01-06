@@ -39,9 +39,9 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/unknown/ir-data-playground-python#readme"
-Issues = "https://github.com/unknown/ir-data-playground-python/issues"
-Source = "https://github.com/unknown/ir-data-playground-python"
+Documentation = "https://github.com/jglanz/irsdk-interop#readme"
+Issues = "https://github.com/jglanz/irsdk-interop/issues"
+Source = "https://github.com/jglanz/irsdk-interop"
 
 [tool.hatch.version]
 path = "packages/python/irsdk/__about__.py"
@@ -78,7 +78,7 @@ dependencies = [
 #python -m grpc_tools.protoc -I packages/proto --python_betterproto_out=packages/python/irsdk/models packages/proto/irsdk_models.proto
 #"""
 protoc = """
-python -m grpc_tools.protoc -I packages/proto --python_out=packages/python/irsdk/models --mypy_out=packages/python/irsdk/models packages/proto/irsdk_models.proto
+python -m grpc_tools.protoc -I packages/proto --python_out=packages/python/irsdk/models --mypy_out=packages/python/irsdk/models packages/proto/LapData.proto
 """
 
 [[tool.hatch.envs.all.matrix]]

@@ -1,1 +1,1 @@
-from .irsdk_models_pb2 import *
+from .LapData_pb2 import *

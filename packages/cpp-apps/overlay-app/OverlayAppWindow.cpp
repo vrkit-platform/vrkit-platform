@@ -62,32 +62,32 @@ OverlayApp::OverlayApp()
  ******************************************************************/
 
 OverlayApp::~OverlayApp() {
-  SafeRelease(&m_pD2DFactory);
-  SafeRelease(&m_pWICFactory);
-  SafeRelease(&m_pDWriteFactory);
+  DXSafeRelease(&m_pD2DFactory);
+  DXSafeRelease(&m_pWICFactory);
+  DXSafeRelease(&m_pDWriteFactory);
 
-  SafeRelease(&m_pDevice);
-  SafeRelease(&m_pSwapChain);
-  SafeRelease(&m_pRenderTargetView);
-  SafeRelease(&m_pState);
-  SafeRelease(&m_pDepthStencil);
-  SafeRelease(&m_pDepthStencilView);
-  SafeRelease(&m_pOffscreenTexture);
-  SafeRelease(&m_pShader);
-  SafeRelease(&m_pVertexBuffer);
-  SafeRelease(&m_pVertexLayout);
-  SafeRelease(&m_pFacesIndexBuffer);
-  SafeRelease(&m_pTextureRV);
-  SafeRelease(&m_pBackBufferRT);
-  SafeRelease(&m_pBackBufferTextBrush);
-  SafeRelease(&m_pBackBufferGradientBrush);
-  SafeRelease(&m_pGridPatternBitmapBrush);
-  SafeRelease(&m_pRenderTarget);
-  SafeRelease(&m_pLGBrush);
-  SafeRelease(&m_pBlackBrush);
-  SafeRelease(&m_pBitmap);
-  SafeRelease(&m_pTextFormat);
-  SafeRelease(&m_pPathGeometry);
+  DXSafeRelease(&m_pDevice);
+  DXSafeRelease(&m_pSwapChain);
+  DXSafeRelease(&m_pRenderTargetView);
+  DXSafeRelease(&m_pState);
+  DXSafeRelease(&m_pDepthStencil);
+  DXSafeRelease(&m_pDepthStencilView);
+  DXSafeRelease(&m_pOffscreenTexture);
+  DXSafeRelease(&m_pShader);
+  DXSafeRelease(&m_pVertexBuffer);
+  DXSafeRelease(&m_pVertexLayout);
+  DXSafeRelease(&m_pFacesIndexBuffer);
+  DXSafeRelease(&m_pTextureRV);
+  DXSafeRelease(&m_pBackBufferRT);
+  DXSafeRelease(&m_pBackBufferTextBrush);
+  DXSafeRelease(&m_pBackBufferGradientBrush);
+  DXSafeRelease(&m_pGridPatternBitmapBrush);
+  DXSafeRelease(&m_pRenderTarget);
+  DXSafeRelease(&m_pLGBrush);
+  DXSafeRelease(&m_pBlackBrush);
+  DXSafeRelease(&m_pBitmap);
+  DXSafeRelease(&m_pTextFormat);
+  DXSafeRelease(&m_pPathGeometry);
 }
 
 /******************************************************************
@@ -225,7 +225,7 @@ HRESULT OverlayApp::CreateDeviceIndependentResources() {
     hr = pSink->Close();
   }
 
-  SafeRelease(&pSink);
+  DXSafeRelease(&pSink);
 
   return hr;
 }
@@ -335,12 +335,12 @@ HRESULT OverlayApp::CreateDeviceResources() {
     }
   }
 
-  //SafeRelease(&pDeviceContext);
-  SafeRelease(&pDevice);
-  SafeRelease(&pDXGIDevice);
-  SafeRelease(&pAdapter);
-  SafeRelease(&pDXGIFactory);
-  SafeRelease(&pSurface);
+  //DXSafeRelease(&pDeviceContext);
+  DXSafeRelease(&pDevice);
+  DXSafeRelease(&pDXGIDevice);
+  DXSafeRelease(&pAdapter);
+  DXSafeRelease(&pDXGIFactory);
+  DXSafeRelease(&pSurface);
 
   return hr;
 }
@@ -360,8 +360,8 @@ HRESULT OverlayApp::RecreateSizedResources(UINT nWidth, UINT nHeight) {
   ID3D11RenderTargetView *viewList[1] = {nullptr};
 
   // Ensure that nobody is holding onto one of the old resources
-  SafeRelease(&m_pBackBufferRT);
-  SafeRelease(&m_pRenderTargetView);
+  DXSafeRelease(&m_pBackBufferRT);
+  DXSafeRelease(&m_pRenderTargetView);
 
   ID3D11DeviceContext *deviceContext = nullptr;
   m_pDevice->GetImmediateContext(&deviceContext);
@@ -385,7 +385,7 @@ HRESULT OverlayApp::RecreateSizedResources(UINT nWidth, UINT nHeight) {
     texDesc.SampleDesc.Quality = 0;
     texDesc.Usage = D3D11_USAGE_DEFAULT;
 
-    SafeRelease(&m_pDepthStencil);
+    DXSafeRelease(&m_pDepthStencil);
     hr = m_pDevice->CreateTexture2D(&texDesc, nullptr, &m_pDepthStencil);
   }
 
@@ -399,7 +399,7 @@ HRESULT OverlayApp::RecreateSizedResources(UINT nWidth, UINT nHeight) {
     renderDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
     renderDesc.Texture2D.MipSlice = 0;
 
-    SafeRelease(&m_pRenderTargetView);
+    DXSafeRelease(&m_pRenderTargetView);
     hr = m_pDevice->CreateRenderTargetView(pBackBufferResource, &renderDesc,
                                            &m_pRenderTargetView);
   }
@@ -411,7 +411,7 @@ HRESULT OverlayApp::RecreateSizedResources(UINT nWidth, UINT nHeight) {
     // depthViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
     // depthViewDesc.Texture2D.MipSlice = 0;
 
-    SafeRelease(&m_pDepthStencilView);
+    DXSafeRelease(&m_pDepthStencilView);
     hr = m_pDevice->CreateDepthStencilView(m_pDepthStencil, &depthViewDesc,
                                            &m_pDepthStencilView);
   }
@@ -457,14 +457,14 @@ HRESULT OverlayApp::RecreateSizedResources(UINT nWidth, UINT nHeight) {
 
     // Create a D2D render target which can draw into the surface in the swap
     // chain
-    SafeRelease(&m_pBackBufferRT);
+    DXSafeRelease(&m_pBackBufferRT);
     hr = m_pD2DFactory->CreateDxgiSurfaceRenderTarget(pBackBuffer, &props,
                                                       &m_pBackBufferRT);
   }
 
-  SafeRelease(&pBackBuffer);
-  SafeRelease(&pBackBufferResource);
-  SafeRelease(&deviceContext);
+  DXSafeRelease(&pBackBuffer);
+  DXSafeRelease(&pBackBufferResource);
+  DXSafeRelease(&deviceContext);
 
   return hr;
 }
@@ -521,7 +521,7 @@ HRESULT OverlayApp::CreateD3DDeviceResources() {
   }
   if (SUCCEEDED(hr)) {
     // Convert the Direct2D texture into a Shader Resource View
-    SafeRelease(&m_pTextureRV);
+    DXSafeRelease(&m_pTextureRV);
     hr = m_pDevice->CreateShaderResourceView(m_pOffscreenTexture, nullptr,
                                              &m_pTextureRV);
   }
@@ -614,7 +614,7 @@ HRESULT OverlayApp::CreateD3DDeviceResources() {
       deviceContext->IASetInputLayout(m_pVertexLayout);
     }
   }
-  SafeRelease(&deviceContext);
+  DXSafeRelease(&deviceContext);
   return hr;
 }
 
@@ -640,7 +640,7 @@ HRESULT OverlayApp::CreateD2DDeviceResources() {
         D2D1_RENDER_TARGET_TYPE_DEFAULT,
         D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
         96, 96);
-    SafeRelease(&m_pRenderTarget);
+    DXSafeRelease(&m_pRenderTarget);
     hr = m_pD2DFactory->CreateDxgiSurfaceRenderTarget(pDxgiSurface, &props,
                                                       &m_pRenderTarget);
   }
@@ -672,7 +672,7 @@ HRESULT OverlayApp::CreateD2DDeviceResources() {
         {1.f, {0.f, 0.f, 1.f, 1.f}},   // Toward blue
     };
 
-    SafeRelease(&pGradientStops);
+    DXSafeRelease(&pGradientStops);
     hr = m_pRenderTarget->CreateGradientStopCollection(
         stopsGeometry, ARRAYSIZE(stopsGeometry), &pGradientStops);
     if (SUCCEEDED(hr)) {
@@ -698,8 +698,8 @@ HRESULT OverlayApp::CreateD2DDeviceResources() {
     }
   }
 
-  SafeRelease(&pDxgiSurface);
-  SafeRelease(&pGradientStops);
+  DXSafeRelease(&pDxgiSurface);
+  DXSafeRelease(&pGradientStops);
 
   return hr;
 }
@@ -767,29 +767,29 @@ OverlayApp::CreateGridPatternBrush(ID2D1RenderTarget *pRenderTarget,
 
 void OverlayApp::DiscardDeviceResources() {
 
-  SafeRelease(&m_pDevice);
-  SafeRelease(&m_pSwapChain);
-  SafeRelease(&m_pRenderTargetView);
-  SafeRelease(&m_pState);
+  DXSafeRelease(&m_pDevice);
+  DXSafeRelease(&m_pSwapChain);
+  DXSafeRelease(&m_pRenderTargetView);
+  DXSafeRelease(&m_pState);
 
-  SafeRelease(&m_pDepthStencil);
-  SafeRelease(&m_pDepthStencilView);
-  SafeRelease(&m_pOffscreenTexture);
-  SafeRelease(&m_pShader);
-  SafeRelease(&m_pVertexBuffer);
-  SafeRelease(&m_pVertexLayout);
-  SafeRelease(&m_pFacesIndexBuffer);
-  SafeRelease(&m_pTextureRV);
+  DXSafeRelease(&m_pDepthStencil);
+  DXSafeRelease(&m_pDepthStencilView);
+  DXSafeRelease(&m_pOffscreenTexture);
+  DXSafeRelease(&m_pShader);
+  DXSafeRelease(&m_pVertexBuffer);
+  DXSafeRelease(&m_pVertexLayout);
+  DXSafeRelease(&m_pFacesIndexBuffer);
+  DXSafeRelease(&m_pTextureRV);
 
-  SafeRelease(&m_pBackBufferRT);
-  SafeRelease(&m_pBackBufferTextBrush);
-  SafeRelease(&m_pBackBufferGradientBrush);
-  SafeRelease(&m_pGridPatternBitmapBrush);
+  DXSafeRelease(&m_pBackBufferRT);
+  DXSafeRelease(&m_pBackBufferTextBrush);
+  DXSafeRelease(&m_pBackBufferGradientBrush);
+  DXSafeRelease(&m_pGridPatternBitmapBrush);
 
-  SafeRelease(&m_pRenderTarget);
-  SafeRelease(&m_pLGBrush);
-  SafeRelease(&m_pBlackBrush);
-  SafeRelease(&m_pBitmap);
+  DXSafeRelease(&m_pRenderTarget);
+  DXSafeRelease(&m_pLGBrush);
+  DXSafeRelease(&m_pBlackBrush);
+  DXSafeRelease(&m_pBitmap);
 }
 
 /******************************************************************
@@ -909,7 +909,7 @@ HRESULT OverlayApp::OnRender() {
     }
   }
 
-  // SafeRelease(&deviceContext);
+  // DXSafeRelease(&deviceContext);
   // If the device is lost for any reason, we need to recreate it
   if (hr == DXGI_ERROR_DEVICE_RESET || hr == DXGI_ERROR_DEVICE_REMOVED ||
       hr == D2DERR_RECREATE_TARGET) {
@@ -917,7 +917,7 @@ HRESULT OverlayApp::OnRender() {
 
     DiscardDeviceResources();
   }
-  SafeRelease(&deviceContext);
+  DXSafeRelease(&deviceContext);
   return hr;
 }
 
@@ -1121,7 +1121,7 @@ HRESULT OverlayApp::CreateD3DDevice(IDXGIAdapter *pAdapter,
                                        ID3D11Device **ppDevice) {
   HRESULT hr = S_OK;
 
-  
+
   static const D3D_FEATURE_LEVEL levelAttempts[] = {
       D3D_FEATURE_LEVEL_11_0,
       D3D_FEATURE_LEVEL_10_1,
@@ -1257,11 +1257,11 @@ HRESULT OverlayApp::LoadResourceBitmap(
     hr = pRenderTarget->CreateBitmapFromWicBitmap(pConverter, nullptr, ppBitmap);
   }
 
-  SafeRelease(&pDecoder);
-  SafeRelease(&pSource);
-  SafeRelease(&pStream);
-  SafeRelease(&pConverter);
-  SafeRelease(&pScaler);
+  DXSafeRelease(&pDecoder);
+  DXSafeRelease(&pSource);
+  DXSafeRelease(&pStream);
+  DXSafeRelease(&pConverter);
+  DXSafeRelease(&pScaler);
 
   return hr;
 }

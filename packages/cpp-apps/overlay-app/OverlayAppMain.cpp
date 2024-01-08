@@ -4,7 +4,7 @@
 
 #include "OverlayAppMain.h"
 
-#include "OverlayAppWindow.h"
+#include "NewOverlayAppWindow.h"
 
 #include <IRacingTools/Shared/SharedMemoryStorage.h>
 
@@ -25,7 +25,7 @@ int WINAPI WinMain(
   if (SUCCEEDED(CoInitialize(NULL)))
   {
     {
-      OverlayApp app;
+      NewOverlayApp app;
 
       if (SUCCEEDED(app.Initialize()))
       {

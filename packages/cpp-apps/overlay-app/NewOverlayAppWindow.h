@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include "IRacingTools/Shared/Graphics/DXResourceProvider.h"
-#include "IRacingTools/Shared/Graphics/DXTrackMapRenderer.h"
+#include <IRacingTools/Shared/Graphics/DX11TrackMapResources.h>
+#include <IRacingTools/Shared/Graphics/DXResources.h>
 #include "OverlayAppPCH.h"
 
 using namespace IRacingTools::Shared::Graphics;
@@ -54,10 +54,9 @@ private:
 
 
 
-private:
-    HWND m_hwnd;
-    std::unique_ptr<DX11WindowResourcesProvider> windowResources_{nullptr};
-    std::unique_ptr<DX11TrackMapRenderer> trackMapResources_{nullptr};
+    HWND windowHandle_;
+    std::unique_ptr<DX11WindowResources> windowResources_{nullptr};
+    std::unique_ptr<DX11TrackMapResources> trackMapResources_{nullptr};
 
 };
 

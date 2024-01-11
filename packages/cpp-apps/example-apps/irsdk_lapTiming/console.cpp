@@ -87,7 +87,7 @@ bool getCursorPosition(int &x, int &y)
 
 void setCursorPosition(int x, int y)
 {
-	const COORD pos = { (SHORT)x, (SHORT)y };
+	const COORD pos = { static_cast<SHORT>(x), static_cast<SHORT>(y) };
 	const HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleCursorPosition(output, pos);
 }

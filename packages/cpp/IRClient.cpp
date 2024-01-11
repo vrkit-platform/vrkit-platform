@@ -191,12 +191,12 @@ int IRClient::getVarInt(int idx, int entry) {
                     break;
 
                 case IRVarType::type_float:
-                    return (int)(((const float *)data)[entry]);
+                    return static_cast<int>(((const float *) data)[entry]);
                     break;
 
                 // 8 bytes
                 case IRVarType::type_double:
-                    return (int)(((const double *)data)[entry]);
+                    return static_cast<int>(((const double *) data)[entry]);
                     break;
                 }
             } else {
@@ -228,7 +228,7 @@ float IRClient::getVarFloat(int idx, int entry) {
                 // 4 bytes
                 case IRVarType::type_int:
                 case IRVarType::type_bitmask:
-                    return (float)(((const int *)data)[entry]);
+                    return static_cast<float>(((const int *) data)[entry]);
                     break;
 
                 case IRVarType::type_float:
@@ -237,7 +237,7 @@ float IRClient::getVarFloat(int idx, int entry) {
 
                 // 8 bytes
                 case IRVarType::type_double:
-                    return (float)(((const double *)data)[entry]);
+                    return static_cast<float>(((const double *) data)[entry]);
                     break;
                 }
             } else {

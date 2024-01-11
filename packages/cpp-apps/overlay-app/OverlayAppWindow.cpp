@@ -3,11 +3,13 @@
 //
 
 #include "OverlayAppWindow.h"
+#include "IRacingTools/Shared/Graphics/DX11Resources.h"
 #include "resource.h"
 
 #include <IRacingTools/Shared/Macros.h>
 #include <cassert>
 
+using IRacingTools::Shared::DXSafeRelease;
 /******************************************************************
  *                                                                 *
  *  Static Data                                                    *
@@ -62,7 +64,7 @@ OverlayApp::OverlayApp()
  ******************************************************************/
 
 OverlayApp::~OverlayApp() {
-  DXSafeRelease(&m_pD2DFactory);
+    DXSafeRelease(&m_pD2DFactory);
   DXSafeRelease(&m_pWICFactory);
   DXSafeRelease(&m_pDWriteFactory);
 
@@ -436,8 +438,8 @@ HRESULT OverlayApp::RecreateSizedResources(UINT nWidth, UINT nHeight) {
   if (SUCCEEDED(hr)) {
     // Reset the projection matrix now that the swapchain is resized.
     D3DMatrixPerspectiveFovLH(&m_ProjectionMatrix,
-                              (float)D3DX_PI * 0.24f,  // fovy
-                              nWidth / (float)nHeight, // aspect
+                              static_cast<float>(D3DX_PI) * 0.24f,  // fovy
+                              nWidth / static_cast<float>(nHeight), // aspect
                               0.1f,                    // zn
                               100.0f                   // zf
     );
@@ -839,7 +841,7 @@ HRESULT OverlayApp::OnRender() {
     }
     t = (dwTimeCur - dwTimeStart) / 3000.0f;
 
-    float a = (t * 360.0f) * ((float)D3DX_PI / 180.0f);
+    float a = (t * 360.0f) * (static_cast<float>(D3DX_PI) / 180.0f);
     D3DMatrixRotationY(&m_WorldMatrix, a);
 
     // Swap chain will tell us how big the back buffer is
@@ -858,8 +860,9 @@ HRESULT OverlayApp::OnRender() {
             D2D1::Matrix3x2F::Scale(m_pBackBufferRT->GetSize()));
 
         D2D1_RECT_F rect =
-            D2D1::RectF(0.0f, 0.0f, (float)swapDesc.BufferDesc.Width,
-                        (float)swapDesc.BufferDesc.Height);
+            D2D1::RectF(0.0f, 0.0f, static_cast<float>(swapDesc.BufferDesc.Width),
+                        static_cast<float>(swapDesc.BufferDesc.Height)
+        );
 
         m_pBackBufferRT->FillRectangle(&rect, m_pBackBufferGradientBrush);
 
@@ -1045,7 +1048,7 @@ LRESULT CALLBACK OverlayApp::WndProc(HWND hwnd, UINT message, WPARAM wParam,
 
   if (message == WM_CREATE) {
     LPCREATESTRUCT pcs = (LPCREATESTRUCT)lParam;
-    OverlayApp *pDXGISampleApp = (OverlayApp *)pcs->lpCreateParams;
+    OverlayApp *pDXGISampleApp = static_cast<OverlayApp *>(pcs->lpCreateParams);
 
     ::SetWindowLongPtrW(hwnd, GWLP_USERDATA,
                         reinterpret_cast<LONG_PTR>(pDXGISampleApp));

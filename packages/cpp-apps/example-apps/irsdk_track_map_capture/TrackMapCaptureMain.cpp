@@ -410,9 +410,9 @@ bool processYAMLLiveString()
     // can write to disk, parse, etc
 
     // output file once every 1 seconds
-    const DWORD minTime = (DWORD)(1.0f * 1000);
+    const DWORD minTime = static_cast<DWORD>(1.0f * 1000);
     const DWORD curTime = timeGetTime(); // millisecond resolution
-    if (abs((long long)(curTime - lastTime)) > minTime)
+    if (abs(static_cast<long long>(curTime - lastTime)) > minTime)
     {
         lastTime = curTime;
 
@@ -521,8 +521,8 @@ void printFlags(int flags)
 
 void printTime(double time_s)
 {
-    const int minutes = (int)(time_s / 60);
-    const float seconds = (float)(time_s - (60 * minutes));
+    const int minutes = static_cast<int>(time_s / 60);
+    const float seconds = static_cast<float>(time_s - (60 * minutes));
     printf("%03d:%05.2f", minutes, seconds);
 }
 

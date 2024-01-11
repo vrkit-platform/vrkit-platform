@@ -2,10 +2,24 @@
 
 ENABLE_LANGUAGE(RC)
 
+set(graphicsBinaryDir ${CMAKE_CURRENT_BINARY_DIR}/resources/shaders)
+file(MAKE_DIRECTORY ${graphicsBinaryDir})
+add_custom_command(
+  OUTPUT ${graphicsBinaryDir}/TrackMapShader.fxo
+  PRE_BUILD
+  COMMAND fxc
+  ARGS /T fx_5_0 /Fo ${graphicsBinaryDir}/TrackMapShader.fxo ${CMAKE_CURRENT_LIST_DIR}/TrackMapShader.fx
+  VERBATIM
+)
+embed_resource("${graphicsBinaryDir}/TrackMapShader.fxo" "${graphicsBinaryDir}/TrackMapShader.c" RCDataTrackMapShader)
+embed_resource("${CMAKE_CURRENT_LIST_DIR}/sampleImage.jpg" "${graphicsBinaryDir}/sampleImage.c" RCDataSampleImage)
+
 # SDK Source & headers
-file(GLOB_RECURSE sharedAppLibSources *.cpp SharedAppLib.rc)
+file(GLOB_RECURSE sharedAppLibSources *.cpp )
 file(GLOB_RECURSE sharedAppLibHeaders *.h EXCLUDE include)
 file(GLOB_RECURSE sharedAppLibHeadersPublic include/*.h)
+
+list(APPEND sharedAppLibSources "${graphicsBinaryDir}/TrackMapShader.c" "${graphicsBinaryDir}/sampleImage.c")
 
 set(depPkgNames directxmath directxtk fmt OpenXR dxsdk-d3dx protobuf effects11)
 foreach(depPkgName ${depPkgNames})
@@ -25,26 +39,30 @@ target_link_libraries(${sharedAppLibTarget} PUBLIC ${modelsTarget})
 target_link_libraries(${sharedAppLibTargetStatic} PUBLIC ${modelsTargetStatic})
 
 target_compile_definitions(${sharedAppLibTargetStatic} PUBLIC IS_STATIC_LIB)
-set(graphicsBinaryDir ${CMAKE_CURRENT_BINARY_DIR}/Graphics)
-file(MAKE_DIRECTORY ${graphicsBinaryDir})
 
-add_custom_command(
-  TARGET ${sharedAppLibTargetStatic}
-  PRE_BUILD
-  COMMAND fxc
-  ARGS /T fx_5_0 /Fo ${graphicsBinaryDir}/TrackMapShaderStatic.fxo ${CMAKE_CURRENT_LIST_DIR}/Graphics/TrackMapShader.fx
-  COMMAND echo
-  ARGS IDR_PIXEL_TRACK_MAP_SHADER RCDATA Graphics/TrackMapShaderStatic.fxo > ${graphicsBinaryDir}/TrackMapShaderStatic.resinclude
-)
+#add_custom_command(
+#  TARGET ${sharedAppLibTargetStatic}
+#  PRE_BUILD
+#  COMMAND fxc
+#  ARGS /T fx_5_0 /Fo ${graphicsBinaryDir}/TrackMapShaderStatic.fxo ${CMAKE_CURRENT_LIST_DIR}/TrackMapShader.fx
+##  COMMAND echo
+##  ARGS IDR_PIXEL_TRACK_MAP_SHADER RCDATA TrackMapShader.fxo > ${graphicsBinaryDir}/TrackMapShader.resinclude
+#  VERBATIM
+#)
 
-add_custom_command(
-  TARGET ${sharedAppLibTarget}
-  PRE_BUILD
-  COMMAND fxc
-  ARGS /T fx_5_0 /Fo ${graphicsBinaryDir}/TrackMapShader.fxo ${CMAKE_CURRENT_LIST_DIR}/Graphics/TrackMapShader.fx
-  COMMAND echo
-  ARGS IDR_PIXEL_TRACK_MAP_SHADER RCDATA Graphics/TrackMapShader.fxo > ${graphicsBinaryDir}/TrackMapShader.resinclude
-)
+#embed_resource(${sharedAppLibTargetStatic} "${graphicsBinaryDir}/TrackMapShaderStatic.fxo" "${graphicsBinaryDir}/TrackMapShaderStatic.cpp" RCDataTrackMapShader)
+
+#add_custom_command(
+#  TARGET ${sharedAppLibTarget}
+#  PRE_BUILD
+#  COMMAND fxc
+#  ARGS /T fx_5_0 /Fo ${graphicsBinaryDir}/TrackMapShader.fxo ${CMAKE_CURRENT_LIST_DIR}/TrackMapShader.fx
+##  COMMAND echo
+##  ARGS IDR_PIXEL_TRACK_MAP_SHADER RCDATA TrackMapShader.fxo > ${graphicsBinaryDir}/TrackMapShader.resinclude
+#  VERBATIM
+#)
+
+#embed_resource(${sharedAppLibTarget} "${graphicsBinaryDir}/TrackMapShader.fxo" "${graphicsBinaryDir}/TrackMapShader.cpp" RCDataTrackMapShader)
 
 foreach(targetName ${sharedAppLibTarget} ${sharedAppLibTargetStatic})
   target_link_libraries(${targetName} PUBLIC magic_enum::magic_enum )

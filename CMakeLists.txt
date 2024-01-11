@@ -17,6 +17,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_VISIBILITY_PRESET visible)
 
 # Include CMake helper libs
+include(cmake/embed_resource.cmake)
 include(cmake/targets.cmake)
 include(cmake/fs.cmake)
 include(cmake/example_target.cmake)

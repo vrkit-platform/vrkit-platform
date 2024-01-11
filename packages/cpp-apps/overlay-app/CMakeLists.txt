@@ -29,11 +29,15 @@ add_custom_command(
   COMMAND echo
   ARGS IDR_PIXEL_SHADER RCDATA OverlayApp.fxo > ${CMAKE_CURRENT_BINARY_DIR}/OverlayApp.resinclude
 )
+
+
+
 #target_sources(${targetName} PRIVATE )
 target_include_directories(${targetName} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(${targetName} PRIVATE d2d1.lib dwrite.lib windowscodecs.lib dxgi.lib d3d10_1.lib d3d11.lib)
 target_link_libraries(${targetName} PRIVATE ${sdkTargetStatic} ${sharedAppLibTargetStatic} ${modelsTargetStatic})
+#target_link_libraries(${targetName} PRIVATE ${sdkTarget} ${sharedAppLibTarget} ${modelsTarget})
 target_link_libraries(${targetName} PRIVATE Microsoft::D3DX9 Microsoft::D3DX10 Microsoft::D3DX11 Microsoft::Effects11)
 target_link_libraries(${targetName} PRIVATE Microsoft::DirectXMath)
 target_link_libraries(${targetName} PRIVATE magic_enum::magic_enum )

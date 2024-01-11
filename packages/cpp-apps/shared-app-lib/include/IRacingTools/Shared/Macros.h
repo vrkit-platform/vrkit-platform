@@ -4,28 +4,34 @@
 
 #pragma once
 
+#include "DXPlatformHelpers.h"
 #include "SharedAppLibPCH.h"
 #include <cassert>
+
+namespace IRacingTools::Shared {
+
+template<class Interface>
+void DXSafeRelease(Interface **ppInterfaceToRelease) {
+    if (*ppInterfaceToRelease != nullptr) {
+        (*ppInterfaceToRelease)->Release();
+        *ppInterfaceToRelease = nullptr;
+    }
+}
+} // namespace IRacingTools::Shared
+
 /******************************************************************
  *                                                                 *
  *  Macros                                                         *
  *                                                                 *
  ******************************************************************/
 
-template <class Interface>
-inline void DXSafeRelease(Interface **ppInterfaceToRelease) {
-  if (*ppInterfaceToRelease != nullptr) {
-    (*ppInterfaceToRelease)->Release();
-    *ppInterfaceToRelease = nullptr;
-  }
-}
 
 #ifndef Assert
 #if defined(DEBUG) || defined(_DEBUG)
-#define Assert(b)                                                              \
-  if (!(b)) {                                                                  \
-    OutputDebugStringA("Assert: " #b "\n");                                    \
-  }
+#define Assert(b) \
+    if (!(b)) { \
+        OutputDebugStringA("Assert: " #b "\n"); \
+    }
 #else
 #define Assert(b, msg)
 #endif // DEBUG || _DEBUG
@@ -33,16 +39,20 @@ inline void DXSafeRelease(Interface **ppInterfaceToRelease) {
 
 #ifndef AssertMsg
 #if defined(DEBUG) || defined(_DEBUG)
-#define AssertMsg(b, msg)                                                              \
-if (!(b)) {                                                                  \
-OutputDebugStringA("Assert: " #b " " ##msg "\n");                                    \
-assert(b);\
-}
+#define AssertMsg(b, msg) \
+    if (!(b)) { \
+        OutputDebugStringA("Assert: " #b " "##msg "\n"); \
+        assert(b); \
+    }
 #else
 #define AssertMsg(b, msg)
 #endif // DEBUG || _DEBUG
 #endif
 
+
+#define AssertOkMsg(result, msg) AssertMsg(SUCCEEDED(result), msg)
+#define AssertOk(result) Assert(SUCCEEDED(result))
+#define AOK AssertOk
 
 #ifndef HINST_THISCOMPONENT
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;

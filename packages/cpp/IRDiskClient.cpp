@@ -51,7 +51,7 @@ bool IRDiskClient::openFile(const char *path)
 				if(m_sessionInfoString)
 				{
 					fseek(m_ibtFile, m_header.sessionInfoOffset, SEEK_SET);
-					if(fread(m_sessionInfoString, 1, m_header.sessionInfoLen, m_ibtFile) == (size_t)m_header.sessionInfoLen)
+					if(fread(m_sessionInfoString, 1, m_header.sessionInfoLen, m_ibtFile) == static_cast<size_t>(m_header.sessionInfoLen))
 					{
 						m_sessionInfoString[m_header.sessionInfoLen-1] = '\0';
 
@@ -113,7 +113,7 @@ void IRDiskClient::closeFile()
 bool IRDiskClient::getNextData()
 {
 	if(m_ibtFile)
-		return fread(m_varBuf, 1, m_header.bufLen, m_ibtFile) == (size_t)m_header.bufLen;
+		return fread(m_varBuf, 1, m_header.bufLen, m_ibtFile) == static_cast<size_t>(m_header.bufLen);
 
 	return false;
 }
@@ -300,12 +300,12 @@ int IRDiskClient::getVarInt(int idx, int entry)
 					break;
 					
 				case IRVarType::type_float:
-					return (int)(((const float*)data)[entry]);
+					return static_cast<int>(((const float *) data)[entry]);
 					break;
 
 				// 8 bytes
 				case IRVarType::type_double:
-					return (int)(((const double*)data)[entry]);
+					return static_cast<int>(((const double *) data)[entry]);
 					break;
 				}
 			}
@@ -345,7 +345,7 @@ float IRDiskClient::getVarFloat(int idx, int entry)
 				// 4 bytes
 				case IRVarType::type_int:
 				case IRVarType::type_bitmask:
-					return (float)(((const int*)data)[entry]);
+					return static_cast<float>(((const int *) data)[entry]);
 					break;
 					
 				case IRVarType::type_float:
@@ -354,7 +354,7 @@ float IRDiskClient::getVarFloat(int idx, int entry)
 
 				// 8 bytes
 				case IRVarType::type_double:
-					return (float)(((const double*)data)[entry]);
+					return static_cast<float>(((const double *) data)[entry]);
 					break;
 				}
 			}

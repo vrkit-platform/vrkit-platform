@@ -79,7 +79,7 @@ bool irsdk_startup()
 	{
 		if(!pSharedMem)
 		{
-			pSharedMem = (const char *)MapViewOfFile(hMemMapFile, FILE_MAP_READ, 0, 0, 0);
+			pSharedMem = static_cast<const char *>(MapViewOfFile(hMemMapFile, FILE_MAP_READ, 0, 0, 0));
 			pHeader = (IRHeader *)pSharedMem;
 			lastTickCount = INT_MAX;
 		}
@@ -221,7 +221,7 @@ bool irsdk_isConnected()
 {
 	if(isInitialized)
 	{
-		const int elapsed = (int)difftime(time(nullptr), lastValidTime);
+		const int elapsed = static_cast<int>(difftime(time(nullptr), lastValidTime));
 		return (pHeader->status & static_cast<int>(IRStatusField::Connected)) > 0 && elapsed < timeout;
 	}
 
@@ -344,7 +344,7 @@ void irsdk_broadcastMsg(irsdk_BroadcastMsg msg, int var1, int var2, int var3)
 void irsdk_broadcastMsg(irsdk_BroadcastMsg msg, int var1, float var2)
 {
 	// multiply by 2^16-1 to move fractional part to the integer part
-	const int real = (int)(var2 * 65536.0f);
+	const int real = static_cast<int>(var2 * 65536.0f);
 
 	irsdk_broadcastMsg(msg, var1, real);
 }

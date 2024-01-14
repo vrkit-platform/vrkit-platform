@@ -1202,7 +1202,7 @@ HRESULT OverlayApp::LoadResourceBitmap(
   }
   if (SUCCEEDED(hr)) {
     // Initialize the stream with the memory pointer and size.
-    hr = pStream->InitializeFromMemory(reinterpret_cast<BYTE *>(pImageFile),
+    hr = pStream->InitializeFromMemory(static_cast<BYTE *>(pImageFile),
                                        imageFileSize);
   }
   if (SUCCEEDED(hr)) {

@@ -5,6 +5,7 @@ ENABLE_LANGUAGE(RC)
 set(graphicsBinaryDir ${CMAKE_CURRENT_BINARY_DIR}/resources/shaders)
 file(MAKE_DIRECTORY ${graphicsBinaryDir})
 add_custom_command(
+  DEPENDS ${CMAKE_CURRENT_LIST_DIR}/TrackMapShader.fx
   OUTPUT ${graphicsBinaryDir}/TrackMapShader.fxo
   PRE_BUILD
   COMMAND fxc
@@ -21,6 +22,7 @@ file(GLOB_RECURSE sharedAppLibHeadersPublic include/*.h)
 
 list(APPEND sharedAppLibSources "${graphicsBinaryDir}/TrackMapShader.c" "${graphicsBinaryDir}/sampleImage.c")
 
+#set(depPkgNames directxmath directxtk fmt OpenXR dxsdk-d3dx protobuf effects11)
 set(depPkgNames directxmath directxtk fmt OpenXR dxsdk-d3dx protobuf effects11)
 foreach(depPkgName ${depPkgNames})
   find_package(${depPkgName} CONFIG REQUIRED)

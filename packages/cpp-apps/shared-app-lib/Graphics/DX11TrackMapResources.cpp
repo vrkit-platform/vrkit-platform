@@ -3,7 +3,7 @@
 //
 
 #include "../resource.h"
-#include <..\include\IRacingTools\Shared\Graphics\DX11TrackMapResources.h>
+#include <IRacingTools/Shared/Graphics/DX11TrackMapResources.h>
 #include <IRacingTools/Shared/Macros.h>
 
 namespace IRacingTools::Shared::Graphics {
@@ -24,12 +24,12 @@ struct SimpleVertex {
 constexpr WCHAR kHelloWorld[] = L"Hello, World!";
 
 /*static*/
-[[maybe_unused]] constexpr D3D11_INPUT_ELEMENT_DESC kInputLayout[] = {
+constexpr D3D11_INPUT_ELEMENT_DESC kInputLayout[] = {
     {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
     {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
 };
 
-/*static*/ const SimpleVertex kVertexArray[]
+/*static*/ static const SimpleVertex kVertexArray[]
     = {{D3DXVECTOR3(-1.0f, -1.0f, 1.0f), D3DXVECTOR2(1.0f, 1.0f)},
        {D3DXVECTOR3(1.0f, -1.0f, 1.0f), D3DXVECTOR2(0.0f, 1.0f)},
        {D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR2(0.0f, 0.0f)},
@@ -41,20 +41,22 @@ constexpr WCHAR kHelloWorld[] = L"Hello, World!";
 
 DX11TrackMapResources::DX11TrackMapResources(DX11DeviceResources *deviceResources) :
     deviceResources_(deviceResources) {}
+
 HRESULT DX11TrackMapResources::render(DWORD dwTimeCur) {
     static float t = 0.0f;
     static DWORD dwTimeStart = 0;
 
     HRESULT hr = S_OK;
     if (!ready_) {
-        AssertMsg(SUCCEEDED(createD3DResources()), "Failed to create 3D resources");
-        AssertMsg(SUCCEEDED(createD3DSizedResources()), "Failed to create 3D sized resources");
-        AssertMsg(SUCCEEDED(createD2DResources()), "Failed to create 2D resources");
+        AssertOkMsg(createD3DResources(), "Failed to create 3D resources");
+        AssertOkMsg(createD3DSizedResources(), "Failed to create 3D sized resources");
+        AssertOkMsg(createD2DResources(), "Failed to create 2D resources");
+        AssertOkMsg(createDeviceIndependentResources(), "Failed to create device independent resources");
         ready_ = true;
     }
 
-    auto swapChain = deviceResources_->getSwapChain();
-    auto deviceContext = deviceResources_->getDeviceContext();
+    auto& swapChain = deviceResources_->getSwapChain();
+    auto& deviceContext = deviceResources_->getDeviceContext();
 
     if (dwTimeStart == 0) {
         dwTimeStart = dwTimeCur;
@@ -85,6 +87,7 @@ HRESULT DX11TrackMapResources::render(DWORD dwTimeCur) {
 
         AssertOkMsg(backBufferRT_->EndDraw(), "Fukk rect");
         AssertOkMsg(diffuseVariableNoRef_->SetResource(nullptr), "Failed to set diffuseVariable");
+
         AssertOkMsg(techniqueNoRef_->GetPassByIndex(0)->Apply(0, deviceContext.Get()), "Failed to call technique");
 
         // Draw the D2D content into a D3D surface.
@@ -109,12 +112,12 @@ HRESULT DX11TrackMapResources::render(DWORD dwTimeCur) {
             backBufferRT_->SetTransform(D2D1::Matrix3x2F::Identity());
 
             // Text format object will center the text in layout
-            // D2D1_SIZE_F rtSize = backBufferRT_->GetSize();
-            // backBufferRT_->DrawText(
-            //     sc_helloWorld, ARRAYSIZE(sc_helloWorld) - 1, m_pTextFormat,
-            //     D2D1::RectF(0.0f, 0.0f, rtSize.width, rtSize.height),
-            //     m_pBackBufferTextBrush);
-            //
+            D2D1_SIZE_F rtSize = backBufferRT_->GetSize();
+            backBufferRT_->DrawText(
+                kHelloWorld, ARRAYSIZE(kHelloWorld) - 1, textFormat_.Get(),
+                D2D1::RectF(0.0f, 0.0f, rtSize.width, rtSize.height),
+                backBufferTextBrush_.Get());
+
             hr = backBufferRT_->EndDraw();
         }
         AOK(swapChain->Present(1, 0));
@@ -122,17 +125,78 @@ HRESULT DX11TrackMapResources::render(DWORD dwTimeCur) {
     return hr;
 }
 
-bool DX11TrackMapResources::isReady() const {
-    return ready_;
+
+HRESULT DX11TrackMapResources::createDeviceIndependentResources() {
+    deviceResources_->getOrCreateD2DFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED);
+
+    static constexpr WCHAR kFontName[] = L"Verdana";
+    static constexpr FLOAT kFontSize = 50;
+
+    ComPtr<ID2D1GeometrySink> sink{nullptr};
+
+    auto &d2dFactory = deviceResources_->getD2DFactory();
+
+    // Create D2D factory
+
+    // Create DWrite factory
+    HRESULT hr = DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(dwriteFactory_), &dwriteFactory_);
+
+    if (SUCCEEDED(hr)) {
+        // Create DWrite text format object
+        hr = dwriteFactory_->CreateTextFormat(
+            kFontName,
+            nullptr,
+            DWRITE_FONT_WEIGHT_NORMAL,
+            DWRITE_FONT_STYLE_NORMAL,
+            DWRITE_FONT_STRETCH_NORMAL,
+            kFontSize,
+            L"", // locale
+            &textFormat_
+        );
+    }
+    if (SUCCEEDED(hr)) {
+        // Center the text both horizontally and vertically.
+        textFormat_->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+        textFormat_->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+        // Create the path geometry.
+        hr = d2dFactory->CreatePathGeometry(pathGeometry_.ReleaseAndGetAddressOf());
+    }
+    if (SUCCEEDED(hr)) {
+        // Write to the path geometry using the geometry sink. We are going to
+        // create an hour glass.
+        hr = pathGeometry_->Open(&sink);
+    }
+    if (SUCCEEDED(hr)) {
+        sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
+
+        sink->BeginFigure(D2D1::Point2F(0, 0), D2D1_FIGURE_BEGIN_FILLED);
+
+        sink->AddLine(D2D1::Point2F(200, 0));
+
+        sink->AddBezier(D2D1::BezierSegment(D2D1::Point2F(150, 50), D2D1::Point2F(150, 150), D2D1::Point2F(200, 200)));
+
+        sink->AddLine(D2D1::Point2F(0, 200));
+
+        sink->AddBezier(D2D1::BezierSegment(D2D1::Point2F(50, 150), D2D1::Point2F(50, 50), D2D1::Point2F(0, 0)));
+
+        sink->EndFigure(D2D1_FIGURE_END_CLOSED);
+
+        hr = sink->Close();
+    }
+
+    return hr;
 }
 
 HRESULT DX11TrackMapResources::createD3DResources() {
     HRESULT hr = S_OK;
+    if (isD3DReady())
+        return hr;
 
     D3D11_SUBRESOURCE_DATA InitData;
-    auto device = deviceResources_->getDevice();
-    auto deviceContext = deviceResources_->getDeviceContext();
-    auto rasterizerState = deviceResources_->getRasterizerState();
+    auto& device = deviceResources_->getDevice();
+    auto& deviceContext = deviceResources_->getDeviceContext();
+    auto& rasterizerState = deviceResources_->getRasterizerState();
 
     //    device->GetImmediateContext(&deviceContext);
 
@@ -200,7 +264,7 @@ HRESULT DX11TrackMapResources::createD3DResources() {
     AssertMsg(SUCCEEDED(hr), "Failed to load shader");
 
     // Obtain the technique
-    techniqueNoRef_ = shader_->GetTechniqueByName("Render2");
+    techniqueNoRef_ = shader_->GetTechniqueByName("Render");
     hr = techniqueNoRef_ ? S_OK : E_FAIL;
     AssertMsg(SUCCEEDED(hr), "Failed to find Render technique");
     // Obtain the variables
@@ -226,11 +290,39 @@ HRESULT DX11TrackMapResources::createD3DResources() {
     hr = projectionVariableNoRef_ ? S_OK : E_FAIL;
 
     AssertMsg(SUCCEEDED(hr), "failed to get projection");
-    ready_ = true;
+
+    // Define the input layout
+    UINT numElements = ARRAYSIZE(kInputLayout);
+
+    // Create the input layout
+    D3DX11_PASS_DESC PassDesc{};
+    // ZeroMemory(&PassDesc, sizeof(D3DX11_PASS_DESC));
+    AOK(techniqueNoRef_->GetPassByIndex(0)->GetDesc(&PassDesc));
+
+    AOK(device->CreateInputLayout(
+        kInputLayout, numElements, PassDesc.pIAInputSignature,
+        PassDesc.IAInputSignatureSize, &vertexLayout_));
+
+
+    // Set the input layout
+    deviceContext->IASetInputLayout(vertexLayout_.Get());
+
+
     return hr;
 }
 
+bool DX11TrackMapResources::isReady() {
+    return ready_;
+}
+
+bool DX11TrackMapResources::isD3DReady() {
+    return !!offscreenTexture_;
+}
+
 HRESULT DX11TrackMapResources::createD3DSizedResources() {
+    if (!isD3DReady()) {
+        createD3DResources();
+    }
     HRESULT hr = S_OK;
 
     // D3D11_SUBRESOURCE_DATA InitData;
@@ -239,6 +331,12 @@ HRESULT DX11TrackMapResources::createD3DSizedResources() {
     auto &swapChain = deviceResources_->getSwapChain();
     // auto& rasterizerState = deviceResources_->getRasterizerState();
     auto &d2dFactory = deviceResources_->getOrCreateD2DFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED);
+
+    backBufferRT_.Reset();
+    deviceResources_->getDepthStencil().Reset();
+    deviceResources_->getRenderTargetView().Reset();
+
+    //d2dRenderTarget_->Release();
 
     ComPtr<IDXGISurface> pBackBuffer{nullptr};
     ComPtr<ID3D11Resource> pBackBufferResource{nullptr};
@@ -269,7 +367,7 @@ HRESULT DX11TrackMapResources::createD3DSizedResources() {
     texDesc.SampleDesc.Quality = 0;
     texDesc.Usage = D3D11_USAGE_DEFAULT;
 
-    hr = device->CreateTexture2D(&texDesc, nullptr, deviceResources_->getDepthStencil().ReleaseAndGetAddressOf());
+    hr = device->CreateTexture2D(&texDesc, nullptr, deviceResources_->getDepthStencil().GetAddressOf());
 
     AssertOkMsg(hr, "Failed to create depth stencil");
     // Create the render target view and set it on the device
@@ -283,7 +381,7 @@ HRESULT DX11TrackMapResources::createD3DSizedResources() {
     renderDesc.Texture2D.MipSlice = 0;
 
     hr = device->CreateRenderTargetView(
-        pBackBufferResource.Get(), &renderDesc, deviceResources_->getRenderTargetView().ReleaseAndGetAddressOf()
+        pBackBufferResource.Get(), &renderDesc, deviceResources_->getRenderTargetView().GetAddressOf()
     );
 
     AssertOkMsg(hr, "CreateRenderTargetView failed");
@@ -322,7 +420,7 @@ HRESULT DX11TrackMapResources::createD3DSizedResources() {
         100.0f                                                  // zf
     );
 
-    AOK(projectionVariableNoRef_->SetMatrix(reinterpret_cast<float *>(&projectionMatrix_)));
+    AssertOk(projectionVariableNoRef_->SetMatrix(reinterpret_cast<float *>(&projectionMatrix_)));
 
     // Create the DXGI Surface Render Target.
     FLOAT dpiX;
@@ -347,7 +445,7 @@ HRESULT DX11TrackMapResources::createD3DSizedResources() {
 HRESULT DX11TrackMapResources::createD2DResources() {
     HRESULT hr = S_OK;
 
-    auto d2dFactory = deviceResources_->getOrCreateD2DFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED);
+    auto& d2dFactory = deviceResources_->getOrCreateD2DFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED);
 
     ComPtr<IDXGISurface> pDxgiSurface{nullptr};
     ComPtr<ID2D1GradientStopCollection> pGradientStops{nullptr};
@@ -412,8 +510,8 @@ HRESULT DX11TrackMapResources::createD2DResources() {
         deviceResources_->getWICFactory().Get(),
         RCDataSampleImage,
         RCDataSampleImage_len,
-        100,
-        0,
+        1024,
+        768,
         &bitmap_
     );
 
@@ -479,26 +577,29 @@ HRESULT DX11TrackMapResources::renderD2DContentIntoSurface() {
 
     D2D1_SIZE_F size = bitmap_->GetSize();
 
-    d2dRenderTarget_->DrawBitmap(bitmap_.Get(), D2D1::RectF(0.0f, 0.0f, size.width, size.height));
-
-    // Draw the bitmap at the bottom corner of the window
-    d2dRenderTarget_->DrawBitmap(bitmap_.Get(), D2D1::RectF(width - size.width, height - size.height, width, height));
-
     // Set the world transform to a 45 degree rotation at the center of the render
     // target and write "Hello, World"
     d2dRenderTarget_->SetTransform(D2D1::Matrix3x2F::Rotation(45, D2D1::Point2F(width / 2, height / 2)));
 
-    // d2dRenderTarget_->DrawText(
-    //     kHelloWorld, ARRAYSIZE(kHelloWorld) - 1, m_pTextFormat, D2D1::RectF(0, 0, width, height), m_pBlackBrush
-    // );
-    //
-    // // Reset back to the identity transform d2dRenderTarget_->SetTransform(D2D1::Matrix3x2F::Translation(0, height - 200));
-    //
-    // d2dRenderTarget_->FillGeometry(pathGeometry_.Get(), lGBrush_.Get());
-    //
-    // d2dRenderTarget_->SetTransform(D2D1::Matrix3x2F::Translation(width - 200, 0));
-    //
-    // d2dRenderTarget_->FillGeometry(pathGeometry_.Get(), lGBrush_.Get());
+
+    d2dRenderTarget_->DrawBitmap(bitmap_.Get(), D2D1::RectF(0.0f, 0.0f, size.width, size.height),1, D2D1_BITMAP_INTERPOLATION_MODE_LINEAR);
+
+    // Draw the bitmap at the bottom corner of the window
+    d2dRenderTarget_->DrawBitmap(bitmap_.Get(), D2D1::RectF(width - size.width, height - size.height, width, height));
+
+
+    d2dRenderTarget_->DrawText(
+        kHelloWorld, ARRAYSIZE(kHelloWorld) - 1, textFormat_.Get(), D2D1::RectF(0, 0, width, height), blackBrush_.Get()
+    );
+
+    // Reset back to the identity transform
+    d2dRenderTarget_->SetTransform(D2D1::Matrix3x2F::Translation(0, height - 200));
+
+    d2dRenderTarget_->FillGeometry(pathGeometry_.Get(), lGBrush_.Get());
+
+    d2dRenderTarget_->SetTransform(D2D1::Matrix3x2F::Translation(width - 200, 0));
+
+    d2dRenderTarget_->FillGeometry(pathGeometry_.Get(), lGBrush_.Get());
 
     HRESULT hr = d2dRenderTarget_->EndDraw();
 

@@ -31,9 +31,10 @@ void DXSafeRelease(Interface **ppInterfaceToRelease) {
 #define Assert(b) \
     if (!(b)) { \
         OutputDebugStringA("Assert: " #b "\n"); \
+        assert(b);\
     }
 #else
-#define Assert(b, msg)
+#define Assert(b)
 #endif // DEBUG || _DEBUG
 #endif
 
@@ -52,6 +53,7 @@ void DXSafeRelease(Interface **ppInterfaceToRelease) {
 
 #define AssertOkMsg(result, msg) AssertMsg(SUCCEEDED(result), msg)
 #define AssertOk(result) Assert(SUCCEEDED(result))
+#define AOKMSG AssertOkMsg
 #define AOK AssertOk
 
 #ifndef HINST_THISCOMPONENT

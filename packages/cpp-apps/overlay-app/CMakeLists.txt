@@ -19,16 +19,16 @@ endforeach()
 
 # App
 set(targetName ${PROJECT_NAME}-overlay-app)
-add_executable(${targetName} WIN32 ${appSources} ${appHeaders} ${sdkInternalHeaders} OverlayApp.rc)
+add_executable(${targetName} WIN32 ${appSources} ${appHeaders} ${sdkInternalHeaders})
 
-add_custom_command(
-  TARGET ${targetName}
-  PRE_BUILD
-  COMMAND fxc
-  ARGS /T fx_5_0 /Fo ${CMAKE_CURRENT_BINARY_DIR}/OverlayApp.fxo ${CMAKE_CURRENT_LIST_DIR}/OverlayApp.fx
-  COMMAND echo
-  ARGS IDR_PIXEL_SHADER RCDATA OverlayApp.fxo > ${CMAKE_CURRENT_BINARY_DIR}/OverlayApp.resinclude
-)
+#add_custom_command(
+#  TARGET ${targetName}
+#  PRE_BUILD
+#  COMMAND fxc
+#  ARGS /T fx_5_0 /Fo ${CMAKE_CURRENT_BINARY_DIR}/OverlayApp.fxo ${CMAKE_CURRENT_LIST_DIR}/OverlayApp.fx
+#  COMMAND echo
+#  ARGS IDR_PIXEL_SHADER RCDATA OverlayApp.fxo > ${CMAKE_CURRENT_BINARY_DIR}/OverlayApp.resinclude
+#)
 
 
 

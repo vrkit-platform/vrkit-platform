@@ -1,6 +1,9 @@
 /.idea
+/.vs
+/out
 /build
 /vcpkg_installed
 .ipynb_checkpoints
 __pycache__
 venv
+/.vs/

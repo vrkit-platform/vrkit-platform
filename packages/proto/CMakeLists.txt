@@ -1,5 +1,7 @@
 
-find_package(Protobuf REQUIRED)
+#find_package(Protobuf REQUIRED)
+find_package(protobuf CONFIG REQUIRED)
+message(NOTICE "Protobuf INCLUDE_DIRS= ${Protobuf_INCLUDE_DIRS}")
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -41,37 +43,35 @@ add_custom_target(
 #  PRE_BUILD
 #  VERBATIM )
 ##SETUP_LIB_EXPORTS(${modelsTarget} ${modelsTargetStatic} PROTO_SRCS PROTO_HDRS PROTO_HDRS)
-#add_library(${modelsTarget} SHARED ${PROTO_SRCS} ${PROTO_HDRS})
-#target_link_libraries(${modelsTarget} ${Protobuf_LIBRARIES})
-#
-#add_library(${modelsTargetStatic} STATIC ${PROTO_SRCS} ${PROTO_HDRS})
-#target_link_libraries(${modelsTargetStatic} ${Protobuf_LIBRARIES})
-#
-#foreach(target ${modelsTarget} ${modelsTargetStatic})
-#
-#  target_include_directories(${target} PUBLIC
-#    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-#    $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
-#  )
-#
-##  install(TARGETS ${target} DESTINATION ${LIBRARY_INSTALL_DIR})
-##  install(TARGETS ${target} FILES  DESTINATION ${INCLUDE_INSTALL_DIR})
-#endforeach()
+add_library(${modelsTarget} SHARED ${allProtoGenFiles})
+add_library(${modelsTargetStatic} STATIC ${allProtoGenFiles})
 
-SETUP_LIB_EXPORTS(NO_SOURCE_HEADERS ${modelsTarget} ${modelsTargetStatic} PROTO_SRCS PROTO_HDRS PROTO_HDRS)
+#
+foreach(target ${modelsTarget} ${modelsTargetStatic})
 
-foreach(headerFile ${PROTO_HDRS})
-  foreach(target ${modelsTarget} ${modelsTargetStatic})
-    get_filename_component(baseHeaderFile ${headerFile} NAME)
-    set(relHeaderFile IRacingTools/Models/${baseHeaderFile})
-    target_sources(
-      ${target}
-      PUBLIC
-      $<INSTALL_INTERFACE:${relHeaderFile}>
-      $<BUILD_INTERFACE:${headerFile}>
-    )
-  endforeach()
+  target_include_directories(${target} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
+  )
+
+#  install(TARGETS ${target} DESTINATION ${LIBRARY_INSTALL_DIR})
+#  install(TARGETS ${target} FILES  DESTINATION ${INCLUDE_INSTALL_DIR})
 endforeach()
 
-target_link_libraries(${modelsTarget} ${Protobuf_LIBRARIES})
-target_link_libraries(${modelsTargetStatic} ${Protobuf_LIBRARIES})
+#SETUP_LIB_EXPORTS(NO_SOURCE_HEADERS ${modelsTarget} ${modelsTargetStatic} PROTO_SRCS PROTO_HDRS PROTO_HDRS)
+
+#foreach(headerFile ${PROTO_HDRS})
+#  foreach(target ${modelsTarget} ${modelsTargetStatic})
+#    get_filename_component(baseHeaderFile ${headerFile} NAME)
+#    set(relHeaderFile IRacingTools/Models/${baseHeaderFile})
+#    target_sources(
+#      ${target}
+#      PUBLIC
+#      $<INSTALL_INTERFACE:${relHeaderFile}>
+#      $<BUILD_INTERFACE:${headerFile}>
+#    )
+#  endforeach()
+#endforeach()
+
+target_link_libraries(${modelsTarget} PUBLIC ${Protobuf_LIBRARY_DEBUG})
+target_link_libraries(${modelsTargetStatic} PUBLIC ${Protobuf_LIBRARY_DEBUG})

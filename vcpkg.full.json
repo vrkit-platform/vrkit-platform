@@ -9,6 +9,12 @@
     "name" : "openxr-loader",
     "version>=" : "1.0.31"
   }, {
+    "name" : "skia",
+    "version>=" : "0.38.2#2"
+  }, {
+    "name" : "vulkan-headers",
+    "version>=" : "1.3.268.0"
+  }, {
     "name" : "magic-enum",
     "version>=" : "0.9.5"
   }, {

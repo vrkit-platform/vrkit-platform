@@ -12,18 +12,21 @@ public:
     explicit DX11TrackMapResources(DX11DeviceResources *deviceResources);
 
     HRESULT render(DWORD dwTimeCur);
-    bool isReady() const;
+    bool isReady();
 
-protected:
+// protected:
+    bool isD3DReady();
     HRESULT createD3DResources();
     HRESULT createD3DSizedResources();
     HRESULT createD2DResources();
+    HRESULT createDeviceIndependentResources();
     HRESULT renderD2DContentIntoSurface();
     HRESULT createGridPatternBrush(ID2D1RenderTarget *pRenderTarget,
                                       ID2D1BitmapBrush **ppBitmapBrush);
 
 
 private:
+
     std::atomic_bool ready_{false};
     std::atomic_bool disposed_{false};
 
@@ -53,6 +56,7 @@ private:
     ComPtr<ID3DX11EffectShaderResourceVariable> diffuseVariableNoRef_{nullptr};
 
     // Device-Independent Resources
+    ComPtr<IDWriteFactory> dwriteFactory_{nullptr};
     ComPtr<IDWriteTextFormat> textFormat_{nullptr};
     ComPtr<ID2D1PathGeometry> pathGeometry_{nullptr};
 

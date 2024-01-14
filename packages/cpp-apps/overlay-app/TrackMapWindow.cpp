@@ -2,46 +2,45 @@
 // Created by jglanz on 1/5/2024.
 //
 
-#include "NewOverlayAppWindow.h"
+#include "TrackMapWindow.h"
 
 #include <IRacingTools/Shared/Macros.h>
 #include <cassert>
 
 /******************************************************************
  *                                                                 *
- *  NewOverlayApp::NewOverlayApp                                   *
+ *  TrackMapWindow::TrackMapWindow                                   *
  *                                                                 *
  *  Constructor -- initialize member data                          *
  *                                                                 *
  ******************************************************************/
 
-NewOverlayApp::NewOverlayApp() : windowHandle_(nullptr) {}
+TrackMapWindow::TrackMapWindow() : windowHandle_(nullptr) {}
 
 /******************************************************************
  *                                                                 *
- *  NewOverlayApp::~NewOverlayApp                                  *
+ *  TrackMapWindow::~TrackMapWindow                                  *
  *                                                                 *
  *  Destructor -- tear down member data                            *
  *                                                                 *
  ******************************************************************/
 
-NewOverlayApp::~NewOverlayApp() {}
+TrackMapWindow::~TrackMapWindow() {}
 
 /******************************************************************
  *                                                                 *
- *  NewOverlayApp::Initialize                                      *
+ *  TrackMapWindow::initialize                                      *
  *                                                                 *
  *  Create application window and device-independent resources     *
  *                                                                 *
  ******************************************************************/
-HRESULT NewOverlayApp::Initialize()
-{
+HRESULT TrackMapWindow::initialize() {
     HRESULT hr;
 
     // Register the window class.
     WNDCLASSEX wcex = {sizeof(WNDCLASSEX)};
     wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = NewOverlayApp::WndProc;
+    wcex.lpfnWndProc = TrackMapWindow::WndProc;
     wcex.cbClsExtra = 0;
     wcex.cbWndExtra = sizeof(LONG_PTR);
     wcex.hInstance = HINST_THISCOMPONENT;
@@ -94,7 +93,7 @@ HRESULT NewOverlayApp::Initialize()
 
 /******************************************************************
  *                                                                 *
- *  NewOverlayApp::CreateDeviceIndependentResources                *
+ *  TrackMapWindow::CreateDeviceIndependentResources                *
  *                                                                 *
  *  This method is used to create resources which are not bound    *
  *  to any device. Their lifetime effectively extends for the      *
@@ -107,14 +106,13 @@ HRESULT NewOverlayApp::Initialize()
 
 /******************************************************************
  *                                                                 *
- *  NewOverlayApp::RunMessageLoop                                  *
+ *  TrackMapWindow::eventLoop                                  *
  *                                                                 *
  *  This is the main message pump for the application              *
  *                                                                 *
  ******************************************************************/
 
-void NewOverlayApp::RunMessageLoop()
-{
+void TrackMapWindow::eventLoop() {
     MSG msg;
 
     while (GetMessage(&msg, nullptr, 0, 0)) {
@@ -123,9 +121,19 @@ void NewOverlayApp::RunMessageLoop()
     }
 }
 
+void TrackMapWindow::prepare() {
+    if (!windowResources_) {
+        windowResources_ = std::make_unique<DX11WindowResources>(windowHandle_);
+    }
+
+    if (!trackMapResources_) {
+        trackMapResources_ = std::make_unique<DX11TrackMapResources>(windowResources_.get());
+    }
+}
+
 /******************************************************************
  *                                                                 *
- *  NewOverlayApp::OnRender                                        *
+ *  TrackMapWindow::onRender                                        *
  *                                                                 *
  *  This method is called when the app needs to paint the window.  *
  *  It uses a D2D RT to draw a gradient background into the swap   *
@@ -135,21 +143,13 @@ void NewOverlayApp::RunMessageLoop()
  *                                                                 *
  ******************************************************************/
 
-HRESULT NewOverlayApp::OnRender()
-{
+HRESULT TrackMapWindow::onRender() {
     HRESULT hr = S_OK;
 
     static float t = 0.0f;
     static DWORD dwTimeStart = 0;
 
-    if (!windowResources_) {
-        windowResources_ = std::make_unique<DX11WindowResources>(windowHandle_);
-
-    }
-
-    if (!trackMapResources_) {
-        trackMapResources_ = std::make_unique<DX11TrackMapResources>(windowResources_.get());
-    }
+    prepare();
 
     trackMapResources_->render(GetTickCount());
     //auto ctx = windowResources_->getDeviceContext();
@@ -248,7 +248,7 @@ HRESULT NewOverlayApp::OnRender()
 
 /******************************************************************
  *                                                                 *
- *  NewOverlayApp::RenderD2DContentIntoSurface                     *
+ *  TrackMapWindow::RenderD2DContentIntoSurface                     *
  *                                                                 *
  *  This method renders a simple 2D scene into a D2D render target *
  *  that maps to a D3D texture. It's important that the return     *
@@ -259,7 +259,7 @@ HRESULT NewOverlayApp::OnRender()
  *                                                                 *
  ******************************************************************/
 
-// HRESULT NewOverlayApp::RenderD2DContentIntoSurface() {
+// HRESULT TrackMapWindow::RenderD2DContentIntoSurface() {
 //   HRESULT hr;
 //   D2D1_SIZE_F renderTargetSize = m_pRenderTarget->GetSize();
 //
@@ -313,7 +313,7 @@ HRESULT NewOverlayApp::OnRender()
 //
 // /******************************************************************
 //  *                                                                 *
-//  *  NewOverlayApp::OnResize                                        *
+//  *  TrackMapWindow::onResize                                        *
 //  *                                                                 *
 //  *  This method is called in response to a WM_SIZE window message  *
 //  *                                                                 *
@@ -322,8 +322,12 @@ HRESULT NewOverlayApp::OnRender()
 //  *                                                                 *
 //  ******************************************************************/
 
-void NewOverlayApp::OnResize(UINT width, UINT height)
-{
+void TrackMapWindow::onResize(UINT width, UINT height) {
+    prepare();
+
+    Size newWindowSize(width, height);
+    windowResources_->updateSize(newWindowSize);
+    trackMapResources_->createD3DSizedResources();
     // if (!m_pDevice) {
     //   CreateDeviceResources();
     // } else {
@@ -333,15 +337,14 @@ void NewOverlayApp::OnResize(UINT width, UINT height)
 
 /******************************************************************
  *                                                                 *
- *  NewOverlayApp::OnGetMinMaxInfo                                 *
+ *  TrackMapWindow::onGetMinMaxInfo                                 *
  *                                                                 *
  *  This method is called in response to a WM_GETMINMAXINFO window *
  *  message. We use it to set the minimum size of the window.      *
  *                                                                 *
  ******************************************************************/
 
-void NewOverlayApp::OnGetMinMaxInfo(MINMAXINFO *pMinMaxInfo)
-{
+void TrackMapWindow::onGetMinMaxInfo(MINMAXINFO *pMinMaxInfo) {
     // FLOAT dpiX, dpiY;
     // m_pD2DFactory->GetDesktopDpi(&dpiX, &dpiY);
     //
@@ -351,54 +354,51 @@ void NewOverlayApp::OnGetMinMaxInfo(MINMAXINFO *pMinMaxInfo)
 
 /******************************************************************
  *                                                                 *
- *  NewOverlayApp::OnTimer                                         *
+ *  TrackMapWindow::onTimer                                         *
  *                                                                 *
  *                                                                 *
  ******************************************************************/
 
-void NewOverlayApp::OnTimer()
-{
+void TrackMapWindow::onTimer() {
     InvalidateRect(windowHandle_, nullptr, FALSE);
 }
 
 /******************************************************************
  *                                                                 *
- *  NewOverlayApp::WndProc                                         *
+ *  TrackMapWindow::WndProc                                         *
  *                                                                 *
  *  This static method handles our app's window messages           *
  *                                                                 *
  ******************************************************************/
 
-LRESULT CALLBACK NewOverlayApp::WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
+LRESULT CALLBACK TrackMapWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     LRESULT result = 0;
 
     if (message == WM_CREATE) {
-        LPCREATESTRUCT pcs = (LPCREATESTRUCT) lParam;
-        NewOverlayApp *pDXGISampleApp = static_cast<NewOverlayApp *>(pcs->lpCreateParams);
+        auto pcs = reinterpret_cast<LPCREATESTRUCT>(lParam);
+        auto scene = static_cast<TrackMapWindow *>(pcs->lpCreateParams);
 
-        ::SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pDXGISampleApp));
+        ::SetWindowLongPtrW(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(scene));
 
         result = 1;
     } else {
-        NewOverlayApp *pDXGISampleApp = reinterpret_cast<NewOverlayApp *>(::GetWindowLongPtrW(hwnd, GWLP_USERDATA));
-
+        auto scene = reinterpret_cast<TrackMapWindow *>(::GetWindowLongPtrW(hWnd, GWLP_USERDATA));
         bool wasHandled = false;
 
-        if (pDXGISampleApp) {
+        if (scene) {
             switch (message) {
                 case WM_SIZE: {
                     UINT width = LOWORD(lParam);
                     UINT height = HIWORD(lParam);
-                    pDXGISampleApp->OnResize(width, height);
+                    scene->onResize(width, height);
                 }
                     result = 0;
                     wasHandled = true;
                     break;
 
                 case WM_GETMINMAXINFO: {
-                    MINMAXINFO *pMinMaxInfo = reinterpret_cast<MINMAXINFO *>(lParam);
-                    pDXGISampleApp->OnGetMinMaxInfo(pMinMaxInfo);
+                    auto pMinMaxInfo = reinterpret_cast<MINMAXINFO *>(lParam);
+                    scene->onGetMinMaxInfo(pMinMaxInfo);
                 }
                     result = 0;
                     wasHandled = true;
@@ -407,16 +407,16 @@ LRESULT CALLBACK NewOverlayApp::WndProc(HWND hwnd, UINT message, WPARAM wParam, 
                 case WM_PAINT:
                 case WM_DISPLAYCHANGE: {
                     PAINTSTRUCT ps;
-                    BeginPaint(hwnd, &ps);
-                    pDXGISampleApp->OnRender();
-                    EndPaint(hwnd, &ps);
+                    BeginPaint(hWnd, &ps);
+                    scene->onRender();
+                    EndPaint(hWnd, &ps);
                 }
                     result = 0;
                     wasHandled = true;
                     break;
 
                 case WM_TIMER: {
-                    pDXGISampleApp->OnTimer();
+                    scene->onTimer();
                 }
                     result = 0;
                     wasHandled = true;
@@ -432,7 +432,7 @@ LRESULT CALLBACK NewOverlayApp::WndProc(HWND hwnd, UINT message, WPARAM wParam, 
         }
 
         if (!wasHandled) {
-            result = DefWindowProc(hwnd, message, wParam, lParam);
+            result = DefWindowProc(hWnd, message, wParam, lParam);
         }
     }
 

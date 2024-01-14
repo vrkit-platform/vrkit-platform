@@ -31,14 +31,15 @@ HRESULT DX11WindowResources::createD3DResources() {
     swapChainDesc.BufferDesc.Width = width;
     swapChainDesc.BufferDesc.Height = height;
     swapChainDesc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-    swapChainDesc.SampleDesc.Count = 1;
-    swapChainDesc.SampleDesc.Quality = 0;
     swapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
     swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
     swapChainDesc.BufferCount = 1; // one back buffer
-
     swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // how swap chain is to be used
 
+    swapChainDesc.SampleDesc.Count = 1;
+    swapChainDesc.SampleDesc.Quality = 0;
+
+    swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
     // swapChainDesc.SampleDesc.Count = 4; // how many multisamples
     swapChainDesc.Windowed = TRUE; // windowed/full-screen mode
 

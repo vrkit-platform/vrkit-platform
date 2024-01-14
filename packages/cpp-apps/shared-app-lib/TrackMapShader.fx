@@ -77,7 +77,7 @@ float4 PS( PS_INPUT input) : SV_Target
 
 
 //--------------------------------------------------------------------------------------
-technique10 Render2
+technique10 Render
 {
     pass P0
     {

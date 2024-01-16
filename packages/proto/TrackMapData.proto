@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+message TrackMap {
+  message Point {
+    float x = 1;
+    float y = 2;
+    float distance = 3;
+  }
+  string name = 1;
+  float total_distance = 2;
+  repeated Point points = 10;
+}
+

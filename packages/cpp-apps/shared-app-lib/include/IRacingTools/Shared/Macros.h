@@ -25,6 +25,11 @@ void DXSafeRelease(Interface **ppInterfaceToRelease) {
  *                                                                 *
  ******************************************************************/
 
+#define LOGD(s) \
+{ \
+auto c = s.c_str();\
+OutputDebugStringA(c); \
+}
 
 #ifndef Assert
 #if defined(DEBUG) || defined(_DEBUG)

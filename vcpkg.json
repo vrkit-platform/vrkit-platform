@@ -26,5 +26,20 @@
   }, {
     "name" : "effects11",
     "version>=" : "11.29#3"
+  }, {
+    "name" : "cli11",
+    "version>=" : "2.3.2"
+  }, {
+    "name" : "cppwinrt",
+    "version>=" : "2.0.230207.1"
+  }, {
+    "name" : "wil",
+    "version>=" : "2023-10-28"
+  }, {
+    "name" : "gtest",
+    "version>=" : "1.14.0"
+  }, {
+    "name" : "nlohmann-json",
+    "version>=" : "3.11.3"
   } ]
 }

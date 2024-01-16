@@ -4,17 +4,11 @@
 
 #pragma once
 
-#include "iracing-tools-shared-app-lib_and_static_export.h"
-
-namespace IRacingTools {
-namespace Apps {
-namespace Shared {
+namespace IRacingTools::Shared {
 
 class SharedMemoryStorage {
 public:
-  void noop();
+    void noop();
 };
 
-} // Shared
-} // Apps
-} // IRacingTools
+} // namespace IRacingTools::Apps::Shared

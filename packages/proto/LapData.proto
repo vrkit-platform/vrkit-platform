@@ -24,3 +24,4 @@ message LapTrajectoryPoint {
   float altitude = 12;
   float speed = 20;
 }
+

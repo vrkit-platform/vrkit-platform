@@ -11,7 +11,7 @@ protobuf_generate(
   LANGUAGE cpp
   OUT_VAR allProtoGenFiles
   PROTOC_OUT_DIR ${protoIncludeDest}
-  PROTOS LapData.proto)
+  PROTOS LapData.proto TrackMapData.proto)
 #protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS irsdk_models.proto)
 #protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS EXPORT_MACRO DLL_EXPORT irsdk_models.proto)
 #protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS DESCRIPTORS PROTO_DESCS irsdk_models.proto)

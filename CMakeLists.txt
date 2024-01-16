@@ -21,9 +21,15 @@ include(cmake/embed_resource.cmake)
 include(cmake/targets.cmake)
 include(cmake/fs.cmake)
 include(cmake/example_target.cmake)
+#include(cmake/hybrid_crt.cmake NO_POLICY_SCOPE)
 
 # Deps
 find_package(magic_enum CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+
+# Include test tools
+include(CTest)
+include(GoogleTest)
 
 # SDK Include dir
 set(sdkIncludeDir ${CMAKE_SOURCE_DIR}/packages/cpp/include)

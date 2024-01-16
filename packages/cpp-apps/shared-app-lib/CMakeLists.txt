@@ -1,6 +1,4 @@
-
-
-ENABLE_LANGUAGE(RC)
+#ENABLE_LANGUAGE(RC)
 
 set(graphicsBinaryDir ${CMAKE_CURRENT_BINARY_DIR}/resources/shaders)
 file(MAKE_DIRECTORY ${graphicsBinaryDir})
@@ -16,14 +14,16 @@ embed_resource("${graphicsBinaryDir}/TrackMapShader.fxo" "${graphicsBinaryDir}/T
 embed_resource("${CMAKE_CURRENT_LIST_DIR}/sampleImage.jpg" "${graphicsBinaryDir}/sampleImage.c" RCDataSampleImage)
 
 # SDK Source & headers
-file(GLOB_RECURSE sharedAppLibSources *.cpp )
-file(GLOB_RECURSE sharedAppLibHeaders *.h EXCLUDE include)
+file(GLOB_RECURSE sharedAppLibTestSources tests/*.cpp)
+file(GLOB sharedAppLibSources *.cpp  Graphics/*.cpp)
+file(GLOB sharedAppLibHeaders *.h Graphics/*.h)
 file(GLOB_RECURSE sharedAppLibHeadersPublic include/*.h)
 
 list(APPEND sharedAppLibSources "${graphicsBinaryDir}/TrackMapShader.c" "${graphicsBinaryDir}/sampleImage.c")
 
+
 #set(depPkgNames directxmath directxtk fmt OpenXR dxsdk-d3dx protobuf effects11)
-set(depPkgNames directxmath directxtk fmt OpenXR dxsdk-d3dx protobuf effects11)
+set(depPkgNames directxmath directxtk fmt OpenXR dxsdk-d3dx protobuf effects11 GTest nlohmann_json)
 foreach(depPkgName ${depPkgNames})
   find_package(${depPkgName} CONFIG REQUIRED)
 endforeach()
@@ -67,15 +67,25 @@ target_compile_definitions(${sharedAppLibTargetStatic} PUBLIC IS_STATIC_LIB)
 #embed_resource(${sharedAppLibTarget} "${graphicsBinaryDir}/TrackMapShader.fxo" "${graphicsBinaryDir}/TrackMapShader.cpp" RCDataTrackMapShader)
 
 foreach(targetName ${sharedAppLibTarget} ${sharedAppLibTargetStatic})
-  target_link_libraries(${targetName} PUBLIC magic_enum::magic_enum )
+
+  target_link_libraries(${targetName} PUBLIC nlohmann_json::nlohmann_json)
+  target_link_libraries(${targetName} PUBLIC magic_enum::magic_enum)
   target_link_libraries(${targetName} PUBLIC d2d1.lib dwrite.lib windowscodecs.lib dxgi.lib d3d10_1.lib d3d11.lib)
   target_link_libraries(${targetName} PUBLIC Microsoft::D3DX9 Microsoft::D3DX10 Microsoft::D3DX11 Microsoft::Effects11)
   target_link_libraries(${targetName} PUBLIC Microsoft::DirectXMath)
-  target_link_libraries(${targetName} PUBLIC magic_enum::magic_enum )
+  target_link_libraries(${targetName} PUBLIC magic_enum::magic_enum)
   target_link_libraries(${targetName} PUBLIC Microsoft::DirectXTK)
   target_link_libraries(${targetName} PUBLIC fmt::fmt)
   target_link_libraries(${targetName} PUBLIC magic_enum::magic_enum)
   target_link_libraries(${targetName} PUBLIC OpenXR::headers)
-
 endforeach()
 
+set(testTargetName ${sharedAppLibTarget}_tests)
+add_executable(${testTargetName} ${sharedAppLibTestSources})
+target_link_libraries(${testTargetName} PUBLIC
+  ${sharedAppLibTargetStatic}
+  fmt::fmt
+  GTest::gtest_main
+  nlohmann_json::nlohmann_json
+  )
+#GTest::gtest

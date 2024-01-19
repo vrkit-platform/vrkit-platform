@@ -14,8 +14,10 @@
 
 #pragma warning(disable : 4324)
 
+#include <cstdarg>
 #include <exception>
 #include <memory>
+#include <windows.h>
 
 #ifndef MAKEFOURCC
 

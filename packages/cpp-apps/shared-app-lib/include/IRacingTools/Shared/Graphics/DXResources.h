@@ -9,7 +9,6 @@
 #include <mutex>
 
 namespace IRacingTools::Shared::Graphics {
-
 using Microsoft::WRL::ComPtr;
 
 struct Size {
@@ -75,16 +74,16 @@ public:
     // function prototypes
     virtual ~DXResources() = default;
 
-    virtual DXResTPtr(V, Device) & getDevice() = 0;
-    virtual DXResTPtr(V, DeviceContext) & getDeviceContext() = 0;
-    virtual DXResTPtr(V, SwapChain) & getSwapChain() = 0;
-    virtual DXResTPtr(V, RasterizerState) & getRasterizerState() = 0;
+    virtual DXResTPtr(V, Device) &getDevice() = 0;
+    virtual DXResTPtr(V, DeviceContext) &getDeviceContext() = 0;
+    virtual DXResTPtr(V, SwapChain) &getSwapChain() = 0;
+    virtual DXResTPtr(V, RasterizerState) &getRasterizerState() = 0;
 
-    virtual DXResTPtr(V, Texture2D) & getRenderTarget() = 0;
-    virtual DXResTPtr(V, Texture2D) & getDepthStencil() = 0;
+    virtual DXResTPtr(V, Texture2D) &getRenderTarget() = 0;
+    virtual DXResTPtr(V, Texture2D) &getDepthStencil() = 0;
 
-    virtual DXResTPtr(V, RenderTargetView) & getRenderTargetView() = 0;
-    virtual DXResTPtr(V, DepthStencilView) & getDepthStencilView() = 0;
+    virtual DXResTPtr(V, RenderTargetView) &getRenderTargetView() = 0;
+    virtual DXResTPtr(V, DepthStencilView) &getDepthStencilView() = 0;
     virtual DXResT(V, Viewport) getViewport() = 0;
 
     virtual DXGI_FORMAT getBackBufferFormat() = 0;
@@ -96,16 +95,16 @@ public:
 template<DXVersion V>
 class DXDeviceResources : public DXResources<V> {
 public:
-    DXResTPtr(V, Device) & getDevice() override { return dev_; };
-    DXResTPtr(V, DeviceContext) & getDeviceContext() override { return devContext_; };
-    DXResTPtr(V, SwapChain) & getSwapChain() override { return swapChain_; };
-    DXResTPtr(V, RasterizerState) & getRasterizerState() override { return rasterizerState_; };
+    DXResTPtr(V, Device) &getDevice() override { return dev_; };
+    DXResTPtr(V, DeviceContext) &getDeviceContext() override { return devContext_; };
+    DXResTPtr(V, SwapChain) &getSwapChain() override { return swapChain_; };
+    DXResTPtr(V, RasterizerState) &getRasterizerState() override { return rasterizerState_; };
 
-    DXResTPtr(V, Texture2D) & getRenderTarget() override { return renderTarget_; };
-    DXResTPtr(V, Texture2D) & getDepthStencil() override { return depthStencil_; };
+    DXResTPtr(V, Texture2D) &getRenderTarget() override { return renderTarget_; };
+    DXResTPtr(V, Texture2D) &getDepthStencil() override { return depthStencil_; };
 
-    DXResTPtr(V, RenderTargetView) & getRenderTargetView() override { return renderTargetView_; };
-    DXResTPtr(V, DepthStencilView) & getDepthStencilView() override { return depthStencilView_; };
+    DXResTPtr(V, RenderTargetView) &getRenderTargetView() override { return renderTargetView_; };
+    DXResTPtr(V, DepthStencilView) &getDepthStencilView() override { return depthStencilView_; };
     DXResT(V, Viewport) getViewport() override { return viewport_; }
 
     DXGI_FORMAT getBackBufferFormat() override { return backBufferFormat_; }
@@ -117,7 +116,10 @@ public:
     virtual ComPtr<IWICImagingFactory> &getWICFactory() { return wicFactory_; };
 
     virtual ComPtr<ID2D1Factory> &createD2DFactory(D2D1_FACTORY_TYPE factoryType) {
-        AssertOkMsg(D2D1CreateFactory(factoryType, d2dFactory_.ReleaseAndGetAddressOf()), "Unable to create d2d factory");
+        AssertOkMsg(
+            D2D1CreateFactory(factoryType, d2dFactory_.ReleaseAndGetAddressOf()),
+            "Unable to create d2d factory"
+        );
         return d2dFactory_;
     };
 
@@ -132,7 +134,10 @@ public:
     virtual ComPtr<ID2D1Factory> &getD2DFactory() { return d2dFactory_; };
 
     HRESULT createShaderFromMemory(
-        DXResT(V, Device) * pDevice, const void *pData, SIZE_T dataSize, DXResT(V, Effect) * *ppShader
+        DXResT(V, Device) *pDevice,
+        const void *pData,
+        SIZE_T dataSize,
+        DXResT(V, Effect) * *ppShader
     ) {
         return ::D3DX11CreateEffectFromMemory(pData, dataSize, 0, pDevice, ppShader);
     }
@@ -147,87 +152,72 @@ public:
         ID2D1Bitmap **ppBitmap
     ) {
         HRESULT hr = S_OK;
-        IWICBitmapDecoder *pDecoder = nullptr;
-        IWICBitmapFrameDecode *pSource = nullptr;
-        IWICStream *pStream = nullptr;
-        IWICFormatConverter *pConverter = nullptr;
-        IWICBitmapScaler *pScaler = nullptr;
+        ComPtr<IWICBitmapDecoder> pDecoder = nullptr;
+        ComPtr<IWICBitmapFrameDecode> pSource = nullptr;
+        ComPtr<IWICStream> pStream = nullptr;
+        ComPtr<IWICFormatConverter> pConverter = nullptr;
+        ComPtr<IWICBitmapScaler> pScaler = nullptr;
 
         AOK(hr);
         // Create a WIC stream to map onto the memory.
-        hr = pIWICFactory->CreateStream(&pStream);
+        winrt::check_hresult(pIWICFactory->CreateStream(&pStream));
 
+        // Initialize the stream with the memory pointer and size.
+        winrt::check_hresult(pStream->InitializeFromMemory(data, dataLen));
+        // Create a decoder for the stream.
+        winrt::check_hresult(
+            pIWICFactory->CreateDecoderFromStream(pStream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &pDecoder)
+        );
+        // Create the initial frame.
+        winrt::check_hresult(pDecoder->GetFrame(0, &pSource));
+        // Convert the image format to 32bppPBGRA
+        // (DXGI_FORMAT_B8G8R8A8_UNORM + D2D1_ALPHA_MODE_PREMULTIPLIED).
+        winrt::check_hresult(pIWICFactory->CreateFormatConverter(&pConverter));
+        // If a new width or height was specified, create an
+        // IWICBitmapScaler and use it to resize the image.
+        if (destinationWidth != 0 || destinationHeight != 0) {
+            UINT originalWidth, originalHeight;
+            winrt::check_hresult(pSource->GetSize(&originalWidth, &originalHeight));
 
-        if (SUCCEEDED(hr)) {
-            // Initialize the stream with the memory pointer and size.
-            hr = pStream->InitializeFromMemory(data, dataLen);
-        }
-        if (SUCCEEDED(hr)) {
-            // Create a decoder for the stream.
-            hr = pIWICFactory->CreateDecoderFromStream(pStream, nullptr, WICDecodeMetadataCacheOnLoad, &pDecoder);
-        }
-        if (SUCCEEDED(hr)) {
-            // Create the initial frame.
-            hr = pDecoder->GetFrame(0, &pSource);
-        }
-        if (SUCCEEDED(hr)) {
-            // Convert the image format to 32bppPBGRA
-            // (DXGI_FORMAT_B8G8R8A8_UNORM + D2D1_ALPHA_MODE_PREMULTIPLIED).
-            hr = pIWICFactory->CreateFormatConverter(&pConverter);
-        }
-        if (SUCCEEDED(hr)) {
-            // If a new width or height was specified, create an
-            // IWICBitmapScaler and use it to resize the image.
-            if (destinationWidth != 0 || destinationHeight != 0) {
-                UINT originalWidth, originalHeight;
-                hr = pSource->GetSize(&originalWidth, &originalHeight);
-                if (SUCCEEDED(hr)) {
-                    if (destinationWidth == 0) {
-                        FLOAT scalar = static_cast<FLOAT>(destinationHeight) / static_cast<FLOAT>(originalHeight);
-                        destinationWidth = static_cast<UINT>(scalar * static_cast<FLOAT>(originalWidth));
-                    } else if (destinationHeight == 0) {
-                        FLOAT scalar = static_cast<FLOAT>(destinationWidth) / static_cast<FLOAT>(originalWidth);
-                        destinationHeight = static_cast<UINT>(scalar * static_cast<FLOAT>(originalHeight));
-                    }
+            if (destinationWidth == 0) {
+                FLOAT scalar = static_cast<FLOAT>(destinationHeight) / static_cast<FLOAT>(originalHeight);
+                destinationWidth = static_cast<UINT>(scalar * static_cast<FLOAT>(originalWidth));
+            } else if (destinationHeight == 0) {
+                FLOAT scalar = static_cast<FLOAT>(destinationWidth) / static_cast<FLOAT>(originalWidth);
+                destinationHeight = static_cast<UINT>(scalar * static_cast<FLOAT>(originalHeight));
+            }
 
-                    hr = pIWICFactory->CreateBitmapScaler(&pScaler);
-                    if (SUCCEEDED(hr)) {
-                        hr = pScaler->Initialize(
-                            pSource, destinationWidth, destinationHeight, WICBitmapInterpolationModeCubic
-                        );
-                        if (SUCCEEDED(hr)) {
-                            hr = pConverter->Initialize(
-                                pScaler,
-                                GUID_WICPixelFormat32bppPBGRA,
-                                WICBitmapDitherTypeNone,
-                                nullptr,
-                                0.f,
-                                WICBitmapPaletteTypeMedianCut
-                            );
-                        }
-                    }
-                }
-            } else {
-                hr = pConverter->Initialize(
-                    pSource,
+            winrt::check_hresult(pIWICFactory->CreateBitmapScaler(&pScaler));
+
+            winrt::check_hresult(
+                pScaler->Initialize(pSource.Get(), destinationWidth, destinationHeight, WICBitmapInterpolationModeCubic)
+            );
+
+            winrt::check_hresult(
+                pConverter->Initialize(
+                    pScaler.Get(),
                     GUID_WICPixelFormat32bppPBGRA,
                     WICBitmapDitherTypeNone,
                     nullptr,
                     0.f,
                     WICBitmapPaletteTypeMedianCut
-                );
-            }
-        }
-        if (SUCCEEDED(hr)) {
-            // create a Direct2D bitmap from the WIC bitmap.
-            hr = pRenderTarget->CreateBitmapFromWicBitmap(pConverter, nullptr, ppBitmap);
+                )
+            );
+        } else {
+            winrt::check_hresult(
+                pConverter->Initialize(
+                    pSource.Get(),
+                    GUID_WICPixelFormat32bppPBGRA,
+                    WICBitmapDitherTypeNone,
+                    nullptr,
+                    0.f,
+                    WICBitmapPaletteTypeMedianCut
+                )
+            );
         }
 
-        DXSafeRelease(&pDecoder);
-        DXSafeRelease(&pSource);
-        DXSafeRelease(&pStream);
-        DXSafeRelease(&pConverter);
-        DXSafeRelease(&pScaler);
+        // create a Direct2D bitmap from the WIC bitmap.
+        winrt::check_hresult(pRenderTarget->CreateBitmapFromWicBitmap(pConverter.Get(), nullptr, ppBitmap));
 
         return hr;
     };
@@ -283,6 +273,7 @@ private:
             disposers_.clear();
         }
     }
+
     std::vector<DXDisposer> disposers_{};
     std::atomic_bool disposed_{false};
     std::mutex disposalMutex_{};

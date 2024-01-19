@@ -48,7 +48,8 @@ OutputDebugStringA(c); \
 #define AssertMsg(b, msg) \
     if (!(b)) { \
         OutputDebugStringA("Assert: " #b " "##msg "\n"); \
-        assert(b); \
+            __debugbreak();\
+            assert(b); \
     }
 #else
 #define AssertMsg(b, msg)

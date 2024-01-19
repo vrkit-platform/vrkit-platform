@@ -2,7 +2,7 @@
 list_subdirs(exampleDirs ${CMAKE_CURRENT_LIST_DIR})
 
 foreach(exampleDir ${exampleDirs})
-#  if (NOT EXISTS ${exampleDir}/CMakeLists.txt)
+
   if (EXISTS ${exampleDir}/CMakeLists.txt)
     message(STATUS "Example (${exampleDir}) has CMakeLists.txt, including directly")
     add_subdirectory(${exampleDir})

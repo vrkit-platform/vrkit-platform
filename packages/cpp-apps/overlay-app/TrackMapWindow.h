@@ -28,6 +28,8 @@ struct SimpleVertex {
 
 class TrackMapWindow {
 public:
+    static constexpr auto kWindowClass = L"TrackMapWindow";
+
     TrackMapWindow();
     ~TrackMapWindow();
 

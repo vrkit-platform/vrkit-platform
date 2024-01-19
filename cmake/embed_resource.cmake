@@ -1,13 +1,39 @@
 
-function(EMBED_RESOURCE resFile outputSourceFile varName)
+set(RC_DATA_DIR "${CMAKE_BINARY_DIR}/resources")
+file(MAKE_DIRECTORY ${RC_DATA_DIR})
+#set(RC_DATA_SHADER_DIR ${RC_DATA_DIR}/shaders)
+#file(MAKE_DIRECTORY ${RC_DATA_SHADER_DIR})
+
+function(EMBED_RESOURCE RC_DATA_FILE RC_VAR_NAME OUTPUT_SRC_FILE_LIST)
+
+  set(OUTPUT_SRC_FILE "${RC_DATA_DIR}/${RC_VAR_NAME}.c")
   add_custom_command(
-    OUTPUT ${outputSourceFile}
-    DEPENDS ${resFile}
+    OUTPUT ${OUTPUT_SRC_FILE}
+    DEPENDS ${RC_DATA_FILE}
     PRE_BUILD
     COMMAND python
-    ARGS ${CMAKE_SOURCE_DIR}/scripts/embed_resource.py -o ${outputSourceFile} ${varName} ${resFile}
+    ARGS ${CMAKE_SOURCE_DIR}/scripts/embed_resource.py -o ${OUTPUT_SRC_FILE} ${RC_VAR_NAME} ${RC_DATA_FILE}
+    VERBATIM
+  )
+  list(APPEND ${OUTPUT_SRC_FILE_LIST} ${OUTPUT_SRC_FILE})
+  set(${OUTPUT_SRC_FILE_LIST} ${${OUTPUT_SRC_FILE_LIST}} PARENT_SCOPE)
+endfunction()
+
+function(EMBED_SHADER_FX_RESOURCE FX_FILE RC_VAR_NAME OUTPUT_SRC_FILE_LIST)
+  cmake_path(GET FX_FILE FILENAME FXO_FILE)
+  set(FXO_FILE "${RC_DATA_DIR}/${FXO_FILE}o")
+  message(NOTICE "Embedding shader ${FX_FILE} -> ${FXO_FILE}")
+  add_custom_command(
+    DEPENDS ${FX_FILE}
+    OUTPUT ${FXO_FILE}
+    PRE_BUILD
+    COMMAND fxc
+    ARGS /T fx_5_0 /Fo ${FXO_FILE} ${FX_FILE} 
     VERBATIM
   )
 
-#  target_sources(${targetName} PRIVATE ${outputSourceFile})
+  set(LOCAL_OUTPUT_SRC_FILE_LIST)
+  embed_resource("${FXO_FILE}" ${RC_VAR_NAME} LOCAL_OUTPUT_SRC_FILE_LIST)
+  list(APPEND ${OUTPUT_SRC_FILE_LIST} ${LOCAL_OUTPUT_SRC_FILE_LIST})
+  set(${OUTPUT_SRC_FILE_LIST} ${${OUTPUT_SRC_FILE_LIST}} PARENT_SCOPE)
 endfunction()

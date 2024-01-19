@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(iracing-tools)
+project(iracing_tools)
 
 # Subprojects & Targets
-set(sdkTarget ${PROJECT_NAME}-sdk)
+set(sdkTarget ${PROJECT_NAME}_sdk)
 set(sdkTargetStatic ${sdkTarget}_static)
-set(modelsTarget ${PROJECT_NAME}-models)
+set(modelsTarget ${PROJECT_NAME}_models)
 set(modelsTargetStatic ${modelsTarget}_static)
 set(modelsTargetPython ${modelsTarget}_python)
-set(sharedAppLibTarget ${PROJECT_NAME}-shared-app-lib)
+set(sharedAppLibTarget ${PROJECT_NAME}_shared_app_lib)
 set(sharedAppLibTargetStatic ${sharedAppLibTarget}_static)
+set(overlayAppTarget ${PROJECT_NAME}_overlay_app)
 
 # Setup
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
@@ -20,12 +21,9 @@ set(CMAKE_CXX_VISIBILITY_PRESET visible)
 include(cmake/embed_resource.cmake)
 include(cmake/targets.cmake)
 include(cmake/fs.cmake)
+include(cmake/dependencies.cmake NO_POLICY_SCOPE)
 include(cmake/example_target.cmake)
 #include(cmake/hybrid_crt.cmake NO_POLICY_SCOPE)
-
-# Deps
-find_package(magic_enum CONFIG REQUIRED)
-find_package(GTest CONFIG REQUIRED)
 
 # Include test tools
 include(CTest)

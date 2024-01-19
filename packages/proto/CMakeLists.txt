@@ -1,77 +1,43 @@
 
-#find_package(Protobuf REQUIRED)
-find_package(protobuf CONFIG REQUIRED)
 message(NOTICE "Protobuf INCLUDE_DIRS= ${Protobuf_INCLUDE_DIRS}")
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-set(protoIncludeDest ${CMAKE_CURRENT_BINARY_DIR}/IRacingTools/Models)
-file(MAKE_DIRECTORY ${protoIncludeDest})
+set(PROTO_INCLUDE_DEST ${CMAKE_CURRENT_BINARY_DIR}/IRacingTools/Models)
+file(MAKE_DIRECTORY ${PROTO_INCLUDE_DEST})
+file(GLOB_RECURSE PROTO_FILES *.proto)
 protobuf_generate(
   LANGUAGE cpp
-  OUT_VAR allProtoGenFiles
-  PROTOC_OUT_DIR ${protoIncludeDest}
-  PROTOS LapData.proto TrackMapData.proto)
-#protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS irsdk_models.proto)
-#protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS EXPORT_MACRO DLL_EXPORT irsdk_models.proto)
-#protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS DESCRIPTORS PROTO_DESCS irsdk_models.proto)
-#protobuf_generate_python(PROTO_PY irsdk_models.proto)
-message(NOTICE "Generated ${allProtoGenFiles}")
+  OUT_VAR PROTO_GEN_FILES
+  PROTOC_OUT_DIR ${PROTO_INCLUDE_DEST}
+  PROTOS ${PROTO_FILES})
+
+message(NOTICE "Generated ${PROTO_GEN_FILES}")
 set(PROTO_SRCS)
 set(PROTO_HDRS)
 
-foreach(genFile ${allProtoGenFiles})
-  if(genFile MATCHES "cc$")
-    list(APPEND PROTO_SRCS ${genFile})
+foreach(PROTO_GEN_FILE ${PROTO_GEN_FILES})
+  if(PROTO_GEN_FILE MATCHES "cc$")
+    list(APPEND PROTO_SRCS ${PROTO_GEN_FILE})
   else()
-    list(APPEND PROTO_HDRS ${genFile})
+    list(APPEND PROTO_HDRS ${PROTO_GEN_FILE})
   endif()
 endforeach()
 
-#get_filename_component(modelProtoFile irsdk_models.proto ABSOLUTE)
-
+# Python Target
 add_custom_target(
   ${modelsTargetPython}
   ${CMAKE_SOURCE_DIR}/scripts/protoc-python.bat
 )
 
-#add_custom_command(
-#  TARGET ${modelsTargetPython}
-#  COMMAND protobuf::protoc
-#  ARGS -I ${CMAKE_CURRENT_LIST_DIR} --python_out=${CMAKE_SOURCE_DIR}/packages/python/irsdk/models --mypy_out=${CMAKE_SOURCE_DIR}/packages/python/irsdk/models ${modelProtoFile}
-#  DEPENDS ${modelProtoFile} protobuf::protoc ${protobuf_generate_DEPENDENCIES}
-#  PRE_BUILD
-#  VERBATIM )
-##SETUP_LIB_EXPORTS(${modelsTarget} ${modelsTargetStatic} PROTO_SRCS PROTO_HDRS PROTO_HDRS)
-add_library(${modelsTarget} SHARED ${allProtoGenFiles})
-add_library(${modelsTargetStatic} STATIC ${allProtoGenFiles})
+# Shared & Static CPP Targets
+add_library(${modelsTarget} SHARED ${PROTO_GEN_FILES})
+add_library(${modelsTargetStatic} STATIC ${PROTO_GEN_FILES})
 
-#
 foreach(target ${modelsTarget} ${modelsTargetStatic})
-
+  target_link_libraries(${target} PUBLIC protobuf::libprotobuf)
   target_include_directories(${target} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-    $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
+    $<INSTALL_INTERFACE:include>
   )
-
-#  install(TARGETS ${target} DESTINATION ${LIBRARY_INSTALL_DIR})
-#  install(TARGETS ${target} FILES  DESTINATION ${INCLUDE_INSTALL_DIR})
 endforeach()
-
-#SETUP_LIB_EXPORTS(NO_SOURCE_HEADERS ${modelsTarget} ${modelsTargetStatic} PROTO_SRCS PROTO_HDRS PROTO_HDRS)
-
-#foreach(headerFile ${PROTO_HDRS})
-#  foreach(target ${modelsTarget} ${modelsTargetStatic})
-#    get_filename_component(baseHeaderFile ${headerFile} NAME)
-#    set(relHeaderFile IRacingTools/Models/${baseHeaderFile})
-#    target_sources(
-#      ${target}
-#      PUBLIC
-#      $<INSTALL_INTERFACE:${relHeaderFile}>
-#      $<BUILD_INTERFACE:${headerFile}>
-#    )
-#  endforeach()
-#endforeach()
-
-target_link_libraries(${modelsTarget} PUBLIC ${Protobuf_LIBRARY_DEBUG})
-target_link_libraries(${modelsTargetStatic} PUBLIC ${Protobuf_LIBRARY_DEBUG})

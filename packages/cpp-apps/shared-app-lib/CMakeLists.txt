@@ -1,17 +1,3 @@
-#ENABLE_LANGUAGE(RC)
-
-set(graphicsBinaryDir ${CMAKE_CURRENT_BINARY_DIR}/resources/shaders)
-file(MAKE_DIRECTORY ${graphicsBinaryDir})
-add_custom_command(
-  DEPENDS ${CMAKE_CURRENT_LIST_DIR}/TrackMapShader.fx
-  OUTPUT ${graphicsBinaryDir}/TrackMapShader.fxo
-  PRE_BUILD
-  COMMAND fxc
-  ARGS /T fx_5_0 /Fo ${graphicsBinaryDir}/TrackMapShader.fxo ${CMAKE_CURRENT_LIST_DIR}/TrackMapShader.fx
-  VERBATIM
-)
-embed_resource("${graphicsBinaryDir}/TrackMapShader.fxo" "${graphicsBinaryDir}/TrackMapShader.c" RCDataTrackMapShader)
-embed_resource("${CMAKE_CURRENT_LIST_DIR}/sampleImage.jpg" "${graphicsBinaryDir}/sampleImage.c" RCDataSampleImage)
 
 # SDK Source & headers
 file(GLOB_RECURSE sharedAppLibTestSources tests/*.cpp)
@@ -19,73 +5,29 @@ file(GLOB sharedAppLibSources *.cpp  Graphics/*.cpp)
 file(GLOB sharedAppLibHeaders *.h Graphics/*.h)
 file(GLOB_RECURSE sharedAppLibHeadersPublic include/*.h)
 
-list(APPEND sharedAppLibSources "${graphicsBinaryDir}/TrackMapShader.c" "${graphicsBinaryDir}/sampleImage.c")
+# Embed Resources
+set(RC_SRC_FILES)
+embed_shader_fx_resource("${CMAKE_CURRENT_LIST_DIR}/TrackMapShader.fx" RCDataTrackMapShader RC_SRC_FILES)
+embed_resource("${CMAKE_CURRENT_LIST_DIR}/sampleImage.jpg" RCDataSampleImage RC_SRC_FILES)
 
+message(NOTICE "RC SRC Generated: ${RC_SRC_FILES}")
+list(APPEND sharedAppLibSources ${RC_SRC_FILES})
 
-#set(depPkgNames directxmath directxtk fmt OpenXR dxsdk-d3dx protobuf effects11)
-set(depPkgNames directxmath directxtk fmt OpenXR dxsdk-d3dx protobuf effects11 GTest nlohmann_json)
-foreach(depPkgName ${depPkgNames})
-  find_package(${depPkgName} CONFIG REQUIRED)
-endforeach()
+# Create Library & Targets
+setup_lib_exports(${sharedAppLibTarget} ${sharedAppLibTargetStatic} sharedAppLibSources sharedAppLibHeaders sharedAppLibHeadersPublic)
 
-# Actual library
-SETUP_LIB_EXPORTS(${sharedAppLibTarget} ${sharedAppLibTargetStatic} sharedAppLibSources sharedAppLibHeaders sharedAppLibHeadersPublic)
-
-#add_library(${sharedAppLibTarget} SHARED ${sharedAppLibSources} ${sharedAppLibHeaders})
-#target_link_libraries(${sharedAppLibTarget} PUBLIC magic_enum::magic_enum)
+# Link targets
 target_link_libraries(${sharedAppLibTarget} PUBLIC ${modelsTarget})
-
-#add_library(${sharedAppLibTargetStatic} STATIC ${sharedAppLibSources} ${sharedAppLibHeaders} ${sharedAppLibInternalHeaders})
-#${Protobuf_LIBRARIES}
-
 target_link_libraries(${sharedAppLibTargetStatic} PUBLIC ${modelsTargetStatic})
 
-target_compile_definitions(${sharedAppLibTargetStatic} PUBLIC IS_STATIC_LIB)
-
-#add_custom_command(
-#  TARGET ${sharedAppLibTargetStatic}
-#  PRE_BUILD
-#  COMMAND fxc
-#  ARGS /T fx_5_0 /Fo ${graphicsBinaryDir}/TrackMapShaderStatic.fxo ${CMAKE_CURRENT_LIST_DIR}/TrackMapShader.fx
-##  COMMAND echo
-##  ARGS IDR_PIXEL_TRACK_MAP_SHADER RCDATA TrackMapShader.fxo > ${graphicsBinaryDir}/TrackMapShader.resinclude
-#  VERBATIM
-#)
-
-#embed_resource(${sharedAppLibTargetStatic} "${graphicsBinaryDir}/TrackMapShaderStatic.fxo" "${graphicsBinaryDir}/TrackMapShaderStatic.cpp" RCDataTrackMapShader)
-
-#add_custom_command(
-#  TARGET ${sharedAppLibTarget}
-#  PRE_BUILD
-#  COMMAND fxc
-#  ARGS /T fx_5_0 /Fo ${graphicsBinaryDir}/TrackMapShader.fxo ${CMAKE_CURRENT_LIST_DIR}/TrackMapShader.fx
-##  COMMAND echo
-##  ARGS IDR_PIXEL_TRACK_MAP_SHADER RCDATA TrackMapShader.fxo > ${graphicsBinaryDir}/TrackMapShader.resinclude
-#  VERBATIM
-#)
-
-#embed_resource(${sharedAppLibTarget} "${graphicsBinaryDir}/TrackMapShader.fxo" "${graphicsBinaryDir}/TrackMapShader.cpp" RCDataTrackMapShader)
-
 foreach(targetName ${sharedAppLibTarget} ${sharedAppLibTargetStatic})
-
-  target_link_libraries(${targetName} PUBLIC nlohmann_json::nlohmann_json)
-  target_link_libraries(${targetName} PUBLIC magic_enum::magic_enum)
-  target_link_libraries(${targetName} PUBLIC d2d1.lib dwrite.lib windowscodecs.lib dxgi.lib d3d10_1.lib d3d11.lib)
-  target_link_libraries(${targetName} PUBLIC Microsoft::D3DX9 Microsoft::D3DX10 Microsoft::D3DX11 Microsoft::Effects11)
-  target_link_libraries(${targetName} PUBLIC Microsoft::DirectXMath)
-  target_link_libraries(${targetName} PUBLIC magic_enum::magic_enum)
-  target_link_libraries(${targetName} PUBLIC Microsoft::DirectXTK)
-  target_link_libraries(${targetName} PUBLIC fmt::fmt)
-  target_link_libraries(${targetName} PUBLIC magic_enum::magic_enum)
-  target_link_libraries(${targetName} PUBLIC OpenXR::headers)
+  target_link_runtime_libs(${targetName})
 endforeach()
 
+# Tests
 set(testTargetName ${sharedAppLibTarget}_tests)
 add_executable(${testTargetName} ${sharedAppLibTestSources})
 target_link_libraries(${testTargetName} PUBLIC
-  ${sharedAppLibTargetStatic}
-  fmt::fmt
-  GTest::gtest_main
-  nlohmann_json::nlohmann_json
-  )
-#GTest::gtest
+  ${sharedAppLibTargetStatic})
+target_link_test_libs(${testTargetName})
+

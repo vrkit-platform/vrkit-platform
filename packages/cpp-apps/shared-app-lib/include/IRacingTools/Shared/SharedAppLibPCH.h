@@ -23,6 +23,7 @@
 // Windows Header Files:
 #include <windows.h>
 #include <windowsx.h>
+#include <winrt/base.h>
 
 #include <d3d11.h>
 #include <d3dx11.h>

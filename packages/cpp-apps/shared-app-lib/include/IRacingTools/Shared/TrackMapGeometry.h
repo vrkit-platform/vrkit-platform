@@ -1,12 +1,16 @@
 #pragma once
 
-#include <IRacingTools/Models/LapData.pb.h>
-#include <cmath>
+
+#include <algorithm>
+#include <filesystem>
 #include <numbers>
 #include <numeric>
 #include <type_traits>
 
+#include <IRacingTools/Models/LapData.pb.h>
 #include <IRacingTools/Models/TrackMapData.pb.h>
+#include <IRacingTools/Shared/Graphics/DXResources.h>
+
 /*
 Based on https://stackoverflow.com/questions/2651099/convert-long-lat-to-pixel-x-y-on-a-given-picture
 public class GoogleMapsAPIProjection
@@ -56,7 +60,6 @@ Convert.ToSingle(longitude));
 }
 */
 namespace IRacingTools::Shared::Geometry {
-
 using ZoomLevel = size_t;
 constexpr ZoomLevel kZoomLevelDefault = 20;
 
@@ -73,6 +76,14 @@ template<typename T>
 struct PixelBase {
     T x;
     T y;
+};
+
+template<typename T>
+struct PixelData {
+    using Pixel = PixelBase<T>;
+    std::vector<Pixel> pixels;
+
+    Pixel max;
 };
 
 using PixelF = PixelBase<float>;
@@ -104,7 +115,8 @@ public:
         return outValue;
     }
 
-    explicit PixelConverter(ZoomLevel zoomLevel = kZoomLevelDefault) : zoomLevel_(zoomLevel) {
+    explicit PixelConverter(ZoomLevel zoomLevel = kZoomLevelDefault) :
+        zoomLevel_(zoomLevel) {
         pixelZoomWidth_ = kPixelTileSize * pow(2.0, static_cast<double>(zoomLevel));
 
         xPixelToDegreesRatio_ = pixelZoomWidth_ / 360.0;
@@ -117,19 +129,21 @@ public:
     Pixel coordinateToPixel(const Coordinate &coord) {
         auto x = static_cast<PixelType>(std::round(pixelCenter_.x + (coord.longitude * xPixelToDegreesRatio_)));
 
-        double f = std::min(std::max(std::sin(coord.latitude * kRadiansToDegreesRatio), -0.9999), 0.9999);
-        auto y = static_cast<PixelType>(
-            std::round(pixelCenter_.y + 0.5 * std::log((1.0 + f) / (1.0 - f)) * -yPixelToRadiansRatio_)
+        double f = std::min<double>(
+            std::max<double>(std::sin(coord.latitude * kRadiansToDegreesRatio), -0.9999),
+            0.9999
         );
+        auto y = static_cast<PixelType>(std::round(
+            pixelCenter_.y + 0.5 * std::log((1.0 + f) / (1.0 - f)) * -yPixelToRadiansRatio_
+        ));
 
         return Pixel{x, y};
     };
 
     Coordinate pixelToCoordinate(const Pixel &pixel) {
         float longitude = (pixel.x - pixelCenter_.x) / xPixelToDegreesRatio_;
-        float latitude = (2.0 * std::atan(std::exp((pixel.y - pixelCenter_.y) / -yPixelToRadiansRatio_))
-                          - std::numbers::pi / 2.0)
-            * kDegreesToRadiansRatio;
+        float latitude = (2.0 * std::atan(std::exp((pixel.y - pixelCenter_.y) / -yPixelToRadiansRatio_)) -
+            std::numbers::pi / 2.0) * kDegreesToRadiansRatio;
         return {latitude, longitude};
     }
 
@@ -149,19 +163,24 @@ public:
     using Pixel = PixelBase<PixelType>;
     static constexpr bool kConvertToInteger = isPixelTypeInteger<PixelType>();
 
-    explicit LapTracjectoryConverter(ZoomLevel zoomLevel = kZoomLevelDefault) :pixelConverter_(zoomLevel) {
-    }
+    explicit LapTracjectoryConverter(ZoomLevel zoomLevel = kZoomLevelDefault) :
+        pixelConverter_(zoomLevel) {}
 
-    std::vector<Pixel> toPixels(const LapTrajectory& trajectory) {
-        auto& path = trajectory.path();
-        auto geoPixels = std::accumulate(path.begin(), path.end(), std::vector<Pixel>{}, [&] (auto& point, auto& pixels) {
-            auto pixel = pixelConverter_.coordinateToPixel({point.latitude(), point.longitude()});
-            pixels.push_back(pixel);
-            return pixels;
-        });
+    PixelData<PixelType> toPixels(const LapTrajectory &trajectory) {
+        auto &path = trajectory.path();
+        auto geoPixels = std::accumulate(
+            path.begin(),
+            path.end(),
+            std::vector<Pixel>{},
+            [&](auto pixels, auto &point) {
+                auto pixel = pixelConverter_.coordinateToPixel({point.latitude(), point.longitude()});
+                pixels.push_back(pixel);
+                return pixels;
+            }
+        );
         PixelType minX, maxX, minY, maxY;
         bool first = true;
-        for(auto& [x,y] : geoPixels) {
+        for (auto &[x,y] : geoPixels) {
             if (first) {
                 minX = maxX = x;
                 minY = maxY = y;
@@ -185,23 +204,36 @@ public:
             }
         }
 
-        return std::accumulate(geoPixels.begin(), geoPixels.end(), std::vector<Pixel>{}, [&] (auto& geoPixel, auto& pixels) {
-            auto [x,y] = geoPixel;
-            Pixel pixel {x - minX, y - minY};
-            pixels.push_back(pixel);
-            return pixels;
-        });
+        PixelData<PixelType> pixelData{.pixels = {}, .max = {maxX - minX, maxY - minY}};
+        std::for_each(
+            geoPixels.begin(),
+            geoPixels.end(),
+            [&](auto &geoPixel) {
+                auto [x,y] = geoPixel;
+                Pixel pixel{x - minX, y - minY};
+                pixelData.pixels.push_back(pixel);
+            }
+        );
+
+        return pixelData;
     };
 
-    TrackMap toTrackMap(const LapTrajectory& trajectory) {
-        auto pixels = toPixels(trajectory);
+    TrackMap toTrackMap(const LapTrajectory &trajectory) {
+        auto pixelData = toPixels(trajectory);
 
         TrackMap tm;
-        std::for_each(pixels.begin(),pixels.end(),[&] (auto& pixel) {
-            auto point = tm.add_points();
-            point->set_x(pixel.x);
-            point->set_y(pixel.y);
-        });
+        std::for_each(
+            pixelData.pixels.begin(),
+            pixelData.pixels.end(),
+            [&](auto &pixel) {
+                auto point = tm.add_points();
+                point->set_x(pixel.x);
+                point->set_y(pixel.y);
+            }
+        );
+        auto size = tm.mutable_size();
+        size->set_width(pixelData.max.x);
+        size->set_height(pixelData.max.y);
 
         return tm;
     }
@@ -210,4 +242,16 @@ private:
     PixelConverter<PixelType> pixelConverter_;
 };
 
+/**
+ * \brief Convert trajectory to track map
+ *
+ *
+ * \param lapTrajectory datasource
+ * \param zoomLevel scale to use, default is 18
+ * \return
+ */
+
+TrackMap ToTrackMap(const LapTrajectory &lapTrajectory, ZoomLevel zoomLevel = kZoomLevelDefault);
+
+TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Graphics::Size &size);
 } // namespace IRacingTools::Shared::Geo

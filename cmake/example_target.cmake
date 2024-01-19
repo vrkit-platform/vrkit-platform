@@ -1,7 +1,7 @@
 
 function(ADD_EXAMPLE exampleDir)
   get_filename_component(exampleName ${exampleDir} NAME)
-  set(exampleTarget ${PROJECT_NAME}-example-${exampleName})
+  set(exampleTarget ${PROJECT_NAME}_example_${exampleName})
   file(GLOB sourceFiles ${exampleDir}/*.cpp)
   file(GLOB headerFiles ${exampleDir}/*.h)
 
@@ -11,6 +11,10 @@ function(ADD_EXAMPLE exampleDir)
     PRIVATE
     ${sdkIncludeDir}
   )
-  target_link_libraries(${exampleTarget} PRIVATE ${sdkTargetStatic} ${modelsTargetStatic})
-  target_link_libraries(${exampleTarget} PRIVATE magic_enum::magic_enum)
+  target_link_libraries(${exampleTarget} PRIVATE
+    ${sdkTargetStatic}
+    ${modelsTargetStatic}
+    ${DEP_MAGICENUM}
+    ${DEP_PROTOBUF}
+  )
 endfunction()

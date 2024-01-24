@@ -25,11 +25,10 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef IRSDKCLIENT_H
-#define IRSDKCLIENT_H
+#pragma once
+
 #include "IRTypes.h"
 
-#define DLLEXPORT IRACING_TOOLS_SDK_AND_STATIC_EXPORT
 
 // A C++ wrapper around the irsdk calls that takes care of the details of maintaining a connection.
 // reads out the data into a cache so you don't have to worry about timming
@@ -137,5 +136,5 @@ protected:
 	int m_statusID;
 };
 
-#undef DLLEXPORT
-#endif // IRSDKCLIENT_H
+
+

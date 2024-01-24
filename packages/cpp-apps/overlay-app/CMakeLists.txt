@@ -1,6 +1,6 @@
 # SDK Source & headers
-file(GLOB_RECURSE appSources *.cpp)
-file(GLOB_RECURSE appHeaders *.h)
+file(GLOB_RECURSE appSources src/*.cpp)
+file(GLOB_RECURSE appHeaders include/*.h)
 
 # App
 set(targetName ${overlayAppTarget})

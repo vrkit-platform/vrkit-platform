@@ -78,12 +78,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    irsdk_broadcastMsg() function.
 */
 
-// Constant Definitions
-#include "iracing-tools-sdk_and_static_export.h"
-#define DLLEXPORT IRACING_TOOLS_SDK_AND_STATIC_EXPORT
-
-#include <windows.h>
+#include <magic_enum.hpp>
 #include <tchar.h>
+#include <windows.h>
 
 static constexpr _TCHAR IRSDK_DATAVALIDEVENTNAME[] = _T("Local\\IRSDKDataValidEvent");
 static constexpr _TCHAR IRSDK_MEMMAPFILENAME[]     = _T("Local\\IRSDKMemMapFileName");
@@ -124,16 +121,17 @@ enum class IRVarType : int
 	number_of_types
 };
 
-static const int IRVarTypeBytes[static_cast<size_t>(IRVarType::number_of_types)] =
-{
-	1,		// type_char
-	1,		// type_bool
+constexpr size_t kIRVarTypeCount = magic_enum::enum_underlying(IRVarType::number_of_types);
 
-	4,		// type_int
-	4,		// type_bitmask
-	4,		// type_float
+constexpr std::array<int, kIRVarTypeCount> IRVarTypeBytes = {
+    1,		// type_char
+    1,		// type_bool
 
-	8		// type_double
+    4,		// type_int
+    4,		// type_bitmask
+    4,		// type_float
+
+    8		// type_double
 };
 
 // bit fields
@@ -766,7 +764,7 @@ enum irsdk_FFBCommandMode				// You can call this any time
 
 // irsdk_BroadcastCamSwitchPos or irsdk_BroadcastCamSwitchNum camera focus defines
 // pass these in for the first parameter to select the 'focus at' types in the camera system.
-enum irsdk_csMode
+enum class irsdk_csMode
 {
 	irsdk_csFocusAtIncident = -3,
 	irsdk_csFocusAtLeader   = -2,
@@ -797,4 +795,4 @@ void irsdk_broadcastMsg(irsdk_BroadcastMsg msg, int var1, float var2);
 // to encode car #001 call padCarNum(1,2)
 int  irsdk_padCarNum(int num, int zero);
 
-#undef DLLEXPORT
+

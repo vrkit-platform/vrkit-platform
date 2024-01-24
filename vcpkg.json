@@ -41,5 +41,14 @@
   }, {
     "name" : "nlohmann-json",
     "version>=" : "3.11.3"
+  }, {
+    "name" : "boost-system",
+    "version>=" : "1.83.0"
+  }, {
+    "name" : "boost-interprocess",
+    "version>=" : "1.83.0"
+  }, {
+    "name" : "wxwidgets",
+    "version>=" : "3.2.4"
   } ]
 }

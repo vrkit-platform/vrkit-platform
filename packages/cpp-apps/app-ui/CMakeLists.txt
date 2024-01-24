@@ -33,11 +33,23 @@ configure_file(
   COPYONLY
 )
 
-set(uiSources
-  app.manifest
-  App.xaml.cpp App.xaml.h App.xaml App.idl
-  DemoPage.xaml.cpp DemoPage.xaml.h DemoPage.xaml DemoPage.idl
-  MainWindow.xaml.cpp MainWindow.xaml.h MainWindow.xaml MainWindow.idl)
+#set(uiSources
+#  app.manifest
+#  App.xaml.cpp
+#  App.xaml.h
+#  App.xaml
+#  App.idl
+#  DemoPage.xaml.cpp
+#  DemoPage.xaml.h
+#  DemoPage.xaml
+#  DemoPage.idl
+#  MainWindow.xaml.cpp
+#  MainWindow.xaml.h
+#  MainWindow.xaml
+#  MainWindow.idl)
+
+file(GLOB_RECURSE uiSources src/*.idl src/*.manifest src/*.xaml src/*.h src/*.cpp)
+
 #target_sources(${targetName} PRIVATE app.manifest
 #  App.xaml.cpp App.xaml.h App.xaml App.idl
 #  DemoPage.xaml.cpp DemoPage.xaml.h DemoPage.xaml DemoPage.idl
@@ -56,7 +68,7 @@ target_include_directories(
 )
 
 set_property(
-  SOURCE App.xaml
+  SOURCE src/App.xaml
   PROPERTY VS_XAML_TYPE
   "ApplicationDefinition"
 )
@@ -77,7 +89,7 @@ target_include_directories(
 target_precompile_headers(
   ${targetName}
   PRIVATE
-  pch.h
+  src/pch.h
 )
 set_target_properties(
   ${targetName}
@@ -145,3 +157,18 @@ foreach(SOURCE ${SOURCES})
     )
   endif()
 endforeach()
+
+# Include headers for generated files
+target_include_directories(${targetName} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+# Link configured deps
+target_link_runtime_libs(${targetName})
+
+# Link other local project targets
+#target_link_libraries(${targetName} PRIVATE ${sdkTargetStatic} ${sharedAppLibTargetStatic} ${modelsTargetStatic} ${Protobuf_LIBRARY_DEBUG})
+#target_link_libraries(${targetName} PRIVATE ${sdkTarget} ${sharedAppLibTarget} ${modelsTarget} ${Protobuf_LIBRARY_DEBUG})
+target_link_libraries(${targetName}
+  PRIVATE
+  ${sdkTargetStatic}
+  ${sharedAppLibTargetStatic}
+  ${modelsTargetStatic})

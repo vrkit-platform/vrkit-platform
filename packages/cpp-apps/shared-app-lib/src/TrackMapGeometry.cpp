@@ -14,8 +14,8 @@ TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Graphics::Size &size
 
     auto scaledSize = scaled.mutable_scaled_size();
 
-    scaledSize->set_width(size.width);
-    scaledSize->set_height(size.height);
+    scaledSize->set_width(static_cast<float>(size.width));
+    scaledSize->set_height(static_cast<float>(size.height));
 
 
     float scaleX = scaledSize->width() / trackMap.size().width();

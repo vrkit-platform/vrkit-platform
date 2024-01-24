@@ -119,6 +119,8 @@ unsigned char %s[] = {
 
         for ch in contents:
             # Nicely format things in rows
+            if isinstance(ch,int):
+                ch = chr(ch)
             f.write('%-06s ' % ('0x%0X,' % ord(ch)))
 
             linecount += 1
@@ -129,7 +131,7 @@ unsigned char %s[] = {
                 linecount = 0
 
         # Write footer
-        f.write('\n};\n\n');
+        f.write('\n};\n\n')
         f.write('size_t %s_len = sizeof(%s);\n\n' % (symbol, symbol))
         f.write("""
 #ifdef __cplusplus

@@ -1,23 +1,21 @@
 
-
 # SDK Source & headers
-file(GLOB_RECURSE sdkSources *.cpp)
+file(GLOB_RECURSE sdkTestSources tests/*.cpp)
+file(GLOB_RECURSE sdkSources src/*.cpp)
 file(GLOB_RECURSE sdkHeaders ${sdkIncludeDir}/*.h)
-file(GLOB_RECURSE sdkInternalHeaders *.h EXCLUDE ${sdkIncludeDir})
+file(GLOB_RECURSE sdkInternalHeaders src/*.h)
 
-#include_directories(
-#  "${CMAKE_CURRENT_BINARY_DIR}"
-#  "${CMAKE_CURRENT_SOURCE_DIR}/include"
-#)
-
-# Actual library
+# Create libraries
 SETUP_LIB_EXPORTS(${sdkTarget} ${sdkTargetStatic} sdkSources sdkInternalHeaders sdkHeaders)
 
-# Actual library
-#add_library(${sdkTarget} SHARED ${sdkSources} ${sdkHeaders} ${sdkInternalHeaders})
-target_link_libraries(${sdkTarget} PRIVATE magic_enum::magic_enum)
-
-#add_library(${sdkTargetStatic} STATIC ${sdkSources} ${sdkHeaders} ${sdkInternalHeaders})
-target_link_libraries(${sdkTargetStatic} PRIVATE magic_enum::magic_enum)
+# Add dependency
+target_link_libraries(${sdkTarget} PUBLIC ${DEP_MAGICENUM})
+target_link_libraries(${sdkTargetStatic} PUBLIC ${DEP_MAGICENUM})
 
 
+# Tests
+set(testTargetName ${sdkTarget}_tests)
+add_executable(${testTargetName} ${sdkTestSources})
+target_link_libraries(${testTargetName} PUBLIC
+  ${sdkTargetStatic})
+target_link_test_libs(${testTargetName})

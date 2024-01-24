@@ -1,5 +1,4 @@
-
-#include <IRacingTools/Shared/Geometry.h>
+#include <IRacingTools/Shared/TrackMapGeometry.h>
 #include <fmt/core.h>
 #include <gtest/gtest.h>
 
@@ -11,7 +10,7 @@ constexpr Geometry::Coordinate kCoordinate_SFO = {37.6164442, -122.3886441};
 } // namespace
 
 TEST(GeoTests, float_conversion) {
-    Geometry::PixelConverter pixelFConverter{};
+    Geometry::CoordinateToPixelConverter pixelFConverter{};
 
     fmt::println(
         "Input\nNYC lat={},lon={} \t\tSFO lat={},lon={}",
@@ -44,4 +43,25 @@ TEST(GeoTests, float_conversion) {
     EXPECT_LT(std::abs(coordNYC.longitude - kCoordinate_NYC.longitude), 1.0f);
     EXPECT_LT(std::abs(coordSFO.latitude - kCoordinate_SFO.latitude), 1.0f);
     EXPECT_LT(std::abs(coordSFO.longitude - kCoordinate_SFO.longitude), 1.0f);
+}
+
+TEST(GeoTests, calculate_distance) {
+    constexpr auto distTestPairs = {std::make_tuple(Geometry::MetricUnit::Kilometer, 4023.0, 500.0),
+                                    std::make_tuple(Geometry::MetricUnit::Meter, 4023000.0, 500000.0),};
+    for (auto &[unit, match, errBias] : distTestPairs) {
+        auto distance = Geometry::CalculateDistance(kCoordinate_NYC, kCoordinate_SFO, unit);
+
+        fmt::println(
+            "Distance from NYC(lat={},lon={}) to SFO(lat={},lon={}): {} {}",
+            kCoordinate_NYC.latitude,
+            kCoordinate_NYC.longitude,
+            kCoordinate_SFO.latitude,
+            kCoordinate_SFO.longitude,
+            distance,
+            magic_enum::enum_name(unit)
+        );
+
+
+        EXPECT_NEAR(distance, match, errBias);
+    }
 }

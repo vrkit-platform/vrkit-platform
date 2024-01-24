@@ -11,6 +11,7 @@ set(modelsTargetPython ${modelsTarget}_python)
 set(sharedAppLibTarget ${PROJECT_NAME}_shared_app_lib)
 set(sharedAppLibTargetStatic ${sharedAppLibTarget}_static)
 set(overlayAppTarget ${PROJECT_NAME}_overlay_app)
+set(appUIQTTarget ${PROJECT_NAME}_app_ui_qt)
 
 # Setup
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
@@ -24,6 +25,8 @@ include(cmake/fs.cmake)
 include(cmake/dependencies.cmake NO_POLICY_SCOPE)
 include(cmake/example_target.cmake)
 #include(cmake/hybrid_crt.cmake NO_POLICY_SCOPE)
+
+add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
 
 # Include test tools
 include(CTest)

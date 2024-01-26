@@ -25,7 +25,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
 
 /*
  The IRSDK is a simple api that lets clients access telemetry data from the 
@@ -77,11 +76,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    any external application by sending a windows message with the 
    irsdk_broadcastMsg() function.
 */
+#pragma once
 
 #include <magic_enum.hpp>
 #include <tchar.h>
 #include <windows.h>
-
+namespace IRacingTools::SDK {
 static constexpr _TCHAR IRSDK_DATAVALIDEVENTNAME[] = _T("Local\\IRSDKDataValidEvent");
 static constexpr _TCHAR IRSDK_MEMMAPFILENAME[]     = _T("Local\\IRSDKMemMapFileName");
 static constexpr _TCHAR IRSDK_BROADCASTMSGNAME[]   = _T("IRSDK_BROADCASTMSG");
@@ -795,4 +795,4 @@ void irsdk_broadcastMsg(irsdk_BroadcastMsg msg, int var1, float var2);
 // to encode car #001 call padCarNum(1,2)
 int  irsdk_padCarNum(int num, int zero);
 
-
+}

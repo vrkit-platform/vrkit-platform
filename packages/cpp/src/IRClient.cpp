@@ -29,13 +29,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstring>
 
 #include <cassert>
-#include <irsdk-cpp/IRClient.h>
-#include <irsdk-cpp/IRTypes.h>
-#include <irsdk-cpp/yaml_parser.h>
+#include <IRacingTools/SDK/Client.h>
+#include <IRacingTools/SDK/Types.h>
+
 #include <magic_enum.hpp>
 
-#pragma warning(disable : 4996)
+#include "YamlParser.h"
 
+#pragma warning(disable : 4996)
+namespace IRacingTools::SDK {
 IRClient &IRClient::instance() {
     static IRClient INSTANCE;
     return INSTANCE;
@@ -134,28 +136,28 @@ bool IRClient::getVarBool(int idx, int entry) {
             if (entry >= 0 && entry < vh->count) {
                 const char *data = data_ + vh->offset;
                 switch (vh->type) {
-                // 1 byte
-                case IRVarType::type_char:
-                case IRVarType::type_bool:
-                    return (((const char *)data)[entry]) != 0;
+                    // 1 byte
+                    case IRVarType::type_char:
+                    case IRVarType::type_bool:
+                        return (((const char *)data)[entry]) != 0;
                     break;
 
-                // 4 bytes
-                case IRVarType::type_int:
-                case IRVarType::type_bitmask:
-                    return (((const int *)data)[entry]) != 0;
+                    // 4 bytes
+                    case IRVarType::type_int:
+                    case IRVarType::type_bitmask:
+                        return (((const int *)data)[entry]) != 0;
                     break;
 
-                // test float/double for greater than 1.0 so that
-                // we have a chance of this being usefull
-                // technically there is no right conversion...
-                case IRVarType::type_float:
-                    return (reinterpret_cast<const float *>(data)[entry]) >= 1.0f;
+                    // test float/double for greater than 1.0 so that
+                    // we have a chance of this being usefull
+                    // technically there is no right conversion...
+                    case IRVarType::type_float:
+                        return (reinterpret_cast<const float *>(data)[entry]) >= 1.0f;
                     break;
 
-                // 8 bytes
-                case IRVarType::type_double:
-                    return (reinterpret_cast<const double *>(data)[entry]) >= 1.0;
+                    // 8 bytes
+                    case IRVarType::type_double:
+                        return (reinterpret_cast<const double *>(data)[entry]) >= 1.0;
                     break;
                 }
             } else {
@@ -178,25 +180,25 @@ int IRClient::getVarInt(int idx, int entry) {
             if (entry >= 0 && entry < vh->count) {
                 const char *data = data_ + vh->offset;
                 switch (vh->type) {
-                // 1 byte
-                case IRVarType::type_char:
-                case IRVarType::type_bool:
-                    return (int)(((const char *)data)[entry]);
+                    // 1 byte
+                    case IRVarType::type_char:
+                    case IRVarType::type_bool:
+                        return (int)(((const char *)data)[entry]);
                     break;
 
-                // 4 bytes
-                case IRVarType::type_int:
-                case IRVarType::type_bitmask:
-                    return (int)(((const int *)data)[entry]);
+                    // 4 bytes
+                    case IRVarType::type_int:
+                    case IRVarType::type_bitmask:
+                        return (int)(((const int *)data)[entry]);
                     break;
 
-                case IRVarType::type_float:
-                    return static_cast<int>(((const float *) data)[entry]);
+                    case IRVarType::type_float:
+                        return static_cast<int>(((const float *) data)[entry]);
                     break;
 
-                // 8 bytes
-                case IRVarType::type_double:
-                    return static_cast<int>(((const double *) data)[entry]);
+                    // 8 bytes
+                    case IRVarType::type_double:
+                        return static_cast<int>(((const double *) data)[entry]);
                     break;
                 }
             } else {
@@ -219,25 +221,25 @@ float IRClient::getVarFloat(int idx, int entry) {
             if (entry >= 0 && entry < vh->count) {
                 const char *data = data_ + vh->offset;
                 switch (vh->type) {
-                // 1 byte
-                case IRVarType::type_char:
-                case IRVarType::type_bool:
-                    return (float)(((const char *)data)[entry]);
+                    // 1 byte
+                    case IRVarType::type_char:
+                    case IRVarType::type_bool:
+                        return (float)(((const char *)data)[entry]);
                     break;
 
-                // 4 bytes
-                case IRVarType::type_int:
-                case IRVarType::type_bitmask:
-                    return static_cast<float>(((const int *) data)[entry]);
+                    // 4 bytes
+                    case IRVarType::type_int:
+                    case IRVarType::type_bitmask:
+                        return static_cast<float>(((const int *) data)[entry]);
                     break;
 
-                case IRVarType::type_float:
-                    return (float)(((const float *)data)[entry]);
+                    case IRVarType::type_float:
+                        return (float)(((const float *)data)[entry]);
                     break;
 
-                // 8 bytes
-                case IRVarType::type_double:
-                    return static_cast<float>(((const double *) data)[entry]);
+                    // 8 bytes
+                    case IRVarType::type_double:
+                        return static_cast<float>(((const double *) data)[entry]);
                     break;
                 }
             } else {
@@ -260,25 +262,25 @@ double IRClient::getVarDouble(int idx, int entry) {
             if (entry >= 0 && entry < vh->count) {
                 const char *data = data_ + vh->offset;
                 switch (vh->type) {
-                // 1 byte
-                case IRVarType::type_char:
-                case IRVarType::type_bool:
-                    return (double)(((const char *)data)[entry]);
+                    // 1 byte
+                    case IRVarType::type_char:
+                    case IRVarType::type_bool:
+                        return (double)(((const char *)data)[entry]);
                     break;
 
-                // 4 bytes
-                case IRVarType::type_int:
-                case IRVarType::type_bitmask:
-                    return (double)(((const int *)data)[entry]);
+                    // 4 bytes
+                    case IRVarType::type_int:
+                    case IRVarType::type_bitmask:
+                        return (double)(((const int *)data)[entry]);
                     break;
 
-                case IRVarType::type_float:
-                    return (double)(((const float *)data)[entry]);
+                    case IRVarType::type_float:
+                        return (double)(((const float *)data)[entry]);
                     break;
 
-                // 8 bytes
-                case IRVarType::type_double:
-                    return (double)(((const double *)data)[entry]);
+                    // 8 bytes
+                    case IRVarType::type_double:
+                        return (double)(((const double *)data)[entry]);
                     break;
                 }
             } else {
@@ -411,4 +413,5 @@ double IRVarHolder::getDouble(int entry) {
     if (checkIdx())
         return IRClient::instance().getVarDouble(m_idx, entry);
     return 0.0;
+}
 }

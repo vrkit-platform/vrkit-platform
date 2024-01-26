@@ -1,7 +1,8 @@
 
 
-set(DEP_PACKAGES
 
+set(DEP_PACKAGES
+  Microsoft.GSL
   directxmath
   directxtk
   fmt
@@ -32,6 +33,7 @@ set(DEP_WXWIDGETS wx::core wx::base)
 set(DEP_PROTOBUF protobuf::libprotobuf)
 set(DEP_JSON nlohmann_json::nlohmann_json)
 set(DEP_MAGICENUM magic_enum::magic_enum)
+set(DEP_GSL Microsoft.GSL::GSL)
 set(DEP_DIRECTX
   d2d1.lib
   dwrite.lib
@@ -58,6 +60,7 @@ set(ALL_RUNTIME_DEPS
   ${DEP_OPENXR}
 #  ${DEP_WXWIDGETS}
   ${DEP_QT_UI}
+  ${DEP_GSL}
   ${DEP_BOOST_DEFAULT}
 )
 

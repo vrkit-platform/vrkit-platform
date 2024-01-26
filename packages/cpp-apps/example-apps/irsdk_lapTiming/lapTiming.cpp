@@ -19,8 +19,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include <irsdk-cpp/IRTypes.h>
-#include <irsdk-cpp/IRClient.h>
+#include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/Client.h>
 #include <irsdk-cpp/yaml_parser.h>
 
 #include "console.h"

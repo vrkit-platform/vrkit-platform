@@ -2,7 +2,9 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <stdexcept>
 #include <utility>
+#include <fmt/core.h>
 
 namespace IRacingTools::SDK::Utils {
 template<typename T, typename K>
@@ -41,7 +43,7 @@ public:
             }
         }
 
-        abort();
+        throw std::range_error(fmt::format("{}: Not Found", key));
     }
 
     constexpr T operator[](const K &key) const {

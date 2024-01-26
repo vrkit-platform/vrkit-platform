@@ -45,15 +45,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <atomic>
-#include <irsdk-cpp/IRTypes.h>
+#include <stdexcept>
+#include <IRacingTools/SDK/Types.h>
 
 // for timeBeginPeriod()
 #pragma comment(lib, "Winmm")
 // for RegisterWindowMessage() and SendMessage()
 #pragma comment(lib, "User32")
 
+namespace IRacingTools::SDK {
 // Local memory
 namespace {
+
 HANDLE gDataValidEventHandle{nullptr};
 HANDLE gMemMapFileHandle{nullptr};
 
@@ -326,4 +329,5 @@ int irsdk_padCarNum(int num, int zero) {
     }
 
     return retVal;
+}
 }

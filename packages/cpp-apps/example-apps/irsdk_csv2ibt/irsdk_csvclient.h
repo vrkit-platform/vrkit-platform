@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // A C++ wrapper around the irsdk calls that takes care of reading a .ibt file
 
 #define MAX_YAML_STR_LEN 131072
-#include <irsdk-cpp/IRTypes.h>
+#include <IRacingTools/SDK/Types.h>
 
 class irsdkCSVClient
 {

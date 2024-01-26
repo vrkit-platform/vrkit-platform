@@ -9,8 +9,8 @@ file(GLOB_RECURSE sdkInternalHeaders src/*.h)
 SETUP_LIB_EXPORTS(${sdkTarget} ${sdkTargetStatic} sdkSources sdkInternalHeaders sdkHeaders)
 
 # Add dependency
-target_link_libraries(${sdkTarget} PUBLIC ${DEP_MAGICENUM})
-target_link_libraries(${sdkTargetStatic} PUBLIC ${DEP_MAGICENUM})
+target_link_libraries(${sdkTarget} PUBLIC ${DEP_MAGICENUM} ${DEP_GSL})
+target_link_libraries(${sdkTargetStatic} PUBLIC ${DEP_MAGICENUM} ${DEP_GSL})
 
 
 # Tests

@@ -57,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <signal.h>
 #include <time.h>
 
-#include <irsdk-cpp/IRTypes.h>
+#include <IRacingTools/SDK/Types.h>
 #include <irsdk-cpp/yaml_parser.h>
 
 // for timeBeginPeriod

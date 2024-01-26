@@ -27,93 +27,106 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstdio>
 #include <cstring>
-
 #include <cassert>
-#include <irsdk-cpp/IRTypes.h>
-#include <irsdk-cpp/yaml_parser.h>
-#include <irsdk-cpp/IRDiskClient.h>
+
+#include <gsl/util>
+
+#include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/DiskClient.h>
+
+#include "YamlParser.h"
 
 #pragma warning(disable:4996)
 
-
+namespace IRacingTools::SDK {
 bool IRDiskClient::openFile(const char *path)
 {
 	closeFile();
 
-	m_ibtFile = fopen(path, "rb");
-	if(m_ibtFile)
-	{
-		if(fread(&m_header, 1, sizeof(m_header), m_ibtFile) == sizeof(m_header))
-		{
-			if(fread(&m_diskSubHeader, 1, sizeof(m_diskSubHeader), m_ibtFile) == sizeof(m_diskSubHeader))
-			{
-				m_sessionInfoString = new char[m_header.sessionInfoLen];
-				if(m_sessionInfoString)
-				{
-					fseek(m_ibtFile, m_header.sessionInfoOffset, SEEK_SET);
-					if(fread(m_sessionInfoString, 1, m_header.sessionInfoLen, m_ibtFile) == static_cast<size_t>(m_header.sessionInfoLen))
-					{
-						m_sessionInfoString[m_header.sessionInfoLen-1] = '\0';
+	ibtFile_ = std::fopen(path, "rb");
+	if(!ibtFile_)
+	    return false;
 
-						m_varHeaders = new IRVarHeader[m_header.numVars];
-						if(m_varHeaders)
+    auto fileDisposer = gsl::finally([&] {
+        if (ibtFile_) {
+            std::fclose(ibtFile_);
+            ibtFile_ = nullptr;
+        }
+    });
+
+    if (std::fread(&header_, 1, sizeof(header_), ibtFile_) != sizeof(header_)) {
+        return false;
+
+    }
+			if(std::fread(&diskSubHeader_, 1, sizeof(diskSubHeader_), ibtFile_) != sizeof(diskSubHeader_)) {
+			    return false;
+			}
+				sessionInfoString_ = new char[header_.sessionInfoLen];
+				if(sessionInfoString_)
+				{
+					fseek(ibtFile_, header_.sessionInfoOffset, SEEK_SET);
+					if(fread(sessionInfoString_, 1, header_.sessionInfoLen, ibtFile_) == static_cast<size_t>(header_.sessionInfoLen))
+					{
+						sessionInfoString_[header_.sessionInfoLen-1] = '\0';
+
+						varHeaders_ = new IRVarHeader[header_.numVars];
+						if(varHeaders_)
 						{
-							fseek(m_ibtFile, m_header.varHeaderOffset, SEEK_SET);
-							const size_t len = m_header.numVars * sizeof(IRVarHeader);
-							if(fread(m_varHeaders, 1, len, m_ibtFile) == len)
+							fseek(ibtFile_, header_.varHeaderOffset, SEEK_SET);
+							const size_t len = header_.numVars * sizeof(IRVarHeader);
+							if(fread(varHeaders_, 1, len, ibtFile_) == len)
 							{
-								m_varBuf = new char[m_header.bufLen];
-								if(m_varBuf)
+								varBuf_ = new char[header_.bufLen];
+								if(varBuf_)
 								{
-									fseek(m_ibtFile, m_header.varBuf[0].bufOffset, SEEK_SET);
+									fseek(ibtFile_, header_.varBuf[0].bufOffset, SEEK_SET);
 
 									return true;
 
-									//delete [] m_varBuf;
-									//m_varBuf = NULL;
+									//delete [] varBuf_;
+									//varBuf_ = NULL;
 								}
 							}
 
-							delete [] m_varHeaders;
-							m_varHeaders = nullptr;
+							delete [] varHeaders_;
+							varHeaders_ = nullptr;
 						}
 					}
 
-					delete [] m_sessionInfoString;
-					m_sessionInfoString = nullptr;
+					delete [] sessionInfoString_;
+					sessionInfoString_ = nullptr;
 				}
-			}
-		}
-		fclose(m_ibtFile);
-		m_ibtFile = nullptr;
-	}
+
+
+
+
 
 	return false;
 }
 
 void IRDiskClient::closeFile()
 {
-	if(m_varBuf)
-		delete [] m_varBuf;
-	m_varBuf = nullptr;
+	if(varBuf_)
+		delete [] varBuf_;
+	varBuf_ = nullptr;
 
-	if(m_varHeaders)
-		delete [] m_varHeaders;
-	m_varHeaders = nullptr;
+	if(varHeaders_)
+		delete [] varHeaders_;
+	varHeaders_ = nullptr;
 
-	if(m_sessionInfoString)
-		delete [] m_sessionInfoString;
-	m_sessionInfoString = nullptr;
+	if(sessionInfoString_)
+		delete [] sessionInfoString_;
+	sessionInfoString_ = nullptr;
 
-	if(m_ibtFile)
-		fclose(m_ibtFile);
-	m_ibtFile = nullptr;
+	if(ibtFile_)
+		fclose(ibtFile_);
+	ibtFile_ = nullptr;
 }
 
 bool IRDiskClient::getNextData()
 {
-	if(m_ibtFile)
-		return fread(m_varBuf, 1, m_header.bufLen, m_ibtFile) == static_cast<size_t>(m_header.bufLen);
+	if(ibtFile_)
+		return fread(varBuf_, 1, header_.bufLen, ibtFile_) == static_cast<size_t>(header_.bufLen);
 
 	return false;
 }
@@ -121,19 +134,19 @@ bool IRDiskClient::getNextData()
 // return how many variables this .ibt file has in the header
 int IRDiskClient::getNumVars()
 {
-	if(m_ibtFile)
-		return m_header.numVars;
+	if(ibtFile_)
+		return header_.numVars;
 
 	return -1;
 }
 
 int IRDiskClient::getVarIdx(const char *name)
 {
-	if(m_ibtFile && name)
+	if(ibtFile_ && name)
 	{
-		for(int idx=0; idx<m_header.numVars; idx++)
+		for(int idx=0; idx<header_.numVars; idx++)
 		{
-			if(0 == strncmp(name, m_varHeaders[idx].name, IRSDK_MAX_STRING))
+			if(0 == strncmp(name, varHeaders_[idx].name, IRSDK_MAX_STRING))
 			{
 				return idx;
 			}
@@ -145,11 +158,11 @@ int IRDiskClient::getVarIdx(const char *name)
 
 IRVarType IRDiskClient::getVarType(int idx)
 {
-	if(m_ibtFile)
+	if(ibtFile_)
 	{
-		if(idx >= 0 && idx < m_header.numVars)
+		if(idx >= 0 && idx < header_.numVars)
 		{
-			return (IRVarType)m_varHeaders[idx].type;
+			return (IRVarType)varHeaders_[idx].type;
 		}
 
 		//invalid variable index
@@ -162,11 +175,11 @@ IRVarType IRDiskClient::getVarType(int idx)
 // get info on the var
 const char* IRDiskClient::getVarName(int idx)
 {
-	if(m_ibtFile)
+	if(ibtFile_)
 	{
-		if(idx >= 0 && idx < m_header.numVars)
+		if(idx >= 0 && idx < header_.numVars)
 		{
-			return m_varHeaders[idx].name;
+			return varHeaders_[idx].name;
 		}
 
 		//invalid variable index
@@ -178,11 +191,11 @@ const char* IRDiskClient::getVarName(int idx)
 
 const char* IRDiskClient::getVarDesc(int idx)
 {
-	if(m_ibtFile)
+	if(ibtFile_)
 	{
-		if(idx >= 0 && idx < m_header.numVars)
+		if(idx >= 0 && idx < header_.numVars)
 		{
-			return m_varHeaders[idx].desc;
+			return varHeaders_[idx].desc;
 		}
 
 		//invalid variable index
@@ -194,11 +207,11 @@ const char* IRDiskClient::getVarDesc(int idx)
 
 const char* IRDiskClient::getVarUnit(int idx)
 {
-	if(m_ibtFile)
+	if(ibtFile_)
 	{
-		if(idx >= 0 && idx < m_header.numVars)
+		if(idx >= 0 && idx < header_.numVars)
 		{
-			return m_varHeaders[idx].unit;
+			return varHeaders_[idx].unit;
 		}
 
 		//invalid variable index
@@ -210,11 +223,11 @@ const char* IRDiskClient::getVarUnit(int idx)
 
 int IRDiskClient::getVarCount(int idx)
 {
-	if(m_ibtFile)
+	if(ibtFile_)
 	{
-		if(idx >= 0 && idx < m_header.numVars)
+		if(idx >= 0 && idx < header_.numVars)
 		{
-			return m_varHeaders[idx].count;
+			return varHeaders_[idx].count;
 		}
 
 		//invalid variable index
@@ -226,14 +239,14 @@ int IRDiskClient::getVarCount(int idx)
 
 bool IRDiskClient::getVarBool(int idx, int entry)
 {
-	if(m_ibtFile)
+	if(ibtFile_)
 	{
-		if(idx >= 0 && idx < m_header.numVars)
+		if(idx >= 0 && idx < header_.numVars)
 		{
-			if(entry >= 0 && entry < m_varHeaders[idx].count)
+			if(entry >= 0 && entry < varHeaders_[idx].count)
 			{
-				const char * data = m_varBuf + m_varHeaders[idx].offset;
-				switch(m_varHeaders[idx].type)
+				const char * data = varBuf_ + varHeaders_[idx].offset;
+				switch(varHeaders_[idx].type)
 				{
 				// 1 byte
 				case IRVarType::type_char:
@@ -278,14 +291,14 @@ bool IRDiskClient::getVarBool(int idx, int entry)
 
 int IRDiskClient::getVarInt(int idx, int entry)
 {
-	if(m_ibtFile)
+	if(ibtFile_)
 	{
-		if(idx >= 0 && idx < m_header.numVars)
+		if(idx >= 0 && idx < header_.numVars)
 		{
-			if(entry >= 0 && entry < m_varHeaders[idx].count)
+			if(entry >= 0 && entry < varHeaders_[idx].count)
 			{
-				const char * data = m_varBuf + m_varHeaders[idx].offset;
-				switch(m_varHeaders[idx].type)
+				const char * data = varBuf_ + varHeaders_[idx].offset;
+				switch(varHeaders_[idx].type)
 				{
 				// 1 byte
 				case IRVarType::type_char:
@@ -327,14 +340,14 @@ int IRDiskClient::getVarInt(int idx, int entry)
 
 float IRDiskClient::getVarFloat(int idx, int entry)
 {
-	if(m_ibtFile)
+	if(ibtFile_)
 	{
-		if(idx >= 0 && idx < m_header.numVars)
+		if(idx >= 0 && idx < header_.numVars)
 		{
-			if(entry >= 0 && entry < m_varHeaders[idx].count)
+			if(entry >= 0 && entry < varHeaders_[idx].count)
 			{
-				const char * data = m_varBuf + m_varHeaders[idx].offset;
-				switch(m_varHeaders[idx].type)
+				const char * data = varBuf_ + varHeaders_[idx].offset;
+				switch(varHeaders_[idx].type)
 				{
 				// 1 byte
 				case IRVarType::type_char:
@@ -376,14 +389,14 @@ float IRDiskClient::getVarFloat(int idx, int entry)
 
 double IRDiskClient::getVarDouble(int idx, int entry)
 {
-	if(m_ibtFile)
+	if(ibtFile_)
 	{
-		if(idx >= 0 && idx < m_header.numVars)
+		if(idx >= 0 && idx < header_.numVars)
 		{
-			if(entry >= 0 && entry < m_varHeaders[idx].count)
+			if(entry >= 0 && entry < varHeaders_[idx].count)
 			{
-				const char * data = m_varBuf + m_varHeaders[idx].offset;
-				switch(m_varHeaders[idx].type)
+				const char * data = varBuf_ + varHeaders_[idx].offset;
+				switch(varHeaders_[idx].type)
 				{
 				// 1 byte
 				case IRVarType::type_char:
@@ -426,11 +439,11 @@ double IRDiskClient::getVarDouble(int idx, int entry)
 //path is in the form of "DriverInfo:Drivers:CarIdx:{%d}UserName:"
 int IRDiskClient::getSessionStrVal(const char *path, char *val, int valLen)
 {
-	if(m_ibtFile && path && val && valLen > 0)
+	if(ibtFile_ && path && val && valLen > 0)
 	{
 		const char *tVal = nullptr;
 		int tValLen = 0;
-		if(parseYaml(m_sessionInfoString, path, &tVal, &tValLen))
+		if(parseYaml(sessionInfoString_, path, &tVal, &tValLen))
 		{
 			// dont overflow out buffer
 			int len = tValLen;
@@ -452,3 +465,4 @@ int IRDiskClient::getSessionStrVal(const char *path, char *val, int valLen)
 	return 0;
 }
 
+}

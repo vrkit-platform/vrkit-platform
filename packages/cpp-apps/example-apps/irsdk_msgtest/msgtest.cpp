@@ -44,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <conio.h>
 #include <signal.h>
 
-#include <irsdk-cpp/IRTypes.h>
+#include <IRacingTools/SDK/Types.h>
 
 
 void ex_program(int sig) 

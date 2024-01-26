@@ -25,46 +25,48 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef IRSDKDISKCLIENT_H
-#define IRSDKDISKCLIENT_H
+#pragma once
+
+#include "Types.h"
+#include "Utils/Buffer.h"
 
 // A C++ wrapper around the irsdk calls that takes care of reading a .ibt file
-
+namespace IRacingTools::SDK {
 class IRDiskClient
 {
 public:
 
 	IRDiskClient()
-		: m_ibtFile(nullptr)
-		, m_sessionInfoString(nullptr)
-		, m_varHeaders(nullptr)
-		, m_varBuf(nullptr)
+		: sessionInfoString_(nullptr)
+		, varHeaders_(nullptr)
+		, varBuf_(nullptr)
+		, ibtFile_(nullptr)
 	{
-		memset(&m_header, 0, sizeof(m_header));
-		memset(&m_diskSubHeader, 0, sizeof(m_diskSubHeader));
+		memset(&header_, 0, sizeof(header_));
+		memset(&diskSubHeader_, 0, sizeof(diskSubHeader_));
 	}
 
 	explicit IRDiskClient(const char *path)
-		: m_sessionInfoString(nullptr)
-		, m_varHeaders(nullptr)
-		, m_varBuf(nullptr)
-		, m_ibtFile(nullptr)
+		: sessionInfoString_(nullptr)
+		, varHeaders_(nullptr)
+		, varBuf_(nullptr)
+		, ibtFile_(nullptr)
 	{
-		memset(&m_header, 0, sizeof(m_header));
-		memset(&m_diskSubHeader, 0, sizeof(m_diskSubHeader));
+		memset(&header_, 0, sizeof(header_));
+		memset(&diskSubHeader_, 0, sizeof(diskSubHeader_));
 
 		openFile(path);
 	}
 
 	~IRDiskClient() { closeFile(); }
 
-	bool isFileOpen() const { return m_ibtFile != nullptr; }
+	bool isFileOpen() const { return ibtFile_ != nullptr; }
 	bool openFile(const char *path);
 	void closeFile();
 
 	// read next line out of file
 	bool getNextData();
-	int getDataCount() const { return m_diskSubHeader.sessionRecordCount; }
+	int getDataCount() const { return diskSubHeader_.sessionRecordCount; }
 
 	// return how many variables this .ibt file has in the header
 	int getNumVars();
@@ -101,18 +103,18 @@ public:
 	// 1 success, 0 failure, -n minimum buffer size
 	int getSessionStrVal(const char *path, char *val, int valLen);
 	// get the whole string
-	const char *getSessionStr() { return m_sessionInfoString; }
+	const char *getSessionStr() { return sessionInfoString_; }
 
 protected:
 
-	IRHeader m_header;
-	IRDiskSubHeader m_diskSubHeader;
+	IRHeader header_;
+	IRDiskSubHeader diskSubHeader_;
 
-	char *m_sessionInfoString;
-	IRVarHeader *m_varHeaders;
-	char *m_varBuf;
+	char *sessionInfoString_;
+	IRVarHeader *varHeaders_;
+	char *varBuf_;
 
-	FILE *m_ibtFile;
+	FILE *ibtFile_;
 };
+}
 
-#endif // IRSDKDISKCLIENT_H

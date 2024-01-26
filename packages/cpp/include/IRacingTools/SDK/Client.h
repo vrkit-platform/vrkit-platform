@@ -27,9 +27,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "IRTypes.h"
+#include "Types.h"
 
 
+namespace IRacingTools::SDK {
 // A C++ wrapper around the irsdk calls that takes care of the details of maintaining a connection.
 // reads out the data into a cache so you don't have to worry about timming
 class IRClient
@@ -136,5 +137,5 @@ protected:
 	int m_statusID;
 };
 
-
+}
 

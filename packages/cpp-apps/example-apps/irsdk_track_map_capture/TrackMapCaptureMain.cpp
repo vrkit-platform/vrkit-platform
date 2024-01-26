@@ -17,8 +17,8 @@
 #include <csignal>
 #include <cstdio>
 
-#include <irsdk-cpp/IRClient.h>
-#include <irsdk-cpp/IRTypes.h>
+#include <IRacingTools/SDK/Client.h>
+#include <IRacingTools/SDK/Types.h>
 #include <irsdk-cpp/yaml_parser.h>
 
 // for timeBeginPeriod

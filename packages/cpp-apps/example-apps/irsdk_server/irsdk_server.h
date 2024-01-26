@@ -28,7 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef IRSDK_SERVER_H
 #define IRSDK_SERVER_H
 
-#include <irsdk-cpp/IRTypes.h>
+#include <IRacingTools/SDK/Types.h>
 
 static const int TICKS_PER_SEC = 60;
 

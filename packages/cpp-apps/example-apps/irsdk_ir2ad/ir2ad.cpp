@@ -18,8 +18,8 @@
 #include <signal.h>
 #include <time.h>
 
-#include <irsdk-cpp/IRTypes.h>
-#include <irsdk-cpp/IRClient.h>
+#include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/Client.h>
 #include "serial.h"
 
 // for timeBeginPeriod

@@ -20,8 +20,8 @@
 #include <string.h>
 #include <conio.h>
 
-#include <irsdk-cpp/IRTypes.h>
-#include <irsdk-cpp/IRDiskClient.h>
+#include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/DiskClient.h>
 
 // tune these to your liking
 const int maxTorque_Nm = 80; // max number of bins in the histogram

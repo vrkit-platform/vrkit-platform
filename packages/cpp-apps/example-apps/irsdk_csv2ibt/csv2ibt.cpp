@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <conio.h>
 #include <time.h>
 
-#include <irsdk-cpp/IRTypes.h>
+#include <IRacingTools/SDK/Types.h>
 #include "irsdk_csvclient.h"
 
 irsdkCSVClient ick;

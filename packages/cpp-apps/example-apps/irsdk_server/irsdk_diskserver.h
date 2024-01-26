@@ -28,7 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef IRSDK_DISKSERVER_H
 #define IRSDK_DISKSERVER_H
 
-#include <irsdk-cpp/IRTypes.h>
+#include <IRacingTools/SDK/Types.h>
 #include "irsdk_server.h"
 
 class irsdkDiskServer

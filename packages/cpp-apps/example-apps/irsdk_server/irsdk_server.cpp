@@ -36,7 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #pragma intrinsic(_WriteBarrier)
 
-#include <irsdk-cpp/IRTypes.h>
+#include <IRacingTools/SDK/Types.h>
 #include "irsdk_server.h"
 #include "irsdk_memserver.h"
 #include "irsdk_diskserver.h"

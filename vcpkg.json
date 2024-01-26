@@ -50,5 +50,8 @@
   }, {
     "name" : "wxwidgets",
     "version>=" : "3.2.4"
+  }, {
+    "name" : "ms-gsl",
+    "version>=" : "4.0.0#1"
   } ]
 }

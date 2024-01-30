@@ -25,152 +25,152 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdio.h>
-#include <string.h>
-
-enum yaml_state {
-	space,
-	key,
-	keysep,
-	value,
-	newline
+#include <cstring>
+#include <IRacingTools/SDK/Utils/YamlParser.h>
+namespace IRacingTools::SDK::Utils {
+enum class YamlState {
+    space,
+    key,
+    keysep,
+    value,
+    newline
 };
 
 // super simple YAML parser
-bool parseYaml(const char *data, const char* path, const char **val, int *len)
+bool ParseYaml(const char *data, const char* path, const char **val, int *len)
 {
-	if(data && path && val && len)
-	{
-		// make sure we set this to something
-		*val = nullptr;
-		*len = 0;
+    if(data && path && val && len)
+    {
+        // make sure we set this to something
+        *val = nullptr;
+        *len = 0;
 
-		int depth = 0;
-		yaml_state state = space;
+        int depth = 0;
+        auto state = YamlState::space;
 
-		const char *keystr = nullptr;
-		int keylen = 0;
+        const char *keystr = nullptr;
+        int keylen = 0;
 
-		const char *valuestr = nullptr;
-		int valuelen = 0;
+        const char *valuestr = nullptr;
+        int valuelen = 0;
 
-		const char *pathptr = path;
-		int pathdepth = 0;
+        const char *pathptr = path;
+        int pathdepth = 0;
 
-		while(*data)
-		{
-			switch(*data)
-			{
-			case ' ':
-				if(state == newline)
-					state = space;
-				if(state == space)
-					depth++;
-				else if(state == key)
-					keylen++;
-				else if(state == value)
-					valuelen++;
-				break;
-			case '-':
-				if(state == newline)
-					state = space;
-				if(state == space)
-					depth++;
-				else if(state == key)
-					keylen++;
-				else if(state == value)
-					valuelen++;
-				else if(state == keysep)
-				{
-					state = value;
-					valuestr = data;
-					valuelen = 1;
-				}
-				break;
-			case ':':
-				if(state == key)
-				{
-					state = keysep;
-					keylen++;
-				}
-				else if(state == keysep)
-				{
-					state = value;
-					valuestr = data;
-				}
-				else if(state == value)
-					valuelen++;
-				break;
-			case '\n':
-			case '\r':
-				if(state != newline)
-				{
-					if(depth < pathdepth)
-					{
-						return false;
-					}
-					else if(keylen && 0 == strncmp(keystr, pathptr, keylen))
-					{
-						bool found = true;
-						//do we need to test the value?
-						if(*(pathptr+keylen) == '{')
-						{
-							//search for closing brace
-							int pathvaluelen = keylen + 1; 
-							while(*(pathptr+pathvaluelen) && *(pathptr+pathvaluelen) != '}')
-								pathvaluelen++; 
+        while(*data)
+        {
+            switch(*data)
+            {
+                case ' ':
+                    if(state == YamlState::newline)
+                        state = YamlState::space;
+                if(state == YamlState::space)
+                    depth++;
+                else if(state == YamlState::key)
+                    keylen++;
+                else if(state == YamlState::value)
+                    valuelen++;
+                break;
+                case '-':
+                    if(state == YamlState::newline)
+                        state = YamlState::space;
+                if(state == YamlState::space)
+                    depth++;
+                else if(state == YamlState::key)
+                    keylen++;
+                else if(state == YamlState::value)
+                    valuelen++;
+                else // Always YamlState::keysep
+                {
+                    state = YamlState::value;
+                    valuestr = data;
+                    valuelen = 1;
+                }
+                break;
+                case ':':
+                    if(state == YamlState::key)
+                    {
+                        state = YamlState::keysep;
+                        keylen++;
+                    }
+                    else if(state == YamlState::keysep)
+                    {
+                        state = YamlState::value;
+                        valuestr = data;
+                    }
+                    else if(state == YamlState::value)
+                        valuelen++;
+                break;
+                case '\n':
+                case '\r':
+                    if(state != YamlState::newline)
+                    {
+                        if(depth < pathdepth)
+                        {
+                            return false;
+                        }
+                        else if(keylen && 0 == strncmp(keystr, pathptr, keylen))
+                        {
+                            bool found = true;
+                            //do we need to test the value?
+                            if(*(pathptr+keylen) == '{')
+                            {
+                                //search for closing brace
+                                int pathvaluelen = keylen + 1;
+                                while(*(pathptr+pathvaluelen) && *(pathptr+pathvaluelen) != '}')
+                                    pathvaluelen++;
 
-							if(valuelen == pathvaluelen - (keylen+1) && 0 == strncmp(valuestr, (pathptr+keylen+1), valuelen))
-								pathptr += valuelen + 2;
-							else
-								found = false;
-						}
+                                if(valuelen == pathvaluelen - (keylen+1) && 0 == strncmp(valuestr, (pathptr+keylen+1), valuelen))
+                                    pathptr += valuelen + 2;
+                                else
+                                    found = false;
+                            }
 
-						if(found)
-						{
-							pathptr += keylen;
-							pathdepth = depth;
+                            if(found)
+                            {
+                                pathptr += keylen;
+                                pathdepth = depth;
 
-							if(*pathptr == '\0')
-							{
-								*val = valuestr;
-								*len = valuelen;
-								return true;
-							}
-						}
-					}
+                                if(*pathptr == '\0')
+                                {
+                                    *val = valuestr;
+                                    *len = valuelen;
+                                    return true;
+                                }
+                            }
+                        }
 
-					depth = 0;
-					keylen = 0;
-					valuelen = 0;
-				}
-				state = newline;
-				break;
-			default:
-				if(state == space || state == newline)
-				{
-					state = key;
-					keystr = data;
-					keylen = 0; //redundant?
-				}
-				else if(state == keysep)
-				{
-					state = value;
-					valuestr = data;
-					valuelen = 0; //redundant?
-				}
-				if(state == key)
-					keylen++;
-				if(state == value)
-					valuelen++;
-				break;
-			}
+                        depth = 0;
+                        keylen = 0;
+                        valuelen = 0;
+                    }
+                state = YamlState::newline;
+                break;
+                default:
+                    if(state == YamlState::space || state == YamlState::newline)
+                    {
+                        state = YamlState::key;
+                        keystr = data;
+                        keylen = 0; //redundant?
+                    }
+                    else if(state == YamlState::keysep)
+                    {
+                        state = YamlState::value;
+                        valuestr = data;
+                        valuelen = 0; //redundant?
+                    }
+                if(state == YamlState::key)
+                    keylen++;
+                if(state == YamlState::value)
+                    valuelen++;
+                break;
+            }
 
-			// important, increment our pointer
-			data++;
-		}
+            // important, increment our pointer
+            data++;
+        }
 
-	}
-	return false;
+    }
+    return false;
 }
-
+}

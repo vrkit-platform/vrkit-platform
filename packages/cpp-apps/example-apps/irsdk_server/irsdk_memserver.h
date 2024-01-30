@@ -38,7 +38,7 @@ public:
 	static irsdkMemServer* instance();
 
 	int regVar(const char *name, const void *var, 
-		IRVarType type, int count, 
+		VarDataType type, int count,
 		const char *desc, const char *unit,
 		float multiplier = 1.0f, float offset = 0.0f);
 

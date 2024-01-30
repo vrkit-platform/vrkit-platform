@@ -17,9 +17,10 @@
 #include <csignal>
 #include <cstdio>
 
-#include <IRacingTools/SDK/Client.h>
+#include <IRacingTools/SDK/LiveClient.h>
 #include <IRacingTools/SDK/Types.h>
-#include <irsdk-cpp/yaml_parser.h>
+
+#include <IRacingTools/SDK/Utils/YamlParser.h>
 
 // for timeBeginPeriod
 #pragma comment(lib, "Winmm")
@@ -31,64 +32,64 @@
 // 'live' session info
 
 // Live weather info, may change as session progresses
-
-IRVarHolder g_playerInCar("IsOnTrack");
-IRVarHolder g_AirDensity("AirDensity"); // (float) kg/m^3, Density of air at start/finish line
-IRVarHolder g_AirPressure("AirPressure"); // (float) Hg, Pressure of air at start/finish line
-IRVarHolder g_AirTemp("AirTemp"); // (float) C, Temperature of air at start/finish line
-IRVarHolder g_FogLevel("FogLevel"); // (float) %, Fog level
-IRVarHolder g_RelativeHumidity("RelativeHumidity"); // (float) %, Relative Humidity
-IRVarHolder g_Skies("Skies"); // (int) Skies (0=clear/1=p cloudy/2=m cloudy/3=overcast)
-IRVarHolder g_TrackTempCrew("TrackTempCrew"); // (float) C, Temperature of track measured by crew around track
-IRVarHolder g_WeatherType("WeatherType"); // (int) Weather type (0=constant 1=dynamic)
-IRVarHolder g_WindDir("WindDir"); // (float) rad, Wind direction at start/finish line
-IRVarHolder g_WindVel("WindVel"); // (float) m/s, Wind velocity at start/finish line
+using namespace IRacingTools::SDK;
+VarHolder g_playerInCar("IsOnTrack");
+VarHolder g_AirDensity("AirDensity"); // (float) kg/m^3, Density of air at start/finish line
+VarHolder g_AirPressure("AirPressure"); // (float) Hg, Pressure of air at start/finish line
+VarHolder g_AirTemp("AirTemp"); // (float) C, Temperature of air at start/finish line
+VarHolder g_FogLevel("FogLevel"); // (float) %, Fog level
+VarHolder g_RelativeHumidity("RelativeHumidity"); // (float) %, Relative Humidity
+VarHolder g_Skies("Skies"); // (int) Skies (0=clear/1=p cloudy/2=m cloudy/3=overcast)
+VarHolder g_TrackTempCrew("TrackTempCrew"); // (float) C, Temperature of track measured by crew around track
+VarHolder g_WeatherType("WeatherType"); // (int) Weather type (0=constant 1=dynamic)
+VarHolder g_WindDir("WindDir"); // (float) rad, Wind direction at start/finish line
+VarHolder g_WindVel("WindVel"); // (float) m/s, Wind velocity at start/finish line
 
 // session status
-IRVarHolder g_PitsOpen("PitsOpen"); // (bool) True if pit stop is allowed, basically true if caution lights not out
-IRVarHolder g_RaceLaps("RaceLaps"); // (int) Laps completed in race
-IRVarHolder g_SessionFlags("SessionFlags"); // (int) IRFlags, bitfield
-IRVarHolder g_SessionLapsRemain("SessionLapsRemain"); // (int) Laps left till session ends
-IRVarHolder g_SessionLapsRemainEx("SessionLapsRemainEx"); // (int) New improved laps left till session ends
-IRVarHolder g_SessionNum("SessionNum"); // (int) Session number
-IRVarHolder g_SessionState("SessionState"); // (int) IRSessionState, Session state
-IRVarHolder g_SessionTick("SessionTick"); // (int) Current update number
-IRVarHolder g_SessionTime("SessionTime"); // (double), s, Seconds since session start
-IRVarHolder g_SessionTimeOfDay("SessionTimeOfDay"); // (float) s, Time of day in seconds
-IRVarHolder g_SessionTimeRemain("SessionTimeRemain"); // (double) s, Seconds left till session ends
-IRVarHolder g_SessionUniqueID("SessionUniqueID"); // (int) Session ID
+VarHolder g_PitsOpen("PitsOpen"); // (bool) True if pit stop is allowed, basically true if caution lights not out
+VarHolder g_RaceLaps("RaceLaps"); // (int) Laps completed in race
+VarHolder g_SessionFlags("SessionFlags"); // (int) FlagType, bitfield
+VarHolder g_SessionLapsRemain("SessionLapsRemain"); // (int) Laps left till session ends
+VarHolder g_SessionLapsRemainEx("SessionLapsRemainEx"); // (int) New improved laps left till session ends
+VarHolder g_SessionNum("SessionNum"); // (int) Session number
+VarHolder g_SessionState("SessionState"); // (int) SessionState, Session state
+VarHolder g_SessionTick("SessionTick"); // (int) Current update number
+VarHolder g_SessionTime("SessionTime"); // (double), s, Seconds since session start
+VarHolder g_SessionTimeOfDay("SessionTimeOfDay"); // (float) s, Time of day in seconds
+VarHolder g_SessionTimeRemain("SessionTimeRemain"); // (double) s, Seconds left till session ends
+VarHolder g_SessionUniqueID("SessionUniqueID"); // (int) Session ID
 
 // competitor information, array of up to 64 cars
-IRVarHolder g_CarIdxEstTime("CarIdxEstTime"); // (float) s, Estimated time to reach current location on track
-IRVarHolder g_CarIdxClassPosition("CarIdxClassPosition"); // (int) Cars class position in race by car index
-IRVarHolder g_CarIdxF2Time("CarIdxF2Time"); // (float) s, Race time behind leader or fastest lap time otherwise
-IRVarHolder g_CarIdxGear("CarIdxGear"); // (int) -1=reverse 0=neutral 1..n=current gear by car index
-IRVarHolder g_CarIdxLap("CarIdxLap"); // (int) Lap count by car index
-IRVarHolder g_CarIdxLapCompleted("CarIdxLapCompleted"); // (int) Laps completed by car index
-IRVarHolder g_CarIdxLapDistPct("CarIdxLapDistPct"); // (float) %, Percentage distance around lap by car index
-IRVarHolder g_CarIdxOnPitRoad("CarIdxOnPitRoad"); // (bool) On pit road between the cones by car index
-IRVarHolder g_CarIdxPosition("CarIdxPosition"); // (int) Cars position in race by car index
-IRVarHolder g_CarIdxRPM("CarIdxRPM"); // (float) revs/min, Engine rpm by car index
-IRVarHolder g_CarIdxSteer("CarIdxSteer"); // (float) rad, Steering wheel angle by car index
-IRVarHolder g_CarIdxTrackSurface("CarIdxTrackSurface"); // (int) IRTrkLoc, Track surface type by car index
-IRVarHolder g_CarIdxTrackSurfaceMaterial("CarIdxTrackSurfaceMaterial");
-// (int) irsdk_TrkSurf, Track surface material type by car index
+VarHolder g_CarIdxEstTime("CarIdxEstTime"); // (float) s, Estimated time to reach current location on track
+VarHolder g_CarIdxClassPosition("CarIdxClassPosition"); // (int) Cars class position in race by car index
+VarHolder g_CarIdxF2Time("CarIdxF2Time"); // (float) s, Race time behind leader or fastest lap time otherwise
+VarHolder g_CarIdxGear("CarIdxGear"); // (int) -1=reverse 0=neutral 1..n=current gear by car index
+VarHolder g_CarIdxLap("CarIdxLap"); // (int) Lap count by car index
+VarHolder g_CarIdxLapCompleted("CarIdxLapCompleted"); // (int) Laps completed by car index
+VarHolder g_CarIdxLapDistPct("CarIdxLapDistPct"); // (float) %, Percentage distance around lap by car index
+VarHolder g_CarIdxOnPitRoad("CarIdxOnPitRoad"); // (bool) On pit road between the cones by car index
+VarHolder g_CarIdxPosition("CarIdxPosition"); // (int) Cars position in race by car index
+VarHolder g_CarIdxRPM("CarIdxRPM"); // (float) revs/min, Engine rpm by car index
+VarHolder g_CarIdxSteer("CarIdxSteer"); // (float) rad, Steering wheel angle by car index
+VarHolder g_CarIdxTrackSurface("CarIdxTrackSurface"); // (int) TrackLocation, Track surface type by car index
+VarHolder g_CarIdxTrackSurfaceMaterial("CarIdxTrackSurfaceMaterial");
+// (int) TrackSurface, Track surface material type by car index
 
 // new variables
-IRVarHolder g_CarIdxLastLapTime("CarIdxLastLapTime"); // (float) s, Cars last lap time
-IRVarHolder g_CarIdxBestLapTime("CarIdxBestLapTime"); // (float) s, Cars best lap time
-IRVarHolder g_CarIdxBestLapNum("CarIdxBestLapNum"); // (int) Cars best lap number
+VarHolder g_CarIdxLastLapTime("CarIdxLastLapTime"); // (float) s, Cars last lap time
+VarHolder g_CarIdxBestLapTime("CarIdxBestLapTime"); // (float) s, Cars best lap time
+VarHolder g_CarIdxBestLapNum("CarIdxBestLapNum"); // (int) Cars best lap number
 
-IRVarHolder g_CarIdxP2P_Status("CarIdxP2P_Status"); // (bool) Push2Pass active or not
-IRVarHolder g_CarIdxP2P_Count("CarIdxP2P_Count"); // (int) Push2Pass count of usage (or remaining in Race)
+VarHolder g_CarIdxP2P_Status("CarIdxP2P_Status"); // (bool) Push2Pass active or not
+VarHolder g_CarIdxP2P_Count("CarIdxP2P_Count"); // (int) Push2Pass count of usage (or remaining in Race)
 
-IRVarHolder g_PaceMode("PaceMode"); // (int) irsdk_PaceMode, Are we pacing or not
-IRVarHolder g_CarIdxPaceLine("CarIdxPaceLine"); // (int) What line cars are pacing in, or -1 if not pacing
-IRVarHolder g_CarIdxPaceRow("CarIdxPaceRow"); // (int) What row cars are pacing in, or -1 if not pacing
-IRVarHolder g_CarIdxPaceFlags("CarIdxPaceFlags"); // (int) irsdk_PaceFlags, Pacing status flags for each car
+VarHolder g_PaceMode("PaceMode"); // (int) PaceMode, Are we pacing or not
+VarHolder g_CarIdxPaceLine("CarIdxPaceLine"); // (int) What line cars are pacing in, or -1 if not pacing
+VarHolder g_CarIdxPaceRow("CarIdxPaceRow"); // (int) What row cars are pacing in, or -1 if not pacing
+VarHolder g_CarIdxPaceFlags("CarIdxPaceFlags"); // (int) PaceFlagType, Pacing status flags for each car
 
-IRVarHolder g_Lat("Lat");
-IRVarHolder g_Lon("Lon");
+VarHolder g_Lat("Lat");
+VarHolder g_Lon("Lon");
 
 const int g_maxCars = 64;
 const int g_maxNameLen = 64;
@@ -142,7 +143,7 @@ bool parceYamlInt(const char* yamlStr, const char* path, int* dest)
             int count;
             const char* strPtr;
 
-            if (parseYaml(yamlStr, path, &strPtr, &count))
+            if (Utils::ParseYaml(yamlStr, path, &strPtr, &count))
             {
                 (*dest) = atoi(strPtr);
                 return true;
@@ -153,7 +154,7 @@ bool parceYamlInt(const char* yamlStr, const char* path, int* dest)
     return false;
 }
 
-bool parceYamlStr(const char* yamlStr, const char* path, char* dest, int maxCount)
+bool parseYamlStr(const char* yamlStr, const char* path, char* dest, int maxCount)
 {
     if (dest && maxCount > 0)
     {
@@ -164,7 +165,7 @@ bool parceYamlStr(const char* yamlStr, const char* path, char* dest, int maxCoun
             int count;
             const char* strPtr;
 
-            if (parseYaml(yamlStr, path, &strPtr, &count))
+            if (Utils::ParseYaml(yamlStr, path, &strPtr, &count))
             {
                 // strip leading quotes
                 if (*strPtr == '"')
@@ -298,14 +299,14 @@ const char* generateLiveYAMLString()
     len += _snprintf(tstr + len, m_len - len, " PitsOpen: %d\n", g_PitsOpen.getBool());
     // True if pit stop is allowed, basically true if caution lights not out
     len += _snprintf(tstr + len, m_len - len, " RaceLaps: %d\n", g_RaceLaps.getInt()); // Laps completed in race
-    len += _snprintf(tstr + len, m_len - len, " SessionFlags: %d\n", g_SessionFlags.getInt()); // IRFlags, bitfield
+    len += _snprintf(tstr + len, m_len - len, " SessionFlags: %d\n", g_SessionFlags.getInt()); // FlagType, bitfield
     len += _snprintf(tstr + len, m_len - len, " SessionLapsRemain: %d\n", g_SessionLapsRemain.getInt());
     // Laps left till session ends
     len += _snprintf(tstr + len, m_len - len, " SessionLapsRemainEx: %d\n", g_SessionLapsRemainEx.getInt());
     // New improved laps left till session ends
     len += _snprintf(tstr + len, m_len - len, " SessionNum: %d\n", g_SessionNum.getInt()); // Session number
     len += _snprintf(tstr + len, m_len - len, " SessionState: %d\n", g_SessionState.getInt());
-    // IRSessionState, Session state
+    // SessionState, Session state
     len += _snprintf(tstr + len, m_len - len, " SessionTick: %d\n", g_SessionTick.getInt()); // Current update number
     len += _snprintf(tstr + len, m_len - len, " SessionTime: %.12f\n", g_SessionTime.getDouble());
     // s, Seconds since session start
@@ -320,7 +321,7 @@ const char* generateLiveYAMLString()
     len += _snprintf(tstr + len, m_len - len, "CarStatus:\n");
     if (g_PaceMode.isValid())
         len += _snprintf(tstr + len, m_len - len, " PaceMode: %d\n", g_PaceMode.getInt());
-    // irsdk_PaceMode, Are we pacing or not
+    // PaceMode, Are we pacing or not
 
     len += _snprintf(tstr + len, m_len - len, " Cars:\n");
     for (int i = 0; i < g_maxCars; i++)
@@ -350,10 +351,10 @@ const char* generateLiveYAMLString()
         len += _snprintf(tstr + len, m_len - len, "   CarIdxSteer: %.2f\n", g_CarIdxSteer.getFloat(i));
         // rad, Steering wheel angle by car index
         len += _snprintf(tstr + len, m_len - len, "   CarIdxTrackSurface: %d\n", g_CarIdxTrackSurface.getInt(i));
-        // IRTrkLoc, Track surface type by car index
+        // TrackLocation, Track surface type by car index
         len += _snprintf(tstr + len, m_len - len, "   CarIdxTrackSurfaceMaterial: %d\n",
                          g_CarIdxTrackSurfaceMaterial.getInt(i));
-        // irsdk_TrkSurf, Track surface material type by car index
+        // TrackSurface, Track surface material type by car index
 
         //****Note, don't use this one any more, it is replaced by CarIdxLastLapTime
         len += _snprintf(tstr + len, m_len - len, "   CarIdxLapTime: %.6f\n", g_lapTime[i]);
@@ -383,7 +384,7 @@ const char* generateLiveYAMLString()
         // What row cars are pacing in, or -1 if not pacing
         if (g_CarIdxPaceFlags.isValid())
             len += _snprintf(tstr + len, m_len - len, "   CarIdxPaceFlags: %d\n", g_CarIdxPaceFlags.getInt(i));
-        // irsdk_PaceFlags, Pacing status flags for each car
+        // PaceFlagType, Pacing status flags for each car
     }
     len += _snprintf(tstr + len, m_len - len, "\n");
 
@@ -463,15 +464,15 @@ void processYAMLSessionString(const char* yamlStr)
                 parceYamlInt(yamlStr, tstr, &(g_driverTableTable[i].carClassId));
 
                 sprintf(tstr, "DriverInfo:Drivers:CarIdx:{%d}UserName:", i);
-                parceYamlStr(yamlStr, tstr, g_driverTableTable[i].driverName,
-                             sizeof(g_driverTableTable[i].driverName) - 1);
+                parseYamlStr(
+                    yamlStr, tstr, g_driverTableTable[i].driverName, sizeof(g_driverTableTable[i].driverName) - 1
+                );
 
                 sprintf(tstr, "DriverInfo:Drivers:CarIdx:{%d}TeamName:", i);
-                parceYamlStr(yamlStr, tstr, g_driverTableTable[i].teamName, sizeof(g_driverTableTable[i].teamName) - 1);
+                parseYamlStr(yamlStr, tstr, g_driverTableTable[i].teamName, sizeof(g_driverTableTable[i].teamName) - 1);
 
                 sprintf(tstr, "DriverInfo:Drivers:CarIdx:{%d}CarNumber:", i);
-                parceYamlStr(yamlStr, tstr, g_driverTableTable[i].carNumStr,
-                             sizeof(g_driverTableTable[i].carNumStr) - 1);
+                parseYamlStr(yamlStr, tstr, g_driverTableTable[i].carNumStr, sizeof(g_driverTableTable[i].carNumStr) - 1);
 
                 // TeamID
             }
@@ -488,35 +489,35 @@ void processYAMLSessionString(const char* yamlStr)
 void printFlags(int flags)
 {
     // global flags
-    if (flags & irsdk_checkered) printf("checkered ");
-    if (flags & irsdk_white) printf("white ");
-    if (flags & irsdk_green) printf("green ");
-    if (flags & irsdk_yellow) printf("yellow ");
-    if (flags & irsdk_red) printf("red ");
-    if (flags & irsdk_blue) printf("blue ");
-    if (flags & irsdk_debris) printf("debris ");
-    if (flags & irsdk_crossed) printf("crossed ");
-    if (flags & irsdk_yellowWaving) printf("yellowWaving ");
-    if (flags & irsdk_oneLapToGreen) printf("oneLapToGreen ");
-    if (flags & irsdk_greenHeld) printf("greenHeld ");
-    if (flags & irsdk_tenToGo) printf("tenToGo ");
-    if (flags & irsdk_fiveToGo) printf("fiveToGo ");
-    if (flags & irsdk_randomWaving) printf("randomWaving ");
-    if (flags & irsdk_caution) printf("caution ");
-    if (flags & irsdk_cautionWaving) printf("cautionWaving ");
+    if (IsFlagSet(flags, FlagType::Checkered)) printf("checkered ");
+    if (IsFlagSet(flags, FlagType::White)) printf("white ");
+    if (IsFlagSet(flags, FlagType::Green)) printf("green ");
+    if (IsFlagSet(flags, FlagType::Yellow)) printf("yellow ");
+    if (IsFlagSet(flags, FlagType::Red)) printf("red ");
+    if (IsFlagSet(flags, FlagType::Blue)) printf("blue ");
+    if (IsFlagSet(flags, FlagType::Debris)) printf("debris ");
+    if (IsFlagSet(flags, FlagType::Crossed)) printf("crossed ");
+    if (IsFlagSet(flags, FlagType::YellowWaving)) printf("yellowWaving ");
+    if (IsFlagSet(flags, FlagType::OneLapToGreen)) printf("oneLapToGreen ");
+    if (IsFlagSet(flags, FlagType::GreenHeld)) printf("greenHeld ");
+    if (IsFlagSet(flags, FlagType::TenToGo)) printf("tenToGo ");
+    if (IsFlagSet(flags, FlagType::FiveToGo)) printf("fiveToGo ");
+    if (IsFlagSet(flags, FlagType::RandomWaving)) printf("randomWaving ");
+    if (IsFlagSet(flags, FlagType::Caution)) printf("caution ");
+    if (IsFlagSet(flags, FlagType::CautionWaving)) printf("cautionWaving ");
 
     // drivers black flags
-    if (flags & irsdk_black) printf("black ");
-    if (flags & irsdk_disqualify) printf("disqualify ");
-    if (flags & irsdk_servicible) printf("servicible ");
-    if (flags & irsdk_furled) printf("furled ");
-    if (flags & irsdk_repair) printf("repair ");
+    if (IsFlagSet(flags, FlagType::Black)) printf("black ");
+    if (IsFlagSet(flags, FlagType::Disqualify)) printf("disqualify ");
+    if (IsFlagSet(flags, FlagType::Servicible)) printf("servicible ");
+    if (IsFlagSet(flags, FlagType::Furled)) printf("furled ");
+    if (IsFlagSet(flags, FlagType::Repair)) printf("repair ");
 
     // start lights
-    if (flags & irsdk_startHidden) printf("startHidden ");
-    if (flags & irsdk_startReady) printf("startReady ");
-    if (flags & irsdk_startSet) printf("startSet ");
-    if (flags & irsdk_startGo) printf("startGo ");
+    if (IsFlagSet(flags, FlagType::StartHidden)) printf("startHidden ");
+    if (IsFlagSet(flags, FlagType::StartReady)) printf("startReady ");
+    if (IsFlagSet(flags, FlagType::StartSet)) printf("startSet ");
+    if (IsFlagSet(flags, FlagType::StartGo)) printf("startGo ");
 }
 
 void printTime(double time_s)
@@ -526,51 +527,53 @@ void printTime(double time_s)
     printf("%03d:%05.2f", minutes, seconds);
 }
 
-void printSessionState(int state)
+void printSessionState(int stateValue)
 {
+    auto state = magic_enum::enum_cast<SessionState>(stateValue).value();
     switch (state)
     {
-    case irsdk_StateInvalid:
+    case SessionState::Invalid:
         printf("Invalid");
         break;
-    case irsdk_StateGetInCar:
+    case SessionState::GetInCar:
         printf("GetInCar");
         break;
-    case irsdk_StateWarmup:
+    case SessionState::Warmup:
         printf("Warmup");
         break;
-    case irsdk_StateParadeLaps:
+    case SessionState::ParadeLaps:
         printf("ParadeLap");
         break;
-    case irsdk_StateRacing:
+    case SessionState::Racing:
         printf("Racing");
         break;
-    case irsdk_StateCheckered:
+    case SessionState::Checkered:
         printf("Checkered");
         break;
-    case irsdk_StateCoolDown:
+    case SessionState::CoolDown:
         printf("CoolDown");
         break;
     }
 }
 
-void printPaceMode(int mode)
+void printPaceMode(int modeValue)
 {
+    auto mode = magic_enum::enum_cast<PaceMode>(modeValue).value();
     switch (mode)
     {
-    case irsdk_PaceModeSingleFileStart:
+    case PaceMode::SingleFileStart:
         printf("SingleFileStart");
         break;
-    case irsdk_PaceModeDoubleFileStart:
+    case PaceMode::DoubleFileStart:
         printf("DoubleFileStart");
         break;
-    case irsdk_PaceModeSingleFileRestart:
+    case PaceMode::SingleFileRestart:
         printf("SingleFileRestart");
         break;
-    case irsdk_PaceModeDoubleFileRestart:
+    case PaceMode::DoubleFileRestart:
         printf("DoubleFileRestart:");
         break;
-    case irsdk_PaceModeNotPacing:
+    case PaceMode::NotPacing:
         printf("NotPacing");
         break;
     }
@@ -578,11 +581,11 @@ void printPaceMode(int mode)
 
 void printPaceFlags(int flags)
 {
-    if (flags & irsdk_PaceFlagsEndOfLine)
+    if (IsPaceFlagSet(flags, PaceFlagType::EndOfLine))
         printf("EndOfLine|");
-    if (flags & irsdk_PaceFlagsFreePass)
+    if (IsPaceFlagSet(flags, PaceFlagType::FreePass))
         printf("FreePass|");
-    if (flags & irsdk_PaceFlagsWavedAround)
+    if (IsPaceFlagSet(flags, PaceFlagType::WavedAround))
         printf("WavedAround|");
 }
 
@@ -610,7 +613,7 @@ void monitorConnectionStatus()
     // keep track of connection status
     static bool wasConnected = false;
 
-    const auto isConnected = IRClient::instance().isConnected();
+    const auto isConnected = LiveClient::instance().isConnected();
     if (wasConnected != isConnected)
     {
         if (isConnected)
@@ -630,7 +633,7 @@ void monitorConnectionStatus()
 void run()
 {
     // wait up to 16 ms for start of session or new data
-    if (IRClient::instance().waitForData(16))
+    if (LiveClient::instance().waitForData(16))
     {
         // bool wasUpdated = false;
 
@@ -652,7 +655,7 @@ void run()
 
         // #ifdef DUMP_TO_DISPLAY
         // update the display as well
-        updateDisplay();
+        // updateDisplay();
         // #endif
     }
     // else we did not grab data, do nothing
@@ -690,7 +693,7 @@ bool init()
     timeBeginPeriod(1);
 
     // startup event broadcaster
-    // hDataValidEvent = CreateEvent(NULL, true, false, IRSDK_DATAVALIDEVENTNAME);
+    // hDataValidEvent = CreateEvent(NULL, true, false, Resources::DataValidEventName);
 
     //****Note, put your init logic here
 

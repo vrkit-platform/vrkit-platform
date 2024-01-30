@@ -58,7 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <time.h>
 
 #include <IRacingTools/SDK/Types.h>
-#include <irsdk-cpp/yaml_parser.h>
+#include <IRacingTools/SDK/Utils/YamlParser.h>
 
 // for timeBeginPeriod
 #pragma comment(lib, "Winmm")
@@ -155,7 +155,7 @@ void writeSessionItem(FILE *file, const char *path, const char *desc)
 	int valstrlen; 
 
 	fprintf(file, desc);
-	if(parseYaml(irsdk_getSessionInfoStr(), path, &valstr, &valstrlen))
+	if(ParseYaml(irsdk_getSessionInfoStr(), path, &valstr, &valstrlen))
 		fwrite(valstr, 1, valstrlen, file);
 	fprintf(file, "\n");
 }
@@ -329,7 +329,7 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 		for(int i=0; i<header->numVars; i++)
 		{
 			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
-			int count = (rec->type == IRVarType::type_char) ? 1 : rec->count;
+			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(int j=0; j<count; j++)
 			{
@@ -348,7 +348,7 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 		for(int i=0; i<header->numVars; i++)
 		{
 			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
-			int count = (rec->type == IRVarType::type_char) ? 1 : rec->count;
+			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(int j=0; j<count; j++)
 			{
@@ -364,7 +364,7 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 		for(int i=0; i<header->numVars; i++)
 		{
 			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
-			int count = (rec->type == IRVarType::type_char) ? 1 : rec->count;
+			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(int j=0; j<count; j++)
 			{
@@ -380,7 +380,7 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 		for(int i=0; i<header->numVars; i++)
 		{
 			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
-			int count = (rec->type == IRVarType::type_char) ? 1 : rec->count;
+			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(int j=0; j<count; j++)
 			{
@@ -389,12 +389,12 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 
 				switch(rec->type)
 				{
-				case IRVarType::type_char: fputs("string", file); break;
-				case IRVarType::type_bool: fputs("boolean", file); break;
-				case IRVarType::type_int: fputs("integer", file); break;
-				case IRVarType::type_bitmask: fputs("bitfield", file); break;
-				case IRVarType::type_float: fputs("float", file); break;
-				case IRVarType::type_double: fputs("double", file); break;
+				case VarDataType::Char: fputs("string", file); break;
+				case VarDataType::Bool: fputs("boolean", file); break;
+				case VarDataType::Int: fputs("integer", file); break;
+				case VarDataType::Bitmask: fputs("bitfield", file); break;
+				case VarDataType::Float: fputs("float", file); break;
+				case VarDataType::Double: fputs("double", file); break;
 				default: fputs("unknown", file); break;
 				}
 			}
@@ -424,7 +424,7 @@ void logDataToCSV(const irsdk_header *header, const char *data, FILE *file)
 		for(int i=0; i<header->numVars; i++)
 		{
 			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
-			int count = (rec->type == IRVarType::type_char) ? 1 : rec->count;
+			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(int j=0; j<count; j++)
 			{
@@ -434,17 +434,17 @@ void logDataToCSV(const irsdk_header *header, const char *data, FILE *file)
 				// write each entry out
 				switch(rec->type)
 				{
-				case IRVarType::type_char:
+				case VarDataType::Char:
 					fprintf(file, "%s", (char *)(data+rec->offset) ); break;
-				case IRVarType::type_bool:
+				case VarDataType::Bool:
 					fprintf(file, "%d", ((bool *)(data+rec->offset))[j]); break;
-				case IRVarType::type_int:
+				case VarDataType::Int:
 					fprintf(file, "%d", ((int *)(data+rec->offset))[j]); break;
-				case IRVarType::type_bitmask:
+				case VarDataType::Bitmask:
 					fprintf(file, "%d", ((int *)(data+rec->offset))[j]); break;
-				case IRVarType::type_float:
+				case VarDataType::Float:
 					fprintf(file, "%g", ((float *)(data+rec->offset))[j]); break;
-				case IRVarType::type_double:
+				case VarDataType::Double:
 					fprintf(file, "%g", ((double *)(data+rec->offset))[j]); break;
 				}
 			}
@@ -517,31 +517,31 @@ void logDataToDisplay(const irsdk_header *header, const char *data)
 			// only dump the first 4 entrys in an array to save space
 			// for now ony carsTrkPct and carsTrkLoc output more than 4 entrys
 			int count = 1;
-			if(rec->type != IRVarType::type_char)
+			if(rec->type != VarDataType::Char)
 				count = min(4, rec->count);
 
 			for(int j=0; j<count; j++)
 			{
 				switch(rec->type)
 				{
-				case IRVarType::type_char:
+				case VarDataType::Char:
 					printf("%s", (char *)(data+rec->offset) ); break;
-				case IRVarType::type_bool:
+				case VarDataType::Bool:
 					printf("%d", ((bool *)(data+rec->offset))[j] ); break;
-				case IRVarType::type_int:
+				case VarDataType::Int:
 					printf("%d", ((int *)(data+rec->offset))[j] ); break;
-				case IRVarType::type_bitmask:
+				case VarDataType::Bitmask:
 					printf("0x%08x", ((int *)(data+rec->offset))[j] ); break;
-				case IRVarType::type_float:
+				case VarDataType::Float:
 					printf("%0.2f", ((float *)(data+rec->offset))[j] ); break;
-				case IRVarType::type_double:
+				case VarDataType::Double:
 					printf("%0.2f", ((double *)(data+rec->offset))[j] ); break;
 				}
 
 				if(j+1 < count)
 					printf("; ");
 			}
-			if(rec->type != IRVarType::type_char && count < rec->count)
+			if(rec->type != VarDataType::Char && count < rec->count)
 				printf("; ...");
 
 			printf("]");
@@ -569,7 +569,7 @@ void initData(const irsdk_header *header, char* &data, int &nData)
 	//int valstrlen; 
 	//const char g_playerCarIdxPath[] = "DriverInfo:DriverCarIdx:";
 	//playerCarIdx = -1;
-	//if(parseYaml(irsdk_getSessionInfoStr(), g_playerCarIdxPath, &valstr, &valstrlen))
+	//if(ParseYaml(irsdk_getSessionInfoStr(), g_playerCarIdxPath, &valstr, &valstrlen))
 	//	playerCarIdx = atoi(valstr);
 }
 

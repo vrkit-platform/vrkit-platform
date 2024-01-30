@@ -9,20 +9,21 @@
 #include <fmt/core.h>
 #include <CLI/CLI.hpp>
 
-
-#include <IRacingTools/Shared/Graphics/DX11Resources.h>
-#include <IRacingTools/Shared/SharedMemoryStorage.h>
-#include <IRacingTools/Shared/ProtoHelpers.h>
 #include "TrackMapWindow.h"
-#include <IRacingTools/Shared/UnicodeHelpers.h>
+#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
+#include <IRacingTools/Shared/Graphics/DX11Resources.h>
+#include <IRacingTools/Shared/ProtoHelpers.h>
+#include <IRacingTools/Shared/SharedMemoryStorage.h>
 #include <winrt/base.h>
+
+using namespace IRacingTools::SDK::Utils;
 
 int WINAPI WinMain(
     HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nCmdShow*/
 ) {
 
     auto wcmdline = GetCommandLineW();
-    auto cmdline = UnicodeConvStd::ToUtf8(wcmdline);
+    auto cmdline = ToUtf8(wcmdline);
 
     CLI::App cli{"IRacing Tools Overlays"};
 

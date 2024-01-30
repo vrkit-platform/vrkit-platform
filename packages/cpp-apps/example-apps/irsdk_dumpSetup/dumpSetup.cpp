@@ -18,9 +18,9 @@
 #include <signal.h>
 #include <time.h>
 
+#include <IRacingTools/SDK/LiveClient.h> // live telemetry
+#include <IRacingTools/SDK/DiskClient.h>                      // disk telemetry
 #include <IRacingTools/SDK/Types.h>
-#include <IRacingTools/SDK/Client.h>		// live telemetry
-#include <IRacingTools/SDK/DiskClient.h>	// disk telemetry
 
 // for timeBeginPeriod
 #pragma comment(lib, "Winmm")

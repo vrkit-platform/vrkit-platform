@@ -14,16 +14,39 @@ embed_resource("${RC_SRC_DIR}/sampleImage.jpg" RCDataSampleImage RC_OUT_SRC_FILE
 message(NOTICE "RC SRC Generated: ${RC_OUT_SRC_FILES}")
 list(APPEND sharedAppLibSources ${RC_OUT_SRC_FILES})
 
+add_library(${sharedAppLibTargetStatic} STATIC ${sharedAppLibSources} ${sharedAppLibHeaders} ${sharedAppLibHeadersPublic})
+
+  target_include_directories(${sharedAppLibTargetStatic} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
+  )
+
+target_include_directories(${sharedAppLibTargetStatic} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
+)
+
+target_sources(
+  ${sharedAppLibTargetStatic}
+  PUBLIC
+  FILE_SET publicHeaders
+  TYPE HEADERS
+  FILES
+  ${sharedAppLibHeadersPublic}
+)
+install(TARGETS ${sharedAppLibTargetStatic} FILE_SET publicHeaders DESTINATION ${INCLUDE_INSTALL_DIR})
+
 # Create Library & Targets
-setup_lib_exports(${sharedAppLibTarget} ${sharedAppLibTargetStatic} sharedAppLibSources sharedAppLibHeaders sharedAppLibHeadersPublic)
+# setup_lib_exports(${sharedAppLibTarget} ${sharedAppLibTargetStatic} sharedAppLibSources sharedAppLibHeaders sharedAppLibHeadersPublic)
 
 # Link targets
-target_link_libraries(${sharedAppLibTarget} PUBLIC ${modelsTarget})
-target_link_libraries(${sharedAppLibTargetStatic} PUBLIC ${modelsTargetStatic})
+# target_link_libraries(${sharedAppLibTarget} PUBLIC ${sdkTarget} ${modelsTarget})
+target_link_libraries(${sharedAppLibTargetStatic} PUBLIC ${sdkTargetStatic} ${modelsTargetStatic})
 
-foreach(targetName ${sharedAppLibTarget} ${sharedAppLibTargetStatic})
-  target_link_runtime_libs(${targetName})
-endforeach()
+target_link_runtime_libs(${sharedAppLibTargetStatic})
+# foreach(targetName ${sharedAppLibTarget} ${sharedAppLibTargetStatic})
+#   target_link_runtime_libs(${targetName})
+# endforeach()
 
 # Tests
 set(testTargetName ${sharedAppLibTarget}_tests)

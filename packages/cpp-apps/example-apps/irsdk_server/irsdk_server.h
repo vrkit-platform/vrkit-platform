@@ -54,7 +54,7 @@ public:
 		memset(name, 0, sizeof(name));
 	}
 
-	char name[IRSDK_MAX_STRING];
+	char name[Resources::MaxStringLength];
 	int memIndex;
 	int diskIndex;
 	int logMode;
@@ -81,7 +81,7 @@ public:
 	static irsdkServer* instance();
 
 	int regVar(const char *name, const void *var, 
-		IRVarType type, int count, 
+		VarDataType type, int count,
 		const char *desc, const char *unit,
 		int logMode, float multiplier = 1.0f, float offset = 0.0f);
 
@@ -132,7 +132,7 @@ class irsdkVar
 {
 public:
 	irsdkVar(const char *name, const void *var, 
-		IRVarType type, int count, 
+		VarDataType type, int count,
 		const char *desc, const char *unit,
 		int logMode, float multiplier = 1.0f, float offset = 0.0f);
 

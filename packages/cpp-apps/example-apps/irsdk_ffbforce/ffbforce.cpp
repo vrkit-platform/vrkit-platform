@@ -151,7 +151,7 @@ void process()
 {
 	// isOnTrack indicates that the player is in his car and ready to race
 	const bool isOnTrack = idk.getVarBool(isOnTrack_idx);
-	// irsdk_OnTrack indicates that the players car is on the racing surface, as opposed to spinning off the track
+	// OnTrack indicates that the players car is on the racing surface, as opposed to spinning off the track
 	const int trackSurface = (playerTrackSurface_idx == -1) ? irsdk_OnTrack : idk.getVarInt(playerTrackSurface_idx); // new variable, not avaliable in older telemetry
 	// Speed is in meters/second, make sure we are moving before starting to collect data
 	const float speed = idk.getVarFloat(speed_idx);

@@ -30,12 +30,6 @@
     "name" : "cli11",
     "version>=" : "2.3.2"
   }, {
-    "name" : "cppwinrt",
-    "version>=" : "2.0.230207.1"
-  }, {
-    "name" : "wil",
-    "version>=" : "2023-10-28"
-  }, {
     "name" : "gtest",
     "version>=" : "1.14.0"
   }, {
@@ -48,10 +42,13 @@
     "name" : "boost-interprocess",
     "version>=" : "1.83.0"
   }, {
-    "name" : "wxwidgets",
-    "version>=" : "3.2.4"
-  }, {
     "name" : "ms-gsl",
     "version>=" : "4.0.0#1"
+  }, {
+    "name" : "range-v3",
+    "version>=" : "0.12.0#1"
+  }, {
+    "name" : "tabulate",
+    "version>=" : "1.5"
   } ]
 }

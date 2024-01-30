@@ -112,7 +112,7 @@ bool irsdkMemServer::startup()
 	if(!hMemMapFile)
 	{
 		hMemMapFile = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, 
-			PAGE_READWRITE, 0, irsdkMemServer::SharedMemSize, IRSDK_MEMMAPFILENAME); 
+			PAGE_READWRITE, 0, irsdkMemServer::SharedMemSize, Resources::MemMapFilename);
 	}
 
 	if (hMemMapFile) 
@@ -138,7 +138,7 @@ bool irsdkMemServer::startup()
 			_WriteBarrier();
 
 			if(!hDataValidEvent)
-				hDataValidEvent = CreateEvent(NULL, true, false, IRSDK_DATAVALIDEVENTNAME);
+				hDataValidEvent = CreateEvent(NULL, true, false, Resources::DataValidEventName);
 
 			if(hDataValidEvent)
 			{
@@ -191,17 +191,17 @@ void irsdkMemServer::shutdown()
 
 // safe to call before m_isInitialized, only writes to localHeader
 int irsdkMemServer::regVar(const char *name, const void *var, 
-							  IRVarType type, int count, 
+							  VarDataType type, int count,
 							  const char *desc, const char *unit,
 							  float multiplier, float offset)
 {
 	assert(name);
-	assert(strlen(name) < IRSDK_MAX_STRING);
+	assert(strlen(name) < Resources::MaxStringLength);
 	assert(strlen(name) > 0);
 	assert(desc);
-	assert(strlen(desc) < IRSDK_MAX_DESC);
+	assert(strlen(desc) < Resources::MaxDescriptionLength);
 	assert(unit);
-	assert(strlen(unit) < IRSDK_MAX_STRING);
+	assert(strlen(unit) < Resources::MaxStringLength);
 	assert(localHeader.numVars < IRSDK_MAX_VARS);
 
 	int index;
@@ -221,7 +221,7 @@ int irsdkMemServer::regVar(const char *name, const void *var,
 				if(name && desc && unit)
 				{
 					//double check the space
-					int recLen = IRVarTypeBytes[type] * count;
+					int recLen = VarDataTypeBytes[type] * count;
 					int usedLen = recLen + localHeader.bufLen;
 					assert(usedLen < irsdkMemServer::bufLength);
 
@@ -236,14 +236,14 @@ int irsdkMemServer::regVar(const char *name, const void *var,
 						rec->type = type;
 						rec->count = count;
 
-						strncpy(rec->name, name, IRSDK_MAX_STRING);
-						rec->name[IRSDK_MAX_STRING-1] = '\0';
+						strncpy(rec->name, name, Resources::MaxStringLength);
+						rec->name[Resources::MaxStringLength-1] = '\0';
 
-						strncpy(rec->desc, desc, IRSDK_MAX_DESC);
-						rec->desc[IRSDK_MAX_DESC-1] = '\0';
+						strncpy(rec->desc, desc, Resources::MaxDescriptionLength);
+						rec->desc[Resources::MaxDescriptionLength-1] = '\0';
 
-						strncpy(rec->unit, unit, IRSDK_MAX_STRING);
-						rec->unit[IRSDK_MAX_STRING-1] = '\0';
+						strncpy(rec->unit, unit, Resources::MaxStringLength);
+						rec->unit[Resources::MaxStringLength-1] = '\0';
 
 						//stash local var so we can retrieve it later
 						entryVarHelper[index].varPtr = var;
@@ -441,7 +441,7 @@ int irsdkMemServer::varNameToIndex(const char *name)
 	{
 		for(int index = 0; index < localHeader.numVars; index++)
 		{
-			if(0 == strncmp(name, localVarHeader[index].name, IRSDK_MAX_STRING))
+			if(0 == strncmp(name, localVarHeader[index].name, Resources::MaxStringLength))
 			{
 				return index;
 			}

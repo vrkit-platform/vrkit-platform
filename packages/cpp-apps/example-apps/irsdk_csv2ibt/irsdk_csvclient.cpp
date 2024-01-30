@@ -100,7 +100,7 @@ bool irsdkCSVClient::openFile(const char *path)
 					{
 						m_varScale[i].mul = 1;
 						m_varScale[i].add = 0;
-						m_varHeaders[i].type = static_cast<int>(IRVarType::type_float); // assume float data by default
+						m_varHeaders[i].type = static_cast<int>(VarDataType::Float); // assume float data by default
 					}
 					m_varCount = 0;
 
@@ -134,8 +134,8 @@ bool irsdkCSVClient::openFile(const char *path)
 					while(st != NULL && count < m_varCount)
 					{
 						st = stripEnds(st);
-						strncpy(m_varHeaders[count].desc, st, IRSDK_MAX_DESC);
-						m_varHeaders[count].desc[IRSDK_MAX_DESC-1] = '\0';
+						strncpy(m_varHeaders[count].desc, st, Resources::MaxDescriptionLength);
+						m_varHeaders[count].desc[Resources::MaxDescriptionLength-1] = '\0';
 
 						count++;
 						st = getNextElement(NULL);
@@ -148,8 +148,8 @@ bool irsdkCSVClient::openFile(const char *path)
 					while(st != NULL && count < m_varCount)
 					{
 						st = stripEnds(st);
-						strncpy(m_varHeaders[count].unit, st, IRSDK_MAX_STRING);
-						m_varHeaders[count].unit[IRSDK_MAX_STRING-1] = '\0';
+						strncpy(m_varHeaders[count].unit, st, Resources::MaxStringLength);
+						m_varHeaders[count].unit[Resources::MaxStringLength-1] = '\0';
 
 						count++;
 						st = getNextElement(NULL);
@@ -177,7 +177,7 @@ bool irsdkCSVClient::openFile(const char *path)
 							m_varHeaders[count].type = type_char;
 						else
 						*/
-							m_varHeaders[count].type = static_cast<int>(IRVarType::type_float);
+							m_varHeaders[count].type = static_cast<int>(VarDataType::Float);
 
 						count++;
 						st = getNextElement(NULL);
@@ -301,7 +301,7 @@ int irsdkCSVClient::getVarIdx(const char *name)
 	{
 		for(int idx=0; idx<m_varCount; idx++)
 		{
-			if(0 == strncmp(name, m_varHeaders[idx].name, IRSDK_MAX_STRING))
+			if(0 == strncmp(name, m_varHeaders[idx].name, Resources::MaxStringLength))
 			{
 				return idx;
 			}
@@ -331,7 +331,7 @@ void irsdkCSVClient::parceNameAndUnit(const char *str, irsdk_varHeader &head, in
 
 	head.name[0] = '\0';
 	head.unit[0] = '\0';
-	head.type = IRVarType::type_float;
+	head.type = VarDataType::Float;
 	head.count = 1;
 	head.desc[0] = '\0';
 	head.offset = varOffset;
@@ -357,7 +357,7 @@ void irsdkCSVClient::parceNameAndUnit(const char *str, irsdk_varHeader &head, in
 			}
 			else if(isUnit || isalnum((unsigned char)str[0]))
 			{
-				if(offset < (IRSDK_MAX_STRING-1))
+				if(offset < (Resources::MaxStringLength-1))
 				{
 					buf[offset] = str[0];
 					offset++;

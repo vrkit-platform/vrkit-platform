@@ -143,7 +143,7 @@ int irsdkDiskServer::varNameToIndex(const char *name)
 	{
 		for(int index = 0; index < localHeader.numVars; index++)
 		{
-			if(0 == strncmp(name, localVarHeader[index].name, IRSDK_MAX_STRING))
+			if(0 == strncmp(name, localVarHeader[index].name, Resources::MaxStringLength))
 			{
 				return index;
 			}
@@ -159,7 +159,7 @@ int irsdkDiskServer::varNameToOffset(const char *name)
 	{
 		for(int index=0; index<localHeader.numVars; index++)
 		{
-			if(0 == strncmp(name, localVarHeader[index].name, IRSDK_MAX_STRING))
+			if(0 == strncmp(name, localVarHeader[index].name, Resources::MaxStringLength))
 			{
 				return localVarHeader[index].offset;
 			}
@@ -257,17 +257,17 @@ void irsdkDiskServer::shutdown()
 
 // safe to call before m_isInitialized, only writes to localHeader
 int irsdkDiskServer::regVar(const char *name, const void *var, 
-							  IRVarType type, int count,
+							  VarDataType type, int count,
 							  const char *desc, const char *unit,
 							  float multiplier, float offset)
 {
 	assert(name);
-	assert(strlen(name) < IRSDK_MAX_STRING);
+	assert(strlen(name) < Resources::MaxStringLength);
 	assert(strlen(name) > 0);
 	assert(desc);
-	assert(strlen(desc) < IRSDK_MAX_DESC);
+	assert(strlen(desc) < Resources::MaxDescriptionLength);
 	assert(unit);
-	assert(strlen(unit) < IRSDK_MAX_STRING);
+	assert(strlen(unit) < Resources::MaxStringLength);
 	assert(localHeader.numVars < IRSDK_MAX_VARS);
 
 	int index;
@@ -287,7 +287,7 @@ int irsdkDiskServer::regVar(const char *name, const void *var,
 				if(name && desc && unit)
 				{
 					//double check the space
-					int recLen = IRVarTypeBytes[type] * count;
+					int recLen = VarDataTypeBytes[type] * count;
 					int usedLen = recLen + localHeader.bufLen;
 					assert(usedLen < irsdkDiskServer::bufLength);
 
@@ -302,14 +302,14 @@ int irsdkDiskServer::regVar(const char *name, const void *var,
 						rec->type = type;
 						rec->count = count;
 
-						strncpy(rec->name, name, IRSDK_MAX_STRING);
-						rec->name[IRSDK_MAX_STRING-1] = '\0';
+						strncpy(rec->name, name, Resources::MaxStringLength);
+						rec->name[Resources::MaxStringLength-1] = '\0';
 
-						strncpy(rec->desc, desc, IRSDK_MAX_DESC);
-						rec->desc[IRSDK_MAX_DESC-1] = '\0';
+						strncpy(rec->desc, desc, Resources::MaxDescriptionLength);
+						rec->desc[Resources::MaxDescriptionLength-1] = '\0';
 
-						strncpy(rec->unit, unit, IRSDK_MAX_STRING);
-						rec->unit[IRSDK_MAX_STRING-1] = '\0';
+						strncpy(rec->unit, unit, Resources::MaxStringLength);
+						rec->unit[Resources::MaxStringLength-1] = '\0';
 
 						//stash local var so we can retrieve it later
 						entryVarHelper[index].varPtr = var;
@@ -602,7 +602,7 @@ void irsdkDiskServer::logHeaderToCSV()
 		{
 			const irsdk_varHeader *rec = &localVarHeader[i];
 
-			if(rec->type != IRVarType::type_char && rec->count > 1)
+			if(rec->type != VarDataType::Char && rec->count > 1)
 			{
 				for(int j=0; j<rec->count; j++)
 					fprintf(file, "%s_%d, ", rec->name, j+1);
@@ -617,7 +617,7 @@ void irsdkDiskServer::logHeaderToCSV()
 		{
 			const irsdk_varHeader *rec = &localVarHeader[i];
 
-			int count = (rec->type != IRVarType::type_char && rec->count > 1) ? rec->count : 1;
+			int count = (rec->type != VarDataType::Char && rec->count > 1) ? rec->count : 1;
 			for(int j=0; j<count; j++)
 				fprintf(file, "%s, ", rec->desc);
 		}
@@ -628,7 +628,7 @@ void irsdkDiskServer::logHeaderToCSV()
 		{
 			const irsdk_varHeader *rec = &localVarHeader[i];
 
-			int count = (rec->type != IRVarType::type_char && rec->count > 1) ? rec->count : 1;
+			int count = (rec->type != VarDataType::Char && rec->count > 1) ? rec->count : 1;
 			for(int j=0; j<count; j++)
 				fprintf(file, "%s, ", rec->unit);
 		}
@@ -639,27 +639,27 @@ void irsdkDiskServer::logHeaderToCSV()
 		{
 			const irsdk_varHeader *rec = &localVarHeader[i];
 
-			int count = (rec->type != IRVarType::type_char && rec->count > 1) ? rec->count : 1;
+			int count = (rec->type != VarDataType::Char && rec->count > 1) ? rec->count : 1;
 			for(int j=0; j<count; j++)
 			{
 				switch(rec->type)
 				{
-				case IRVarType::type_char:
+				case VarDataType::Char:
 					fprintf(file, "string, ");
 					break;
-				case IRVarType::type_bool:
+				case VarDataType::Bool:
 					fprintf(file, "boolean, ");
 					break;
-				case IRVarType::type_int:
+				case VarDataType::Int:
 					fprintf(file, "integer, ");
 					break;
-				case IRVarType::type_bitmask:
+				case VarDataType::Bitmask:
 					fprintf(file, "bitfield, ");
 					break;
-				case IRVarType::type_float:
+				case VarDataType::Float:
 					fprintf(file, "float, ");
 					break;
-				case IRVarType::type_double:
+				case VarDataType::Double:
 					fprintf(file, "double, ");
 					break;
 				default:
@@ -682,22 +682,22 @@ void irsdkDiskServer::logDataToCSV()
 			const irsdk_varHeader *rec = &localVarHeader[i];
 
 			// write each entry out
-			int count = (rec->type != IRVarType::type_char && rec->count > 1) ? rec->count : 1;
+			int count = (rec->type != VarDataType::Char && rec->count > 1) ? rec->count : 1;
 			for(int j=0; j<count; j++)
 			{
 				switch(rec->type)
 				{
-				case IRVarType::type_char:
+				case VarDataType::Char:
 					fprintf(file, "%s, ", (char *)(pBase+rec->offset) ); break;
-				case IRVarType::type_bool:
+				case VarDataType::Bool:
 					fprintf(file, "%d, ", ((bool *)(pBase+rec->offset))[j]); break;
-				case IRVarType::type_int:
+				case VarDataType::Int:
 					fprintf(file, "%d, ", ((int *)(pBase+rec->offset))[j]); break;
-				case IRVarType::type_bitmask:
+				case VarDataType::Bitmask:
 					fprintf(file, "%d, ", ((int *)(pBase+rec->offset))[j]); break;
-				case IRVarType::type_float:
+				case VarDataType::Float:
 					fprintf(file, "%g, ", ((float *)(pBase+rec->offset))[j]); break;
-				case IRVarType::type_double:
+				case VarDataType::Double:
 					fprintf(file, "%g, ", ((double *)(pBase+rec->offset))[j]); break;
 				}
 			}

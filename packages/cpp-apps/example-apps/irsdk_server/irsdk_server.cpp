@@ -66,7 +66,7 @@ irsdkServer::~irsdkServer()
 
 // safe to call before m_isInitialized, only writes to localHeader
 int irsdkServer::regVar(const char *name, const void *var, 
-							  IRVarType type, int count, 
+							  VarDataType type, int count,
 							  const char *desc, const char *unit,
 							  int logMode, float multiplier, float offset)
 {
@@ -84,8 +84,8 @@ int irsdkServer::regVar(const char *name, const void *var,
 			if(varCount < IRSDK_MAX_VARS)
 			{
 				index = varCount++;
-				strncpy(varLookup[index].name, name, IRSDK_MAX_STRING);
-				varLookup[index].name[IRSDK_MAX_STRING-1] = '\0';
+				strncpy(varLookup[index].name, name, Resources::MaxStringLength);
+				varLookup[index].name[Resources::MaxStringLength-1] = '\0';
 				varLookup[index].memIndex = varLookup[index].diskIndex = -1;
 				varLookup[index].logMode = logMode;
 			}
@@ -259,7 +259,7 @@ int irsdkServer::nameToIndex(const char *name)
 	{
 		for(int index = 0; index < varCount; index++)
 		{
-			if(0 == strncmp(name, varLookup[index].name, IRSDK_MAX_STRING))
+			if(0 == strncmp(name, varLookup[index].name, Resources::MaxStringLength))
 			{
 				return index;
 			}
@@ -287,7 +287,7 @@ bool irsdkServer::isDiskLoggingActive()
 //-------------
 
 irsdkVar::irsdkVar(const char *name, const void *var, 
-				   IRVarType type, int count, 
+				   VarDataType type, int count,
 				   const char *desc, const char *unit,
 				   int logMode, float multiplier, float offset)
 {
@@ -315,7 +315,7 @@ void writeVar(int count, int type, float multiplier, float offset, const void *p
 
 		// if data needs scalling, then slowly walk the array
 		if(
-			(type == static_cast<int>(IRVarType::type_int) || type == static_cast<int>(IRVarType::type_float) || type == static_cast<int>(IRVarType::type_double)) && 
+			(type == static_cast<int>(VarDataType::Int) || type == static_cast<int>(VarDataType::Float) || type == static_cast<int>(VarDataType::Double)) &&
 			(multiplier != 1.0f || offset != 0.0f)
 		)
 		{
@@ -323,29 +323,29 @@ void writeVar(int count, int type, float multiplier, float offset, const void *p
 			{
 				switch(type)
 				{
-				case IRVarType::type_double:
+				case VarDataType::Double:
 					*((double*)pDest) = (double)(*((double*)pSource) * multiplier + offset);
 					break;
-				case IRVarType::type_float:
+				case VarDataType::Float:
 					*((float*)pDest) = (float)(*((float*)pSource) * multiplier + offset);
 					break;
-				case IRVarType::type_int:
+				case VarDataType::Int:
 					*((int*)pDest) = (int)(*((int*)pSource) * multiplier + offset);
 					break;
-				case IRVarType::type_bitmask:
+				case VarDataType::Bitmask:
 					*((int*)pDest) = *((int*)pSource);
 					break;
-				case IRVarType::type_bool:
+				case VarDataType::Bool:
 					*((char*)pDest) = *((char*)pSource);
 					break;
-				case IRVarType::type_char:
+				case VarDataType::Char:
 				default:
 					*((char*)pDest) = *((char*)pSource);
 					break;
 				}
 				
-				pSource += IRVarTypeBytes[type];
-				pDest += IRVarTypeBytes[type];
+				pSource += VarDataTypeBytes[type];
+				pDest += VarDataTypeBytes[type];
 			}
 		}
 		// otherwise just copy it over
@@ -355,7 +355,7 @@ void writeVar(int count, int type, float multiplier, float offset, const void *p
 			memcpy(
 				pDest,
 				pSource,
-				IRVarTypeBytes[type] * count);
+				VarDataTypeBytes[type] * count);
 		}
 	}
 }

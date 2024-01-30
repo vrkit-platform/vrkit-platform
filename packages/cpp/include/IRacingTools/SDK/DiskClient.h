@@ -27,94 +27,82 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include <filesystem>
+
 #include "Types.h"
 #include "Utils/Buffer.h"
 
 // A C++ wrapper around the irsdk calls that takes care of reading a .ibt file
 namespace IRacingTools::SDK {
-class IRDiskClient
-{
+namespace fs = std::filesystem;
+
+class DiskClient {
 public:
+    explicit DiskClient(const std::optional<fs::path> &path = std::nullopt) :
+        sessionInfoBuf_(new Utils::DynamicBuffer<char>()), ibtFile_(nullptr) {
+        memset(&header_, 0, sizeof(header_));
+        memset(&diskSubHeader_, 0, sizeof(diskSubHeader_));
 
-	IRDiskClient()
-		: sessionInfoString_(nullptr)
-		, varHeaders_(nullptr)
-		, varBuf_(nullptr)
-		, ibtFile_(nullptr)
-	{
-		memset(&header_, 0, sizeof(header_));
-		memset(&diskSubHeader_, 0, sizeof(diskSubHeader_));
-	}
+        if (path) {
+            openFile(path.value());
+        }
+    }
 
-	explicit IRDiskClient(const char *path)
-		: sessionInfoString_(nullptr)
-		, varHeaders_(nullptr)
-		, varBuf_(nullptr)
-		, ibtFile_(nullptr)
-	{
-		memset(&header_, 0, sizeof(header_));
-		memset(&diskSubHeader_, 0, sizeof(diskSubHeader_));
+    ~DiskClient() { closeFile(); }
 
-		openFile(path);
-	}
+    [[nodiscard]] bool isFileOpen() const { return ibtFile_ != nullptr; }
+    bool openFile(const fs::path& path);
+    void closeFile();
 
-	~IRDiskClient() { closeFile(); }
+    // read next line out of file
+    bool getNextData();
+    int getDataCount() const { return diskSubHeader_.sessionRecordCount; }
 
-	bool isFileOpen() const { return ibtFile_ != nullptr; }
-	bool openFile(const char *path);
-	void closeFile();
+    // return how many variables this .ibt file has in the header
+    int getNumVars();
 
-	// read next line out of file
-	bool getNextData();
-	int getDataCount() const { return diskSubHeader_.sessionRecordCount; }
+    int getVarIdx(const char *name);
 
-	// return how many variables this .ibt file has in the header
-	int getNumVars();
+    // get info on the var
+    const char *getVarName(int idx);
+    const char *getVarDesc(int idx);
+    const char *getVarUnit(int idx);
 
-	int getVarIdx(const char *name);
+    // what is the base type of the data
+    VarDataType getVarType(int idx);
+    VarDataType getVarType(const char *name) { return getVarType(getVarIdx(name)); }
 
-	// get info on the var
-	const char* getVarName(int idx);
-	const char* getVarDesc(int idx);
-	const char* getVarUnit(int idx);
+    // how many elements in array, or 1 if not an array
+    int getVarCount(int idx);
+    int getVarCount(const char *name) { return getVarCount(getVarIdx(name)); }
 
-	// what is the base type of the data
-	IRVarType getVarType(int idx);
-	IRVarType getVarType(const char *name) { return getVarType(getVarIdx(name)); }
+    // idx is the variables index, entry is the array offset, or 0 if not an array element
+    // will convert data to requested type
+    bool getVarBool(int idx, int entry = 0);
+    bool getVarBool(const char *name, int entry = 0) { return getVarBool(getVarIdx(name), entry); }
 
-	// how many elements in array, or 1 if not an array
-	int getVarCount(int idx);
-	int getVarCount(const char *name) { return getVarCount(getVarIdx(name)); }
+    int getVarInt(int idx, int entry = 0);
+    int getVarInt(const char *name, int entry = 0) { return getVarInt(getVarIdx(name), entry); }
 
-	// idx is the variables index, entry is the array offset, or 0 if not an array element
-	// will convert data to requested type
-	bool getVarBool(int idx, int entry = 0);
-	bool getVarBool(const char *name, int entry = 0) { return getVarBool(getVarIdx(name), entry); }
+    float getVarFloat(int idx, int entry = 0);
+    float getVarFloat(const char *name, int entry = 0) { return getVarFloat(getVarIdx(name), entry); }
 
-	int getVarInt(int idx, int entry = 0);
-	int getVarInt(const char *name, int entry = 0) { return getVarInt(getVarIdx(name), entry); }
-	
-	float getVarFloat(int idx, int entry = 0);
-	float getVarFloat(const char *name, int entry = 0) { return getVarFloat(getVarIdx(name), entry); }
+    double getVarDouble(int idx, int entry = 0);
+    double getVarDouble(const char *name, int entry = 0) { return getVarDouble(getVarIdx(name), entry); }
 
-	double getVarDouble(int idx, int entry = 0);
-	double getVarDouble(const char *name, int entry = 0) { return getVarDouble(getVarIdx(name), entry); }
-
-	// 1 success, 0 failure, -n minimum buffer size
-	int getSessionStrVal(const char *path, char *val, int valLen);
-	// get the whole string
-	const char *getSessionStr() { return sessionInfoString_; }
+    // 1 success, 0 failure, -n minimum buffer size
+    int getSessionStrVal(const char *path, char *val, int valLen);
+    // get the whole string
+    const char *getSessionStr() { return !sessionInfoBuf_ ? nullptr : sessionInfoBuf_->data(); }
 
 protected:
+    DataHeader header_{};
+    DiskSubHeader diskSubHeader_{};
 
-	IRHeader header_;
-	IRDiskSubHeader diskSubHeader_;
+    std::shared_ptr<Utils::DynamicBuffer<char>> sessionInfoBuf_;
+    std::vector<VarDataHeader> varHeaders_{};
+    Utils::DynamicBuffer<char> varBuf_{};
 
-	char *sessionInfoString_;
-	IRVarHeader *varHeaders_;
-	char *varBuf_;
-
-	FILE *ibtFile_;
+    FILE *ibtFile_;
 };
-}
-
+} // namespace IRacingTools::SDK

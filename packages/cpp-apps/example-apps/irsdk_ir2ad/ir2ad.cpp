@@ -16,11 +16,11 @@
 #include <stdio.h>
 #include <conio.h>
 #include <signal.h>
-#include <time.h>
+#include <ctime>
 
-#include <IRacingTools/SDK/Types.h>
-#include <IRacingTools/SDK/Client.h>
 #include "serial.h"
+#include <IRacingTools/SDK/LiveClient.h>
+#include <IRacingTools/SDK/Types.h>
 
 // for timeBeginPeriod
 #pragma comment(lib, "Winmm")

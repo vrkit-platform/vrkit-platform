@@ -127,22 +127,22 @@ int main()
 		{
 		case 'a':
 			printf("Switching camera to Pos 1, Group 1\n");
-			irsdk_broadcastMsg(irsdk_BroadcastCamSwitchPos, 1, 1, 0);
+			irsdk_broadcastMsg(BroadcastMessage::CamSwitchPos, 1, 1, 0);
 			break;
 
 		case 'b':
 			printf("Switching camera to Driver #64, Group 2\n");
-			irsdk_broadcastMsg(irsdk_BroadcastCamSwitchNum, 64, 2, 0);
+			irsdk_broadcastMsg(BroadcastMessage::CamSwitchNum, 64, 2, 0);
 			break;
 
 		case 'c':
 			printf("Switching camera to Group 3\n");
-			irsdk_broadcastMsg(irsdk_BroadcastCamSwitchPos, 0, 3, 0);
+			irsdk_broadcastMsg(BroadcastMessage::CamSwitchPos, 0, 3, 0);
 			break;
 
 		case 'd':
 			printf("Set playback speed to %d %d\n", playSpeed, slowMotion);
-			irsdk_broadcastMsg(irsdk_BroadcastReplaySetPlaySpeed, playSpeed, slowMotion, 0);
+			irsdk_broadcastMsg(BroadcastMessage::ReplaySetPlaySpeed, playSpeed, slowMotion, 0);
 			playSpeed--;
 			if(playSpeed < -16)
 			{
@@ -153,10 +153,10 @@ int main()
 
 		case 'e':
 			printf("Set replay search to %d\n", replaySearch);
-			irsdk_broadcastMsg(irsdk_BroadcastReplaySearch, replaySearch, 0, 0);
+			irsdk_broadcastMsg(BroadcastMessage::ReplaySearch, replaySearch, 0, 0);
 
 			replaySearch++;
-			if(replaySearch >= irsdk_RpySrch_Last)
+			if(replaySearch >= ReplaySearchMode::Last)
 				replaySearch = 0;
 			break;
 
@@ -165,7 +165,7 @@ int main()
 			irsdk_broadcastMsg(irskd_BroadcastReplaySetPlayPosition, replayOffset, replayFrame);
 
 			replayOffset++;
-			if(replayOffset >= irsdk_RpyPos_Last)
+			if(replayOffset >= ReplayPositionMode::Last)
 				replayOffset = 0;
 
 			break;
@@ -184,28 +184,30 @@ int main()
 					irsdk_UseMouseAimMode ;
 
 			printf("Set camera state %d\n", cameraState);
-			irsdk_broadcastMsg(irsdk_BroadcastCamSetState, cameraState, 0);
+			irsdk_broadcastMsg(BroadcastMessage::CamSetState, cameraState, 0);
 			break;
 
 		case 'h':
 			printf("Clear replay tape\n");
-			irsdk_broadcastMsg(irsdk_BroadcastReplaySetState, irsdk_RpyState_EraseTape, 0);
+			irsdk_broadcastMsg(
+                IRacingTools::SDK::BroadcastMessage::ReplaySetState, IRacingTools::SDK::ReplayStateMode::EraseTape, 0);
 			break;
 
 		// chat commands
 		case 'i':
 			printf("Clear chat window\n");
-			irsdk_broadcastMsg(irsdk_BroadcastChatComand, irsdk_ChatCommand_Cancel, 0);
+			irsdk_broadcastMsg(
+                IRacingTools::SDK::BroadcastMessage::ChatComand, ChatCommandMode::Cancel, 0);
 			break;
 
 		case 'j':
 			printf("Begin reply chat window\n");
-			irsdk_broadcastMsg(irsdk_BroadcastChatComand, irsdk_ChatCommand_Reply, 0);
+			irsdk_broadcastMsg(BroadcastMessage::ChatComand, ChatCommandMode::Reply, 0);
 			break;
 
 		case 'k':
 			printf("Activate chat window\n");
-			irsdk_broadcastMsg(irsdk_BroadcastChatComand, irsdk_ChatCommand_BeginChat, 0);
+			irsdk_broadcastMsg(BroadcastMessage::ChatComand, ChatCommandMode::BeginChat, 0);
 			break;
 
 		case 'l':
@@ -213,43 +215,45 @@ int main()
 				chatMacro = 0;
 
 			printf("Sending chat macro %d\n", chatMacro);
-			irsdk_broadcastMsg(irsdk_BroadcastChatComand, irsdk_ChatCommand_Macro, chatMacro++, 0);
+			irsdk_broadcastMsg(BroadcastMessage::ChatComand, ChatCommandMode::Macro, chatMacro++, 0);
 			break;
 
 		// pit stop commands
 		case 'm':
 			printf("Clear all pit commands\n");
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_Clear, 0);
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::Clear, 0);
 			break;
 		case 'n':
 			printf("Add fuel\n");
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_Fuel, 10); // add 10 liters (2.7 gallon), or pass '0' to leave level at previous value
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::Fuel, 10); // add 10 liters (2.7 gallon), or pass '0' to leave level at previous value
 			break;
 		case 'o':
 			printf("Change all tires\n");
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_LF, 0); // leave pressure alone
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_RF, 70); // fill tire to 70 KPa (10 psi)
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_LR, 200); // 200 KPa (30 psi)
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_RR, 1000); // Max, whatever that is
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::LF, 0); // leave pressure alone
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::RF, 70); // fill tire to 70 KPa (10 psi)
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::LR, 200); // 200 KPa (30 psi)
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::RR, 1000); // Max, whatever that is
 			break;
 		case 'p':
 			printf("Clean window\n");
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_WS, 0);
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::WS, 0);
 			break;
 		case 'q':
 			printf("Clear tire pit commands\n");
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_ClearTires, 0);
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::ClearTires, 0);
 			break;
 
 		// etc
 		case 'r':
 			printf("Reload custom car textures for all cars\n");
-			irsdk_broadcastMsg(irsdk_BroadcastReloadTextures, irsdk_ReloadTextures_All, 0, 0);
+			irsdk_broadcastMsg(
+                IRacingTools::SDK::BroadcastMessage::ReloadTextures, IRacingTools::SDK::ReloadTexturesMode::All, 0, 0);
 			break;
 
 		case 's':
 			printf("Reload custom car textures for carIdx %d\n", carIdx);
-			irsdk_broadcastMsg(irsdk_BroadcastReloadTextures, irsdk_ReloadTextures_CarIdx, 
+			irsdk_broadcastMsg(
+                IRacingTools::SDK::BroadcastMessage::ReloadTextures, IRacingTools::SDK::ReloadTexturesMode::CarIdx,
 				carIdx++,  // carIdx
 				0); // not currently used
 			// loop for fun
@@ -259,31 +263,33 @@ int main()
 
 		case 't':
 			printf("Set playback speed to normal speed\n");
-			irsdk_broadcastMsg(irsdk_BroadcastReplaySetPlaySpeed, 1, false, 0);
+			irsdk_broadcastMsg(BroadcastMessage::ReplaySetPlaySpeed, 1, false, 0);
 			break;
 
 
 		case 'u':
 			printf("Set playback speed to 1/16th speed\n");
-			irsdk_broadcastMsg(irsdk_BroadcastReplaySetPlaySpeed, 16, true, 0);
+			irsdk_broadcastMsg(BroadcastMessage::ReplaySetPlaySpeed, 16, true, 0);
 			break;
 
 		case 'v':
 			printf("Pause playback\n");
-			irsdk_broadcastMsg(irsdk_BroadcastReplaySetPlaySpeed, 0, 0, 0);
+			irsdk_broadcastMsg(BroadcastMessage::ReplaySetPlaySpeed, 0, 0, 0);
 			break;
 
 		case 'w':
 			printf("Stop recording telemetry\n");
-			irsdk_broadcastMsg(irsdk_BroadcastTelemCommand, irsdk_TelemCommand_Stop, 0, 0);
+			irsdk_broadcastMsg(
+                IRacingTools::SDK::BroadcastMessage::TelemCommand, IRacingTools::SDK::TelemetryCommandMode::Stop, 0, 0);
 			break;
 		case 'x':
 			printf("Start recording telemetry\n");
-			irsdk_broadcastMsg(irsdk_BroadcastTelemCommand, irsdk_TelemCommand_Start, 0, 0);
+			irsdk_broadcastMsg(
+                IRacingTools::SDK::BroadcastMessage::TelemCommand, IRacingTools::SDK::TelemetryCommandMode::Start, 0, 0);
 			break;
 		case 'y':
 			printf("Start new telemetry file\n");
-			irsdk_broadcastMsg(irsdk_BroadcastTelemCommand, irsdk_TelemCommand_Restart, 0, 0);
+			irsdk_broadcastMsg(BroadcastMessage::TelemCommand, Restart, 0, 0);
 			break;
 		case 'z':
 			{
@@ -295,7 +301,8 @@ int main()
 			else
 				printf("Set wheel to %f Nm\n", force);
 
-			irsdk_broadcastMsg(irsdk_BroadcastFFBCommand, irsdk_FFBCommand_MaxForce, force);
+			irsdk_broadcastMsg(
+                IRacingTools::SDK::BroadcastMessage::FFBCommand, IRacingTools::SDK::FFBCommandMode::MaxForce, force);
 			}
 
 			break;
@@ -303,58 +310,58 @@ int main()
 		case 'A':
 			printf("Set replay search to session 1 at 100 seconds\n");
 			// this does a search and not a direct jump, may take a while!
-			irsdk_broadcastMsg(irsdk_BroadcastReplaySearchSessionTime, 1, 100*1000);
+			irsdk_broadcastMsg(BroadcastMessage::ReplaySearchSessionTime, 1, 100*1000);
 
 			break;
 
 		case 'B':
 			printf("Fast repair pit commands\n");
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_FR, 0);
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::FR, 0);
 			break;
 
 		case 'C':
 			printf("Clear (uncheck) winshield pit commands\n");
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_ClearWS, 0);
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::ClearWS, 0);
 			break;
 
 		case 'D':
 			printf("Clear Fast Repair pit commands\n");
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_ClearFR, 0);
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::ClearFR, 0);
 			break;
 
 		case 'E':
 			printf("Clear Add Fuel pit commands\n");
-			irsdk_broadcastMsg(irsdk_BroadcastPitCommand, irsdk_PitCommand_ClearFuel, 0);
+			irsdk_broadcastMsg(BroadcastMessage::PitCommand, PitCommandMode::ClearFuel, 0);
 			break;
 
 		case 'F':
 			printf("Trigger screen shot\n");
-			irsdk_broadcastMsg(irsdk_BroadcastVideoCapture, irsdk_VideoCapture_TriggerScreenShot, 0);
+			irsdk_broadcastMsg(BroadcastMessage::VideoCapture, VideoCaptureMode::TriggerScreenShot, 0);
 			break;
 
 		case 'G':
 			printf("Start video capture\n");
-			irsdk_broadcastMsg(irsdk_BroadcastVideoCapture, irsdk_VideoCaptuer_StartVideoCapture, 0);
+			irsdk_broadcastMsg(BroadcastMessage::VideoCapture, VideoCaptureMode::StartVideoCapture, 0);
 			break;
 
 		case 'H':
 			printf("Stop video capture\n");
-			irsdk_broadcastMsg(irsdk_BroadcastVideoCapture, irsdk_VideoCaptuer_EndVideoCapture, 0);
+			irsdk_broadcastMsg(BroadcastMessage::VideoCapture, VideoCaptureMode::EndVideoCapture, 0);
 			break;
 
 		case 'I':
 			printf("Toggle video capture\n");
-			irsdk_broadcastMsg(irsdk_BroadcastVideoCapture, irsdk_VideoCaptuer_ToggleVideoCapture, 0);
+			irsdk_broadcastMsg(BroadcastMessage::VideoCapture, VideoCaptureMode::ToggleVideoCapture, 0);
 			break;
 
 		case 'J':
 			printf("Show video timer\n");
-			irsdk_broadcastMsg(irsdk_BroadcastVideoCapture, irsdk_VideoCaptuer_ShowVideoTimer, 0);
+			irsdk_broadcastMsg(BroadcastMessage::VideoCapture, VideoCaptureMode::ShowVideoTimer, 0);
 			break;
 
 		case 'K':
 			printf("Hide video timer\n");
-			irsdk_broadcastMsg(irsdk_BroadcastVideoCapture, irsdk_VideoCaptuer_HideVideoTimer, 0);
+			irsdk_broadcastMsg(BroadcastMessage::VideoCapture, VideoCaptureMode::HideVideoTimer, 0);
 			break;
 
 		default:

@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assert.h>
 
 #include <IRacingTools/SDK/Types.h>
-#include <irsdk-cpp/yaml_parser.h>
+#include <IRacingTools/SDK/Utils/YamlParser.h>
 
 #include "irsdk_server.h"
 

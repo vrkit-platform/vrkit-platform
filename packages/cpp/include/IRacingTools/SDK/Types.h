@@ -67,8 +67,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    typing alt-L at any time.  The ibt file format directly mirrors the format
    of the live data.
 
-   It is stored as an IRHeader followed immediately by an IRDiskSubHeader.
-   After that the offsets in the IRHeader point to the sessionInfo string,
+   It is stored as an DataHeader followed immediately by an DiskSubHeader.
+   After that the offsets in the DataHeader point to the sessionInfo string,
    the varHeader, and the varBuffer.
 
  - Remote Conrol
@@ -81,573 +81,550 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <magic_enum.hpp>
 #include <tchar.h>
 #include <windows.h>
+
+#include "ErrorTypes.h"
+#include "Resources.h"
+#include <IRacingTools/SDK/Utils/LUT.h>
+
 namespace IRacingTools::SDK {
-static constexpr _TCHAR IRSDK_DATAVALIDEVENTNAME[] = _T("Local\\IRSDKDataValidEvent");
-static constexpr _TCHAR IRSDK_MEMMAPFILENAME[]     = _T("Local\\IRSDKMemMapFileName");
-static constexpr _TCHAR IRSDK_BROADCASTMSGNAME[]   = _T("IRSDK_BROADCASTMSG");
-
-static constexpr int IRSDK_MAX_BUFS = 4;
-static constexpr int IRSDK_MAX_STRING = 32;
-// descriptions can be longer than max_string!
-static constexpr int IRSDK_MAX_DESC = 64;
-
-// define markers for unlimited session lap and time
-static constexpr int IRSDK_UNLIMITED_LAPS = 32767;
-static constexpr float IRSDK_UNLIMITED_TIME = 604800.0f;
-
-// latest version of our telemetry headers
-static constexpr int IRSDK_VER = 2;
-
-enum class IRStatusField : int
-{
-	Connected   = 1
+enum class ConnectionStatus : int {
+    NotConnected = 0,
+    Connected = 1
 };
 
-enum class IRVarType : int
-{
-	// 1 byte
-	type_char = 0,
-	type_bool,
+enum class VarDataType : int {
+    // 1 byte
+    Char = 0,
+    Bool,
 
-	// 4 bytes
-	type_int,
-	type_bitmask,
-	type_float,
+    // 4 bytes
+    Int32,
+    Bitmask,
+    Float,
 
-	// 8 bytes
-	type_double,
-
-	//index, don't use
-	number_of_types
+    // 8 bytes
+    Double,
 };
 
-constexpr size_t kIRVarTypeCount = magic_enum::enum_underlying(IRVarType::number_of_types);
+constexpr std::size_t VarDataTypeCount = magic_enum::enum_count<VarDataType>();
 
-constexpr std::array<int, kIRVarTypeCount> IRVarTypeBytes = {
-    1,		// type_char
-    1,		// type_bool
+constexpr Utils::LUT<VarDataType, std::size_t, VarDataTypeCount> VarDataTypeSizeTable = {
+    {{VarDataType::Char, 1},
+     {VarDataType::Bool, 1},
+     {VarDataType::Int32, 4},
+     {VarDataType::Bitmask, 4},
+     {VarDataType::Float, 4},
+     {VarDataType::Double, 8},},};
 
-    4,		// type_int
-    4,		// type_bitmask
-    4,		// type_float
 
-    8		// type_double
-};
+constexpr std::array<std::size_t, VarDataTypeCount> VarDataTypeBytes = VarDataTypeSizeTable.values();
+//     {
+//     1,		// type_char
+//     1,		// type_bool
+//
+//     4,		// type_int
+//     4,		// type_bitmask
+//     4,		// type_float
+//
+//     8		// type_double
+// };
 
 // bit fields
-enum IREngineWarnings
-{
-	irsdk_waterTempWarning		= 0x01,
-	irsdk_fuelPressureWarning	= 0x02,
-	irsdk_oilPressureWarning	= 0x04,
-	irsdk_engineStalled			= 0x08,
-	irsdk_pitSpeedLimiter		= 0x10,
-	irsdk_revLimiterActive		= 0x20,
-	irsdk_oilTempWarning		= 0x40,
+enum class EngineWarning {
+    WaterTemp = 0x01,
+    FuelPressure = 0x02,
+    OilPressure = 0x04,
+    EngineStalled = 0x08,
+    PitSpeedLimiter = 0x10,
+    RevLimiterActive = 0x20,
+    OilTemp = 0x40,
 };
 
 // global flags
-enum IRFlags
-{
-	// global flags
-	irsdk_checkered				= 0x00000001,
-	irsdk_white					= 0x00000002,
-	irsdk_green					= 0x00000004,
-	irsdk_yellow				= 0x00000008,
-	irsdk_red					= 0x00000010,
-	irsdk_blue					= 0x00000020,
-	irsdk_debris				= 0x00000040,
-	irsdk_crossed				= 0x00000080,
-	irsdk_yellowWaving			= 0x00000100,
-	irsdk_oneLapToGreen			= 0x00000200,
-	irsdk_greenHeld				= 0x00000400,
-	irsdk_tenToGo				= 0x00000800,
-	irsdk_fiveToGo				= 0x00001000,
-	irsdk_randomWaving			= 0x00002000,
-	irsdk_caution				= 0x00004000,
-	irsdk_cautionWaving			= 0x00008000,
+enum class FlagType : uint32_t {
+    // global flags
+    Checkered = 0x00000001,
+    White = 0x00000002,
+    Green = 0x00000004,
+    Yellow = 0x00000008,
+    Red = 0x00000010,
+    Blue = 0x00000020,
+    Debris = 0x00000040,
+    Crossed = 0x00000080,
+    YellowWaving = 0x00000100,
+    OneLapToGreen = 0x00000200,
+    GreenHeld = 0x00000400,
+    TenToGo = 0x00000800,
+    FiveToGo = 0x00001000,
+    RandomWaving = 0x00002000,
+    Caution = 0x00004000,
+    CautionWaving = 0x00008000,
 
-	// drivers black flags
-	irsdk_black					= 0x00010000,
-	irsdk_disqualify			= 0x00020000,
-	irsdk_servicible			= 0x00040000, // car is allowed service (not a flag)
-	irsdk_furled				= 0x00080000,
-	irsdk_repair				= 0x00100000,
+    // drivers black flags
+    Black = 0x00010000,
+    Disqualify = 0x00020000,
+    Servicible = 0x00040000,
+    // car is allowed service (not a flag)
+    Furled = 0x00080000,
+    Repair = 0x00100000,
 
-	// start lights
-	irsdk_startHidden			= 0x10000000,
-	irsdk_startReady			= 0x20000000,
-	irsdk_startSet				= 0x40000000,
-	irsdk_startGo				= 0x80000000,
+    // start lights
+    StartHidden = 0x10000000,
+    StartReady = 0x20000000,
+    StartSet = 0x40000000,
+    StartGo = 0x80000000,
 };
 
+inline bool IsFlagSet(uint32_t bitmask, FlagType flag) {
+    return magic_enum::enum_underlying(flag) & bitmask > 0;
+}
 
-// status 
-enum IRTrkLoc
-{
-	irsdk_NotInWorld = -1,
-	irsdk_OffTrack,
-	irsdk_InPitStall,
-	irsdk_AproachingPits,
-	irsdk_OnTrack
+// status
+enum class TrackLocation {
+    NotInWorld = -1,
+    OffTrack,
+    InPitStall,
+    ApproachingPits,
+    OnTrack
 };
 
-enum irsdk_TrkSurf
-{
-	irsdk_SurfaceNotInWorld = -1,
-	irsdk_UndefinedMaterial = 0,
-
-	irsdk_Asphalt1Material,
-	irsdk_Asphalt2Material,
-	irsdk_Asphalt3Material,
-	irsdk_Asphalt4Material,
-	irsdk_Concrete1Material,
-	irsdk_Concrete2Material,
-	irsdk_RacingDirt1Material,
-	irsdk_RacingDirt2Material,
-	irsdk_Paint1Material,
-	irsdk_Paint2Material,
-	irsdk_Rumble1Material,
-	irsdk_Rumble2Material,
-	irsdk_Rumble3Material,
-	irsdk_Rumble4Material,
-
-	irsdk_Grass1Material,
-	irsdk_Grass2Material,
-	irsdk_Grass3Material,
-	irsdk_Grass4Material,
-	irsdk_Dirt1Material,
-	irsdk_Dirt2Material,
-	irsdk_Dirt3Material,
-	irsdk_Dirt4Material,
-	irsdk_SandMaterial,
-	irsdk_Gravel1Material,
-	irsdk_Gravel2Material,
-	irsdk_GrasscreteMaterial,
-	irsdk_AstroturfMaterial,
+enum class TrackSurface {
+    SurfaceNotInWorld = -1,
+    Undefined = 0,
+    Asphalt1,
+    Asphalt2,
+    Asphalt3,
+    Asphalt4,
+    Concrete1,
+    Concrete2,
+    RacingDirt1,
+    RacingDirt2,
+    Paint1,
+    Paint2,
+    Rumble1,
+    Rumble2,
+    Rumble3,
+    Rumble4,
+    Grass1,
+    Grass2,
+    Grass3,
+    Grass4,
+    Dirt1,
+    Dirt2,
+    Dirt3,
+    Dirt4,
+    Sand,
+    Gravel1,
+    Gravel2,
+    Grasscrete,
+    Astroturf,
 };
 
-enum IRSessionState
-{
-	irsdk_StateInvalid,
-	irsdk_StateGetInCar,
-	irsdk_StateWarmup,
-	irsdk_StateParadeLaps,
-	irsdk_StateRacing,
-	irsdk_StateCheckered,
-	irsdk_StateCoolDown
+enum class SessionState {
+    Invalid,
+    GetInCar,
+    Warmup,
+    ParadeLaps,
+    Racing,
+    Checkered,
+    CoolDown
 };
 
-enum IRCarLeftRight
-{
-	irsdk_LROff,
-	irsdk_LRClear,			// no cars around us.
-	irsdk_LRCarLeft,		// there is a car to our left.
-	irsdk_LRCarRight,		// there is a car to our right.
-	irsdk_LRCarLeftRight,	// there are cars on each side.
-	irsdk_LR2CarsLeft,		// there are two cars to our left.
-	irsdk_LR2CarsRight		// there are two cars to our right.
+enum class CarLeftRight {
+    LROff,
+    LRClear,
+    // no cars around us.
+    LRCarLeft,
+    // there is a car to our left.
+    LRCarRight,
+    // there is a car to our right.
+    LRCarLeftRight,
+    // there are cars on each side.
+    LR2CarsLeft,
+    // there are two cars to our left.
+    LR2CarsRight // there are two cars to our right.
 };
 
-enum irsdk_CameraState
-{
-	irsdk_IsSessionScreen          = 0x0001, // the camera tool can only be activated if viewing the session screen (out of car)
-	irsdk_IsScenicActive           = 0x0002, // the scenic camera is active (no focus car)
+enum class CameraState {
+    IsSessionScreen = 0x0001,
+    // the camera tool can only be activated if viewing the session screen (out of car)
+    IsScenicActive = 0x0002,
+    // the scenic camera is active (no focus car)
 
-	//these can be changed with a broadcast message
-	irsdk_CamToolActive            = 0x0004,
-	irsdk_UIHidden                 = 0x0008,
-	irsdk_UseAutoShotSelection     = 0x0010,
-	irsdk_UseTemporaryEdits        = 0x0020,
-	irsdk_UseKeyAcceleration       = 0x0040,
-	irsdk_UseKey10xAcceleration    = 0x0080,
-	irsdk_UseMouseAimMode          = 0x0100
+    //these can be changed with a broadcast message
+    CamToolActive = 0x0004,
+    UIHidden = 0x0008,
+    UseAutoShotSelection = 0x0010,
+    UseTemporaryEdits = 0x0020,
+    UseKeyAcceleration = 0x0040,
+    UseKey10xAcceleration = 0x0080,
+    UseMouseAimMode = 0x0100
 };
 
-enum irsdk_PitSvFlags
-{
-	irsdk_LFTireChange		= 0x0001,
-	irsdk_RFTireChange		= 0x0002,
-	irsdk_LRTireChange		= 0x0004,
-	irsdk_RRTireChange		= 0x0008,
-
-	irsdk_FuelFill			= 0x0010,
-	irsdk_WindshieldTearoff	= 0x0020,
-	irsdk_FastRepair		= 0x0040
+enum class PitSvTask {
+    LFTireChange = 0x0001,
+    RFTireChange = 0x0002,
+    LRTireChange = 0x0004,
+    RRTireChange = 0x0008,
+    FuelFill = 0x0010,
+    WindshieldTearoff = 0x0020,
+    FastRepair = 0x0040
 };
 
-enum irsdk_PitSvStatus
-{
-	// status
-	irsdk_PitSvNone = 0,
-	irsdk_PitSvInProgress,
-	irsdk_PitSvComplete,
+enum class PitSvStatus {
+    // status
+    None = 0,
+    InProgress,
+    Complete,
 
-	// errors
-	irsdk_PitSvTooFarLeft = 100,
-	irsdk_PitSvTooFarRight,
-	irsdk_PitSvTooFarForward,
-	irsdk_PitSvTooFarBack,
-	irsdk_PitSvBadAngle,
-	irsdk_PitSvCantFixThat,
+    // errors
+    TooFarLeft = 100,
+    TooFarRight,
+    TooFarForward,
+    TooFarBack,
+    BadAngle,
+    CantFixThat,
 };
 
-enum irsdk_PaceMode
-{
-	irsdk_PaceModeSingleFileStart = 0,
-	irsdk_PaceModeDoubleFileStart,
-	irsdk_PaceModeSingleFileRestart,
-	irsdk_PaceModeDoubleFileRestart,
-	irsdk_PaceModeNotPacing,
+enum class PaceMode {
+    SingleFileStart = 0,
+    DoubleFileStart,
+    SingleFileRestart,
+    DoubleFileRestart,
+    NotPacing,
 };
 
-enum irsdk_PaceFlags
-{
-	irsdk_PaceFlagsEndOfLine = 0x01,
-	irsdk_PaceFlagsFreePass = 0x02,
-	irsdk_PaceFlagsWavedAround = 0x04,
+enum class PaceFlagType : uint32_t {
+    EndOfLine = 0x01,
+    FreePass = 0x02,
+    WavedAround = 0x04,
 };
 
-enum class IRAllVarName {
-  AirDensity = 0,
-AirPressure,
-AirTemp,
-Alt,
-Brake,
-BrakeRaw,
-CamCameraNumber,
-CamCameraState,
-CamCarIdx,
-CamGroupNumber,
-Clutch,
-CpuUsageBG,
-DCDriversSoFar,
-DCLapStatus,
-DisplayUnits,
-DriverMarker,
-EngineWarnings,
-EnterExitReset,
-FogLevel,
-FrameRate,
-FuelLevel,
-FuelLevelPct,
-FuelPress,
-FuelUsePerHour,
-Gear,
-IsDiskLoggingActive,
-IsDiskLoggingEnabled,
-IsInGarage,
-IsOnTrack,
-IsOnTrackCar,
-IsReplayPlaying,
-Lap,
-LapBestLap,
-LapBestLapTime,
-LapBestNLapLap,
-LapBestNLapTime,
-LapCurrentLapTime,
-LapDeltaToBestLap,
-LapDeltaToBestLap_DD,
-LapDeltaToBestLap_OK,
-LapDeltaToOptimalLap,
-LapDeltaToOptimalLap_DD,
-LapDeltaToOptimalLap_OK,
-LapDeltaToSessionBestLap,
-LapDeltaToSessionBestLap_DD,
-LapDeltaToSessionBestLap_OK,
-LapDeltaToSessionLastlLap,
-LapDeltaToSessionLastlLap_DD,
-LapDeltaToSessionLastlLap_OK,
-LapDeltaToSessionOptimalLap,
-LapDeltaToSessionOptimalLap_DD,
-LapDeltaToSessionOptimalLap_OK,
-LapDist,
-LapDistPct,
-LapLasNLapSeq,
-LapLastLapTime,
-LapLastNLapTime,
-Lat,
-LatAccel,
-Lon,
-LongAccel,
-ManifoldPress,
-OilLevel,
-OilPress,
-OilTemp,
-OnPitRoad,
-Pitch,
-PitchRate,
-PitOptRepairLeft,
-PitRepairLeft,
-PitSvFlags,
-PitSvFuel,
-PitSvLFP,
-PitSvLRP,
-PitSvRFP,
-PitSvRRP,
-PlayerCarClassPosition,
-PlayerCarPosition,
-RaceLaps,
-RadioTransmitCarIdx,
-RadioTransmitFrequencyIdx,
-RadioTransmitRadioIdx,
-RelativeHumidity,
-ReplayFrameNum,
-ReplayFrameNumEnd,
-ReplayPlaySlowMotion,
-ReplayPlaySpeed,
-ReplaySessionNum,
-ReplaySessionTime,
-Roll,
-RollRate,
-RPM,
-SessionFlags,
-SessionLapsRemain,
-SessionNum,
-SessionState,
-SessionTime,
-SessionTimeRemain,
-SessionUniqueID,
-ShiftGrindRPM,
-ShiftIndicatorPct,
-ShiftPowerPct,
-Skies,
-Speed,
-SteeringWheelAngle,
-SteeringWheelAngleMax,
-SteeringWheelPctDamper,
-SteeringWheelPctTorque,
-SteeringWheelPctTorqueSign,
-SteeringWheelPctTorqueSignStops,
-SteeringWheelPeakForceNm,
-SteeringWheelTorque,
-Throttle,
-ThrottleRaw,
-TrackTemp,
-TrackTempCrew,
-VelocityX,
-VelocityY,
-VelocityZ,
-VertAccel,
-Voltage,
-WaterLevel,
-WaterTemp,
-WeatherType,
-WindDir,
-WindVel,
-Yaw,
-YawNorth,
-YawRate,
-CFrideHeight,
-CFshockDefl,
-CFshockVel,
-CFSRrideHeight,
-CRrideHeight,
-CRshockDefl,
-CRshockVel,
-dcABS,
-dcAntiRollFront,
-dcAntiRollRear,
-dcBoostLevel,
-dcBrakeBias,
-dcDiffEntry,
-dcDiffExit,
-dcDiffMiddle,
-dcEngineBraking,
-dcEnginePower,
-dcFuelMixture,
-dcRevLimiter,
-dcThrottleShape,
-dcTractionControl,
-dcTractionControl2,
-dcTractionControlToggle,
-dcWeightJackerLeft,
-dcWeightJackerRight,
-dcWingFront,
-dcWingRear,
-dpFNOMKnobSetting,
-dpFUFangleIndex,
-dpFWingAngle,
-dpFWingIndex,
-dpLrWedgeAdj,
-dpPSSetting,
-dpQtape,
-dpRBarSetting,
-dpRFTruckarmP1Dz,
-dpRRDamperPerchOffsetm,
-dpRrPerchOffsetm,
-dpRrWedgeAdj,
-dpRWingAngle,
-dpRWingIndex,
-dpRWingSetting,
-dpTruckarmP1Dz,
-dpWedgeAdj,
-LFbrakeLinePress,
-LFcoldPressure,
-LFpressure,
-LFrideHeight,
-LFshockDefl,
-LFshockVel,
-LFspeed,
-LFtempCL,
-LFtempCM,
-LFtempCR,
-LFtempL,
-LFtempM,
-LFtempR,
-LFwearL,
-LFwearM,
-LFwearR,
-LRbrakeLinePress,
-LRcoldPressure,
-LRpressure,
-LRrideHeight,
-LRshockDefl,
-LRshockVel,
-LRspeed,
-LRtempCL,
-LRtempCM,
-LRtempCR,
-LRtempL,
-LRtempM,
-LRtempR,
-LRwearL,
-LRwearM,
-LRwearR,
-RFbrakeLinePress,
-RFcoldPressure,
-RFpressure,
-RFrideHeight,
-RFshockDefl,
-RFshockVel,
-RFspeed,
-RFtempCL,
-RFtempCM,
-RFtempCR,
-RFtempL,
-RFtempM,
-RFtempR,
-RFwearL,
-RFwearM,
-RFwearR,
-RRbrakeLinePress,
-RRcoldPressure,
-RRpressure,
-RRrideHeight,
-RRshockDefl,
-RRshockVel,
-RRspeed,
-RRtempCL,
-RRtempCM,
-RRtempCR,
-RRtempL,
-RRtempM,
-RRtempR,
-RRwearL,
-RRwearM,
-RRwearR,
-CarIdxClassPosition,
-CarIdxEstTime,
-CarIdxF2Time,
-CarIdxGear,
-CarIdxLap,
-CarIdxLapDistPct,
-CarIdxOnPitRoad,
-CarIdxPosition,
-CarIdxRPM,
-CarIdxSteer,
-CarIdxTrackSurface,
+inline bool IsPaceFlagSet(uint32_t bitmask, PaceFlagType flag) {
+    return magic_enum::enum_underlying(flag) & bitmask > 0;
+}
+
+enum class KnownVarName {
+    AirDensity = 0,
+    AirPressure,
+    AirTemp,
+    Alt,
+    Brake,
+    BrakeRaw,
+    CamCameraNumber,
+    CamCameraState,
+    CamCarIdx,
+    CamGroupNumber,
+    Clutch,
+    CpuUsageBG,
+    DCDriversSoFar,
+    DCLapStatus,
+    DisplayUnits,
+    DriverMarker,
+    EngineWarnings,
+    EnterExitReset,
+    FogLevel,
+    FrameRate,
+    FuelLevel,
+    FuelLevelPct,
+    FuelPress,
+    FuelUsePerHour,
+    Gear,
+    IsDiskLoggingActive,
+    IsDiskLoggingEnabled,
+    IsInGarage,
+    IsOnTrack,
+    IsOnTrackCar,
+    IsReplayPlaying,
+    Lap,
+    LapBestLap,
+    LapBestLapTime,
+    LapBestNLapLap,
+    LapBestNLapTime,
+    LapCurrentLapTime,
+    LapDeltaToBestLap,
+    LapDeltaToBestLap_DD,
+    LapDeltaToBestLap_OK,
+    LapDeltaToOptimalLap,
+    LapDeltaToOptimalLap_DD,
+    LapDeltaToOptimalLap_OK,
+    LapDeltaToSessionBestLap,
+    LapDeltaToSessionBestLap_DD,
+    LapDeltaToSessionBestLap_OK,
+    LapDeltaToSessionLastlLap,
+    LapDeltaToSessionLastlLap_DD,
+    LapDeltaToSessionLastlLap_OK,
+    LapDeltaToSessionOptimalLap,
+    LapDeltaToSessionOptimalLap_DD,
+    LapDeltaToSessionOptimalLap_OK,
+    LapDist,
+    LapDistPct,
+    LapLasNLapSeq,
+    LapLastLapTime,
+    LapLastNLapTime,
+    Lat,
+    LatAccel,
+    Lon,
+    LongAccel,
+    ManifoldPress,
+    OilLevel,
+    OilPress,
+    OilTemp,
+    OnPitRoad,
+    Pitch,
+    PitchRate,
+    PitOptRepairLeft,
+    PitRepairLeft,
+    PitSvFlags,
+    PitSvFuel,
+    PitSvLFP,
+    PitSvLRP,
+    PitSvRFP,
+    PitSvRRP,
+    PlayerCarClassPosition,
+    PlayerCarPosition,
+    RaceLaps,
+    RadioTransmitCarIdx,
+    RadioTransmitFrequencyIdx,
+    RadioTransmitRadioIdx,
+    RelativeHumidity,
+    ReplayFrameNum,
+    ReplayFrameNumEnd,
+    ReplayPlaySlowMotion,
+    ReplayPlaySpeed,
+    ReplaySessionNum,
+    ReplaySessionTime,
+    Roll,
+    RollRate,
+    RPM,
+    SessionFlags,
+    SessionLapsRemain,
+    SessionNum,
+    SessionState,
+    SessionTime,
+    SessionTimeRemain,
+    SessionUniqueID,
+    ShiftGrindRPM,
+    ShiftIndicatorPct,
+    ShiftPowerPct,
+    Skies,
+    Speed,
+    SteeringWheelAngle,
+    SteeringWheelAngleMax,
+    SteeringWheelPctDamper,
+    SteeringWheelPctTorque,
+    SteeringWheelPctTorqueSign,
+    SteeringWheelPctTorqueSignStops,
+    SteeringWheelPeakForceNm,
+    SteeringWheelTorque,
+    Throttle,
+    ThrottleRaw,
+    TrackTemp,
+    TrackTempCrew,
+    VelocityX,
+    VelocityY,
+    VelocityZ,
+    VertAccel,
+    Voltage,
+    WaterLevel,
+    WaterTemp,
+    WeatherType,
+    WindDir,
+    WindVel,
+    Yaw,
+    YawNorth,
+    YawRate,
+    CFrideHeight,
+    CFshockDefl,
+    CFshockVel,
+    CFSRrideHeight,
+    CRrideHeight,
+    CRshockDefl,
+    CRshockVel,
+    dcABS,
+    dcAntiRollFront,
+    dcAntiRollRear,
+    dcBoostLevel,
+    dcBrakeBias,
+    dcDiffEntry,
+    dcDiffExit,
+    dcDiffMiddle,
+    dcEngineBraking,
+    dcEnginePower,
+    dcFuelMixture,
+    dcRevLimiter,
+    dcThrottleShape,
+    dcTractionControl,
+    dcTractionControl2,
+    dcTractionControlToggle,
+    dcWeightJackerLeft,
+    dcWeightJackerRight,
+    dcWingFront,
+    dcWingRear,
+    dpFNOMKnobSetting,
+    dpFUFangleIndex,
+    dpFWingAngle,
+    dpFWingIndex,
+    dpLrWedgeAdj,
+    dpPSSetting,
+    dpQtape,
+    dpRBarSetting,
+    dpRFTruckarmP1Dz,
+    dpRRDamperPerchOffsetm,
+    dpRrPerchOffsetm,
+    dpRrWedgeAdj,
+    dpRWingAngle,
+    dpRWingIndex,
+    dpRWingSetting,
+    dpTruckarmP1Dz,
+    dpWedgeAdj,
+    LFbrakeLinePress,
+    LFcoldPressure,
+    LFpressure,
+    LFrideHeight,
+    LFshockDefl,
+    LFshockVel,
+    LFspeed,
+    LFtempCL,
+    LFtempCM,
+    LFtempCR,
+    LFtempL,
+    LFtempM,
+    LFtempR,
+    LFwearL,
+    LFwearM,
+    LFwearR,
+    LRbrakeLinePress,
+    LRcoldPressure,
+    LRpressure,
+    LRrideHeight,
+    LRshockDefl,
+    LRshockVel,
+    LRspeed,
+    LRtempCL,
+    LRtempCM,
+    LRtempCR,
+    LRtempL,
+    LRtempM,
+    LRtempR,
+    LRwearL,
+    LRwearM,
+    LRwearR,
+    RFbrakeLinePress,
+    RFcoldPressure,
+    RFpressure,
+    RFrideHeight,
+    RFshockDefl,
+    RFshockVel,
+    RFspeed,
+    RFtempCL,
+    RFtempCM,
+    RFtempCR,
+    RFtempL,
+    RFtempM,
+    RFtempR,
+    RFwearL,
+    RFwearM,
+    RFwearR,
+    RRbrakeLinePress,
+    RRcoldPressure,
+    RRpressure,
+    RRrideHeight,
+    RRshockDefl,
+    RRshockVel,
+    RRspeed,
+    RRtempCL,
+    RRtempCM,
+    RRtempCR,
+    RRtempL,
+    RRtempM,
+    RRtempR,
+    RRwearL,
+    RRwearM,
+    RRwearR,
+    CarIdxClassPosition,
+    CarIdxEstTime,
+    CarIdxF2Time,
+    CarIdxGear,
+    CarIdxLap,
+    CarIdxLapDistPct,
+    CarIdxOnPitRoad,
+    CarIdxPosition,
+    CarIdxRPM,
+    CarIdxSteer,
+    CarIdxTrackSurface,
 };
 
 
 //----
 //
 
-struct IRVarHeader
-{
-	IRVarType type;			// IRVarType
-	int offset;			// offset fron start of buffer row
-	int count;			// number of entrys (array)
-						// so length in bytes would be IRVarTypeBytes[type] * count
-	bool countAsTime;
-	char pad[3];		// (16 byte align)
+struct VarDataHeader {
+    VarDataType type; // VarDataType
+    int offset;       // offset fron start of buffer row
+    int count;        // number of entrys (array)
+    // so length in bytes would be VarDataTypeBytes[type] * count
+    bool countAsTime;
+    char pad[3]; // (16 byte align)
 
-	char name[IRSDK_MAX_STRING];
-	char desc[IRSDK_MAX_DESC];
-	char unit[IRSDK_MAX_STRING];	// something like "kg/m^2"
+    char name[Resources::MaxStringLength];
+    char desc[Resources::MaxDescriptionLength];
+    char unit[Resources::MaxStringLength]; // something like "kg/m^2"
 
-	void clear()
-	{
-		type = IRVarType::type_char;
-		offset = 0;
-		count = 0;
-		countAsTime = false;
-		memset(name, 0, sizeof(name));
-		memset(desc, 0, sizeof(name));
-		memset(unit, 0, sizeof(name));
-	}
+    void clear() {
+        type = VarDataType::Char;
+        offset = 0;
+        count = 0;
+        countAsTime = false;
+        memset(name, 0, sizeof(name));
+        memset(desc, 0, sizeof(name));
+        memset(unit, 0, sizeof(name));
+    }
 };
 
-struct irsdk_varBuf
-{
-	int tickCount;		// used to detect changes in data
-	int bufOffset;		// offset from header
-	int pad[2];			// (16 byte align)
+struct VarDataBufDescriptor {
+    int tickCount; // used to detect changes in data
+    int bufOffset; // offset from header
+    int pad[2];    // (16 byte align)
 };
 
-struct IRHeader
-{
-	int ver;				// this api header version, see IRSDK_VER
-	int status;				// bitfield using IRStatusField
-	int tickRate;			// ticks per second (60 or 360 etc)
+struct SessionInfoState {
+    uint32_t count;
+    uint32_t len;
+    uint32_t offset;
+};
 
-	// session information, updated periodicaly
-	int sessionInfoUpdate;	// Incremented when session info changes
-	int sessionInfoLen;		// Length in bytes of session info string
-	int sessionInfoOffset;	// Session info, encoded in YAML format
+struct DataHeader {
+    Resources::VersionType ver;      // this api header version, see Resources::Version
+    ConnectionStatus status;   // bitfield using IRStatusField
+    int tickRate; // ticks per second (60 or 360 etc)
 
-	// State data, output at tickRate
+    // session information, updated periodicaly
+    SessionInfoState sessionInfo;
+    // int sessionInfoUpdate; // Incremented when session info changes
+    // int sessionInfoLen;    // Length in bytes of session info string
+    // int sessionInfoOffset; // Session info, encoded in YAML format
 
-	int numVars;			// length of arra pointed to by varHeaderOffset
-	int varHeaderOffset;	// offset to IRVarHeader[numVars] array, Describes the variables received in varBuf
+    // State data, output at tickRate
 
-	int numBuf;				// <= IRSDK_MAX_BUFS (3 for now)
-	int bufLen;				// length in bytes for one line
-	int pad1[2];			// (16 byte align)
-	irsdk_varBuf varBuf[IRSDK_MAX_BUFS]; // buffers of data being written to
+    int numVars;         // length of arra pointed to by varHeaderOffset
+    int varHeaderOffset; // offset to VarDataHeader[numVars] array, Describes the variables received in varBuf
+
+    int numBuf;                                     // <= Resources::MaxBufferCount (3 for now)
+    int bufLen;                                     // length in bytes for one line
+    int pad1[2];                                    // (16 byte align)
+    VarDataBufDescriptor varBuf[Resources::MaxBufferCount]; // buffers of data being written to
 };
 
 // sub header used when writing telemetry to disk
-struct IRDiskSubHeader
-{
-	time_t sessionStartDate;
-	double sessionStartTime;
-	double sessionEndTime;
-	int sessionLapCount;
-	int sessionRecordCount;
+struct DiskSubHeader {
+    time_t sessionStartDate;
+    double sessionStartTime;
+    double sessionEndTime;
+    int sessionLapCount;
+    int sessionRecordCount;
 };
 
-//----
-// Client function definitions
-
-bool irsdk_startup();
-void  irsdk_shutdown();
-
-bool irsdk_getNewData(char *data);
-bool irsdk_waitForDataReady(int timeOut, char *data);
-bool irsdk_isConnected();
-
-const IRHeader *irsdk_getHeader();
-const char *irsdk_getData(int index);
-const char *irsdk_getSessionInfoStr();
-int irsdk_getSessionInfoStrUpdate(); // incrementing index that indicates new session info string
-
-const IRVarHeader *irsdk_getVarHeaderPtr();
-const IRVarHeader *irsdk_getVarHeaderEntry(int index);
-
-int irsdk_varNameToIndex(const char *name);
-int irsdk_varNameToOffset(const char *name);
-//
 // DLLEXPORT bool irsdk_startup();
 // DLLEXPORT void  irsdk_shutdown();
 //
@@ -655,144 +632,195 @@ int irsdk_varNameToOffset(const char *name);
 // DLLEXPORT bool irsdk_waitForDataReady(int timeOut, char *data);
 // DLLEXPORT bool irsdk_isConnected();
 //
-// DLLEXPORT const IRHeader *irsdk_getHeader();
+// DLLEXPORT const DataHeader *irsdk_getHeader();
 // DLLEXPORT const char *irsdk_getData(int index);
 // DLLEXPORT const char *irsdk_getSessionInfoStr();
 // DLLEXPORT int irsdk_getSessionInfoStrUpdate(); // incrementing index that indicates new session info string
 //
-// DLLEXPORT const IRVarHeader *irsdk_getVarHeaderPtr();
-// DLLEXPORT const IRVarHeader *irsdk_getVarHeaderEntry(int index);
+// DLLEXPORT const VarDataHeader *irsdk_getVarHeaderPtr();
+// DLLEXPORT const VarDataHeader *irsdk_getVarHeaderEntry(int index);
 //
 // DLLEXPORT int irsdk_varNameToIndex(const char *name);
 // DLLEXPORT int irsdk_varNameToOffset(const char *name);
 
 //----
 // Remote controll the sim by sending these windows messages
-// camera and replay commands only work when you are out of your car, 
+// camera and replay commands only work when you are out of your car,
 // pit commands only work when in your car
-enum irsdk_BroadcastMsg 
-{
-	irsdk_BroadcastCamSwitchPos = 0,      // car position, group, camera
-	irsdk_BroadcastCamSwitchNum,	      // driver #, group, camera
-	irsdk_BroadcastCamSetState,           // irsdk_CameraState, unused, unused 
-	irsdk_BroadcastReplaySetPlaySpeed,    // speed, slowMotion, unused
-	irskd_BroadcastReplaySetPlayPosition, // irsdk_RpyPosMode, Frame Number (high, low)
-	irsdk_BroadcastReplaySearch,          // irsdk_RpySrchMode, unused, unused
-	irsdk_BroadcastReplaySetState,        // irsdk_RpyStateMode, unused, unused
-	irsdk_BroadcastReloadTextures,        // irsdk_ReloadTexturesMode, carIdx, unused
-	irsdk_BroadcastChatComand,		      // irsdk_ChatCommandMode, subCommand, unused
-	irsdk_BroadcastPitCommand,            // irsdk_PitCommandMode, parameter
-	irsdk_BroadcastTelemCommand,		  // irsdk_TelemCommandMode, unused, unused
-	irsdk_BroadcastFFBCommand,		      // irsdk_FFBCommandMode, value (float, high, low)
-	irsdk_BroadcastReplaySearchSessionTime, // sessionNum, sessionTimeMS (high, low)
-	irsdk_BroadcastVideoCapture,          // irsdk_VideoCaptureMode, unused, unused
-	irsdk_BroadcastLast                   // unused placeholder
+enum class BroadcastMessage {
+    CamSwitchPos = 0,
+    // car position, group, camera
+    CamSwitchNum,
+    // driver #, group, camera
+    CamSetState,
+    // CameraState, unused, unused
+    ReplaySetPlaySpeed,
+    // speed, slowMotion, unused
+    irskd_BroadcastReplaySetPlayPosition,
+    // ReplayPositionMode, Frame Number (high, low)
+    ReplaySearch,
+    // ReplaySearchMode, unused, unused
+    ReplaySetState,
+    // ReplayStateMode, unused, unused
+    ReloadTextures,
+    // ReloadTexturesMode, carIdx, unused
+    ChatComand,
+    // ChatCommandMode, subCommand, unused
+    PitCommand,
+    // PitCommandMode, parameter
+    TelemCommand,
+    // TelemetryCommandMode, unused, unused
+    FFBCommand,
+    // FFBCommandMode, value (float, high, low)
+    ReplaySearchSessionTime,
+    // sessionNum, sessionTimeMS (high, low)
+    VideoCapture,
+    // VideoCaptureMode, unused, unused
+    Last // unused placeholder
 };
 
-enum irsdk_ChatCommandMode
-{
-	irsdk_ChatCommand_Macro = 0,		// pass in a number from 1-15 representing the chat macro to launch
-	irsdk_ChatCommand_BeginChat,		// Open up a new chat window
-	irsdk_ChatCommand_Reply,			// Reply to last private chat
-	irsdk_ChatCommand_Cancel			// Close chat window
+enum class ChatCommandMode {
+    Macro = 0,
+    // pass in a number from 1-15 representing the chat macro to launch
+    BeginChat,
+    // Open up a new chat window
+    Reply,
+    // Reply to last private chat
+    Cancel // Close chat window
 };
 
-enum irsdk_PitCommandMode				// this only works when the driver is in the car
+enum class PitCommandMode // this only works when the driver is in the car
 {
-	irsdk_PitCommand_Clear = 0,			// Clear all pit checkboxes
-	irsdk_PitCommand_WS,				// Clean the winshield, using one tear off
-	irsdk_PitCommand_Fuel,				// Add fuel, optionally specify the amount to add in liters or pass '0' to use existing amount
-	irsdk_PitCommand_LF,				// Change the left front tire, optionally specifying the pressure in KPa or pass '0' to use existing pressure
-	irsdk_PitCommand_RF,				// right front
-	irsdk_PitCommand_LR,				// left rear
-	irsdk_PitCommand_RR,				// right rear
-	irsdk_PitCommand_ClearTires,		// Clear tire pit checkboxes
-	irsdk_PitCommand_FR,				// Request a fast repair
-	irsdk_PitCommand_ClearWS,			// Uncheck Clean the winshield checkbox
-	irsdk_PitCommand_ClearFR,			// Uncheck request a fast repair
-	irsdk_PitCommand_ClearFuel,			// Uncheck add fuel
+    Clear = 0,
+    // Clear all pit checkboxes
+    WS,
+    // Clean the winshield, using one tear off
+    Fuel,
+    // Add fuel, optionally specify the amount to add in liters or pass '0' to use existing amount
+    LF,
+    // Change the left front tire, optionally specifying the pressure in KPa or pass '0' to use existing pressure
+    RF,
+    // right front
+    LR,
+    // left rear
+    RR,
+    // right rear
+    ClearTires,
+    // Clear tire pit checkboxes
+    FR,
+    // Request a fast repair
+    ClearWS,
+    // Uncheck Clean the winshield checkbox
+    ClearFR,
+    // Uncheck request a fast repair
+    ClearFuel,
+    // Uncheck add fuel
 };
 
-enum irsdk_TelemCommandMode				// You can call this any time, but telemtry only records when driver is in there car
+enum class TelemetryCommandMode // You can call this any time, but telemtry only records when driver is in there car
 {
-	irsdk_TelemCommand_Stop = 0,		// Turn telemetry recording off
-	irsdk_TelemCommand_Start,			// Turn telemetry recording on
-	irsdk_TelemCommand_Restart,			// Write current file to disk and start a new one
+    Stop = 0,
+    // Turn telemetry recording off
+    Start,
+    // Turn telemetry recording on
+    Restart,
+    // Write current file to disk and start a new one
 };
 
-enum irsdk_RpyStateMode
-{
-	irsdk_RpyState_EraseTape = 0,		// clear any data in the replay tape
-	irsdk_RpyState_Last					// unused place holder
+enum class ReplayStateMode {
+    EraseTape = 0,
+    // clear any data in the replay tape
+    Last // unused place holder
 };
 
-enum irsdk_ReloadTexturesMode
-{
-	irsdk_ReloadTextures_All = 0,		// reload all textuers
-	irsdk_ReloadTextures_CarIdx			// reload only textures for the specific carIdx
+enum class ReloadTexturesMode {
+    All = 0,
+    // reload all textuers
+    CarIdx // reload only textures for the specific carIdx
 };
 
 // Search replay tape for events
-enum irsdk_RpySrchMode
-{
-	irsdk_RpySrch_ToStart = 0,
-	irsdk_RpySrch_ToEnd,
-	irsdk_RpySrch_PrevSession,
-	irsdk_RpySrch_NextSession,
-	irsdk_RpySrch_PrevLap,
-	irsdk_RpySrch_NextLap,
-	irsdk_RpySrch_PrevFrame,
-	irsdk_RpySrch_NextFrame,
-	irsdk_RpySrch_PrevIncident,
-	irsdk_RpySrch_NextIncident,
-	irsdk_RpySrch_Last                   // unused placeholder
+enum class ReplaySearchMode {
+    ToStart = 0,
+    ToEnd,
+    PrevSession,
+    NextSession,
+    PrevLap,
+    NextLap,
+    PrevFrame,
+    NextFrame,
+    PrevIncident,
+    NextIncident,
+    Last // unused placeholder
 };
 
-enum irsdk_RpyPosMode
-{
-	irsdk_RpyPos_Begin = 0,
-	irsdk_RpyPos_Current,
-	irsdk_RpyPos_End,
-	irsdk_RpyPos_Last                   // unused placeholder
+enum class ReplayPositionMode {
+    Begin = 0,
+    Current,
+    End,
+    Last // unused placeholder
 };
 
-enum irsdk_FFBCommandMode				// You can call this any time
+enum class FFBCommandMode // You can call this any time
 {
-	irsdk_FFBCommand_MaxForce = 0,		// Set the maximum force when mapping steering torque force to direct input units (float in Nm)
-	irsdk_FFBCommand_Last               // unused placeholder
+    MaxForce = 0,
+    // Set the maximum force when mapping steering torque force to direct input units (float in Nm)
+    Last // unused placeholder
 };
 
-// irsdk_BroadcastCamSwitchPos or irsdk_BroadcastCamSwitchNum camera focus defines
+// CamSwitchPos or CamSwitchNum camera focus defines
 // pass these in for the first parameter to select the 'focus at' types in the camera system.
-enum class irsdk_csMode
-{
-	irsdk_csFocusAtIncident = -3,
-	irsdk_csFocusAtLeader   = -2,
-	irsdk_csFocusAtExiting  = -1,
-	// ctFocusAtDriver + car number...
-	irsdk_csFocusAtDriver   = 0
+enum class CameraSwitchMode {
+    FocusAtIncident = -3,
+    FocusAtLeader = -2,
+    FocusAtExiting = -1,
+    // ctFocusAtDriver + car number...
+    FocusAtDriver = 0
 };
 
-enum irsdk_VideoCaptureMode
-{
-	irsdk_VideoCapture_TriggerScreenShot = 0,	// save a screenshot to disk
-	irsdk_VideoCaptuer_StartVideoCapture,		// start capturing video
-	irsdk_VideoCaptuer_EndVideoCapture,			// stop capturing video
-	irsdk_VideoCaptuer_ToggleVideoCapture,		// toggle video capture on/off
-	irsdk_VideoCaptuer_ShowVideoTimer,			// show video timer in upper left corner of display
-	irsdk_VideoCaptuer_HideVideoTimer,			// hide video timer
+enum class VideoCaptureMode {
+    TriggerScreenShot = 0,
+    // save a screenshot to disk
+    StartVideoCapture,
+    // start capturing video
+    EndVideoCapture,
+    // stop capturing video
+    ToggleVideoCapture,
+    // toggle video capture on/off
+    ShowVideoTimer,
+    // show video timer in upper left corner of display
+    HideVideoTimer,
+    // hide video timer
 };
 
-//send a remote controll message to the sim
-// var1, var2, and var3 are all 16 bits signed
-void irsdk_broadcastMsg(irsdk_BroadcastMsg msg, int var1, int var2, int var3);
-// var2 can be a full 32 bits
-void irsdk_broadcastMsg(irsdk_BroadcastMsg msg, int var1, int var2);
-// var2 can be a full 32 bit float
-void irsdk_broadcastMsg(irsdk_BroadcastMsg msg, int var1, float var2);
+// helper class to keep track of our variables index
+// Create a global instance of this and it will take care of the details for you.
+class VarHolder
+{
+public:
+    VarHolder();
+    explicit VarHolder(const char *name);
 
-// add a leading zero (or zeros) to a car number
-// to encode car #001 call padCarNum(1,2)
-int  irsdk_padCarNum(int num, int zero);
+    void setVarName(const char *name);
+
+    // returns VarDataType as int so we don't depend on IRTypes.h
+    int getType();
+    int getCount();
+    bool isValid();
+
+    // entry is the array offset, or 0 if not an array element
+    bool getBool(int entry = 0);
+    int getInt(int entry = 0);
+    float getFloat(int entry = 0);
+    double getDouble(int entry = 0);
+
+protected:
+    bool checkIdx();
+
+    static const int max_string = 32; //Resources::MaxStringLength
+    char m_name[max_string];
+    int m_idx;
+    int m_statusID;
+};
 
 }

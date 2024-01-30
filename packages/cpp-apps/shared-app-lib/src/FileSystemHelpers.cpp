@@ -3,10 +3,12 @@
 #include <format>
 #include <mutex>
 
+#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/Macros.h>
-#include <IRacingTools/Shared/UnicodeHelpers.h>
 
 namespace IRacingTools::Shared {
+
+using namespace IRacingTools::SDK::Utils;
 
 namespace {
 std::filesystem::path GetTemporaryDirectoryRoot() {
@@ -66,7 +68,7 @@ std::vector<BYTE> ReadFile(const fs::path &path) {
 
     std::vector<BYTE> data(size);
     auto buf = data.data();
-    auto pathStr = UnicodeConvStd::ToUtf8(path);
+    auto pathStr = ToUtf8(path);
     auto file = std::fopen(pathStr.c_str(),"rb");
     {
 

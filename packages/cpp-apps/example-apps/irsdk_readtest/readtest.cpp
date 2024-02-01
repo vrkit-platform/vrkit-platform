@@ -42,10 +42,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <conio.h>
 #include <ctime>
 
-#include "../IRTypes.h"
+
+#include <IRacingTools/SDK/LiveConnection.h>
+#include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingTools/SDK/LiveClient.h>
+#include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/Utils/YamlParser.h>
 
 
-void writeCSVSessionString(FILE *file, IRDiskSubHeader *diskSubHeader, const char *sessionInfoString)
+using namespace IRacingTools::SDK;
+
+void writeCSVSessionString(FILE *file, DiskSubHeader *diskSubHeader, const char *sessionInfoString)
 {
 	if(file)
 	{
@@ -86,7 +93,7 @@ void writeCSVSessionString(FILE *file, IRDiskSubHeader *diskSubHeader, const cha
 	}
 }
 
-void writeCSVVarHeaders(FILE *file, IRHeader *header, IRVarHeader *varHeaders)
+void writeCSVVarHeaders(FILE *file, DataHeader *header, VarDataHeader *varHeaders)
 {
 	if(file && header && varHeaders)
 	{
@@ -94,7 +101,7 @@ void writeCSVVarHeaders(FILE *file, IRHeader *header, IRVarHeader *varHeaders)
 
 		for(i=0; i<header->numVars; i++)
 		{
-			int count = (varHeaders[i].type == irsdk_char) ? 1 : varHeaders[i].count;
+			int count = (varHeaders[i].type == VarDataType::Char) ? 1 : varHeaders[i].count;
 			for(j=0; j<count; j++)
 			{
 				if((i+j) > 0)
@@ -110,7 +117,7 @@ void writeCSVVarHeaders(FILE *file, IRHeader *header, IRVarHeader *varHeaders)
 
 		for(i=0; i<header->numVars; i++)
 		{
-			int count = (varHeaders[i].type == irsdk_char) ? 1 : varHeaders[i].count;
+			int count = (varHeaders[i].type == VarDataType::Char) ? 1 : varHeaders[i].count;
 			for(j=0; j<count; j++)
 			{
 				if((i+j) > 0)
@@ -123,7 +130,7 @@ void writeCSVVarHeaders(FILE *file, IRHeader *header, IRVarHeader *varHeaders)
 
 		for(i=0; i<header->numVars; i++)
 		{
-			int count = (varHeaders[i].type == irsdk_char) ? 1 : varHeaders[i].count;
+			int count = (varHeaders[i].type == VarDataType::Char) ? 1 : varHeaders[i].count;
 			for(j=0; j<count; j++)
 			{
 				if((i+j) > 0)
@@ -136,7 +143,7 @@ void writeCSVVarHeaders(FILE *file, IRHeader *header, IRVarHeader *varHeaders)
 
 		for(i=0; i<header->numVars; i++)
 		{
-			int count = (varHeaders[i].type == irsdk_char) ? 1 : varHeaders[i].count;
+			int count = (varHeaders[i].type == VarDataType::Char) ? 1 : varHeaders[i].count;
 			for(j=0; j<count; j++)
 			{
 				if((i+j) > 0)
@@ -144,12 +151,12 @@ void writeCSVVarHeaders(FILE *file, IRHeader *header, IRVarHeader *varHeaders)
 
 				switch(varHeaders[i].type)
 				{
-				case irsdk_char: fputs("string", file); break;
-				case irsdk_bool: fputs("boolean", file); break;
-				case irsdk_int: fputs("integer", file); break;
-				case irsdk_bitField: fputs("bitfield", file); break;
-				case irsdk_float: fputs("float", file); break;
-				case irsdk_double: fputs("double", file); break;
+				case VarDataType::Char: fputs("string", file); break;
+				case VarDataType::Bool: fputs("boolean", file); break;
+				case VarDataType::Int32: fputs("integer", file); break;
+				case VarDataType::Bitmask: fputs("bitfield", file); break;
+				case VarDataType::Float: fputs("float", file); break;
+				case VarDataType::Double: fputs("double", file); break;
 				default: fputs("unknown", file); break;
 				}
 			}
@@ -158,18 +165,18 @@ void writeCSVVarHeaders(FILE *file, IRHeader *header, IRVarHeader *varHeaders)
 	}
 }
 
-void writeCSVData(FILE *file, IRHeader *header, IRVarHeader *varHeaders, char *lineBuf)
+void writeCSVData(FILE *file, DataHeader *header, VarDataHeader *varHeaders, char *lineBuf)
 {
 	if(file && header && varHeaders && lineBuf)
 	{
 		int i, j;
-		const IRVarHeader *rec;
+		const VarDataHeader *rec;
 
 		for(i=0; i<header->numVars; i++)
 		{
 			rec = &varHeaders[i];
 			//strings are an array of chars
-			int count = (rec->type == irsdk_char) ? 1 : rec->count;
+			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(j=0; j<count; j++)
 			{
@@ -178,17 +185,17 @@ void writeCSVData(FILE *file, IRHeader *header, IRVarHeader *varHeaders, char *l
 
 				switch(rec->type)
 				{
-				case irsdk_char:
+				case VarDataType::Char:
 					fprintf(file, "%s", (char *)(lineBuf+rec->offset) ); break;
-				case irsdk_bool:
+				case VarDataType::Bool:
 					fprintf(file, "%d", ((bool *)(lineBuf+rec->offset))[j]); break;
-				case irsdk_int:
+				case VarDataType::Int32:
 					fprintf(file, "%d", ((int *)(lineBuf+rec->offset))[j]); break;
-				case irsdk_bitField:
+				case VarDataType::Bitmask:
 					fprintf(file, "%d", ((int *)(lineBuf+rec->offset))[j]); break;
-				case irsdk_float:
+				case VarDataType::Float:
 					fprintf(file, "%g", ((float *)(lineBuf+rec->offset))[j]); break;
-				case irsdk_double:
+				case VarDataType::Double:
 					fprintf(file, "%g", ((double *)(lineBuf+rec->offset))[j]); break;
 				default: 
 					printf("found unknown type!\n"); break;
@@ -201,13 +208,13 @@ void writeCSVData(FILE *file, IRHeader *header, IRVarHeader *varHeaders, char *l
 
 int main(int argc, char **argv)
 {
-	IRHeader header;
-	IRDiskSubHeader diskSubHeader;
+	DataHeader header;
+	DiskSubHeader diskSubHeader;
 
 	char *sessionInfoString = nullptr;
-	IRVarHeader *varHeaders = nullptr;
+	VarDataHeader *varHeaders = nullptr;
 	char *varBuf = nullptr;
-	int len;
+	size_t len;
 
 	if(argc > 1)
 	{
@@ -222,20 +229,20 @@ int main(int argc, char **argv)
 				len = sizeof(diskSubHeader);
 				if(len == (int)fread(&diskSubHeader, 1, len, file))
 				{
-					sessionInfoString = new char[header.sessionInfoLen];
+					sessionInfoString = new char[header.session.len];
 					if(sessionInfoString)
 					{
-						fseek(file, header.sessionInfoOffset, SEEK_SET);
-						len = header.sessionInfoLen;
+						fseek(file, header.session.offset, SEEK_SET);
+						len = header.session.len;
 						if(len == (int)fread(sessionInfoString, 1, len, file))
 						{
-							sessionInfoString[header.sessionInfoLen-1] = '\0';
+							sessionInfoString[header.session.len-1] = '\0';
 						
-							varHeaders = new IRVarHeader[header.numVars];
+							varHeaders = new VarDataHeader[header.numVars];
 							if(varHeaders)
 							{
 								fseek(file, header.varHeaderOffset, SEEK_SET);
-								len = sizeof(IRVarHeader)*header.numVars;
+								len = sizeof(VarDataHeader)*header.numVars;
 								if(len == (int)fread(varHeaders, 1, len, file))
 								{
 									varBuf = new char[header.bufLen];
@@ -277,14 +284,14 @@ int main(int argc, char **argv)
 										printf("failed to allocate varLineBuffer\n");
 								}
 								else
-									printf("failed to read IRVarHeader\n");
+									printf("failed to read VarDataHeader\n");
 
 								if(varHeaders)
 									delete []varHeaders;
 								varHeaders = nullptr;
 							}
 							else
-								printf("failed to allocate IRVarHeader\n");
+								printf("failed to allocate VarDataHeader\n");
 						}
 						else
 							printf("failed to read sessionInfoString\n");
@@ -300,7 +307,7 @@ int main(int argc, char **argv)
 					printf("error reading IRDiskSubHeader\n");
 			}
 			else
-				printf("error reading IRHeader\n");
+				printf("error reading DataHeader\n");
 
 			fclose(file);
 		}

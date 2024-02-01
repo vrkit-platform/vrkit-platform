@@ -21,6 +21,7 @@
 #include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/YamlParser.h>
 
+#include <IRacingTools/SDK/VarData.h>
 #include "console.h"
 #include <IRacingTools/SDK/LiveClient.h>
 
@@ -688,7 +689,7 @@ void monitorConnectionStatus()
     // keep track of connection status
     static bool wasConnected = false;
 
-    const auto isConnected = LiveClient::instance().isConnected();
+    const auto isConnected = LiveClient::GetInstance().isConnected();
     if (wasConnected != isConnected)
     {
         setCursorPosition(0, 1);
@@ -709,7 +710,7 @@ void monitorConnectionStatus()
 void run()
 {
     // wait up to 16 ms for start of session or new data
-    if (LiveClient::instance().waitForData(16))
+    if (LiveClient::GetInstance().waitForData(16))
     {
         bool wasUpdated = false;
 
@@ -719,9 +720,9 @@ void run()
             wasUpdated = true;
 
         // only process session string if it changed
-        if (LiveClient::instance().wasSessionStrUpdated())
+        if (LiveClient::GetInstance().wasSessionStrUpdated())
         {
-            processYAMLSessionString(LiveClient::instance().getSessionStr());
+            //processYAMLSessionString(LiveClient::GetInstance().getSessionStr());
             wasUpdated = true;
         }
 

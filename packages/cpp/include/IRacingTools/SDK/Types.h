@@ -555,96 +555,15 @@ enum class KnownVarName {
     CarIdxTrackSurface,
 };
 
+constexpr auto KnownVarNames = magic_enum::enum_names<KnownVarName>();
 
 //----
 //
 
-struct VarDataHeader {
-    VarDataType type; // VarDataType
-    int offset;       // offset fron start of buffer row
-    int count;        // number of entrys (array)
-    // so length in bytes would be VarDataTypeBytes[type] * count
-    bool countAsTime;
-    char pad[3]; // (16 byte align)
 
-    char name[Resources::MaxStringLength];
-    char desc[Resources::MaxDescriptionLength];
-    char unit[Resources::MaxStringLength]; // something like "kg/m^2"
-
-    void clear() {
-        type = VarDataType::Char;
-        offset = 0;
-        count = 0;
-        countAsTime = false;
-        memset(name, 0, sizeof(name));
-        memset(desc, 0, sizeof(name));
-        memset(unit, 0, sizeof(name));
-    }
-};
-
-struct VarDataBufDescriptor {
-    int tickCount; // used to detect changes in data
-    int bufOffset; // offset from header
-    int pad[2];    // (16 byte align)
-};
-
-struct SessionInfoState {
-    uint32_t count;
-    uint32_t len;
-    uint32_t offset;
-};
-
-struct DataHeader {
-    Resources::VersionType ver;      // this api header version, see Resources::Version
-    ConnectionStatus status;   // bitfield using IRStatusField
-    int tickRate; // ticks per second (60 or 360 etc)
-
-    // session information, updated periodicaly
-    SessionInfoState sessionInfo;
-    // int sessionInfoUpdate; // Incremented when session info changes
-    // int sessionInfoLen;    // Length in bytes of session info string
-    // int sessionInfoOffset; // Session info, encoded in YAML format
-
-    // State data, output at tickRate
-
-    int numVars;         // length of arra pointed to by varHeaderOffset
-    int varHeaderOffset; // offset to VarDataHeader[numVars] array, Describes the variables received in varBuf
-
-    int numBuf;                                     // <= Resources::MaxBufferCount (3 for now)
-    int bufLen;                                     // length in bytes for one line
-    int pad1[2];                                    // (16 byte align)
-    VarDataBufDescriptor varBuf[Resources::MaxBufferCount]; // buffers of data being written to
-};
-
-// sub header used when writing telemetry to disk
-struct DiskSubHeader {
-    time_t sessionStartDate;
-    double sessionStartTime;
-    double sessionEndTime;
-    int sessionLapCount;
-    int sessionRecordCount;
-};
-
-// DLLEXPORT bool irsdk_startup();
-// DLLEXPORT void  irsdk_shutdown();
-//
-// DLLEXPORT bool irsdk_getNewData(char *data);
-// DLLEXPORT bool irsdk_waitForDataReady(int timeOut, char *data);
-// DLLEXPORT bool irsdk_isConnected();
-//
-// DLLEXPORT const DataHeader *irsdk_getHeader();
-// DLLEXPORT const char *irsdk_getData(int index);
-// DLLEXPORT const char *irsdk_getSessionInfoStr();
-// DLLEXPORT int irsdk_getSessionInfoStrUpdate(); // incrementing index that indicates new session info string
-//
-// DLLEXPORT const VarDataHeader *irsdk_getVarHeaderPtr();
-// DLLEXPORT const VarDataHeader *irsdk_getVarHeaderEntry(int index);
-//
-// DLLEXPORT int irsdk_varNameToIndex(const char *name);
-// DLLEXPORT int irsdk_varNameToOffset(const char *name);
 
 //----
-// Remote controll the sim by sending these windows messages
+// Remote control the sim by sending these windows messages
 // camera and replay commands only work when you are out of your car,
 // pit commands only work when in your car
 enum class BroadcastMessage {
@@ -656,7 +575,7 @@ enum class BroadcastMessage {
     // CameraState, unused, unused
     ReplaySetPlaySpeed,
     // speed, slowMotion, unused
-    irskd_BroadcastReplaySetPlayPosition,
+    ReplaySetPlayPosition,
     // ReplayPositionMode, Frame Number (high, low)
     ReplaySearch,
     // ReplaySearchMode, unused, unused
@@ -664,7 +583,7 @@ enum class BroadcastMessage {
     // ReplayStateMode, unused, unused
     ReloadTextures,
     // ReloadTexturesMode, carIdx, unused
-    ChatComand,
+    ChatCommand,
     // ChatCommandMode, subCommand, unused
     PitCommand,
     // PitCommandMode, parameter
@@ -791,36 +710,6 @@ enum class VideoCaptureMode {
     // show video timer in upper left corner of display
     HideVideoTimer,
     // hide video timer
-};
-
-// helper class to keep track of our variables index
-// Create a global instance of this and it will take care of the details for you.
-class VarHolder
-{
-public:
-    VarHolder();
-    explicit VarHolder(const char *name);
-
-    void setVarName(const char *name);
-
-    // returns VarDataType as int so we don't depend on IRTypes.h
-    int getType();
-    int getCount();
-    bool isValid();
-
-    // entry is the array offset, or 0 if not an array element
-    bool getBool(int entry = 0);
-    int getInt(int entry = 0);
-    float getFloat(int entry = 0);
-    double getDouble(int entry = 0);
-
-protected:
-    bool checkIdx();
-
-    static const int max_string = 32; //Resources::MaxStringLength
-    char m_name[max_string];
-    int m_idx;
-    int m_statusID;
 };
 
 }

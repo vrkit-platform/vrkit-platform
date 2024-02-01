@@ -26,7 +26,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
 
+#include <string>
+
 namespace IRacingTools::SDK::Utils {
 // super simple YAML parser
-bool ParseYaml(const char *data, const char* path, const char **val, int *len);
+bool ParseYaml(const char *data, const std::string_view& path, const char **val, int *len);
 }

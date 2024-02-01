@@ -52,11 +52,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma warning(disable:4996) //_CRT_SECURE_NO_WARNINGS
 
 #include <windows.h>
-#include <stdio.h>
+#include <cstdio>
 #include <conio.h>
-#include <signal.h>
-#include <time.h>
+#include <csignal>
+#include <ctime>
 
+#include "IRacingTools/SDK/LiveConnection.h"
+#include "IRacingTools/SDK/Utils/YamlParser.h"
+#include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingTools/SDK/LiveClient.h>
 #include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/YamlParser.h>
 
@@ -65,6 +69,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // 16 ms timeout
 #define TIMEOUT 16
+
+using namespace IRacingTools::SDK;
 
 char *g_data = NULL;
 int g_nData = 0;
@@ -96,8 +102,8 @@ int recordCount;
 long int recordCountOffset;
 
 // place holders for data that needs to be updated in our IBT file
-irsdk_header g_diskHeader;
-irsdk_diskSubHeader g_diskSubHeader;
+DataHeader g_diskHeader;
+DiskSubHeader g_diskSubHeader;
 int g_diskSubHeaderOffset = 0;
 int g_diskLastLap = -1;
 
@@ -155,7 +161,7 @@ void writeSessionItem(FILE *file, const char *path, const char *desc)
 	int valstrlen; 
 
 	fprintf(file, desc);
-	if(ParseYaml(irsdk_getSessionInfoStr(), path, &valstr, &valstrlen))
+	if(Utils::ParseYaml(LiveConnection::GetInstance().getSessionInfoStr(), path, &valstr, &valstrlen))
 		fwrite(valstr, 1, valstrlen, file);
 	fprintf(file, "\n");
 }
@@ -196,7 +202,7 @@ void fileWriteReservedFloat(FILE *file, long int pos, double value)
 }
 
 // log header to ibt binary format
-void logHeaderToIBT(const irsdk_header *header, FILE *file, time_t t_time)
+void logHeaderToIBT(const DataHeader *header, FILE *file, time_t t_time)
 {
 	if(header && file)
 	{
@@ -214,11 +220,11 @@ void logHeaderToIBT(const irsdk_header *header, FILE *file, time_t t_time)
 
 		// pointer to var definitions
 		g_diskHeader.varHeaderOffset = offset;
-		offset += g_diskHeader.numVars * sizeof(irsdk_varHeader);
+		offset += g_diskHeader.numVars * sizeof(VarDataHeader);
 
 		// pointer to session info string
-		g_diskHeader.sessionInfoOffset = offset;
-		offset += g_diskHeader.sessionInfoLen;
+		g_diskHeader.session.offset = offset;
+		offset += g_diskHeader.session.len;
 
 		// pointer to start of buffered data
 		g_diskHeader.numBuf = 1;
@@ -226,15 +232,15 @@ void logHeaderToIBT(const irsdk_header *header, FILE *file, time_t t_time)
 
 		fwrite(&g_diskHeader, 1, sizeof(g_diskHeader), file);
 		fwrite(&g_diskSubHeader, 1, sizeof(g_diskSubHeader), file);
-		fwrite(irsdk_getVarHeaderPtr(), 1, g_diskHeader.numVars * sizeof(irsdk_varHeader), file);
-		fwrite(irsdk_getSessionInfoStr(), 1, g_diskHeader.sessionInfoLen, file);
+		fwrite(LiveConnection::GetInstance().getVarHeaderPtr(), 1, g_diskHeader.numVars * sizeof(VarDataHeader), file);
+		fwrite(LiveConnection::GetInstance().getSessionInfoStr(), 1, g_diskHeader.session.len, file);
 
 		if(ftell(file) != g_diskHeader.varBuf[0].bufOffset)
-			printf("ERROR: file pointer mismach: %d != %d\n", ftell(file), g_diskHeader.varBuf[0].bufOffset);
+			printf("ERROR: file pointer mismatch: %ld != %d\n", ftell(file), g_diskHeader.varBuf[0].bufOffset);
 	}
 }
 
-void logDataToIBT(const irsdk_header *header, const char *data, FILE *file)
+void logDataToIBT(const DataHeader *header, const char *data, FILE *file)
 {
 	// write data to disk, and update irsdk_diskSubHeader in memory
 	if(header && data && file)
@@ -281,13 +287,13 @@ void logCloseIBT(FILE *file)
 }
 
 // dump data in CSV format
-void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
+void logHeaderToCSV(const DataHeader *header, FILE *file, time_t t_time)
 {
 	if(header && file)
 	{
 		// remove trailing ... from string
-		const char *sessionStr = irsdk_getSessionInfoStr();
-		int len = strlen(sessionStr);
+		const char *sessionStr = LiveConnection::GetInstance().getSessionInfoStr();
+		size_t len = strlen(sessionStr);
 		const char *pStr = strstr(sessionStr, "...");
 		if(pStr)
 			len = pStr - sessionStr;
@@ -295,12 +301,12 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 		// and write the whole thing out
 		fwrite(sessionStr, 1, len,  file);
 
-		// reserve space for entrys that will be filled in later
+		// reserve space for entries that will be filled in later
 		fprintf(file, "SessionLogInfo:\n");
 
 		// get file open time as a string
 		char tstr[512];
-		tm tm_time;
+		tm tm_time{};
 		localtime_s(&tm_time, &t_time);
 		strftime(tstr, 512, " %Y-%m-%d %H:%M:%S", &tm_time);
 		tstr[512-1] = '\0';
@@ -328,7 +334,7 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 		// dump the var names
 		for(int i=0; i<header->numVars; i++)
 		{
-			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
+			const VarDataHeader *rec = LiveConnection::GetInstance().getVarHeaderEntry(i);
 			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(int j=0; j<count; j++)
@@ -347,7 +353,7 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 		// dump the var descriptions
 		for(int i=0; i<header->numVars; i++)
 		{
-			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
+			const VarDataHeader *rec = LiveConnection::GetInstance().getVarHeaderEntry(i);
 			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(int j=0; j<count; j++)
@@ -363,7 +369,7 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 		// dump the var units
 		for(int i=0; i<header->numVars; i++)
 		{
-			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
+			const VarDataHeader *rec = LiveConnection::GetInstance().getVarHeaderEntry(i);
 			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(int j=0; j<count; j++)
@@ -379,7 +385,7 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 		// dump the var data type
 		for(int i=0; i<header->numVars; i++)
 		{
-			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
+			const VarDataHeader *rec = LiveConnection::GetInstance().getVarHeaderEntry(i);
 			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(int j=0; j<count; j++)
@@ -391,7 +397,7 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 				{
 				case VarDataType::Char: fputs("string", file); break;
 				case VarDataType::Bool: fputs("boolean", file); break;
-				case VarDataType::Int: fputs("integer", file); break;
+				case VarDataType::Int32: fputs("integer", file); break;
 				case VarDataType::Bitmask: fputs("bitfield", file); break;
 				case VarDataType::Float: fputs("float", file); break;
 				case VarDataType::Double: fputs("double", file); break;
@@ -405,25 +411,26 @@ void logHeaderToCSV(const irsdk_header *header, FILE *file, time_t t_time)
 
 void logStateToFile(time_t t_time)
 {
-	if(irsdk_getSessionInfoStr())
+    auto sesStr = LiveConnection::GetInstance().getSessionInfoStr();
+    if(sesStr)
 	{
 		FILE *file = openUniqueFile("irsdk_session", "txt", t_time, false);
 		if(file)
 		{
 			// dump session information to disk
-			fputs(irsdk_getSessionInfoStr(), file);
+			fputs(sesStr, file);
 			fclose(file);
 		}
 	}
 }
 
-void logDataToCSV(const irsdk_header *header, const char *data, FILE *file)
+void logDataToCSV(const DataHeader *header, const char *data, FILE *file)
 {
 	if(header && data && file)
 	{
 		for(int i=0; i<header->numVars; i++)
 		{
-			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
+			const VarDataHeader *rec = LiveConnection::GetInstance().getVarHeaderEntry(i);
 			int count = (rec->type == VarDataType::Char) ? 1 : rec->count;
 
 			for(int j=0; j<count; j++)
@@ -438,9 +445,8 @@ void logDataToCSV(const irsdk_header *header, const char *data, FILE *file)
 					fprintf(file, "%s", (char *)(data+rec->offset) ); break;
 				case VarDataType::Bool:
 					fprintf(file, "%d", ((bool *)(data+rec->offset))[j]); break;
-				case VarDataType::Int:
-					fprintf(file, "%d", ((int *)(data+rec->offset))[j]); break;
-				case VarDataType::Bitmask:
+				case VarDataType::Int32:
+                case VarDataType::Bitmask:
 					fprintf(file, "%d", ((int *)(data+rec->offset))[j]); break;
 				case VarDataType::Float:
 					fprintf(file, "%g", ((float *)(data+rec->offset))[j]); break;
@@ -485,32 +491,32 @@ void logDataToCSV(const irsdk_header *header, const char *data, FILE *file)
 }
 
 // dump data to display, for debugging
-void logHeaderToDisplay(const irsdk_header *header)
+void logHeaderToDisplay(const DataHeader *header)
 {
 	if(header)
 	{
 		printf("\n\nSession Info String:\n\n");
 
 		// puts is safer in case the string contains '%' characters
-		puts(irsdk_getSessionInfoStr());
+		puts(LiveConnection::GetInstance().getSessionInfoStr());
 
 		printf("\n\nVariable Headers:\n\n");
 		for(int i=0; i<header->numVars; i++)
 		{
-			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
+			const VarDataHeader *rec = LiveConnection::GetInstance().getVarHeaderEntry(i);
 			printf("%s, %s, %s\n", rec->name, rec->desc, rec->unit);
 		}
 		printf("\n\n");
 	}
 }
 
-void logDataToDisplay(const irsdk_header *header, const char *data)
+void logDataToDisplay(const DataHeader *header, const char *data)
 {
 	if(header && data)
 	{
 		for(int i=0; i<header->numVars; i++)
 		{
-			const irsdk_varHeader *rec = irsdk_getVarHeaderEntry(i);
+			const VarDataHeader *rec = LiveConnection::GetInstance().getVarHeaderEntry(i);
 
 			printf("%s[", rec->name);
 
@@ -528,7 +534,7 @@ void logDataToDisplay(const irsdk_header *header, const char *data)
 					printf("%s", (char *)(data+rec->offset) ); break;
 				case VarDataType::Bool:
 					printf("%d", ((bool *)(data+rec->offset))[j] ); break;
-				case VarDataType::Int:
+				case VarDataType::Int32:
 					printf("%d", ((int *)(data+rec->offset))[j] ); break;
 				case VarDataType::Bitmask:
 					printf("0x%08x", ((int *)(data+rec->offset))[j] ); break;
@@ -553,16 +559,16 @@ void logDataToDisplay(const irsdk_header *header, const char *data)
 	}
 }
 
-void initData(const irsdk_header *header, char* &data, int &nData)
+void initData(const DataHeader *header, char* &data, int &nData)
 {
 	if(data) delete [] data;
 	nData = header->bufLen;
 	data = new char[nData];
 
 	// grab the memory offset to the playerInCar flag
-	g_playerInCarOffset = irsdk_varNameToOffset(g_playerInCarString);
-	g_sessionTimeOffset = irsdk_varNameToOffset(g_sessionTimeString);
-	g_lapIndexOffset = irsdk_varNameToOffset(g_lapIndexString);
+	g_playerInCarOffset = LiveConnection::GetInstance().varNameToOffset(g_playerInCarString);
+	g_sessionTimeOffset = LiveConnection::GetInstance().varNameToOffset(g_sessionTimeString);
+	g_lapIndexOffset = LiveConnection::GetInstance().varNameToOffset(g_lapIndexString);
 
 	// get the playerCarIdx
 	//const char *valstr;
@@ -573,7 +579,7 @@ void initData(const irsdk_header *header, char* &data, int &nData)
 	//	playerCarIdx = atoi(valstr);
 }
 
-bool canLogToFile(const irsdk_header *header, const char *data)
+bool canLogToFile(const DataHeader *header, const char *data)
 {
 	(void)header;
 	(void)data;
@@ -633,7 +639,7 @@ void end_session(bool shutdown)
 
 	if(shutdown)
 	{
-		irsdk_shutdown();
+        LiveConnection::GetInstance().cleanup();
 		timeEndPeriod(1);
 	}
 }
@@ -671,9 +677,9 @@ int main()
 	while(!_kbhit())
 	{
 		// wait for new data and copy it into the g_data buffer, if g_data is not null
-		if(irsdk_waitForDataReady(TIMEOUT, g_data))
+		if(LiveConnection::GetInstance().waitForDataReady(TIMEOUT, g_data))
 		{
-			const irsdk_header *pHeader = irsdk_getHeader();
+			auto pHeader = LiveConnection::GetInstance().getHeader();
 			if(pHeader)
 			{
 
@@ -725,7 +731,7 @@ int main()
 			}
 		}
 		// session ended
-		else if(!irsdk_isConnected())
+		else if(!LiveConnection::GetInstance().isConnected())
 			end_session(false);
 	}
 

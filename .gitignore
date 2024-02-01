@@ -8,3 +8,6 @@ __pycache__
 venv
 /.vs/
 /vcpkg_installed*
+/tmp*
+CMakeLists.txt.user
+*orig.json

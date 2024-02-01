@@ -66,13 +66,13 @@ bool DiskClient::openFile(const fs::path& path)
 			}
 
                 sessionInfoBuf_.reset();// = new char[header_.sessionInfo.len];
-    assert(sessionInfoBuf_->resize(header_.sessionInfo.len));
+    assert(sessionInfoBuf_->resize(header_.session.len));
 
                 auto data = sessionInfoBuf_->data();
-					std::fseek(ibtFile_, header_.sessionInfo.offset, SEEK_SET);
-					assert(std::fread(data, 1, header_.sessionInfo.len, ibtFile_) == static_cast<size_t>(header_.sessionInfo.len));
+					std::fseek(ibtFile_, header_.session.offset, SEEK_SET);
+					assert(std::fread(data, 1, header_.session.len, ibtFile_) == static_cast<size_t>(header_.session.len));
 
-						data[header_.sessionInfo.len-1] = '\0';
+						data[header_.session.len-1] = '\0';
 
 						varHeaders_.resize(header_.numVars);
 

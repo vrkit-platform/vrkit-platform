@@ -29,6 +29,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <filesystem>
 
+#include "DataHeader.h"
+#include "DiskSubHeader.h"
 #include "Types.h"
 #include "Utils/Buffer.h"
 

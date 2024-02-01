@@ -25,38 +25,33 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstdio>
+#include <cassert>
 #include <cstring>
 
-#include <IRacingTools/SDK/LiveClient.h>
-#include <IRacingTools/SDK/Types.h>
-#include <cassert>
-
-#include <IRacingTools/SDK/LiveConnection.h>
 #include <magic_enum.hpp>
 
+#include <IRacingTools/SDK/LiveClient.h>
+
+#include <IRacingTools/SDK/LiveConnection.h>
+#include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/YamlParser.h>
+#include <IRacingTools/SDK/VarData.h>
 
 #pragma warning(disable : 4996)
 namespace IRacingTools::SDK {
 using namespace Utils;
 
-LiveClient &LiveClient::instance() {
-    static LiveClient INSTANCE;
-    return INSTANCE;
-}
-
 bool LiveClient::waitForData(int timeoutMS) {
-    auto& conn = LiveConnection::GetInstance();
+    auto &conn = LiveConnection::GetInstance();
 
     // wait for start of session or new data
-    if (conn.irsdk_waitForDataReady(timeoutMS, data_) && conn.irsdk_getHeader()) {
+    if (conn.waitForDataReady(timeoutMS, data_) && conn.getHeader()) {
         // if new connection, or data changed lenght then init
-        if (!data_ || nData_ != conn.irsdk_getHeader()->bufLen) {
+        if (!data_ || nData_ != conn.getHeader()->bufLen) {
             // allocate memory to hold incoming data from sim
             if (data_)
                 delete[] data_;
-            nData_ = conn.irsdk_getHeader()->bufLen;
+            nData_ = conn.getHeader()->bufLen;
             data_ = new char[nData_];
 
             // indicate a new connection
@@ -66,10 +61,10 @@ bool LiveClient::waitForData(int timeoutMS) {
             lastSessionCt_ = -1;
 
             // and try to fill in the data
-            if (conn.irsdk_getNewData(data_))
+            if (conn.getNewData(data_))
                 return true;
         } else if (data_) {
-            // else we are allready initialized, and data is ready for processing
+            // else we are already initialized, and data is ready for processing
             return true;
         }
     } else if (!isConnected()) {
@@ -86,8 +81,8 @@ bool LiveClient::waitForData(int timeoutMS) {
 }
 
 void LiveClient::shutdown() {
-    auto& conn = LiveConnection::GetInstance();
-    conn.irsdk_shutdown();
+    auto &conn = LiveConnection::GetInstance();
+    conn.cleanup();
 
     delete[] data_;
     data_ = nullptr;
@@ -97,37 +92,37 @@ void LiveClient::shutdown() {
 }
 
 bool LiveClient::isConnected() const {
-    auto& conn = LiveConnection::GetInstance();
-    return data_ != nullptr && conn.irsdk_isConnected();
+    auto &conn = LiveConnection::GetInstance();
+    return data_ != nullptr && conn.isConnected();
 }
 
-int LiveClient::getVarIdx(const char *name) const {
-    auto& conn = LiveConnection::GetInstance();
+int LiveClient::getVarIdx(const std::string_view &name) const {
+    auto &conn = LiveConnection::GetInstance();
     if (isConnected()) {
-        return conn.irsdk_varNameToIndex(name);
+        return conn.varNameToIndex(name);
     }
 
     return -1;
 }
 
-int /*VarDataType*/ LiveClient::getVarType(int idx) const {
-    auto& conn = LiveConnection::GetInstance();
+VarDataType LiveClient::getVarType(int idx) const {
+    auto &conn = LiveConnection::GetInstance();
     if (isConnected()) {
-        if (const VarDataHeader *vh = conn.irsdk_getVarHeaderEntry(idx)) {
-            return magic_enum::enum_underlying(vh->type);
+        if (const VarDataHeader *vh = conn.getVarHeaderEntry(idx)) {
+            return vh->type;
         } else {
             //invalid variable index
             assert(false);
         }
     }
 
-    return static_cast<int>(VarDataType::Char);
+    return VarDataType::Char;
 }
 
 int LiveClient::getVarCount(int idx) const {
-    auto& conn = LiveConnection::GetInstance();
+    auto &conn = LiveConnection::GetInstance();
     if (isConnected()) {
-        const VarDataHeader *vh = conn.irsdk_getVarHeaderEntry(idx);
+        const VarDataHeader *vh = conn.getVarHeaderEntry(idx);
         if (vh) {
             return vh->count;
         } else {
@@ -140,9 +135,9 @@ int LiveClient::getVarCount(int idx) const {
 }
 
 bool LiveClient::getVarBool(int idx, int entry) {
-    auto& conn = LiveConnection::GetInstance();
+    auto &conn = LiveConnection::GetInstance();
     if (isConnected()) {
-        const VarDataHeader *vh = conn.irsdk_getVarHeaderEntry(idx);
+        const VarDataHeader *vh = conn.getVarHeaderEntry(idx);
         if (vh) {
             if (entry >= 0 && entry < vh->count) {
                 const char *data = data_ + vh->offset;
@@ -150,26 +145,26 @@ bool LiveClient::getVarBool(int idx, int entry) {
                     // 1 byte
                     case VarDataType::Char:
                     case VarDataType::Bool:
-                        return (((const char *)data)[entry]) != 0;
-                    break;
+                        return (((const char *) data)[entry]) != 0;
+                        break;
 
                     // 4 bytes
                     case VarDataType::Int32:
                     case VarDataType::Bitmask:
-                        return (((const int *)data)[entry]) != 0;
-                    break;
+                        return (((const int *) data)[entry]) != 0;
+                        break;
 
                     // test float/double for greater than 1.0 so that
                     // we have a chance of this being usefull
                     // technically there is no right conversion...
                     case VarDataType::Float:
                         return (reinterpret_cast<const float *>(data)[entry]) >= 1.0f;
-                    break;
+                        break;
 
                     // 8 bytes
                     case VarDataType::Double:
                         return (reinterpret_cast<const double *>(data)[entry]) >= 1.0;
-                    break;
+                        break;
                 }
             } else {
                 // invalid offset
@@ -185,9 +180,9 @@ bool LiveClient::getVarBool(int idx, int entry) {
 }
 
 int LiveClient::getVarInt(int idx, int entry) {
-    auto& conn = LiveConnection::GetInstance();
+    auto &conn = LiveConnection::GetInstance();
     if (isConnected()) {
-        const VarDataHeader *vh = conn.irsdk_getVarHeaderEntry(idx);
+        const VarDataHeader *vh = conn.getVarHeaderEntry(idx);
         if (vh) {
             if (entry >= 0 && entry < vh->count) {
                 const char *data = data_ + vh->offset;
@@ -195,23 +190,23 @@ int LiveClient::getVarInt(int idx, int entry) {
                     // 1 byte
                     case VarDataType::Char:
                     case VarDataType::Bool:
-                        return (int)(((const char *)data)[entry]);
-                    break;
+                        return (int) (((const char *) data)[entry]);
+                        break;
 
                     // 4 bytes
                     case VarDataType::Int32:
                     case VarDataType::Bitmask:
-                        return (int)(((const int *)data)[entry]);
-                    break;
+                        return (int) (((const int *) data)[entry]);
+                        break;
 
                     case VarDataType::Float:
                         return static_cast<int>(((const float *) data)[entry]);
-                    break;
+                        break;
 
                     // 8 bytes
                     case VarDataType::Double:
                         return static_cast<int>(((const double *) data)[entry]);
-                    break;
+                        break;
                 }
             } else {
                 // invalid offset
@@ -227,9 +222,9 @@ int LiveClient::getVarInt(int idx, int entry) {
 }
 
 float LiveClient::getVarFloat(int idx, int entry) {
-    auto& conn = LiveConnection::GetInstance();
+    auto &conn = LiveConnection::GetInstance();
     if (isConnected()) {
-        const VarDataHeader *vh = conn.irsdk_getVarHeaderEntry(idx);
+        const VarDataHeader *vh = conn.getVarHeaderEntry(idx);
         if (vh) {
             if (entry >= 0 && entry < vh->count) {
                 const char *data = data_ + vh->offset;
@@ -237,23 +232,23 @@ float LiveClient::getVarFloat(int idx, int entry) {
                     // 1 byte
                     case VarDataType::Char:
                     case VarDataType::Bool:
-                        return (float)(((const char *)data)[entry]);
-                    break;
+                        return (float) (((const char *) data)[entry]);
+                        break;
 
                     // 4 bytes
                     case VarDataType::Int32:
                     case VarDataType::Bitmask:
                         return static_cast<float>(((const int *) data)[entry]);
-                    break;
+                        break;
 
                     case VarDataType::Float:
-                        return (float)(((const float *)data)[entry]);
-                    break;
+                        return (float) (((const float *) data)[entry]);
+                        break;
 
                     // 8 bytes
                     case VarDataType::Double:
                         return static_cast<float>(((const double *) data)[entry]);
-                    break;
+                        break;
                 }
             } else {
                 // invalid offset
@@ -271,7 +266,7 @@ float LiveClient::getVarFloat(int idx, int entry) {
 double LiveClient::getVarDouble(int idx, int entry) {
     auto &conn = LiveConnection::GetInstance();
     if (isConnected()) {
-        const VarDataHeader *vh = conn.irsdk_getVarHeaderEntry(idx);
+        const VarDataHeader *vh = conn.getVarHeaderEntry(idx);
         if (vh) {
             if (entry >= 0 && entry < vh->count) {
                 const char *data = data_ + vh->offset;
@@ -310,128 +305,75 @@ double LiveClient::getVarDouble(int idx, int entry) {
     return 0.0;
 }
 int LiveClient::getSessionCt() {
-    auto& conn = LiveConnection::GetInstance();
-    return conn.irsdk_getSessionInfoStrUpdate();
+    auto &conn = LiveConnection::GetInstance();
+    return conn.getSessionInfoStrUpdate();
 }
 
 //path is in the form of "DriverInfo:Drivers:CarIdx:{%d}UserName:"
-int LiveClient::getSessionStrVal(const char *path, char *val, int valLen) {
-    auto& conn = LiveConnection::GetInstance();
-    if (isConnected() && path && val && valLen > 0) {
-        // track changes in string
-        lastSessionCt_ = getSessionCt();
+int LiveClient::getSessionStrVal(const std::string_view &path, char *val, int valLen) {
+    auto &conn = LiveConnection::GetInstance();
+    if (!isConnected() || path.empty() || !val || !valLen) {
+        return 0;
+    }
 
-        const char *tVal = nullptr;
-        int tValLen = 0;
-        if (ParseYaml(conn.irsdk_getSessionInfoStr(), path, &tVal, &tValLen)) {
-            // dont overflow out buffer
-            int len = tValLen;
-            if (len > valLen)
-                len = valLen;
+    // track changes in string
+    lastSessionCt_ = getSessionCt();
 
-            // copy what we can, even if buffer too small
-            memcpy(val, tVal, len);
-            val[len] = '\0'; // origional string has no null termination...
+    const char *tVal = nullptr;
+    int tValLen = 0;
+    if (ParseYaml(conn.getSessionInfoStr(), path, &tVal, &tValLen)) {
+        // dont overflow out buffer
+        int len = tValLen;
+        if (len > valLen)
+            len = valLen;
 
-            // if buffer was big enough, return success
-            if (valLen >= tValLen)
-                return 1;
-            else // return size of buffer needed
-                return -tValLen;
-        }
+        // copy what we can, even if buffer too small
+        memcpy(val, tVal, len);
+        val[len] = '\0'; // origional string has no null termination...
+
+        // if buffer was big enough, return success
+        if (valLen >= tValLen)
+            return 1;
+        else // return size of buffer needed
+            return -tValLen;
     }
 
     return 0;
 }
 
 // get the whole string
-const char *LiveClient::getSessionStr() {
-    auto& conn = LiveConnection::GetInstance();
+std::expected<std::string_view, std::logic_error> LiveClient::getSessionStr() {
+    auto &conn = LiveConnection::GetInstance();
     if (isConnected()) {
         lastSessionCt_ = getSessionCt();
-        return conn.irsdk_getSessionInfoStr();
+        return conn.getSessionInfoStr();
     }
 
-    return nullptr;
+    return std::unexpected(std::logic_error("Session Str not found"));
+}
+bool LiveClient::wasSessionStrUpdated() {
+    return lastSessionCt_ != getSessionCt();
+}
+double LiveClient::getVarDouble(const std::string_view &name, int entry) {
+    return getVarDouble(getVarIdx(name), entry);
+}
+float LiveClient::getVarFloat(const std::string_view &name, int entry) {
+    return getVarFloat(getVarIdx(name), entry);
+}
+int LiveClient::getVarInt(const std::string_view &name, int entry) {
+    return getVarInt(getVarIdx(name), entry);
+}
+bool LiveClient::getVarBool(const std::string_view &name, int entry) {
+    return getVarBool(getVarIdx(name), entry);
+}
+int LiveClient::getVarCount(const std::string_view &name) {
+    return getVarCount(getVarIdx(name));
+}
+VarDataType LiveClient::getVarType(const std::string_view &name) {
+    return getVarType(getVarIdx(name));
+}
+int LiveClient::getStatusId() {
+    return statusId_;
 }
 
-
-//----------------------------------
-
-VarHolder::VarHolder() : m_idx(-1), m_statusID(-1) {
-    m_name[0] = '\0';
-}
-
-VarHolder::VarHolder(const char *name) {
-    m_name[0] = '\0';
-    setVarName(name);
-}
-
-void VarHolder::setVarName(const char *name) {
-    if (!name || 0 != strncmp(name, m_name, sizeof(m_name))) {
-        m_idx = -1;
-        m_statusID = -1;
-
-        if (name) {
-            strncpy(m_name, name, max_string);
-            m_name[max_string - 1] = '\0';
-        } else
-            m_name[0] = '\0';
-    }
-}
-
-bool VarHolder::checkIdx() {
-    if (LiveClient::instance().isConnected()) {
-        if (m_statusID != LiveClient::instance().getStatusID()) {
-            m_statusID = LiveClient::instance().getStatusID();
-            m_idx = LiveClient::instance().getVarIdx(m_name);
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-int /*VarDataType*/ VarHolder::getType() {
-    if (checkIdx())
-        return LiveClient::instance().getVarType(m_idx);
-    return 0;
-}
-
-int VarHolder::getCount() {
-    if (checkIdx())
-        return LiveClient::instance().getVarCount(m_idx);
-    return 0;
-}
-
-bool VarHolder::isValid() {
-    checkIdx();
-    return (m_idx > -1);
-}
-
-
-bool VarHolder::getBool(int entry) {
-    if (checkIdx())
-        return LiveClient::instance().getVarBool(m_idx, entry);
-    return false;
-}
-
-int VarHolder::getInt(int entry) {
-    if (checkIdx())
-        return LiveClient::instance().getVarInt(m_idx, entry);
-    return 0;
-}
-
-float VarHolder::getFloat(int entry) {
-    if (checkIdx())
-        return LiveClient::instance().getVarFloat(m_idx, entry);
-    return 0.0f;
-}
-
-double VarHolder::getDouble(int entry) {
-    if (checkIdx())
-        return LiveClient::instance().getVarDouble(m_idx, entry);
-    return 0.0;
-}
-}
+} // namespace IRacingTools::SDK

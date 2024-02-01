@@ -15,7 +15,7 @@ set(appUIQTTarget ${PROJECT_NAME}_app_ui_qt)
 
 # Setup
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # CCACHE
@@ -30,8 +30,8 @@ endif ()
 
 
 # Windows
-#set(CMAKE_CXX_VISIBILITY_PRESET visible)
-set(CMAKE_CXX_VISIBILITY_PRESET default)
+set(CMAKE_CXX_VISIBILITY_PRESET visible)
+#set(CMAKE_CXX_VISIBILITY_PRESET default)
 
 
 # Include CMake helper libs

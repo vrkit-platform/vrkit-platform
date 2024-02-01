@@ -162,7 +162,7 @@ int main()
 
 		case 'f':
 			printf("Set replay offset to %d %d\n", replayOffset, replayFrame);
-			irsdk_broadcastMsg(irskd_BroadcastReplaySetPlayPosition, replayOffset, replayFrame);
+			irsdk_broadcastMsg(ReplaySetPlayPosition, replayOffset, replayFrame);
 
 			replayOffset++;
 			if(replayOffset >= ReplayPositionMode::Last)
@@ -197,7 +197,7 @@ int main()
 		case 'i':
 			printf("Clear chat window\n");
 			irsdk_broadcastMsg(
-                IRacingTools::SDK::BroadcastMessage::ChatComand, ChatCommandMode::Cancel, 0);
+                IRacingTools::SDK::BroadcastMessage::ChatCommand, ChatCommandMode::Cancel, 0);
 			break;
 
 		case 'j':

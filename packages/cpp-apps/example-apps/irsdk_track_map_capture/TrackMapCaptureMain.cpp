@@ -613,7 +613,7 @@ void monitorConnectionStatus()
     // keep track of connection status
     static bool wasConnected = false;
 
-    const auto isConnected = LiveClient::instance().isConnected();
+    const auto isConnected = LiveClient::GetInstance().isConnected();
     if (wasConnected != isConnected)
     {
         if (isConnected)
@@ -633,7 +633,7 @@ void monitorConnectionStatus()
 void run()
 {
     // wait up to 16 ms for start of session or new data
-    if (LiveClient::instance().waitForData(16))
+    if (LiveClient::GetInstance().waitForData(16))
     {
         // bool wasUpdated = false;
 

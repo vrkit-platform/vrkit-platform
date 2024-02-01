@@ -17,6 +17,8 @@ constexpr int MaxStringLength = 32;
 // descriptions can be longer than max_string!
 constexpr int MaxDescriptionLength = 64;
 
+constexpr int MaxCars = 64;
+
 // define markers for unlimited session lap and time
 constexpr int UnlimitedLaps = 32767;
 constexpr float UnlimitedTime = 604800.0f;

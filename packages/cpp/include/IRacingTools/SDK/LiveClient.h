@@ -28,85 +28,86 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "Types.h"
+#include "Utils/Singleton.h"
 
+#include <expected>
 
 namespace IRacingTools::SDK {
 // A C++ wrapper around the irsdk calls that takes care of the details of maintaining a connection.
-// reads out the data into a cache so you don't have to worry about timming
-class LiveClient
-{
+// reads out the data into a cache, so you don't have to worry about timing
+class LiveClient : public Utils::Singleton<LiveClient> {
 public:
-	// singleton
-	static LiveClient& instance();
+    LiveClient() = delete;
+    LiveClient(const LiveClient &other) = delete;
+    LiveClient(LiveClient &&other) noexcept = delete;
+    LiveClient &operator=(const LiveClient &other) = delete;
+    LiveClient &operator=(LiveClient &&other) noexcept = delete;
 
-	// wait for live data, or if a .ibt file is open
-	// then read the next line from the file.
-	bool waitForData(int timeoutMS = 16);
+    virtual ~LiveClient() { shutdown(); }
 
-	[[nodiscard]] bool isConnected() const;
-	int getStatusID() { return statusId_; }
 
-	int getVarIdx(const char*name) const;
+    // wait for live data, or if a .ibt file is open
+    // then read the next line from the file.
+    bool waitForData(int timeoutMS = 16);
 
-	// what is the base type of the data
-	// returns VarDataType as int so we don't depend on IRTypes.h
-	int getVarType(int idx) const;
-	int getVarType(const char *name) { return getVarType(getVarIdx(name)); }
+    bool isConnected() const;
+    int getStatusId();
 
-	// how many elements in array, or 1 if not an array
-	int getVarCount(int idx) const;
-	int getVarCount(const char *name) { return getVarCount(getVarIdx(name)); }
+    int getVarIdx(const std::string_view &name) const;
 
-	// idx is the variables index, entry is the array offset, or 0 if not an array element
-	// will convert data to requested type
-	bool getVarBool(int idx, int entry = 0);
-	bool getVarBool(const char *name, int entry = 0) { return getVarBool(getVarIdx(name), entry); }
+    // what is the base type of the data
+    // returns VarDataType as int, so we don't depend on IRTypes.h
+    VarDataType getVarType(int idx) const;
+    VarDataType getVarType(const std::string_view &name);
 
-	int getVarInt(int idx, int entry = 0);
-	int getVarInt(const char *name, int entry = 0) { return getVarInt(getVarIdx(name), entry); }
-	
-	float getVarFloat(int idx, int entry = 0);
-	float getVarFloat(const char *name, int entry = 0) { return getVarFloat(getVarIdx(name), entry); }
+    // how many elements in array, or 1 if not an array
+    int getVarCount(int idx) const;
+    int getVarCount(const std::string_view &name);
 
-	double getVarDouble(int idx, int entry = 0);
-	double getVarDouble(const char *name, int entry = 0) { return getVarDouble(getVarIdx(name), entry); }
+    // idx is the variables index, entry is the array offset, or 0 if not an array element
+    // will convert data to requested type
+    bool getVarBool(int idx, int entry = 0);
+    bool getVarBool(const std::string_view &name, int entry = 0);
 
-	//---
+    int getVarInt(int idx, int entry = 0);
+    int getVarInt(const std::string_view &name, int entry = 0);
 
-	// value that increments with each update to string
-	int getSessionCt();
+    float getVarFloat(int idx, int entry = 0);
+    float getVarFloat(const std::string_view &name, int entry = 0);
+
+    double getVarDouble(int idx, int entry = 0);
+    double getVarDouble(const std::string_view &name, int entry = 0);
+
+    //---
+
+    // value that increments with each update to string
+    int getSessionCt();
 
     // has string changed since we last read any values from it
-	bool wasSessionStrUpdated() { return lastSessionCt_ != getSessionCt(); }
+    bool wasSessionStrUpdated();
 
-	// pars string for individual value, 1 success, 0 failure, -n minimum buffer size
-	//****Note, this is a linear parser, so it is slow!
-	int getSessionStrVal(const char *path, char *val, int valLen);
+    // pars string for individual value, 1 success, 0 failure, -n minimum buffer size
+    //****Note, this is a linear parser, so it is slow!
+    int getSessionStrVal(const std::string_view &path, char *val, int valLen);
 
-	// get the whole string
-	const char *getSessionStr();
+    // get the whole string
+    std::expected<std::string_view, std::logic_error> getSessionStr();
 
-protected:
 
-	LiveClient()
-		: data_(nullptr)
-		, nData_(0)
-		, statusId_(0)
-		, lastSessionCt_(-1)
-	{ }
+private:
+    explicit LiveClient(token) : data_(nullptr), nData_(0), statusId_(0), lastSessionCt_(-1) {}
 
-	~LiveClient() { shutdown(); }
 
-	void shutdown();
 
-	char *data_;
-	int nData_;
-	int statusId_;
+    friend Singleton;
 
-	int lastSessionCt_;
+    void shutdown();
+
+    char *data_;
+    int nData_;
+    int statusId_;
+
+    int lastSessionCt_;
 };
 
-
-
-}
-
+} // namespace IRacingTools::SDK

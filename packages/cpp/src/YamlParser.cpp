@@ -25,8 +25,9 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cstring>
 #include <IRacingTools/SDK/Utils/YamlParser.h>
+#include <cstring>
+#include <string>
 namespace IRacingTools::SDK::Utils {
 enum class YamlState {
     space,
@@ -37,9 +38,9 @@ enum class YamlState {
 };
 
 // super simple YAML parser
-bool ParseYaml(const char *data, const char* path, const char **val, int *len)
+bool ParseYaml(const char *data, const std::string_view& path, const char **val, int *len)
 {
-    if(data && path && val && len)
+    if(data && !path.empty() && val && len)
     {
         // make sure we set this to something
         *val = nullptr;
@@ -54,7 +55,7 @@ bool ParseYaml(const char *data, const char* path, const char **val, int *len)
         const char *valuestr = nullptr;
         int valuelen = 0;
 
-        const char *pathptr = path;
+        const char *pathptr = path.data();
         int pathdepth = 0;
 
         while(*data)

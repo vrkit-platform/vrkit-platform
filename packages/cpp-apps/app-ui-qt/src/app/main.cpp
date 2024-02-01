@@ -69,6 +69,9 @@ int main(int argc, char *argv[])
     }
 
     auto dataServiceThread = new IRDataServiceThread();
+    QObject::connect(dataServiceThread, &IRDataServiceThread::sessionUpdated, [&] (IRSessionUpdateEvent& event) {
+        qDebug() << "Received session update with car total = " << event.getCars().size();
+    });
 
     // Init generic utils
     UtilsApp *utilsApp = UtilsApp::getInstance();

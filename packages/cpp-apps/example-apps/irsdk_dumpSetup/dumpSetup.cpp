@@ -26,6 +26,8 @@
 #pragma comment(lib, "Winmm")
 
 
+using namespace IRacingTools::SDK;
+
 //------------------------
 // process live setup info
 
@@ -69,7 +71,7 @@ bool init()
 void monitorConnectionStatus()
 {
 	// keep track of connection status
-	const bool isConnected = IRClient::instance().isConnected();
+	const bool isConnected = LiveClient::GetInstance().isConnected();
 	static bool wasConnected = false;
 	if(wasConnected != isConnected)
 	{
@@ -86,13 +88,13 @@ void monitorConnectionStatus()
 void run()
 {
 	// wait up to 16 ms for start of session or new data
-	if(IRClient::instance().waitForData(16))
+	if(LiveClient::GetInstance().waitForData(16))
 	{
 		// and grab the data
 		const int MAX_STR = 1024;
 		char tstr[MAX_STR];
 
-		if(1 == IRClient::instance().getSessionStrVal("CarSetup:UpdateCount:", tstr, MAX_STR))
+		if(1 == LiveClient::GetInstance().getSessionStrVal("CarSetup:UpdateCount:", tstr, MAX_STR))
 		{
 			const int count = atoi(tstr);
 			if(g_lastSetupCount != count)
@@ -100,33 +102,33 @@ void run()
 				g_lastSetupCount = count;
 
 				// get info on the car path
-				if(1 == IRClient::instance().getSessionStrVal("DriverInfo:DriverCarIdx:", tstr, MAX_STR))
+				if(1 == LiveClient::GetInstance().getSessionStrVal("DriverInfo:DriverCarIdx:", tstr, MAX_STR))
 				{
 					const int driverCarIdx = atoi(tstr);
 					char pathStr[MAX_STR];
 
 					sprintf(pathStr, "DriverInfo:Drivers:CarIdx:{%d}CarScreenName:", driverCarIdx);
-					if(1 == IRClient::instance().getSessionStrVal(pathStr, tstr, MAX_STR))
+					if(1 == LiveClient::GetInstance().getSessionStrVal(pathStr, tstr, MAX_STR))
 						printf("CarName: %s\n", tstr);
 
 					sprintf(pathStr, "DriverInfo:Drivers:CarIdx:{%d}CarPath:", driverCarIdx);
-					if(1 == IRClient::instance().getSessionStrVal(pathStr, tstr, MAX_STR))
+					if(1 == LiveClient::GetInstance().getSessionStrVal(pathStr, tstr, MAX_STR))
 						printf("CarPath: %s\n", tstr);
 				}
 
 				// get info on what setup is loaded
-				if(1 == IRClient::instance().getSessionStrVal("DriverInfo:DriverSetupName:", tstr, MAX_STR))
+				if(1 == LiveClient::GetInstance().getSessionStrVal("DriverInfo:DriverSetupName:", tstr, MAX_STR))
 				{
 					printf("CarSetupName: %s", tstr);
 
-					if(1 == IRClient::instance().getSessionStrVal("DriverInfo:DriverSetupLoadTypeName:", tstr, MAX_STR))
+					if(1 == LiveClient::GetInstance().getSessionStrVal("DriverInfo:DriverSetupLoadTypeName:", tstr, MAX_STR))
 						printf(", %s", tstr);
 
-					if(1 == IRClient::instance().getSessionStrVal("DriverInfo:DriverSetupIsModified:", tstr, MAX_STR))
+					if(1 == LiveClient::GetInstance().getSessionStrVal("DriverInfo:DriverSetupIsModified:", tstr, MAX_STR))
 						if(atoi(tstr) == 1)
 							printf(", modified");
 
-					if(1 == IRClient::instance().getSessionStrVal("DriverInfo:DriverSetupPassedTech:", tstr, MAX_STR))
+					if(1 == LiveClient::GetInstance().getSessionStrVal("DriverInfo:DriverSetupPassedTech:", tstr, MAX_STR))
 						if(atoi(tstr) == 0)
 							printf(", failed tech");
 
@@ -134,16 +136,17 @@ void run()
 				}
 
 				// get the current setup and dump it
-				const char *sesStr = IRClient::instance().getSessionStr();
-				if(sesStr)
+				auto res = LiveClient::GetInstance().getSessionStr();
+				if(res.has_value())
 				{
-					//****Note, this assumes CarSetup is the last section of the session string.
-					const char *tstr = strstr(sesStr, "CarSetup:");
-					if(tstr)
-					{
-						printf(tstr);
-						printf("\n");
-					}
+					auto& sesStr = res.value();
+                    //****Note, this assumes CarSetup is the last section of the session string.
+//					const char *tstr = strstr(sesStr, "CarSetup:");
+//					if(tstr)
+//					{
+//						printf(tstr);
+//						printf("\n");
+//					}
 				}
 			}
 		}
@@ -172,7 +175,7 @@ void runLoop()
 //------------------------
 // process ibt files
 
-IRDiskClient idk;
+DiskClient idk;
 
 void processFile(const char *path)
 {

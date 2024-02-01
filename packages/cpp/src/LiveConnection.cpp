@@ -28,22 +28,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MIN_WIN_VER 0x0501
 
 #ifndef WINVER
-#	define WINVER			MIN_WIN_VER
+#define WINVER MIN_WIN_VER
 #endif
 
 #ifndef _WIN32_WINNT
-#	define _WIN32_WINNT		MIN_WIN_VER
+#define _WIN32_WINNT MIN_WIN_VER
 #endif
 
 //#include <windows.h>
+#include <climits>
 #include <cstdio>
 #include <ctime>
-#include <climits>
 
 #ifdef _MSC_VER
 #include <crtdbg.h>
 #endif
 
+#include <IRacingTools/SDK/DataHeader.h>
 #include <IRacingTools/SDK/LiveConnection.h>
 #include <IRacingTools/SDK/Types.h>
 #include <atomic>
@@ -69,11 +70,11 @@ std::atomic_bool gIsInitialized{false};
 
 constexpr double kCommTimeout = 30.0; // kCommTimeout after 30 seconds with no communication
 time_t gLastValidTime = 0;
-}
+} // namespace
 
 // Function Implementations
 
-bool LiveConnection::irsdk_startup() {
+bool LiveConnection::initialize() {
     if (!gMemMapFileHandle) {
         gMemMapFileHandle = OpenFileMapping(FILE_MAP_READ, FALSE, Resources::MemMapFilename);
         gLastTickCount = INT_MAX;
@@ -106,7 +107,7 @@ bool LiveConnection::irsdk_startup() {
     return gIsInitialized;
 }
 
-void LiveConnection::irsdk_shutdown() {
+void LiveConnection::cleanup() {
     if (gDataValidEventHandle)
         CloseHandle(gDataValidEventHandle);
 
@@ -125,8 +126,8 @@ void LiveConnection::irsdk_shutdown() {
     gLastTickCount = INT_MAX;
 }
 
-bool LiveConnection::irsdk_getNewData(char *data) {
-    if (gIsInitialized || irsdk_startup()) {
+bool LiveConnection::getNewData(char *data) {
+    if (gIsInitialized || initialize()) {
 #ifdef _MSC_VER
         _ASSERTE(nullptr != gDataHeader);
 #endif
@@ -175,22 +176,21 @@ bool LiveConnection::irsdk_getNewData(char *data) {
     return false;
 }
 
-
-bool LiveConnection::irsdk_waitForDataReady(int timeOut, char *data) {
+bool LiveConnection::waitForDataReady(int timeOut, char *data) {
 #ifdef _MSC_VER
     _ASSERTE(timeOut >= 0);
 #endif
 
-    if (gIsInitialized || irsdk_startup()) {
+    if (gIsInitialized || initialize()) {
         // just to be sure, check before we sleep
-        if (irsdk_getNewData(data))
+        if (getNewData(data))
             return true;
 
         // sleep till signaled
         WaitForSingleObject(gDataValidEventHandle, timeOut);
 
         // we woke up, so check for data
-        if (irsdk_getNewData(data))
+        if (getNewData(data))
             return true;
         else
             return false;
@@ -203,7 +203,7 @@ bool LiveConnection::irsdk_waitForDataReady(int timeOut, char *data) {
     return false;
 }
 
-bool LiveConnection::irsdk_isConnected() {
+bool LiveConnection::isConnected() {
     if (gIsInitialized) {
         const int elapsed = static_cast<int>(std::difftime(std::time(nullptr), gLastValidTime));
         return gDataHeader->status == ConnectionStatus::Connected && elapsed < kCommTimeout;
@@ -212,7 +212,7 @@ bool LiveConnection::irsdk_isConnected() {
     return false;
 }
 
-const DataHeader *LiveConnection::irsdk_getHeader() {
+const DataHeader *LiveConnection::getHeader() {
     if (gIsInitialized) {
         return gDataHeader;
     }
@@ -221,9 +221,9 @@ const DataHeader *LiveConnection::irsdk_getHeader() {
 }
 
 // direct access to the data buffer
-// Warnign! This buffer is volitile so read it out fast!
+// Warning! This buffer is volatile so read it out fast!
 // Use the cached copy from irsdk_waitForDataReady() or irsdk_getNewData() instead
-const char *LiveConnection::irsdk_getData(int index) {
+const char *LiveConnection::getData(int index) {
     if (gIsInitialized) {
         return gSharedMemPtr + gDataHeader->varBuf[index].bufOffset;
     }
@@ -231,44 +231,42 @@ const char *LiveConnection::irsdk_getData(int index) {
     return nullptr;
 }
 
-const char *LiveConnection::irsdk_getSessionInfoStr() {
+const char *LiveConnection::getSessionInfoStr() {
     if (gIsInitialized) {
-        return gSharedMemPtr + gDataHeader->sessionInfo.offset;
+        return gSharedMemPtr + gDataHeader->session.offset;
     }
     return nullptr;
 }
 
-uint32_t LiveConnection::irsdk_getSessionInfoStrUpdate() {
+uint32_t LiveConnection::getSessionInfoStrUpdate() {
     if (gIsInitialized) {
-        return gDataHeader->sessionInfo.count;
+        return gDataHeader->session.count;
     }
     return -1;
 }
 
-const VarDataHeader *LiveConnection::irsdk_getVarHeaderPtr() {
+const VarDataHeader *LiveConnection::getVarHeaderPtr() {
     if (gIsInitialized) {
         return ((VarDataHeader *) (gSharedMemPtr + gDataHeader->varHeaderOffset));
     }
     return nullptr;
 }
 
-const VarDataHeader *LiveConnection::irsdk_getVarHeaderEntry(int index) {
-    if (gIsInitialized) {
-        if (index >= 0 && index < gDataHeader->numVars) {
-            return &((VarDataHeader *) (gSharedMemPtr + gDataHeader->varHeaderOffset))[index];
-        }
-    }
-    return nullptr;
+const VarDataHeader *LiveConnection::getVarHeaderEntry(int index) {
+    if (!gIsInitialized || index < 0 || index >= gDataHeader->numVars)
+        return nullptr;
+
+    return &((VarDataHeader *) (gSharedMemPtr + gDataHeader->varHeaderOffset))[index];
 }
 
 // Note: this is a linear search, so cache the results
-int LiveConnection::irsdk_varNameToIndex(const char *name) {
+int LiveConnection::varNameToIndex(const std::string_view &name) {
     const VarDataHeader *pVar;
 
-    if (name) {
+    if (!name.empty()) {
         for (int index = 0; index < gDataHeader->numVars; index++) {
-            pVar = irsdk_getVarHeaderEntry(index);
-            if (pVar && 0 == strncmp(name, pVar->name, Resources::MaxStringLength)) {
+            pVar = getVarHeaderEntry(index);
+            if (pVar && 0 == strncmp(name.data(), pVar->name, Resources::MaxStringLength)) {
                 return index;
             }
         }
@@ -277,13 +275,13 @@ int LiveConnection::irsdk_varNameToIndex(const char *name) {
     return -1;
 }
 
-int LiveConnection::irsdk_varNameToOffset(const char *name) {
+int LiveConnection::varNameToOffset(const std::string_view &name) {
     const VarDataHeader *pVar;
 
-    if (name) {
+    if (!name.empty()) {
         for (int index = 0; index < gDataHeader->numVars; index++) {
-            pVar = irsdk_getVarHeaderEntry(index);
-            if (pVar && 0 == strncmp(name, pVar->name, Resources::MaxStringLength)) {
+            pVar = getVarHeaderEntry(index);
+            if (pVar && 0 == strncmp(name.data(), pVar->name, Resources::MaxStringLength)) {
                 return pVar->offset;
             }
         }
@@ -292,32 +290,32 @@ int LiveConnection::irsdk_varNameToOffset(const char *name) {
     return -1;
 }
 
-unsigned int irsdk_getBroadcastMsgID() {
+unsigned int getBroadcastMessageId() {
     static unsigned int msgId = RegisterWindowMessage(Resources::BroadcastMessageName);
 
     return msgId;
 }
 
-void LiveConnection::irsdk_broadcastMsg(BroadcastMessage msg, int var1, int var2, int var3) {
-    LiveConnection::GetInstance().irsdk_broadcastMsg(msg, var1, static_cast<int>(MAKELONG(var2, var3)));
+void LiveConnection::broadcastMessage(BroadcastMessage msg, int var1, int var2, int var3) {
+    LiveConnection::GetInstance().broadcastMessage(msg, var1, static_cast<int>(MAKELONG(var2, var3)));
 }
 
-void LiveConnection::irsdk_broadcastMsg(BroadcastMessage msg, int var1, float var2) {
+void LiveConnection::broadcastMessage(BroadcastMessage msg, int var1, float var2) {
     // multiply by 2^16-1 to move fractional part to the integer part
     const int real = static_cast<int>(var2 * 65536.0f);
 
-    irsdk_broadcastMsg(msg, var1, real);
+    broadcastMessage(msg, var1, real);
 }
 
-void LiveConnection::irsdk_broadcastMsg(BroadcastMessage msg, int var1, int var2) {
-    static unsigned int msgId = irsdk_getBroadcastMsgID();
+void LiveConnection::broadcastMessage(BroadcastMessage msg, int var1, int var2) {
+    static unsigned int msgId = getBroadcastMessageId();
     auto msgType = magic_enum::enum_underlying(msg);
     if (msgId && msgType >= 0 && msgType < magic_enum::enum_underlying(BroadcastMessage::Last)) {
         SendNotifyMessage(HWND_BROADCAST, msgId, MAKELONG(msg, var1), var2);
     }
 }
 
-int LiveConnection::irsdk_padCarNum(int num, int zero) {
+int LiveConnection::padCarNumber(int num, int zero) {
     int retVal = num;
     int numPlace = 1;
     if (num > 99)
@@ -331,4 +329,4 @@ int LiveConnection::irsdk_padCarNum(int num, int zero) {
 
     return retVal;
 }
-}
+} // namespace IRacingTools::SDK

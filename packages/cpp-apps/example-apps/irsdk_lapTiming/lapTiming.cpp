@@ -21,9 +21,10 @@
 #include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/YamlParser.h>
 
-#include <IRacingTools/SDK/VarData.h>
 #include "console.h"
 #include <IRacingTools/SDK/LiveClient.h>
+#include <IRacingTools/SDK/VarData.h>
+#include <IRacingTools/SDK/VarHolder.h>
 
 // for timeBeginPeriod
 #pragma comment(lib, "Winmm")

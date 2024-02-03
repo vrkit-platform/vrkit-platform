@@ -11,6 +11,7 @@
 #include <IRacingTools/SDK/LiveClient.h>
 #include <IRacingTools/SDK/LiveConnection.h>
 #include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/VarHolder.h>
 
 #include <QEventLoop>
 #include <QAbstractEventDispatcher>

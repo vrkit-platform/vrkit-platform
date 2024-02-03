@@ -27,15 +27,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "DataHeader.h"
+#include "ErrorTypes.h"
 #include "Types.h"
 #include "Utils/Singleton.h"
 
-#include <expected>
+#include "Client.h"
+#include "Utils/Buffer.h"
 
 namespace IRacingTools::SDK {
+
 // A C++ wrapper around the irsdk calls that takes care of the details of maintaining a connection.
 // reads out the data into a cache, so you don't have to worry about timing
-class LiveClient : public Utils::Singleton<LiveClient> {
+class LiveClient : public Client, public Utils::Singleton<LiveClient> {
 public:
     LiveClient() = delete;
     LiveClient(const LiveClient &other) = delete;
@@ -43,71 +47,89 @@ public:
     LiveClient &operator=(const LiveClient &other) = delete;
     LiveClient &operator=(LiveClient &&other) noexcept = delete;
 
-    virtual ~LiveClient() { shutdown(); }
-
+    virtual ~LiveClient() override { shutdown(); }
 
     // wait for live data, or if a .ibt file is open
     // then read the next line from the file.
     bool waitForData(int timeoutMS = 16);
 
     bool isConnected() const;
-    int getStatusId();
+    ConnectionId getConnectionId() override;
 
-    int getVarIdx(const std::string_view &name) const;
+    virtual bool isAvailable() override;
 
     // what is the base type of the data
     // returns VarDataType as int, so we don't depend on IRTypes.h
-    VarDataType getVarType(int idx) const;
-    VarDataType getVarType(const std::string_view &name);
+    // return how many variables this .ibt file has in the header
+    virtual std::optional<uint32_t> getNumVars() override;
+
+    virtual const VarHeaders &getVarHeaders() override;
+
+    virtual Opt<const VarDataHeader*> getVarHeader(uint32_t idx) override;
+    virtual Opt<const VarDataHeader*> getVarHeader(const std::string_view &name) override;
+
+    virtual std::optional<uint32_t> getVarIdx(const std::string_view &name) override;
+
+    // get info on the var
+    virtual std::optional<std::string_view> getVarName(uint32_t idx) override;
+    virtual std::optional<std::string_view> getVarDesc(uint32_t idx) override;
+    virtual std::optional<std::string_view> getVarUnit(uint32_t idx) override;
+
+    // what is the base type of the data
+    virtual std::optional<VarDataType> getVarType(uint32_t idx) override;
+    virtual std::optional<VarDataType> getVarType(const std::string_view &name) override;
 
     // how many elements in array, or 1 if not an array
-    int getVarCount(int idx) const;
-    int getVarCount(const std::string_view &name);
+    virtual std::optional<uint32_t> getVarCount(uint32_t idx) override;
+    virtual std::optional<uint32_t> getVarCount(const std::string_view &name) override;
 
     // idx is the variables index, entry is the array offset, or 0 if not an array element
     // will convert data to requested type
-    bool getVarBool(int idx, int entry = 0);
-    bool getVarBool(const std::string_view &name, int entry = 0);
+    virtual std::optional<bool> getVarBool(uint32_t idx, uint32_t entry = 0) override;
+    virtual std::optional<bool> getVarBool(const std::string_view &name, uint32_t entry = 0) override;
 
-    int getVarInt(int idx, int entry = 0);
-    int getVarInt(const std::string_view &name, int entry = 0);
+    virtual std::optional<int> getVarInt(uint32_t idx, uint32_t entry = 0) override;
+    virtual std::optional<int> getVarInt(const std::string_view &name, uint32_t entry = 0) override;
 
-    float getVarFloat(int idx, int entry = 0);
-    float getVarFloat(const std::string_view &name, int entry = 0);
+    virtual std::optional<float> getVarFloat(uint32_t idx, uint32_t entry = 0) override;
+    virtual std::optional<float> getVarFloat(const std::string_view &name, uint32_t entry = 0) override;
 
-    double getVarDouble(int idx, int entry = 0);
-    double getVarDouble(const std::string_view &name, int entry = 0);
+    virtual std::optional<double> getVarDouble(uint32_t idx, uint32_t entry = 0) override;
+    virtual std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry = 0) override;
 
+    // 1 success, 0 failure, -n minimum buffer size
+    virtual int getSessionStrVal(const std::string_view &path, char *val, int valLen) override;
+
+    // get the whole string
+    // get the whole string
+    virtual Expected<std::string_view> getSessionStr() override;
+    //    virtual const char *getSessionStr() = 0;
     //---
 
     // value that increments with each update to string
-    int getSessionCt();
+    Opt<std::size_t> getSessionUpdateCount();
 
     // has string changed since we last read any values from it
     bool wasSessionStrUpdated();
 
-    // pars string for individual value, 1 success, 0 failure, -n minimum buffer size
-    //****Note, this is a linear parser, so it is slow!
-    int getSessionStrVal(const std::string_view &path, char *val, int valLen);
-
-    // get the whole string
-    std::expected<std::string_view, std::logic_error> getSessionStr();
-
-
 private:
-    explicit LiveClient(token) : data_(nullptr), nData_(0), statusId_(0), lastSessionCt_(-1) {}
-
-
+    explicit LiveClient(token) : data_(nullptr), nData_(0), connectionId_(1), previousSessionUpdateCount_(-1) {}
 
     friend Singleton;
+
 
     void shutdown();
 
     char *data_;
     int nData_;
-    int statusId_;
+    ConnectionId connectionId_;
 
-    int lastSessionCt_;
+    int previousSessionUpdateCount_;
+
+protected:
+    //    std::shared_ptr<Utils::DynamicBuffer<char>> sessionInfoBuf_;
+    //    std::vector<VarDataHeader> varHeaders_{};
+    //    Utils::DynamicBuffer<char> varBuf_{};
 };
 
 } // namespace IRacingTools::SDK

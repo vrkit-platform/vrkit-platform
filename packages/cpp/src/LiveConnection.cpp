@@ -238,7 +238,7 @@ const char *LiveConnection::getSessionInfoStr() {
     return nullptr;
 }
 
-uint32_t LiveConnection::getSessionInfoStrUpdate() {
+uint32_t LiveConnection::getSessionUpdateCount() {
     if (gIsInitialized) {
         return gDataHeader->session.count;
     }
@@ -252,8 +252,8 @@ const VarDataHeader *LiveConnection::getVarHeaderPtr() {
     return nullptr;
 }
 
-const VarDataHeader *LiveConnection::getVarHeaderEntry(int index) {
-    if (!gIsInitialized || index < 0 || index >= gDataHeader->numVars)
+const VarDataHeader *LiveConnection::getVarHeaderEntry(uint32_t index) {
+    if (!gIsInitialized || index >= gDataHeader->numVars)
         return nullptr;
 
     return &((VarDataHeader *) (gSharedMemPtr + gDataHeader->varHeaderOffset))[index];

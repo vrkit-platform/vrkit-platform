@@ -79,15 +79,15 @@ void writeCSVSessionString(FILE *file, DiskSubHeader *diskSubHeader, const char 
 			// get file open time as a string
 			char tstr[512];
 			tm tm_time;
-			localtime_s(&tm_time, &diskSubHeader->sessionStartDate);
+			localtime_s(&tm_time, &diskSubHeader->startDate);
 			strftime(tstr, 512, " %Y-%m-%d %H:%M:%S", &tm_time);
 			tstr[512-1] = '\0';
 			fprintf(file, " SessionStartDate: %s\n", tstr);
 
-			fprintf(file, " SessionStartTime: %f\n", diskSubHeader->sessionStartTime);
-			fprintf(file, " SessionEndTime: %f\n", diskSubHeader->sessionEndTime);
-			fprintf(file, " SessionLapCount: %d\n", diskSubHeader->sessionLapCount);
-			fprintf(file, " SessionRecordCount: %d\n", diskSubHeader->sessionRecordCount);
+			fprintf(file, " SessionStartTime: %f\n", diskSubHeader->startTime);
+			fprintf(file, " SessionEndTime: %f\n", diskSubHeader->endTime);
+			fprintf(file, " SessionLapCount: %d\n", diskSubHeader->lapCount);
+			fprintf(file, " SessionRecordCount: %d\n", diskSubHeader->sampleCount);
 		}
 		fprintf(file, "...\n");
 	}
@@ -208,9 +208,12 @@ void writeCSVData(FILE *file, DataHeader *header, VarDataHeader *varHeaders, cha
 
 int main(int argc, char **argv)
 {
-	DataHeader header;
-	DiskSubHeader diskSubHeader;
+    if(argc < 2) {
 
+    }
+    DataHeader header{};
+	DiskSubHeader diskSubHeader{};
+    DiskClient diskClient{};
 	char *sessionInfoString = nullptr;
 	VarDataHeader *varHeaders = nullptr;
 	char *varBuf = nullptr;
@@ -230,11 +233,9 @@ int main(int argc, char **argv)
 				if(len == (int)fread(&diskSubHeader, 1, len, file))
 				{
 					sessionInfoString = new char[header.session.len];
-					if(sessionInfoString)
-					{
-						fseek(file, header.session.offset, SEEK_SET);
+					fseek(file, static_cast<long>(header.session.offset), SEEK_SET);
 						len = header.session.len;
-						if(len == (int)fread(sessionInfoString, 1, len, file))
+						if(len == fread(sessionInfoString, 1, len, file))
 						{
 							sessionInfoString[header.session.len-1] = '\0';
 						
@@ -299,9 +300,7 @@ int main(int argc, char **argv)
 						if(sessionInfoString)
 							delete []sessionInfoString;
 						sessionInfoString = nullptr;
-					}
-					else
-						printf("failed to allocate sessionInfoString\n");
+
 				}
 				else
 					printf("error reading IRDiskSubHeader\n");

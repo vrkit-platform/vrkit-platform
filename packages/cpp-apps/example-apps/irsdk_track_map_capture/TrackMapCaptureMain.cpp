@@ -19,6 +19,7 @@
 
 #include <IRacingTools/SDK/LiveClient.h>
 #include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/VarHolder.h>
 
 #include <IRacingTools/SDK/Utils/YamlParser.h>
 

@@ -11,3 +11,4 @@ venv
 /tmp*
 CMakeLists.txt.user
 *orig.json
+irsdk_session*

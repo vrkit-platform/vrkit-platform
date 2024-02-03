@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <filesystem>
 
+#include "Client.h"
 #include "DataHeader.h"
 #include "DiskSubHeader.h"
 #include "Types.h"
@@ -38,73 +39,97 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace IRacingTools::SDK {
 namespace fs = std::filesystem;
 
-class DiskClient {
+using VarHeaders = std::vector<VarDataHeader>;
+
+class DiskClient : public Client {
 public:
-    explicit DiskClient(const std::optional<fs::path> &path = std::nullopt) :
-        sessionInfoBuf_(new Utils::DynamicBuffer<char>()), ibtFile_(nullptr) {
-        memset(&header_, 0, sizeof(header_));
-        memset(&diskSubHeader_, 0, sizeof(diskSubHeader_));
 
-        if (path) {
-            openFile(path.value());
-        }
-    }
+    explicit DiskClient(const std::optional<fs::path> &path = std::nullopt);
+    DiskClient() = delete;
+    DiskClient(const DiskClient &other) = delete;
+    DiskClient(DiskClient &&other) noexcept = delete;
+    DiskClient &operator=(const DiskClient &other) = delete;
+    DiskClient &operator=(DiskClient &&other) noexcept = delete;
 
-    ~DiskClient() { closeFile(); }
+    ~DiskClient();
 
-    [[nodiscard]] bool isFileOpen() const { return ibtFile_ != nullptr; }
-    bool openFile(const fs::path& path);
-    void closeFile();
+    bool isFileOpen();
+    bool openFile(const fs::path &path);
+    void reset();
 
     // read next line out of file
-    bool getNextData();
-    int getDataCount() const { return diskSubHeader_.sessionRecordCount; }
+    bool next();
+    bool hasNext();
+    
+    std::size_t getSampleCount();
+    std::size_t getSampleIndex();
+    
+    std::optional<fs::path> getFilePath();
+    std::size_t getFileSize();
+    
+    virtual bool isAvailable() override;
 
     // return how many variables this .ibt file has in the header
-    int getNumVars();
+    std::optional<uint32_t> getNumVars() override;
 
-    int getVarIdx(const char *name);
+    const VarHeaders& getVarHeaders() override;
+    Opt<const VarDataHeader*> getVarHeader(uint32_t idx) override;
+    Opt<const VarDataHeader*> getVarHeader(const std::string_view &name) override;
+
+    std::optional<uint32_t> getVarIdx(const std::string_view &name) override;
 
     // get info on the var
-    const char *getVarName(int idx);
-    const char *getVarDesc(int idx);
-    const char *getVarUnit(int idx);
+    std::optional<std::string_view> getVarName(uint32_t idx) override;
+    std::optional<std::string_view> getVarDesc(uint32_t idx) override;
+    std::optional<std::string_view> getVarUnit(uint32_t idx) override;
 
     // what is the base type of the data
-    VarDataType getVarType(int idx);
-    VarDataType getVarType(const char *name) { return getVarType(getVarIdx(name)); }
+    std::optional<VarDataType> getVarType(uint32_t idx) override;
+    std::optional<VarDataType> getVarType(const std::string_view &name) override;
 
     // how many elements in array, or 1 if not an array
-    int getVarCount(int idx);
-    int getVarCount(const char *name) { return getVarCount(getVarIdx(name)); }
+    std::optional<uint32_t> getVarCount(uint32_t idx) override;
+    std::optional<uint32_t> getVarCount(const std::string_view &name) override;
 
     // idx is the variables index, entry is the array offset, or 0 if not an array element
     // will convert data to requested type
-    bool getVarBool(int idx, int entry = 0);
-    bool getVarBool(const char *name, int entry = 0) { return getVarBool(getVarIdx(name), entry); }
+    std::optional<bool> getVarBool(uint32_t idx, uint32_t entry = 0) override;
+    std::optional<bool> getVarBool(const std::string_view &name, uint32_t entry = 0) override;
 
-    int getVarInt(int idx, int entry = 0);
-    int getVarInt(const char *name, int entry = 0) { return getVarInt(getVarIdx(name), entry); }
+    std::optional<int> getVarInt(uint32_t idx, uint32_t entry = 0) override;
+    std::optional<int> getVarInt(const std::string_view &name, uint32_t entry = 0) override;
 
-    float getVarFloat(int idx, int entry = 0);
-    float getVarFloat(const char *name, int entry = 0) { return getVarFloat(getVarIdx(name), entry); }
+    std::optional<float> getVarFloat(uint32_t idx, uint32_t entry = 0) override;
+    std::optional<float> getVarFloat(const std::string_view &name, uint32_t entry = 0) override;
 
-    double getVarDouble(int idx, int entry = 0);
-    double getVarDouble(const char *name, int entry = 0) { return getVarDouble(getVarIdx(name), entry); }
+    std::optional<double> getVarDouble(uint32_t idx, uint32_t entry = 0) override;
+    std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry = 0) override;
 
     // 1 success, 0 failure, -n minimum buffer size
-    int getSessionStrVal(const char *path, char *val, int valLen);
-    // get the whole string
-    const char *getSessionStr() { return !sessionInfoBuf_ ? nullptr : sessionInfoBuf_->data(); }
+    int getSessionStrVal(const std::string_view& path, char *val, int valLen) override;
+
+    /**
+     * @brief Session update string (yaml)
+     *
+     * @return string_view or error if unavailable
+     */
+    Expected<std::string_view> getSessionStr() override;
+    virtual ConnectionId getConnectionId() override;
 
 protected:
     DataHeader header_{};
     DiskSubHeader diskSubHeader_{};
 
+    std::size_t fileSize_{};
+    std::optional<fs::path> filePath_{};
+    std::size_t sampleDataSize_{};
+    std::size_t sampleDataOffset_{};
+    std::size_t sampleIndex_{};
+
     std::shared_ptr<Utils::DynamicBuffer<char>> sessionInfoBuf_;
     std::vector<VarDataHeader> varHeaders_{};
     Utils::DynamicBuffer<char> varBuf_{};
 
-    FILE *ibtFile_;
+    FILE *ibtFile_{nullptr};
 };
 } // namespace IRacingTools::SDK

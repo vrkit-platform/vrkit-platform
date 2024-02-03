@@ -3,18 +3,51 @@
 //
 
 #pragma once
-#include <stdexcept>
 #include <fmt/core.h>
+#include <stdexcept>
+#include <expected>
 
 namespace IRacingTools::SDK {
-class NotImplementedError : public std::logic_error {
+
+enum class ErrorCode : uint32_t { General, NotImplemented };
+
+class GeneralError : public std::logic_error {
 public:
-    template<typename... T>
-    static NotImplementedError create(fmt::format_string<T...> fmt, T &&... args) {
-        return NotImplementedError(fmt::format(fmt, args...));
+    template<typename E, typename... T>
+    static E create(ErrorCode code, fmt::format_string<T...> fmt, T &&...args) {
+        return E(code, fmt::format(fmt, args...));
     }
 
-    explicit NotImplementedError(const std::string &msg = "") :
-        std::logic_error(msg) {};
+    explicit GeneralError(ErrorCode code = ErrorCode::General, const std::string &msg = "") :
+        std::logic_error(msg), code_(code){};
+
+    explicit GeneralError(const std::string &msg = "") :
+        std::logic_error(msg), code_(ErrorCode::General){};
+
+protected:
+    ErrorCode code_{ErrorCode::General};
 };
+
+class NotImplementedError : public GeneralError {
+public:
+    explicit NotImplementedError(ErrorCode code = ErrorCode::NotImplemented, const std::string &msg = "") :
+        GeneralError(code, msg){};
+
+    explicit NotImplementedError(const std::string &msg = "") :
+        GeneralError(ErrorCode::NotImplemented, msg){};
+};
+
+template<typename V>
+using Expected = std::expected<V, GeneralError>;
+
+template<typename E, typename... T>
+auto MakeUnexpected(fmt::format_string<T...> fmt, T &&...args) {
+    return std::unexpected<E>(E(fmt::format(fmt, args...)));
 }
+
+template<typename E, typename... T>
+auto MakeUnexpected(ErrorCode code, fmt::format_string<T...> fmt, T &&...args) {
+    return std::unexpected<E>(E(code, fmt::format(fmt, args...)));
+};
+
+} // namespace IRacingTools::SDK

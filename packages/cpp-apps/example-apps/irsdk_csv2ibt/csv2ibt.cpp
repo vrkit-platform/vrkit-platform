@@ -173,7 +173,7 @@ void logHeaderToIBT(irsdkCSVClient *pCSV, FILE *pIBT)
 
 		// sub header is written out at end of session
 		memset(&g_diskSubHeader, 0, sizeof(g_diskSubHeader));
-		g_diskSubHeader.sessionStartDate = time(NULL);
+		g_diskSubHeader.startDate = time(NULL);
 		g_diskSubHeaderOffset = offset;
 		offset += sizeof(g_diskSubHeader);
 
@@ -211,31 +211,31 @@ void logDataToIBT(irsdkCSVClient *pCSV, FILE *pIBT)
 		if(varArray)
 		{
 			fwrite(varArray, 1, g_diskHeader.bufLen, pIBT);
-			g_diskSubHeader.sessionRecordCount++;
+			g_diskSubHeader.sampleCount++;
 
 			if(g_sessionTimeOffset >= 0 && g_sessionTimeOffset < pCSV->getVarCount())
 			{
 				double time = varArray[g_sessionTimeOffset];
-				if(g_diskSubHeader.sessionRecordCount == 1)
+				if(g_diskSubHeader.sampleCount == 1)
 				{
-					g_diskSubHeader.sessionStartTime = time;
-					g_diskSubHeader.sessionEndTime = time;
+					g_diskSubHeader.startTime = time;
+					g_diskSubHeader.endTime = time;
 				}
 
-				if(g_diskSubHeader.sessionEndTime < time)
-					g_diskSubHeader.sessionEndTime = time;
+				if(g_diskSubHeader.endTime < time)
+					g_diskSubHeader.endTime = time;
 			}
 
 			if(g_lapIndexOffset >= 0 && g_lapIndexOffset < pCSV->getVarCount())
 			{
 				const int lap = (int)varArray[g_lapIndexOffset];
 
-				if(g_diskSubHeader.sessionRecordCount == 1)
+				if(g_diskSubHeader.sampleCount == 1)
 					g_diskLastLap = lap-1;
 
 				if(g_diskLastLap < lap)
 				{
-					g_diskSubHeader.sessionLapCount++;
+					g_diskSubHeader.lapCount++;
 					g_diskLastLap = lap;
 				}
 			}

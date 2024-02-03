@@ -37,16 +37,17 @@ target_include_directories(${targetName} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Link configured deps
 target_link_runtime_libs(${targetName})
-
 target_compile_definitions(${targetName} PRIVATE QT_QML_DEBUG)
 target_compile_definitions(${targetName} PUBLIC PROJECT_NAME="${targetName}")
+
+
 
 target_link_libraries(${targetName}
   PRIVATE
   ${sdkTargetStatic}
   ${sharedAppLibTargetStatic}
   ${modelsTargetStatic}
-#  ${DEP_TINYORM}
+  ${DEP_QT_UI}
 )
 
 set_target_properties(${targetName} PROPERTIES

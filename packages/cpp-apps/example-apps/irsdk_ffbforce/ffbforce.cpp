@@ -237,7 +237,7 @@ void shutdown()
 #endif // SIMPLEOUTPUT
 	}
 
-	idk.closeFile();
+    idk.reset();
 }
 
 int main(int argc, char *argv[])
@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
 	{
 		if(init(argv[1]))
 		{
-			while(idk.getNextData())
+			while(idk.next())
 				process();
 
 			shutdown();

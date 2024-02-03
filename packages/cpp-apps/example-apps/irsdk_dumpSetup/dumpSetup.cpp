@@ -239,7 +239,7 @@ void processFile(const char *path)
 			}
 		}
 
-		idk.closeFile();
+        idk.reset();
 	}
 	else
 		printf("failed!\n");

@@ -17,50 +17,21 @@ foreach(depPkgName ${DEP_PACKAGES})
   find_package(${depPkgName} CONFIG REQUIRED)
 endforeach()
 
-set(QTModules Core Gui Widgets Quick QuickControls2 Svg Sql Qml)
-set(QTModuleTargets)
-foreach(QTMod ${QTModules})
-  list(APPEND QTModuleTargets "Qt6::${QTMod}")
-endforeach()
-
-
 # QT
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-find_package(Qt6 REQUIRED COMPONENTS ${QTModules})
-qt_standard_project_setup()
+include(${CMAKE_CURRENT_LIST_DIR}/qt.cmake NO_POLICY_SCOPE)
 
-
+# Boost
 find_package(Boost REQUIRED COMPONENTS system)
+
 # Other deps
 #target_link_libraries(${targetName} PRIVATE Microsoft::CppWinRT)
 #target_link_libraries(${targetName} PRIVATE WIL::WIL)
 #find_library(DEP_BOOST_IPC_LIB Boost::interprocess REQUIRED)
 #find_package(Boost REQUIRED COMPONENTS interprocess)
 
-
-
-
-
 # TinyORM Dep
-#include(FetchContent)
-#FetchContent_Declare(TinyOrm
-#  GIT_REPOSITORY https://github.com/silverqx/TinyORM.git
-#  GIT_TAG        origin/main
-#
-#  OVERRIDE_FIND_PACKAGE
-#)
-#
-## Here you can configure TinyORM CMake options
-#set(MYSQL_PING OFF)
-#set(TOM ON)
-#set(TOM_EXAMPLE OFF)
-#
-#find_package(TinyOrm CONFIG REQUIRED)
+include(${CMAKE_CURRENT_LIST_DIR}/tiny_orm.cmake NO_POLICY_SCOPE)
 
-set(DEP_TINYORM TinyOrm::TinyOrm)
-set(DEP_QT_UI
-  ${QTModuleTargets})
 set(DEP_WXWIDGETS wx::core wx::base)
 set(DEP_PROTOBUF protobuf::libprotobuf)
 set(DEP_JSON nlohmann_json::nlohmann_json)
@@ -90,8 +61,8 @@ set(ALL_RUNTIME_DEPS
   ${DEP_DIRECTX}
   ${DEP_FMT}
   ${DEP_OPENXR}
-  #  ${DEP_WXWIDGETS}
-  ${DEP_QT_UI}
+  ${DEP_QT_CORE}
+
   ${DEP_GSL}
   ${DEP_BOOST_DEFAULT}
 )

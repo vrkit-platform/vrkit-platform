@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(iracing_tools)
+set(appNamePrefix irt)
+set(appVersionMajor 1)
+set(appVersionMinor 0)
+set(appVersionPatch 0)
+set(appVersion ${appVersionMajor}.${appVersionMinor}.${appVersionPatch})
+
+project(iracing_tools VERSION ${appVersion})
 
 # Subprojects & Targets
 set(sdkTarget ${PROJECT_NAME}_sdk)
@@ -11,7 +17,8 @@ set(modelsTargetPython ${modelsTarget}_python)
 set(sharedAppLibTarget ${PROJECT_NAME}_shared_app_lib)
 set(sharedAppLibTargetStatic ${sharedAppLibTarget}_static)
 set(overlayAppTarget ${PROJECT_NAME}_overlay_app)
-set(appUIQTTarget ${PROJECT_NAME}_app_ui_qt)
+set(appUIQTTarget ${appNamePrefix}_ui)
+set(appCLITarget ${appNamePrefix}_tool)
 
 # Setup
 

@@ -7,17 +7,17 @@
 #include "ErrorTypes.h"
 #include "Types.h"
 
-
 namespace IRacingTools::SDK {
-
 
 // sub header used when writing telemetry to disk
 struct DiskSubHeader {
-    time_t sessionStartDate;
-    double sessionStartTime;
-    double sessionEndTime;
-    int sessionLapCount;
-    int sessionRecordCount;
+    time_t startDate{};
+    double startTime{};
+    double endTime{};
+    uint32_t lapCount{};
+    uint32_t sampleCount{};
 };
 
-}
+constexpr auto DiskSubHeaderSize = sizeof(DiskSubHeader);
+
+} // namespace IRacingTools::SDK

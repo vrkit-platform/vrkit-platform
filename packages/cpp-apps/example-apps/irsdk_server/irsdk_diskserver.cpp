@@ -770,7 +770,7 @@ void irsdkDiskServer::logHeaderToIBT()
 
 		// sub header is written out at end of session
 		memset(&diskSubHeader, 0, sizeof(diskSubHeader));
-		diskSubHeader.sessionStartDate = t_time;
+		diskSubHeader.startDate = t_time;
 		diskSubHeaderOffset = offset;
 		offset += sizeof(diskSubHeader);
 
@@ -804,31 +804,31 @@ void irsdkDiskServer::logDataToIBT()
 		char *pBase = pSharedMem + localHeader.varBuf[0].bufOffset;
 		fwrite(pBase, 1, diskHeader.bufLen, file);
 
-		diskSubHeader.sessionRecordCount++;
+		diskSubHeader.sampleCount++;
 
 		if(sessionTimeOffset >= 0)
 		{
 			double time = *((double *)(pBase+sessionTimeOffset));
-			if(diskSubHeader.sessionRecordCount == 1)
+			if(diskSubHeader.sampleCount == 1)
 			{
-				diskSubHeader.sessionStartTime = time;
-				diskSubHeader.sessionEndTime = time;
+				diskSubHeader.startTime = time;
+				diskSubHeader.endTime = time;
 			}
 
-			if(diskSubHeader.sessionEndTime < time)
-				diskSubHeader.sessionEndTime = time;
+			if(diskSubHeader.endTime < time)
+				diskSubHeader.endTime = time;
 		}
 
 		if(lapIndexOffset >= 0)
 		{
 			int lap = *((int *)(pBase+lapIndexOffset));
 
-			if(diskSubHeader.sessionRecordCount == 1)
+			if(diskSubHeader.sampleCount == 1)
 				diskLastLap = lap-1;
 
 			if(diskLastLap < lap)
 			{
-				diskSubHeader.sessionLapCount++;
+				diskSubHeader.lapCount++;
 				diskLastLap = lap;
 			}
 		}

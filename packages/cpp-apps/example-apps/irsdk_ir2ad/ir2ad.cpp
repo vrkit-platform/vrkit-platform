@@ -21,40 +21,42 @@
 #include "serial.h"
 #include <IRacingTools/SDK/LiveClient.h>
 #include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/VarHolder.h>
 
 // for timeBeginPeriod
 #pragma comment(lib, "Winmm")
 
+using namespace IRacingTools::SDK;
 
 // bool, driver is in the car and physics are running
 // shut off motion if this is not true
-IRVarHolder g_playerInCar("IsOnTrack");
+VarHolder g_playerInCar("IsOnTrack");
 
 // double, cars position in lat/lon decimal degrees
-IRVarHolder g_carLat("Lat");
-IRVarHolder g_carLon("Lon");
+VarHolder g_carLat("Lat");
+VarHolder g_carLon("Lon");
 // float, cars altitude in meters relative to sea levels
-IRVarHolder g_carAlt("Alt");
+VarHolder g_carAlt("Alt");
 
 // float, cars velocity in m/s
-IRVarHolder g_carVelX("VelocityX");
-IRVarHolder g_carVelY("VelocityY");
-IRVarHolder g_carVelZ("VelocityZ");
+VarHolder g_carVelX("VelocityX");
+VarHolder g_carVelY("VelocityY");
+VarHolder g_carVelZ("VelocityZ");
 
 // float, cars acceleration in m/s^2
-IRVarHolder g_carAccelX("LongAccel");
-IRVarHolder g_carAccelY("LatAccel");
-IRVarHolder g_carAccelZ("VertAccel");
+VarHolder g_carAccelX("LongAccel");
+VarHolder g_carAccelY("LatAccel");
+VarHolder g_carAccelZ("VertAccel");
 
 // float, cars orientation in rad
-IRVarHolder g_carYaw("YawNorth");
-IRVarHolder g_carPitch("Pitch");
-IRVarHolder g_carRoll("Roll");
+VarHolder g_carYaw("YawNorth");
+VarHolder g_carPitch("Pitch");
+VarHolder g_carRoll("Roll");
 
 // float, cars change in orientation in rad/s
-IRVarHolder g_carYawRate("YawRate");
-IRVarHolder g_carPitchRate("PitchRate");
-IRVarHolder g_carRollRate("RollRate");
+VarHolder g_carYawRate("YawRate");
+VarHolder g_carPitchRate("PitchRate");
+VarHolder g_carRollRate("RollRate");
 
 Serial serial;
 

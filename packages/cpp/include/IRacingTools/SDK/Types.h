@@ -87,6 +87,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <IRacingTools/SDK/Utils/LUT.h>
 
 namespace IRacingTools::SDK {
+
+template<typename T>
+using Opt = std::optional<T>;
+
 enum class ConnectionStatus : int {
     NotConnected = 0,
     Connected = 1

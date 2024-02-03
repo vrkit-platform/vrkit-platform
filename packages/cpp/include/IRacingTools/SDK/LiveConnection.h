@@ -11,8 +11,8 @@
 #include "Types.h"
 #include "VarData.h"
 
-#include <IRacingTools/SDK/Utils/LUT.h>
-#include <IRacingTools/SDK/Utils/Singleton.h>
+#include "Utils/LUT.h"
+#include "Utils/Singleton.h"
 
 namespace IRacingTools::SDK {
 
@@ -32,10 +32,10 @@ public:
     const DataHeader *getHeader();
     const char *getData(int index);
     const char *getSessionInfoStr();
-    uint32_t getSessionInfoStrUpdate(); // incrementing index that indicates new session info string
+    uint32_t getSessionUpdateCount(); // incrementing index that indicates new session info string
 
     const VarDataHeader *getVarHeaderPtr();
-    const VarDataHeader *getVarHeaderEntry(int index);
+    const VarDataHeader *getVarHeaderEntry(uint32_t index);
 
     int varNameToIndex(const std::string_view& name);
     int varNameToOffset(const std::string_view& name);

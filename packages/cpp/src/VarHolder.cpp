@@ -30,81 +30,112 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <magic_enum.hpp>
 
-#include <IRacingTools/SDK/LiveClient.h>
+#include <IRacingTools/SDK/Client.h>
+#include <IRacingTools/SDK/ClientManager.h>
 #include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/Utils/Singleton.h>
 #include <IRacingTools/SDK/Utils/YamlParser.h>
 #include <IRacingTools/SDK/VarData.h>
-
+#include <IRacingTools/SDK/VarHolder.h>
 #pragma warning(disable : 4996)
 namespace IRacingTools::SDK {
 using namespace Utils;
 //----------------------------------
 
-VarHolder::VarHolder() : idx_(-1), statusId_(-1) {
-
-}
-
-VarHolder::VarHolder(const std::string_view& name) {
+VarHolder::VarHolder(const std::string_view& name, const std::optional<std::string_view> &clientId) {
     setVarName(name);
+    if (clientId)
+        setClientId(clientId.value());
+
 }
 
 void VarHolder::setVarName(const std::string_view& name) {
+    reset();
     name_ = name;
+
+    isAvailable();
 }
 
-bool VarHolder::checkIdx() {
-    if (!LiveClient::GetInstance().isConnected()) {
-        return false;
-
-    }
-
-    if (statusId_ != LiveClient::GetInstance().getStatusId()) {
-        statusId_ = LiveClient::GetInstance().getStatusId();
-        idx_ = LiveClient::GetInstance().getVarIdx(name_);
-    }
+bool VarHolder::reset() {
+    available_ = false;
+    unit_ = "";
+    description_ = "";
 
     return true;
 }
 
+bool VarHolder::isAvailable() {
+    auto client = getClient();
+    if (!client || !client->isAvailable()) {
+        return false;
+    }
+
+    if (!available_ || connectionId_ != client->getConnectionId()) {
+        connectionId_ = client->getConnectionId();
+
+        auto idx = client->getVarIdx(name_);
+        if (!idx) {
+            available_ = false;
+            return false;
+        }
+        idx_ = idx.value();
+        unit_ = client->getVarUnit(idx_).value();
+        description_ = client->getVarDesc(idx_).value();
+        available_ = true;
+    }
+
+    return available_;
+}
+
 VarDataType /*VarDataType*/ VarHolder::getType() {
-    if (checkIdx())
-        return LiveClient::GetInstance().getVarType(idx_);
+    if (isAvailable()) {
+        return getClient()->getVarType(idx_).value();
+    }
     return VarDataType::Char;
 }
 
-int VarHolder::getCount() {
-    if (checkIdx())
-        return LiveClient::GetInstance().getVarCount(idx_);
+uint32_t VarHolder::getCount() {
+    if (isAvailable())
+        return getClient()->getVarCount(idx_).value();
     return 0;
 }
 
 bool VarHolder::isValid() {
-    checkIdx();
-    return (idx_ > -1);
+    return isAvailable() && (idx_ > -1);
 }
 
 
 bool VarHolder::getBool(int entry) {
-    if (checkIdx())
-        return LiveClient::GetInstance().getVarBool(idx_, entry);
+    if (isAvailable())
+        return getClient()->getVarBool(idx_, entry).value();
     return false;
 }
 
 int VarHolder::getInt(int entry) {
-    if (checkIdx())
-        return LiveClient::GetInstance().getVarInt(idx_, entry);
+    if (isAvailable())
+        return getClient()->getVarInt(idx_, entry).value();
     return 0;
 }
 
 float VarHolder::getFloat(int entry) {
-    if (checkIdx())
-        return LiveClient::GetInstance().getVarFloat(idx_, entry);
+    if (isAvailable())
+        return getClient()->getVarFloat(idx_, entry).value();
     return 0.0f;
 }
 
 double VarHolder::getDouble(int entry) {
-    if (checkIdx())
-        return LiveClient::GetInstance().getVarDouble(idx_, entry);
+    if (isAvailable())
+        return getClient()->getVarDouble(idx_, entry).value();
     return 0.0;
 }
+void VarHolder::setClientId(const std::string_view &clientId) {
+    clientId_ = clientId;
+}
+
+Client *VarHolder::getClient() {
+    return ClientManager::Get().get(clientId_);
+
+
+}
+
 }

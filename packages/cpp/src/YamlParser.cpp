@@ -29,19 +29,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstring>
 #include <string>
 namespace IRacingTools::SDK::Utils {
-enum class YamlState {
-    space,
-    key,
-    keysep,
-    value,
-    newline
-};
+enum class YamlState { space, key, keysep, value, newline };
 
 // super simple YAML parser
-bool ParseYaml(const char *data, const std::string_view& path, const char **val, int *len)
-{
-    if(data && !path.empty() && val && len)
-    {
+bool ParseYaml(const char *data, const std::string_view &path, const char **val, int *len) {
+    if (data && !path.empty() && val && len) {
         // make sure we set this to something
         *val = nullptr;
         *len = 0;
@@ -50,128 +42,112 @@ bool ParseYaml(const char *data, const std::string_view& path, const char **val,
         auto state = YamlState::space;
 
         const char *keystr = nullptr;
-        int keylen = 0;
+        int keyLen = 0;
 
         const char *valuestr = nullptr;
-        int valuelen = 0;
+        int valueLen = 0;
 
-        const char *pathptr = path.data();
+        const char *pathPtr = path.data();
         int pathdepth = 0;
 
-        while(*data)
-        {
-            switch(*data)
-            {
+        while (*data) {
+            switch (*data) {
                 case ' ':
-                    if(state == YamlState::newline)
+                    if (state == YamlState::newline)
                         state = YamlState::space;
-                if(state == YamlState::space)
-                    depth++;
-                else if(state == YamlState::key)
-                    keylen++;
-                else if(state == YamlState::value)
-                    valuelen++;
-                break;
+                    if (state == YamlState::space)
+                        depth++;
+                    else if (state == YamlState::key)
+                        keyLen++;
+                    else if (state == YamlState::value)
+                        valueLen++;
+                    break;
                 case '-':
-                    if(state == YamlState::newline)
+                    if (state == YamlState::newline)
                         state = YamlState::space;
-                if(state == YamlState::space)
-                    depth++;
-                else if(state == YamlState::key)
-                    keylen++;
-                else if(state == YamlState::value)
-                    valuelen++;
-                else // Always YamlState::keysep
-                {
-                    state = YamlState::value;
-                    valuestr = data;
-                    valuelen = 1;
-                }
-                break;
-                case ':':
-                    if(state == YamlState::key)
-                    {
-                        state = YamlState::keysep;
-                        keylen++;
-                    }
-                    else if(state == YamlState::keysep)
+                    if (state == YamlState::space)
+                        depth++;
+                    else if (state == YamlState::key)
+                        keyLen++;
+                    else if (state == YamlState::value)
+                        valueLen++;
+                    else // Always YamlState::keysep
                     {
                         state = YamlState::value;
                         valuestr = data;
+                        valueLen = 1;
                     }
-                    else if(state == YamlState::value)
-                        valuelen++;
-                break;
+                    break;
+                case ':':
+                    if (state == YamlState::key) {
+                        state = YamlState::keysep;
+                        keyLen++;
+                    } else if (state == YamlState::keysep) {
+                        state = YamlState::value;
+                        valuestr = data;
+                    } else if (state == YamlState::value)
+                        valueLen++;
+                    break;
                 case '\n':
                 case '\r':
-                    if(state != YamlState::newline)
-                    {
-                        if(depth < pathdepth)
-                        {
+                    if (state != YamlState::newline) {
+                        if (depth < pathdepth) {
                             return false;
-                        }
-                        else if(keylen && 0 == strncmp(keystr, pathptr, keylen))
-                        {
+                        } else if (keyLen && 0 == strncmp(keystr, pathPtr, keyLen)) {
                             bool found = true;
                             //do we need to test the value?
-                            if(*(pathptr+keylen) == '{')
-                            {
+                            if (*(pathPtr + keyLen) == '{') {
                                 //search for closing brace
-                                int pathvaluelen = keylen + 1;
-                                while(*(pathptr+pathvaluelen) && *(pathptr+pathvaluelen) != '}')
-                                    pathvaluelen++;
+                                int pathValueLen = keyLen + 1;
+                                while (*(pathPtr + pathValueLen) && *(pathPtr + pathValueLen) != '}')
+                                    pathValueLen++;
 
-                                if(valuelen == pathvaluelen - (keylen+1) && 0 == strncmp(valuestr, (pathptr+keylen+1), valuelen))
-                                    pathptr += valuelen + 2;
+                                if (valueLen == pathValueLen - (keyLen + 1)
+                                    && 0 == strncmp(valuestr, (pathPtr + keyLen + 1), valueLen))
+                                    pathPtr += valueLen + 2;
                                 else
                                     found = false;
                             }
 
-                            if(found)
-                            {
-                                pathptr += keylen;
+                            if (found) {
+                                pathPtr += keyLen;
                                 pathdepth = depth;
 
-                                if(*pathptr == '\0')
-                                {
+                                if (*pathPtr == '\0') {
                                     *val = valuestr;
-                                    *len = valuelen;
+                                    *len = valueLen;
                                     return true;
                                 }
                             }
                         }
 
                         depth = 0;
-                        keylen = 0;
-                        valuelen = 0;
+                        keyLen = 0;
+                        valueLen = 0;
                     }
-                state = YamlState::newline;
-                break;
+                    state = YamlState::newline;
+                    break;
                 default:
-                    if(state == YamlState::space || state == YamlState::newline)
-                    {
+                    if (state == YamlState::space || state == YamlState::newline) {
                         state = YamlState::key;
                         keystr = data;
-                        keylen = 0; //redundant?
-                    }
-                    else if(state == YamlState::keysep)
-                    {
+                        keyLen = 0; //redundant?
+                    } else if (state == YamlState::keysep) {
                         state = YamlState::value;
                         valuestr = data;
-                        valuelen = 0; //redundant?
+                        valueLen = 0; //redundant?
                     }
-                if(state == YamlState::key)
-                    keylen++;
-                if(state == YamlState::value)
-                    valuelen++;
-                break;
+                    if (state == YamlState::key)
+                        keyLen++;
+                    if (state == YamlState::value)
+                        valueLen++;
+                    break;
             }
 
             // important, increment our pointer
             data++;
         }
-
     }
     return false;
 }
-}
+} // namespace IRacingTools::SDK::Utils

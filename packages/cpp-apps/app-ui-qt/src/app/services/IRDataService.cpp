@@ -97,7 +97,7 @@ void IRDataServiceThread::processData() {
 
     // only process session string if it changed
     if (client.wasSessionStrUpdated()) {
-        qDebug() << "SessionStr updated: " << client.getSessionCt();
+        qDebug() << "SessionStr updated: " << client.getSessionUpdateCount().value_or(0);
         //        processYAMLSessionString(LiveClient::GetInstance().getSessionStr());
         wasUpdated = true;
     }

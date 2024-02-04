@@ -1,0 +1,177 @@
+//
+// Created by jglanz on 1/28/2024.
+//
+
+#pragma once
+
+#include <windows.h>
+
+#include <thread>
+
+#include <IRacingTools/SDK/LiveClient.h>
+#include <IRacingTools/SDK/LiveConnection.h>
+#include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/Utils/EventEmitter.h>
+#include <IRacingTools/SDK/VarHolder.h>
+
+namespace IRacingTools::Shared {
+
+class SessionDataEvent;
+
+class SessionDataAccess {
+private:
+    SDK::ClientIdProvider clientIdProvider_;
+    const SDK::ClientIdProvider clientIdProviderInternal_{[&] () {
+        return clientIdProvider_();
+    }};
+    
+public:
+    explicit SessionDataAccess(const SDK::ClientId& clientId);
+    explicit SessionDataAccess(const SDK::ClientIdProvider& clientIdProvider);
+    SessionDataAccess();
+    SessionDataAccess(const SessionDataAccess&) = delete;
+    SessionDataAccess(SessionDataAccess&&) = delete;
+
+
+    // session status
+#define DeclareVarHolder(Name) SDK::VarHolder Name {#Name, clientIdProviderInternal_}
+    DeclareVarHolder(PitsOpen); // (bool) True if pit stop is allowed, basically true if caution lights not out
+    DeclareVarHolder(RaceLaps); // (int) Laps completed in race
+    DeclareVarHolder(SessionFlags); // (int) FlagType, bitfield
+    DeclareVarHolder(SessionLapsRemain); // (int) Laps left till session ends
+    DeclareVarHolder(SessionLapsRemainEx); // (int) New improved laps left till session ends
+    DeclareVarHolder(SessionNum); // (int) Session number
+    DeclareVarHolder(SessionState); // (int) SessionState, Session state
+    DeclareVarHolder(SessionTick); // (int) Current update number
+    DeclareVarHolder(SessionTime); // (double), s, Seconds since session start
+    DeclareVarHolder(SessionTimeOfDay); // (float) s, Time of day in seconds
+    DeclareVarHolder(SessionTimeRemain); // (double) s, Seconds left till session ends
+    DeclareVarHolder(SessionUniqueID); // (int) Session ID
+
+    // competitor information, array of up to 64 cars
+    DeclareVarHolder(CarIdxEstTime); // (float) s, Estimated time to reach current location on track
+    DeclareVarHolder(CarIdxClassPosition); // (int) Cars class position in race by car index
+    DeclareVarHolder(CarIdxF2Time); // (float) s, Race time behind leader or fastest lap time otherwise
+    DeclareVarHolder(CarIdxGear); // (int) -1=reverse 0=neutral 1..n=current gear by car index
+    DeclareVarHolder(CarIdxLap); // (int) Lap count by car index
+    DeclareVarHolder(CarIdxLapCompleted); // (int) Laps completed by car index
+    DeclareVarHolder(CarIdxLapDistPct); // (float) %, Percentage distance around lap by car index
+    DeclareVarHolder(CarIdxOnPitRoad); // (bool) On pit road between the cones by car index
+    DeclareVarHolder(CarIdxPosition); // (int) Cars position in race by car index
+    DeclareVarHolder(CarIdxRPM); // (float) revs/min, Engine rpm by car index
+    DeclareVarHolder(CarIdxSteer); // (float) rad, Steering wheel angle by car index
+    DeclareVarHolder(CarIdxTrackSurface); // (int) TrackLocation, Track surface type by car index
+    DeclareVarHolder(CarIdxTrackSurfaceMaterial);
+    // (int) TrackSurface, Track surface material type by car index
+
+    // new variables
+    DeclareVarHolder(CarIdxLastLapTime); // (float) s, Cars last lap time
+    DeclareVarHolder(CarIdxBestLapTime); // (float) s, Cars best lap time
+    DeclareVarHolder(CarIdxBestLapNum); // (int) Cars best lap number
+
+    DeclareVarHolder(CarIdxP2P_Status); // (bool) Push2Pass active or not
+    DeclareVarHolder(CarIdxP2P_Count); // (int) Push2Pass count of usage (or remaining in Race)
+
+    DeclareVarHolder(PaceMode); // (int) PaceMode, Are we pacing or not
+    DeclareVarHolder(CarIdxPaceLine); // (int) What line cars are pacing in, or -1 if not pacing
+    DeclareVarHolder(CarIdxPaceRow); // (int) What row cars are pacing in, or -1 if not pacing
+    DeclareVarHolder(CarIdxPaceFlags); // (int) PaceFlagType, Pacing status flags for each car
+
+#undef DeclareVarHolder
+    std::shared_ptr<SessionDataEvent> createDataEvent();
+};
+
+enum class SessionDataEventType {
+    Data,
+    Session
+};
+
+class SessionDataEvent  {
+    
+public:
+    struct SessionCarState {
+        int index;
+        int lap;
+        int lapsCompleted;
+
+        float lapPercentComplete;
+
+        float estimatedTime;
+
+        struct {
+            int overall;
+            int clazz;
+        } position;
+
+        std::tuple<int,int,int,float,float,int,int> toTuple() const {
+            return {index,lap,lapsCompleted, lapPercentComplete, estimatedTime, position.overall, position.clazz};
+        }
+    };
+
+//    SessionDataEvent() = delete;
+    SessionDataEvent(SessionDataEventType type, SessionDataAccess * dataAccess);
+    void refresh();
+    const std::vector<SessionCarState>& cars();
+    SessionDataEventType type();
+
+
+
+private:
+    SessionDataEventType type_;
+    SessionDataAccess *dataAccess_;
+    std::vector<SessionCarState> cars_{};
+};
+
+
+
+
+/**
+ * @brief IRacing Data Service
+ */
+class SessionDataProvider : public SDK::Utils::EventEmitter<std::shared_ptr<SessionDataEvent>> {
+
+public:
+    virtual ~SessionDataProvider() = default;
+
+    virtual bool start() = 0;
+    virtual bool isRunning() = 0;
+    virtual void stop() = 0;
+
+//    HANDLE dataValidEvent_{nullptr};
+};
+
+
+class LiveSessionDataProvider : public SessionDataProvider {
+
+public:
+    virtual ~LiveSessionDataProvider() override;
+
+    bool start() override;
+    bool isRunning() override;
+    void stop() override;
+
+protected:
+    void runnable();
+
+private:
+    void init();
+    void process();
+    void processData();
+    void processDataUpdate();
+    bool processYAMLLiveString();
+
+    void checkConnection();
+
+    SessionDataAccess dataAccess_{""};
+    std::unique_ptr<std::thread> thread_{nullptr};
+    std::mutex threadMutex_{};
+
+    std::atomic_bool running_{false};
+    std::atomic_bool isConnected_{false};
+    DWORD lastUpdatedTime_{0};
+    //    HANDLE dataValidEvent_{nullptr};
+};
+
+} // namespace Services
+
+

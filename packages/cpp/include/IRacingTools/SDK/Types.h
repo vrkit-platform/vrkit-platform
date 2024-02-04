@@ -88,6 +88,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace IRacingTools::SDK {
 
+using ClientId = std::string_view;
+using ConnectionId = std::size_t;
+using ClientIdProvider = std::function<ClientId()>;
+
+inline ClientIdProvider MakeStaticClientIdProvider(const std::string_view & clientId) {
+
+    return [clientId] () {
+        return clientId;
+    };
+}
+
 template<typename T>
 using Opt = std::optional<T>;
 

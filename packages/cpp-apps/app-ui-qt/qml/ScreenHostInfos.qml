@@ -186,7 +186,7 @@ Loader {
                             font.capitalization: Font.AllUppercase
                         }
                         Text {
-                            text: utilsSysinfo.os_name
+                            text: utilsSysInfo.os_name
                             textFormat: Text.PlainText
                             color: Theme.colorHighContrast
                             font.pixelSize: Theme.fontSizeContentBig
@@ -194,7 +194,7 @@ Loader {
                     }
 
                     Column {
-                        visible: utilsSysinfo.os_version !== "unknown"
+                        visible: utilsSysInfo.os_version !== "unknown"
 
                         Text {
                             text: qsTr("Operating System VERSION")
@@ -205,7 +205,7 @@ Loader {
                             font.capitalization: Font.AllUppercase
                         }
                         Text {
-                            text: utilsSysinfo.os_version
+                            text: utilsSysInfo.os_version
                             textFormat: Text.PlainText
                             color: Theme.colorHighContrast
                             font.pixelSize: Theme.fontSizeContentBig
@@ -253,7 +253,7 @@ Loader {
                             font.capitalization: Font.AllUppercase
                         }
                         Text {
-                            text: utilsSysinfo.cpu_arch
+                            text: utilsSysInfo.cpu_arch
                             textFormat: Text.PlainText
                             font.pixelSize: Theme.fontSizeContentBig
                             color: Theme.colorHighContrast
@@ -270,7 +270,7 @@ Loader {
                             font.capitalization: Font.AllUppercase
                         }
                         Text {
-                            text: utilsSysinfo.cpu_coreCount_physical
+                            text: utilsSysInfo.cpu_coreCount_physical
                             textFormat: Text.PlainText
                             font.pixelSize: Theme.fontSizeContentBig
                             color: Theme.colorHighContrast
@@ -287,7 +287,7 @@ Loader {
                             font.capitalization: Font.AllUppercase
                         }
                         Text {
-                            text: utilsSysinfo.cpu_coreCount_logical
+                            text: utilsSysInfo.cpu_coreCount_logical
                             textFormat: Text.PlainText
                             font.pixelSize: Theme.fontSizeContentBig
                             color: Theme.colorHighContrast
@@ -304,7 +304,7 @@ Loader {
                             font.capitalization: Font.AllUppercase
                         }
                         Text {
-                            text: utilsSysinfo.ram_total + " " + qsTr("MB")
+                            text: utilsSysInfo.ram_total + " " + qsTr("MB")
                             textFormat: Text.PlainText
                             color: Theme.colorHighContrast
                             font.pixelSize: Theme.fontSizeContentBig

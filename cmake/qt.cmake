@@ -19,9 +19,14 @@ set(CMAKE_AUTORCC ON)
 find_package(Qt6 REQUIRED COMPONENTS ${QTModules})
 qt_standard_project_setup()
 
+
+include(${CMAKE_CURRENT_LIST_DIR}/external/qdep-inject.cmake NO_POLICY_SCOPE)
+
 # QT Dependencies
 set(DEP_QT_CORE
   ${QTCoreModuleTargets})
 set(DEP_QT_UI
   ${DEP_QT_CORE}
-  ${QTUIModuleTargets})
+  ${QTUIModuleTargets}
+  ${DEP_QINJECT}
+)

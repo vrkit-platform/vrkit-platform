@@ -18,9 +18,9 @@
  * \author    Emeric Grange <emeric.grange@gmail.com>
  */
 
-#include <QQmlDebuggingEnabler>
 #include "SettingsManager.h"
-#include "services/IRDataService.h"
+#include "services/SessionDataTableModel.h"
+#include <QQmlDebuggingEnabler>
 
 #include <utils_app.h>
 #include <utils_screen.h>
@@ -34,14 +34,24 @@
 
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <QQuickWindow>
 #include <QQuickStyle>
+#include <QQuickWindow>
 #include <QSurfaceFormat>
+#include <QtUITypes.h>
 
 /* ************************************************************************** */
 
+using namespace IRacingTools::App;
 using namespace IRacingTools::App::Services;
 
+namespace {
+const QString &EngineContextEntryKey(const QMLEngineContextEntry &entry) {
+    return entry.first;
+}
+QObject* EngineContextEntryValue(const QMLEngineContextEntry &entry) {
+    return entry.second;
+}
+}
 int main(int argc, char *argv[])
 {
     // GUI application /////////////////////////////////////////////////////////
@@ -49,16 +59,15 @@ int main(int argc, char *argv[])
     SingleApplication app(argc, argv);
 
     // Application name
-    app.setApplicationName(PROJECT_NAME);
-    app.setApplicationDisplayName(PROJECT_NAME);
-    app.setOrganizationName("3FV");
-    app.setOrganizationDomain("3FV");
+    SingleApplication::setApplicationName(APP_NAME);
+    SingleApplication::setApplicationDisplayName(APP_NAME);
+    SingleApplication::setApplicationVersion(APP_VERSION);
+    SingleApplication::setOrganizationName("3FV");
+    SingleApplication::setOrganizationDomain("3FV");
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     // Application icon
     QIcon appIcon(":/assets/logos/logo.svg");
-    app.setWindowIcon(appIcon);
-#endif
+    SingleApplication::setWindowIcon(appIcon);
 
     // Init app components
     SettingsManager *sm = SettingsManager::getInstance();
@@ -68,15 +77,17 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    auto dataServiceThread = new IRDataServiceThread();
-    QObject::connect(dataServiceThread, &IRDataServiceThread::sessionUpdated, [&] (IRSessionUpdateEvent& event) {
-        qDebug() << "Received session update with car total = " << event.getCars().size();
-    });
+    auto liveSessionDataProvider = std::make_shared<IRacingTools::Shared::LiveSessionDataProvider>();
+    auto sessionDataTableModel = new SessionDataTableModel(liveSessionDataProvider);
+//    QObject::connect(sessionDataTableModel, &SessionDataTableModel::sessionDataChanged, [&] (auto event) {
+//        qDebug() << "Received session update with car total = " << event->cars().size();
+//    });
 
     // Init generic utils
+
     UtilsApp *utilsApp = UtilsApp::getInstance();
     UtilsScreen *utilsScreen = UtilsScreen::getInstance();
-    UtilsSysInfo *utilsSysinfo = UtilsSysInfo::getInstance();
+    UtilsSysInfo *utilsSysInfo = UtilsSysInfo::getInstance();
     UtilsLanguage *utilsLanguage = UtilsLanguage::getInstance();
     if (!utilsScreen || !utilsApp || !utilsLanguage)
     {
@@ -92,22 +103,24 @@ int main(int argc, char *argv[])
 
     // Force QtQuick components style? // Some styles are only available on target OS
     // Basic // Fusion // Imagine // macOS // iOS // Material // Universal // Windows
-    //QQuickStyle::setStyle("Universal");
-
-//    MobileUI::registerQML();
+//    QQuickStyle::setStyle("windows");
 
     // Then we start the UI
     QQmlApplicationEngine engine;
-    QQmlContext *engine_context = engine.rootContext();
+    QQmlContext *engineContext = engine.rootContext();
 
-    engine_context->setContextProperty("dataServiceThread",dataServiceThread);
-    engine_context->setContextProperty("settingsManager", sm);
-    engine_context->setContextProperty("utilsApp", utilsApp);
-    engine_context->setContextProperty("utilsLanguage", utilsLanguage);
-    engine_context->setContextProperty("utilsScreen", utilsScreen);
-    engine_context->setContextProperty("utilsSysinfo", utilsSysinfo);
+    QList<QMLEngineContextEntry> contextEntries {
+        {"sessionDataTableModel",sessionDataTableModel},
+        {"settingsManager", sm},
+        {"utilsApp", utilsApp},
+        {"utilsLanguage", utilsLanguage},
+        {"utilsScreen", utilsScreen},
+        {"utilsSysInfo", utilsSysInfo}
+    };
 
-    // Load the main view
+    std::for_each(contextEntries.begin(),contextEntries.end(),[&](auto& entry) {
+        engineContext->setContextProperty(entry.first,entry.second);
+    });
 
     engine.load(QUrl(QStringLiteral("qrc:/qml/DesktopApplication.qml")));
 
@@ -117,22 +130,23 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // For i18n retranslate
     utilsLanguage->setQmlEngine(&engine);
 
-    dataServiceThread->start();
+//    sessionDataTableModel->start();
 
     // React to secondary instances // QQuickWindow must be valid at this point
     auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().value(0));
     QObject::connect(&app, &SingleApplication::instanceStarted, window, &QQuickWindow::show);
     QObject::connect(&app, &SingleApplication::instanceStarted, window, &QQuickWindow::raise);
+//    QObject::connect(&app, &QAPPLICATION_CLASS::applicationStateChanged, [&](Qt::ApplicationState state) {
+//
+//    });
 
 
 //    dataServiceThread->
 
     auto res = app.exec();
-    dataServiceThread->requestInterruption();
-    dataServiceThread->wait();
+    sessionDataTableModel->resetDataProvider();
     return res;
 }
 

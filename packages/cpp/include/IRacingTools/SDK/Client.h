@@ -40,7 +40,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace IRacingTools::SDK {
 namespace fs = std::filesystem;
 
-using ConnectionId = std::size_t;
 
 class Client {
 public:

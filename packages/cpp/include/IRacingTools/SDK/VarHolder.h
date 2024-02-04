@@ -16,7 +16,8 @@ namespace IRacingTools::SDK {
 class VarHolder {
 public:
     VarHolder() = delete;
-    explicit VarHolder(const std::string_view &name, const std::optional<std::string_view> &clientId = std::nullopt);
+    explicit VarHolder(const std::string_view &name, const std::string_view& clientId = "");
+    explicit VarHolder(const std::string_view &name, ClientIdProvider clientIdProvider);
 
     void setVarName(const std::string_view &name);
 
@@ -31,7 +32,7 @@ public:
     float getFloat(int entry = 0);
     double getDouble(int entry = 0);
 
-    void setClientId(const std::string_view &clientId);
+    void setClientIdProvider(const ClientIdProvider &clientIdProvider);
 
 protected:
     bool reset();
@@ -41,7 +42,8 @@ protected:
 
 
     std::atomic_bool available_{false};
-    std::string_view clientId_{""};
+//    std::string_view clientId_{""};
+    ClientIdProvider clientIdProvider_;
     std::string_view name_{""};
     std::string_view unit_{""};
     std::string_view description_{""};

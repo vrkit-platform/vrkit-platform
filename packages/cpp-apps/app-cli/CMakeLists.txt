@@ -7,7 +7,6 @@ file(GLOB_RECURSE appHeaders include/*.h)
 
 # App
 set(targetName ${appCLITarget})
-
 set(APP_NAME ${targetName})
 set(APP_VERSION ${appVersion})
 

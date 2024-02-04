@@ -25,28 +25,29 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <cassert>
-#include <cstring>
 
 #include <magic_enum.hpp>
 
 #include <IRacingTools/SDK/Client.h>
 #include <IRacingTools/SDK/ClientManager.h>
 #include <IRacingTools/SDK/Types.h>
-#include <IRacingTools/SDK/Utils/Singleton.h>
 #include <IRacingTools/SDK/Utils/YamlParser.h>
-#include <IRacingTools/SDK/VarData.h>
 #include <IRacingTools/SDK/VarHolder.h>
 #pragma warning(disable : 4996)
 namespace IRacingTools::SDK {
 using namespace Utils;
 //----------------------------------
 
-VarHolder::VarHolder(const std::string_view& name, const std::optional<std::string_view> &clientId) {
-    setVarName(name);
-    if (clientId)
-        setClientId(clientId.value());
+VarHolder::VarHolder(const std::string_view& name, const std::string_view &clientId) :
+    VarHolder(name, MakeStaticClientIdProvider(clientId)) {
 
+
+}
+
+VarHolder::VarHolder(const std::string_view &name,  ClientIdProvider clientIdProvider) : clientIdProvider_(clientIdProvider) {
+    setVarName(name);
+//    if (clientId)
+//        setClientId(clientId.value());
 }
 
 void VarHolder::setVarName(const std::string_view& name) {
@@ -128,14 +129,15 @@ double VarHolder::getDouble(int entry) {
         return getClient()->getVarDouble(idx_, entry).value();
     return 0.0;
 }
-void VarHolder::setClientId(const std::string_view &clientId) {
-    clientId_ = clientId;
-}
 
 Client *VarHolder::getClient() {
-    return ClientManager::Get().get(clientId_);
+    auto clientId = clientIdProvider_();
+    return ClientManager::Get().get(clientId);
 
 
+}
+void VarHolder::setClientIdProvider(const ClientIdProvider &clientIdProvider) {
+    clientIdProvider_ = clientIdProvider;
 }
 
 }

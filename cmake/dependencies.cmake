@@ -30,7 +30,8 @@ find_package(Boost REQUIRED COMPONENTS system)
 #find_package(Boost REQUIRED COMPONENTS interprocess)
 
 # TinyORM Dep
-include(${CMAKE_CURRENT_LIST_DIR}/tiny_orm.cmake NO_POLICY_SCOPE)
+include(${CMAKE_CURRENT_LIST_DIR}/external/tiny_orm.cmake NO_POLICY_SCOPE)
+
 
 set(DEP_WXWIDGETS wx::core wx::base)
 set(DEP_PROTOBUF protobuf::libprotobuf)

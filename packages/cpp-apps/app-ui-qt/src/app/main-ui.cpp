@@ -18,19 +18,17 @@
  * \author    Emeric Grange <emeric.grange@gmail.com>
  */
 
-#include "SettingsManager.h"
-#include "services/SessionDataTableModel.h"
 #include <QQmlDebuggingEnabler>
 
+#include <SingleApplication>
 #include <utils_app.h>
+#include <utils_language.h>
 #include <utils_screen.h>
 #include <utils_sysinfo.h>
-#include <utils_language.h>
-#include <SingleApplication>
 
-#include <QtGlobal>
 #include <QLibraryInfo>
 #include <QVersionNumber>
+#include <QtGlobal>
 
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -38,6 +36,11 @@
 #include <QQuickWindow>
 #include <QSurfaceFormat>
 #include <QtUITypes.h>
+
+#include "services/SessionDataTableModel.h"
+#include "services/HotReloadService.h"
+#include "AppState.h"
+#include "SettingsManager.h"
 
 /* ************************************************************************** */
 
@@ -48,12 +51,63 @@ namespace {
 const QString &EngineContextEntryKey(const QMLEngineContextEntry &entry) {
     return entry.first;
 }
-QObject* EngineContextEntryValue(const QMLEngineContextEntry &entry) {
+QObject *EngineContextEntryValue(const QMLEngineContextEntry &entry) {
     return entry.second;
 }
+
+AppState * configureQMLEngine(QQmlApplicationEngine &engine, const QList<QMLEngineContextEntry> &contextEntries) {
+    QQmlContext *engineContext = engine.rootContext();
+    std::for_each(contextEntries.begin(), contextEntries.end(), [&](auto &entry) {
+        engineContext->setContextProperty(entry.first, entry.second);
+    });
+
+    // ThemeEngine
+    qmlRegisterSingletonType(QUrl("qrc:/qml/ThemeEngine.qml"), "ThemeEngine", 1, 0, "Theme");
+//    AppState * appState = new AppState();// engine.singletonInstance<AppState>();
+//    qmlRegisterSingletonType<AppState>("AppState", 1, 0, "AppState", [&](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject * {
+//        Q_UNUSED(engine)
+//        Q_UNUSED(scriptEngine)
+//
+//        return appState;
+//    });
+//    qmlRegisterSingletonType("", 1, 0, "AppState", appState);
+    AppState * appState = engine.singletonInstance<AppState*>("IRT","AppState");
+    qDebug() << "DataSourceType == " << QMetaEnum::fromType<DataSourceConfig::Type>().valueToKey(appState->dataSourceConfig()->type());
+#ifdef QML_HOT_RELOAD
+    std::filesystem::path srcPath{APP_SRC_DIR};
+    auto qmlPath = srcPath / "qml";
+    auto qmlMainPath = qmlPath / "DesktopApplication.qml";
+    auto qmlPathStr = QString::fromStdString(qmlPath.string());
+    auto qmlMainPathStr = QString::fromStdString(qmlMainPath.string());
+    //
+    const auto appUrl = QUrl::fromLocalFile(qmlMainPathStr);
+    const auto appContentUrl = QUrl::fromLocalFile(
+                                   QString::fromStdString((qmlPath / "AppContent.qml").string())).toString();
+
+    engine.addImportPath(QUrl::fromLocalFile(qmlPathStr).toString() + "/");
+    for (auto childDir : {"components_generic", "components_themed", "components_js", "popups"}) {
+        auto childStr = QUrl::fromLocalFile(QString::fromStdString((qmlPath / childDir).string())).toString() + "/";
+        qInfo() << "Adding import: " << childStr;
+        engine.addImportPath(childStr);
+    }
+
+    auto hotReloadService = new HotReloadService(engine, qmlPathStr, appUrl);
+    engineContext->setContextProperty("HotReloadService", hotReloadService);
+    engineContext->setContextProperty("QMLSourcePath", qmlPathStr);
+    engineContext->setContextProperty("AppContentFilePath", appContentUrl);
+    hotReloadService->load();
+
+#else
+    const auto appUrl = QUrl(QStringLiteral("qrc:/qml/DesktopApplication.qml"));
+    engineContext->setContextProperty("AppContentFilePath", appUrl.toString());
+    engine.load(appUrl);
+#endif
+   return appState;
+
 }
-int main(int argc, char *argv[])
-{
+
+} // namespace
+int main(int argc, char *argv[]) {
     // GUI application /////////////////////////////////////////////////////////
 
     SingleApplication app(argc, argv);
@@ -71,17 +125,16 @@ int main(int argc, char *argv[])
 
     // Init app components
     SettingsManager *sm = SettingsManager::getInstance();
-    if (!sm)
-    {
+    if (!sm) {
         qWarning() << "Cannot init app components!";
         return EXIT_FAILURE;
     }
 
     auto liveSessionDataProvider = std::make_shared<IRacingTools::Shared::LiveSessionDataProvider>();
     auto sessionDataTableModel = new SessionDataTableModel(liveSessionDataProvider);
-//    QObject::connect(sessionDataTableModel, &SessionDataTableModel::sessionDataChanged, [&] (auto event) {
-//        qDebug() << "Received session update with car total = " << event->cars().size();
-//    });
+    //    QObject::connect(sessionDataTableModel, &SessionDataTableModel::sessionDataChanged, [&] (auto event) {
+    //        qDebug() << "Received session update with car total = " << event->cars().size();
+    //    });
 
     // Init generic utils
 
@@ -89,8 +142,7 @@ int main(int argc, char *argv[])
     UtilsScreen *utilsScreen = UtilsScreen::getInstance();
     UtilsSysInfo *utilsSysInfo = UtilsSysInfo::getInstance();
     UtilsLanguage *utilsLanguage = UtilsLanguage::getInstance();
-    if (!utilsScreen || !utilsApp || !utilsLanguage)
-    {
+    if (!utilsScreen || !utilsApp || !utilsLanguage) {
         qWarning() << "Cannot init generic utils!";
         return EXIT_FAILURE;
     }
@@ -98,52 +150,46 @@ int main(int argc, char *argv[])
     // Translate the application
     utilsLanguage->loadLanguage(sm->getAppLanguage());
 
-    // ThemeEngine
-    qmlRegisterSingletonType(QUrl("qrc:/qml/ThemeEngine.qml"), "ThemeEngine", 1, 0, "Theme");
+
 
     // Force QtQuick components style? // Some styles are only available on target OS
     // Basic // Fusion // Imagine // macOS // iOS // Material // Universal // Windows
-//    QQuickStyle::setStyle("windows");
+    //    QQuickStyle::setStyle("windows");
+    QQuickStyle::setStyle("Material");
 
-    // Then we start the UI
     QQmlApplicationEngine engine;
-    QQmlContext *engineContext = engine.rootContext();
+    configureQMLEngine(
+        engine,
+        QList<QMLEngineContextEntry>{
+            {"sessionDataTableModel", sessionDataTableModel},
+            {"settingsManager", sm},
+            {"utilsApp", utilsApp},
+            {"utilsLanguage", utilsLanguage},
+            {"utilsScreen", utilsScreen},
+            {"utilsSysInfo", utilsSysInfo}
+        }
+    );
 
-    QList<QMLEngineContextEntry> contextEntries {
-        {"sessionDataTableModel",sessionDataTableModel},
-        {"settingsManager", sm},
-        {"utilsApp", utilsApp},
-        {"utilsLanguage", utilsLanguage},
-        {"utilsScreen", utilsScreen},
-        {"utilsSysInfo", utilsSysInfo}
-    };
 
-    std::for_each(contextEntries.begin(),contextEntries.end(),[&](auto& entry) {
-        engineContext->setContextProperty(entry.first,entry.second);
-    });
 
-    engine.load(QUrl(QStringLiteral("qrc:/qml/DesktopApplication.qml")));
-
-    if (engine.rootObjects().isEmpty())
-    {
+    if (engine.rootObjects().isEmpty()) {
         qWarning() << "Cannot init QmlApplicationEngine!";
         return EXIT_FAILURE;
     }
 
     utilsLanguage->setQmlEngine(&engine);
 
-//    sessionDataTableModel->start();
+    //    sessionDataTableModel->start();
 
     // React to secondary instances // QQuickWindow must be valid at this point
     auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().value(0));
     QObject::connect(&app, &SingleApplication::instanceStarted, window, &QQuickWindow::show);
     QObject::connect(&app, &SingleApplication::instanceStarted, window, &QQuickWindow::raise);
-//    QObject::connect(&app, &QAPPLICATION_CLASS::applicationStateChanged, [&](Qt::ApplicationState state) {
-//
-//    });
+    //    QObject::connect(&app, &QAPPLICATION_CLASS::applicationStateChanged, [&](Qt::ApplicationState state) {
+    //
+    //    });
 
-
-//    dataServiceThread->
+    //    dataServiceThread->
 
     auto res = app.exec();
     sessionDataTableModel->resetDataProvider();

@@ -65,17 +65,17 @@ Loader {
                 Row {
                     // left
                     anchors.left: parent.left
-                    anchors.leftMargin: 24
+                    // anchors.leftMargin: 24
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 16
-                    visible: !singleColumn
 
+                    // visible: !singleColumn
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         color: Theme.colorActionbarContent
                         font.bold: true
                         font.pixelSize: Theme.fontSizeContentBig
-                        text: "Lap timing"
+                        text: "Lap timing37"
                         verticalAlignment: Text.AlignVCenter
                     }
                 }
@@ -83,55 +83,71 @@ Loader {
         }
 
         // CONTENT /////////////////////////////////////////////////////////////////
-        Flickable {
-            LayoutMirroring.enabled: appHeader.componentsMirrored
+        // Flickable {
+        //     // LayoutMirroring.enabled: appHeader.componentsMirrored
+        //     anchors.bottom: parent.bottom
+        //     anchors.left: parent.left
+        //     anchors.right: parent.right
+        //     anchors.top: menusArea.bottom
+        //     // boundsBehavior: Flickable.OvershootBounds
+        //     contentHeight: contentColumn.height
+        //     //layoutDirection: Qt.RightToLeft
+        //     contentWidth: parent.width
+
+        // Column {
+        //     id: contentColumn
+        //     anchors.bottom: parent.bottom
+        //     anchors.left: parent.left
+        //     // anchors.margins: Theme.componentMargin
+        //     anchors.right: parent.right
+        //     anchors.top: parent.top
+        //     // bottomPadding: Theme.componentMargin
+        //     // spacing: Theme.componentMargin
+        //     // topPadding: Theme.componentMargin
+
+        // anchors.fill: parent
+
+        // anchors.right: parent.right
+        // anchors.left: parent.left
+        ////////////////
+        TableView {
+            id: tableView
+
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: menusArea.bottom
-            boundsBehavior: isDesktop ? Flickable.OvershootBounds : Flickable.DragAndOvershootBounds
-            contentHeight: contentColumn.height
-            //layoutDirection: Qt.RightToLeft
-            contentWidth: parent.width
-            enabled: appHeader.componentsEnabled
 
-            ScrollBar.vertical: ScrollBar {
-                visible: isDesktop
+            columnWidthProvider: function (column) {
+                return tableView.model ? tableView.width / tableView.model.columnCount() : 0;
             }
 
-            Column {
-                id: contentColumn
+            onWidthChanged: tableView.forceLayout()
 
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.margins: Theme.componentMargin
-                anchors.right: parent.right
-                anchors.top: parent.top
-                bottomPadding: Theme.componentMargin
-                spacing: Theme.componentMargin
-                topPadding: Theme.componentMargin
+            // anchors.left: parent.left
+            // anchors.right: parent.right
+            model: sessionDataTableModel
+            // resizableColumns: true
 
-                ////////////////
-                TableView {
-                    id: tableView
+            delegate: Rectangle {
 
-                    anchors.fill: parent
+                border.width: 1
+                color: "transparent"
+                implicitHeight: 50
+                implicitWidth: tableView.columnWidthProvider(column)
 
-                    model: sessionDataTableModel
-
-                    delegate: Rectangle {
-                        border.width: 1
-                        implicitHeight: 50
-                        implicitWidth: 100
-
-                        color: "transparent"
-                        Text {
-                            anchors.centerIn: parent
-                            text: display
-                        }
-                    }
+                Text {
+                    anchors.centerIn: parent
+                    text: display
                 }
             }
+
+
+        }
+        Rectangle {
+            anchors.fill: parent
+            color: "red"
+            z: -1
         }
     }
 

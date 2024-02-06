@@ -16,19 +16,16 @@
 
 #include <IRacingTools/Shared/SessionDataProvider.h>
 #include <QAbstractEventDispatcher>
-#include <QEventLoop>
 #include <QAbstractTableModel>
+#include <QEventLoop>
 
-namespace IRacingTools {
-namespace App {
-namespace Services {
+namespace IRacingTools::App::Services {
 
 class SessionDataModelEvent : public QObject {
     Q_OBJECT
 public:
-    explicit SessionDataModelEvent(std::shared_ptr<Shared::SessionDataEvent> dataEvent, QObject * parent = nullptr);
-    std::vector<Shared::SessionDataEvent::SessionCarState>& cars();
-
+    explicit SessionDataModelEvent(std::shared_ptr<Shared::SessionDataEvent> dataEvent, QObject *parent = nullptr);
+    std::vector<Shared::SessionDataEvent::SessionCarState> &cars();
 
 private:
     std::vector<Shared::SessionDataEvent::SessionCarState> cars_{};
@@ -41,9 +38,9 @@ class SessionDataTableModel : public QAbstractTableModel {
     Q_OBJECT
     QML_ELEMENT
 
-//signals:
-//    [[maybe_unused]] void sessionUpdated(IRSessionUpdateEvent& ev);
-//    void dataEventReceived();
+    //signals:
+    //    [[maybe_unused]] void sessionUpdated(IRSessionUpdateEvent& ev);
+    //    void dataEventReceived();
 signals:
     void sessionDataChanged(QSharedPointer<SessionDataModelEvent> event);
 
@@ -51,8 +48,8 @@ private slots:
     void onSessionDataChanged(QSharedPointer<SessionDataModelEvent> event);
 
 public:
-    explicit SessionDataTableModel(QObject * parent = nullptr);
-    explicit SessionDataTableModel(std::shared_ptr<Shared::SessionDataProvider> dataProvider, QObject * parent = nullptr);
+    explicit SessionDataTableModel(QObject *parent = nullptr);
+    explicit SessionDataTableModel(std::shared_ptr<Shared::SessionDataProvider> dataProvider, QObject *parent = nullptr);
 
     void resetDataProvider();
 
@@ -63,9 +60,7 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-    QVariant headerData(int /* section */, Qt::Orientation /* orientation */,
-                        int role) const override;
-
+    QVariant headerData(int /* section */, Qt::Orientation /* orientation */, int role) const override;
 
 private:
     void cleanup();
@@ -75,9 +70,7 @@ private:
 
     std::mutex dataProviderMutex_{};
     std::shared_ptr<Shared::SessionDataProvider> dataProvider_{nullptr};
-//    HANDLE dataValidEvent_{nullptr};
+    //    HANDLE dataValidEvent_{nullptr};
 };
 
-} // namespace Services
-} // namespace App
-} // namespace IRacingTools
+} // namespace IRacingTools::App::Services

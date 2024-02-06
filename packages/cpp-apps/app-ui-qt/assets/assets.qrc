@@ -2,6 +2,7 @@
     <qresource prefix="/assets">
         <file>logos/logo.svg</file>
         <file>logos/github.svg</file>
+        <file>icons_material/bolt-24dp.svg</file>
         <file>icons_material/baseline-accessibility-24px.svg</file>
         <file>icons_material/baseline-add-24px.svg</file>
         <file>icons_material/baseline-archive-24px.svg</file>
@@ -20,6 +21,7 @@
         <file>icons_material/baseline-delete-24px.svg</file>
         <file>icons_material/baseline-filter_list-24px.svg</file>
         <file>icons_material/baseline-flaky-24px.svg</file>
+        <file>icons_material/baseline-folder-24px.svg</file>
         <file>icons_material/baseline-import_contacts-24px.svg</file>
         <file>icons_material/baseline-insert_link-24px.svg</file>
         <file>icons_material/baseline-iso-24px.svg</file>

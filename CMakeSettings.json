@@ -4,12 +4,14 @@
       "name": "x64-Debug",
       "generator": "Ninja",
       "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${projectDir}\\build\\vs-${name}",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "buildRoot": "${projectDir}\\build\\vs3-${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE=\"${env:VCPKG_ROOT}\\scripts\\buildsystems\\vcpkg.cmake\" -DVCPKG_ROOT=\"Y:\\code\\sim-racing\\vcpkg\"",
+      "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE=\"Y:\\code\\sim-racing\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake\" -DVCPKG_ROOT=\"Y:\\code\\sim-racing\\vcpkg\"",
       "buildCommandArgs": "",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "Y:\\code\\sim-racing\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
+      "intelliSenseMode": "windows-msvc-x64"
     }
   ]
 }

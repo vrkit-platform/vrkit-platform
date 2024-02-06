@@ -10,7 +10,7 @@ add_executable(${targetName} WIN32 ${appSources} ${appHeaders} ${sdkInternalHead
 target_include_directories(${targetName} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Link configured deps
-target_link_runtime_libs(${targetName})
+irt_configure_runtime_libs(${targetName})
 
 # Link other local project targets
 #target_link_libraries(${targetName} PRIVATE ${sdkTargetStatic} ${sharedAppLibTargetStatic} ${modelsTargetStatic} ${Protobuf_LIBRARY_DEBUG})

@@ -19,7 +19,7 @@
 
 
 # App
-set(targetName IRacingToolsAppUI)
+set(targetName irt_winui3)
 
 # Patch up the generated vcxproj
 configure_file(
@@ -72,6 +72,7 @@ set_property(
   PROPERTY VS_XAML_TYPE
   "ApplicationDefinition"
 )
+
 set_property(
   TARGET ${targetName}
   PROPERTY VS_PACKAGE_REFERENCES
@@ -85,12 +86,13 @@ target_include_directories(
   ${targetName}
   PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${CMAKE_CURRENT_LIST_DIR}/src"
 )
-target_precompile_headers(
-  ${targetName}
-  PRIVATE
-  src/pch.h
-)
+#target_precompile_headers(
+#  ${targetName}
+##  PRIVATE
+#  src/pch.h
+#)
 set_target_properties(
   ${targetName}
   PROPERTIES
@@ -104,10 +106,10 @@ set_target_properties(
   VS_GLOBAL_CppWinRTOptimized true
   VS_GLOBAL_CppWinRTRootNamespaceAutoMerge true
   VS_GLOBAL_UseWinUI true
-  VS_GLOBAL_ApplicationType "Windows Store"
+  #VS_GLOBAL_ApplicationType "Windows Store"
   VS_GLOBAL_RuntimeIdentifiers "win-x64"
   VS_GLOBAL_RuntimeIdentifier "win-x64"
-#  VS_GLOBAL_ApplicationType "Windows Store"
+  VS_GLOBAL_ApplicationType "Windows Store"
   VS_GLOBAL_WindowsPackageType None
   VS_GLOBAL_EnablePreviewMsixTooling true
   VS_GLOBAL_WindowsAppSDKSelfContained true
@@ -162,7 +164,7 @@ endforeach()
 target_include_directories(${targetName} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Link configured deps
-target_link_runtime_libs(${targetName})
+irt_configure_runtime_libs(${targetName})
 
 # Link other local project targets
 #target_link_libraries(${targetName} PRIVATE ${sdkTargetStatic} ${sharedAppLibTargetStatic} ${modelsTargetStatic} ${Protobuf_LIBRARY_DEBUG})

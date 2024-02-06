@@ -43,8 +43,6 @@ macro(SETUP_LIB_EXPORTS)
       $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
     )
 
-
-
     if(NOT SETUP_LIB_EXPORTS_NO_SOURCE_HEADERS)
       target_include_directories(${target} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -111,8 +109,6 @@ macro(SETUP_MOD_EXPORTS)
       $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
     )
 
-
-
     if(NOT SETUP_MOD_EXPORTS_NO_SOURCE_HEADERS)
       target_include_directories(${target} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -127,13 +123,32 @@ macro(SETUP_MOD_EXPORTS)
         FILES
         ${${libHeadersPublicVarName}}
       )
-#      install(TARGETS ${target} FILE_SET publicHeaders DESTINATION ${INCLUDE_INSTALL_DIR})
+      #      install(TARGETS ${target} FILE_SET publicHeaders DESTINATION ${INCLUDE_INSTALL_DIR})
     endif()
 
-#    install(TARGETS ${target} DESTINATION ${LIBRARY_INSTALL_DIR})
+    #    install(TARGETS ${target} DESTINATION ${LIBRARY_INSTALL_DIR})
     #    install(TARGETS ${target} FILE_SET publicExportHeaders DESTINATION ${INCLUDE_INSTALL_DIR})
     #    install(TARGETS ${target} FILES
     #      ${exportHeader} DESTINATION ${INCLUDE_INSTALL_DIR}
     #    )
   endforeach()
 endmacro()
+
+function(IRT_CONFIGURE_EXECUTABLE TARGET)
+  message(NOTICE "CMAKE_BUILD_TYPE == ${CMAKE_BUILD_TYPE}")
+#  if("${CMAKE_BUILD_TYPE}" STREQUAL Debug)
+#    message(NOTICE "Setting DEBUG compile def for ${TARGET}")
+#    target_compile_definitions(
+#      ${TARGET}
+#      PRIVATE
+#
+#    )
+#  endif()
+
+  target_compile_definitions(
+    ${TARGET}
+    PRIVATE
+    $<$<CONFIG:Debug>:DEBUG>
+    BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+  )
+endfunction()

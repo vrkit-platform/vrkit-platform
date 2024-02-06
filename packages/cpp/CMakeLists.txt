@@ -18,4 +18,4 @@ set(testTargetName ${sdkTarget}_tests)
 add_executable(${testTargetName} ${sdkTestSources})
 target_link_libraries(${testTargetName} PUBLIC
   ${sdkTargetStatic})
-target_link_test_libs(${testTargetName})
+irt_configure_test_libs(${testTargetName})

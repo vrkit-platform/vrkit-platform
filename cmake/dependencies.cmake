@@ -73,10 +73,10 @@ set(DEP_GTEST GTest::gtest)
 
 
 
-function(TARGET_LINK_RUNTIME_LIBS TARGET)
+function(IRT_CONFIGURE_RUNTIME_LIBS TARGET)
   target_link_libraries(${TARGET} PUBLIC ${ALL_RUNTIME_DEPS})
 endfunction()
 
-function(TARGET_LINK_TEST_LIBS TARGET)
+function(IRT_CONFIGURE_TEST_LIBS TARGET)
   target_link_libraries(${TARGET} PUBLIC ${ALL_RUNTIME_DEPS} ${DEP_GTEST_MAIN})
 endfunction()

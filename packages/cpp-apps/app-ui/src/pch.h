@@ -7,6 +7,6 @@
 
 #undef GetCurrentTime
 
-#include <winrt/Microsoft.UI.Xaml.Markup.h>
+//#include <winrt/Microsoft.UI.Xaml.Markup.h>
 
 #include <winrt/Windows.Foundation.Collections.h>

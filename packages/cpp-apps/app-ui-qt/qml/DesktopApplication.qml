@@ -1,291 +1,102 @@
 // noinspection JSVoidFunctionReturnValueUsed
-
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
-
 import ThemeEngine
+import QtQuick.Controls.Material
 
 ApplicationWindow {
     id: appWindow
-    flags: settingsManager.appThemeCSD ? Qt.Window | Qt.FramelessWindowHint : Qt.Window
-    color: settingsManager.appThemeCSD ? "transparent" : Theme.colorBackground
 
+    Material.theme: Material.Dark
+    Material.accent: Material.BlueGrey;
+
+    // UI sizes ////////////////////////////////////////////////////////////////
+    property bool headerUnicolor: (Theme.colorHeader === Theme.colorBackground)
     property bool isHdpi: (utilsScreen.screenDpi >= 128 || utilsScreen.screenPar >= 2.0)
-    property bool isDesktop: true
-    property bool isMobile: false
-    property bool isPhone: false
-    property bool isTablet: false
+    property bool sidebarUnicolor: (Theme.colorSidebar === Theme.colorBackground)
+    property bool singleColumn: false
+    property bool wideMode: (width >= 560)
+    property bool wideWideMode: (width >= 640)
 
-    // Desktop stuff ///////////////////////////////////////////////////////////
+    // User generated events handling //////////////////////////////////////////
+    function backAction() {
 
-    minimumWidth: 800
-    minimumHeight: 560
-
-    width: {
-        if (settingsManager.initialSize.width > 0)
-            return settingsManager.initialSize.width
-        else
-            return isHdpi ? 800 : 1280
     }
+
+    function deselectAction() {
+    }
+
+    function forwardAction() {
+    }
+
+    // color: settingsManager.appThemeCSD ? "transparent" : Theme.colorBackground
+    // flags: settingsManager.appThemeCSD ? Qt.Window | Qt.FramelessWindowHint : Qt.Window
+    color: Theme.colorWindowBackground
+    flags: Qt.Window | Qt.FramelessWindowHint
     height: {
         if (settingsManager.initialSize.height > 0)
-            return settingsManager.initialSize.height
+            return settingsManager.initialSize.height;
         else
-            return isHdpi ? 560 : 720
+            return isHdpi ? 560 : 720;
+    }
+    minimumHeight: 560
+
+    // Desktop stuff ///////////////////////////////////////////////////////////
+    minimumWidth: 800
+    visibility: settingsManager.initialVisibility
+    visible: true
+    width: {
+        if (settingsManager.initialSize.width > 0)
+            return settingsManager.initialSize.width;
+        else
+            return isHdpi ? 800 : 1280;
     }
     x: settingsManager.initialPosition.width
     y: settingsManager.initialPosition.height
-    visibility: settingsManager.initialVisibility
-    visible: true
+
+    onClosing: (close) =>{
+
+    }
 
     WindowGeometrySaver {
         windowInstance: appWindow
+
         Component.onCompleted: {
             // Make sure we handle window visibility correctly
-            visibility = settingsManager.initialVisibility
+            visibility = settingsManager.initialVisibility;
         }
     }
-
-    // Mobile stuff ////////////////////////////////////////////////////////////
-
-    property int screenOrientation: Screen.primaryOrientation
-    property int screenOrientationFull: Screen.orientation
-
-    property int screenPaddingStatusbar: 0
-    property int screenPaddingNavbar: 0
-    property int screenPaddingTop: 0
-    property int screenPaddingLeft: 0
-    property int screenPaddingRight: 0
-    property int screenPaddingBottom: 0
 
     // Events handling /////////////////////////////////////////////////////////
-
-    Component.onCompleted: {
-        //
-    }
-
     Connections {
-        target: appHeader
-
-        function onBackButtonClicked() {
-            backAction()
-        }
-        function onRightMenuClicked() {
-            //
-        }
-
-        function onMenuComponentsClicked() { screenLapTiming.loadScreen() }
-        function onMenuSettingsClicked() { screenSettings.loadScreen() }
-        function onMenuAboutClicked() { screenAbout.loadScreen() }
-    }
-
-    Connections {
-        target: Qt.application
         function onStateChanged() {
             switch (Qt.application.state) {
-                case Qt.ApplicationActive:
-                    //console.log("Qt.ApplicationActive")
-
-                    // Check if we need an 'automatic' theme change
-                    Theme.loadTheme(settingsManager.appTheme)
-
-                    break
+            case Qt.ApplicationActive:
+                Theme.loadTheme(settingsManager.appTheme);
+                break;
             }
         }
-    }
 
-    onActiveFocusItemChanged: {
-        //console.log("activeFocusItem:" + activeFocusItem)
+        target: Qt.application
     }
+    Loader {
+        id: mainLoader
 
-    onClosing: (close) =>  {
-        if (Qt.platform.os === "osx") {
-            close.accepted = false
-            appWindow.hide()
-        }
-    }
-
-    // User generated events handling //////////////////////////////////////////
-
-    function backAction() {
-        if (appContent.state === "MobileComponents") {
-            screenMobileComponents.backAction()
-        } else {
-            screenLapTiming.loadScreen()
-        }
-    }
-    function forwardAction() {
-        //
-    }
-    function deselectAction() {
-        //
-    }
-
-    MouseArea {
         anchors.fill: parent
-        z: 99
-        acceptedButtons: Qt.BackButton | Qt.ForwardButton
-        onClicked: (mouse) => {
-            if (mouse.button === Qt.BackButton) {
-                backAction()
-            } else if (mouse.button === Qt.ForwardButton) {
-                forwardAction()
-            }
+        scale: 1
+        source: AppContentFilePath
+    }
+    Connections {
+        target: HotReloadService
+
+        function onWatchedSourceChanged() {
+            console.log("Reloading " + AppContentFilePath);
+            mainLoader.active = false;
+            HotReloadService.clearCache();
+            mainLoader.setSource(AppContentFilePath);
+            mainLoader.active = true;
         }
-    }
-
-    Shortcut {
-        sequences: [
-            StandardKey.Back,
-            StandardKey.Backspace
-        ]
-
-        onActivated: backAction()
-    }
-    Shortcut {
-        sequences: [StandardKey.Forward]
-        onActivated: forwardAction()
-    }
-    Shortcut {
-        sequences: [StandardKey.Refresh]
-        //onActivated: //
-    }
-    Shortcut {
-        sequence: "Ctrl+F5"
-        //onActivated: //
-    }
-    Shortcut {
-        sequences: [StandardKey.Deselect, StandardKey.Cancel]
-        onActivated: deselectAction()
-    }
-    Shortcut {
-        sequence: StandardKey.Preferences
-        onActivated: screenSettings.loadScreen()
-    }
-    Shortcut {
-        sequences: [StandardKey.Close]
-        onActivated: appWindow.close()
-    }
-    Shortcut {
-        sequence: StandardKey.Quit
-        onActivated: appWindow.exit(0)
-    }
-
-    // UI sizes ////////////////////////////////////////////////////////////////
-
-    property bool headerUnicolor: (Theme.colorHeader === Theme.colorBackground)
-    property bool sidebarUnicolor: (Theme.colorSidebar === Theme.colorBackground)
-
-    property bool singleColumn: {
-        if (isMobile) {
-            if (screenOrientation === Qt.PortraitOrientation ||
-                (isTablet && width < 480)) { // can be a 2/3 split screen on tablet
-                return true
-            } else {
-                return false
-            }
-        } else {
-            return (appWindow.width < appWindow.height)
-        }
-    }
-
-    property bool wideMode: (isDesktop && width >= 560) || (isTablet && width >= 480)
-    property bool wideWideMode: (width >= 640)
-
-    // Menubar /////////////////////////////////////////////////////////////////
-/*
-    menuBar: MenuBar {
-        id: appMenubar
-        Menu {
-            title: qsTr("File")
-            MenuItem {
-                text: qsTr("Do nothing")
-                onTriggered: console.log("Do nothing action triggered");
-            }
-            MenuItem {
-                text: qsTr("&Exit")
-                onTriggered: Qt.quit();
-            }
-        }
-    }
-*/
-    // QML /////////////////////////////////////////////////////////////////////
-
-    DesktopSidebar {
-        id: appSidebar
-        z: 2
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-    }
-
-    DesktopHeader {
-        id: appHeader
-
-        anchors.top: parent.top
-        anchors.left: appSidebar.right
-        anchors.right: parent.right
-    }
-
-    Rectangle {
-        id: appContent
-
-        anchors.top: appHeader.bottom
-        anchors.left: appSidebar.right
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-
-        color: Theme.colorBackground
-
-        ScreenMainView {
-            id: screenMainView
-        }
-        ScreenLapTiming {
-            id: screenLapTiming
-        }
-
-        ScreenSettings {
-            id: screenSettings
-        }
-
-        Component.onCompleted: {
-            screenLapTiming.loadScreen()
-        }
-
-        onStateChanged: {
-            //
-        }
-
-        // Initial state
-        state: "MainView"
-
-        states: [
-            State {
-                name: "MainView"
-                PropertyChanges { target: screenMainView; visible: true; enabled: true; focus: true; }
-                PropertyChanges { target: screenLapTiming; visible: false; enabled: false; }
-
-                PropertyChanges { target: screenSettings; visible: false; enabled: false; }
-
-            },
-            State {
-                name: "LapTiming"
-                PropertyChanges { target: screenMainView; visible: false; enabled: false; }
-                PropertyChanges { target: screenLapTiming; visible: true; enabled: true; focus: true; }
-                PropertyChanges { target: screenSettings; visible: false; enabled: false; }
-
-            },
-            State {
-                name: "Settings"
-                PropertyChanges { target: screenMainView; visible: false; enabled: false; }
-                PropertyChanges { target: screenLapTiming; visible: false; enabled: false; }
-                PropertyChanges { target: screenSettings; visible: true; enabled: true; focus: true; }
-
-            }
-
-        ]
     }
 
     ////////////////////////////////////////////////////////////////////////////

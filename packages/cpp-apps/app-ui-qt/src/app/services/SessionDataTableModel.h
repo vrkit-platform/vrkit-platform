@@ -6,8 +6,13 @@
 
 #include <windows.h>
 
+#include <optional>
+
 #include <QThread>
 #include <QtQml/qqml.h>
+#include <QAbstractEventDispatcher>
+#include <QAbstractTableModel>
+#include <QEventLoop>
 
 #include <IRacingTools/SDK/LiveClient.h>
 #include <IRacingTools/SDK/LiveConnection.h>
@@ -15,12 +20,14 @@
 #include <IRacingTools/SDK/VarHolder.h>
 
 #include <IRacingTools/Shared/SessionDataProvider.h>
-#include <QAbstractEventDispatcher>
-#include <QAbstractTableModel>
-#include <QEventLoop>
+
+#include "../DataSourceConfig.h"
 
 namespace IRacingTools::App::Services {
 
+/**
+ * @brief Session data model event
+ */
 class SessionDataModelEvent : public QObject {
     Q_OBJECT
 public:
@@ -38,22 +45,21 @@ class SessionDataTableModel : public QAbstractTableModel {
     Q_OBJECT
     QML_ELEMENT
 
-    //signals:
-    //    [[maybe_unused]] void sessionUpdated(IRSessionUpdateEvent& ev);
-    //    void dataEventReceived();
 signals:
     void sessionDataChanged(QSharedPointer<SessionDataModelEvent> event);
 
 private slots:
     void onSessionDataChanged(QSharedPointer<SessionDataModelEvent> event);
+    void onDataSourceConfigChanged(const DataSourceConfig* config);
 
 public:
     explicit SessionDataTableModel(QObject *parent = nullptr);
-    explicit SessionDataTableModel(std::shared_ptr<Shared::SessionDataProvider> dataProvider, QObject *parent = nullptr);
+//    explicit SessionDataTableModel(std::shared_ptr<Shared::SessionDataProvider> dataProvider, QObject *parent = nullptr);
 
+    void createDataProvider(const DataSourceConfig& config);
     void resetDataProvider();
 
-    void setDataProvider(std::shared_ptr<Shared::SessionDataProvider> dataProvider);
+//    void setDataProvider(std::shared_ptr<Shared::SessionDataProvider> dataProvider);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -68,8 +74,10 @@ private:
     std::vector<Shared::SessionDataEvent::SessionCarState> cars_{};
     std::mutex dataMutex_{};
 
-    std::mutex dataProviderMutex_{};
-    std::shared_ptr<Shared::SessionDataProvider> dataProvider_{nullptr};
+    std::shared_ptr<DataSourceConfig> dataSourceConfig_{nullptr};
+
+    std::recursive_mutex dataProviderMutex_{};
+    Shared::SessionDataProvider::Ptr dataProvider_{nullptr};
     //    HANDLE dataValidEvent_{nullptr};
 };
 

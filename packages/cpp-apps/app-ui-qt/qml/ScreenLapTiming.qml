@@ -4,6 +4,8 @@ import QtQuick.Effects
 import Qt5Compat.GraphicalEffects
 import ThemeEngine
 
+import IRT
+
 // import SessionDataTableModel
 Loader {
     id: screenLapTiming
@@ -126,7 +128,9 @@ Loader {
 
             // anchors.left: parent.left
             // anchors.right: parent.right
-            model: sessionDataTableModel
+            model: SessionDataTableModel {
+
+            }
             // resizableColumns: true
 
             delegate: Rectangle {

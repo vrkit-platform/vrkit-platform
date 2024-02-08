@@ -7,6 +7,7 @@
 #include "ErrorTypes.h"
 #include "Resources.h"
 #include "Types.h"
+#include <IRacingTools/SDK/Client.h>
 #include <IRacingTools/SDK/Utils/LUT.h>
 
 namespace IRacingTools::SDK {
@@ -14,10 +15,10 @@ namespace IRacingTools::SDK {
 // helper class to keep track of our variables index
 // Create a global instance of this and it will take care of the details for you.
 class VarHolder {
+  ClientProvider * clientProvider_;
 public:
     VarHolder() = delete;
-    explicit VarHolder(const std::string_view &name, const std::string_view& clientId = "");
-    explicit VarHolder(const std::string_view &name, ClientIdProvider clientIdProvider);
+    explicit VarHolder(const std::string_view &name, ClientProvider * clientProvider);
 
     void setVarName(const std::string_view &name);
 
@@ -32,18 +33,18 @@ public:
     float getFloat(int entry = 0);
     double getDouble(int entry = 0);
 
-    void setClientIdProvider(const ClientIdProvider &clientIdProvider);
+//    void setClientIdProvider(const ClientIdProvider &clientIdProvider);
 
 protected:
     bool reset();
     bool isAvailable();
-    Client * getClient();
+    std::shared_ptr<Client> getClient();
     static constexpr int kMaxStringLength = Resources::MaxStringLength; //Resources::MaxStringLength
 
 
     std::atomic_bool available_{false};
 //    std::string_view clientId_{""};
-    ClientIdProvider clientIdProvider_;
+//    ClientIdProvider clientIdProvider_;
     std::string_view name_{""};
     std::string_view unit_{""};
     std::string_view description_{""};

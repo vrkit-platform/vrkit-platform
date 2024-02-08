@@ -10,19 +10,19 @@ import ThemeEngine
 
 Item {
 
-    MouseArea {
-        acceptedButtons: Qt.BackButton | Qt.ForwardButton
-        anchors.fill: parent
-        z: 99
-
-        onClicked: mouse => {
-            if (mouse.button === Qt.BackButton) {
-                backAction();
-            } else if (mouse.button === Qt.ForwardButton) {
-                forwardAction();
-            }
-        }
-    }
+    // MouseArea {
+    //     acceptedButtons: Qt.BackButton | Qt.ForwardButton
+    //     anchors.fill: parent
+    //     z: 99
+    //
+    //     onClicked: mouse => {
+    //         if (mouse.button === Qt.BackButton) {
+    //             backAction();
+    //         } else if (mouse.button === Qt.ForwardButton) {
+    //             forwardAction();
+    //         }
+    //     }
+    // }
     Shortcut {
         sequences: [StandardKey.Back, StandardKey.Backspace]
 
@@ -61,26 +61,41 @@ Item {
         onActivated: appWindow.exit(0)
     }
 
-
     CsdWindows {
     }
-    // Menubar /////////////////////////////////////////////////////////////////
 
+    // Menubar /////////////////////////////////////////////////////////////////
     MenuBar {
         id: appMenubar
+        anchors {
+            top: parent.top
+            left: parent.left
+            // right: parent.right
+        }
 
         Menu {
-
             title: qsTr("File")
+
             MenuItem {
                 text: qsTr("Do nothing")
-                onTriggered: console.log("Do nothing action triggered");
+
+                onTriggered: console.log("Do nothing action triggered")
             }
             MenuItem {
                 text: qsTr("&Exit")
-                onTriggered: Qt.quit();
+
+                onTriggered: Qt.quit()
             }
         }
+    }
+
+    DragHandler {
+        target: appMenubar
+
+        // Drag on the sidebar to drag the whole window // Qt 5.15+
+        // Also, prevent clicks below this area
+        onActiveChanged: if (active)
+            appWindow.startSystemMove()
     }
 
     AppHeader {

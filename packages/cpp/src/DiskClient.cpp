@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <gsl/util>
 
+#include <IRacingTools/SDK/ClientManager.h>
 #include <IRacingTools/SDK/DiskClient.h>
 #include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/FileHelpers.h>
@@ -41,27 +42,42 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace IRacingTools::SDK {
 using namespace IRacingTools::SDK::Utils;
 
-DiskClient::DiskClient(const std::optional<fs::path> &path) :
+DiskClient::DiskClient(const fs::path &path) :
+    clientId_(path.string()),
+    filePath_(path),
     sessionInfoBuf_(std::make_shared<Utils::DynamicBuffer<char>>()), ibtFile_(nullptr) {
+
     memset(&header_, 0, sizeof(header_));
     memset(&diskSubHeader_, 0, sizeof(diskSubHeader_));
 
-    if (path) {
-        openFile(path.value());
-    }
+    openFile();
+
+    ClientManager::Get().set(clientId_, this);
+
 }
 
-bool DiskClient::openFile(const fs::path &path) {
+DiskClient::~DiskClient() {
     reset();
 
-    if (!fs::exists(path)) {
-        return false;
+    if (ibtFile_)
+        std::fclose(ibtFile_);
+
+    ibtFile_ = nullptr;
+
+    ClientManager::Get().del(clientId_);
+}
+
+
+bool DiskClient::openFile() {
+    reset();
+
+    if (!fs::exists(filePath_)) {
+        throw GeneralError(ErrorCode::NotFound, std::format("{} does not exist", filePath_.string()));
     }
 
-    fileSize_ = fs::file_size(path);
-    filePath_ = path;
+    fileSize_ = fs::file_size(filePath_);
 
-    std::FILE *ibtFile = std::fopen(ToUtf8(path).c_str(), "rb");
+    std::FILE *ibtFile = std::fopen(ToUtf8(filePath_).c_str(), "rb");
     if (!ibtFile)
         return false;
 
@@ -143,11 +159,6 @@ bool DiskClient::openFile(const fs::path &path) {
 }
 
 void DiskClient::reset() {
-    if (ibtFile_)
-        std::fclose(ibtFile_);
-
-    ibtFile_ = nullptr;
-
     fileSize_ = 0;
     sampleDataOffset_ = 0;
     sampleIndex_ = 0;
@@ -366,9 +377,7 @@ int DiskClient::getSessionStrVal(const std::string_view &path, char *val, int va
     return 0;
 }
 
-DiskClient::~DiskClient() {
-    reset();
-}
+
 bool DiskClient::isFileOpen() {
     return ibtFile_ != nullptr;
 }

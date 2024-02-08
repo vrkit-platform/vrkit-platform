@@ -2,8 +2,8 @@ import QtQuick 2.15
 import QtQuick.Controls.impl 2.15
 import QtQuick.Templates 2.15 as T
 
-import ThemeEngine 1.0
-import "qrc:/js/UtilsNumber.js" as UtilsNumber
+import ThemeEngine
+// import "qrc:/js/UtilsNumber.js" as UtilsNumber
 
 T.Button {
     id: control
@@ -85,19 +85,19 @@ T.Button {
     }
 
     ////////////////
-
-    Loader {
-        anchors.fill: control
-        active: control.tooltipText
-
-        sourceComponent: ToolTipFlat {
-            visible: control.hovered
-            text: control.tooltipText
-            textColor: control.textColor
-            tooltipPosition: control.tooltipPosition
-            backgroundColor: control.backgroundColor
-        }
-    }
+    //
+    // Loader {
+    //     anchors.fill: control
+    //     active: control.tooltipText
+    //
+    //     sourceComponent: ToolTipFlat {
+    //         visible: control.hovered
+    //         text: control.tooltipText
+    //         textColor: control.textColor
+    //         tooltipPosition: control.tooltipPosition
+    //         backgroundColor: control.backgroundColor
+    //     }
+    // }
 
     ////////////////
 }

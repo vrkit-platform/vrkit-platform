@@ -7,36 +7,57 @@
 
 namespace IRacingTools::SDK {
 
-Client *ClientManager::get(const std::string_view &clientId) {
+  Client *ClientManager::get(const std::string_view &clientId) {
     if (clientId == LiveClientId)
-        return &LiveClient::GetInstance();
+      return &LiveClient::GetInstance();
 
     if (clients_.contains(clientId))
-        return clients_[clientId];
+      return clients_[clientId];
 
     return nullptr;
-}
+  }
 
-Expected<bool> ClientManager::del(const std::string_view &clientId) {
+  Expected<bool> ClientManager::del(const std::string_view &clientId) {
     if (clientId == LiveClientId) {
-        return MakeUnexpected<GeneralError>("LiveClientId can not be deleted");
+      return MakeUnexpected<GeneralError>("LiveClientId can not be deleted");
     }
     if (clients_.contains(clientId)) {
-        clients_.erase(clientId);
-        return true;
+      if (clientId == activeClientId_) {
+        setActive(LiveClientId);
+      }
+      clients_.erase(clientId);
+      return true;
     }
 
     return false;
-}
-Expected<void> ClientManager::set(const std::string_view &clientId, Client *client) {
+  }
+
+  Expected<bool> ClientManager::set(const std::string_view &clientId, Client *client, bool active) {
     if (clientId == LiveClientId) {
-        return MakeUnexpected<GeneralError>("LiveClientId can not be deleted");
+      return MakeUnexpected<GeneralError>("LiveClientId can not be deleted");
     }
 
     if (clients_.contains(clientId)) {
-        return MakeUnexpected<GeneralError>("clientId({}) is already registered", clientId);
+      return MakeUnexpected<GeneralError>("clientId({}) is already registered", clientId);
     }
 
     clients_[clientId] = client;
-}
+    if (active) {
+      setActive(clientId);
+    }
+    return true;
+  }
+
+  Expected<bool> ClientManager::setActive(const std::string_view &clientId) {
+    if (!clients_.contains(clientId)) {
+      return MakeUnexpected<GeneralError>("clientId({}) is not registered", clientId);
+    }
+
+    activeClientId_ = clientId;
+    return true;
+  }
+
+  Client *ClientManager::getActive() {
+    return get(activeClientId_);
+  }
 } // namespace SDK

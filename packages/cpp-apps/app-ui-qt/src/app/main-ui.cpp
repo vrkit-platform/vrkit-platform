@@ -72,6 +72,7 @@ AppState * configureQMLEngine(QQmlApplicationEngine &engine, const QList<QMLEngi
 //    });
 //    qmlRegisterSingletonType("", 1, 0, "AppState", appState);
     AppState * appState = engine.singletonInstance<AppState*>("IRT","AppState");
+    AppState::SetInstance(appState);
     qDebug() << "DataSourceType == " << QMetaEnum::fromType<DataSourceConfig::Type>().valueToKey(appState->dataSourceConfig()->type());
 #ifdef QML_HOT_RELOAD
     std::filesystem::path srcPath{APP_SRC_DIR};
@@ -130,8 +131,8 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    auto liveSessionDataProvider = std::make_shared<IRacingTools::Shared::LiveSessionDataProvider>();
-    auto sessionDataTableModel = new SessionDataTableModel(liveSessionDataProvider);
+    //auto liveSessionDataProvider = std::make_shared<IRacingTools::Shared::LiveSessionDataProvider>();
+    //auto sessionDataTableModel = new SessionDataTableModel(liveSessionDataProvider);
     //    QObject::connect(sessionDataTableModel, &SessionDataTableModel::sessionDataChanged, [&] (auto event) {
     //        qDebug() << "Received session update with car total = " << event->cars().size();
     //    });
@@ -150,18 +151,14 @@ int main(int argc, char *argv[]) {
     // Translate the application
     utilsLanguage->loadLanguage(sm->getAppLanguage());
 
-
-
-    // Force QtQuick components style? // Some styles are only available on target OS
-    // Basic // Fusion // Imagine // macOS // iOS // Material // Universal // Windows
-    //    QQuickStyle::setStyle("windows");
     QQuickStyle::setStyle("Material");
 
     QQmlApplicationEngine engine;
+
     configureQMLEngine(
         engine,
         QList<QMLEngineContextEntry>{
-            {"sessionDataTableModel", sessionDataTableModel},
+            //{"sessionDataTableModel", sessionDataTableModel},
             {"settingsManager", sm},
             {"utilsApp", utilsApp},
             {"utilsLanguage", utilsLanguage},
@@ -192,7 +189,7 @@ int main(int argc, char *argv[]) {
     //    dataServiceThread->
 
     auto res = app.exec();
-    sessionDataTableModel->resetDataProvider();
+    //sessionDataTableModel->resetDataProvider();
     return res;
 }
 

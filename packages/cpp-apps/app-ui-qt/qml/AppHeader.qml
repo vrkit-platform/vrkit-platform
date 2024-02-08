@@ -13,8 +13,36 @@ import IRT
 import "components"
 
 Rectangle {
+
+    function setDataSourceLive() {
+        DataSourceActions.changeDataSource(DataSourceConfig.Live);
+    }
+    function setDataSourceReplay() {
+        DataSourceActions.changeDataSource(DataSourceConfig.Disk);
+    }
+    function changeDataSourceDiskFile() {
+        openDialog.open();
+    }
+
+    function isDataSourceDisk(): bool {
+        return AppState.dataSourceConfig.type === DataSourceConfig.Disk;
+    }
     function isDataSourceLive(): bool {
         return AppState.dataSourceConfig.type === DataSourceConfig.Live;
+    }
+    function isDataSourceNone(): bool {
+        return !isDataSourceSet();
+    }
+    function isDataSourceSet(): bool {
+        return AppState.dataSourceConfig.type !== DataSourceConfig.None;
+    }
+    function showErrorMessage(e, info = "") {
+        errorDialog.text = typeof e === "string" ? e : e.message;
+        if (info.length) {
+            errorDialog.informativeText = info;
+        }
+        console.error("Error message", e);
+        errorDialog.open();
     }
 
     anchors.left: parent.left
@@ -29,14 +57,6 @@ Rectangle {
     // anchors.fill: parent
     implicitWidth: parent.width
 
-    DragHandler {
-        target: null
-
-        // Drag on the sidebar to drag the whole window // Qt 5.15+
-        // Also, prevent clicks below this area
-        onActiveChanged: if (active)
-            appWindow.startSystemMove()
-    }
     RowLayout {
         id: appHeaderContent
 
@@ -60,101 +80,93 @@ Rectangle {
             // anchors.right: parent.right
             // anchors.top: parent.top
             // anchors.bottom: parent.bottom
-            Layout.margins: 15
-
-            RoundButtonIcon {
-                id: buttonMenu
-
-                backgroundColor: isDataSourceLive() ? Theme.colorBlue : Theme.colorRed
-                backgroundVisible: true //isDataSourceLive()
-                height: 50
-                source: isDataSourceLive() ? "qrc:/assets/icons_material/bolt-24dp.svg" : "qrc:/assets/icons_material/baseline-folder-24px.svg"
-                // text: "Settings"
-                width: 50
-
-                // QQuickIcon {
-                //     source:
-                // }
-
-                // anchors.verticalCenter: parent.verticalCenter
-                // backgroundColor: Theme.colorHeaderHighlight
-                // iconColor: Theme.colorHeaderContent
-                // source: "qrc:/assets/icons_material/baseline-more_vert-24px.svg"
-                onClicked: () => {
-                    if (isDataSourceLive()) {
-                        AppState.dataSourceConfig.type = DataSourceConfig.Disk;
-                        AppState.dataSourceConfig.url = Qt.url("file://124");
-                    } else {
-                        AppState.dataSourceConfig.type = DataSourceConfig.Live;
-                        AppState.dataSourceConfig.url = Qt.url(
-                            // ActionMenuFloating {
-                            //     id: actionMenu
-                            //     model: ListModel {
-                            //         id: lmActionMenu
-                            //         ListElement {
-                            //             idx: 1
-                            //             src: "qrc:/assets/icons_material/baseline-accessibility-24px.svg"
-                            //             t: "itm"
-                            //             txt: "Action 1"
-                            //         }
-                            //         ListElement {
-                            //             idx: 2
-                            //             src: "qrc:/assets/icons_material/baseline-accessibility-24px.svg"
-                            //             t: "itm"
-                            //             txt: "Action 2"
-                            //         }
-                            //         ListElement {
-                            //             t: "sep"
-                            //         }
-                            //         ListElement {
-                            //             idx: 3
-                            //             src: "qrc:/assets/icons_material/baseline-accessibility-24px.svg"
-                            //             t: "itm"
-                            //             txt: "Action 3"
-                            //         }
-                            //     }
-                            //     onMenuSelected: index => {}
-                            // }
-                            "");
-                    }
+            RowLayout {
+                Layout.margins: {
+                    left: 15;
+                    right: 15;
                 }
-                //     actionMenu.open()
+                visible: isDataSourceNone()
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: Theme.colorActionbarContent
+                    font.bold: true
+                    font.pixelSize: Theme.fontSizeContentBig
+                    text: "Configure a data source"
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                RoundButtonText {
+                    backgroundColor: Theme.colorBlue
+
+                    text: "LIVE"
+
+                    onClicked: () => setDataSourceLive()
+                }
+
+                RoundButtonText {
+                    backgroundColor: Theme.colorRed
+                    text: "REPLAY"
+
+                    onClicked: () => setDataSourceReplay()
+                }
             }
-            Button {
-                // active: !isDataSourceLive()
-                text: (() => {
-                        let file = AppState.dataSourceConfig.localFile;
-                        console.log(`IBT file file string: ${file}`);
-                        return (file === "") ? "Select an IBT file" : file;
+            RowLayout {
+                Layout.margins: {
+                    left: 15;
+                    right: 15;
+                }
+                visible: isDataSourceLive()
 
-                        //     Layout.fillWidth: true
-                        //     clip: true
-                        //     elide: Text.ElideRight
-                        //     padding: 5
-                        //     text: "DataSourceConfig type = " + JSON.stringify(AppState.dataSourceConfig.type === DataSourceConfig.Live)
-                        //     // anchors.left: parent.left
-                        //     // anchors.top: parent.top
-                        //     // anchors.bottom: parent.bottom
-                        //     // anchors.right: appHeaderButtons.left
-                        //     verticalAlignment: Text.AlignVCenter
-                        // }
-                    })()
-                visible: !isDataSourceLive()
+                RoundButtonIcon {
+                    id: buttonMenu
 
-                onClicked: openDialog.open()
+                    backgroundColor: isDataSourceLive() ? Theme.colorBlue : Theme.colorRed
+                    backgroundVisible: true //isDataSourceLive()
+                    height: 50
+                    source: isDataSourceLive() ? "qrc:/assets/icons_material/bolt-24dp.svg" : "qrc:/assets/icons_material/baseline-folder-24px.svg"
+                    width: 50
+
+                    onClicked: () => changeDataSource(DataSourceConfig.Live)
+
+                    //     actionMenu.open()
+                }
+
+                Button {
+                    // active: !isDataSourceLive()
+                    text: (() => {
+                            let file = AppState.dataSourceConfig.localFile;
+                            console.log(`IBT file file string: ${file}`);
+                            return (file === "") ? "Select an IBT file" : file;
+                        })()
+                    visible: !isDataSourceLive()
+
+                    onClicked: () => changeDataSourceDiskFile()
+                }
+            }
+            MessageDialog {
+                id: errorDialog
+
+                buttons: MessageDialog.Ok
+                informativeText: "Do you want to save your changes?"
+                text: "The document has been modified."
+
+                onAccepted: () => {}
             }
             FileDialog {
                 id: openDialog
 
-                currentFolder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
                 fileMode: FileDialog.OpenFile
                 nameFilters: ["IBT files (*.ibt)"]
                 selectedNameFilter.index: 1
 
                 onAccepted: () => {
                     console.log("Selected file: " + selectedFile);
-
-                    AppState.dataSourceConfig.url = Qt.url(selectedFile);
+                    try {
+                        DataSourceActions.changeDataSource(DataSourceConfig.Disk, Qt.url(selectedFile));
+                    } catch (e) {
+                        showErrorMessage(e);
+                    }
                 }
             }
             // Text {

@@ -104,4 +104,11 @@ public:
 
 
 };
+
+
+  struct ClientProvider {
+
+    virtual std::shared_ptr<Client> getClient() = 0;
+  };
+
 } // namespace IRacingTools::SDK

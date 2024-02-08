@@ -47,8 +47,7 @@ int main(int argc, char** argv) {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch());
     };
-//    VarHolder latVar("Lat");
-//    VarHolder lonVar("Lon");
+
     std::chrono::milliseconds previousSessionDuration{0};
     std::chrono::milliseconds previousTimeMillis = nowMillis();
     std::chrono::milliseconds lastPrintTime{0};

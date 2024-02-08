@@ -9,7 +9,7 @@
 
 namespace IRacingTools::SDK {
 
-enum class ErrorCode : uint32_t { General, NotImplemented };
+enum class ErrorCode : uint32_t { General, NotImplemented, NotFound };
 
 class GeneralError : public std::logic_error {
 public:

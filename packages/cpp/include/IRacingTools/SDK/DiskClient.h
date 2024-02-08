@@ -44,7 +44,7 @@ using VarHeaders = std::vector<VarDataHeader>;
 class DiskClient : public Client {
 public:
 
-    explicit DiskClient(const std::optional<fs::path> &path = std::nullopt);
+    explicit DiskClient(const std::filesystem::path &path);
     DiskClient() = delete;
     DiskClient(const DiskClient &other) = delete;
     DiskClient(DiskClient &&other) noexcept = delete;
@@ -54,7 +54,7 @@ public:
     ~DiskClient();
 
     bool isFileOpen();
-    bool openFile(const fs::path &path);
+
     void reset();
 
     // read next line out of file
@@ -117,11 +117,17 @@ public:
     virtual ConnectionId getConnectionId() override;
 
 protected:
+    bool openFile();
+
+    const std::string_view clientId_;
+    const fs::path filePath_;
+
     DataHeader header_{};
     DiskSubHeader diskSubHeader_{};
 
+
     std::size_t fileSize_{};
-    std::optional<fs::path> filePath_{};
+
     std::size_t sampleDataSize_{};
     std::size_t sampleDataOffset_{};
     std::size_t sampleIndex_{};

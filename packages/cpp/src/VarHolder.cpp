@@ -28,116 +28,108 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <magic_enum.hpp>
 
-#include <IRacingTools/SDK/Client.h>
+
 #include <IRacingTools/SDK/ClientManager.h>
 #include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/YamlParser.h>
 #include <IRacingTools/SDK/VarHolder.h>
+
 #pragma warning(disable : 4996)
 namespace IRacingTools::SDK {
-using namespace Utils;
-//----------------------------------
+  using namespace Utils;
+  //----------------------------------
 
-VarHolder::VarHolder(const std::string_view& name, const std::string_view &clientId) :
-    VarHolder(name, MakeStaticClientIdProvider(clientId)) {
-
-
-}
-
-VarHolder::VarHolder(const std::string_view &name,  ClientIdProvider clientIdProvider) : clientIdProvider_(clientIdProvider) {
+  VarHolder::VarHolder(const std::string_view &name, ClientProvider *clientProvider) : clientProvider_(clientProvider) {
     setVarName(name);
-//    if (clientId)
-//        setClientId(clientId.value());
-}
+  }
 
-void VarHolder::setVarName(const std::string_view& name) {
+  void VarHolder::setVarName(const std::string_view &name) {
     reset();
     name_ = name;
 
     isAvailable();
-}
+  }
 
-bool VarHolder::reset() {
+  bool VarHolder::reset() {
     available_ = false;
     unit_ = "";
     description_ = "";
 
     return true;
-}
+  }
 
-bool VarHolder::isAvailable() {
+  bool VarHolder::isAvailable() {
     auto client = getClient();
     if (!client || !client->isAvailable()) {
-        return false;
+      return false;
     }
 
     if (!available_ || connectionId_ != client->getConnectionId()) {
-        connectionId_ = client->getConnectionId();
+      connectionId_ = client->getConnectionId();
 
-        auto idx = client->getVarIdx(name_);
-        if (!idx) {
-            available_ = false;
-            return false;
-        }
-        idx_ = idx.value();
-        unit_ = client->getVarUnit(idx_).value();
-        description_ = client->getVarDesc(idx_).value();
-        available_ = true;
+      auto idx = client->getVarIdx(name_);
+      if (!idx) {
+        available_ = false;
+        return false;
+      }
+      idx_ = idx.value();
+      unit_ = client->getVarUnit(idx_).value();
+      description_ = client->getVarDesc(idx_).value();
+      available_ = true;
     }
 
     return available_;
-}
+  }
 
-VarDataType /*VarDataType*/ VarHolder::getType() {
+  VarDataType /*VarDataType*/ VarHolder::getType() {
     if (isAvailable()) {
-        return getClient()->getVarType(idx_).value();
+      return getClient()->getVarType(idx_).value();
     }
     return VarDataType::Char;
-}
+  }
 
-uint32_t VarHolder::getCount() {
+  uint32_t VarHolder::getCount() {
     if (isAvailable())
-        return getClient()->getVarCount(idx_).value();
+      return getClient()->getVarCount(idx_).value();
     return 0;
-}
+  }
 
-bool VarHolder::isValid() {
+  bool VarHolder::isValid() {
     return isAvailable() && (idx_ > -1);
-}
+  }
 
 
-bool VarHolder::getBool(int entry) {
+  bool VarHolder::getBool(int entry) {
     if (isAvailable())
-        return getClient()->getVarBool(idx_, entry).value();
+      return getClient()->getVarBool(idx_, entry).value();
     return false;
-}
+  }
 
-int VarHolder::getInt(int entry) {
+  int VarHolder::getInt(int entry) {
     if (isAvailable())
-        return getClient()->getVarInt(idx_, entry).value();
+      return getClient()->getVarInt(idx_, entry).value();
     return 0;
-}
+  }
 
-float VarHolder::getFloat(int entry) {
+  float VarHolder::getFloat(int entry) {
     if (isAvailable())
-        return getClient()->getVarFloat(idx_, entry).value();
+      return getClient()->getVarFloat(idx_, entry).value();
     return 0.0f;
-}
+  }
 
-double VarHolder::getDouble(int entry) {
+  double VarHolder::getDouble(int entry) {
     if (isAvailable())
-        return getClient()->getVarDouble(idx_, entry).value();
+      return getClient()->getVarDouble(idx_, entry).value();
     return 0.0;
-}
+  }
 
-Client *VarHolder::getClient() {
-    auto clientId = clientIdProvider_();
-    return ClientManager::Get().get(clientId);
+  std::shared_ptr<Client> VarHolder::getClient() {
+    return !clientProvider_ ? nullptr : clientProvider_->getClient();//ClientManager::Get().getActive();
 
 
-}
-void VarHolder::setClientIdProvider(const ClientIdProvider &clientIdProvider) {
-    clientIdProvider_ = clientIdProvider;
-}
+  }
+  //void VarHolder::setClientIdProvider(const ClientIdProvider &clientIdProvider) {
+  //    clientIdProvider_ = clientIdProvider;
+  //}
 
 }

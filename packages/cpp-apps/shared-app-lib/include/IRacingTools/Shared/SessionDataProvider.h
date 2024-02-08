@@ -6,35 +6,42 @@
 
 #include <windows.h>
 
+#include <memory>
 #include <thread>
 
+#include <IRacingTools/SDK/DiskClient.h>
 #include <IRacingTools/SDK/LiveClient.h>
 #include <IRacingTools/SDK/LiveConnection.h>
 #include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/EventEmitter.h>
 #include <IRacingTools/SDK/VarHolder.h>
 
+#include "Chrono.h"
+
 namespace IRacingTools::Shared {
 
 class SessionDataEvent;
 
-class SessionDataAccess {
+class SessionDataAccess : public SDK::ClientProvider {
 private:
-    SDK::ClientIdProvider clientIdProvider_;
-    const SDK::ClientIdProvider clientIdProviderInternal_{[&] () {
-        return clientIdProvider_();
-    }};
+  std::weak_ptr<SDK::Client> client_;
+//  SDK::ClientId clientId_;
+  //SDK::ClientIdProvider clientIdProvider_;
+//    const SDK::ClientIdProvider clientIdProviderInternal_{[&] () {
+//        return clientIdProvider_();
+//    }};
     
 public:
-    explicit SessionDataAccess(const SDK::ClientId& clientId);
-    explicit SessionDataAccess(const SDK::ClientIdProvider& clientIdProvider);
-    SessionDataAccess();
+//    explicit SessionDataAccess(const SDK::ClientId& clientId);
+//    explicit SessionDataAccess(const SDK::ClientIdProvider& clientIdProvider);
+SessionDataAccess() = delete;
+    SessionDataAccess(std::weak_ptr<SDK::Client> client);
     SessionDataAccess(const SessionDataAccess&) = delete;
     SessionDataAccess(SessionDataAccess&&) = delete;
 
-
+virtual std::shared_ptr<SDK::Client> getClient() override;
     // session status
-#define DeclareVarHolder(Name) SDK::VarHolder Name {#Name, clientIdProviderInternal_}
+#define DeclareVarHolder(Name) SDK::VarHolder Name {#Name, this}
     DeclareVarHolder(PitsOpen); // (bool) True if pit stop is allowed, basically true if caution lights not out
     DeclareVarHolder(RaceLaps); // (int) Laps completed in race
     DeclareVarHolder(SessionFlags); // (int) FlagType, bitfield
@@ -131,6 +138,8 @@ private:
 class SessionDataProvider : public SDK::Utils::EventEmitter<std::shared_ptr<SessionDataEvent>> {
 
 public:
+    using Ptr = std::shared_ptr<SessionDataProvider>;
+
     virtual ~SessionDataProvider() = default;
 
     virtual bool start() = 0;
@@ -144,6 +153,7 @@ public:
 class LiveSessionDataProvider : public SessionDataProvider {
 
 public:
+    LiveSessionDataProvider();
     virtual ~LiveSessionDataProvider() override;
 
     bool start() override;
@@ -162,12 +172,53 @@ private:
 
     void checkConnection();
 
-    SessionDataAccess dataAccess_{""};
+    SessionDataAccess dataAccess_;
     std::unique_ptr<std::thread> thread_{nullptr};
     std::mutex threadMutex_{};
 
     std::atomic_bool running_{false};
     std::atomic_bool isConnected_{false};
+    DWORD lastUpdatedTime_{0};
+    //    HANDLE dataValidEvent_{nullptr};
+};
+
+
+
+class DiskSessionDataProvider : public SessionDataProvider {
+
+public:
+    DiskSessionDataProvider() = delete;
+    DiskSessionDataProvider(const std::string& clientId, const std::filesystem::path& file);
+    virtual ~DiskSessionDataProvider() override;
+
+    bool start() override;
+    bool isRunning() override;
+    void stop() override;
+
+protected:
+    void runnable();
+
+private:
+    void init();
+    void process();
+    void processData();
+    void processDataUpdate();
+    bool processYAMLLiveString();
+
+    void checkConnection();
+
+    std::string clientId_;
+    std::filesystem::path file_;
+
+    std::shared_ptr<SDK::DiskClient> diskClient_;
+
+    std::unique_ptr<SessionDataAccess> dataAccess_;
+    std::unique_ptr<std::thread> thread_{nullptr};
+    std::mutex threadMutex_{};
+    std::mutex diskClientMutex_{};
+
+    std::atomic_bool running_{false};
+    std::atomic_bool isAvailable_{false};
     DWORD lastUpdatedTime_{0};
     //    HANDLE dataValidEvent_{nullptr};
 };

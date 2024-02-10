@@ -5,19 +5,23 @@
 #include <IRacingTools/SDK/ClientManager.h>
 #include <IRacingTools/SDK/LiveClient.h>
 
+#include <utility>
+
 namespace IRacingTools::SDK {
 
-  Client *ClientManager::get(const std::string_view &clientId) {
+  std::shared_ptr<Client> ClientManager::get(const std::string_view &clientId) {
+    std::lock_guard lock(clientMutex_);
     if (clientId == LiveClientId)
-      return &LiveClient::GetInstance();
+      return LiveClient::GetPtr();
 
     if (clients_.contains(clientId))
-      return clients_[clientId];
+      return clients_[clientId].lock();
 
     return nullptr;
   }
 
-  Expected<bool> ClientManager::del(const std::string_view &clientId) {
+  Expected<bool> ClientManager::remove(const std::string_view &clientId) {
+    std::lock_guard lock(clientMutex_);
     if (clientId == LiveClientId) {
       return MakeUnexpected<GeneralError>("LiveClientId can not be deleted");
     }
@@ -32,7 +36,8 @@ namespace IRacingTools::SDK {
     return false;
   }
 
-  Expected<bool> ClientManager::set(const std::string_view &clientId, Client *client, bool active) {
+  Expected<bool> ClientManager::add(const std::string_view &clientId, std::weak_ptr<Client> client, bool active) {
+    std::lock_guard lock(clientMutex_);
     if (clientId == LiveClientId) {
       return MakeUnexpected<GeneralError>("LiveClientId can not be deleted");
     }
@@ -41,7 +46,7 @@ namespace IRacingTools::SDK {
       return MakeUnexpected<GeneralError>("clientId({}) is already registered", clientId);
     }
 
-    clients_[clientId] = client;
+    clients_[clientId] = std::move(client);
     if (active) {
       setActive(clientId);
     }
@@ -49,6 +54,7 @@ namespace IRacingTools::SDK {
   }
 
   Expected<bool> ClientManager::setActive(const std::string_view &clientId) {
+    std::lock_guard lock(clientMutex_);
     if (!clients_.contains(clientId)) {
       return MakeUnexpected<GeneralError>("clientId({}) is not registered", clientId);
     }
@@ -57,7 +63,7 @@ namespace IRacingTools::SDK {
     return true;
   }
 
-  Client *ClientManager::getActive() {
+  std::shared_ptr<Client> ClientManager::getActive() {
     return get(activeClientId_);
   }
 } // namespace SDK

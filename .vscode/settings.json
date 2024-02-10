@@ -1,3 +1,9 @@
 {
-  "cmake.buildDirectory": "${workspaceFolder}/build/debug-vscode"
+  "cmake.buildDirectory": "${workspaceFolder}/build/debug-vscode",
+  "cmake.allowCommentsInPresetsFile": true,
+  "cmake.automaticReconfigure": false,
+  "cmake.configureArgs": [
+    "-DCMAKE_TOOLCHAIN_FILE=\"Y:\\code\\sim-racing\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake\"",
+    "-DCMAKE_BUILD_TYPE=Debug"
+  ]
 }

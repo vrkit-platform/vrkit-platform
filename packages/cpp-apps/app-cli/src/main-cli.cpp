@@ -8,6 +8,7 @@
 #include <fmt/core.h>
 
 #include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingTools/SDK/ClientManager.h>
 #include <QCoreApplication>
 #include <QDebug>
 
@@ -40,9 +41,11 @@ int main(int argc, char** argv) {
 
 
 
-    DiskClient diskClient(filename);
-    std::cout << "Disk client opened " << filename << ": ready=" << diskClient.isFileOpen()
-             << ",sampleCount=" << diskClient.getSampleCount() << std::endl;
+    auto diskClient = std::make_shared<DiskClient>(filename);
+    ClientManager::Get().add(filename, diskClient);
+
+    std::cout << "Disk client opened " << filename << ": ready=" << diskClient->isFileOpen()
+             << ",sampleCount=" << diskClient->getSampleCount() << std::endl;
     auto nowMillis = [] () {
         return std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch());
@@ -51,16 +54,16 @@ int main(int argc, char** argv) {
     std::chrono::milliseconds previousSessionDuration{0};
     std::chrono::milliseconds previousTimeMillis = nowMillis();
     std::chrono::milliseconds lastPrintTime{0};
-    while (diskClient.hasNext()) {
-        if (!diskClient.next()) {
-            std::cerr << "Unable to get next: " << diskClient.getSampleIndex() << "\n";
+    while (diskClient->hasNext()) {
+        if (!diskClient->next()) {
+            std::cerr << "Unable to get next: " << diskClient->getSampleIndex() << "\n";
             break;
         }
 
-        auto lat = diskClient.getVarFloat("Lat");
-        auto lon = diskClient.getVarFloat("Lon");
-        auto posCountRes = diskClient.getVarCount("CarIdxPosition");
-        auto sessionTimeVal = diskClient.getVarDouble("SessionTime");
+        auto lat = diskClient->getVarFloat("Lat");
+        auto lon = diskClient->getVarFloat("Lon");
+        auto posCountRes = diskClient->getVarCount("CarIdxPosition");
+        auto sessionTimeVal = diskClient->getVarDouble("SessionTime");
         if (!sessionTimeVal) {
             std::cerr << "No session time\n";
             abort();
@@ -69,7 +72,7 @@ int main(int argc, char** argv) {
         int posCount = 0;
         if (posCountRes) {
             for (std::size_t i = 0; i < posCountRes.value();i++) {
-                auto pos = diskClient.getVarInt("CarIdxPosition", i).value_or(-2);
+                auto pos = diskClient->getVarInt("CarIdxPosition", i).value_or(-2);
                 if (pos > 0) {
                     posCount++;
                 }
@@ -118,7 +121,7 @@ int main(int argc, char** argv) {
 //        std::cout << std::format("Coordinate\t\t{}\t{}\n",lat.value(),lon.value());
     }
 
-    //    auto& varHeaders = diskClient.getVarHeaders();
+    //    auto& varHeaders = diskClient->getVarHeaders();
 
 //    using RowType = std::tuple<std::string, std::size_t>;
 

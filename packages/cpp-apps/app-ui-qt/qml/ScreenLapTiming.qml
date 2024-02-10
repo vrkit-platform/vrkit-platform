@@ -5,7 +5,7 @@ import Qt5Compat.GraphicalEffects
 import ThemeEngine
 
 import IRT
-
+import IRTObjects
 // import SessionDataTableModel
 Loader {
     id: screenLapTiming

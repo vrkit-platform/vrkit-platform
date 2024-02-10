@@ -50,5 +50,8 @@
   }, {
     "name" : "tabulate",
     "version>=" : "1.5"
+  }, {
+    "name" : "yaml-cpp",
+    "version>=" : "0.8.0#1"
   } ]
 }

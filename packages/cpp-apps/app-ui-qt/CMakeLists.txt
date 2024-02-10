@@ -47,7 +47,7 @@ target_include_directories(
 )
 
 # Link configured deps
-irt_configure_runtime_libs(${targetName})
+IRT_CONFIGURE_APP_LIBS(${targetName})
 irt_configure_executable(${targetName})
 
 target_compile_definitions(

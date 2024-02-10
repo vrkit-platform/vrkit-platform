@@ -65,7 +65,7 @@ struct Session {
     // New improved laps left till session ends
     int num;
     int state;
-    // SessionState, Session state
+    // AppSessionState, Session state
     int tick;
     double time;
     // s, Seconds since session start

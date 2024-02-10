@@ -9,7 +9,6 @@ HotReloadService::HotReloadService(
 ) : QObject(parent), watcher_(new QFileSystemWatcher(this)), engine_(engine), mainUrl_(mainUrl) {
     qInfo() << "Watching " << qmlPath;
     watcher_->addPath(qmlPath);
-
     connect(watcher_, &QFileSystemWatcher::directoryChanged, this, [this, &engine](const QString &path) {
         emit watchedSourceChanged();
         //        load();

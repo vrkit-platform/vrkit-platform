@@ -20,27 +20,24 @@
 
 namespace IRacingTools::Shared {
 
-class SessionDataEvent;
+  class SessionDataEvent;
+  class SessionDataUpdatedEvent;
 
-class SessionDataAccess : public SDK::ClientProvider {
-private:
-  std::weak_ptr<SDK::Client> client_;
-//  SDK::ClientId clientId_;
-  //SDK::ClientIdProvider clientIdProvider_;
-//    const SDK::ClientIdProvider clientIdProviderInternal_{[&] () {
-//        return clientIdProvider_();
-//    }};
-    
-public:
-//    explicit SessionDataAccess(const SDK::ClientId& clientId);
-//    explicit SessionDataAccess(const SDK::ClientIdProvider& clientIdProvider);
-SessionDataAccess() = delete;
-    SessionDataAccess(std::weak_ptr<SDK::Client> client);
-    SessionDataAccess(const SessionDataAccess&) = delete;
-    SessionDataAccess(SessionDataAccess&&) = delete;
+  class SessionDataAccess : public SDK::ClientProvider {
+  private:
+    std::weak_ptr<SDK::Client> client_;
 
-virtual std::shared_ptr<SDK::Client> getClient() override;
-    // session status
+  public:
+    SessionDataAccess() = delete;
+
+    explicit SessionDataAccess(std::weak_ptr<SDK::Client> client);
+
+    SessionDataAccess(const SessionDataAccess &) = delete;
+
+    SessionDataAccess(SessionDataAccess &&) = delete;
+
+    virtual std::shared_ptr<SDK::Client> getClient() override;
+
 #define DeclareVarHolder(Name) SDK::VarHolder Name {#Name, this}
     DeclareVarHolder(PitsOpen); // (bool) True if pit stop is allowed, basically true if caution lights not out
     DeclareVarHolder(RaceLaps); // (int) Laps completed in race
@@ -48,7 +45,7 @@ virtual std::shared_ptr<SDK::Client> getClient() override;
     DeclareVarHolder(SessionLapsRemain); // (int) Laps left till session ends
     DeclareVarHolder(SessionLapsRemainEx); // (int) New improved laps left till session ends
     DeclareVarHolder(SessionNum); // (int) Session number
-    DeclareVarHolder(SessionState); // (int) SessionState, Session state
+    DeclareVarHolder(SessionState); // (int) AppSessionState, Session state
     DeclareVarHolder(SessionTick); // (int) Current update number
     DeclareVarHolder(SessionTime); // (double), s, Seconds since session start
     DeclareVarHolder(SessionTimeOfDay); // (float) s, Time of day in seconds
@@ -85,89 +82,120 @@ virtual std::shared_ptr<SDK::Client> getClient() override;
     DeclareVarHolder(CarIdxPaceFlags); // (int) PaceFlagType, Pacing status flags for each car
 
 #undef DeclareVarHolder
-    std::shared_ptr<SessionDataEvent> createDataEvent();
-};
 
-enum class SessionDataEventType {
-    Data,
-    Session
-};
+    std::shared_ptr<SessionDataUpdatedEvent> createDataEvent();
+  };
 
-class SessionDataEvent  {
-    
-public:
-    struct SessionCarState {
-        int index;
-        int lap;
-        int lapsCompleted;
+  enum class SessionDataEventType {
+    Updated, Session, Available
+  };
 
-        float lapPercentComplete;
+  class SessionDataEvent {
 
-        float estimatedTime;
+  public:
+    SessionDataEvent() = delete;
+    virtual ~SessionDataEvent() = default;
+    explicit SessionDataEvent(SessionDataEventType type);
 
-        struct {
-            int overall;
-            int clazz;
-        } position;
-
-        std::tuple<int,int,int,float,float,int,int> toTuple() const {
-            return {index,lap,lapsCompleted, lapPercentComplete, estimatedTime, position.overall, position.clazz};
-        }
-    };
-
-//    SessionDataEvent() = delete;
-    SessionDataEvent(SessionDataEventType type, SessionDataAccess * dataAccess);
-    void refresh();
-    const std::vector<SessionCarState>& cars();
     SessionDataEventType type();
 
 
-
-private:
+  protected:
     SessionDataEventType type_;
+  };
+
+  class SessionDataUpdatedEvent: public SessionDataEvent {
+  public:
+    struct SessionCarState {
+      int index;
+      int lap;
+      int lapsCompleted;
+
+      float lapPercentComplete;
+
+      float estimatedTime;
+
+      struct {
+        int overall;
+        int clazz;
+      } position;
+
+      std::tuple<int, int, int, float, float, int, int> toTuple() const {
+        return {index, lap, lapsCompleted, lapPercentComplete, estimatedTime, position.overall, position.clazz};
+      }
+    };
+
+    SessionDataUpdatedEvent() = delete;
+    explicit SessionDataUpdatedEvent(SessionDataEventType type, SessionDataAccess *dataAccess);
+    virtual ~SessionDataUpdatedEvent() = default;
+
+    void refresh();
+
+    int sessionTimeMillis();
+
+    const std::vector<SessionCarState> &cars();
+
+    const std::string& sessionInfoYaml() {
+      return sessionInfoYaml_;
+    }
+
+
+  private:
+    std::string sessionInfoYaml_{};
     SessionDataAccess *dataAccess_;
     std::vector<SessionCarState> cars_{};
-};
+    int sessionTimeMillis_{-1};
+  };
 
 
+  /**
+   * @brief IRacing Data Service
+   */
+  class SessionDataProvider : public SDK::Utils::EventEmitter<std::shared_ptr<SessionDataEvent>> {
 
-
-/**
- * @brief IRacing Data Service
- */
-class SessionDataProvider : public SDK::Utils::EventEmitter<std::shared_ptr<SessionDataEvent>> {
-
-public:
+  public:
     using Ptr = std::shared_ptr<SessionDataProvider>;
 
     virtual ~SessionDataProvider() = default;
 
+    virtual bool isAvailable() = 0;
+
     virtual bool start() = 0;
+
     virtual bool isRunning() = 0;
+
     virtual void stop() = 0;
 
-//    HANDLE dataValidEvent_{nullptr};
-};
+    //    HANDLE dataValidEvent_{nullptr};
+  };
 
 
-class LiveSessionDataProvider : public SessionDataProvider {
+  class LiveSessionDataProvider : public SessionDataProvider {
 
-public:
+  public:
     LiveSessionDataProvider();
+
     virtual ~LiveSessionDataProvider() override;
 
+    bool isAvailable() override;
     bool start() override;
+
     bool isRunning() override;
+
     void stop() override;
 
-protected:
+  protected:
     void runnable();
 
-private:
+  private:
     void init();
+
     void process();
+
     void processData();
+
     void processDataUpdate();
+
     bool processYAMLLiveString();
 
     void checkConnection();
@@ -180,29 +208,38 @@ private:
     std::atomic_bool isConnected_{false};
     DWORD lastUpdatedTime_{0};
     //    HANDLE dataValidEvent_{nullptr};
-};
+  };
 
 
+  class DiskSessionDataProvider : public SessionDataProvider {
 
-class DiskSessionDataProvider : public SessionDataProvider {
-
-public:
+  public:
     DiskSessionDataProvider() = delete;
-    DiskSessionDataProvider(const std::string& clientId, const std::filesystem::path& file);
+
+    DiskSessionDataProvider(const std::string &clientId, const std::filesystem::path &file);
+
     virtual ~DiskSessionDataProvider() override;
 
+    bool isAvailable() override;
+
     bool start() override;
+
     bool isRunning() override;
+
     void stop() override;
 
-protected:
+  protected:
     void runnable();
 
-private:
+  private:
     void init();
+
     void process();
+
     void processData();
+
     void processDataUpdate();
+
     bool processYAMLLiveString();
 
     void checkConnection();
@@ -221,7 +258,7 @@ private:
     std::atomic_bool isAvailable_{false};
     DWORD lastUpdatedTime_{0};
     //    HANDLE dataValidEvent_{nullptr};
-};
+  };
 
 } // namespace Services
 

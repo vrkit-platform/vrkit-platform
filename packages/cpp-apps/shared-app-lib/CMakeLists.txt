@@ -43,9 +43,9 @@ install(TARGETS ${sharedAppLibTargetStatic} FILE_SET publicHeaders DESTINATION $
 # target_link_libraries(${sharedAppLibTarget} PUBLIC ${sdkTarget} ${modelsTarget})
 target_link_libraries(${sharedAppLibTargetStatic} PUBLIC ${sdkTargetStatic} ${modelsTargetStatic})
 
-irt_configure_runtime_libs(${sharedAppLibTargetStatic})
+IRT_CONFIGURE_APP_LIBS(${sharedAppLibTargetStatic})
 # foreach(targetName ${sharedAppLibTarget} ${sharedAppLibTargetStatic})
-#   irt_configure_runtime_libs(${targetName})
+#   IRT_CONFIGURE_APP_LIBS(${targetName})
 # endforeach()
 
 # Tests

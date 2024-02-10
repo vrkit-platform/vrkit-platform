@@ -52,8 +52,6 @@ DiskClient::DiskClient(const fs::path &path) :
 
     openFile();
 
-    ClientManager::Get().set(clientId_, this);
-
 }
 
 DiskClient::~DiskClient() {
@@ -64,7 +62,7 @@ DiskClient::~DiskClient() {
 
     ibtFile_ = nullptr;
 
-    ClientManager::Get().del(clientId_);
+  ClientManager::Get().remove(clientId_);
 }
 
 

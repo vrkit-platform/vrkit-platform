@@ -8,12 +8,18 @@ import ThemeEngine
 T.Button {
     id: control
 
-    implicitWidth: Theme.componentHeight
-    implicitHeight: Theme.componentHeight
+
+    // implicitWidth: contentItem.width
+    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
+                             implicitContentWidth + leftPadding + rightPadding)
+    implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
+                             implicitContentHeight + topPadding + bottomPadding)
+
+
 
     focusPolicy: Qt.NoFocus
 
-    property int textSize: Math.round(width * 0.333)
+    // property int textSize: Math.round(width * 0.333)
 
     // settings
     property bool borderVisible: false
@@ -33,6 +39,7 @@ T.Button {
     ////////////////
 
     background: Rectangle {
+
         implicitWidth: Theme.componentHeight
         implicitHeight: Theme.componentHeight
         radius: Theme.componentHeight
@@ -50,7 +57,7 @@ T.Button {
         Behavior on opacity { NumberAnimation { duration: 333 } }
 
         Rectangle { // border
-            anchors.fill: parent
+            // anchors.fill: parent
             radius: width
 
             visible: control.borderVisible
@@ -65,13 +72,16 @@ T.Button {
     contentItem: Text {
         text: control.text
         textFormat: Text.PlainText
-        elide: Text.ElideMiddle
+        // elide: Text.ElideMiddle
         font.bold: true
-        font.pixelSize: control.textSize
+        //font.pixelSize: control.textSize
         font.capitalization: Font.Normal
-        horizontalAlignment: Text.AlignHCenter
+        // horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-
+        padding: {
+            left: 10
+            right: 10
+        }
         color: {
             if ((control.highlighted || control.hovered || control.pressed) &&
                 (control.highlightMode === "color" || control.highlightMode === "both")) {

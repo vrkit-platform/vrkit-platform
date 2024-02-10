@@ -1,13 +1,26 @@
 ﻿{
   "configurations": [
     {
-      "name": "x64-Debug",
+      "name": "visual-studio-x64-debug",
       "generator": "Ninja",
       "configurationType": "Debug",
       "inheritEnvironments": [ "msvc_x64" ],
       "buildRoot": "${projectDir}\\build\\vs3-${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "-DCMAKE_TOOLCHAIN_FILE=\"Y:\\code\\sim-racing\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake\" -DVCPKG_ROOT=\"Y:\\code\\sim-racing\\vcpkg\"",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "cmakeToolchain": "Y:\\code\\sim-racing\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
+      "intelliSenseMode": "windows-msvc-x64"
+    },
+    {
+      "name": "vscode-x64-debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "buildRoot": "${projectDir}\\build\\vscode-${name}",
+      "installRoot": "${projectDir}\\build\\vscode-${name}-install",
+      "cmakeCommandArgs": "-DVCPKG_ROOT=\"Y:\\code\\sim-racing\\vcpkg\"",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "cmakeToolchain": "Y:\\code\\sim-racing\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",

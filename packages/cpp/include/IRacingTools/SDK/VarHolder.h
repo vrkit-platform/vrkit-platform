@@ -12,43 +12,57 @@
 
 namespace IRacingTools::SDK {
 
-// helper class to keep track of our variables index
-// Create a global instance of this and it will take care of the details for you.
+/**
+ * @brief helper class to keep track of our variables index
+ *
+ * Create a global instance of this and it will take care of the details for you.
+ */
 class VarHolder {
-  ClientProvider * clientProvider_;
+
 public:
     VarHolder() = delete;
-    explicit VarHolder(const std::string_view &name, ClientProvider * clientProvider);
+    explicit VarHolder(const std::string_view &name, ClientProvider * clientProvider = nullptr);
 
     void setVarName(const std::string_view &name);
 
-    // returns VarDataType as int so we don't depend on IRTypes.h
-    VarDataType getType();
-    uint32_t getCount();
+    /**
+     * @brief Get type
+     *
+     * @return
+     */
+    [[maybe_unused]] VarDataType getType();
+
+    /**
+     * @brief Get number of samples
+     *
+     * @return
+     */
+    [[maybe_unused]] uint32_t getCount();
     bool isValid();
 
-    // entry is the array offset, or 0 if not an array element
+    /**
+     * @brief Get boolean value
+     *
+     * @param entry is the array offset, or 0 if not an array element
+     * @return
+     */
     bool getBool(int entry = 0);
     int getInt(int entry = 0);
     float getFloat(int entry = 0);
     double getDouble(int entry = 0);
 
-//    void setClientIdProvider(const ClientIdProvider &clientIdProvider);
-
 protected:
     bool reset();
     bool isAvailable();
     std::shared_ptr<Client> getClient();
-    static constexpr int kMaxStringLength = Resources::MaxStringLength; //Resources::MaxStringLength
-
 
     std::atomic_bool available_{false};
-//    std::string_view clientId_{""};
-//    ClientIdProvider clientIdProvider_;
-    std::string_view name_{""};
-    std::string_view unit_{""};
-    std::string_view description_{""};
+    std::string_view name_{};
+    [[maybe_unused]] std::string_view unit_{};
+    [[maybe_unused]] std::string_view description_{};
     uint32_t idx_{0};
     ConnectionId connectionId_{0};
+
+    ClientProvider * clientProvider_;
 };
 }

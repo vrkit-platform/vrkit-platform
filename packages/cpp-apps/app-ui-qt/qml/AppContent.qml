@@ -1,15 +1,44 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Window
 import QtQuick.Layouts
 import QtQuick.Templates as T
 import "components"
 
+import IRT
+import IRTObjects
+
 //  as ActionMenuFloating
 import ThemeEngine
 
 Item {
+    MessageDialog {
+        id: errorDialog
 
+        buttons: MessageDialog.Ok
+        informativeText: "Do you want to save your changes?"
+        text: "The document has been modified."
+
+        onAccepted: () => {}
+    }
+
+    FileDialog {
+        id: openIBTFileDialog
+
+        fileMode: FileDialog.OpenFile
+        nameFilters: ["IBT files (*.ibt)"]
+        selectedNameFilter.index: 1
+
+        onAccepted: () => {
+            console.log("Selected file: " + selectedFile);
+            try {
+                AppSessionManager.setConfig(AppSessionConfig.Disk, Qt.url(selectedFile));
+            } catch (e) {
+                showErrorMessage(e);
+            }
+        }
+    }
     // MouseArea {
     //     acceptedButtons: Qt.BackButton | Qt.ForwardButton
     //     anchors.fill: parent
@@ -70,22 +99,46 @@ Item {
         anchors {
             top: parent.top
             left: parent.left
-            // right: parent.right
         }
-
         Menu {
             title: qsTr("File")
 
-            MenuItem {
-                text: qsTr("Do nothing")
-
-                onTriggered: console.log("Do nothing action triggered")
-            }
             MenuItem {
                 text: qsTr("&Exit")
 
                 onTriggered: Qt.quit()
             }
+        }
+
+        Menu {
+            title: qsTr("Mode")
+
+            MenuItem {
+                text: qsTr("Live")
+                checkable: false
+                checked: AppSessionManager.config.type === AppSessionConfig.Live
+                onTriggered: AppSessionManager.setConfig(AppSessionConfig.Live)
+            }
+            MenuItem {
+                checkable: false
+                checked: AppSessionManager.config.type === AppSessionConfig.Disk
+                text: qsTr("Replay")
+
+                onTriggered: AppSessionManager.setConfig(AppSessionConfig.Disk)
+            }
+
+            MenuSeparator {
+                visible: AppSessionManager.config.type === AppSessionConfig.Disk
+
+            }
+
+            MenuItem {
+                enabled: AppSessionManager.config.type === AppSessionConfig.Disk
+                text: qsTr("Open IBT file...")
+
+                onTriggered: openIBTFileDialog.open()
+            }
+
         }
     }
 

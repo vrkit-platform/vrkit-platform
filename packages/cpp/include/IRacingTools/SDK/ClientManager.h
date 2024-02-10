@@ -5,6 +5,7 @@
 #pragma once
 
 #include <map>
+#include <mutex>
 
 #include "Utils/Singleton.h"
 #include "Client.h"
@@ -12,11 +13,9 @@
 namespace IRacingTools::SDK {
   using namespace Utils;
 
-
-
   class ClientManager : public Singleton<ClientManager> {
   public:
-    static constexpr std::string_view LiveClientId = "";
+    static constexpr std::string_view LiveClientId{};
 
     ClientManager() = delete;
 
@@ -28,15 +27,15 @@ namespace IRacingTools::SDK {
 
     ClientManager &operator=(ClientManager &&other) noexcept = delete;
 
-    Expected<bool> del(const std::string_view &clientId);
+    Expected<bool> remove(const std::string_view &clientId);
 
-    Expected<bool> set(const std::string_view &clientId, Client *client, bool active = true);
+    Expected<bool> add(const std::string_view &clientId, std::weak_ptr<Client> client, bool active = true);
 
     Expected<bool> setActive(const std::string_view &clientId);
 
-    Client *get(const std::string_view &clientId);
+    std::shared_ptr<Client> get(const std::string_view &clientId);
 
-    Client *getActive();
+    std::shared_ptr<Client> getActive();
 
 
   private:
@@ -45,9 +44,11 @@ namespace IRacingTools::SDK {
     explicit ClientManager(token) {
     };
 
-    std::map<std::string_view, Client *> clients_{};
+    std::map<std::string_view, std::weak_ptr<Client>> clients_{};
 
     std::string_view activeClientId_{LiveClientId};
+
+    std::recursive_mutex clientMutex_{};
   };
 
 } // namespace IRacingTools::SDK

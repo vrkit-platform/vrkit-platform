@@ -55,7 +55,7 @@ QObject *EngineContextEntryValue(const QMLEngineContextEntry &entry) {
     return entry.second;
 }
 
-AppState * configureQMLEngine(QQmlApplicationEngine &engine, const QList<QMLEngineContextEntry> &contextEntries) {
+void configureQMLEngine(QQmlApplicationEngine &engine, const QList<QMLEngineContextEntry> &contextEntries) {
     QQmlContext *engineContext = engine.rootContext();
     std::for_each(contextEntries.begin(), contextEntries.end(), [&](auto &entry) {
         engineContext->setContextProperty(entry.first, entry.second);
@@ -63,6 +63,8 @@ AppState * configureQMLEngine(QQmlApplicationEngine &engine, const QList<QMLEngi
 
     // ThemeEngine
     qmlRegisterSingletonType(QUrl("qrc:/qml/ThemeEngine.qml"), "ThemeEngine", 1, 0, "Theme");
+    qmlRegisterSingletonInstance("IRTObjects", 1, 0, "AppState", AppState::GetPtr().get());
+    qmlRegisterSingletonInstance("IRTObjects", 1, 0, "AppSessionManager", AppSessionManager::GetPtr().get());
 //    AppState * appState = new AppState();// engine.singletonInstance<AppState>();
 //    qmlRegisterSingletonType<AppState>("AppState", 1, 0, "AppState", [&](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject * {
 //        Q_UNUSED(engine)
@@ -71,9 +73,9 @@ AppState * configureQMLEngine(QQmlApplicationEngine &engine, const QList<QMLEngi
 //        return appState;
 //    });
 //    qmlRegisterSingletonType("", 1, 0, "AppState", appState);
-    AppState * appState = engine.singletonInstance<AppState*>("IRT","AppState");
-    AppState::SetInstance(appState);
-    qDebug() << "DataSourceType == " << QMetaEnum::fromType<DataSourceConfig::Type>().valueToKey(appState->dataSourceConfig()->type());
+//    AppState * appState = engine.singletonInstance<AppState*>("IRT","AppState");
+//    AppState::SetInstance(appState);
+//    qDebug() << "DataSourceType == " << QMetaEnum::fromType<AppSessionConfig::Type>().valueToKey(appState->dataSourceConfig()->type());
 #ifdef QML_HOT_RELOAD
     std::filesystem::path srcPath{APP_SRC_DIR};
     auto qmlPath = srcPath / "qml";
@@ -103,7 +105,7 @@ AppState * configureQMLEngine(QQmlApplicationEngine &engine, const QList<QMLEngi
     engineContext->setContextProperty("AppContentFilePath", appUrl.toString());
     engine.load(appUrl);
 #endif
-   return appState;
+
 
 }
 

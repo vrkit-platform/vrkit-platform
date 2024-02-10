@@ -10,8 +10,8 @@ set(DEP_PACKAGES
   effects11
   CLI11
   GTest
+  yaml-cpp
   magic_enum
-#  wxwidgets
   nlohmann_json)
 foreach(depPkgName ${DEP_PACKAGES})
   find_package(${depPkgName} CONFIG REQUIRED)
@@ -32,8 +32,8 @@ find_package(Boost REQUIRED COMPONENTS system)
 # TinyORM Dep
 include(${CMAKE_CURRENT_LIST_DIR}/external/tiny_orm.cmake NO_POLICY_SCOPE)
 
-
-set(DEP_WXWIDGETS wx::core wx::base)
+#set(DEP_WXWIDGETS wx::core wx::base)
+set(DEP_YAML yaml-cpp::yaml-cpp)
 set(DEP_PROTOBUF protobuf::libprotobuf)
 set(DEP_JSON nlohmann_json::nlohmann_json)
 set(DEP_MAGICENUM magic_enum::magic_enum)
@@ -55,7 +55,7 @@ set(DEP_DIRECTX
 set(DEP_FMT fmt::fmt)
 set(DEP_OPENXR OpenXR::headers)
 set(DEP_BOOST_DEFAULT Boost::system)
-set(ALL_RUNTIME_DEPS
+set(ALL_APP_DEPS
   ${DEP_PROTOBUF}
   ${DEP_JSON}
   ${DEP_MAGICENUM}
@@ -63,20 +63,27 @@ set(ALL_RUNTIME_DEPS
   ${DEP_FMT}
   ${DEP_OPENXR}
   ${DEP_QT_CORE}
-
+  ${DEP_YAML}
   ${DEP_GSL}
   ${DEP_BOOST_DEFAULT}
+)
+
+set(ALL_SDK_DEPS
+  ${DEP_MAGICENUM} ${DEP_GSL} ${DEP_FMT} ${DEP_YAML}
 )
 
 set(DEP_GTEST_MAIN GTest::gtest_main)
 set(DEP_GTEST GTest::gtest)
 
 
+function(IRT_CONFIGURE_SDK_LIBS TARGET)
+  target_link_libraries(${TARGET} PUBLIC ${ALL_SDK_DEPS})
+endfunction()
 
-function(IRT_CONFIGURE_RUNTIME_LIBS TARGET)
-  target_link_libraries(${TARGET} PUBLIC ${ALL_RUNTIME_DEPS})
+function(IRT_CONFIGURE_APP_LIBS TARGET)
+  target_link_libraries(${TARGET} PUBLIC ${ALL_APP_DEPS})
 endfunction()
 
 function(IRT_CONFIGURE_TEST_LIBS TARGET)
-  target_link_libraries(${TARGET} PUBLIC ${ALL_RUNTIME_DEPS} ${DEP_GTEST_MAIN})
+  target_link_libraries(${TARGET} PUBLIC ${ALL_APP_DEPS} ${DEP_GTEST_MAIN})
 endfunction()

@@ -1,0 +1,1608 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/Root",
+  "definitions": {
+    "Root": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "WeekendInfo": {
+          "$ref": "#/definitions/WeekendInfo"
+        },
+        "SessionInfo": {
+          "$ref": "#/definitions/SessionInfo"
+        },
+        "QualifyResultsInfo": {
+          "$ref": "#/definitions/QualifyResultsInfo"
+        },
+        "CameraInfo": {
+          "$ref": "#/definitions/CameraInfo"
+        },
+        "RadioInfo": {
+          "$ref": "#/definitions/RadioInfo"
+        },
+        "DriverInfo": {
+          "$ref": "#/definitions/DriverInfo"
+        },
+        "SplitTimeInfo": {
+          "$ref": "#/definitions/SplitTimeInfo"
+        },
+        "CarSetup": {
+          "$ref": "#/definitions/CarSetup"
+        }
+      },
+      "required": [
+        "CameraInfo",
+        "CarSetup",
+        "DriverInfo",
+        "QualifyResultsInfo",
+        "RadioInfo",
+        "SessionInfo",
+        "SplitTimeInfo",
+        "WeekendInfo"
+      ],
+      "title": "Welcome8"
+    },
+    "CameraInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Group"
+          }
+        }
+      },
+      "required": [
+        "Groups"
+      ],
+      "title": "CameraInfo"
+    },
+    "Group": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "GroupNum": {
+          "type": "integer"
+        },
+        "GroupName": {
+          "type": "string"
+        },
+        "Cameras": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Camera"
+          }
+        },
+        "IsScenic": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "Cameras",
+        "GroupName",
+        "GroupNum"
+      ],
+      "title": "Group"
+    },
+    "Camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "CameraNum": {
+          "type": "integer"
+        },
+        "CameraName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "CameraName",
+        "CameraNum"
+      ],
+      "title": "Camera"
+    },
+    "CarSetup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "UpdateCount": {
+          "type": "integer"
+        },
+        "TiresAero": {
+          "$ref": "#/definitions/TiresAero"
+        },
+        "Chassis": {
+          "$ref": "#/definitions/Chassis"
+        },
+        "BrakesDriveUnit": {
+          "$ref": "#/definitions/BrakesDriveUnit"
+        }
+      },
+      "required": [
+        "BrakesDriveUnit",
+        "Chassis",
+        "TiresAero",
+        "UpdateCount"
+      ],
+      "title": "CarSetup"
+    },
+    "BrakesDriveUnit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "BrakeSpec": {
+          "$ref": "#/definitions/BrakeSpec"
+        },
+        "Fuel": {
+          "$ref": "#/definitions/Fuel"
+        },
+        "Engine": {
+          "$ref": "#/definitions/Engine"
+        },
+        "GearRatios": {
+          "$ref": "#/definitions/GearRatios"
+        }
+      },
+      "required": [
+        "BrakeSpec",
+        "Engine",
+        "Fuel",
+        "GearRatios"
+      ],
+      "title": "BrakesDriveUnit"
+    },
+    "BrakeSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "PadCompound": {
+          "type": "string"
+        },
+        "BrakePressureBias": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "BrakePressureBias",
+        "PadCompound"
+      ],
+      "title": "BrakeSpec"
+    },
+    "Engine": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "BoostLevel_Cal": {
+          "type": "integer"
+        },
+        "ThrottleShape_Tps": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "BoostLevel_Cal",
+        "ThrottleShape_Tps"
+      ],
+      "title": "Engine"
+    },
+    "Fuel": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "FuelLevel": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "FuelLevel"
+      ],
+      "title": "Fuel"
+    },
+    "GearRatios": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "GearStack": {
+          "type": "string"
+        },
+        "SpeedInFirst": {
+          "type": "string"
+        },
+        "SpeedInSecond": {
+          "type": "string"
+        },
+        "SpeedInThird": {
+          "type": "string"
+        },
+        "SpeedInFourth": {
+          "type": "string"
+        },
+        "SpeedInFifth": {
+          "type": "string"
+        },
+        "SpeedInSixth": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "GearStack",
+        "SpeedInFifth",
+        "SpeedInFirst",
+        "SpeedInFourth",
+        "SpeedInSecond",
+        "SpeedInSixth",
+        "SpeedInThird"
+      ],
+      "title": "GearRatios"
+    },
+    "Chassis": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Front": {
+          "$ref": "#/definitions/Front"
+        },
+        "LeftFront": {
+          "$ref": "#/definitions/LeftFront"
+        },
+        "LeftRear": {
+          "$ref": "#/definitions/LeftFront"
+        },
+        "RightFront": {
+          "$ref": "#/definitions/LeftFront"
+        },
+        "RightRear": {
+          "$ref": "#/definitions/LeftFront"
+        },
+        "Rear": {
+          "$ref": "#/definitions/Rear"
+        }
+      },
+      "required": [
+        "Front",
+        "LeftFront",
+        "LeftRear",
+        "Rear",
+        "RightFront",
+        "RightRear"
+      ],
+      "title": "Chassis"
+    },
+    "Front": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ArbSize": {
+          "type": "string"
+        },
+        "ToeIn": {
+          "type": "string"
+        },
+        "SteeringRatio": {
+          "type": "integer"
+        },
+        "DisplayPage": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ArbSize",
+        "DisplayPage",
+        "SteeringRatio",
+        "ToeIn"
+      ],
+      "title": "Front"
+    },
+    "LeftFront": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "CornerWeight": {
+          "type": "string"
+        },
+        "RideHeight": {
+          "type": "string"
+        },
+        "ShockDefl": {
+          "type": "string"
+        },
+        "SpringPerchOffset": {
+          "type": "string"
+        },
+        "SpringRate": {
+          "type": "string"
+        },
+        "LsCompDamping": {
+          "type": "string"
+        },
+        "HsCompDamping": {
+          "type": "string"
+        },
+        "HsRbdDamping": {
+          "type": "string"
+        },
+        "Camber": {
+          "type": "string"
+        },
+        "SpringDefl": {
+          "type": "string"
+        },
+        "ToeIn": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Camber",
+        "CornerWeight",
+        "HsCompDamping",
+        "HsRbdDamping",
+        "LsCompDamping",
+        "RideHeight",
+        "ShockDefl",
+        "SpringPerchOffset",
+        "SpringRate"
+      ],
+      "title": "LeftFront"
+    },
+    "Rear": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ArbSize": {
+          "type": "string"
+        },
+        "CrossWeight": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ArbSize",
+        "CrossWeight"
+      ],
+      "title": "Rear"
+    },
+    "TiresAero": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "LeftFrontTire": {
+          "$ref": "#/definitions/Tire"
+        },
+        "LeftRearTire": {
+          "$ref": "#/definitions/Tire"
+        },
+        "RightFrontTire": {
+          "$ref": "#/definitions/Tire"
+        },
+        "RightRearTire": {
+          "$ref": "#/definitions/Tire"
+        },
+        "AeroSettings": {
+          "$ref": "#/definitions/AeroSettings"
+        }
+      },
+      "required": [
+        "AeroSettings",
+        "LeftFrontTire",
+        "LeftRearTire",
+        "RightFrontTire",
+        "RightRearTire"
+      ],
+      "title": "TiresAero"
+    },
+    "AeroSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "RearWingSetting": {
+          "type": "string"
+        },
+        "OfDivePlanes": {
+          "type": "integer"
+        },
+        "WingGurneySetting": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "OfDivePlanes",
+        "RearWingSetting",
+        "WingGurneySetting"
+      ],
+      "title": "AeroSettings"
+    },
+    "Tire": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "StartingPressure": {
+          "type": "string"
+        },
+        "LastHotPressure": {
+          "type": "string"
+        },
+        "LastTempsOMI": {
+          "type": "string"
+        },
+        "TreadRemaining": {
+          "type": "string"
+        },
+        "LastTempsIMO": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "LastHotPressure",
+        "StartingPressure",
+        "TreadRemaining"
+      ],
+      "title": "Tire"
+    },
+    "DriverInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "DriverCarIdx": {
+          "type": "integer"
+        },
+        "DriverUserID": {
+          "type": "integer"
+        },
+        "PaceCarIdx": {
+          "type": "integer"
+        },
+        "DriverHeadPosX": {
+          "type": "number"
+        },
+        "DriverHeadPosY": {
+          "type": "number"
+        },
+        "DriverHeadPosZ": {
+          "type": "number"
+        },
+        "DriverCarIsElectric": {
+          "type": "integer"
+        },
+        "DriverCarIdleRPM": {
+          "type": "integer"
+        },
+        "DriverCarRedLine": {
+          "type": "integer"
+        },
+        "DriverCarEngCylinderCount": {
+          "type": "integer"
+        },
+        "DriverCarFuelKgPerLtr": {
+          "type": "number"
+        },
+        "DriverCarFuelMaxLtr": {
+          "type": "integer"
+        },
+        "DriverCarMaxFuelPct": {
+          "type": "number"
+        },
+        "DriverCarGearNumForward": {
+          "type": "integer"
+        },
+        "DriverCarGearNeutral": {
+          "type": "integer"
+        },
+        "DriverCarGearReverse": {
+          "type": "integer"
+        },
+        "DriverCarSLFirstRPM": {
+          "type": "integer"
+        },
+        "DriverCarSLShiftRPM": {
+          "type": "integer"
+        },
+        "DriverCarSLLastRPM": {
+          "type": "integer"
+        },
+        "DriverCarSLBlinkRPM": {
+          "type": "integer"
+        },
+        "DriverCarVersion": {
+          "type": "string"
+        },
+        "DriverPitTrkPct": {
+          "type": "number"
+        },
+        "DriverCarEstLapTime": {
+          "type": "number"
+        },
+        "DriverSetupName": {
+          "type": "string"
+        },
+        "DriverSetupIsModified": {
+          "type": "integer"
+        },
+        "DriverSetupLoadTypeName": {
+          "type": "string"
+        },
+        "DriverSetupPassedTech": {
+          "type": "integer"
+        },
+        "DriverIncidentCount": {
+          "type": "integer"
+        },
+        "Drivers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Driver"
+          }
+        }
+      },
+      "required": [
+        "DriverCarEngCylinderCount",
+        "DriverCarEstLapTime",
+        "DriverCarFuelKgPerLtr",
+        "DriverCarFuelMaxLtr",
+        "DriverCarGearNeutral",
+        "DriverCarGearNumForward",
+        "DriverCarGearReverse",
+        "DriverCarIdleRPM",
+        "DriverCarIdx",
+        "DriverCarIsElectric",
+        "DriverCarMaxFuelPct",
+        "DriverCarRedLine",
+        "DriverCarSLBlinkRPM",
+        "DriverCarSLFirstRPM",
+        "DriverCarSLLastRPM",
+        "DriverCarSLShiftRPM",
+        "DriverCarVersion",
+        "DriverHeadPosX",
+        "DriverHeadPosY",
+        "DriverHeadPosZ",
+        "DriverIncidentCount",
+        "DriverPitTrkPct",
+        "DriverSetupIsModified",
+        "DriverSetupLoadTypeName",
+        "DriverSetupName",
+        "DriverSetupPassedTech",
+        "DriverUserID",
+        "Drivers",
+        "PaceCarIdx"
+      ],
+      "title": "DriverInfo"
+    },
+    "Driver": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "CarIdx": {
+          "type": "integer"
+        },
+        "UserName": {
+          "type": "string"
+        },
+        "AbbrevName": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "Initials": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "UserID": {
+          "type": "integer"
+        },
+        "TeamID": {
+          "type": "integer"
+        },
+        "TeamName": {
+          "type": "string"
+        },
+        "CarNumber": {
+          "type": "string"
+        },
+        "CarNumberRaw": {
+          "type": "integer"
+        },
+        "CarPath": {
+          "$ref": "#/definitions/CarPath"
+        },
+        "CarClassID": {
+          "type": "integer"
+        },
+        "CarID": {
+          "type": "integer"
+        },
+        "CarIsPaceCar": {
+          "type": "integer"
+        },
+        "CarIsAI": {
+          "type": "integer"
+        },
+        "CarIsElectric": {
+          "type": "integer"
+        },
+        "CarScreenName": {
+          "$ref": "#/definitions/Car"
+        },
+        "CarScreenNameShort": {
+          "$ref": "#/definitions/Car"
+        },
+        "CarClassShortName": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Car"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "CarClassRelSpeed": {
+          "type": "integer"
+        },
+        "CarClassLicenseLevel": {
+          "type": "integer"
+        },
+        "CarClassMaxFuelPct": {
+          "$ref": "#/definitions/CarClassMaxFuelPct"
+        },
+        "CarClassWeightPenalty": {
+          "$ref": "#/definitions/CarClassWeightPenalty"
+        },
+        "CarClassPowerAdjust": {
+          "$ref": "#/definitions/CarClassPowerAdjust"
+        },
+        "CarClassDryTireSetLimit": {
+          "$ref": "#/definitions/TrackFogLevel"
+        },
+        "CarClassColor": {
+          "type": "integer"
+        },
+        "CarClassEstLapTime": {
+          "type": "number"
+        },
+        "IRating": {
+          "type": "integer"
+        },
+        "LicLevel": {
+          "type": "integer"
+        },
+        "LicSubLevel": {
+          "type": "integer"
+        },
+        "LicString": {
+          "type": "string"
+        },
+        "LicColor": {
+          "type": "integer"
+        },
+        "IsSpectator": {
+          "type": "integer"
+        },
+        "CarDesignStr": {
+          "type": "string"
+        },
+        "HelmetDesignStr": {
+          "type": "string"
+        },
+        "SuitDesignStr": {
+          "type": "string"
+        },
+        "BodyType": {
+          "type": "integer"
+        },
+        "FaceType": {
+          "type": "integer"
+        },
+        "HelmetType": {
+          "type": "integer"
+        },
+        "CarNumberDesignStr": {
+          "$ref": "#/definitions/CarNumberDesignStr"
+        },
+        "CarSponsor_1": {
+          "type": "integer"
+        },
+        "CarSponsor_2": {
+          "type": "integer"
+        },
+        "ClubName": {
+          "type": "string"
+        },
+        "ClubID": {
+          "type": "integer"
+        },
+        "DivisionName": {
+          "type": "string"
+        },
+        "DivisionID": {
+          "type": "integer"
+        },
+        "CurDriverIncidentCount": {
+          "type": "integer"
+        },
+        "TeamIncidentCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "AbbrevName",
+        "BodyType",
+        "CarClassColor",
+        "CarClassDryTireSetLimit",
+        "CarClassEstLapTime",
+        "CarClassID",
+        "CarClassLicenseLevel",
+        "CarClassMaxFuelPct",
+        "CarClassPowerAdjust",
+        "CarClassRelSpeed",
+        "CarClassShortName",
+        "CarClassWeightPenalty",
+        "CarDesignStr",
+        "CarID",
+        "CarIdx",
+        "CarIsAI",
+        "CarIsElectric",
+        "CarIsPaceCar",
+        "CarNumber",
+        "CarNumberDesignStr",
+        "CarNumberRaw",
+        "CarPath",
+        "CarScreenName",
+        "CarScreenNameShort",
+        "CarSponsor_1",
+        "CarSponsor_2",
+        "ClubID",
+        "ClubName",
+        "CurDriverIncidentCount",
+        "DivisionID",
+        "DivisionName",
+        "FaceType",
+        "HelmetDesignStr",
+        "HelmetType",
+        "IRating",
+        "Initials",
+        "IsSpectator",
+        "LicColor",
+        "LicLevel",
+        "LicString",
+        "LicSubLevel",
+        "SuitDesignStr",
+        "TeamID",
+        "TeamIncidentCount",
+        "TeamName",
+        "UserID",
+        "UserName"
+      ],
+      "title": "Driver"
+    },
+    "QualifyResultsInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Result"
+          }
+        }
+      },
+      "required": [
+        "Results"
+      ],
+      "title": "QualifyResultsInfo"
+    },
+    "Result": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Position": {
+          "type": "integer"
+        },
+        "ClassPosition": {
+          "type": "integer"
+        },
+        "CarIdx": {
+          "type": "integer"
+        },
+        "FastestLap": {
+          "type": "integer"
+        },
+        "FastestTime": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "CarIdx",
+        "ClassPosition",
+        "FastestLap",
+        "FastestTime",
+        "Position"
+      ],
+      "title": "Result"
+    },
+    "RadioInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "SelectedRadioNum": {
+          "type": "integer"
+        },
+        "Radios": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Radio"
+          }
+        }
+      },
+      "required": [
+        "Radios",
+        "SelectedRadioNum"
+      ],
+      "title": "RadioInfo"
+    },
+    "Radio": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "RadioNum": {
+          "type": "integer"
+        },
+        "HopCount": {
+          "type": "integer"
+        },
+        "NumFrequencies": {
+          "type": "integer"
+        },
+        "TunedToFrequencyNum": {
+          "type": "integer"
+        },
+        "ScanningIsOn": {
+          "type": "integer"
+        },
+        "Frequencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Frequency"
+          }
+        }
+      },
+      "required": [
+        "Frequencies",
+        "HopCount",
+        "NumFrequencies",
+        "RadioNum",
+        "ScanningIsOn",
+        "TunedToFrequencyNum"
+      ],
+      "title": "Radio"
+    },
+    "Frequency": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "FrequencyNum": {
+          "type": "integer"
+        },
+        "FrequencyName": {
+          "type": "string"
+        },
+        "Priority": {
+          "type": "integer"
+        },
+        "CarIdx": {
+          "type": "integer"
+        },
+        "EntryIdx": {
+          "type": "integer"
+        },
+        "ClubID": {
+          "type": "integer"
+        },
+        "CanScan": {
+          "type": "integer"
+        },
+        "CanSquawk": {
+          "type": "integer"
+        },
+        "Muted": {
+          "type": "integer"
+        },
+        "IsMutable": {
+          "type": "integer"
+        },
+        "IsDeletable": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "CanScan",
+        "CanSquawk",
+        "CarIdx",
+        "ClubID",
+        "EntryIdx",
+        "FrequencyName",
+        "FrequencyNum",
+        "IsDeletable",
+        "IsMutable",
+        "Muted",
+        "Priority"
+      ],
+      "title": "Frequency"
+    },
+    "SessionInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Sessions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Session"
+          }
+        }
+      },
+      "required": [
+        "Sessions"
+      ],
+      "title": "SessionInfo"
+    },
+    "Session": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "SessionNum": {
+          "type": "integer"
+        },
+        "SessionLaps": {
+          "$ref": "#/definitions/SessionLaps"
+        },
+        "SessionTime": {
+          "type": "string"
+        },
+        "SessionNumLapsToAvg": {
+          "type": "integer"
+        },
+        "SessionType": {
+          "type": "string"
+        },
+        "SessionTrackRubberState": {
+          "type": "string"
+        },
+        "SessionName": {
+          "type": "string"
+        },
+        "SessionSubType": {
+          "type": "null"
+        },
+        "SessionSkipped": {
+          "type": "integer"
+        },
+        "SessionRunGroupsUsed": {
+          "type": "integer"
+        },
+        "SessionEnforceTireCompoundChange": {
+          "type": "integer"
+        },
+        "ResultsPositions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ResultsPosition"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ResultsFastestLap": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ResultsFastestLap"
+          }
+        },
+        "ResultsAverageLapTime": {
+          "type": "integer"
+        },
+        "ResultsNumCautionFlags": {
+          "type": "integer"
+        },
+        "ResultsNumCautionLaps": {
+          "type": "integer"
+        },
+        "ResultsNumLeadChanges": {
+          "type": "integer"
+        },
+        "ResultsLapsComplete": {
+          "type": "integer"
+        },
+        "ResultsOfficial": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ResultsAverageLapTime",
+        "ResultsFastestLap",
+        "ResultsLapsComplete",
+        "ResultsNumCautionFlags",
+        "ResultsNumCautionLaps",
+        "ResultsNumLeadChanges",
+        "ResultsOfficial",
+        "ResultsPositions",
+        "SessionEnforceTireCompoundChange",
+        "SessionLaps",
+        "SessionName",
+        "SessionNum",
+        "SessionNumLapsToAvg",
+        "SessionRunGroupsUsed",
+        "SessionSkipped",
+        "SessionSubType",
+        "SessionTime",
+        "SessionTrackRubberState",
+        "SessionType"
+      ],
+      "title": "Session"
+    },
+    "ResultsFastestLap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "CarIdx": {
+          "type": "integer"
+        },
+        "FastestLap": {
+          "type": "integer"
+        },
+        "FastestTime": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "CarIdx",
+        "FastestLap",
+        "FastestTime"
+      ],
+      "title": "ResultsFastestLap"
+    },
+    "ResultsPosition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Position": {
+          "type": "integer"
+        },
+        "ClassPosition": {
+          "type": "integer"
+        },
+        "CarIdx": {
+          "type": "integer"
+        },
+        "Lap": {
+          "type": "integer"
+        },
+        "Time": {
+          "type": "number"
+        },
+        "FastestLap": {
+          "type": "integer"
+        },
+        "FastestTime": {
+          "type": "number"
+        },
+        "LastTime": {
+          "type": "number"
+        },
+        "LapsLed": {
+          "type": "integer"
+        },
+        "LapsComplete": {
+          "type": "integer"
+        },
+        "JokerLapsComplete": {
+          "type": "integer"
+        },
+        "LapsDriven": {
+          "type": "number"
+        },
+        "Incidents": {
+          "type": "integer"
+        },
+        "ReasonOutId": {
+          "type": "integer"
+        },
+        "ReasonOutStr": {
+          "$ref": "#/definitions/ReasonOutStr"
+        }
+      },
+      "required": [
+        "CarIdx",
+        "ClassPosition",
+        "FastestLap",
+        "FastestTime",
+        "Incidents",
+        "JokerLapsComplete",
+        "Lap",
+        "LapsComplete",
+        "LapsDriven",
+        "LapsLed",
+        "LastTime",
+        "Position",
+        "ReasonOutId",
+        "ReasonOutStr",
+        "Time"
+      ],
+      "title": "ResultsPosition"
+    },
+    "SplitTimeInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Sectors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Sector"
+          }
+        }
+      },
+      "required": [
+        "Sectors"
+      ],
+      "title": "SplitTimeInfo"
+    },
+    "Sector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "SectorNum": {
+          "type": "integer"
+        },
+        "SectorStartPct": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "SectorNum",
+        "SectorStartPct"
+      ],
+      "title": "Sector"
+    },
+    "WeekendInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "TrackName": {
+          "type": "string"
+        },
+        "TrackID": {
+          "type": "integer"
+        },
+        "TrackLength": {
+          "type": "string"
+        },
+        "TrackLengthOfficial": {
+          "type": "string"
+        },
+        "TrackDisplayName": {
+          "type": "string"
+        },
+        "TrackDisplayShortName": {
+          "type": "string"
+        },
+        "TrackConfigName": {
+          "type": "string"
+        },
+        "TrackCity": {
+          "type": "string"
+        },
+        "TrackCountry": {
+          "type": "string"
+        },
+        "TrackAltitude": {
+          "type": "string"
+        },
+        "TrackLatitude": {
+          "type": "string"
+        },
+        "TrackLongitude": {
+          "type": "string"
+        },
+        "TrackNorthOffset": {
+          "type": "string"
+        },
+        "TrackNumTurns": {
+          "type": "integer"
+        },
+        "TrackPitSpeedLimit": {
+          "type": "string"
+        },
+        "TrackType": {
+          "type": "string"
+        },
+        "TrackDirection": {
+          "type": "string"
+        },
+        "TrackWeatherType": {
+          "type": "string"
+        },
+        "TrackSkies": {
+          "type": "string"
+        },
+        "TrackSurfaceTemp": {
+          "type": "string"
+        },
+        "TrackAirTemp": {
+          "type": "string"
+        },
+        "TrackAirPressure": {
+          "type": "string"
+        },
+        "TrackWindVel": {
+          "type": "string"
+        },
+        "TrackWindDir": {
+          "type": "string"
+        },
+        "TrackRelativeHumidity": {
+          "type": "string"
+        },
+        "TrackFogLevel": {
+          "$ref": "#/definitions/TrackFogLevel"
+        },
+        "TrackPrecipitation": {
+          "$ref": "#/definitions/TrackFogLevel"
+        },
+        "TrackCleanup": {
+          "type": "integer"
+        },
+        "TrackDynamicTrack": {
+          "type": "integer"
+        },
+        "TrackVersion": {
+          "type": "string"
+        },
+        "SeriesID": {
+          "type": "integer"
+        },
+        "SeasonID": {
+          "type": "integer"
+        },
+        "SessionID": {
+          "type": "integer"
+        },
+        "SubSessionID": {
+          "type": "integer"
+        },
+        "LeagueID": {
+          "type": "integer"
+        },
+        "Official": {
+          "type": "integer"
+        },
+        "RaceWeek": {
+          "type": "integer"
+        },
+        "EventType": {
+          "type": "string"
+        },
+        "Category": {
+          "type": "string"
+        },
+        "SimMode": {
+          "type": "string"
+        },
+        "TeamRacing": {
+          "type": "integer"
+        },
+        "MinDrivers": {
+          "type": "integer"
+        },
+        "MaxDrivers": {
+          "type": "integer"
+        },
+        "DCRuleSet": {
+          "type": "string"
+        },
+        "QualifierMustStartRace": {
+          "type": "integer"
+        },
+        "NumCarClasses": {
+          "type": "integer"
+        },
+        "NumCarTypes": {
+          "type": "integer"
+        },
+        "HeatRacing": {
+          "type": "integer"
+        },
+        "BuildType": {
+          "type": "string"
+        },
+        "BuildTarget": {
+          "type": "string"
+        },
+        "BuildVersion": {
+          "type": "string"
+        },
+        "WeekendOptions": {
+          "$ref": "#/definitions/WeekendOptions"
+        },
+        "TelemetryOptions": {
+          "$ref": "#/definitions/TelemetryOptions"
+        }
+      },
+      "required": [
+        "BuildTarget",
+        "BuildType",
+        "BuildVersion",
+        "Category",
+        "DCRuleSet",
+        "EventType",
+        "HeatRacing",
+        "LeagueID",
+        "MaxDrivers",
+        "MinDrivers",
+        "NumCarClasses",
+        "NumCarTypes",
+        "Official",
+        "QualifierMustStartRace",
+        "RaceWeek",
+        "SeasonID",
+        "SeriesID",
+        "SessionID",
+        "SimMode",
+        "SubSessionID",
+        "TeamRacing",
+        "TelemetryOptions",
+        "TrackAirPressure",
+        "TrackAirTemp",
+        "TrackAltitude",
+        "TrackCity",
+        "TrackCleanup",
+        "TrackConfigName",
+        "TrackCountry",
+        "TrackDirection",
+        "TrackDisplayName",
+        "TrackDisplayShortName",
+        "TrackDynamicTrack",
+        "TrackFogLevel",
+        "TrackID",
+        "TrackLatitude",
+        "TrackLength",
+        "TrackLengthOfficial",
+        "TrackLongitude",
+        "TrackName",
+        "TrackNorthOffset",
+        "TrackNumTurns",
+        "TrackPitSpeedLimit",
+        "TrackPrecipitation",
+        "TrackRelativeHumidity",
+        "TrackSkies",
+        "TrackSurfaceTemp",
+        "TrackType",
+        "TrackVersion",
+        "TrackWeatherType",
+        "TrackWindDir",
+        "TrackWindVel",
+        "WeekendOptions"
+      ],
+      "title": "WeekendInfo"
+    },
+    "TelemetryOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "TelemetryDiskFile": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "TelemetryDiskFile"
+      ],
+      "title": "TelemetryOptions"
+    },
+    "WeekendOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "NumStarters": {
+          "type": "integer"
+        },
+        "StartingGrid": {
+          "type": "string"
+        },
+        "QualifyScoring": {
+          "type": "string"
+        },
+        "CourseCautions": {
+          "type": "string"
+        },
+        "StandingStart": {
+          "type": "integer"
+        },
+        "ShortParadeLap": {
+          "type": "integer"
+        },
+        "Restarts": {
+          "type": "string"
+        },
+        "WeatherType": {
+          "type": "string"
+        },
+        "Skies": {
+          "type": "string"
+        },
+        "WindDirection": {
+          "type": "string"
+        },
+        "WindSpeed": {
+          "type": "string"
+        },
+        "WeatherTemp": {
+          "type": "string"
+        },
+        "RelativeHumidity": {
+          "type": "string"
+        },
+        "FogLevel": {
+          "$ref": "#/definitions/TrackFogLevel"
+        },
+        "TimeOfDay": {
+          "type": "string"
+        },
+        "Date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "EarthRotationSpeedupFactor": {
+          "type": "integer"
+        },
+        "Unofficial": {
+          "type": "integer"
+        },
+        "CommercialMode": {
+          "type": "string"
+        },
+        "NightMode": {
+          "type": "string"
+        },
+        "IsFixedSetup": {
+          "type": "integer"
+        },
+        "StrictLapsChecking": {
+          "type": "string"
+        },
+        "HasOpenRegistration": {
+          "type": "integer"
+        },
+        "HardcoreLevel": {
+          "type": "integer"
+        },
+        "NumJokerLaps": {
+          "type": "integer"
+        },
+        "IncidentLimit": {
+          "type": "integer"
+        },
+        "FastRepairsLimit": {
+          "type": "integer"
+        },
+        "GreenWhiteCheckeredLimit": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "CommercialMode",
+        "CourseCautions",
+        "Date",
+        "EarthRotationSpeedupFactor",
+        "FastRepairsLimit",
+        "FogLevel",
+        "GreenWhiteCheckeredLimit",
+        "HardcoreLevel",
+        "HasOpenRegistration",
+        "IncidentLimit",
+        "IsFixedSetup",
+        "NightMode",
+        "NumJokerLaps",
+        "NumStarters",
+        "QualifyScoring",
+        "RelativeHumidity",
+        "Restarts",
+        "ShortParadeLap",
+        "Skies",
+        "StandingStart",
+        "StartingGrid",
+        "StrictLapsChecking",
+        "TimeOfDay",
+        "Unofficial",
+        "WeatherTemp",
+        "WeatherType",
+        "WindDirection",
+        "WindSpeed"
+      ],
+      "title": "WeekendOptions"
+    },
+    "SessionLaps": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "title": "SessionLaps"
+    },
+    "TrackFogLevel": {
+      "type": "string",
+      "enum": [
+        "0 %"
+      ],
+      "title": "TrackFogLevel"
+    },
+    "CarClassMaxFuelPct": {
+      "type": "string",
+      "enum": [
+        "1.000 %",
+        "0.660 %"
+      ],
+      "title": "CarClassMaxFuelPct"
+    },
+    "CarClassPowerAdjust": {
+      "type": "string",
+      "enum": [
+        "0.000 %"
+      ],
+      "title": "CarClassPowerAdjust"
+    },
+    "Car": {
+      "type": "string",
+      "enum": [
+        "Radical SR10",
+        "safety pcporsche911cup"
+      ],
+      "title": "Car"
+    },
+    "CarClassWeightPenalty": {
+      "type": "string",
+      "enum": [
+        "0.000 kg"
+      ],
+      "title": "CarClassWeightPenalty"
+    },
+    "CarNumberDesignStr": {
+      "type": "string",
+      "enum": [
+        "0,0,ffffff,ffffff,ffffff",
+        "0,0,ffffff,777777,000000"
+      ],
+      "title": "CarNumberDesignStr"
+    },
+    "CarPath": {
+      "type": "string",
+      "enum": [
+        "safety pcporsche911cup",
+        "radicalsr10"
+      ],
+      "title": "CarPath"
+    },
+    "ReasonOutStr": {
+      "type": "string",
+      "enum": [
+        "Running"
+      ],
+      "title": "ReasonOutStr"
+    }
+  }
+}

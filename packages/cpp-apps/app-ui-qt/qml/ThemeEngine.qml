@@ -124,6 +124,8 @@ Item {
 
     ////////////////
 
+    property int headerHeight: 50
+
     // Fonts (sizes in pixel)
     readonly property int fontSizeHeader: 26
     readonly property int fontSizeTitle: 28

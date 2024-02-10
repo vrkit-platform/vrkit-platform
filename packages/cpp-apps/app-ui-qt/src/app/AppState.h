@@ -4,68 +4,59 @@
 
 #pragma once
 
-#include <QtCore>
+#include <IRacingTools/SDK/Utils/Singleton.h>
 #include <QMutex>
+#include <QtCore>
 #include <QtQml>
 
-#include "DataSourceConfig.h"
+#include "AppSessionConfig.h"
 
 namespace IRacingTools::App {
-
-
 // WRITE setDataSourceConfig
-class AppState : public QObject {
+class AppState : public QObject, public SDK::Utils::Singleton<AppState> {
     Q_OBJECT
-    Q_PROPERTY(
-        DataSourceConfig* dataSourceConfig READ dataSourceConfig NOTIFY dataSourceConfigChanged)
     QML_ELEMENT
-    QML_SINGLETON
+//    QML_SINGLETON
 
 public:
-    /**
-     * @brief Set singleton instance
-     *
-     * @param instance
-     */
-    static void SetInstance(AppState * instance);
+//    /**
+//         * @brief Set singleton instance
+//         *
+//         * @param instance
+//         */
+//    static void SetInstance(AppState *instance);
 
     /**
-     * @brief Get singleton instance
-     *
-     * @return
-     */
-    static AppState * GetInstance();
+         * @brief Get singleton instance
+         *
+         * @return
+         */
+//    static AppState *GetInstance();
+//
+//    /**
+//         * \brief
+//         * \return
+//         */
+//    static bool IsReady();
+//
+//    static void AssertReady();
 
-    static bool IsReady();
 
-    static void AssertReady();
+//signals:
 
-
-    /**
-     * @brief Create AppState
-     *
-     * @param parent
-     */
-    AppState(QObject *parent = nullptr);
-
-    /**
-     * @brief DataSource config
-     *
-     * @return
-     */
-  Q_INVOKABLE DataSourceConfig* dataSourceConfig();
-
-//    Q_INVOKABLE void setDataSourceConfig(DataSourceConfig::Type type, const QUrl& url);
-    Q_INVOKABLE void setDataSourceConfig(QSharedPointer<DataSourceConfig> dataSourceConfig);
-
-signals:
-    void dataSourceConfigChanged(const DataSourceConfig *config);
 
 private:
 
-    QSharedPointer<DataSourceConfig> dataSourceConfig_{nullptr};
+    /**
+         * @brief Create AppState
+         *
+         * @param parent
+         */
+    explicit AppState(token): QObject(nullptr) {};
+    friend SDK::Utils::Singleton<AppState>;
+
+
 };
 
-#define ASSERT_APP_STATE_READY AppState::AssertReady()
 
 } // namespace IRacingTools::App

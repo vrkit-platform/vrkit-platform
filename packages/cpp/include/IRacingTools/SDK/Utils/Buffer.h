@@ -150,7 +150,7 @@ public:
         storage_.fill(0);
     }
 
-    virtual Buffer<std::array<T, N>> clone() override {
+    virtual Buffer<std::array<T, N>> clone() {
         FixedBuffer copy;
         std::copy(storage_.begin(), storage_.end(), copy.storage_.begin());
         return std::move(copy);

@@ -124,7 +124,7 @@ namespace IRacingTools::SDK {
   }
 
   std::shared_ptr<Client> VarHolder::getClient() {
-    return !clientProvider_ ? nullptr : clientProvider_->getClient();//ClientManager::Get().getActive();
+    return !clientProvider_ ? ClientManager::Get().getActive() : clientProvider_->getClient();
 
 
   }

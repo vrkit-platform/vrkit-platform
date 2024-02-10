@@ -5,8 +5,17 @@
         <file>ScreenMainView.qml</file>
         <file>ScreenLapTiming.qml</file>
         <file>ScreenSettings.qml</file>
-
         <file>ThemeEngine.qml</file>
         <file>WindowGeometrySaver.qml</file>
+        <file>components/ActionMenuFloating.qml</file>
+        <file>components/ActionMenuItem.qml</file>
+        <file>components/ActionMenuSeparator.qml</file>
+        <file>components/BorderedButton.qml</file>
+        <file>components/ButtonIconThemed.qml</file>
+        <file>components/CsdWindows.qml</file>
+        <file>components/IconSvg.qml</file>
+        <file>components/RoundButtonIcon.qml</file>
+        <file>components/RoundButtonText.qml</file>
+        <file>AppHeader.qml</file>
     </qresource>
 </RCC>

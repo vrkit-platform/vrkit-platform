@@ -56,7 +56,7 @@ VarHolder g_SessionFlags("SessionFlags"); // (int) FlagType, bitfield
 VarHolder g_SessionLapsRemain("SessionLapsRemain"); // (int) Laps left till session ends
 VarHolder g_SessionLapsRemainEx("SessionLapsRemainEx"); // (int) New improved laps left till session ends
 VarHolder g_SessionNum("SessionNum"); // (int) Session number
-VarHolder g_SessionState("SessionState"); // (int) SessionState, Session state
+VarHolder g_SessionState("AppSessionState"); // (int) AppSessionState, Session state
 VarHolder g_SessionTick("SessionTick"); // (int) Current update number
 VarHolder g_SessionTime("SessionTime"); // (double), s, Seconds since session start
 VarHolder g_SessionTimeOfDay("SessionTimeOfDay"); // (float) s, Time of day in seconds
@@ -306,8 +306,8 @@ const char* generateLiveYAMLString()
     len += _snprintf(tstr + len, m_len - len, " SessionLapsRemainEx: %d\n", g_SessionLapsRemainEx.getInt());
     // New improved laps left till session ends
     len += _snprintf(tstr + len, m_len - len, " SessionNum: %d\n", g_SessionNum.getInt()); // Session number
-    len += _snprintf(tstr + len, m_len - len, " SessionState: %d\n", g_SessionState.getInt());
-    // SessionState, Session state
+    len += _snprintf(tstr + len, m_len - len, " AppSessionState: %d\n", g_SessionState.getInt());
+    // AppSessionState, Session state
     len += _snprintf(tstr + len, m_len - len, " SessionTick: %d\n", g_SessionTick.getInt()); // Current update number
     len += _snprintf(tstr + len, m_len - len, " SessionTime: %.12f\n", g_SessionTime.getDouble());
     // s, Seconds since session start

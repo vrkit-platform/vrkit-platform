@@ -1,122 +1,66 @@
-# .clang-format for Qt Creator
-#
-# This is for clang-format >= 5.0.
-#
-# The configuration below follows the Qt Creator Coding Rules [1] as closely as
-# possible. For documentation of the options, see [2].
-#
-# Use ../../tests/manual/clang-format-for-qtc/test.cpp for documenting problems
-# or testing changes.
-#
-# In case you update this configuration please also update the qtcStyle() in src\plugins\clangformat\clangformatutils.cpp
-#
-# [1] https://doc-snapshots.qt.io/qtcreator-extending/coding-style.html
-# [2] https://clang.llvm.org/docs/ClangFormatStyleOptions.html
-#
-# yaml-language-server: $schema=https://json.schemastore.org/clang-format.json
-#
----
-Language:        Cpp
-AccessModifierOffset: -4
-AlignAfterOpenBracket: BlockIndent
+# Generated from CLion C/C++ Code Style settings
+BasedOnStyle: LLVM
+AccessModifierOffset: -2
+AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: None
-AlignConsecutiveDeclarations: None
-AlignEscapedNewlines: DontAlign
-AlignOperands:   DontAlign
-AlignTrailingComments: true
-AllowAllParametersOfDeclarationOnNextLine: true
+AlignOperands: Align
+AllowAllArgumentsOnNextLine: false
+AllowAllConstructorInitializersOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: Never
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: None
 AllowShortLoopsOnASingleLine: false
-AllowAllArgumentsOnNextLine: true
 AlwaysBreakAfterReturnType: None
-AlwaysBreakBeforeMultilineStrings: true
-AlwaysBreakTemplateDeclarations: Yes
-BinPackArguments: false
-BinPackParameters: false
-BraceWrapping:
-  AfterClass:      false
-  AfterControlStatement: Never
-  AfterEnum:       false
-  AfterFunction:   false
-  AfterNamespace:  false
-  AfterObjCDeclaration: false
-  AfterStruct:     false
-  AfterUnion:      false
-  BeforeCatch:     false
-  BeforeElse:      false
-  IndentBraces:    false
-  SplitEmptyFunction: false
-  SplitEmptyRecord: false
-  SplitEmptyNamespace: false
-BreakBeforeBinaryOperators: All
+AlwaysBreakTemplateDeclarations: No
 BreakBeforeBraces: Custom
-BreakBeforeInheritanceComma: false
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializersBeforeComma: false
-BreakConstructorInitializers: AfterColon
-BreakAfterJavaFieldAnnotations: false
-BreakStringLiterals: true
-ColumnLimit:    120
-CommentPragmas:  '^ IWYU pragma:'
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
+ColumnLimit: 120
 CompactNamespaces: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
-ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
-Cpp11BracedListStyle: true
-DerivePointerAlignment: false
-DisableFormat:   false
-ExperimentalAutoDetectBinPacking: false
-FixNamespaceComments: true
-ForEachMacros:
-  - forever # avoids { wrapped to next line
-  - foreach
-  - Q_FOREACH
-  - BOOST_FOREACH
-IncludeCategories:
-  - Regex:           '^<Q.*'
-    Priority:        200
-IncludeIsMainRegex: '(Test)?$'
-
 IndentCaseLabels: true
-IndentWidth:     4
-IndentWrappedFunctionNames: true
-InsertBraces: false
-JavaScriptQuotes: Leave
-JavaScriptWrapImports: true
-KeepEmptyLinesAtTheStartOfBlocks: false
-# Do not add QT_BEGIN_NAMESPACE/QT_END_NAMESPACE as this will indent lines in between.
-MacroBlockBegin: ""
-MacroBlockEnd:   ""
-MaxEmptyLinesToKeep: 1
-NamespaceIndentation: None
-ObjCBlockIndentWidth: 4
+IndentPPDirectives: BeforeHash
+IndentWidth: 2
+KeepEmptyLinesAtTheStartOfBlocks: true
+MaxEmptyLinesToKeep: 2
+NamespaceIndentation: All
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
-PenaltyBreakAssignment: 88
-PenaltyBreakBeforeFirstCallParameter: 300
-PenaltyBreakComment: 500
-PenaltyBreakFirstLessLess: 400
-PenaltyBreakString: 600
-PenaltyExcessCharacter: 50
-PenaltyReturnTypeOnItsOwnLine: 300
 PointerAlignment: Right
-ReflowComments:  false
-SortIncludes: CaseSensitive
-SortUsingDeclarations: true
+ReflowComments: false
 SpaceAfterCStyleCast: true
+SpaceAfterLogicalNot: false
 SpaceAfterTemplateKeyword: false
 SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
 SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: false
 SpaceInEmptyParentheses: false
-SpacesBeforeTrailingComments: 1
-SpacesInAngles:  Never
-SpacesInContainerLiterals: false
+SpacesBeforeTrailingComments: 0
+SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard: c++20
-TabWidth:        4
-UseTab:          Never
+TabWidth: 2
+UseTab: Never

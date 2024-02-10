@@ -16,5 +16,6 @@ function(ADD_EXAMPLE exampleDir)
     ${modelsTargetStatic}
     ${DEP_MAGICENUM}
     ${DEP_PROTOBUF}
+    ${DEP_FMT}
   )
 endfunction()

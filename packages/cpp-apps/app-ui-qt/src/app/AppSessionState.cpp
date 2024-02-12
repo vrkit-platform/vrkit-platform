@@ -13,6 +13,17 @@ namespace IRacingTools::App {
   AppSessionState::AppSessionState(QObject *parent) : QObject(parent) {
   }
 
+  void AppSessionState::setInfo(const std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> & info) {
+//    if (!info_) {
+      info_ = QSharedPointer<AppSessionInfoMessage>::create(info.get());
+      emit infoChanged();
+//    }
+  }
+
+  AppSessionInfoMessage* AppSessionState::info() {
+    return info_.get();
+  }
+
   /**
    * @inherit
    */
@@ -26,7 +37,7 @@ namespace IRacingTools::App {
   /**
    * @inherit
    */
-  int AppSessionState::time() const {
-    return time_;
-  }
+//  int AppSessionState::time() const {
+//    return time_;
+//  }
 }// namespace IRacingTools::App

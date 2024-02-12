@@ -1,7 +1,7 @@
 #pragma once
 
+#include "ChassisCorner.h"
 #include "Front.h"
-#include "LeftFront.h"
 #include "Rear.h"
 #include <string>
 namespace IRacingTools::SDK::SessionInfo
@@ -9,10 +9,10 @@ namespace IRacingTools::SDK::SessionInfo
     struct Chassis
     {
         Front front;
-        LeftFront leftFront;
-        LeftFront leftRear;
-        LeftFront rightFront;
-        LeftFront rightRear;
+        ChassisCorner leftFront;
+        ChassisCorner leftRear;
+        ChassisCorner rightFront;
+        ChassisCorner rightRear;
         Rear rear;
 
 

@@ -11,7 +11,5 @@ namespace IRacingTools::SDK::SessionInfo
         Tire rightFrontTire;
         Tire rightRearTire;
         AeroSettings aeroSettings;
-
-
     };
 }  // namespace IRacingTools::SDK::SessionInfo

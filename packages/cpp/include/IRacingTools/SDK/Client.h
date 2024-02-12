@@ -27,6 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include <IRacingTools/SDK/SessionInfo/SessionInfoMessage.h>
 #include <expected>
 #include <filesystem>
 
@@ -96,7 +97,8 @@ public:
 
     // 1 success, 0 failure, -n minimum buffer size
     virtual Expected<std::string_view> getSessionStr() = 0;
-    virtual int getSessionStrVal(const std::string_view &path, char *val, int valLen) = 0;
+    virtual std::weak_ptr<SessionInfo::SessionInfoMessage> getSessionInfo() = 0;
+//    virtual int getSessionStrVal(const std::string_view &path, char *val, int valLen) = 0;
 
     // get the whole string
 //    virtual const char *getSessionStr() = 0;

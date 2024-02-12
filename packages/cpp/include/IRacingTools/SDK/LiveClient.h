@@ -98,13 +98,13 @@ public:
     virtual std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry = 0) override;
 
     // 1 success, 0 failure, -n minimum buffer size
-    virtual int getSessionStrVal(const std::string_view &path, char *val, int valLen) override;
+//    virtual int getSessionStrVal(const std::string_view &path, char *val, int valLen) override;
 
     // get the whole string
     // get the whole string
     virtual Expected<std::string_view> getSessionStr() override;
-    //    virtual const char *getSessionStr() = 0;
-    //---
+
+    virtual std::weak_ptr<SessionInfo::SessionInfoMessage> getSessionInfo() override;
 
     // value that increments with each update to string
     Opt<std::size_t> getSessionUpdateCount();
@@ -113,7 +113,7 @@ public:
     bool wasSessionStrUpdated();
 
 private:
-    explicit LiveClient(token) : data_(nullptr), nData_(0), connectionId_(1), previousSessionUpdateCount_(-1) {}
+    explicit LiveClient(token) : data_(nullptr), nData_(0), connectionId_(1), previousSessionInfoUpdateCount_(-1) {}
 
     friend Singleton;
 
@@ -124,9 +124,12 @@ private:
     int nData_;
     ConnectionId connectionId_;
 
-    int previousSessionUpdateCount_;
+    std::size_t previousSessionInfoUpdateCount_{0};
 
-protected:
+    Opt<std::string_view> sessionInfoStr_{std::nullopt};
+    std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfo_{nullptr};
+
+//protected:
     //    std::shared_ptr<Utils::DynamicBuffer<char>> sessionInfoBuf_;
     //    std::vector<VarDataHeader> varHeaders_{};
     //    Utils::DynamicBuffer<char> varBuf_{};

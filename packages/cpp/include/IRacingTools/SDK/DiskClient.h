@@ -106,7 +106,7 @@ public:
     std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry = 0) override;
 
     // 1 success, 0 failure, -n minimum buffer size
-    int getSessionStrVal(const std::string_view& path, char *val, int valLen) override;
+    //int getSessionStrVal(const std::string_view& path, char *val, int valLen) override;
 
     /**
      * @brief Session update string (yaml)
@@ -114,6 +114,9 @@ public:
      * @return string_view or error if unavailable
      */
     Expected<std::string_view> getSessionStr() override;
+
+    virtual std::weak_ptr<SessionInfo::SessionInfoMessage> getSessionInfo() override;
+
     virtual ConnectionId getConnectionId() override;
 
 protected:
@@ -133,6 +136,8 @@ protected:
     std::size_t sampleIndex_{};
 
     std::shared_ptr<Utils::DynamicBuffer<char>> sessionInfoBuf_;
+    std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfo_{nullptr};
+
     std::vector<VarDataHeader> varHeaders_{};
     Utils::DynamicBuffer<char> varBuf_{};
 

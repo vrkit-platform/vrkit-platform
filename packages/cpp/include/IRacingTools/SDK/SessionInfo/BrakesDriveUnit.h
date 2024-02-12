@@ -3,7 +3,7 @@
 #include "BrakeSpec.h"
 #include "Engine.h"
 #include "Fuel.h"
-#include "GearRatios.h"
+#include "GearRatio.h"
 namespace IRacingTools::SDK::SessionInfo
 {
     struct BrakesDriveUnit
@@ -11,7 +11,7 @@ namespace IRacingTools::SDK::SessionInfo
         BrakeSpec brakeSpec;
         Fuel fuel;
         Engine engine;
-        GearRatios gearRatios;
+        GearRatio gearRatios;
 
 
     };

@@ -54,6 +54,8 @@ signals:
     void sessionChanged();
     void dataAvailableChanged();
 
+  private slots:
+    void onDataEvent(QSharedPointer<AppSessionDataEvent> event);
 
 private:
     explicit AppSessionManager(token);

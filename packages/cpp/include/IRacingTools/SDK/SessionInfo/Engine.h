@@ -6,8 +6,8 @@ namespace IRacingTools::SDK::SessionInfo
 {
     struct Engine
     {
-        std::int32_t BoostLevel_Cal;
-        std::int32_t ThrottleShape_Tps;
+        std::int32_t boostLevelCal;
+        std::int32_t throttleShapeTps;
 
 
     };

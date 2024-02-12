@@ -4,8 +4,7 @@
 
 namespace IRacingTools::SDK::SessionInfo
 {
-    struct LeftFront
-    {
+    struct ChassisCorner {
         std::string cornerWeight;
         std::string rideHeight;
         std::string shockDefl;

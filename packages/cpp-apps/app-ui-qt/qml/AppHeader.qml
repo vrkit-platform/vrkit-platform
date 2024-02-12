@@ -17,10 +17,13 @@ Rectangle {
     function changeDataSourceDiskFile() {
         openDialog.open();
     }
-    function formateSessionTime(millis) {
+    function formatSessionTime(millis) {
         let date = new Date(millis);
         const fmtPart = (part, zeros) => part.toString().padStart(zeros, '0');
         return `${fmtPart(date.getUTCHours(), 2)}:${fmtPart(date.getUTCMinutes(), 2)}:${fmtPart(date.getUTCSeconds(), 2)}.${fmtPart(date.getUTCMilliseconds(), 3)}`;
+    }
+    function getTrackName(info) {
+        return (info && info.weekendInfo) ? info.weekendInfo.trackName : "Not available";
     }
     function isDataSourceDisk(): bool {
         return AppSessionManager.config.type === AppSessionConfig.Disk;
@@ -52,7 +55,6 @@ Rectangle {
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.top: appMenubar.bottom
-
     color: Qt.lighter(Theme.colorHeader, 1.3)
     implicitHeight: appHeaderContent.implicitHeight
     implicitWidth: parent.width
@@ -62,7 +64,6 @@ Rectangle {
 
         anchors.left: parent.left
         anchors.right: parent.right
-
         width: parent.width
 
         RowLayout {
@@ -226,7 +227,16 @@ Rectangle {
                     color: "white"
                     font.pixelSize: Theme.fontSizeContentSmall
                     leftPadding: 15
-                    text: AppSessionManager.session.time > 0 ? formateSessionTime(AppSessionManager.session.time) : "00:00:00.000"
+                    text: AppSessionManager.session.time > 0 ? formatSessionTime(AppSessionManager.session.time) : "00:00:00.000"
+                }
+                Text {
+                    id: replayModeSessionInfo
+
+                    color: "white"
+                    font.pixelSize: Theme.fontSizeContentSmall
+                    leftPadding: 15
+                    text: getTrackName(AppSessionManager.session.info)
+
                 }
 
                 // Button {

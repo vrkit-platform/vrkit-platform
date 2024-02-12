@@ -4,8 +4,7 @@
 
 namespace IRacingTools::SDK::SessionInfo
 {
-    struct GearRatios
-    {
+    struct GearRatio {
         std::string gearStack;
         std::string speedInFirst;
         std::string speedInSecond;

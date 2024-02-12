@@ -1,37 +1,14 @@
-/*
-Copyright (c) 2013, iRacing.com Motorsport Simulations, LLC.
-All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of iRacing.com Motorsport Simulations nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 
 #include <cstdio>
 #include <cstring>
 
 #include <gsl/util>
+#include <yaml-cpp/yaml.h>
 
 #include <IRacingTools/SDK/ClientManager.h>
 #include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingTools/SDK/SessionInfo/ModelParser.h>
 #include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/FileHelpers.h>
 #include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
@@ -113,6 +90,16 @@ bool DiskClient::openFile() {
         }
 
         data[sessionLength - 1] = '\0';
+
+        auto rootNode = YAML::Load(data);
+        if (!sessionInfo_) {
+          sessionInfo_ = std::make_shared<SessionInfo::SessionInfoMessage>();
+        }
+
+        SessionInfo::SessionInfoMessage * sessionInfo = sessionInfo_.get();
+        *sessionInfo = rootNode.as<SessionInfo::SessionInfoMessage>();
+
+
     }
 
     // Read Headers
@@ -350,30 +337,30 @@ Opt<double> DiskClient::getVarDouble(uint32_t idx, uint32_t entry) {
 }
 
 //path is in the form of "DriverInfo:Drivers:CarIdx:{%d}UserName:"
-int DiskClient::getSessionStrVal(const std::string_view &path, char *val, int valLen) {
-    if (isFileOpen() && !path.empty() && val && valLen > 0) {
-        const char *tVal = nullptr;
-        int tValLen = 0;
-        if (ParseYaml(sessionInfoBuf_->data(), path, &tVal, &tValLen)) {
-            // dont overflow out buffer
-            int len = tValLen;
-            if (len > valLen)
-                len = valLen;
-
-            // copy what we can, even if buffer too small
-            memcpy(val, tVal, len);
-            val[len] = '\0'; // origional string has no null termination...
-
-            // if buffer was big enough, return success
-            if (valLen >= tValLen)
-                return 1;
-            else // return size of buffer needed
-                return -tValLen;
-        }
-    }
-
-    return 0;
-}
+//int DiskClient::getSessionStrVal(const std::string_view &path, char *val, int valLen) {
+//    if (isFileOpen() && !path.empty() && val && valLen > 0) {
+//        const char *tVal = nullptr;
+//        int tValLen = 0;
+//        if (ParseYaml(sessionInfoBuf_->data(), path, &tVal, &tValLen)) {
+//            // dont overflow out buffer
+//            int len = tValLen;
+//            if (len > valLen)
+//                len = valLen;
+//
+//            // copy what we can, even if buffer too small
+//            memcpy(val, tVal, len);
+//            val[len] = '\0'; // origional string has no null termination...
+//
+//            // if buffer was big enough, return success
+//            if (valLen >= tValLen)
+//                return 1;
+//            else // return size of buffer needed
+//                return -tValLen;
+//        }
+//    }
+//
+//    return 0;
+//}
 
 
 bool DiskClient::isFileOpen() {
@@ -458,6 +445,9 @@ Opt<const VarDataHeader *> DiskClient::getVarHeader(const std::string_view &name
     }
 
     return std::nullopt;
+}
+std::weak_ptr<SessionInfo::SessionInfoMessage> DiskClient::getSessionInfo() {
+  return sessionInfo_;
 }
 
 } // namespace IRacingTools::SDK

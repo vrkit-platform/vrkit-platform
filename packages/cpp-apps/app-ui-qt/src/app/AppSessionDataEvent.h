@@ -23,10 +23,13 @@ namespace IRacingTools::App {
 
     std::vector<IRacingTools::Shared::SessionDataUpdatedEvent::SessionCarState> &cars();
 
+    std::weak_ptr<SessionInfo::SessionInfoMessage> sessionInfo();
+
     int time();
 
   private:
     int time_;
+    std::weak_ptr<SessionInfo::SessionInfoMessage> sessionInfo_;
     std::vector<IRacingTools::Shared::SessionDataUpdatedEvent::SessionCarState> cars_;
   };
 

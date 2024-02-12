@@ -135,14 +135,16 @@ namespace IRacingTools::Shared {
 
     const std::vector<SessionCarState> &cars();
 
-    const std::string& sessionInfoYaml() {
-      return sessionInfoYaml_;
-    }
+    std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo();
+//    const std::string& sessionInfoYaml() {
+//      return sessionInfoYaml_;
+//    }
 
 
   private:
-    std::string sessionInfoYaml_{};
+//    std::string sessionInfoYaml_{};
     SessionDataAccess *dataAccess_;
+    std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo_{};
     std::vector<SessionCarState> cars_{};
     int sessionTimeMillis_{-1};
   };

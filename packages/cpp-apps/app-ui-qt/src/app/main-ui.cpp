@@ -65,6 +65,8 @@ void configureQMLEngine(QQmlApplicationEngine &engine, const QList<QMLEngineCont
     qmlRegisterSingletonType(QUrl("qrc:/qml/ThemeEngine.qml"), "ThemeEngine", 1, 0, "Theme");
     qmlRegisterSingletonInstance("IRTObjects", 1, 0, "AppState", AppState::GetPtr().get());
     qmlRegisterSingletonInstance("IRTObjects", 1, 0, "AppSessionManager", AppSessionManager::GetPtr().get());
+//    qmlRegisterType<IRacingTools::SDK::SessionInfo::SessionInfoMessage>("IRTObjects", 1, 0, "SessionInfoMessage");
+//    qmlRegisterType<IRacingTools::SDK::SessionInfo::WeekendInfo>("IRTObjects", 1, 0, "WeekendInfo");
 //    AppState * appState = new AppState();// engine.singletonInstance<AppState>();
 //    qmlRegisterSingletonType<AppState>("AppState", 1, 0, "AppState", [&](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject * {
 //        Q_UNUSED(engine)

@@ -11,7 +11,10 @@ using namespace IRacingTools::SDK;
 
 AppSessionManager::AppSessionManager(token) :
     QObject(nullptr), session_(QSharedPointer<AppSessionState>::create(this)),
-    config_(QSharedPointer<AppSessionConfig>::create(AppSessionConfig::None, QUrl(""), this)) {}
+    config_(QSharedPointer<AppSessionConfig>::create(AppSessionConfig::None, QUrl(""), this)) {
+
+  connect(this, &AppSessionManager::dataEvent, this, &AppSessionManager::onDataEvent);
+}
 
 AppSessionManager::~AppSessionManager() {
     if (stopped_.exchange(true))
@@ -68,9 +71,6 @@ void AppSessionManager::createProvider() {
             auto srcUpdatedEvent = static_pointer_cast<Shared::SessionDataUpdatedEvent>(srcEvent);
             auto event = QSharedPointer<AppSessionDataEvent>::create(srcUpdatedEvent);
 
-            if (auto it = session())
-                it->setTime(event->time());
-
             emit dataEvent(event);
         } else if (srcEvent->type() == Shared::SessionDataEventType::Available) {
             auto isAvailable = provider_->isAvailable();
@@ -81,7 +81,8 @@ void AppSessionManager::createProvider() {
     // Start
     provider_->start();
 
-    emit providerChanged(provider_.get());
+
+//    emit providerChanged(provider_.get());
 }
 
 /**
@@ -140,6 +141,17 @@ void AppSessionManager::setConfig(QSharedPointer<AppSessionConfig> config) {
 
         createProvider();
     }
+}
+void AppSessionManager::onDataEvent(QSharedPointer<AppSessionDataEvent> event) {
+  if (auto it = session()) {
+    it->setTime(event->time());
+    if (auto info = event->sessionInfo().lock())
+      it->setInfo(info);
+    //              if (auto info = event->sessionInfo().lock()) {
+    //                it->setInfo(info);
+    //              }
+  }
+
 }
 
 } // namespace IRacingTools::App

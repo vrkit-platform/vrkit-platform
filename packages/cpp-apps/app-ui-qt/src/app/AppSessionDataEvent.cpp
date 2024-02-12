@@ -15,7 +15,9 @@ namespace IRacingTools::App {
    * @inherit
    */
   AppSessionDataEvent::AppSessionDataEvent(std::shared_ptr<Shared::SessionDataUpdatedEvent> dataEvent, QObject *parent)
-      : QObject(parent), time_(dataEvent->sessionTimeMillis()), cars_(dataEvent->cars()) {
+      : QObject(parent), time_(dataEvent->sessionTimeMillis()),
+        sessionInfo_(dataEvent->sessionInfo()),
+        cars_(dataEvent->cars()) {
   }
 
   /**
@@ -30,5 +32,8 @@ namespace IRacingTools::App {
    */
   std::vector<Shared::SessionDataUpdatedEvent::SessionCarState> &AppSessionDataEvent::cars() {
     return cars_;
+  }
+  std::weak_ptr<SessionInfo::SessionInfoMessage> AppSessionDataEvent::sessionInfo() {
+    return sessionInfo_;
   }
 }

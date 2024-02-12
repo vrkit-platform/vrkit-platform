@@ -6,11 +6,11 @@ namespace IRacingTools::SDK::SessionInfo
 {
     struct Tire
     {
-        std::string startingPressure;
-        std::string lastHotPressure;
-        std::string lastTempsOMI;
-        std::string treadRemaining;
-        std::string lastTempsIMO;
+        float startingPressure;
+        float lastHotPressure;
+        float lastTempsOMI;
+        float treadRemaining;
+        float lastTempsIMO;
 
 
     };

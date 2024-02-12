@@ -1,34 +1,9 @@
-/*
-Copyright (c) 2013, iRacing.com Motorsport Simulations, LLC.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of iRacing.com Motorsport Simulations nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
 #include <cstring>
 
 #include <magic_enum.hpp>
+#include <yaml-cpp/yaml.h>
 
+#include <IRacingTools/SDK/SessionInfo/ModelParser.h>
 #include <IRacingTools/SDK/LiveClient.h>
 #include <IRacingTools/SDK/LiveConnection.h>
 #include <IRacingTools/SDK/Types.h>
@@ -56,7 +31,7 @@ bool LiveClient::waitForData(int timeoutMS) {
             connectionId_++;
 
             // reset session info str status
-            previousSessionUpdateCount_ = -1;
+            previousSessionInfoUpdateCount_ = -1;
 
             // and try to fill in the data
             if (conn.getNewData(data_))
@@ -72,7 +47,7 @@ bool LiveClient::waitForData(int timeoutMS) {
         data_ = nullptr;
 
         // reset session info str status
-        previousSessionUpdateCount_ = -1;
+        previousSessionInfoUpdateCount_ = -1;
     }
 
     return false;
@@ -86,7 +61,7 @@ void LiveClient::shutdown() {
     data_ = nullptr;
 
     // reset session info str status
-    previousSessionUpdateCount_ = -1;
+    previousSessionInfoUpdateCount_ = -1;
 }
 
 bool LiveClient::isConnected() const {
@@ -271,51 +246,71 @@ Opt<std::size_t> LiveClient::getSessionUpdateCount() {
  * @param valLen
  * @return
  */
-int LiveClient::getSessionStrVal(const std::string_view &path, char *val, int valLen) {
-    auto &conn = LiveConnection::GetInstance();
-    auto sessionUpdateCount = getSessionUpdateCount();
-    if (!isConnected() || !sessionUpdateCount || path.empty() || !val || !valLen) {
-        return 0;
-    }
+//int LiveClient::getSessionStrVal(const std::string_view &path, char *val, int valLen) {
+//    auto &conn = LiveConnection::GetInstance();
+//    auto sessionUpdateCount = getSessionUpdateCount();
+//    if (!isConnected() || !sessionUpdateCount || path.empty() || !val || !valLen) {
+//        return 0;
+//    }
+//
+//    // track changes in string
+//    previousSessionInfoUpdateCount_ = sessionUpdateCount.value();
+//
+//    const char *tVal = nullptr;
+//    int tValLen = 0;
+//    if (ParseYaml(conn.getSessionInfoStr(), path, &tVal, &tValLen)) {
+//        // dont overflow out buffer
+//        int len = tValLen;
+//        if (len > valLen)
+//            len = valLen;
+//
+//        // copy what we can, even if buffer too small
+//        memcpy(val, tVal, len);
+//        val[len] = '\0'; // original string has no null termination...
+//
+//        // if buffer was big enough, return success
+//        if (valLen >= tValLen)
+//            return 1;
+//        else // return size of buffer needed
+//            return -tValLen;
+//    }
+//
+//    return 0;
+//}
 
-    // track changes in string
-    previousSessionUpdateCount_ = sessionUpdateCount.value();
-
-    const char *tVal = nullptr;
-    int tValLen = 0;
-    if (ParseYaml(conn.getSessionInfoStr(), path, &tVal, &tValLen)) {
-        // dont overflow out buffer
-        int len = tValLen;
-        if (len > valLen)
-            len = valLen;
-
-        // copy what we can, even if buffer too small
-        memcpy(val, tVal, len);
-        val[len] = '\0'; // original string has no null termination...
-
-        // if buffer was big enough, return success
-        if (valLen >= tValLen)
-            return 1;
-        else // return size of buffer needed
-            return -tValLen;
-    }
-
-    return 0;
+std::weak_ptr<SessionInfo::SessionInfoMessage> LiveClient::getSessionInfo() {
+  return sessionInfo_;
 }
 
 // get the whole string
 Expected<std::string_view> LiveClient::getSessionStr() {
     auto &conn = LiveConnection::GetInstance();
-    auto count = getSessionUpdateCount();
-    if (isConnected() && count) {
-        previousSessionUpdateCount_ = count.value();
-        return conn.getSessionInfoStr();
+    auto countOpt = getSessionUpdateCount();
+    if (isConnected() && countOpt) {
+      auto count = countOpt.value();
+      if (!sessionInfoStr_ || !sessionInfoStr_.value().empty() || previousSessionInfoUpdateCount_ != count) {
+        previousSessionInfoUpdateCount_ = count;
+
+        auto data = conn.getSessionInfoStr();
+        if (data) {
+          sessionInfoStr_ = std::make_optional<std::string_view>(data);
+          auto rootNode = YAML::Load(data);
+          if (!sessionInfo_) {
+            sessionInfo_ = std::make_shared<SessionInfo::SessionInfoMessage>();
+          }
+
+          SessionInfo::SessionInfoMessage * sessionInfo = sessionInfo_.get();
+          *sessionInfo = rootNode.as<SessionInfo::SessionInfoMessage>();
+        }
+      }
+      if (sessionInfoStr_)
+        return sessionInfoStr_.value();
     }
 
     return MakeUnexpected<GeneralError>("Session Str not found");
 }
 bool LiveClient::wasSessionStrUpdated() {
-    return previousSessionUpdateCount_ != getSessionUpdateCount();
+    return previousSessionInfoUpdateCount_ != getSessionUpdateCount();
 }
 Opt<double> LiveClient::getVarDouble(const std::string_view &name, uint32_t entry) {
     auto res = getVarIdx(name);
@@ -387,5 +382,6 @@ Opt<const VarDataHeader *> LiveClient::getVarHeader(const std::string_view &name
     auto res = getVarIdx(name);
     return res ? getVarHeader(res.value()) : std::nullopt;
 }
+
 
 } // namespace IRacingTools::SDK

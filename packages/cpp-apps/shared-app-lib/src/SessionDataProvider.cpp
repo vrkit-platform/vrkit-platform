@@ -60,14 +60,8 @@ namespace IRacingTools::Shared {
     auto &lapPercentCompleteVar = IRVAR(CarIdxLapDistPct);
 
     if (auto client = dataAccess_->getClient()) {
+      sessionInfo_ = client->getSessionInfo();
 
-      auto sessionInfoYamlRes = client->getSessionStr();
-      if (sessionInfoYamlRes.has_value()) {
-        auto sessionInfoYaml = sessionInfoYamlRes.value();
-        if (!sessionInfoYaml.empty()) {
-          sessionInfoYaml_ = sessionInfoYaml;
-        }
-      }
     }
 
     cars_.clear();
@@ -100,6 +94,10 @@ namespace IRacingTools::Shared {
 
   int SessionDataUpdatedEvent::sessionTimeMillis() {
     return sessionTimeMillis_;
+  }
+
+  std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedEvent::sessionInfo() {
+    return sessionInfo_;
   }
 
   void LiveSessionDataProvider::runnable() {

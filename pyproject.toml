@@ -34,7 +34,9 @@ dependencies = [
   'pandas',
   'click',
   'protobuf',
-  "betterproto"
+  "betterproto",
+  "CppHeaderParser",
+  "clang-format"
 ]
 
 [project.urls]

@@ -7,8 +7,8 @@
 #include <utility>
 
 #include <IRacingTools/Shared/Chrono.h>
+#include <IRacingTools/Shared/SessionDataAccess.h>
 #include <IRacingTools/Shared/SessionDataProvider.h>
-
 
 namespace IRacingTools::Shared {
   using namespace std::chrono_literals;
@@ -20,13 +20,7 @@ namespace IRacingTools::Shared {
     }
   }// namespace
 
-  //SessionDataAccess::SessionDataAccess(const SDK::ClientId &clientId) : clientId_(clientId) {}
-  SessionDataAccess::SessionDataAccess(std::weak_ptr<Client> client) : client_(std::move(client)) {
-  }
-  //SessionDataAccess::SessionDataAccess(const SDK::ClientIdProvider &clientIdProvider) :
-  //    clientIdProvider_(clientIdProvider) {}
-
-  SessionDataEvent::SessionDataEvent(SessionDataEventType type) : type_(type) {
+    SessionDataEvent::SessionDataEvent(SessionDataEventType type) : type_(type) {
   }
 
 
@@ -39,13 +33,16 @@ namespace IRacingTools::Shared {
     refresh();
   }
 
-  std::shared_ptr<SessionDataUpdatedEvent> SessionDataAccess::createDataEvent() {
-    return std::make_shared<SessionDataUpdatedEvent>(SessionDataEventType::Updated, this);
+  SessionCarStateRecord SessionDataUpdatedEvent::SessionCarState::toTuple() {
+    return {index, lap, lapsCompleted, lapPercentComplete, estimatedTime, position.overall, position.clazz, driver};
   }
 
+//  std::shared_ptr<SessionDataUpdatedEvent> SessionDataAccess::createDataEvent() {
+//    return std::make_shared<SessionDataUpdatedEvent>(SessionDataEventType::Updated, this);
+//  }
+
   std::shared_ptr<Client> SessionDataAccess::getClient() {
-    auto tmp = client_.lock();
-    return tmp;
+    return client_.lock();
   }
 
 #define IRVAR(Name) dataAccess_->Name
@@ -58,18 +55,21 @@ namespace IRacingTools::Shared {
     auto &clazzPosVar = IRVAR(CarIdxClassPosition);
     auto &estTimeVar = IRVAR(CarIdxEstTime);
     auto &lapPercentCompleteVar = IRVAR(CarIdxLapDistPct);
-
+    std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo{nullptr};
     if (auto client = dataAccess_->getClient()) {
       sessionInfo_ = client->getSessionInfo();
-
+      sessionInfo = sessionInfo_.lock();
     }
-
+    auto drivers = sessionInfo ? sessionInfo->driverInfo.drivers : std::vector<SDK::SessionInfo::Driver>{};
     cars_.clear();
 
     sessionTimeMillis_ = SessionTimeToMillis(sessionTimeVar.getDouble());
 
     for (int index = 0; index < Resources::MaxCars; index++) {
       auto trackSurface = IRVAR(CarIdxTrackSurface).getInt(index);
+
+      std::optional<SDK::SessionInfo::Driver> driver =
+          drivers.size() > index ? std::make_optional(drivers[index]) : std::nullopt;
 
       auto lap = lapVar.getInt(index);
       auto pos = posVar.getInt(index);
@@ -84,7 +84,8 @@ namespace IRacingTools::Shared {
                           .lapsCompleted = lapsCompletedVar.getInt(index),
                           .lapPercentComplete = lapPercentCompleteVar.getFloat(index),
                           .estimatedTime = estTimeVar.getFloat(index),
-                          .position = {.overall = posVar.getInt(index), .clazz = clazzPosVar.getInt(index)}});
+                          .position = {.overall = posVar.getInt(index), .clazz = clazzPosVar.getInt(index)},
+                          .driver = std::move(driver)});
     }
   }
 
@@ -248,6 +249,18 @@ namespace IRacingTools::Shared {
     return isConnected_;
   }
 
+  bool LiveSessionDataProvider::isPaused(){
+    return false;
+  }
+
+  bool LiveSessionDataProvider::resume() {
+    return false;
+  }
+
+  bool LiveSessionDataProvider::pause() {
+    return false;
+  }
+
   DiskSessionDataProvider::DiskSessionDataProvider(const std::string &clientId, const std::filesystem::path &file)
       : clientId_(clientId), file_(file), diskClient_(std::make_shared<SDK::DiskClient>(file)),
         dataAccess_(std::make_unique<SessionDataAccess>(diskClient_)) {
@@ -259,17 +272,24 @@ namespace IRacingTools::Shared {
               << ",sampleCount=" << diskClient.getSampleCount() << std::endl;
   }
 
+
+  DiskSessionDataProvider::~DiskSessionDataProvider() {
+    stop();
+  }
+
+  /**
+   * @inherit
+   */
   void DiskSessionDataProvider::runnable() {
     std::chrono::milliseconds previousSessionDuration{0};
     std::chrono::milliseconds previousTimeMillis = TimeEpoch();
     std::chrono::milliseconds lastPrintTime{0};
 
-
     while (true) {
       std::scoped_lock lock(diskClientMutex_);
       auto &diskClient = *diskClient_.get();
       {
-        std::scoped_lock lock(threadMutex_);
+        std::scoped_lock threadLock(threadMutex_);
         if (!running_)
           break;
 
@@ -279,14 +299,12 @@ namespace IRacingTools::Shared {
         }
       }
 
-
       auto posCountRes = diskClient.getVarCount("CarIdxPosition");
       auto sessionTimeVal = diskClient.getVarDouble("SessionTime");
       if (!sessionTimeVal) {
         std::cerr << "No session time\n";
         abort();
       }
-
 
       int posCount = 0;
       if (posCountRes) {
@@ -300,7 +318,6 @@ namespace IRacingTools::Shared {
 
       auto sessionTime = sessionTimeVal.value();
 
-
       long long int sessionMillis = SessionTimeToMillis(sessionTime);
       std::chrono::milliseconds sessionDuration{sessionMillis};
       long long int millis = sessionMillis % 1000;
@@ -308,7 +325,6 @@ namespace IRacingTools::Shared {
 
       if (previousSessionDuration.count()) {
         auto currentTimeMillis = TimeEpoch();
-
         if (posCount > 0) {
           auto targetTimeMillis =
               !previousTimeMillis.count() ? currentTimeMillis : (previousTimeMillis + intervalDuration);
@@ -324,18 +340,21 @@ namespace IRacingTools::Shared {
 
       previousSessionDuration = sessionDuration;
 
-      if (posCount > 0 && TimeEpoch() - lastPrintTime > 999ms) {
-        std::cout << std::format("Session Time: {:%H}:{:%M}:{:%S}.{:03d}\t\tCar Pos Count: {}", sessionDuration,
-                                 sessionDuration, sessionDuration, millis, posCount)
-                  << "\n";
-        std::flush(std::cout);
-        lastPrintTime = TimeEpoch();
-      }
+//      if (posCount > 0 && TimeEpoch() - lastPrintTime > 999ms) {
+//        std::cout << std::format("Session Time: {:%H}:{:%M}:{:%S}.{:03d}\t\tCar Pos Count: {}", sessionDuration,
+//                                 sessionDuration, sessionDuration, millis, posCount)
+//                  << "\n";
+//        std::flush(std::cout);
+//        lastPrintTime = TimeEpoch();
+//      }
 
       process();
     }
   }
 
+  /**
+   * @inherit
+   */
   void DiskSessionDataProvider::init() {
     std::scoped_lock lock(threadMutex_);
     if (!running_) {
@@ -349,12 +368,9 @@ namespace IRacingTools::Shared {
     timeBeginPeriod(1);
   }
 
-  void DiskSessionDataProvider::processData() {
-    //    auto &client = LiveClient::GetInstance();
-    //    bool wasUpdated = false;
 
-    // and grab the data
-    processDataUpdate();
+  void DiskSessionDataProvider::process() {
+    fireDataUpdatedEvent();
     processYAMLLiveString();
 
     //    if (processYAMLLiveString())
@@ -364,22 +380,13 @@ namespace IRacingTools::Shared {
     //    if (client.wasSessionStrUpdated()) {
     //        wasUpdated = true;
     //    }
-  }
-
-  void DiskSessionDataProvider::process() {
-    // wait up to 16 ms for start of session or new data
-    processData();
 
     // pump our connection status
     checkConnection();
   }
 
-  void DiskSessionDataProvider::processDataUpdate() {
-    auto event =
-        dataAccess_
-            ->createDataEvent();//std::make_shared<SessionDataEvent>(SessionDataEventType::Data, dataAccess_.get());
-
-    publish(event);
+  void DiskSessionDataProvider::fireDataUpdatedEvent() {
+    publish(std::make_shared<SessionDataUpdatedEvent>(SessionDataEventType::Updated, dataAccess_.get()));
   }
 
   void DiskSessionDataProvider::checkConnection() {
@@ -427,8 +434,21 @@ namespace IRacingTools::Shared {
     return running_.load();
   }
 
-  DiskSessionDataProvider::~DiskSessionDataProvider() {
-    stop();
+  bool DiskSessionDataProvider::resume() {
+    return false;
+  }
+
+  bool DiskSessionDataProvider::pause() {
+    std::scoped_lock lock(threadMutex_);
+    if (paused_)
+      return true;
+
+    paused_ = true;
+    return false;
+  }
+
+  bool DiskSessionDataProvider::isPaused(){
+    return paused_;
   }
 
   bool DiskSessionDataProvider::start() {
@@ -463,4 +483,5 @@ namespace IRacingTools::Shared {
   bool DiskSessionDataProvider::isAvailable() {
     return diskClient_->isAvailable();
   }
+
 }// namespace IRacingTools::Shared

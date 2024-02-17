@@ -13,4 +13,4 @@ namespace IRacingTools::SDK::SessionInfo
 
 
     };
-}  // namespace IRacingTools::SDK::SessionInfo
+}

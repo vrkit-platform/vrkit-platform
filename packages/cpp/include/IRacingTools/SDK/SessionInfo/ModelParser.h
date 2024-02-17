@@ -959,6 +959,4 @@ namespace YAML {
       return true;
     }
   };
-
-
-}// namespace YAML
+}

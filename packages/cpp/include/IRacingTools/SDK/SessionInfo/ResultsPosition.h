@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TypesCore.h"
+
 #include <string>
 
 namespace IRacingTools::SDK::SessionInfo
@@ -21,8 +21,8 @@ namespace IRacingTools::SDK::SessionInfo
         float lapsDriven;
         std::int32_t incidents;
         std::int32_t reasonOutId;
-        ReasonOutStr reasonOutStr;
+        std::string reasonOutStr;
 
 
     };
-}  // namespace IRacingTools::SDK::SessionInfo
+}

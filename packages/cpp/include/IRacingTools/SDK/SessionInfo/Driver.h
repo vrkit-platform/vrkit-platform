@@ -1,6 +1,5 @@
 #pragma once
 
-#include "TypesCore.h"
 #include <string>
 #include <variant>
 
@@ -17,21 +16,21 @@ namespace IRacingTools::SDK::SessionInfo
         std::string teamName;
         std::string carNumber;
         std::int32_t carNumberRaw;
-        CarPath carPath;
+        std::string carPath;
         std::int32_t carClassID;
         std::int32_t carID;
         std::int32_t carIsPaceCar;
         std::int32_t carIsAI;
         std::int32_t carIsElectric;
-        Car carScreenName;
-        Car carScreenNameShort;
-        Car carClassShortName;
+        std::string carScreenName;
+        std::string carScreenNameShort;
+        std::string carClassShortName;
         std::int32_t carClassRelSpeed;
         std::int32_t carClassLicenseLevel;
-        CarClassMaxFuelPct carClassMaxFuelPct;
-        CarClassWeightPenalty carClassWeightPenalty;
-        CarClassPowerAdjust carClassPowerAdjust;
-        TrackFogLevel carClassDryTireSetLimit;
+        std::string carClassMaxFuelPct;
+        std::string carClassWeightPenalty;
+        std::string carClassPowerAdjust;
+        std::string carClassDryTireSetLimit;
         std::string carClassColor;
         float carClassEstLapTime;
         std::int32_t iRating;
@@ -46,7 +45,7 @@ namespace IRacingTools::SDK::SessionInfo
         std::int32_t bodyType;
         std::int32_t faceType;
         std::int32_t helmetType;
-        CarNumberDesignStr carNumberDesignStr;
+        std::string carNumberDesignStr;
         std::string carSponsor1;
         std::string carSponsor2;
         std::string clubName;
@@ -55,7 +54,5 @@ namespace IRacingTools::SDK::SessionInfo
         std::int32_t divisionID;
         std::int32_t curDriverIncidentCount;
         std::int32_t teamIncidentCount;
-
-
     };
-}  // namespace IRacingTools::SDK::SessionInfo
+}

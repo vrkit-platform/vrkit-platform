@@ -12,59 +12,75 @@
 #include "SessionDataTableModel.h"
 
 namespace IRacingTools::App::Services {
-using namespace IRacingTools::SDK;
+  using namespace IRacingTools::SDK;
 
-SessionDataTableModel::SessionDataTableModel(QObject *parent) : QAbstractTableModel(parent) {
+  /**
+   * @brief Create new table model
+   *
+   * @param parent
+   */
+  SessionDataTableModel::SessionDataTableModel(QObject *parent) : QAbstractTableModel(parent) {
     auto manager = AppSessionManager::GetPtr().get();
     connect(manager, &AppSessionManager::dataEvent, this, &SessionDataTableModel::onDataEvent);
-}
+  }
 
-SessionDataTableModel::~SessionDataTableModel() {}
+  /**
+   * @brief Destructor
+   */
+  SessionDataTableModel::~SessionDataTableModel() = default;
 
-/**
+  /**
      * @brief Slot for session data event
      *
      * @param event
      */
-void SessionDataTableModel::onDataEvent(QSharedPointer<AppSessionDataEvent> event) {
+  void SessionDataTableModel::onDataEvent(QSharedPointer<AppSessionDataEvent> event) {
     beginResetModel();
     cars_ = event->cars();
+    std::sort(cars_.begin(),cars_.end(), [] (auto& c1, auto& c2) {
+      return c1.position.overall < c2.position.overall;
+    });
     endResetModel();
-}
+  }
 
-int SessionDataTableModel::rowCount(const QModelIndex &parent) const {
+  int SessionDataTableModel::rowCount(const QModelIndex &parent) const {
     return cars_.size();
-}
+  }
 
-int SessionDataTableModel::columnCount(const QModelIndex &parent) const {
-    return 7;
-}
+  int SessionDataTableModel::columnCount(const QModelIndex &parent) const {
+    return 5;
+  }
 
-QVariant SessionDataTableModel::data(const QModelIndex &index, int role) const {
+  QVariant SessionDataTableModel::data(const QModelIndex &index, int role) const {
     auto &car = cars_[index.row()];
-    auto data = car.toTuple();
+    //    auto data = car.toTuple();
     auto memberIdx = index.column();
-    QVariant value(
-        memberIdx == 0       ? std::get<0>(data)
-            : memberIdx == 1 ? std::get<1>(data)
-            : memberIdx == 2 ? std::get<2>(data)
-            : memberIdx == 3 ? std::get<3>(data)
-            : memberIdx == 4 ? std::get<4>(data)
-            : memberIdx == 5 ? std::get<5>(data)
-            : memberIdx == 6 ? std::get<6>(data)
-                             : 0
-    );
+    QVariant value(memberIdx == 0   ? QString::number(car.position.overall)
+                   : memberIdx == 1 ? (car.driver.has_value() ? QString::fromStdString(car.driver.value().userName)
+                                                              : QString("Unknown"))
+                   : memberIdx == 2 ? QString::number(car.lap)
+                   : memberIdx == 3 ? QString("%1%").arg(std::floor(car.lapPercentComplete * 100.0), 2, '0')
+                   : memberIdx == 4 ? QString::number((double) car.estimatedTime, 'g', 3)
+                                    //            : memberIdx == 5 ? std::get<5>(data)
+                                    //            : memberIdx == 6 ? std::get<6>(data)
+                                    //            : memberIdx == 7 ? std::get<7>(data)
+                                    : 0);
     //    if (memberIdx < 3) {
     //        value = memberIdx == 0 ? car.index :
     //        memberIdx
     //    }
     return value;
-}
+  }
 
-QVariant SessionDataTableModel::headerData(int, Qt::Orientation, int role) const {
+  QVariant SessionDataTableModel::headerData(int section, Qt::Orientation, int role) const {
     if (role == Qt::SizeHintRole)
-        return QSize(1, 1);
-    return QVariant();
-}
+      return QSize(1, 1);
+    return QVariant(section == 0   ? "Position"
+                    : section == 1 ? "Driver"
+                    : section == 2 ? "Lap"
+                    : section == 3 ? "Lap Percent"
+                    : section == 4 ? "Est Lap Time"
+                                   : "Unknown");
+  }
 
-} // namespace IRacingTools::App::Services
+}// namespace IRacingTools::App::Services

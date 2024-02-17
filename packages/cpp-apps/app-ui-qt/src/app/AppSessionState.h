@@ -10,47 +10,16 @@
 
 #include <IRacingTools/Shared/SessionDataProvider.h>
 
+#include "models/AppSessionInfoModels.h"
+
 #include "AppSessionConfig.h"
 
 namespace IRacingTools::App {
   using namespace IRacingTools::Shared;
 
-//#define QIRTPROPS
   /**
-   * @brief Exposes `SDK::SessionInfo::WeekendInfo` -> `Qt/QML` via props
+   * @brief App Session State, holds references to `SessionInfoMessage` model
    */
-  class AppSessionInfoWeekendInfo : public QObject {
-    Q_OBJECT
-    Q_PROPERTY(QString trackName MEMBER trackName_ NOTIFY changed FINAL)
-  public:
-    explicit AppSessionInfoWeekendInfo(IRacingTools::SDK::SessionInfo::WeekendInfo &weekendInfo,
-                                       QObject *parent = nullptr)
-        : QObject(parent), trackName_(QString::fromStdString(weekendInfo.trackName)){};
-
-  signals:
-    void changed();
-
-  private:
-    QString trackName_;
-  };
-
-  /**
-   * @brief Exposes `SDK::SessionInfo::SessionInfoMessage` -> `Qt/QML` via props
-   */
-  class AppSessionInfoMessage : public QObject {
-    Q_OBJECT
-    Q_PROPERTY(AppSessionInfoWeekendInfo *weekendInfo MEMBER weekendInfo_ NOTIFY changed FINAL)
-  public:
-    explicit AppSessionInfoMessage(IRacingTools::SDK::SessionInfo::SessionInfoMessage *info, QObject *parent = nullptr)
-        : QObject(parent), weekendInfo_(new AppSessionInfoWeekendInfo(info->weekendInfo, this)){};
-
-  signals:
-    void changed();
-
-  private:
-    AppSessionInfoWeekendInfo *weekendInfo_;
-  };
-
   class AppSessionState : public QObject {
     Q_OBJECT
     Q_PROPERTY(AppSessionInfoMessage *info READ info NOTIFY infoChanged FINAL)
@@ -58,10 +27,25 @@ namespace IRacingTools::App {
   public:
     explicit AppSessionState(QObject *parent);
 
+    /**
+     * @brief Set the current info message
+     *
+     * @param info
+     */
     void setInfo(const std::shared_ptr<IRacingTools::SDK::SessionInfo::SessionInfoMessage> &info);
+
+    /**
+     * @brief Get current info message
+     *
+     * @return
+     */
     AppSessionInfoMessage *info();
 
-    //    int time() const;
+    /**
+     * @brief Current session time
+     *
+     * @param time
+     */
     void setTime(int time);
 
   signals:

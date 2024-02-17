@@ -2,7 +2,7 @@
 
 #include "ResultsFastestLap.h"
 #include "ResultsPosition.h"
-#include "TypesCore.h"
+
 #include <string>
 #include <variant>
 #include <vector>
@@ -13,7 +13,7 @@ namespace IRacingTools::SDK::SessionInfo
     {
 
         std::int32_t sessionNum;
-        SessionLaps sessionLaps;
+        std::string sessionLaps;
         std::string sessionTime;
         std::int32_t sessionNumLapsToAvg;
         std::string sessionType;
@@ -34,4 +34,4 @@ namespace IRacingTools::SDK::SessionInfo
 
 
     };
-}  // namespace IRacingTools::SDK::SessionInfo
+}

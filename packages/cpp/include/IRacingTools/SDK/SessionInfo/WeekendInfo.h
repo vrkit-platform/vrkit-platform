@@ -33,8 +33,8 @@ namespace IRacingTools::SDK::SessionInfo
         std::string trackWindVel;
         std::string trackWindDir;
         std::string trackRelativeHumidity;
-        TrackFogLevel trackFogLevel;
-        TrackFogLevel trackPrecipitation;
+        std::string trackFogLevel;
+        std::string trackPrecipitation;
         std::int32_t trackCleanup;
         std::int32_t trackDynamicTrack;
         std::string trackVersion;
@@ -64,4 +64,4 @@ namespace IRacingTools::SDK::SessionInfo
 
 
     };
-}  // namespace IRacingTools::SDK::SessionInfo
+}

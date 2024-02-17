@@ -112,13 +112,23 @@ Loader {
         // anchors.right: parent.right
         // anchors.left: parent.left
         ////////////////
+        HorizontalHeaderView {
+            id: tableViewHeader
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: menusArea.bottom
+            clip: true
+            syncView: tableView
+        }
+
         TableView {
             id: tableView
 
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: menusArea.bottom
+            anchors.top: tableViewHeader.bottom
 
             columnWidthProvider: function (column) {
                 return tableView.model ? tableView.width / tableView.model.columnCount() : 0;

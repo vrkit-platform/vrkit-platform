@@ -12,4 +12,4 @@ namespace IRacingTools::SDK::SessionInfo
         Tire rightRearTire;
         AeroSettings aeroSettings;
     };
-}  // namespace IRacingTools::SDK::SessionInfo
+}

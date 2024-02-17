@@ -1,6 +1,5 @@
 #pragma once
 
-#include "TypesCore.h"
 #include <string>
 
 namespace IRacingTools::SDK::SessionInfo
@@ -20,7 +19,7 @@ namespace IRacingTools::SDK::SessionInfo
         std::string windSpeed;
         std::string weatherTemp;
         std::string relativeHumidity;
-        TrackFogLevel fogLevel;
+        std::string fogLevel;
         std::string timeOfDay;
         std::string date;
         std::int32_t earthRotationSpeedupFactor;
@@ -38,4 +37,4 @@ namespace IRacingTools::SDK::SessionInfo
 
 
     };
-}  // namespace IRacingTools::SDK::SessionInfo
+}

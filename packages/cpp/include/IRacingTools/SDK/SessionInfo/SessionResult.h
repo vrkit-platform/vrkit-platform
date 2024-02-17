@@ -11,4 +11,4 @@ namespace IRacingTools::SDK::SessionInfo
         std::int32_t fastestLap;
         float fastestTime;
     };
-}  // namespace IRacingTools::SDK::SessionInfo
+}

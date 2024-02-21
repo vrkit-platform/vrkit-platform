@@ -1,20 +1,15 @@
 
-# SDK Source & headers
-file(GLOB_RECURSE sdkTestSources tests/*.cpp)
-file(GLOB_RECURSE sdkSources src/*.cpp)
-file(GLOB_RECURSE sdkHeaders ${sdkIncludeDir}/*.h)
-file(GLOB_RECURSE sdkInternalHeaders src/*.h)
+# SDK
+add_subdirectory(irsdk++)
 
-# Create libraries
-SETUP_LIB_EXPORTS(${sdkTarget} ${sdkTargetStatic} sdkSources sdkInternalHeaders sdkHeaders)
+# App Libs
+add_subdirectory(shared-app-lib)
 
-# Add dependency
-IRT_CONFIGURE_SDK_LIBS(${sdkTarget})
-IRT_CONFIGURE_SDK_LIBS(${sdkTargetStatic})
+# App Projects
+add_subdirectory(overlay-app)
 
-# Tests
-set(testTargetName ${sdkTarget}_tests)
-add_executable(${testTargetName} ${sdkTestSources})
-target_link_libraries(${testTargetName} PUBLIC
-  ${sdkTargetStatic})
-irt_configure_test_libs(${testTargetName})
+# UI
+#add_subdirectory(app-ui)
+add_subdirectory(app-ui-qt)
+add_subdirectory(app-cli)
+add_subdirectory(example-apps)

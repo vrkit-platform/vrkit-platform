@@ -29,8 +29,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_program(CCACHE_PROGRAM ccache)
 if (CCACHE_PROGRAM)
   message(NOTICE "Selected CCache: ${CCACHE_PROGRAM}")
-  set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM} base_dir=${PROJECT_SOURCE_DIR} hash_dir=false log_file=${PROJECT_SOURCE_DIR}/tmp_ccache.log)
-  set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM} base_dir=${PROJECT_SOURCE_DIR} hash_dir=false log_file=${PROJECT_SOURCE_DIR}/tmp_ccache.log)
+  set(CCACHE_CMDLINE ${CCACHE_PROGRAM} base_dir=${PROJECT_SOURCE_DIR} hash_dir=false log_file=${PROJECT_SOURCE_DIR}/tmp_ccache.log)
+  set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_CMDLINE})
+  set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_CMDLINE})
 else ()
   message(WARNING "Could not find ccache, skipping!")
 endif ()
@@ -47,7 +48,7 @@ include(cmake/targets.cmake)
 include(cmake/fs.cmake)
 include(cmake/dependencies.cmake NO_POLICY_SCOPE)
 include(cmake/example_target.cmake)
-#include(cmake/hybrid_crt.cmake NO_POLICY_SCOPE)
+include(cmake/hybrid_crt.cmake NO_POLICY_SCOPE)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
@@ -57,9 +58,9 @@ include(CTest)
 include(GoogleTest)
 
 # SDK Include dir
-set(sdkIncludeDir ${CMAKE_SOURCE_DIR}/packages/cpp/include)
+set(sdkIncludeDir ${CMAKE_SOURCE_DIR}/packages/cpp/irsdk++/include)
 
 add_subdirectory(packages/proto)
 add_subdirectory(packages/cpp)
-add_subdirectory(packages/cpp-apps)
+
 

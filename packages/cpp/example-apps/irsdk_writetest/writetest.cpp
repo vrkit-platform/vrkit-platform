@@ -614,7 +614,7 @@ void end_session(bool shutdown) {
 void ex_program(int sig) {
     (void) sig;
 
-    printf("recieved ctrl-c, exiting\n\n");
+    printf("received ctrl-c, exiting\n\n");
 
     end_session(true);
 

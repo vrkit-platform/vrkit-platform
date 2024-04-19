@@ -8,4 +8,6 @@ namespace IRacingTools::App {
 
   AppSettings::AppSettings(token) : QSettings() {}
 
+  void AppSettings::onChanged() {
+  }
 }// namespace App

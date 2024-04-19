@@ -26,13 +26,13 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, SessionInfoMessage &rhs) {
-      rhs.weekendInfo = node["WeekendInfo"].as<WeekendInfo>();
-      rhs.sessionInfo = node["SessionInfo"].as<SessionInfo>();
-      rhs.qualifyResultsInfo = node["QualifyResultsInfo"].as<QualifyResultsInfo>();
-      rhs.cameraInfo = node["CameraInfo"].as<CameraInfo>();
-      rhs.radioInfo = node["RadioInfo"].as<RadioInfo>();
-      rhs.driverInfo = node["DriverInfo"].as<DriverInfo>();
-      rhs.splitTimeInfo = node["SplitTimeInfo"].as<SplitTimeInfo>();
+      rhs.weekendInfo = node["WeekendInfo"].as<WeekendInfo>(WeekendInfo{});
+      rhs.sessionInfo = node["SessionInfo"].as<SessionInfo>(SessionInfo{});
+      rhs.qualifyResultsInfo = node["QualifyResultsInfo"].as<QualifyResultsInfo>(QualifyResultsInfo{});
+      rhs.cameraInfo = node["CameraInfo"].as<CameraInfo>(CameraInfo{});
+      rhs.radioInfo = node["RadioInfo"].as<RadioInfo>(RadioInfo{});
+      rhs.driverInfo = node["DriverInfo"].as<DriverInfo>(DriverInfo{});
+      rhs.splitTimeInfo = node["SplitTimeInfo"].as<SplitTimeInfo>(SplitTimeInfo{});
 //      rhs.carSetup = node["CarSetup"].as<CarSetup>();
       return true;
     }
@@ -98,57 +98,57 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, WeekendInfo &rhs) {
-      rhs.trackName = node["TrackName"].as<std::string>();
-      rhs.trackID = node["TrackID"].as<std::int32_t>();
-      rhs.trackLength = node["TrackLength"].as<std::string>();
-      rhs.trackLengthOfficial = node["TrackLengthOfficial"].as<std::string>();
-      rhs.trackDisplayName = node["TrackDisplayName"].as<std::string>();
-      rhs.trackDisplayShortName = node["TrackDisplayShortName"].as<std::string>();
-      rhs.trackConfigName = node["TrackConfigName"].as<std::string>();
-      rhs.trackCity = node["TrackCity"].as<std::string>();
-      rhs.trackCountry = node["TrackCountry"].as<std::string>();
-      rhs.trackAltitude = node["TrackAltitude"].as<std::string>();
-      rhs.trackLatitude = node["TrackLatitude"].as<std::string>();
-      rhs.trackLongitude = node["TrackLongitude"].as<std::string>();
-      rhs.trackNorthOffset = node["TrackNorthOffset"].as<std::string>();
-      rhs.trackNumTurns = node["TrackNumTurns"].as<std::int32_t>();
-      rhs.trackPitSpeedLimit = node["TrackPitSpeedLimit"].as<std::string>();
-      rhs.trackType = node["TrackType"].as<std::string>();
-      rhs.trackDirection = node["TrackDirection"].as<std::string>();
-      rhs.trackWeatherType = node["TrackWeatherType"].as<std::string>();
-      rhs.trackSkies = node["TrackSkies"].as<std::string>();
-      rhs.trackSurfaceTemp = node["TrackSurfaceTemp"].as<std::string>();
-      rhs.trackAirTemp = node["TrackAirTemp"].as<std::string>();
-      rhs.trackAirPressure = node["TrackAirPressure"].as<std::string>();
-      rhs.trackWindVel = node["TrackWindVel"].as<std::string>();
-      rhs.trackWindDir = node["TrackWindDir"].as<std::string>();
-      rhs.trackRelativeHumidity = node["TrackRelativeHumidity"].as<std::string>();
-      rhs.trackFogLevel = node["TrackFogLevel"].as<std::string>();
-      rhs.trackPrecipitation = node["TrackPrecipitation"].as<std::string>();
-      rhs.trackCleanup = node["TrackCleanup"].as<std::int32_t>();
-      rhs.trackDynamicTrack = node["TrackDynamicTrack"].as<std::int32_t>();
-      rhs.trackVersion = node["TrackVersion"].as<std::string>();
-      rhs.seriesID = node["SeriesID"].as<std::int32_t>();
-      rhs.seasonID = node["SeasonID"].as<std::int32_t>();
-      rhs.sessionID = node["SessionID"].as<std::int32_t>();
-      rhs.subSessionID = node["SubSessionID"].as<std::int32_t>();
-      rhs.leagueID = node["LeagueID"].as<std::int32_t>();
-      rhs.official = node["Official"].as<std::int32_t>();
-      rhs.raceWeek = node["RaceWeek"].as<std::int32_t>();
-      rhs.eventType = node["EventType"].as<std::string>();
-      rhs.category = node["Category"].as<std::string>();
-      rhs.simMode = node["SimMode"].as<std::string>();
-      rhs.teamRacing = node["TeamRacing"].as<std::int32_t>();
-      rhs.minDrivers = node["MinDrivers"].as<std::int32_t>();
-      rhs.maxDrivers = node["MaxDrivers"].as<std::int32_t>();
-      rhs.dCRuleSet = node["DCRuleSet"].as<std::string>();
-      rhs.qualifierMustStartRace = node["QualifierMustStartRace"].as<std::int32_t>();
-      rhs.numCarClasses = node["NumCarClasses"].as<std::int32_t>();
-      rhs.numCarTypes = node["NumCarTypes"].as<std::int32_t>();
-      rhs.heatRacing = node["HeatRacing"].as<std::int32_t>();
-      rhs.buildType = node["BuildType"].as<std::string>();
-      rhs.buildTarget = node["BuildTarget"].as<std::string>();
-      rhs.buildVersion = node["BuildVersion"].as<std::string>();
+      rhs.trackName = node["TrackName"].as<std::string>("");
+      rhs.trackID = node["TrackID"].as<std::int32_t>(0);
+      rhs.trackLength = node["TrackLength"].as<std::string>("");
+      rhs.trackLengthOfficial = node["TrackLengthOfficial"].as<std::string>("");
+      rhs.trackDisplayName = node["TrackDisplayName"].as<std::string>("");
+      rhs.trackDisplayShortName = node["TrackDisplayShortName"].as<std::string>("");
+      rhs.trackConfigName = node["TrackConfigName"].as<std::string>("");
+      rhs.trackCity = node["TrackCity"].as<std::string>("");
+      rhs.trackCountry = node["TrackCountry"].as<std::string>("");
+      rhs.trackAltitude = node["TrackAltitude"].as<std::string>("");
+      rhs.trackLatitude = node["TrackLatitude"].as<std::string>("");
+      rhs.trackLongitude = node["TrackLongitude"].as<std::string>("");
+      rhs.trackNorthOffset = node["TrackNorthOffset"].as<std::string>("");
+      rhs.trackNumTurns = node["TrackNumTurns"].as<std::int32_t>(0);
+      rhs.trackPitSpeedLimit = node["TrackPitSpeedLimit"].as<std::string>("");
+      rhs.trackType = node["TrackType"].as<std::string>("");
+      rhs.trackDirection = node["TrackDirection"].as<std::string>("");
+      rhs.trackWeatherType = node["TrackWeatherType"].as<std::string>("");
+      rhs.trackSkies = node["TrackSkies"].as<std::string>("");
+      rhs.trackSurfaceTemp = node["TrackSurfaceTemp"].as<std::string>("");
+      rhs.trackAirTemp = node["TrackAirTemp"].as<std::string>("");
+      rhs.trackAirPressure = node["TrackAirPressure"].as<std::string>("");
+      rhs.trackWindVel = node["TrackWindVel"].as<std::string>("");
+      rhs.trackWindDir = node["TrackWindDir"].as<std::string>("");
+      rhs.trackRelativeHumidity = node["TrackRelativeHumidity"].as<std::string>("");
+      rhs.trackFogLevel = node["TrackFogLevel"].as<std::string>("");
+      rhs.trackPrecipitation = node["TrackPrecipitation"].as<std::string>("");
+      rhs.trackCleanup = node["TrackCleanup"].as<std::int32_t>(0);
+      rhs.trackDynamicTrack = node["TrackDynamicTrack"].as<std::int32_t>(0);
+      rhs.trackVersion = node["TrackVersion"].as<std::string>("");
+      rhs.seriesID = node["SeriesID"].as<std::int32_t>(0);
+      rhs.seasonID = node["SeasonID"].as<std::int32_t>(0);
+      rhs.sessionID = node["SessionID"].as<std::int32_t>(0);
+      rhs.subSessionID = node["SubSessionID"].as<std::int32_t>(0);
+      rhs.leagueID = node["LeagueID"].as<std::int32_t>(0);
+      rhs.official = node["Official"].as<std::int32_t>(0);
+      rhs.raceWeek = node["RaceWeek"].as<std::int32_t>(0);
+      rhs.eventType = node["EventType"].as<std::string>("");
+      rhs.category = node["Category"].as<std::string>("");
+      rhs.simMode = node["SimMode"].as<std::string>("");
+      rhs.teamRacing = node["TeamRacing"].as<std::int32_t>(0);
+      rhs.minDrivers = node["MinDrivers"].as<std::int32_t>(0);
+      rhs.maxDrivers = node["MaxDrivers"].as<std::int32_t>(0);
+      rhs.dCRuleSet = node["DCRuleSet"].as<std::string>("");
+      rhs.qualifierMustStartRace = node["QualifierMustStartRace"].as<std::int32_t>(0);
+      rhs.numCarClasses = node["NumCarClasses"].as<std::int32_t>(0);
+      rhs.numCarTypes = node["NumCarTypes"].as<std::int32_t>(0);
+      rhs.heatRacing = node["HeatRacing"].as<std::int32_t>(0);
+      rhs.buildType = node["BuildType"].as<std::string>("");
+      rhs.buildTarget = node["BuildTarget"].as<std::string>("");
+      rhs.buildVersion = node["BuildVersion"].as<std::string>("");
       rhs.weekendOptions = node["WeekendOptions"].as<WeekendOptions>();
       rhs.telemetryOptions = node["TelemetryOptions"].as<TelemetryOptions>();
       return true;
@@ -190,34 +190,34 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, WeekendOptions &rhs) {
-      rhs.numStarters = node["NumStarters"].as<std::int32_t>();
-      rhs.startingGrid = node["StartingGrid"].as<std::string>();
-      rhs.qualifyScoring = node["QualifyScoring"].as<std::string>();
-      rhs.courseCautions = node["CourseCautions"].as<std::string>();
-      rhs.standingStart = node["StandingStart"].as<std::int32_t>();
-      rhs.shortParadeLap = node["ShortParadeLap"].as<std::int32_t>();
-      rhs.restarts = node["Restarts"].as<std::string>();
-      rhs.weatherType = node["WeatherType"].as<std::string>();
-      rhs.skies = node["Skies"].as<std::string>();
-      rhs.windDirection = node["WindDirection"].as<std::string>();
-      rhs.windSpeed = node["WindSpeed"].as<std::string>();
-      rhs.weatherTemp = node["WeatherTemp"].as<std::string>();
-      rhs.relativeHumidity = node["RelativeHumidity"].as<std::string>();
-      rhs.fogLevel = node["FogLevel"].as<std::string>();
-      rhs.timeOfDay = node["TimeOfDay"].as<std::string>();
-      rhs.date = node["Date"].as<std::string>();
-      rhs.earthRotationSpeedupFactor = node["EarthRotationSpeedupFactor"].as<std::int32_t>();
-      rhs.unofficial = node["Unofficial"].as<std::int32_t>();
-      rhs.commercialMode = node["CommercialMode"].as<std::string>();
-      rhs.nightMode = node["NightMode"].as<std::string>();
-      rhs.isFixedSetup = node["IsFixedSetup"].as<std::int32_t>();
-      rhs.strictLapsChecking = node["StrictLapsChecking"].as<std::string>();
-      rhs.hasOpenRegistration = node["HasOpenRegistration"].as<std::int32_t>();
-      rhs.hardcoreLevel = node["HardcoreLevel"].as<std::int32_t>();
-      rhs.numJokerLaps = node["NumJokerLaps"].as<std::int32_t>();
-      rhs.incidentLimit = node["IncidentLimit"].as<std::int32_t>();
-      rhs.fastRepairsLimit = node["FastRepairsLimit"].as<std::int32_t>();
-      rhs.greenWhiteCheckeredLimit = node["GreenWhiteCheckeredLimit"].as<std::int32_t>();
+      rhs.numStarters = node["NumStarters"].as<std::int32_t>(0);
+      rhs.startingGrid = node["StartingGrid"].as<std::string>("");
+      rhs.qualifyScoring = node["QualifyScoring"].as<std::string>("");
+      rhs.courseCautions = node["CourseCautions"].as<std::string>("");
+      rhs.standingStart = node["StandingStart"].as<std::int32_t>(0);
+      rhs.shortParadeLap = node["ShortParadeLap"].as<std::int32_t>(0);
+      rhs.restarts = node["Restarts"].as<std::string>("");
+      rhs.weatherType = node["WeatherType"].as<std::string>("");
+      rhs.skies = node["Skies"].as<std::string>("");
+      rhs.windDirection = node["WindDirection"].as<std::string>("");
+      rhs.windSpeed = node["WindSpeed"].as<std::string>("");
+      rhs.weatherTemp = node["WeatherTemp"].as<std::string>("");
+      rhs.relativeHumidity = node["RelativeHumidity"].as<std::string>("");
+      rhs.fogLevel = node["FogLevel"].as<std::string>("");
+      rhs.timeOfDay = node["TimeOfDay"].as<std::string>("");
+      rhs.date = node["Date"].as<std::string>("");
+      rhs.earthRotationSpeedupFactor = node["EarthRotationSpeedupFactor"].as<std::int32_t>(0);
+      rhs.unofficial = node["Unofficial"].as<std::int32_t>(0);
+      rhs.commercialMode = node["CommercialMode"].as<std::string>("");
+      rhs.nightMode = node["NightMode"].as<std::string>("");
+      rhs.isFixedSetup = node["IsFixedSetup"].as<std::int32_t>(0);
+      rhs.strictLapsChecking = node["StrictLapsChecking"].as<std::string>("");
+      rhs.hasOpenRegistration = node["HasOpenRegistration"].as<std::int32_t>(0);
+      rhs.hardcoreLevel = node["HardcoreLevel"].as<std::int32_t>(0);
+      rhs.numJokerLaps = node["NumJokerLaps"].as<std::int32_t>(0);
+      rhs.incidentLimit = node["IncidentLimit"].as<std::int32_t>(0);
+      rhs.fastRepairsLimit = node["FastRepairsLimit"].as<std::int32_t>(0);
+      rhs.greenWhiteCheckeredLimit = node["GreenWhiteCheckeredLimit"].as<std::int32_t>(0);
       return true;
     }
   };
@@ -230,7 +230,7 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, TelemetryOptions &rhs) {
-      rhs.telemetryDiskFile = node["TelemetryDiskFile"].as<std::string>();
+      rhs.telemetryDiskFile = node["TelemetryDiskFile"].as<std::string>("");
       return true;
     }
   };
@@ -274,25 +274,25 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Session &rhs) {
-      rhs.sessionNum = node["SessionNum"].as<std::int32_t>();
-      rhs.sessionLaps = node["SessionLaps"].as<std::string>();
-      rhs.sessionTime = node["SessionTime"].as<std::string>();
-      rhs.sessionNumLapsToAvg = node["SessionNumLapsToAvg"].as<std::int32_t>();
-      rhs.sessionType = node["SessionType"].as<std::string>();
-      rhs.sessionTrackRubberState = node["SessionTrackRubberState"].as<std::string>();
-      rhs.sessionName = node["SessionName"].as<std::string>();
-      //        rhs.sessionSubType = node["SessionSubType"].as<std::string>();
-      rhs.sessionSkipped = node["SessionSkipped"].as<std::int32_t>();
-      rhs.sessionRunGroupsUsed = node["SessionRunGroupsUsed"].as<std::int32_t>();
-      rhs.sessionEnforceTireCompoundChange = node["SessionEnforceTireCompoundChange"].as<std::int32_t>();
+      rhs.sessionNum = node["SessionNum"].as<std::int32_t>(0);
+      rhs.sessionLaps = node["SessionLaps"].as<std::string>("");
+      rhs.sessionTime = node["SessionTime"].as<std::string>("");
+      rhs.sessionNumLapsToAvg = node["SessionNumLapsToAvg"].as<std::int32_t>(0);
+      rhs.sessionType = node["SessionType"].as<std::string>("");
+      rhs.sessionTrackRubberState = node["SessionTrackRubberState"].as<std::string>("");
+      rhs.sessionName = node["SessionName"].as<std::string>("");
+      //        rhs.sessionSubType = node["SessionSubType"].as<std::string>("");
+      rhs.sessionSkipped = node["SessionSkipped"].as<std::int32_t>(0);
+      rhs.sessionRunGroupsUsed = node["SessionRunGroupsUsed"].as<std::int32_t>(0);
+      rhs.sessionEnforceTireCompoundChange = node["SessionEnforceTireCompoundChange"].as<std::int32_t>(0);
 //      rhs.resultsPositions = node["ResultsPositions"].as<std::vector<ResultsPosition>>();
 //      rhs.resultsFastestLap = node["ResultsFastestLap"].as<std::vector<ResultsFastestLap>>();
 //      rhs.resultsAverageLapTime = node["ResultsAverageLapTime"].as<float>();
-//      rhs.resultsNumCautionFlags = node["ResultsNumCautionFlags"].as<std::int32_t>();
-//      rhs.resultsNumCautionLaps = node["ResultsNumCautionLaps"].as<std::int32_t>();
-//      rhs.resultsNumLeadChanges = node["ResultsNumLeadChanges"].as<std::int32_t>();
-//      rhs.resultsLapsComplete = node["ResultsLapsComplete"].as<std::int32_t>();
-//      rhs.resultsOfficial = node["ResultsOfficial"].as<std::int32_t>();
+//      rhs.resultsNumCautionFlags = node["ResultsNumCautionFlags"].as<std::int32_t>(0);
+//      rhs.resultsNumCautionLaps = node["ResultsNumCautionLaps"].as<std::int32_t>(0);
+//      rhs.resultsNumLeadChanges = node["ResultsNumLeadChanges"].as<std::int32_t>(0);
+//      rhs.resultsLapsComplete = node["ResultsLapsComplete"].as<std::int32_t>(0);
+//      rhs.resultsOfficial = node["ResultsOfficial"].as<std::int32_t>(0);
       return true;
     }
   };
@@ -319,21 +319,21 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, ResultsPosition &rhs) {
-      rhs.position = node["Position"].as<std::int32_t>();
-      rhs.classPosition = node["ClassPosition"].as<std::int32_t>();
-      rhs.carIdx = node["CarIdx"].as<std::int32_t>();
-      rhs.lap = node["Lap"].as<std::int32_t>();
+      rhs.position = node["Position"].as<std::int32_t>(0);
+      rhs.classPosition = node["ClassPosition"].as<std::int32_t>(0);
+      rhs.carIdx = node["CarIdx"].as<std::int32_t>(0);
+      rhs.lap = node["Lap"].as<std::int32_t>(0);
       rhs.time = node["Time"].as<float>();
-      rhs.fastestLap = node["FastestLap"].as<std::int32_t>();
+      rhs.fastestLap = node["FastestLap"].as<std::int32_t>(0);
       rhs.fastestTime = node["FastestTime"].as<float>();
       rhs.lastTime = node["LastTime"].as<float>();
-      rhs.lapsLed = node["LapsLed"].as<std::int32_t>();
-      rhs.lapsComplete = node["LapsComplete"].as<std::int32_t>();
-      rhs.jokerLapsComplete = node["JokerLapsComplete"].as<std::int32_t>();
+      rhs.lapsLed = node["LapsLed"].as<std::int32_t>(0);
+      rhs.lapsComplete = node["LapsComplete"].as<std::int32_t>(0);
+      rhs.jokerLapsComplete = node["JokerLapsComplete"].as<std::int32_t>(0);
       rhs.lapsDriven = node["LapsDriven"].as<float>();
-      rhs.incidents = node["Incidents"].as<std::int32_t>();
-      rhs.reasonOutId = node["ReasonOutId"].as<std::int32_t>();
-      rhs.reasonOutStr = node["ReasonOutStr"].as<std::string>();
+      rhs.incidents = node["Incidents"].as<std::int32_t>(0);
+      rhs.reasonOutId = node["ReasonOutId"].as<std::int32_t>(0);
+      rhs.reasonOutStr = node["ReasonOutStr"].as<std::string>("");
       return true;
     }
   };
@@ -348,8 +348,8 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, ResultsFastestLap &rhs) {
-      rhs.carIdx = node["CarIdx"].as<std::int32_t>();
-      rhs.fastestLap = node["FastestLap"].as<std::int32_t>();
+      rhs.carIdx = node["CarIdx"].as<std::int32_t>(0);
+      rhs.fastestLap = node["FastestLap"].as<std::int32_t>(0);
       rhs.fastestTime = node["FastestTime"].as<float>();
       return true;
     }
@@ -380,10 +380,10 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, SessionResult &rhs) {
-      rhs.position = node["Position"].as<std::int32_t>();
-      rhs.classPosition = node["ClassPosition"].as<std::int32_t>();
-      rhs.carIdx = node["CarIdx"].as<std::int32_t>();
-      rhs.fastestLap = node["FastestLap"].as<std::int32_t>();
+      rhs.position = node["Position"].as<std::int32_t>(0);
+      rhs.classPosition = node["ClassPosition"].as<std::int32_t>(0);
+      rhs.carIdx = node["CarIdx"].as<std::int32_t>(0);
+      rhs.fastestLap = node["FastestLap"].as<std::int32_t>(0);
       rhs.fastestTime = node["FastestTime"].as<float>();
       return true;
     }
@@ -412,8 +412,8 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Group &rhs) {
-      rhs.groupNum = node["GroupNum"].as<std::int32_t>();
-      rhs.groupName = node["GroupName"].as<std::string>();
+      rhs.groupNum = node["GroupNum"].as<std::int32_t>(0);
+      rhs.groupName = node["GroupName"].as<std::string>("");
       rhs.cameras = node["Cameras"].as<std::vector<Camera>>();
       return true;
     }
@@ -428,8 +428,8 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Camera &rhs) {
-      rhs.cameraNum = node["CameraNum"].as<std::int32_t>();
-      rhs.cameraName = node["CameraName"].as<std::string>();
+      rhs.cameraNum = node["CameraNum"].as<std::int32_t>(0);
+      rhs.cameraName = node["CameraName"].as<std::string>("");
       return true;
     }
   };
@@ -443,7 +443,7 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, RadioInfo &rhs) {
-      rhs.selectedRadioNum = node["SelectedRadioNum"].as<std::int32_t>();
+      rhs.selectedRadioNum = node["SelectedRadioNum"].as<std::int32_t>(0);
       rhs.radios = node["Radios"].as<std::vector<Radio>>();
       return true;
     }
@@ -462,11 +462,11 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Radio &rhs) {
-      rhs.radioNum = node["RadioNum"].as<std::int32_t>();
-      rhs.hopCount = node["HopCount"].as<std::int32_t>();
-      rhs.numFrequencies = node["NumFrequencies"].as<std::int32_t>();
-      rhs.tunedToFrequencyNum = node["TunedToFrequencyNum"].as<std::int32_t>();
-      rhs.scanningIsOn = node["ScanningIsOn"].as<std::int32_t>();
+      rhs.radioNum = node["RadioNum"].as<std::int32_t>(0);
+      rhs.hopCount = node["HopCount"].as<std::int32_t>(0);
+      rhs.numFrequencies = node["NumFrequencies"].as<std::int32_t>(0);
+      rhs.tunedToFrequencyNum = node["TunedToFrequencyNum"].as<std::int32_t>(0);
+      rhs.scanningIsOn = node["ScanningIsOn"].as<std::int32_t>(0);
       rhs.frequencies = node["Frequencies"].as<std::vector<Frequency>>();
       return true;
     }
@@ -490,17 +490,17 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Frequency &rhs) {
-      rhs.frequencyNum = node["FrequencyNum"].as<std::int32_t>();
-      rhs.frequencyName = node["FrequencyName"].as<std::string>();
-      rhs.priority = node["Priority"].as<std::int32_t>();
-      rhs.carIdx = node["CarIdx"].as<std::int32_t>();
-      rhs.entryIdx = node["EntryIdx"].as<std::int32_t>();
-      rhs.clubID = node["ClubID"].as<std::int32_t>();
-      rhs.canScan = node["CanScan"].as<std::int32_t>();
-      rhs.canSquawk = node["CanSquawk"].as<std::int32_t>();
-      rhs.muted = node["Muted"].as<std::int32_t>();
-      rhs.isMutable = node["IsMutable"].as<std::int32_t>();
-      rhs.isDeletable = node["IsDeletable"].as<std::int32_t>();
+      rhs.frequencyNum = node["FrequencyNum"].as<std::int32_t>(0);
+      rhs.frequencyName = node["FrequencyName"].as<std::string>("");
+      rhs.priority = node["Priority"].as<std::int32_t>(0);
+      rhs.carIdx = node["CarIdx"].as<std::int32_t>(0);
+      rhs.entryIdx = node["EntryIdx"].as<std::int32_t>(0);
+      rhs.clubID = node["ClubID"].as<std::int32_t>(0);
+      rhs.canScan = node["CanScan"].as<std::int32_t>(0);
+      rhs.canSquawk = node["CanSquawk"].as<std::int32_t>(0);
+      rhs.muted = node["Muted"].as<std::int32_t>(0);
+      rhs.isMutable = node["IsMutable"].as<std::int32_t>(0);
+      rhs.isDeletable = node["IsDeletable"].as<std::int32_t>(0);
       return true;
     }
   };
@@ -541,34 +541,34 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, DriverInfo &rhs) {
-      rhs.driverCarIdx = node["DriverCarIdx"].as<std::int32_t>();
-      rhs.driverUserID = node["DriverUserID"].as<std::int32_t>();
-      rhs.paceCarIdx = node["PaceCarIdx"].as<std::int32_t>();
+      rhs.driverCarIdx = node["DriverCarIdx"].as<std::int32_t>(0);
+      rhs.driverUserID = node["DriverUserID"].as<std::int32_t>(0);
+      rhs.paceCarIdx = node["PaceCarIdx"].as<std::int32_t>(0);
       rhs.driverHeadPosX = node["DriverHeadPosX"].as<float>();
       rhs.driverHeadPosY = node["DriverHeadPosY"].as<float>();
       rhs.driverHeadPosZ = node["DriverHeadPosZ"].as<float>();
-      rhs.driverCarIsElectric = node["DriverCarIsElectric"].as<std::int32_t>();
+      rhs.driverCarIsElectric = node["DriverCarIsElectric"].as<std::int32_t>(0);
       rhs.driverCarIdleRPM = node["DriverCarIdleRPM"].as<float>();
       rhs.driverCarRedLine = node["DriverCarRedLine"].as<float>();
-      rhs.driverCarEngCylinderCount = node["DriverCarEngCylinderCount"].as<std::int32_t>();
+      rhs.driverCarEngCylinderCount = node["DriverCarEngCylinderCount"].as<std::int32_t>(0);
       rhs.driverCarFuelKgPerLtr = node["DriverCarFuelKgPerLtr"].as<float>();
       rhs.driverCarFuelMaxLtr = node["DriverCarFuelMaxLtr"].as<float>();
       rhs.driverCarMaxFuelPct = node["DriverCarMaxFuelPct"].as<float>();
-      rhs.driverCarGearNumForward = node["DriverCarGearNumForward"].as<std::int32_t>();
-      rhs.driverCarGearNeutral = node["DriverCarGearNeutral"].as<std::int32_t>();
-      rhs.driverCarGearReverse = node["DriverCarGearReverse"].as<std::int32_t>();
+      rhs.driverCarGearNumForward = node["DriverCarGearNumForward"].as<std::int32_t>(0);
+      rhs.driverCarGearNeutral = node["DriverCarGearNeutral"].as<std::int32_t>(0);
+      rhs.driverCarGearReverse = node["DriverCarGearReverse"].as<std::int32_t>(0);
       rhs.driverCarSLFirstRPM = node["DriverCarSLFirstRPM"].as<float>();
       rhs.driverCarSLShiftRPM = node["DriverCarSLShiftRPM"].as<float>();
       rhs.driverCarSLLastRPM = node["DriverCarSLLastRPM"].as<float>();
       rhs.driverCarSLBlinkRPM = node["DriverCarSLBlinkRPM"].as<float>();
-      rhs.driverCarVersion = node["DriverCarVersion"].as<std::string>();
+      rhs.driverCarVersion = node["DriverCarVersion"].as<std::string>("");
       rhs.driverPitTrkPct = node["DriverPitTrkPct"].as<float>();
       rhs.driverCarEstLapTime = node["DriverCarEstLapTime"].as<float>();
-      rhs.driverSetupName = node["DriverSetupName"].as<std::string>();
-      rhs.driverSetupIsModified = node["DriverSetupIsModified"].as<std::int32_t>();
-      rhs.driverSetupLoadTypeName = node["DriverSetupLoadTypeName"].as<std::string>();
-      rhs.driverSetupPassedTech = node["DriverSetupPassedTech"].as<std::int32_t>();
-      rhs.driverIncidentCount = node["DriverIncidentCount"].as<std::int32_t>();
+      rhs.driverSetupName = node["DriverSetupName"].as<std::string>("");
+      rhs.driverSetupIsModified = node["DriverSetupIsModified"].as<std::int32_t>(0);
+      rhs.driverSetupLoadTypeName = node["DriverSetupLoadTypeName"].as<std::string>("");
+      rhs.driverSetupPassedTech = node["DriverSetupPassedTech"].as<std::int32_t>(0);
+      rhs.driverIncidentCount = node["DriverIncidentCount"].as<std::int32_t>(0);
       rhs.drivers = node["Drivers"].as<std::vector<Driver>>();
       return true;
     }
@@ -628,53 +628,53 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Driver &rhs) {
-      rhs.carIdx = node["CarIdx"].as<std::int32_t>();
-      rhs.userName = node["UserName"].as<std::string>();
-      rhs.abbrevName = node["AbbrevName"].as<std::string>();
-      rhs.initials = node["Initials"].as<std::string>();
-      rhs.userID = node["UserID"].as<std::int32_t>();
-      rhs.teamID = node["TeamID"].as<std::int32_t>();
-      rhs.teamName = node["TeamName"].as<std::string>();
-      rhs.carNumber = node["CarNumber"].as<std::string>();
-      rhs.carNumberRaw = node["CarNumberRaw"].as<std::int32_t>();
-      rhs.carPath = node["CarPath"].as<std::string>();
-      rhs.carClassID = node["CarClassID"].as<std::int32_t>();
-      rhs.carID = node["CarID"].as<std::int32_t>();
-      rhs.carIsPaceCar = node["CarIsPaceCar"].as<std::int32_t>();
-      rhs.carIsAI = node["CarIsAI"].as<std::int32_t>();
-      rhs.carIsElectric = node["CarIsElectric"].as<std::int32_t>();
-      rhs.carScreenName = node["CarScreenName"].as<std::string>();
-      rhs.carScreenNameShort = node["CarScreenNameShort"].as<std::string>();
-      rhs.carClassShortName = node["CarClassShortName"].as<std::string>();
-      rhs.carClassRelSpeed = node["CarClassRelSpeed"].as<std::int32_t>();
-      rhs.carClassLicenseLevel = node["CarClassLicenseLevel"].as<std::int32_t>();
-      rhs.carClassMaxFuelPct = node["CarClassMaxFuelPct"].as<std::string>();
-      rhs.carClassWeightPenalty = node["CarClassWeightPenalty"].as<std::string>();
-      rhs.carClassPowerAdjust = node["CarClassPowerAdjust"].as<std::string>();
-      rhs.carClassDryTireSetLimit = node["CarClassDryTireSetLimit"].as<std::string>();
-      rhs.carClassColor = node["CarClassColor"].as<std::string>();
+      rhs.carIdx = node["CarIdx"].as<std::int32_t>(0);
+      rhs.userName = node["UserName"].as<std::string>("");
+      rhs.abbrevName = node["AbbrevName"].as<std::string>("");
+      rhs.initials = node["Initials"].as<std::string>("");
+      rhs.userID = node["UserID"].as<std::int32_t>(0);
+      rhs.teamID = node["TeamID"].as<std::int32_t>(0);
+      rhs.teamName = node["TeamName"].as<std::string>("");
+      rhs.carNumber = node["CarNumber"].as<std::string>("");
+      rhs.carNumberRaw = node["CarNumberRaw"].as<std::int32_t>(0);
+      rhs.carPath = node["CarPath"].as<std::string>("");
+      rhs.carClassID = node["CarClassID"].as<std::int32_t>(0);
+      rhs.carID = node["CarID"].as<std::int32_t>(0);
+      rhs.carIsPaceCar = node["CarIsPaceCar"].as<std::int32_t>(0);
+      rhs.carIsAI = node["CarIsAI"].as<std::int32_t>(0);
+      rhs.carIsElectric = node["CarIsElectric"].as<std::int32_t>(0);
+      rhs.carScreenName = node["CarScreenName"].as<std::string>("");
+      rhs.carScreenNameShort = node["CarScreenNameShort"].as<std::string>("");
+      rhs.carClassShortName = node["CarClassShortName"].as<std::string>("");
+      rhs.carClassRelSpeed = node["CarClassRelSpeed"].as<std::int32_t>(0);
+      rhs.carClassLicenseLevel = node["CarClassLicenseLevel"].as<std::int32_t>(0);
+      rhs.carClassMaxFuelPct = node["CarClassMaxFuelPct"].as<std::string>("");
+      rhs.carClassWeightPenalty = node["CarClassWeightPenalty"].as<std::string>("");
+      rhs.carClassPowerAdjust = node["CarClassPowerAdjust"].as<std::string>("");
+      rhs.carClassDryTireSetLimit = node["CarClassDryTireSetLimit"].as<std::string>("");
+      rhs.carClassColor = node["CarClassColor"].as<std::string>("");
       rhs.carClassEstLapTime = node["CarClassEstLapTime"].as<float>();
-      rhs.iRating = node["IRating"].as<std::int32_t>();
-      rhs.licLevel = node["LicLevel"].as<std::int32_t>();
-      rhs.licSubLevel = node["LicSubLevel"].as<std::int32_t>();
-      rhs.licString = node["LicString"].as<std::string>();
-      rhs.licColor = node["LicColor"].as<std::string>();
-      rhs.isSpectator = node["IsSpectator"].as<std::int32_t>();
-      rhs.carDesignStr = node["CarDesignStr"].as<std::string>();
-      rhs.helmetDesignStr = node["HelmetDesignStr"].as<std::string>();
-      rhs.suitDesignStr = node["SuitDesignStr"].as<std::string>();
-      rhs.bodyType = node["BodyType"].as<std::int32_t>();
-      rhs.faceType = node["FaceType"].as<std::int32_t>();
-      rhs.helmetType = node["HelmetType"].as<std::int32_t>();
-      rhs.carNumberDesignStr = node["CarNumberDesignStr"].as<std::string>();
-      rhs.carSponsor1 = node["CarSponsor_1"].as<std::string>();
-      rhs.carSponsor2 = node["CarSponsor_2"].as<std::string>();
-      rhs.clubName = node["ClubName"].as<std::string>();
-      rhs.clubID = node["ClubID"].as<std::int32_t>();
-      rhs.divisionName = node["DivisionName"].as<std::string>();
-      rhs.divisionID = node["DivisionID"].as<std::int32_t>();
-      rhs.curDriverIncidentCount = node["CurDriverIncidentCount"].as<std::int32_t>();
-      rhs.teamIncidentCount = node["TeamIncidentCount"].as<std::int32_t>();
+      rhs.iRating = node["IRating"].as<std::int32_t>(0);
+      rhs.licLevel = node["LicLevel"].as<std::int32_t>(0);
+      rhs.licSubLevel = node["LicSubLevel"].as<std::int32_t>(0);
+      rhs.licString = node["LicString"].as<std::string>("");
+      rhs.licColor = node["LicColor"].as<std::string>("");
+      rhs.isSpectator = node["IsSpectator"].as<std::int32_t>(0);
+      rhs.carDesignStr = node["CarDesignStr"].as<std::string>("");
+      rhs.helmetDesignStr = node["HelmetDesignStr"].as<std::string>("");
+      rhs.suitDesignStr = node["SuitDesignStr"].as<std::string>("");
+      rhs.bodyType = node["BodyType"].as<std::int32_t>(0);
+      rhs.faceType = node["FaceType"].as<std::int32_t>(0);
+      rhs.helmetType = node["HelmetType"].as<std::int32_t>(0);
+      rhs.carNumberDesignStr = node["CarNumberDesignStr"].as<std::string>("");
+      rhs.carSponsor1 = node["CarSponsor_1"].as<std::string>("");
+      rhs.carSponsor2 = node["CarSponsor_2"].as<std::string>("");
+      rhs.clubName = node["ClubName"].as<std::string>("");
+      rhs.clubID = node["ClubID"].as<std::int32_t>(0);
+      rhs.divisionName = node["DivisionName"].as<std::string>("");
+      rhs.divisionID = node["DivisionID"].as<std::int32_t>(0);
+      rhs.curDriverIncidentCount = node["CurDriverIncidentCount"].as<std::int32_t>(0);
+      rhs.teamIncidentCount = node["TeamIncidentCount"].as<std::int32_t>(0);
       return true;
     }
   };
@@ -701,7 +701,7 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Sector &rhs) {
-      rhs.sectorNum = node["SectorNum"].as<std::int32_t>();
+      rhs.sectorNum = node["SectorNum"].as<std::int32_t>(0);
       rhs.sectorStartPct = node["SectorStartPct"].as<float>();
       return true;
     }
@@ -718,7 +718,7 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, CarSetup &rhs) {
-      rhs.updateCount = node["UpdateCount"].as<std::int32_t>();
+      rhs.updateCount = node["UpdateCount"].as<std::int32_t>(0);
       rhs.tiresAero = node["TiresAero"].as<TiresAero>();
       rhs.chassis = node["Chassis"].as<Chassis>();
       rhs.brakesDriveUnit = node["BrakesDriveUnit"].as<BrakesDriveUnit>();
@@ -777,8 +777,8 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, AeroSettings &rhs) {
-      rhs.rearWingSetting = node["RearWingSetting"].as<std::string>();
-      rhs.ofDivePlanes = node["OfDivePlanes"].as<std::int32_t>();
+      rhs.rearWingSetting = node["RearWingSetting"].as<std::string>("");
+      rhs.ofDivePlanes = node["OfDivePlanes"].as<std::int32_t>(0);
       rhs.wingGurneySetting = node["WingGurneySetting"].as<bool>();
       return true;
     }
@@ -818,10 +818,10 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Front &rhs) {
-      rhs.arbSize = node["ArbSize"].as<std::string>();
-      rhs.toeIn = node["ToeIn"].as<std::string>();
+      rhs.arbSize = node["ArbSize"].as<std::string>("");
+      rhs.toeIn = node["ToeIn"].as<std::string>("");
       rhs.steeringRatio = node["SteeringRatio"].as<float>();
-      rhs.displayPage = node["DisplayPage"].as<std::string>();
+      rhs.displayPage = node["DisplayPage"].as<std::string>("");
       return true;
     }
   };
@@ -843,16 +843,16 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, ChassisCorner &rhs) {
-      rhs.cornerWeight = node["CornerWeight"].as<std::string>();
-      rhs.rideHeight = node["RideHeight"].as<std::string>();
-      rhs.shockDefl = node["ShockDefl"].as<std::string>();
-      rhs.springPerchOffset = node["SpringPerchOffset"].as<std::string>();
-      rhs.springRate = node["SpringRate"].as<std::string>();
-      rhs.lsCompDamping = node["LsCompDamping"].as<std::string>();
-      rhs.hsCompDamping = node["HsCompDamping"].as<std::string>();
-      rhs.hsRbdDamping = node["HsRbdDamping"].as<std::string>();
-      rhs.camber = node["Camber"].as<std::string>();
-      rhs.toeIn = node["ToeIn"].as<std::string>();
+      rhs.cornerWeight = node["CornerWeight"].as<std::string>("");
+      rhs.rideHeight = node["RideHeight"].as<std::string>("");
+      rhs.shockDefl = node["ShockDefl"].as<std::string>("");
+      rhs.springPerchOffset = node["SpringPerchOffset"].as<std::string>("");
+      rhs.springRate = node["SpringRate"].as<std::string>("");
+      rhs.lsCompDamping = node["LsCompDamping"].as<std::string>("");
+      rhs.hsCompDamping = node["HsCompDamping"].as<std::string>("");
+      rhs.hsRbdDamping = node["HsRbdDamping"].as<std::string>("");
+      rhs.camber = node["Camber"].as<std::string>("");
+      rhs.toeIn = node["ToeIn"].as<std::string>("");
       return true;
     }
   };
@@ -867,8 +867,8 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Rear &rhs) {
-      rhs.arbSize = node["ArbSize"].as<std::string>();
-      rhs.crossWeight = node["CrossWeight"].as<std::string>();
+      rhs.arbSize = node["ArbSize"].as<std::string>("");
+      rhs.crossWeight = node["CrossWeight"].as<std::string>("");
       return true;
     }
   };
@@ -901,8 +901,8 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, BrakeSpec &rhs) {
-      rhs.padCompound = node["PadCompound"].as<std::string>();
-      rhs.brakePressureBias = node["BrakePressureBias"].as<std::string>();
+      rhs.padCompound = node["PadCompound"].as<std::string>("");
+      rhs.brakePressureBias = node["BrakePressureBias"].as<std::string>("");
       return true;
     }
   };
@@ -915,7 +915,7 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Fuel &rhs) {
-      rhs.fuelLevel = node["FuelLevel"].as<std::string>();
+      rhs.fuelLevel = node["FuelLevel"].as<std::string>("");
       return true;
     }
   };
@@ -929,8 +929,8 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, Engine &rhs) {
-      rhs.boostLevelCal = node["BoostLevel_Cal"].as<std::int32_t>();
-      rhs.throttleShapeTps = node["ThrottleShape_Tps"].as<std::int32_t>();
+      rhs.boostLevelCal = node["BoostLevel_Cal"].as<std::int32_t>(0);
+      rhs.throttleShapeTps = node["ThrottleShape_Tps"].as<std::int32_t>(0);
       return true;
     }
   };
@@ -949,13 +949,13 @@ namespace YAML {
     }
 
     static bool decode(const Node &node, GearRatio &rhs) {
-      rhs.gearStack = node["GearStack"].as<std::string>();
-      rhs.speedInFirst = node["SpeedInFirst"].as<std::string>();
-      rhs.speedInSecond = node["SpeedInSecond"].as<std::string>();
-      rhs.speedInThird = node["SpeedInThird"].as<std::string>();
-      rhs.speedInFourth = node["SpeedInFourth"].as<std::string>();
-      rhs.speedInFifth = node["SpeedInFifth"].as<std::string>();
-      rhs.speedInSixth = node["SpeedInSixth"].as<std::string>();
+      rhs.gearStack = node["GearStack"].as<std::string>("");
+      rhs.speedInFirst = node["SpeedInFirst"].as<std::string>("");
+      rhs.speedInSecond = node["SpeedInSecond"].as<std::string>("");
+      rhs.speedInThird = node["SpeedInThird"].as<std::string>("");
+      rhs.speedInFourth = node["SpeedInFourth"].as<std::string>("");
+      rhs.speedInFifth = node["SpeedInFifth"].as<std::string>("");
+      rhs.speedInSixth = node["SpeedInSixth"].as<std::string>("");
       return true;
     }
   };

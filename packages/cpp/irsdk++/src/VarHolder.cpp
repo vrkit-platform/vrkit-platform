@@ -68,11 +68,12 @@ namespace IRacingTools::SDK {
       connectionId_ = client->getConnectionId();
 
       auto idx = client->getVarIdx(name_);
-      if (!idx) {
+      if (!idx || idx.value() == 0xffffffff) {
         available_ = false;
         return false;
       }
       idx_ = idx.value();
+
       unit_ = client->getVarUnit(idx_).value();
       description_ = client->getVarDesc(idx_).value();
       available_ = true;

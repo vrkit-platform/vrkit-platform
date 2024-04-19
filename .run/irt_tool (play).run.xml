@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="irt_tool (play)" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="play -f &quot;Y:\code\sim-racing\irsdk-interop\tmp\irsdk_session 2024-04-19 17-41-18.ibt&quot;" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="iracing_tools" TARGET_NAME="irt_tool" CONFIG_NAME="Debug-Ninja" RUN_TARGET_PROJECT_NAME="iracing_tools" RUN_TARGET_NAME="irt_tool">
+    <envs>
+      <env name="Path" value="c:\qt\6.5.0\bin;c:\qt\6.5.0\lib" />
+    </envs>
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

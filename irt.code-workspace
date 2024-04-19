@@ -1,8 +1,31 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"name": "irt",
+			"path": ".",
+			
 		}
 	],
-	"settings": {}
+	
+	"settings": {
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/Thumbs.db": true,
+			"build/**": true,
+			".vs/**": true,
+			".idea/**": true,
+			"venv/**": true,
+			"vcpkg_installed*/**": true,
+		},
+		"files.associations": {
+			"xrandr-new-mode": "fish",
+			"*.txt": "plaintext",
+			"algorithm": "cpp",
+			"execution": "cpp"
+		}
+	}
 }

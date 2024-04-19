@@ -4,7 +4,7 @@ set(DEP_PACKAGES
   directxmath
   directxtk
   fmt
-  OpenXR
+#  OpenXR
   dxsdk-d3dx
   protobuf
   effects11
@@ -33,6 +33,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 include(${CMAKE_CURRENT_LIST_DIR}/external/tiny_orm.cmake NO_POLICY_SCOPE)
 
 #set(DEP_WXWIDGETS wx::core wx::base)
+set(DEP_CLI11 CLI11::CLI11)
 set(DEP_YAML yaml-cpp::yaml-cpp)
 set(DEP_PROTOBUF protobuf::libprotobuf)
 set(DEP_JSON nlohmann_json::nlohmann_json)
@@ -61,7 +62,7 @@ set(ALL_APP_DEPS
   ${DEP_MAGICENUM}
   ${DEP_DIRECTX}
   ${DEP_FMT}
-  ${DEP_OPENXR}
+#  ${DEP_OPENXR}
   ${DEP_QT_CORE}
   ${DEP_YAML}
   ${DEP_GSL}

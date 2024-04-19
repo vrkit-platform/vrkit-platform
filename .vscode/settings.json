@@ -2,8 +2,17 @@
   "cmake.buildDirectory": "${workspaceFolder}/build/debug-vscode",
   "cmake.allowCommentsInPresetsFile": true,
   "cmake.automaticReconfigure": false,
+  "cmake.parallelJobs": 20,
+  "cmake.buildToolArgs": [
+    // "/p:CL_MPCount=20",
+  ],
   "cmake.configureArgs": [
-    "-DCMAKE_TOOLCHAIN_FILE=\"Y:\\code\\sim-racing\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake\"",
+    "-DCMAKE_PREFIX_PATH=C:/Qt/6.5.0;C:/Qt/6.5.0/lib;C:/Qt/6.5.0/lib/cmake",
+    "-DCMAKE_TOOLCHAIN_FILE=Y:/code/sim-racing/vcpkg/scripts/buildsystems/vcpkg.cmake",
     "-DCMAKE_BUILD_TYPE=Debug"
-  ]
+  ],
+  "cmake.buildEnvironment": {
+    "UseMultiToolTask": "true",
+
+  }
 }

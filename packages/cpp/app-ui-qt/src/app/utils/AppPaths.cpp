@@ -6,7 +6,7 @@
 
 namespace IRacingTools::App::Utils {
 
-  AppPaths::AppPaths(token) {}
+//  AppPaths::AppPaths(token) {}
 
 
 }// namespace App

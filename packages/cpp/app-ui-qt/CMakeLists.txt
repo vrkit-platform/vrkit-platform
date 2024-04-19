@@ -41,6 +41,7 @@ target_include_directories(
   ${CMAKE_CURRENT_LIST_DIR}/src/
 	${CMAKE_CURRENT_LIST_DIR}/src/app/
 	${CMAKE_CURRENT_LIST_DIR}/src/app/services/
+	${CMAKE_CURRENT_LIST_DIR}/src/app/utils/
 	${CMAKE_CURRENT_LIST_DIR}/src/thirdparty/
 	${CMAKE_CURRENT_LIST_DIR}/include/
   ${CMAKE_CURRENT_BINARY_DIR}/

@@ -22,6 +22,7 @@
 using namespace std::literals;
 using namespace IRacingTools::SDK::Utils;
 using namespace IRacingTools::SDK;
+using namespace IRacingTools::App::Shared::Utils;
 
 //int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR lpCmdLine, int nCmdShow) {
     //nCmdShow, &lpCmdLine
@@ -29,19 +30,12 @@ int main(int argc, char** argv) {
     QCoreApplication::setApplicationName(APP_NAME);
     QCoreApplication::setApplicationVersion(APP_VERSION);
 
-    CLI::App cli{APP_NAME};
+    CLI::App app{APP_NAME};
     fmt::println("{}", APP_NAME);
 
-    std::vector<std::shared_ptr<ArgCommand>> cmds = {
-        std::make_shared<SessionPlayArgCommand>(),
-        std::make_shared<SessionRecordArgCommand>()
-    };
+    auto cmds = ArgCommand::build<SessionPlayArgCommand,SessionRecordArgCommand>(&app);
 
-    std::for_each(cmds.begin(), cmds.end(), [&] (auto & cmd) {
-      cmd->configure(&cli);
-    });
-
-    CLI11_PARSE(cli,argc,argv);
+    CLI11_PARSE(app,argc,argv);
 
     return 0;
 }

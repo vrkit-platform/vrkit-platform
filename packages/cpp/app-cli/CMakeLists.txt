@@ -29,6 +29,8 @@ target_compile_definitions(
   APP_VERSION="${APP_VERSION}"
 )
 
+target_link_sdl2(${targetName})
+
 target_link_libraries(${targetName}
   PRIVATE
   ${sdkTargetStatic}

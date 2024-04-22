@@ -57,12 +57,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ctime>
 #include <windows.h>
 
-#include "IRacingTools/SDK/LiveConnection.h"
-#include "IRacingTools/SDK/Utils/YamlParser.h"
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/LiveClient.h>
-#include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/LiveConnection.h>
 #include <IRacingTools/SDK/Utils/YamlParser.h>
+#include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingTools/SDK/Types.h>
 
 // for timeBeginPeriod
 #pragma comment(lib, "Winmm")

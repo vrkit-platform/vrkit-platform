@@ -16,7 +16,7 @@
 #include <IRacingTools/SDK/DiskClient.h>
 #include <IRacingTools/SDK/ClientManager.h>
 
-
+namespace IRacingTools::App::Shared::Utils {
 using namespace std::literals;
 using namespace IRacingTools::SDK::Utils;
 using namespace IRacingTools::SDK;
@@ -26,11 +26,15 @@ using namespace IRacingTools::SDK;
 
 class SessionRecordArgCommand: public ArgCommand {
 public:
-  void configure(CLI::App * app) override;
+
   int execute() override;
+
+protected:
+  CLI::App * createCommand(CLI::App * app) override;
 
 private:
   std::string outputPath_{};
   bool printHeader_{false};
   bool printData_{false};
 };
+}

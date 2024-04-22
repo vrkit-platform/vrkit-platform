@@ -53,5 +53,29 @@
   }, {
     "name" : "yaml-cpp",
     "version>=" : "0.8.0#1"
+  }, {
+    "name" : "sdl2pp",
+    "version>=" : "0.16.1#8"
+  }, {
+    "name" : "sdl2",
+    "version>=" : "2.30.1"
+  }, {
+    "name" : "sdl2-gfx",
+    "version>=" : "1.0.4#11"
+  }, {
+    "name" : "sdl2-image",
+    "version>=" : "2.8.2#1"
+  }, {
+    "name" : "sdl2-mixer",
+    "version>=" : "2.8.0#3"
+  }, {
+    "name" : "sdl2-mixer-ext",
+    "version>=" : "2.6.0#1"
+  }, {
+    "name" : "sdl2-net",
+    "version>=" : "2.2.0#3"
+  }, {
+    "name" : "sdl2-ttf",
+    "version>=" : "2.22.0#1"
   } ]
 }

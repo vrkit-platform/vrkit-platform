@@ -16,19 +16,20 @@
 #include <IRacingTools/SDK/DiskClient.h>
 #include <IRacingTools/SDK/ClientManager.h>
 
-
-using namespace std::literals;
-using namespace IRacingTools::SDK::Utils;
-using namespace IRacingTools::SDK;
-
-
+namespace IRacingTools::App::Shared::Utils {
+  using namespace std::literals;
+  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingTools::SDK;
 
 
-class SessionPlayArgCommand: public ArgCommand {
-public:
-  void configure(CLI::App * app) override;
-  int execute() override;
+  class SessionPlayArgCommand : public ArgCommand {
+  public:
+    int execute() override;
 
-private:
-  std::string filename_{};
-};
+  protected:
+    CLI::App *createCommand(CLI::App *app) override;
+
+  private:
+    std::string filename_{};
+  };
+}

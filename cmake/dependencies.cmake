@@ -1,10 +1,13 @@
 # VCPkg & QT Deps
+set(DEP_SDL2_PACKAGES
+  SDL2 SDL2-GFX SDL2_IMAGE SDL2_MIXER SDL2_MIXER_EXT SDL2_NET SDL2_TTF)
+
 set(DEP_PACKAGES
   Microsoft.GSL
   directxmath
   directxtk
   fmt
-#  OpenXR
+  #  OpenXR
   dxsdk-d3dx
   protobuf
   effects11
@@ -12,10 +15,13 @@ set(DEP_PACKAGES
   GTest
   yaml-cpp
   magic_enum
-  nlohmann_json)
+  nlohmann_json
+  ${DEP_SDL2_PACKAGES})
 foreach(depPkgName ${DEP_PACKAGES})
   find_package(${depPkgName} CONFIG REQUIRED)
 endforeach()
+
+find_package(SDL2PP REQUIRED)
 
 # QT
 include(${CMAKE_CURRENT_LIST_DIR}/qt.cmake NO_POLICY_SCOPE)
@@ -39,6 +45,23 @@ set(DEP_PROTOBUF protobuf::libprotobuf)
 set(DEP_JSON nlohmann_json::nlohmann_json)
 set(DEP_MAGICENUM magic_enum::magic_enum)
 set(DEP_GSL Microsoft.GSL::GSL)
+
+function(target_link_sdl2 targetName)
+  target_include_directories(${targetName} PRIVATE ${SDL2PP_INCLUDE_DIRS})
+  target_link_libraries(${targetName}
+    PRIVATE
+    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+    $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+    SDL2::SDL2_gfx
+    ${SDL2PP_LIBRARIES}
+    $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
+    $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
+    $<IF:$<TARGET_EXISTS:SDL2_mixer_ext::SDL2_mixer_ext>,SDL2_mixer_ext::SDL2_mixer_ext,SDL2_mixer_ext::SDL2_mixer_ext_Static>
+    $<IF:$<TARGET_EXISTS:SDL2_net::SDL2_net>,SDL2_net::SDL2_net,SDL2_net::SDL2_net-static>
+    $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>)
+endfunction()
+
+
 set(DEP_DIRECTX
   d2d1.lib
   dwrite.lib
@@ -62,7 +85,7 @@ set(ALL_APP_DEPS
   ${DEP_MAGICENUM}
   ${DEP_DIRECTX}
   ${DEP_FMT}
-#  ${DEP_OPENXR}
+  #  ${DEP_OPENXR}
   ${DEP_QT_CORE}
   ${DEP_YAML}
   ${DEP_GSL}
@@ -75,7 +98,6 @@ set(ALL_SDK_DEPS
 
 set(DEP_GTEST_MAIN GTest::gtest_main)
 set(DEP_GTEST GTest::gtest)
-
 
 function(IRT_CONFIGURE_SDK_LIBS TARGET)
   target_link_libraries(${TARGET} PUBLIC ${ALL_SDK_DEPS})

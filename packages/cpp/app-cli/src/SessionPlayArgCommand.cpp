@@ -30,15 +30,52 @@ namespace IRacingTools::App::Shared::Utils {
       MY_RENDER_TARGET_SIZE = 512,
     };
 
+    int findD3D11Driver(Window * window) {
+      SDL_Renderer* renderer = nullptr;
+      for( int i = 0; i < SDL_GetNumRenderDrivers(); ++i )
+      {
+        SDL_RendererInfo rendererInfo = {};
+        SDL_GetRenderDriverInfo( i, &rendererInfo );
+        if( rendererInfo.name != std::string( "direct3d11" ) )
+        {
+          continue;
+        }
+
+        //renderer = SDL_CreateRenderer(window->Get(), i, 0 );
+        return i;
+      }
+      abort();
+    }
+
     class OverlayWindow {
+    private:
+      std::mutex mutex_{};
+      std::atomic_bool running_{false};
+      std::unique_ptr<std::thread> thread_{nullptr};
+      SDL sdl_{SDL_INIT_VIDEO};
+      Window window_;
+      Renderer renderer_;
+      ID3D11Device * dev_;
+      Texture sprite_;
+      Texture target1_;
+      Texture target2_;
+
+
     public:
-      OverlayWindow() : sdl_(SDL_INIT_VIDEO),window_("libSDL2pp demo: sprites", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MY_SCREEN_WIDTH, MY_SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE),
-            renderer_(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE),
+      OverlayWindow(OverlayWindow&&) = delete;
+      OverlayWindow(const OverlayWindow&) = delete;
+      OverlayWindow()
+          : window_("libSDL2pp demo: sprites", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MY_SCREEN_WIDTH,
+                    MY_SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE),
+            renderer_(window_, findD3D11Driver(&window_), SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE ),
+            dev_(SDL_RenderGetD3D11Device(renderer_.Get())),
+
             // Sprite data
             sprite_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MY_SPRITE_SIZE, MY_SPRITE_SIZE),
-            target1_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, MY_RENDER_TARGET_SIZE, MY_RENDER_TARGET_SIZE),
-            target2_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, MY_RENDER_TARGET_SIZE, MY_RENDER_TARGET_SIZE)
-      {
+            target1_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, MY_RENDER_TARGET_SIZE,
+                     MY_RENDER_TARGET_SIZE),
+            target2_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, MY_RENDER_TARGET_SIZE,
+                     MY_RENDER_TARGET_SIZE) {
 
         renderer_.SetDrawBlendMode(SDL_BLENDMODE_BLEND);
 
@@ -52,14 +89,12 @@ namespace IRacingTools::App::Shared::Utils {
         }
 
 
-
         sprite_.Update(NullOpt, pixels, MY_SPRITE_SIZE * MY_SPRITE_SIZE);
         sprite_.SetBlendMode(SDL_BLENDMODE_BLEND);
 
         // Two render target textures
         target1_.SetBlendMode(SDL_BLENDMODE_BLEND);
         target2_.SetBlendMode(SDL_BLENDMODE_BLEND);
-
       }
 
       ~OverlayWindow() {
@@ -102,7 +137,7 @@ namespace IRacingTools::App::Shared::Utils {
 
     protected:
 
-      [[noreturn]] void runnable() {
+      void runnable() {
         while (running_) {
           // Process input
           SDL_Event event;
@@ -145,16 +180,7 @@ namespace IRacingTools::App::Shared::Utils {
       }
 
 
-    private:
-      std::mutex mutex_{};
-      std::atomic_bool running_{false};
-      std::unique_ptr<std::thread> thread_{nullptr};
-      SDL sdl_;
-      Window window_;
-      Renderer renderer_;
-      Texture sprite_;
-      Texture target1_;
-      Texture target2_;
+
     };
 
   }

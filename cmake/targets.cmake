@@ -2,6 +2,28 @@ include(GenerateExportHeader)
 include(GNUInstallDirs)
 include(CMakeParseArguments)
 
+macro(SETUP_TARGET_COMPILE_DEFS targetName)
+  target_compile_definitions(
+    ${targetName}
+    PRIVATE
+    APP_NAME="${APP_NAME}"
+    APP_VERSION="${APP_VERSION}"
+  )
+
+  target_compile_definitions(
+    ${targetName}
+    PRIVATE
+    $<$<CONFIG:Debug>:DEBUG>
+  )
+#  if (DEBUG)
+#    target_compile_definitions(
+#      ${targetName}
+#      PRIVATE
+#      DEBUG
+#    )
+#  endif()
+endmacro()
+
 macro(SETUP_LIB_EXPORTS)
   set(options NO_SOURCE_HEADERS)
   cmake_parse_arguments(SETUP_LIB_EXPORTS "${options}" "" "" ${ARGN})

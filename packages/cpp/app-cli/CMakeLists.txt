@@ -22,12 +22,7 @@ target_include_directories(
 )
 
 # Set App Name & Version
-target_compile_definitions(
-  ${targetName}
-  PUBLIC
-  APP_NAME="${APP_NAME}"
-  APP_VERSION="${APP_VERSION}"
-)
+SETUP_TARGET_COMPILE_DEFS(${targetName})
 
 target_link_sdl2(${targetName})
 

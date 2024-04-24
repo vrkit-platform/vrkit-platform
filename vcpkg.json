@@ -77,5 +77,8 @@
   }, {
     "name" : "sdl2-ttf",
     "version>=" : "2.22.0#1"
+  }, {
+    "name" : "spdlog",
+    "version>=" : "1.13.0#1"
   } ]
 }

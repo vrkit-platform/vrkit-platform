@@ -22,7 +22,7 @@
 using namespace std::literals;
 using namespace IRacingTools::SDK::Utils;
 using namespace IRacingTools::SDK;
-using namespace IRacingTools::App::Shared::Utils;
+using namespace IRacingTools::App::Commands;
 
 //int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR lpCmdLine, int nCmdShow) {
     //nCmdShow, &lpCmdLine

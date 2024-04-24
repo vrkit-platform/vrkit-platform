@@ -16,7 +16,7 @@
 #include <IRacingTools/SDK/DiskClient.h>
 #include <IRacingTools/SDK/ClientManager.h>
 
-namespace IRacingTools::App::Shared::Utils {
+namespace IRacingTools::App::Commands {
 using namespace std::literals;
 using namespace IRacingTools::SDK::Utils;
 using namespace IRacingTools::SDK;

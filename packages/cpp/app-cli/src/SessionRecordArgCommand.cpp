@@ -35,7 +35,7 @@
 
 // 16 ms timeout
 #define TIMEOUT 16
-namespace IRacingTools::App::Shared::Utils {
+namespace IRacingTools::App::Commands {
   namespace {
 
     using namespace IRacingTools::SDK;

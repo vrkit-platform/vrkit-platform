@@ -7,7 +7,7 @@
 #include <CLI/CLI.hpp>
 #include <fmt/core.h>
 
-namespace IRacingTools::App::Shared::Utils {
+namespace IRacingTools::App::Commands {
   class ArgCommand;
   using ArgCommandPtr = std::shared_ptr<ArgCommand>;
   using ArgCommandList = std::vector<ArgCommandPtr>;

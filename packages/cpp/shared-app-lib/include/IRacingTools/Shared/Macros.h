@@ -62,6 +62,13 @@ OutputDebugStringA(c); \
 #define AOKMSG AssertOkMsg
 #define AOK AssertOk
 
+
+#ifdef DEBUG
+  #define IRT_BREAK __debugbreak()
+#else
+  #define IRT_BREAK
+#endif
+
 #ifndef HINST_THISCOMPONENT
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE) & __ImageBase)

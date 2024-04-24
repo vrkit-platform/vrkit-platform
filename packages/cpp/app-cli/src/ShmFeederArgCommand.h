@@ -22,14 +22,18 @@ namespace IRacingTools::App::Commands {
   using namespace IRacingTools::SDK;
 
 
-  class SessionPlayArgCommand : public ArgCommand {
+
+
+  class SHMFeederArgCommand: public ArgCommand {
   public:
+
     int execute() override;
 
   protected:
-    CLI::App *createCommand(CLI::App *app) override;
+    CLI::App * createCommand(CLI::App * app) override;
 
-  private:
-    std::string filename_{};
+//  private:
+//    std::string outputPath_{};
+
   };
 }

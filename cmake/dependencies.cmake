@@ -7,7 +7,8 @@ set(DEP_PACKAGES
   directxmath
   directxtk
   fmt
-  #  OpenXR
+  spdlog
+    OpenXR
   dxsdk-d3dx
   protobuf
   effects11
@@ -45,6 +46,7 @@ set(DEP_PROTOBUF protobuf::libprotobuf)
 set(DEP_JSON nlohmann_json::nlohmann_json)
 set(DEP_MAGICENUM magic_enum::magic_enum)
 set(DEP_GSL Microsoft.GSL::GSL)
+set(DEP_LOG spdlog::spdlog)
 
 function(target_link_sdl2 targetName)
   target_include_directories(${targetName} PRIVATE ${SDL2PP_INCLUDE_DIRS})
@@ -77,6 +79,7 @@ set(DEP_DIRECTX
   Microsoft::DirectXTK)
 
 set(DEP_FMT fmt::fmt)
+set(DEP_LOG spdlog::spdlog)
 set(DEP_OPENXR OpenXR::headers)
 set(DEP_BOOST_DEFAULT Boost::system)
 set(ALL_APP_DEPS
@@ -85,7 +88,8 @@ set(ALL_APP_DEPS
   ${DEP_MAGICENUM}
   ${DEP_DIRECTX}
   ${DEP_FMT}
-  #  ${DEP_OPENXR}
+  ${DEP_LOG}
+   ${DEP_OPENXR}
   ${DEP_QT_CORE}
   ${DEP_YAML}
   ${DEP_GSL}

@@ -16,10 +16,18 @@ list(APPEND sharedAppLibSources ${RC_OUT_SRC_FILES})
 
 add_library(${sharedAppLibTargetStatic} STATIC ${sharedAppLibSources} ${sharedAppLibHeaders} ${sharedAppLibHeadersPublic})
 
-  target_include_directories(${sharedAppLibTargetStatic} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-    $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
-  )
+SETUP_TARGET_COMPILE_DEFS(${sharedAppLibTargetStatic})
+#target_compile_definitions(
+#  ${sharedAppLibTargetStatic}
+#  PRIVATE
+#  APP_NAME="${sharedAppLibTargetStatic}"
+#  APP_VERSION="${APP_VERSION}"
+#)
+
+target_include_directories(${sharedAppLibTargetStatic} PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+  $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
+)
 
 target_include_directories(${sharedAppLibTargetStatic} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

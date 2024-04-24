@@ -10,7 +10,7 @@
 #include <SDL2pp/Renderer.hh>
 #include <SDL2pp/Texture.hh>
 
-namespace IRacingTools::App::Shared::Utils {
+namespace IRacingTools::App::Commands {
 
   namespace UI {
     using namespace SDL2pp;

@@ -9,7 +9,8 @@
 #include <mutex>
 
 namespace IRacingTools::Shared::Graphics {
-using Microsoft::WRL::ComPtr;
+
+  using Microsoft::WRL::ComPtr;
 
 struct Size {
     UINT width{0};
@@ -34,8 +35,14 @@ struct DXVersionTypes {};
 
 template<>
 struct DXVersionTypes<DXVersion::DX11> {
-    using DeviceType = ID3D11Device;
-    using DeviceContextType = ID3D11DeviceContext;
+  using DGFactoryType =  IDXGIFactory6;
+  using DGAdapterType = IDXGIAdapter4;
+  using DGDeviceType = IDXGIDevice2;
+
+    using DeviceType = ID3D11Device5;
+    using MultiThreadedType = ID3D11Multithread;
+
+    using DeviceContextType = ID3D11DeviceContext4;
     using SwapChainType = IDXGISwapChain;
     using RasterizerStateType = ID3D11RasterizerState;
     using RenderTargetViewType = ID3D11RenderTargetView;
@@ -57,7 +64,15 @@ template<DXVersion V>
 class DXResources {
 public:
     using Config = DXVersionTypes<V>;
-    using Device = typename Config::DeviceType;
+
+
+  using DGFactory = typename Config::DGFactoryType;
+  using DGAdapter = typename Config::DGAdapterType;
+  using DGDevice = typename Config::DGDeviceType;
+
+  using DGAdapterLUID = uint64_t;
+
+  using Device = typename Config::DeviceType;
     using DeviceContext = typename Config::DeviceContextType;
     using SwapChain = typename Config::SwapChainType;
     using RasterizerState = typename Config::RasterizerStateType;
@@ -73,6 +88,11 @@ public:
 
     // function prototypes
     virtual ~DXResources() = default;
+
+  virtual DXResTPtr(V, DGFactory) &getDGFactory() = 0;
+  virtual DXResTPtr(V, DGAdapter) &getDGAdapter() = 0;
+  virtual DXResTPtr(V, DGDevice) &getDGDevice() = 0;
+  virtual DGAdapterLUID getDGAdapterLUID() = 0;
 
     virtual DXResTPtr(V, Device) &getDevice() = 0;
     virtual DXResTPtr(V, DeviceContext) &getDeviceContext() = 0;
@@ -95,6 +115,11 @@ public:
 template<DXVersion V>
 class DXDeviceResources : public DXResources<V> {
 public:
+  DXResTPtr(V, DGFactory) &getDGFactory() override { return dgFactory_; };
+  DXResTPtr(V, DGAdapter) &getDGAdapter() override { return dgAdapter_; };
+  DXResTPtr(V, DGDevice) &getDGDevice() override { return dgDevice_; };
+  virtual DGAdapterLUID getDGAdapterLUID() override { return dgAdapterLUID_; };
+
     DXResTPtr(V, Device) &getDevice() override { return dev_; };
     DXResTPtr(V, DeviceContext) &getDeviceContext() override { return devContext_; };
     DXResTPtr(V, SwapChain) &getSwapChain() override { return swapChain_; };
@@ -232,7 +257,12 @@ protected:
     };
 
     // Direct3D objects.
-    ComPtr<IDXGIFactory2> dxgiFactory_{nullptr};
+    // ComPtr<IDXGIFactory2> dxgiFactory_{nullptr};
+    DXResTPtr(V, DGFactory) dgFactory_{nullptr};
+    DXResTPtr(V, DGAdapter) dgAdapter_{nullptr};
+    DXResTPtr(V, DGDevice) dgDevice_{nullptr};
+    DXResT(V,DGAdapterLUID) dgAdapterLUID_{0};
+
     DXResTPtr(V, Device) dev_{nullptr};
     DXResTPtr(V, DeviceContext) devContext_{nullptr};
     DXResTPtr(V, SwapChain) swapChain_{nullptr};

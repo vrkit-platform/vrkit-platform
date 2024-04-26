@@ -3,7 +3,9 @@
 //
 
 #include "SessionPlayArgCommand.h"
+#include <spdlog/spdlog.h>
 #include <SDL.h>
+#include <SDL_syswm.h>
 
 #include <SDL2pp/SDL.hh>
 #include <SDL2pp/Window.hh>
@@ -54,11 +56,11 @@ namespace IRacingTools::App::Commands {
       std::unique_ptr<std::thread> thread_{nullptr};
       SDL sdl_{SDL_INIT_VIDEO};
       Window window_;
-      Renderer renderer_;
-      ID3D11Device * dev_;
-      Texture sprite_;
-      Texture target1_;
-      Texture target2_;
+//      Renderer renderer_;
+//      ID3D11Device * dev_;
+//      Texture sprite_;
+//      Texture target1_;
+//      Texture target2_;
 
 
     public:
@@ -66,35 +68,36 @@ namespace IRacingTools::App::Commands {
       OverlayWindow(const OverlayWindow&) = delete;
       OverlayWindow()
           : window_("libSDL2pp demo: sprites", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MY_SCREEN_WIDTH,
-                    MY_SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE),
-            renderer_(window_, findD3D11Driver(&window_), SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE ),
-            dev_(SDL_RenderGetD3D11Device(renderer_.Get())),
+                    MY_SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE)
+//            renderer_(window_, findD3D11Driver(&window_), SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE ),
+//            dev_(SDL_RenderGetD3D11Device(renderer_.Get())),
+//
+//            // Sprite data
+//            sprite_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MY_SPRITE_SIZE, MY_SPRITE_SIZE),
+//            target1_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, MY_RENDER_TARGET_SIZE,
+//                     MY_RENDER_TARGET_SIZE),
+//            target2_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, MY_RENDER_TARGET_SIZE,
+//                     MY_RENDER_TARGET_SIZE)
+      {
 
-            // Sprite data
-            sprite_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, MY_SPRITE_SIZE, MY_SPRITE_SIZE),
-            target1_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, MY_RENDER_TARGET_SIZE,
-                     MY_RENDER_TARGET_SIZE),
-            target2_(renderer_, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, MY_RENDER_TARGET_SIZE,
-                     MY_RENDER_TARGET_SIZE) {
-
-        renderer_.SetDrawBlendMode(SDL_BLENDMODE_BLEND);
+//        renderer_.SetDrawBlendMode(SDL_BLENDMODE_BLEND);
 
         // Necessary checks according to SDL docs
-        SDL_RendererInfo ri;
-        renderer_.GetInfo(ri);
-
-        if (!(ri.flags & SDL_RENDERER_TARGETTEXTURE)) {
-          std::cerr << "Sorry, your renderer doesn't support texture targets" << std::endl;
-          abort();
-        }
-
-
-        sprite_.Update(NullOpt, pixels, MY_SPRITE_SIZE * MY_SPRITE_SIZE);
-        sprite_.SetBlendMode(SDL_BLENDMODE_BLEND);
-
-        // Two render target textures
-        target1_.SetBlendMode(SDL_BLENDMODE_BLEND);
-        target2_.SetBlendMode(SDL_BLENDMODE_BLEND);
+//        SDL_RendererInfo ri;
+//        renderer_.GetInfo(ri);
+//
+//        if (!(ri.flags & SDL_RENDERER_TARGETTEXTURE)) {
+//          std::cerr << "Sorry, your renderer doesn't support texture targets" << std::endl;
+//          abort();
+//        }
+//
+//
+//        sprite_.Update(NullOpt, pixels, MY_SPRITE_SIZE * MY_SPRITE_SIZE);
+//        sprite_.SetBlendMode(SDL_BLENDMODE_BLEND);
+//
+//        // Two render target textures
+//        target1_.SetBlendMode(SDL_BLENDMODE_BLEND);
+//        target2_.SetBlendMode(SDL_BLENDMODE_BLEND);
       }
 
       ~OverlayWindow() {
@@ -117,6 +120,17 @@ namespace IRacingTools::App::Commands {
         std::scoped_lock lock(mutex_);
         if (thread_)
           thread_.reset();
+      }
+
+      HWND getNativeHandle() {
+        auto sdlWindow =  window_.Get();
+
+        SDL_SysWMinfo sdlInfo;
+        if (!SDL_GetWindowWMInfo(sdlWindow, &sdlInfo)) {
+          spdlog::error("Error getting window: {}", SDL_GetError());
+          return nullptr;
+        }
+        return sdlInfo.info.win.window;
       }
 
       void start() {
@@ -148,31 +162,31 @@ namespace IRacingTools::App::Commands {
             }
 
           // Note we fill with transparent color, not black
-          renderer_.SetDrawColor(0, 0, 0, 0);
-
-          // Fill base texture with sprite_ texture
-          renderer_.SetTarget(target1_);
-          renderer_.Clear();
-          renderer_.Copy(sprite_);
-
-          // Repeat several cycles of flip-flop tiling
-          for (int i = 0; i < 4; i++) {
-            renderer_.SetTarget(target2_);
-            renderer_.Clear();
-            renderer_.Copy(target1_, NullOpt, Rect(0, 0, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2), SDL_GetTicks() / 10000.0 * 360.0);
-            renderer_.Copy(target1_, NullOpt, Rect(MY_RENDER_TARGET_SIZE / 2, 0, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2), SDL_GetTicks() / 10000.0 * 360.0);
-            renderer_.Copy(target1_, NullOpt, Rect(0, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2), SDL_GetTicks() / 10000.0 * 360.0);
-            renderer_.Copy(target1_, NullOpt, Rect(MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2), SDL_GetTicks() / 10000.0 * 360.0);
-
-            // Swap textures to copy recursively
-            std::swap(target1_, target2_);
-          }
-
-          // Draw result to screen
-          renderer_.SetTarget();
-          renderer_.Clear();
-          renderer_.Copy(target1_, NullOpt, Rect((MY_SCREEN_WIDTH - MY_SCREEN_HEIGHT) / 2, 0, MY_SCREEN_HEIGHT, MY_SCREEN_HEIGHT), SDL_GetTicks() / 10000.0 * 360.0);
-          renderer_.Present();
+//          renderer_.SetDrawColor(0, 0, 0, 0);
+//
+//          // Fill base texture with sprite_ texture
+//          renderer_.SetTarget(target1_);
+//          renderer_.Clear();
+//          renderer_.Copy(sprite_);
+//
+//          // Repeat several cycles of flip-flop tiling
+//          for (int i = 0; i < 4; i++) {
+//            renderer_.SetTarget(target2_);
+//            renderer_.Clear();
+//            renderer_.Copy(target1_, NullOpt, Rect(0, 0, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2), SDL_GetTicks() / 10000.0 * 360.0);
+//            renderer_.Copy(target1_, NullOpt, Rect(MY_RENDER_TARGET_SIZE / 2, 0, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2), SDL_GetTicks() / 10000.0 * 360.0);
+//            renderer_.Copy(target1_, NullOpt, Rect(0, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2), SDL_GetTicks() / 10000.0 * 360.0);
+//            renderer_.Copy(target1_, NullOpt, Rect(MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2, MY_RENDER_TARGET_SIZE / 2), SDL_GetTicks() / 10000.0 * 360.0);
+//
+//            // Swap textures to copy recursively
+//            std::swap(target1_, target2_);
+//          }
+//
+//          // Draw result to screen
+//          renderer_.SetTarget();
+//          renderer_.Clear();
+//          renderer_.Copy(target1_, NullOpt, Rect((MY_SCREEN_WIDTH - MY_SCREEN_HEIGHT) / 2, 0, MY_SCREEN_HEIGHT, MY_SCREEN_HEIGHT), SDL_GetTicks() / 10000.0 * 360.0);
+//          renderer_.Present();
 
           // Frame limiter
           SDL_Delay(1);

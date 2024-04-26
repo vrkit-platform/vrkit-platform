@@ -80,5 +80,8 @@
   }, {
     "name" : "spdlog",
     "version>=" : "1.13.0#1"
+  }, {
+    "name" : "cppwinrt",
+    "version>=" : "2.0.240111.5"
   } ]
 }

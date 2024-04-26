@@ -25,10 +25,14 @@
 #include <windowsx.h>
 #include <winrt/base.h>
 
+#include <dxgi1_6.h>
+
 #include <d3d11.h>
+#include <d3d11_4.h>
 #include <d3dx11.h>
 #include <d3dx10.h>
 
+#include <d3dkmthk.h>
 
 // C RunTime Header Files
 #include <minwinbase.h>

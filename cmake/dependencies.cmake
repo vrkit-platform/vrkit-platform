@@ -4,11 +4,12 @@ set(DEP_SDL2_PACKAGES
 
 set(DEP_PACKAGES
   Microsoft.GSL
+  cppwinrt
   directxmath
   directxtk
   fmt
   spdlog
-    OpenXR
+  OpenXR
   dxsdk-d3dx
   protobuf
   effects11
@@ -47,6 +48,7 @@ set(DEP_JSON nlohmann_json::nlohmann_json)
 set(DEP_MAGICENUM magic_enum::magic_enum)
 set(DEP_GSL Microsoft.GSL::GSL)
 set(DEP_LOG spdlog::spdlog)
+set(DEP_WINRT Microsoft::CppWinRT)
 
 function(target_link_sdl2 targetName)
   target_include_directories(${targetName} PRIVATE ${SDL2PP_INCLUDE_DIRS})
@@ -76,7 +78,9 @@ set(DEP_DIRECTX
   Microsoft::D3DX11
   Microsoft::Effects11
   Microsoft::DirectXMath
-  Microsoft::DirectXTK)
+  Microsoft::DirectXTK
+  ${DEP_WINRT}
+)
 
 set(DEP_FMT fmt::fmt)
 set(DEP_LOG spdlog::spdlog)

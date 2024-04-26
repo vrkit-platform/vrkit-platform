@@ -5,6 +5,8 @@
 #pragma once
 
 #include <cstdio>
+#include <functional>
+#include <optional>
 
 namespace IRacingTools::SDK::Utils {
 

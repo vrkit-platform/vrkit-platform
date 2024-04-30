@@ -24,6 +24,20 @@
 			],
 			"group": {
 				"kind": "build",
+				"isDefault": false
+			},
+			"problemMatcher": [],
+			"detail": "CMake template build task"
+		},
+		{
+			"type": "cmake",
+			"label": "irt_tool",
+			"command": "build",
+			"targets": [
+				"irt_tool"
+			],
+			"group": {
+				"kind": "build",
 				"isDefault": true
 			},
 			"problemMatcher": [],

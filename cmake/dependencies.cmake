@@ -1,6 +1,14 @@
 # VCPkg & QT Deps
 set(DEP_SDL2_PACKAGES
-  SDL2 SDL2-GFX SDL2_IMAGE SDL2_MIXER SDL2_MIXER_EXT SDL2_NET SDL2_TTF)
+  SDL2
+  SDL2-GFX
+  SDL2_IMAGE
+  SDL2_MIXER
+  SDL2_MIXER_EXT
+  SDL2_NET
+  SDL2_TTF
+  Freetype
+)
 
 set(DEP_PACKAGES
   Microsoft.GSL
@@ -10,7 +18,6 @@ set(DEP_PACKAGES
   fmt
   spdlog
   OpenXR
-  dxsdk-d3dx
   protobuf
   effects11
   CLI11
@@ -48,7 +55,7 @@ set(DEP_JSON nlohmann_json::nlohmann_json)
 set(DEP_MAGICENUM magic_enum::magic_enum)
 set(DEP_GSL Microsoft.GSL::GSL)
 set(DEP_LOG spdlog::spdlog)
-set(DEP_WINRT Microsoft::CppWinRT)
+#set(DEP_WINRT Microsoft::CppWinRT)
 
 function(target_link_sdl2 targetName)
   target_include_directories(${targetName} PRIVATE ${SDL2PP_INCLUDE_DIRS})
@@ -62,28 +69,38 @@ function(target_link_sdl2 targetName)
     $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
     $<IF:$<TARGET_EXISTS:SDL2_mixer_ext::SDL2_mixer_ext>,SDL2_mixer_ext::SDL2_mixer_ext,SDL2_mixer_ext::SDL2_mixer_ext_Static>
     $<IF:$<TARGET_EXISTS:SDL2_net::SDL2_net>,SDL2_net::SDL2_net,SDL2_net::SDL2_net-static>
-    $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>)
+    $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
+  )
 endfunction()
 
 
 set(DEP_DIRECTX
-  d2d1.lib
-  dwrite.lib
+#  d2d1.lib
+#  dwrite.lib
   windowscodecs.lib
-  dxgi.lib
-  d3d10_1.lib
-  d3d11.lib
-  Microsoft::D3DX9
-  Microsoft::D3DX10
-  Microsoft::D3DX11
+
+#  dxgi.lib
+#  d3d10_1.lib
+#  d3d11.lib
+  System::Dwrite
+  System::Dxgi
+  System::Dxguid
+  System::D2d1
+  System::D3d11
+  System::D3d12
+  System::WindowsApp
+#  Microsoft::D3DX9
+#  Microsoft::D3DX10
+#  Microsoft::D3DX11
   Microsoft::Effects11
   Microsoft::DirectXMath
+#  directxtk.lib
   Microsoft::DirectXTK
-  ${DEP_WINRT}
+
 )
 
 set(DEP_FMT fmt::fmt)
-set(DEP_LOG spdlog::spdlog)
+set(DEP_LOG spdlog::spdlog ${DEP_FMT})
 set(DEP_OPENXR OpenXR::headers)
 set(DEP_BOOST_DEFAULT Boost::system)
 set(ALL_APP_DEPS
@@ -112,7 +129,7 @@ function(IRT_CONFIGURE_SDK_LIBS TARGET)
 endfunction()
 
 function(IRT_CONFIGURE_APP_LIBS TARGET)
-  target_link_libraries(${TARGET} PUBLIC ${ALL_APP_DEPS})
+  target_link_libraries(${TARGET} PRIVATE ${ALL_APP_DEPS})
 endfunction()
 
 function(IRT_CONFIGURE_TEST_LIBS TARGET)

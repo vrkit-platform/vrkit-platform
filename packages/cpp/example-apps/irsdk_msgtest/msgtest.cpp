@@ -161,7 +161,7 @@ int main()
 			break;
 
 		case 'f':
-			printf("Set replay offset to %d %d\n", replayOffset, replayFrame);
+			printf("Set replay offset_ to %d %d\n", replayOffset, replayFrame);
 			irsdk_broadcastMsg(ReplaySetPlayPosition, replayOffset, replayFrame);
 
 			replayOffset++;

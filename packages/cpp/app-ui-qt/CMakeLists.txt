@@ -49,7 +49,7 @@ target_include_directories(
 
 # Link configured deps
 IRT_CONFIGURE_APP_LIBS(${targetName})
-irt_configure_executable(${targetName})
+IRT_CONFIGURE_TARGET(${targetName})
 
 target_compile_definitions(
   ${targetName}
@@ -63,18 +63,6 @@ target_compile_definitions(
   QT_QML_DEBUG
 )
 
-
-
-#if(CMAKE_BUILD_TYPE STREQUAL Debug)
-#  target_compile_definitions(
-#    ${targetName}
-#    PRIVATE
-#    DEBUG
-#  )
-#endif()
-
-
-
 target_link_libraries(${targetName}
   PRIVATE
   ${sdkTargetStatic}
@@ -83,27 +71,9 @@ target_link_libraries(${targetName}
   ${DEP_QT_UI}
 )
 
-set_target_properties(${targetName} PROPERTIES
-  WIN32_EXECUTABLE TRUE
-)
-
-#install(TARGETS ${targetName}
-#  RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"
-#  BUNDLE DESTINATION "${INSTALL_EXAMPLEDIR}"
-#  LIBRARY DESTINATION "${INSTALL_EXAMPLEDIR}"
-#)
-
 # AppUtils
 add_subdirectory(src/thirdparty/AppUtils)
 target_link_libraries(${targetName} PRIVATE AppUtils)
-
-## MobileUI
-#add_subdirectory(src/thirdparty/MobileUI)
-#target_link_libraries(${targetName} PRIVATE MobileUI)
-#
-## MobileSharing
-#add_subdirectory(src/thirdparty/MobileSharing)
-#target_link_libraries(${targetName} PRIVATE MobileSharing)
 
 # SingleApplication
 set(QAPPLICATION_CLASS QGuiApplication)

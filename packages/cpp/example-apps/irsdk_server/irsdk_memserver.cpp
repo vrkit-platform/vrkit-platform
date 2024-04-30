@@ -70,7 +70,7 @@ irsdkMemServer::irsdkMemServer()
 	
 	localHeader.numBuf = irsdkMemServer::bufCount;
 	localHeader.bufLen = 0;
-	localVarHeader[0].offset = 0;
+	localVarHeader[0].offset_ = 0;
 
 	//offset points to end of memory
 	int offset = sizeof(irsdk_header);
@@ -230,7 +230,7 @@ int irsdkMemServer::regVar(const char *name, const void *var,
 						index = localHeader.numVars++;
 						irsdk_varHeader *rec = &localVarHeader[index];
 
-						rec->offset = localHeader.bufLen;
+						rec->offset_ = localHeader.bufLen;
 						localHeader.bufLen = usedLen;
 
 						rec->type = type;
@@ -304,7 +304,7 @@ bool irsdkMemServer::setVar(int index, const void *var)
 
 			writeVar(localVarHeader[index].count, localVarHeader[index].type, 
 					 entryVarHelper[index].multiplier, entryVarHelper[index].offset, 
-					 var, pBase + rec->offset);
+					 var, pBase + rec->offset_);
 
 			return true;
 		}
@@ -407,7 +407,7 @@ bool irsdkMemServer::pollSampleVars()
 			{
 				writeVar(localVarHeader[index].count, localVarHeader[index].type, 
 						 entryVarHelper[index].multiplier, entryVarHelper[index].offset, 
-						 entryVarHelper[index].varPtr, pBase + rec->offset);
+						 entryVarHelper[index].varPtr, pBase + rec->offset_);
 			}
 		}
 

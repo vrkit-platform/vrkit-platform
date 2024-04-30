@@ -3,19 +3,24 @@
 //
 
 #pragma once
-#include <IRacingTools/Models/TrackMapData.pb.h>
+
 #include <optional>
 #include <random>
 #include <shared_mutex>
 
+#include <IRacingTools/Models/TrackMapData.pb.h>
+
+#include "SharedAppLibPCH.h"
 #include "Constants.h"
 #include "FileSystemHelpers.h"
 #include "Geometry2D.h"
 #include "VRTypes.h"
 
+// #include <wil/cppwinrt.h>
+// #include <wil/cppwinrt_helpers.h>
+
 namespace IRacingTools::Shared {
 
-  using namespace Geometry2D;
   using namespace VR;
 
   struct SHMConfig final {
@@ -125,7 +130,7 @@ namespace IRacingTools::Shared {
     SharedMemoryStorage();
 
     class Impl;
-    std::unique_ptr<Impl> impl_{nullptr};
+    std::unique_ptr<Impl> impl_;
     std::shared_mutex mutex_{};
     std::optional<TrackMap> trackMap_{std::nullopt};
   };

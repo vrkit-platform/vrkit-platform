@@ -3,14 +3,15 @@
 //
 
 
-#include <IRacingTools/SDK/Utils/LockHelpers.h>
-#include <fmt/core.h>
+
+
 #include <IRacingTools/Models/LapData.pb.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/SharedMemoryStorage.h>
 #include <IRacingTools/Shared/TrackMapGeometry.h>
-
+#include <IRacingTools/SDK/Utils/LockHelpers.h>
 #include <spdlog/spdlog.h>
+
 
 namespace IRacingTools::Shared {
 
@@ -20,7 +21,10 @@ namespace IRacingTools::Shared {
       Locked,
     };
 
+
+
     class SharedMemoryStorage::Impl : public SDK::Utils::Lockable {
+
   protected:
     winrt::handle fileHandle_;
     winrt::handle eventHandle_;
@@ -31,36 +35,36 @@ namespace IRacingTools::Shared {
 
   public:
     Impl() {
-      auto fileHandle = winrt::handle(winrt::check_pointer(CreateFileMappingW(
+      auto fileHandle = Win32::CreateFileMappingW(
           INVALID_HANDLE_VALUE,
           nullptr,
           PAGE_READWRITE,
           0,
           DWORD {SHM_SIZE},// Perfect forwarding fails with static constexpr
                           // integer values
-          SHMPath().c_str())));
+          SHMPath().c_str());
 
       if (!fileHandle) {
-        fmt::println(
+        spdlog::error(
             "CreateFileMappingW failed: {}", static_cast<int>(GetLastError()));
         return;
       }
-      auto eventHandle = winrt::handle(winrt::check_pointer(CreateEventW(nullptr,false,false, SHMEventPath().c_str())));
+      auto eventHandle = Win32::CreateEventW(nullptr,false,false, SHMEventPath().c_str());
       if (!eventHandle) {
-        fmt::println("CreateEventW failed: {}", static_cast<int>(GetLastError()));
+        spdlog::error("CreateEventW failed: {}", static_cast<int>(GetLastError()));
         return;
       }
 
-      auto mutexHandle = winrt::handle{CreateMutexW(nullptr, FALSE, SHMMutexPath().c_str())};
+      auto mutexHandle = Win32::CreateMutexW(nullptr, FALSE, SHMMutexPath().c_str());
       if (!mutexHandle) {
-        fmt::println("CreateMutexW failed: {}", static_cast<int>(GetLastError()));
+        spdlog::error("CreateMutexW failed: {}", static_cast<int>(GetLastError()));
         return;
       }
 
       mapping_ = reinterpret_cast<std::byte*>(
           MapViewOfFile(fileHandle.get(), FILE_MAP_WRITE, 0, 0, SHM_SIZE));
       if (!mapping_) {
-        fmt::println(
+        spdlog::error(
             "MapViewOfFile failed: {:#x}", std::bit_cast<uint32_t>(GetLastError()));
         return;
       }
@@ -168,8 +172,8 @@ namespace IRacingTools::Shared {
     return trackMap_;
   }
 
-  SharedMemoryStorage::SharedMemoryStorage() {
-    impl_ = std::make_unique<Impl>();
+  SharedMemoryStorage::SharedMemoryStorage() : impl_(std::make_unique<SharedMemoryStorage::Impl>()) {
+
   }
 
 

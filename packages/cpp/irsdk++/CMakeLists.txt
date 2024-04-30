@@ -8,6 +8,9 @@ file(GLOB_RECURSE sdkInternalHeaders src/*.h)
 # Create libraries
 SETUP_LIB_EXPORTS(${sdkTarget} ${sdkTargetStatic} sdkSources sdkInternalHeaders sdkHeaders)
 
+IRT_CONFIGURE_TARGET(${sdkTarget})
+IRT_CONFIGURE_TARGET(${sdkTargetStatic})
+
 # Add dependency
 IRT_CONFIGURE_SDK_LIBS(${sdkTarget})
 IRT_CONFIGURE_SDK_LIBS(${sdkTargetStatic})

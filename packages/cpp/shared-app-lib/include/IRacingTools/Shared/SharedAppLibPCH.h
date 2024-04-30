@@ -22,15 +22,23 @@
 #define WIN32_LEAN_AND_MEAN     // Exclude rarely-used stuff from Windows headers
 // Windows Header Files:
 #include <windows.h>
+#include <winternl.h>
 #include <windowsx.h>
-#include <winrt/base.h>
 
 #include <dxgi1_6.h>
 
+#include <d2d1.h>
+#include <d2d1_3.h>
+#include <d2d1helper.h>
+
 #include <d3d11.h>
 #include <d3d11_4.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
+// #include <d3dx11.h>
+// #include <d3dx10.h>
+
+#include <DirectXColors.h>
+#include <DirectXMath.h>
+// #include <d3d11_3.h>
 
 #include <d3dkmthk.h>
 
@@ -41,16 +49,19 @@
 #include <memory.h>
 #include <cwchar>
 
-#include <d3dx9math.h>
+// #include <d3dx9math.h>
 #include <d3dx11effect.h>
-#include <d3d11_1.h>
+// #include <d3d11_1.h>
 
-#include <d2d1.h>
-#include <d2d1helper.h>
 #include <dwrite.h>
 #include <wincodec.h>
 #include <wrl/client.h>
 
-#include "D3DMath.h"
 
 
+#include <fmt/xchar.h>
+#include <fmt/core.h>
+#include <spdlog/spdlog.h>
+
+#include <winrt/Windows.Foundation.h>
+#include <winrt/base.h>

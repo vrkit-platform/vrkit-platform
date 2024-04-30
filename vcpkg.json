@@ -1,87 +1,115 @@
 {
-  "name" : "irsdk-cpp",
-  "version" : "0.0.1",
-  "builtin-baseline" : "83972272512ce4ede5fc3b2ba98f6468b179f192",
-  "dependencies" : [ {
-    "name" : "fmt",
-    "version>=" : "10.1.1"
-  }, {
-    "name" : "openxr-loader",
-    "version>=" : "1.0.31"
-  }, {
-    "name" : "magic-enum",
-    "version>=" : "0.9.5"
-  }, {
-    "name" : "directxtk",
-    "version>=" : "2023-12-31"
-  }, {
-    "name" : "protobuf",
-    "version>=" : "3.21.12"
-  }, {
-    "name" : "directxmath",
-    "version>=" : "2023-12-31"
-  }, {
-    "name" : "dxsdk-d3dx",
-    "version>=" : "9.29.952.8#6"
-  }, {
-    "name" : "effects11",
-    "version>=" : "11.29#3"
-  }, {
-    "name" : "cli11",
-    "version>=" : "2.3.2"
-  }, {
-    "name" : "gtest",
-    "version>=" : "1.14.0"
-  }, {
-    "name" : "nlohmann-json",
-    "version>=" : "3.11.3"
-  }, {
-    "name" : "boost-system",
-    "version>=" : "1.83.0"
-  }, {
-    "name" : "boost-interprocess",
-    "version>=" : "1.83.0"
-  }, {
-    "name" : "ms-gsl",
-    "version>=" : "4.0.0#1"
-  }, {
-    "name" : "range-v3",
-    "version>=" : "0.12.0#1"
-  }, {
-    "name" : "tabulate",
-    "version>=" : "1.5"
-  }, {
-    "name" : "yaml-cpp",
-    "version>=" : "0.8.0#1"
-  }, {
-    "name" : "sdl2pp",
-    "version>=" : "0.16.1#8"
-  }, {
-    "name" : "sdl2",
-    "version>=" : "2.30.1"
-  }, {
-    "name" : "sdl2-gfx",
-    "version>=" : "1.0.4#11"
-  }, {
-    "name" : "sdl2-image",
-    "version>=" : "2.8.2#1"
-  }, {
-    "name" : "sdl2-mixer",
-    "version>=" : "2.8.0#3"
-  }, {
-    "name" : "sdl2-mixer-ext",
-    "version>=" : "2.6.0#1"
-  }, {
-    "name" : "sdl2-net",
-    "version>=" : "2.2.0#3"
-  }, {
-    "name" : "sdl2-ttf",
-    "version>=" : "2.22.0#1"
-  }, {
-    "name" : "spdlog",
-    "version>=" : "1.13.0#1"
-  }, {
-    "name" : "cppwinrt",
-    "version>=" : "2.0.240111.5"
-  } ]
+  "name": "irsdk-cpp",
+  "version": "0.0.1",
+  "builtin-baseline": "83972272512ce4ede5fc3b2ba98f6468b179f192",
+  "dependencies": [
+    {
+      "name": "fmt",
+      "version>=": "10.1.1"
+    },
+    {
+      "name": "openxr-loader",
+      "version>=": "1.0.31"
+    },
+    {
+      "name": "magic-enum",
+      "version>=": "0.9.5"
+    },
+    {
+      "name": "directxtk",
+      "version>=": "2023-12-31"
+    },
+    {
+      "name": "protobuf",
+      "version>=": "3.21.12"
+    },
+    {
+      "name": "directxmath",
+      "version>=": "2023-12-31"
+    },
+    {
+      "name": "effects11",
+      "version>=": "11.29#3"
+    },
+    {
+      "name": "cli11",
+      "version>=": "2.3.2"
+    },
+    {
+      "name": "gtest",
+      "version>=": "1.14.0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.11.3"
+    },
+    {
+      "name": "boost-system",
+      "version>=": "1.83.0"
+    },
+    {
+      "name": "boost-interprocess",
+      "version>=": "1.83.0"
+    },
+    {
+      "name": "ms-gsl",
+      "version>=": "4.0.0#1"
+    },
+    {
+      "name": "range-v3",
+      "version>=": "0.12.0#1"
+    },
+    {
+      "name": "tabulate",
+      "version>=": "1.5"
+    },
+    {
+      "name": "yaml-cpp",
+      "version>=": "0.8.0#1"
+    },
+    {
+      "name": "sdl2pp",
+      "version>=": "0.16.1#8"
+    },
+    {
+      "name": "sdl2",
+      "version>=": "2.30.1"
+    },
+    {
+      "name": "sdl2-gfx",
+      "version>=": "1.0.4#11"
+    },
+    {
+      "name": "sdl2-image",
+      "version>=": "2.8.2#1"
+    },
+    {
+      "name": "sdl2-mixer",
+      "version>=": "2.8.0#3"
+    },
+    {
+      "name": "sdl2-mixer-ext",
+      "version>=": "2.6.0#1"
+    },
+    {
+      "name": "sdl2-net",
+      "version>=": "2.2.0#3"
+    },
+    {
+      "name": "sdl2-ttf",
+      "version>=": "2.22.0#1"
+    },
+    {
+      "name": "freetype",
+      "version>=": "2.13.2#1"
+    },
+    {
+      "name": "spdlog",
+      "version>=": "1.13.0#1"
+    },
+    {
+      "name": "cppwinrt",
+      "version>=": "2.0.240111.5"
+    }
+  ]
 }

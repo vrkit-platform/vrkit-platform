@@ -8,6 +8,10 @@ set(appVersion ${appVersionMajor}.${appVersionMinor}.${appVersionPatch})
 
 project(iracing_tools VERSION ${appVersion})
 
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
+
 # Subprojects & Targets
 set(sdkTarget ${PROJECT_NAME}_sdk)
 set(sdkTargetStatic ${sdkTarget}_static)
@@ -43,6 +47,7 @@ set(CMAKE_CXX_VISIBILITY_PRESET visible)
 
 
 # Include CMake helper libs
+include(cmake/system.cmake)
 include(cmake/embed_resource.cmake)
 include(cmake/targets.cmake)
 include(cmake/fs.cmake)
@@ -51,7 +56,7 @@ include(cmake/example_target.cmake)
 include(cmake/hybrid_crt.cmake NO_POLICY_SCOPE)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
+add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP> $<$<CXX_COMPILER_ID:MSVC>:/MTd>)
 
 # Include test tools
 include(CTest)

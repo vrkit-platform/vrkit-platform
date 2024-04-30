@@ -316,7 +316,7 @@ float irsdkCSVClient::getVarFloat(int idx)
 	if(m_csvFile)
 	{
 		if(idx >= 0 && idx < m_varCount)
-			return m_varBuf[m_varHeaders[idx].offset];
+			return m_varBuf[m_varHeaders[idx].offset_];
 		else //invalid variable index
 			assert(false);
 	}
@@ -334,7 +334,7 @@ void irsdkCSVClient::parceNameAndUnit(const char *str, irsdk_varHeader &head, in
 	head.type = VarDataType::Float;
 	head.count = 1;
 	head.desc[0] = '\0';
-	head.offset = varOffset;
+	head.offset_ = varOffset;
 	varOffset += 4;
 
 	char *buf = head.name;

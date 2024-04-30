@@ -30,6 +30,7 @@ namespace IRacingTools::App::Commands {
     CLI::App *createCommand(CLI::App *app) override;
 
   private:
-    std::string filename_{};
+    std::string telemetryFilename_{};
+    std::string trackmapFilename_{};
   };
 }

@@ -3,7 +3,11 @@
 //
 
 #pragma once
+
+#include "SharedAppLibPCH.h"
+
 #include <IRacingTools/Models/TrackMapData.pb.h>
+
 #include <numbers>
 #include <optional>
 #include <random>
@@ -13,7 +17,7 @@
 #include "Geometry2D.h"
 
 namespace IRacingTools::Shared::VR {
-  using namespace Geometry2D;
+
 
   /** Position and orientation.
    *
@@ -79,7 +83,7 @@ namespace IRacingTools::Shared::VR {
   // Distances in metres, positions in radians.
   struct VRLayer {
     VRPose pose;
-    Geometry2D::Size<float> physicalSize;
+    Size<float> physicalSize;
 
     bool enableGazeZoom{true};
     float zoomScale = 2.0f;

@@ -1,314 +1,403 @@
 #pragma once
 
 #include "../SharedAppLibPCH.h"
+#include "DX113D.h"
 #include <algorithm>
 
+#include <IRacingTools/SDK/Utils/LockHelpers.h>
 #include <IRacingTools/Shared/Macros.h>
+
 #include <atomic>
 #include <functional>
 #include <mutex>
 
+
 namespace IRacingTools::Shared::Graphics {
 
-  using Microsoft::WRL::ComPtr;
+  // using Microsoft::WRL::ComPtr;
 
-struct Size {
-    UINT width{0};
-    UINT height{0};
-};
+  // /using Size = Size<UINT>;
+  // struct Size {
+  //     UINT width{0};
+  //     UINT height{0};
+  // };
 
-struct DeviceListener {
+  struct DeviceListener {
     virtual void onDeviceLost() = 0;
+
     virtual void onDeviceRestored() = 0;
 
     virtual ~DeviceListener() = default;
-};
-
-enum class DXVersion { DX11, DX12 };
-
-/**
- * \brief
- * \tparam V
- */
-template<DXVersion V>
-struct DXVersionTypes {};
-
-template<>
-struct DXVersionTypes<DXVersion::DX11> {
-  using DGFactoryType =  IDXGIFactory6;
-  using DGAdapterType = IDXGIAdapter4;
-  using DGDeviceType = IDXGIDevice2;
-
-    using DeviceType = ID3D11Device5;
-    using MultiThreadedType = ID3D11Multithread;
-
-    using DeviceContextType = ID3D11DeviceContext4;
-    using SwapChainType = IDXGISwapChain;
-    using RasterizerStateType = ID3D11RasterizerState;
-    using RenderTargetViewType = ID3D11RenderTargetView;
-
-    using RenderTarget2DType = ID2D1RenderTarget;
-    using Texture2DType = ID3D11Texture2D;
-
-    using DepthStenciViewType = ID3D11DepthStencilView;
-
-    using ViewportType = D3D11_VIEWPORT;
-
-    using EffectType = ID3DX11Effect;
-};
-
-#define DXResT(V, T) typename DXResources<V>::T
-#define DXResTPtr(V, T) ComPtr<DXResT(V, T)>
-
-template<DXVersion V>
-class DXResources {
-public:
-    using Config = DXVersionTypes<V>;
+  };
 
 
-  using DGFactory = typename Config::DGFactoryType;
-  using DGAdapter = typename Config::DGAdapterType;
-  using DGDevice = typename Config::DGDeviceType;
+  /** Resources needed for anything in OpenKneeboard using D3D11.
+   *
+   * This includes:
+   * - the main app
+   * - the SteamVR implementation (which uses its' own devices)
+   * - the viewer
+   */
+  class D3D11Resources : public SDK::Utils::Lockable {
+  protected:
+    D3D11Resources();
 
-  using DGAdapterLUID = uint64_t;
+    ~D3D11Resources();
 
-  using Device = typename Config::DeviceType;
-    using DeviceContext = typename Config::DeviceContextType;
-    using SwapChain = typename Config::SwapChainType;
-    using RasterizerState = typename Config::RasterizerStateType;
+    D3D11Resources(const D3D11Resources &) = delete;
 
-    using RenderTargetView = typename Config::RenderTargetViewType;
-    using RenderTarget2D = typename Config::RenderTarget2DType;
+    D3D11Resources &operator=(const D3D11Resources &) = delete;
 
-    using Texture2D = typename Config::Texture2DType;
-    using DepthStencilView = typename Config::DepthStenciViewType;
-    using Viewport = typename Config::ViewportType;
+    winrt::com_ptr<IDXGIFactory6> dxgiFactory_;
+    winrt::com_ptr<IDXGIAdapter4> dxgiAdapter_;
+    uint64_t dxgiAdapterLUID_;
 
-    using Effect = typename Config::EffectType;
+    winrt::com_ptr<ID3D11Device5> dxDevice_;
+    winrt::com_ptr<ID3D11DeviceContext4> dxImmediateContext_;
 
-    // function prototypes
-    virtual ~DXResources() = default;
+    winrt::com_ptr<IDXGIDevice2> dxgiDevice_;
 
-  virtual DXResTPtr(V, DGFactory) &getDGFactory() = 0;
-  virtual DXResTPtr(V, DGAdapter) &getDGAdapter() = 0;
-  virtual DXResTPtr(V, DGDevice) &getDGDevice() = 0;
-  virtual DGAdapterLUID getDGAdapterLUID() = 0;
+  public:
+    winrt::com_ptr<IDXGIFactory6> &getDXGIFactory();
 
-    virtual DXResTPtr(V, Device) &getDevice() = 0;
-    virtual DXResTPtr(V, DeviceContext) &getDeviceContext() = 0;
-    virtual DXResTPtr(V, SwapChain) &getSwapChain() = 0;
-    virtual DXResTPtr(V, RasterizerState) &getRasterizerState() = 0;
+    winrt::com_ptr<IDXGIAdapter4> &getDXGIAdapter();
 
-    virtual DXResTPtr(V, Texture2D) &getRenderTarget() = 0;
-    virtual DXResTPtr(V, Texture2D) &getDepthStencil() = 0;
+    uint64_t getDXGIAdapterLUID();
 
-    virtual DXResTPtr(V, RenderTargetView) &getRenderTargetView() = 0;
-    virtual DXResTPtr(V, DepthStencilView) &getDepthStencilView() = 0;
-    virtual DXResT(V, Viewport) getViewport() = 0;
+    winrt::com_ptr<ID3D11Device5> &getDXDevice();
 
-    virtual DXGI_FORMAT getBackBufferFormat() = 0;
-    virtual DXGI_FORMAT getDepthBufferFormat() = 0;
-    virtual UINT getBackBufferCount() = 0;
-    virtual Size getSize() = 0;
-};
+    winrt::com_ptr<ID3D11DeviceContext4> &getDXImmediateContext();
 
-template<DXVersion V>
-class DXDeviceResources : public DXResources<V> {
-public:
-  DXResTPtr(V, DGFactory) &getDGFactory() override { return dgFactory_; };
-  DXResTPtr(V, DGAdapter) &getDGAdapter() override { return dgAdapter_; };
-  DXResTPtr(V, DGDevice) &getDGDevice() override { return dgDevice_; };
-  virtual DGAdapterLUID getDGAdapterLUID() override { return dgAdapterLUID_; };
+    winrt::com_ptr<IDXGIDevice2> &getDXGIDevice();
 
-    DXResTPtr(V, Device) &getDevice() override { return dev_; };
-    DXResTPtr(V, DeviceContext) &getDeviceContext() override { return devContext_; };
-    DXResTPtr(V, SwapChain) &getSwapChain() override { return swapChain_; };
-    DXResTPtr(V, RasterizerState) &getRasterizerState() override { return rasterizerState_; };
+    // virtual HWND windowHandle() const = 0;
 
-    DXResTPtr(V, Texture2D) &getRenderTarget() override { return renderTarget_; };
-    DXResTPtr(V, Texture2D) &getDepthStencil() override { return depthStencil_; };
+    // Use `std::unique_lock`
+    void lock() override;
 
-    DXResTPtr(V, RenderTargetView) &getRenderTargetView() override { return renderTargetView_; };
-    DXResTPtr(V, DepthStencilView) &getDepthStencilView() override { return depthStencilView_; };
-    DXResT(V, Viewport) getViewport() override { return viewport_; }
+    bool try_lock() override;
 
-    DXGI_FORMAT getBackBufferFormat() override { return backBufferFormat_; }
-    DXGI_FORMAT getDepthBufferFormat() override { return depthBufferFormat_; }
+    void unlock() override;
 
-    UINT getBackBufferCount() override { return backBufferCount_; }
-    Size getSize() override { return size_; };
+  private:
+    struct Locks;
+    std::unique_ptr<Locks> locks_;
+  };
 
-    virtual ComPtr<IWICImagingFactory> &getWICFactory() { return wicFactory_; };
+  /** Additional resources needed for Direct2D + DirectWrite.
+   *
+   * I've included DirectWrite here for now as it's the only current
+   * reason for using Direct2D.
+   *
+   * D3D should be preferred in new code for basic primitives.
+   */
+  class D2DResources {
 
-    virtual ComPtr<ID2D1Factory> &createD2DFactory(D2D1_FACTORY_TYPE factoryType) {
-        AssertOkMsg(
-            D2D1CreateFactory(factoryType, d2dFactory_.ReleaseAndGetAddressOf()),
-            "Unable to create d2d factory"
-        );
-        return d2dFactory_;
-    };
+  public:
+    D2DResources() = delete;
 
-    virtual ComPtr<ID2D1Factory> &getOrCreateD2DFactory(D2D1_FACTORY_TYPE factoryType) {
-        if (!d2dFactory_) {
-            return createD2DFactory(factoryType);
-        }
+    D2DResources(const D2DResources &) = delete;
 
-        return d2dFactory_;
-    }
+    ~D2DResources();
 
-    virtual ComPtr<ID2D1Factory> &getD2DFactory() { return d2dFactory_; };
+  protected:
 
-    HRESULT createShaderFromMemory(
-        DXResT(V, Device) *pDevice,
-        const void *pData,
-        SIZE_T dataSize,
-        DXResT(V, Effect) * *ppShader
-    ) {
-        return ::D3DX11CreateEffectFromMemory(pData, dataSize, 0, pDevice, ppShader);
-    }
+    explicit D2DResources(D3D11Resources *);
 
-    HRESULT createBitmapFromMemory(
-        ID2D1RenderTarget *pRenderTarget,
-        IWICImagingFactory *pIWICFactory,
-        unsigned char *data,
-        size_t dataLen,
-        UINT destinationWidth,
-        UINT destinationHeight,
-        ID2D1Bitmap **ppBitmap
-    ) {
-        HRESULT hr = S_OK;
-        ComPtr<IWICBitmapDecoder> pDecoder = nullptr;
-        ComPtr<IWICBitmapFrameDecode> pSource = nullptr;
-        ComPtr<IWICStream> pStream = nullptr;
-        ComPtr<IWICFormatConverter> pConverter = nullptr;
-        ComPtr<IWICBitmapScaler> pScaler = nullptr;
+    D2DResources &operator=(const D2DResources &) = delete;
 
-        AOK(hr);
-        // Create a WIC stream to map onto the memory.
-        winrt::check_hresult(pIWICFactory->CreateStream(&pStream));
+    winrt::com_ptr<ID2D1Factory1> d2dFactory_;
 
-        // Initialize the stream with the memory pointer and size.
-        winrt::check_hresult(pStream->InitializeFromMemory(data, dataLen));
-        // Create a decoder for the stream.
-        winrt::check_hresult(
-            pIWICFactory->CreateDecoderFromStream(pStream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &pDecoder)
-        );
-        // Create the initial frame.
-        winrt::check_hresult(pDecoder->GetFrame(0, &pSource));
-        // Convert the image format to 32bppPBGRA
-        // (DXGI_FORMAT_B8G8R8A8_UNORM + D2D1_ALPHA_MODE_PREMULTIPLIED).
-        winrt::check_hresult(pIWICFactory->CreateFormatConverter(&pConverter));
-        // If a new width or height was specified, create an
-        // IWICBitmapScaler and use it to resize the image.
-        if (destinationWidth != 0 || destinationHeight != 0) {
-            UINT originalWidth, originalHeight;
-            winrt::check_hresult(pSource->GetSize(&originalWidth, &originalHeight));
+    winrt::com_ptr<ID2D1Device> d2dDevice_;
+    winrt::com_ptr<ID2D1DeviceContext5> d2dDeviceContext_;
 
-            if (destinationWidth == 0) {
-                FLOAT scalar = static_cast<FLOAT>(destinationHeight) / static_cast<FLOAT>(originalHeight);
-                destinationWidth = static_cast<UINT>(scalar * static_cast<FLOAT>(originalWidth));
-            } else if (destinationHeight == 0) {
-                FLOAT scalar = static_cast<FLOAT>(destinationWidth) / static_cast<FLOAT>(originalWidth);
-                destinationHeight = static_cast<UINT>(scalar * static_cast<FLOAT>(originalHeight));
-            }
+    winrt::com_ptr<IDWriteFactory> directWriteFactory_;
 
-            winrt::check_hresult(pIWICFactory->CreateBitmapScaler(&pScaler));
+  public:
+    // Use like push/pop, but only one is allowed at a time; this exists
+    // to get better debugging information/breakpoints when that's not the case
+    void pushD2DDraw();
 
-            winrt::check_hresult(
-                pScaler->Initialize(pSource.Get(), destinationWidth, destinationHeight, WICBitmapInterpolationModeCubic)
-            );
+    HRESULT popD2DDraw();
 
-            winrt::check_hresult(
-                pConverter->Initialize(
-                    pScaler.Get(),
-                    GUID_WICPixelFormat32bppPBGRA,
-                    WICBitmapDitherTypeNone,
-                    nullptr,
-                    0.f,
-                    WICBitmapPaletteTypeMedianCut
-                )
-            );
-        } else {
-            winrt::check_hresult(
-                pConverter->Initialize(
-                    pSource.Get(),
-                    GUID_WICPixelFormat32bppPBGRA,
-                    WICBitmapDitherTypeNone,
-                    nullptr,
-                    0.f,
-                    WICBitmapPaletteTypeMedianCut
-                )
-            );
-        }
 
-        // create a Direct2D bitmap from the WIC bitmap.
-        winrt::check_hresult(pRenderTarget->CreateBitmapFromWicBitmap(pConverter.Get(), nullptr, ppBitmap));
+    winrt::com_ptr<ID2D1Factory1> &getD2DFactory();
 
-        return hr;
-    };
+    winrt::com_ptr<ID2D1Device> &getD2DDevice();
 
-protected:
-    using DXDisposer = std::function<void()>;
+    winrt::com_ptr<ID2D1DeviceContext5> &getD2DDeviceContext();
 
-    void addDisposer(const DXDisposer &disposer) {
-        std::scoped_lock lock(disposalMutex_);
-        if (!disposed_)
-            disposers_.push_back(disposer);
-    };
+    winrt::com_ptr<IDWriteFactory> &getDirectWriteFactory();
 
-    // Direct3D objects.
-    // ComPtr<IDXGIFactory2> dxgiFactory_{nullptr};
-    DXResTPtr(V, DGFactory) dgFactory_{nullptr};
-    DXResTPtr(V, DGAdapter) dgAdapter_{nullptr};
-    DXResTPtr(V, DGDevice) dgDevice_{nullptr};
-    DXResT(V,DGAdapterLUID) dgAdapterLUID_{0};
 
-    DXResTPtr(V, Device) dev_{nullptr};
-    DXResTPtr(V, DeviceContext) devContext_{nullptr};
-    DXResTPtr(V, SwapChain) swapChain_{nullptr};
-    DXResTPtr(V, RasterizerState) rasterizerState_{nullptr};
+  private:
+    struct Locks;
+    std::unique_ptr<Locks> locks_;
+  };
 
-    // Direct3D rendering objects. Required for 3D.
-    DXResTPtr(V, Texture2D) renderTarget_{nullptr};
-    DXResTPtr(V, Texture2D) depthStencil_{nullptr};
-    DXResTPtr(V, RenderTargetView) renderTargetView_{nullptr};
-    DXResTPtr(V, DepthStencilView) depthStencilView_{nullptr};
+  /// Resources for the OpenKneeboard app
+  class DXResources : public D3D11Resources, public D2DResources {
+  public:
+    DXResources();
 
-    DXResT(V, Viewport) viewport_{};
+    DXResources(const DXResources &) = delete;
 
-    ComPtr<IWICImagingFactory> wicFactory_{nullptr};
-    //Direct2D
-    ComPtr<ID2D1Factory> d2dFactory_{nullptr};
+    DXResources(DXResources &&) = delete;
 
-    // Direct3D properties.
-    DXGI_FORMAT backBufferFormat_{};
-    DXGI_FORMAT depthBufferFormat_{};
-    UINT backBufferCount_{};
+    DXResources &operator=(const DXResources &) = delete;
 
-    // Cached device properties.
-    D3D_FEATURE_LEVEL featureLevel_{};
-    RECT outputSize_{}; // HDR Support
-    DXGI_COLOR_SPACE_TYPE colorSpace_{};
+    DXResources &operator=(DXResources &&) = delete;
 
-    // DeviceResources options (see flags above)
-    unsigned int options_{0};
 
-    Size size_{0, 0};
 
-private:
-    void disposeInternal_() {
-        std::scoped_lock lock(disposalMutex_);
-        if (disposed_.exchange(true)) {
-            std::ranges::for_each(disposers_, [](auto &fn) { fn(); });
-            disposers_.clear();
-        }
-    }
+    // winrt::com_ptr<IWICImagingFactory> &getWICImagingFactory();
 
-    std::vector<DXDisposer> disposers_{};
-    std::atomic_bool disposed_{false};
-    std::mutex disposalMutex_{};
+    // Brushes :)
 
-    // The IDeviceNotify can be held directly as it owns the DeviceResources.
-    DeviceListener *deviceNotify_{nullptr};
-};
+    // Would like something more semantic for this one; used for:
+    // - PDF background
+    winrt::com_ptr<ID2D1SolidColorBrush> &getWhiteBrush();
+
+    // - PDF links
+    // - Button mouseovers
+    winrt::com_ptr<ID2D1SolidColorBrush> &getHighlightBrush();
+
+    //-  Doodle pen
+    winrt::com_ptr<ID2D1SolidColorBrush> &getBlackBrush();
+
+    //-  Doodle eraser
+    winrt::com_ptr<ID2D1SolidColorBrush> &getEraserBrush();
+
+    winrt::com_ptr<ID2D1SolidColorBrush> &getCursorInnerBrush();
+
+    winrt::com_ptr<ID2D1SolidColorBrush> &getCursorOuterBrush();
+
+  protected:
+
+    std::unique_ptr<SpriteBatch> spriteBatch_;
+
+    // e.g. doodles draw to a separate texture
+
+    Microsoft::WRL::ComPtr<ID2D1DeviceContext5> s2sBackBufferDeviceContext_;
+
+    //winrt::com_ptr<IWICImagingFactory> wicImagingFactory_;
+
+    // Brushes :)
+
+    // Would like something more semantic for this one; used for:
+    // - PDF background
+    winrt::com_ptr<ID2D1SolidColorBrush> whiteBrush_;
+    // - PDF links
+    // - Button mouseovers
+    winrt::com_ptr<ID2D1SolidColorBrush> highlightBrush_;
+    //-  Doodle pen
+    winrt::com_ptr<ID2D1SolidColorBrush> blackBrush_;
+    //-  Doodle eraser
+    winrt::com_ptr<ID2D1SolidColorBrush> eraserBrush_;
+
+    winrt::com_ptr<ID2D1SolidColorBrush> cursorInnerBrush_;
+    winrt::com_ptr<ID2D1SolidColorBrush> cursorOuterBrush_;
+
+
+  };
+
+  //
+  // class DXDeviceResources : public DXResources {
+  // public:
+  //   DXResTPtr(V, DGFactory) &getDGFactory() override { return dgFactory_; };
+  //   DXResTPtr(V, DGAdapter) &getDGAdapter() override { return dgAdapter_; };
+  //   DXResTPtr(V, DGDevice) &getDGDevice() override { return dgDevice_; };
+  //   virtual DGAdapterLUID getDGAdapterLUID() override { return dgAdapterLUID_; };
+  //
+  //     DXResTPtr(V, Device) &getDevice() override { return dev_; };
+  //     DXResTPtr(V, DeviceContext) &getDeviceContext() override { return devContext_; };
+  //     DXResTPtr(V, SwapChain) &getSwapChain() override { return swapChain_; };
+  //     DXResTPtr(V, RasterizerState) &getRasterizerState() override { return rasterizerState_; };
+  //
+  //     DXResTPtr(V, Texture2D) &getRenderTarget() override { return renderTarget_; };
+  //     DXResTPtr(V, Texture2D) &getDepthStencil() override { return depthStencil_; };
+  //
+  //     DXResTPtr(V, RenderTargetView) &getRenderTargetView() override { return renderTargetView_; };
+  //     DXResTPtr(V, DepthStencilView) &getDepthStencilView() override { return depthStencilView_; };
+  //     DXResT(V, Viewport) getViewport() override { return viewport_; }
+  //
+  //     DXGI_FORMAT getBackBufferFormat() override { return backBufferFormat_; }
+  //     DXGI_FORMAT getDepthBufferFormat() override { return depthBufferFormat_; }
+  //
+  //     UINT getBackBufferCount() override { return backBufferCount_; }
+  //     Size getSize() override { return size_; };
+  //
+  //     virtual ComPtr<IWICImagingFactory> &getWICFactory() { return wicFactory_; };
+  //
+  //     virtual ComPtr<ID2D1Factory> &createD2DFactory(D2D1_FACTORY_TYPE factoryType) {
+  //         AssertOkMsg(
+  //             D2D1CreateFactory(factoryType, d2dFactory_.ReleaseAndGetAddressOf()),
+  //             "Unable to create d2d factory"
+  //         );
+  //         return d2dFactory_;
+  //     };
+  //
+  //     virtual ComPtr<ID2D1Factory> &getOrCreateD2DFactory(D2D1_FACTORY_TYPE factoryType) {
+  //         if (!d2dFactory_) {
+  //             return createD2DFactory(factoryType);
+  //         }
+  //
+  //         return d2dFactory_;
+  //     }
+  //
+  //     virtual ComPtr<ID2D1Factory> &getD2DFactory() { return d2dFactory_; };
+  //
+  //     HRESULT createShaderFromMemory(
+  //         DXResT(V, Device) *pDevice,
+  //         const void *pData,
+  //         SIZE_T dataSize,
+  //         DXResT(V, Effect) * *ppShader
+  //     ) {
+  //         return ::D3DX11CreateEffectFromMemory(pData, dataSize, 0, pDevice, ppShader);
+  //     }
+  //
+  //     HRESULT createBitmapFromMemory(
+  //         ID2D1RenderTarget *pRenderTarget,
+  //         IWICImagingFactory *pIWICFactory,
+  //         unsigned char *data,
+  //         size_t dataLen,
+  //         UINT destinationWidth,
+  //         UINT destinationHeight,
+  //         ID2D1Bitmap **ppBitmap
+  //     ) {
+  //         HRESULT hr = S_OK;
+  //         ComPtr<IWICBitmapDecoder> pDecoder = nullptr;
+  //         ComPtr<IWICBitmapFrameDecode> pSource = nullptr;
+  //         ComPtr<IWICStream> pStream = nullptr;
+  //         ComPtr<IWICFormatConverter> pConverter = nullptr;
+  //         ComPtr<IWICBitmapScaler> pScaler = nullptr;
+  //
+  //         AOK(hr);
+  //         // Create a WIC stream to map onto the memory.
+  //         winrt::check_hresult(pIWICFactory->CreateStream(&pStream));
+  //
+  //         // Initialize the stream with the memory pointer and size.
+  //         winrt::check_hresult(pStream->InitializeFromMemory(data, dataLen));
+  //         // Create a decoder for the stream.
+  //         winrt::check_hresult(
+  //             pIWICFactory->CreateDecoderFromStream(pStream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, &pDecoder)
+  //         );
+  //         // Create the initial frame.
+  //         winrt::check_hresult(pDecoder->GetFrame(0, &pSource));
+  //         // Convert the image format to 32bppPBGRA
+  //         // (DXGI_FORMAT_B8G8R8A8_UNORM + D2D1_ALPHA_MODE_PREMULTIPLIED).
+  //         winrt::check_hresult(pIWICFactory->CreateFormatConverter(&pConverter));
+  //         // If a new width or height was specified, create an
+  //         // IWICBitmapScaler and use it to resize the image.
+  //         if (destinationWidth != 0 || destinationHeight != 0) {
+  //             UINT originalWidth, originalHeight;
+  //             winrt::check_hresult(pSource->GetSize(&originalWidth, &originalHeight));
+  //
+  //             if (destinationWidth == 0) {
+  //                 FLOAT scalar = static_cast<FLOAT>(destinationHeight) / static_cast<FLOAT>(originalHeight);
+  //                 destinationWidth = static_cast<UINT>(scalar * static_cast<FLOAT>(originalWidth));
+  //             } else if (destinationHeight == 0) {
+  //                 FLOAT scalar = static_cast<FLOAT>(destinationWidth) / static_cast<FLOAT>(originalWidth);
+  //                 destinationHeight = static_cast<UINT>(scalar * static_cast<FLOAT>(originalHeight));
+  //             }
+  //
+  //             winrt::check_hresult(pIWICFactory->CreateBitmapScaler(&pScaler));
+  //
+  //             winrt::check_hresult(
+  //                 pScaler->Initialize(pSource.Get(), destinationWidth, destinationHeight, WICBitmapInterpolationModeCubic)
+  //             );
+  //
+  //             winrt::check_hresult(
+  //                 pConverter->Initialize(
+  //                     pScaler.Get(),
+  //                     GUID_WICPixelFormat32bppPBGRA,
+  //                     WICBitmapDitherTypeNone,
+  //                     nullptr,
+  //                     0.f,
+  //                     WICBitmapPaletteTypeMedianCut
+  //                 )
+  //             );
+  //         } else {
+  //             winrt::check_hresult(
+  //                 pConverter->Initialize(
+  //                     pSource.Get(),
+  //                     GUID_WICPixelFormat32bppPBGRA,
+  //                     WICBitmapDitherTypeNone,
+  //                     nullptr,
+  //                     0.f,
+  //                     WICBitmapPaletteTypeMedianCut
+  //                 )
+  //             );
+  //         }
+  //
+  //         // create a Direct2D bitmap from the WIC bitmap.
+  //         winrt::check_hresult(pRenderTarget->CreateBitmapFromWicBitmap(pConverter.Get(), nullptr, ppBitmap));
+  //
+  //         return hr;
+  //     };
+  //
+  // protected:
+  //     using DXDisposer = std::function<void()>;
+  //
+  //     void addDisposer(const DXDisposer &disposer) {
+  //         std::scoped_lock lock(disposalMutex_);
+  //         if (!disposed_)
+  //             disposers_.push_back(disposer);
+  //     };
+  //
+  //     // Direct3D objects.
+  //     // ComPtr<IDXGIFactory2> dxgiFactory_{nullptr};
+  //     DXResTPtr(V, DGFactory) dgFactory_{nullptr};
+  //     DXResTPtr(V, DGAdapter) dgAdapter_{nullptr};
+  //     DXResTPtr(V, DGDevice) dgDevice_{nullptr};
+  //     DXResT(V,DGAdapterLUID) dgAdapterLUID_{0};
+  //
+  //     DXResTPtr(V, Device) dev_{nullptr};
+  //     DXResTPtr(V, DeviceContext) devContext_{nullptr};
+  //     DXResTPtr(V, SwapChain) swapChain_{nullptr};
+  //     DXResTPtr(V, RasterizerState) rasterizerState_{nullptr};
+  //
+  //     // Direct3D rendering objects. Required for 3D.
+  //     DXResTPtr(V, Texture2D) renderTarget_{nullptr};
+  //     DXResTPtr(V, Texture2D) depthStencil_{nullptr};
+  //     DXResTPtr(V, RenderTargetView) renderTargetView_{nullptr};
+  //     DXResTPtr(V, DepthStencilView) depthStencilView_{nullptr};
+  //
+  //     DXResT(V, Viewport) viewport_{};
+  //
+  //     ComPtr<IWICImagingFactory> wicFactory_{nullptr};
+  //     //Direct2D
+  //     ComPtr<ID2D1Factory> d2dFactory_{nullptr};
+  //
+  //     // Direct3D properties.
+  //     DXGI_FORMAT backBufferFormat_{};
+  //     DXGI_FORMAT depthBufferFormat_{};
+  //     UINT backBufferCount_{};
+  //
+  //     // Cached device properties.
+  //     D3D_FEATURE_LEVEL featureLevel_{};
+  //     RECT outputSize_{}; // HDR Support
+  //     DXGI_COLOR_SPACE_TYPE colorSpace_{};
+  //
+  //     // DeviceResources options (see flags above)
+  //     unsigned int options_{0};
+  //
+  //     Size size_{0, 0};
+  //
+  // private:
+  //     void disposeInternal_() {
+  //         std::scoped_lock lock(disposalMutex_);
+  //         if (disposed_.exchange(true)) {
+  //             std::ranges::for_each(disposers_, [](auto &fn) { fn(); });
+  //             disposers_.clear();
+  //         }
+  //     }
+  //
+  //     std::vector<DXDisposer> disposers_{};
+  //     std::atomic_bool disposed_{false};
+  //     std::mutex disposalMutex_{};
+  //
+  //     // The IDeviceNotify can be held directly as it owns the DeviceResources.
+  //     DeviceListener *deviceNotify_{nullptr};
+  // };
 } // namespace IRacingTools::Shared::Graphics

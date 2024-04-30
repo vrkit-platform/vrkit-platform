@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SharedAppLibPCH.h"
+
 #include <algorithm>
 #include <filesystem>
 #include <numbers>
@@ -8,9 +10,9 @@
 
 #include <IRacingTools/Models/LapData.pb.h>
 #include <IRacingTools/Models/TrackMapData.pb.h>
-#include <IRacingTools/Shared/Graphics/DXResources.h>
+#include "Graphics/DXResources.h"
 
-#include "CoordinateToPixelConverter.h"
+#include "Graphics/CoordinateToPixelConverter.h"
 
 namespace IRacingTools::Shared::Geometry {
 template<typename PixelType = float>
@@ -132,5 +134,5 @@ private:
 
 TrackMap ToTrackMap(const LapTrajectory &lapTrajectory, ZoomLevel zoomLevel = kZoomLevelDefault);
 
-TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Graphics::Size &size);
+TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Size<UINT> &size);
 } // namespace IRacingTools::Shared::Geo

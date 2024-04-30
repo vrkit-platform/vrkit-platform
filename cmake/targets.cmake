@@ -15,6 +15,14 @@ macro(SETUP_TARGET_COMPILE_DEFS targetName)
     PRIVATE
     $<$<CONFIG:Debug>:DEBUG>
   )
+
+  target_compile_definitions(
+    ${targetName}
+    PRIVATE
+    SPDLOG_WCHAR_SUPPORT=1
+    SPDLOG_WCHAR_TO_UTF8_SUPPORT=1
+  )
+
 #  if (DEBUG)
 #    target_compile_definitions(
 #      ${targetName}
@@ -156,16 +164,15 @@ macro(SETUP_MOD_EXPORTS)
   endforeach()
 endmacro()
 
-function(IRT_CONFIGURE_EXECUTABLE TARGET)
+#function(IRT_CONFIGURE_EXECUTABLE TARGET)
+function(IRT_CONFIGURE_TARGET TARGET)
+  set_property(TARGET ${TARGET} PROPERTY
+    MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+  SETUP_TARGET_COMPILE_DEFS(${TARGET})
+
   message(NOTICE "CMAKE_BUILD_TYPE == ${CMAKE_BUILD_TYPE}")
-#  if("${CMAKE_BUILD_TYPE}" STREQUAL Debug)
-#    message(NOTICE "Setting DEBUG compile def for ${TARGET}")
-#    target_compile_definitions(
-#      ${TARGET}
-#      PRIVATE
-#
-#    )
-#  endif()
+
 
   target_compile_definitions(
     ${TARGET}

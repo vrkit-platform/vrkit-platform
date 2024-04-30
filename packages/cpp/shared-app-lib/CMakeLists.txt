@@ -14,19 +14,16 @@ embed_resource("${RC_SRC_DIR}/sampleImage.jpg" RCDataSampleImage RC_OUT_SRC_FILE
 message(NOTICE "RC SRC Generated: ${RC_OUT_SRC_FILES}")
 list(APPEND sharedAppLibSources ${RC_OUT_SRC_FILES})
 
-add_library(${sharedAppLibTargetStatic} STATIC ${sharedAppLibSources} ${sharedAppLibHeaders} ${sharedAppLibHeadersPublic})
+## SETUP
+add_library(${sharedAppLibTargetStatic} STATIC ${sharedAppLibSources} ${sharedAppLibHeaders} ${sharedAppLibHeadersPublic} )
+#target_link_libraries(${sharedAppLibTargetStatic} PUBLIC ${sdkTargetStatic} ${modelsTargetStatic} ${ALL_APP_DEPS})
 
-SETUP_TARGET_COMPILE_DEFS(${sharedAppLibTargetStatic})
-#target_compile_definitions(
-#  ${sharedAppLibTargetStatic}
-#  PRIVATE
-#  APP_NAME="${sharedAppLibTargetStatic}"
-#  APP_VERSION="${APP_VERSION}"
-#)
+IRT_CONFIGURE_TARGET(${sharedAppLibTargetStatic})
 
+## INCLUDES
 target_include_directories(${sharedAppLibTargetStatic} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-  $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
+  $<INSTALL_INTERFACE:include>
 )
 
 target_include_directories(${sharedAppLibTargetStatic} PUBLIC
@@ -34,6 +31,7 @@ target_include_directories(${sharedAppLibTargetStatic} PUBLIC
   $<INSTALL_INTERFACE:include>  # <prefix>/include/mylib
 )
 
+## SOURCES
 target_sources(
   ${sharedAppLibTargetStatic}
   PUBLIC
@@ -42,21 +40,21 @@ target_sources(
   FILES
   ${sharedAppLibHeadersPublic}
 )
-install(TARGETS ${sharedAppLibTargetStatic} FILE_SET publicHeaders DESTINATION ${INCLUDE_INSTALL_DIR})
 
-# Create Library & Targets
-# setup_lib_exports(${sharedAppLibTarget} ${sharedAppLibTargetStatic} sharedAppLibSources sharedAppLibHeaders sharedAppLibHeadersPublic)
-
-# Link targets
-# target_link_libraries(${sharedAppLibTarget} PUBLIC ${sdkTarget} ${modelsTarget})
-target_link_libraries(${sharedAppLibTargetStatic} PUBLIC ${sdkTargetStatic} ${modelsTargetStatic})
+## LINKS
+target_link_libraries(
+  ${sharedAppLibTargetStatic}
+  PRIVATE
+  ${sdkTargetStatic}
+  ${modelsTargetStatic}
+)
 
 IRT_CONFIGURE_APP_LIBS(${sharedAppLibTargetStatic})
-# foreach(targetName ${sharedAppLibTarget} ${sharedAppLibTargetStatic})
-#   IRT_CONFIGURE_APP_LIBS(${targetName})
-# endforeach()
 
-# Tests
+## INSTALL
+install(TARGETS ${sharedAppLibTargetStatic} FILE_SET publicHeaders DESTINATION ${INCLUDE_INSTALL_DIR})
+
+# TESTS
 set(testTargetName ${sharedAppLibTarget}_tests)
 add_executable(${testTargetName} ${sharedAppLibTestSources})
 target_link_libraries(${testTargetName} PUBLIC

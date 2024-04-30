@@ -9,13 +9,13 @@ TrackMap ToTrackMap(const LapTrajectory &lapTrajectory, ZoomLevel zoomLevel) {
     return LapTracjectoryConverter(zoomLevel).toTrackMap(lapTrajectory);
 }
 
-TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Graphics::Size &size) {
+TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Size<UINT> &size) {
     TrackMap scaled(trackMap);
 
     auto scaledSize = scaled.mutable_scaled_size();
 
-    scaledSize->set_width(static_cast<float>(size.width));
-    scaledSize->set_height(static_cast<float>(size.height));
+    scaledSize->set_width(static_cast<float>(size.width()));
+    scaledSize->set_height(static_cast<float>(size.height()));
 
 
     float scaleX = scaledSize->width() / trackMap.size().width();

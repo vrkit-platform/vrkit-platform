@@ -8,7 +8,7 @@
 #include "Geometry2D.h"
 
 namespace IRacingTools::Shared {
-  using namespace Geometry2D;
+
 
   constexpr unsigned int SHMSwapchainLength = 2;
   constexpr PixelSize MaxViewRenderSize{2048, 2048};
@@ -18,4 +18,10 @@ namespace IRacingTools::Shared {
 
   constexpr const char ProjectReverseDomainA[] {"com.irt"};
   constexpr const wchar_t ProjectReverseDomainW[] {L"com.irt"};
+
+#if defined(_DEBUG) || defined(DEBUG)
+  constexpr const bool DebugEnabled = true;
+#else
+  constexpr const bool DebugEnabled = false;
+#endif
 }

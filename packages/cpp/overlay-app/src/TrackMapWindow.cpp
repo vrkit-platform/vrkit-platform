@@ -38,58 +38,59 @@ TrackMapWindow::~TrackMapWindow() = default;
  ******************************************************************/
 HRESULT TrackMapWindow::initialize() {
     // Register the window class.
-    WNDCLASSEX wcex = {sizeof(WNDCLASSEX)};
-    wcex.style = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc = TrackMapWindow::WndProc;
-    wcex.cbClsExtra = 0;
-    wcex.cbWndExtra = sizeof(LONG_PTR);
-    wcex.hInstance = HINST_THISCOMPONENT;
-    wcex.hbrBackground = nullptr;
-    wcex.lpszMenuName = nullptr;
-    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wcex.lpszClassName = kWindowClass;
-
-    RegisterClassEx(&wcex);
-
-    // Create the application window.
+    // WNDCLASSEX wcex = {sizeof(WNDCLASSEX)};
+    // wcex.style = CS_HREDRAW | CS_VREDRAW;
+    // wcex.lpfnWndProc = TrackMapWindow::WndProc;
+    // wcex.cbClsExtra = 0;
+    // wcex.cbWndExtra = sizeof(LONG_PTR);
+    // wcex.hInstance = HINST_THISCOMPONENT;
+    // wcex.hbrBackground = nullptr;
+    // wcex.lpszMenuName = nullptr;
+    // wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    // wcex.lpszClassName = kWindowClass;
     //
-    // Because the CreateWindow function takes its size in pixels, we
-    // obtain the system DPI and use it to scale the window size.
-    FLOAT dpiX, dpiY;
-
-    windowHandle_ = CreateWindow(
-        kWindowClass,
-        kWindowClass,
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT,
-        CW_USEDEFAULT,
-        static_cast<UINT>(ceil(640.f)),
-        static_cast<UINT>(ceil(480.f)),
-        nullptr,
-        nullptr,
-        HINST_THISCOMPONENT,
-        this
-    );
-
-    HRESULT hr = windowHandle_ ? S_OK : E_FAIL;
-    winrt::check_hresult(hr);
-
-    // Create a timer and receive WM_TIMER messages at a rough
-    // granularity of 33msecs. If you need a more precise timer,
-    // consider modifying the message loop and calling more precise
-    // timing functions.
-    SetTimer(
-        windowHandle_,
-        0,      // timerId
-        33,     // msecs
-        nullptr // lpTimerProc
-    );
-
-    ShowWindow(windowHandle_, SW_SHOWNORMAL);
-
-    UpdateWindow(windowHandle_);
-
-    return hr;
+    // RegisterClassEx(&wcex);
+    //
+    // // Create the application window.
+    // //
+    // // Because the CreateWindow function takes its size in pixels, we
+    // // obtain the system DPI and use it to scale the window size.
+    // FLOAT dpiX, dpiY;
+    //
+    // windowHandle_ = CreateWindow(
+    //     kWindowClass,
+    //     kWindowClass,
+    //     WS_OVERLAPPEDWINDOW,
+    //     CW_USEDEFAULT,
+    //     CW_USEDEFAULT,
+    //     static_cast<UINT>(ceil(640.f)),
+    //     static_cast<UINT>(ceil(480.f)),
+    //     nullptr,
+    //     nullptr,
+    //     HINST_THISCOMPONENT,
+    //     this
+    // );
+    //
+    // HRESULT hr = windowHandle_ ? S_OK : E_FAIL;
+    // winrt::check_hresult(hr);
+    //
+    // // Create a timer and receive WM_TIMER messages at a rough
+    // // granularity of 33msecs. If you need a more precise timer,
+    // // consider modifying the message loop and calling more precise
+    // // timing functions.
+    // SetTimer(
+    //     windowHandle_,
+    //     0,      // timerId
+    //     33,     // msecs
+    //     nullptr // lpTimerProc
+    // );
+    //
+    // ShowWindow(windowHandle_, SW_SHOWNORMAL);
+    //
+    // UpdateWindow(windowHandle_);
+    //
+    // return hr;
+    return S_OK;
 }
 
 /******************************************************************
@@ -145,9 +146,9 @@ void TrackMapWindow::prepare() {
  ******************************************************************/
 
 HRESULT TrackMapWindow::onRender() {
-    prepare();
+    //prepare();
 
-    winrt::check_hresult(trackMapResources_->render(GetTickCount()));
+    //winrt::check_hresult(trackMapResources_->render(GetTickCount()));
 
     return S_OK;
 }

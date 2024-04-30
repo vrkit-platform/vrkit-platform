@@ -161,7 +161,7 @@ int irsdkDiskServer::varNameToOffset(const char *name)
 		{
 			if(0 == strncmp(name, localVarHeader[index].name, Resources::MaxStringLength))
 			{
-				return localVarHeader[index].offset;
+				return localVarHeader[index].offset_;
 			}
 		}
 	}
@@ -209,7 +209,7 @@ irsdkDiskServer::irsdkDiskServer()
 	localHeader.numVars = 0;
 	localHeader.numBuf = 1;
 	localHeader.bufLen = 0;
-	localVarHeader[0].offset = 0;
+	localVarHeader[0].offset_ = 0;
 
 	// fill in buffer memory
 	//****FixMe, fill in offset to buffer properly
@@ -296,7 +296,7 @@ int irsdkDiskServer::regVar(const char *name, const void *var,
 						index = localHeader.numVars++;
 						irsdk_varHeader *rec = &localVarHeader[index];
 
-						rec->offset = localHeader.bufLen;
+						rec->offset_ = localHeader.bufLen;
 						localHeader.bufLen = usedLen;
 
 						rec->type = type;
@@ -370,7 +370,7 @@ bool irsdkDiskServer::setVar(int index, const void *var)
 
 			writeVar(localVarHeader[index].count, localVarHeader[index].type, 
 					 entryVarHelper[index].multiplier, entryVarHelper[index].offset, 
-					 var, pBase + rec->offset);
+					 var, pBase + rec->offset_);
 
 			return true;
 		}
@@ -454,7 +454,7 @@ bool irsdkDiskServer::pollSampleVars()
 			{
 				writeVar(localVarHeader[index].count, localVarHeader[index].type, 
 						 entryVarHelper[index].multiplier, entryVarHelper[index].offset, 
-						 entryVarHelper[index].varPtr, pBase + rec->offset);
+						 entryVarHelper[index].varPtr, pBase + rec->offset_);
 			}
 		}
 
@@ -688,17 +688,17 @@ void irsdkDiskServer::logDataToCSV()
 				switch(rec->type)
 				{
 				case VarDataType::Char:
-					fprintf(file, "%s, ", (char *)(pBase+rec->offset) ); break;
+					fprintf(file, "%s, ", (char *)(pBase+rec->offset_) ); break;
 				case VarDataType::Bool:
-					fprintf(file, "%d, ", ((bool *)(pBase+rec->offset))[j]); break;
+					fprintf(file, "%d, ", ((bool *)(pBase+rec->offset_))[j]); break;
 				case VarDataType::Int:
-					fprintf(file, "%d, ", ((int *)(pBase+rec->offset))[j]); break;
+					fprintf(file, "%d, ", ((int *)(pBase+rec->offset_))[j]); break;
 				case VarDataType::Bitmask:
-					fprintf(file, "%d, ", ((int *)(pBase+rec->offset))[j]); break;
+					fprintf(file, "%d, ", ((int *)(pBase+rec->offset_))[j]); break;
 				case VarDataType::Float:
-					fprintf(file, "%g, ", ((float *)(pBase+rec->offset))[j]); break;
+					fprintf(file, "%g, ", ((float *)(pBase+rec->offset_))[j]); break;
 				case VarDataType::Double:
-					fprintf(file, "%g, ", ((double *)(pBase+rec->offset))[j]); break;
+					fprintf(file, "%g, ", ((double *)(pBase+rec->offset_))[j]); break;
 				}
 			}
 		}

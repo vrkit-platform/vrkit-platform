@@ -12,20 +12,15 @@
 #include <QCoreApplication>
 #include <QDebug>
 
+#include "GenerateTrackmapArgCommand.h"
 #include "SessionPlayArgCommand.h"
 #include "SessionRecordArgCommand.h"
-#include <QtCore>
-#include <chrono>
-#include <format>
-#include <iostream>
 
 using namespace std::literals;
 using namespace IRacingTools::SDK::Utils;
 using namespace IRacingTools::SDK;
 using namespace IRacingTools::App::Commands;
 
-//int WINAPI WinMain(HINSTANCE /*hInstance*/, HINSTANCE /*hPrevInstance*/, LPSTR lpCmdLine, int nCmdShow) {
-    //nCmdShow, &lpCmdLine
 int main(int argc, char** argv) {
     QCoreApplication::setApplicationName(APP_NAME);
     QCoreApplication::setApplicationVersion(APP_VERSION);
@@ -33,7 +28,7 @@ int main(int argc, char** argv) {
     CLI::App app{APP_NAME};
     fmt::println("{}", APP_NAME);
 
-    auto cmds = ArgCommand::build<SessionPlayArgCommand,SessionRecordArgCommand>(&app);
+    auto cmds = ArgCommand::build<GenerateTrackmapArgCommand,SessionPlayArgCommand,SessionRecordArgCommand>(&app);
 
     CLI11_PARSE(app,argc,argv);
 

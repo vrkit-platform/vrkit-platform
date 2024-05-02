@@ -93,17 +93,17 @@ public:
 
     // idx is the variables index, entry is the array offset, or 0 if not an array element
     // will convert data to requested type
-    std::optional<bool> getVarBool(uint32_t idx, uint32_t entry = 0) override;
-    std::optional<bool> getVarBool(const std::string_view &name, uint32_t entry = 0) override;
+    std::optional<bool> getVarBool(uint32_t idx, uint32_t entry) override;
+    std::optional<bool> getVarBool(const std::string_view &name, uint32_t entry) override;
 
-    std::optional<int> getVarInt(uint32_t idx, uint32_t entry = 0) override;
-    std::optional<int> getVarInt(const std::string_view &name, uint32_t entry = 0) override;
+    std::optional<int> getVarInt(uint32_t idx, uint32_t entry) override;
+    std::optional<int> getVarInt(const std::string_view &name, uint32_t entry) override;
 
-    std::optional<float> getVarFloat(uint32_t idx, uint32_t entry = 0) override;
-    std::optional<float> getVarFloat(const std::string_view &name, uint32_t entry = 0) override;
+    std::optional<float> getVarFloat(uint32_t idx, uint32_t entry) override;
+    std::optional<float> getVarFloat(const std::string_view &name, uint32_t entry) override;
 
-    std::optional<double> getVarDouble(uint32_t idx, uint32_t entry = 0) override;
-    std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry = 0) override;
+    std::optional<double> getVarDouble(uint32_t idx, uint32_t entry) override;
+    std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry) override;
 
     // 1 success, 0 failure, -n minimum buffer size
     //int getSessionStrVal(const std::string_view& path, char *val, int valLen) override;

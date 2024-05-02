@@ -1,7 +1,6 @@
 import os
 
 import click
-import folium
 from click import echo
 from irsdk import IRDiskClient
 from irsdk.models import LapMetadata
@@ -68,7 +67,7 @@ def create_track_map(ctx, lap_number, output_file):
     if len(data) < 2:
         raise click.ClickException('At least 2 laps of data required')
 
-    remove data[0]
+    del data[0]
     lap: LapMetadata | None = data[lap_number] if lap_number is not None else None
 
     if lap is None:

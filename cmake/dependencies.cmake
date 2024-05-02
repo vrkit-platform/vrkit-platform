@@ -82,6 +82,9 @@ set(DEP_DIRECTX
 #  dxgi.lib
 #  d3d10_1.lib
 #  d3d11.lib
+  System::Dcomp
+  System::Gdi32
+  System::Dwmapi
   System::Dwrite
   System::Dxgi
   System::Dxguid

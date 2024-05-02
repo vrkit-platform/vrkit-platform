@@ -53,6 +53,7 @@
 #include <d3dx11effect.h>
 // #include <d3d11_1.h>
 
+#include <dcomp.h>
 #include <dwrite.h>
 #include <wincodec.h>
 #include <wrl/client.h>

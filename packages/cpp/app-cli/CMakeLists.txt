@@ -56,8 +56,8 @@ target_link_libraries(${targetName}
   ${sharedAppLibTargetStatic}
   ${modelsTargetStatic}
   ${DEP_DIRECTX}
-
   ${DEP_LOG}
+  ${DEP_YAML}
 
 #  ${DEP_PROTOBUF}
 #  ${DEP_JSON}

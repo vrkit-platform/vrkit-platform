@@ -15,6 +15,7 @@ set(DEP_PACKAGES
   cppwinrt
   directxmath
   directxtk
+  imgui
   fmt
   spdlog
   OpenXR
@@ -55,6 +56,7 @@ set(DEP_JSON nlohmann_json::nlohmann_json)
 set(DEP_MAGICENUM magic_enum::magic_enum)
 set(DEP_GSL Microsoft.GSL::GSL)
 set(DEP_LOG spdlog::spdlog)
+set(DEP_IMGUI imgui::imgui)
 #set(DEP_WINRT Microsoft::CppWinRT)
 
 function(target_link_sdl2 targetName)
@@ -73,15 +75,14 @@ function(target_link_sdl2 targetName)
   )
 endfunction()
 
-
 set(DEP_DIRECTX
-#  d2d1.lib
-#  dwrite.lib
+  #  d2d1.lib
+  #  dwrite.lib
   windowscodecs.lib
 
-#  dxgi.lib
-#  d3d10_1.lib
-#  d3d11.lib
+  #  dxgi.lib
+  #  d3d10_1.lib
+  #  d3d11.lib
   System::Dcomp
   System::Gdi32
   System::Dwmapi
@@ -92,12 +93,12 @@ set(DEP_DIRECTX
   System::D3d11
   System::D3d12
   System::WindowsApp
-#  Microsoft::D3DX9
-#  Microsoft::D3DX10
-#  Microsoft::D3DX11
+  #  Microsoft::D3DX9
+  #  Microsoft::D3DX10
+  #  Microsoft::D3DX11
   Microsoft::Effects11
   Microsoft::DirectXMath
-#  directxtk.lib
+  #  directxtk.lib
   Microsoft::DirectXTK
 
 )
@@ -111,9 +112,10 @@ set(ALL_APP_DEPS
   ${DEP_JSON}
   ${DEP_MAGICENUM}
   ${DEP_DIRECTX}
+  ${DEP_IMGUI}
   ${DEP_FMT}
   ${DEP_LOG}
-   ${DEP_OPENXR}
+  ${DEP_OPENXR}
   ${DEP_QT_CORE}
   ${DEP_YAML}
   ${DEP_GSL}
@@ -121,7 +123,7 @@ set(ALL_APP_DEPS
 )
 
 set(ALL_SDK_DEPS
-  ${DEP_MAGICENUM} ${DEP_GSL} ${DEP_FMT} ${DEP_YAML}
+  ${DEP_MAGICENUM} ${DEP_GSL} ${DEP_FMT} ${DEP_YAML}  ${DEP_LOG}
 )
 
 set(DEP_GTEST_MAIN GTest::gtest_main)

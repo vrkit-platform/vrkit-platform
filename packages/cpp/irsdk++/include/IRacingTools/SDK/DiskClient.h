@@ -44,7 +44,7 @@ using VarHeaders = std::vector<VarDataHeader>;
 class DiskClient : public Client {
 public:
 
-    explicit DiskClient(const std::filesystem::path &path);
+    DiskClient(const std::filesystem::path & file, const ClientId& clientId);
     DiskClient() = delete;
     DiskClient(const DiskClient &other) = delete;
     DiskClient(DiskClient &&other) noexcept = delete;
@@ -60,13 +60,13 @@ public:
     // read next line out of file
     bool next();
     bool hasNext();
-    
+
     std::size_t getSampleCount();
     std::size_t getSampleIndex();
-    
+
     std::optional<fs::path> getFilePath();
     std::size_t getFileSize();
-    
+
     virtual bool isAvailable() override;
 
     // return how many variables this .ibt file has in the header
@@ -93,17 +93,17 @@ public:
 
     // idx is the variables index, entry is the array offset, or 0 if not an array element
     // will convert data to requested type
-    std::optional<bool> getVarBool(uint32_t idx, uint32_t entry) override;
-    std::optional<bool> getVarBool(const std::string_view &name, uint32_t entry) override;
+    std::optional<bool> getVarBool(uint32_t idx, uint32_t entry = 0) override;
+    std::optional<bool> getVarBool(const std::string_view &name, uint32_t entry = 0) override;
 
-    std::optional<int> getVarInt(uint32_t idx, uint32_t entry) override;
-    std::optional<int> getVarInt(const std::string_view &name, uint32_t entry) override;
+    std::optional<int> getVarInt(uint32_t idx, uint32_t entry = 0) override;
+    std::optional<int> getVarInt(const std::string_view &name, uint32_t entry = 0) override;
 
-    std::optional<float> getVarFloat(uint32_t idx, uint32_t entry) override;
-    std::optional<float> getVarFloat(const std::string_view &name, uint32_t entry) override;
+    std::optional<float> getVarFloat(uint32_t idx, uint32_t entry = 0) override;
+    std::optional<float> getVarFloat(const std::string_view &name, uint32_t entry = 0) override;
 
-    std::optional<double> getVarDouble(uint32_t idx, uint32_t entry) override;
-    std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry) override;
+    std::optional<double> getVarDouble(uint32_t idx, uint32_t entry = 0) override;
+    std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry = 0) override;
 
     // 1 success, 0 failure, -n minimum buffer size
     //int getSessionStrVal(const std::string_view& path, char *val, int valLen) override;
@@ -117,7 +117,7 @@ public:
 
     virtual std::weak_ptr<SessionInfo::SessionInfoMessage> getSessionInfo() override;
 
-    virtual ConnectionId getConnectionId() override;
+    virtual ClientId getClientId() override;
 
 protected:
     bool openFile();

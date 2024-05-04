@@ -54,7 +54,7 @@ public:
     bool waitForData(int timeoutMS = 16);
 
     bool isConnected() const;
-    ConnectionId getConnectionId() override;
+    virtual ClientId getClientId() override;
 
     virtual bool isAvailable() override;
 
@@ -85,17 +85,17 @@ public:
 
     // idx is the variables index, entry is the array offset, or 0 if not an array element
     // will convert data to requested type
-    virtual std::optional<bool> getVarBool(uint32_t idx, uint32_t entry = 0) override;
-    virtual std::optional<bool> getVarBool(const std::string_view &name, uint32_t entry = 0) override;
+    virtual std::optional<bool> getVarBool(uint32_t idx, uint32_t entry) override;
+    virtual std::optional<bool> getVarBool(const std::string_view &name, uint32_t entry) override;
 
-    virtual std::optional<int> getVarInt(uint32_t idx, uint32_t entry = 0) override;
-    virtual std::optional<int> getVarInt(const std::string_view &name, uint32_t entry = 0) override;
+    virtual std::optional<int> getVarInt(uint32_t idx, uint32_t entry) override;
+    virtual std::optional<int> getVarInt(const std::string_view &name, uint32_t entry) override;
 
-    virtual std::optional<float> getVarFloat(uint32_t idx, uint32_t entry = 0) override;
-    virtual std::optional<float> getVarFloat(const std::string_view &name, uint32_t entry = 0) override;
+    virtual std::optional<float> getVarFloat(uint32_t idx, uint32_t entry) override;
+    virtual std::optional<float> getVarFloat(const std::string_view &name, uint32_t entry) override;
 
-    virtual std::optional<double> getVarDouble(uint32_t idx, uint32_t entry = 0) override;
-    virtual std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry = 0) override;
+    virtual std::optional<double> getVarDouble(uint32_t idx, uint32_t entry) override;
+    virtual std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry) override;
 
     // 1 success, 0 failure, -n minimum buffer size
 //    virtual int getSessionStrVal(const std::string_view &path, char *val, int valLen) override;
@@ -113,7 +113,7 @@ public:
     bool wasSessionStrUpdated();
 
 private:
-    explicit LiveClient(token) : data_(nullptr), nData_(0), connectionId_(1), previousSessionInfoUpdateCount_(-1) {}
+    explicit LiveClient(token) : data_(nullptr), nData_(0), previousSessionInfoUpdateCount_(-1) {}
 
     friend Singleton;
 
@@ -122,17 +122,12 @@ private:
 
     char *data_;
     int nData_;
-    ConnectionId connectionId_;
 
     std::size_t previousSessionInfoUpdateCount_{0};
 
     Opt<std::string_view> sessionInfoStr_{std::nullopt};
     std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfo_{nullptr};
 
-//protected:
-    //    std::shared_ptr<Utils::DynamicBuffer<char>> sessionInfoBuf_;
-    //    std::vector<VarDataHeader> varHeaders_{};
-    //    Utils::DynamicBuffer<char> varBuf_{};
 };
 
 } // namespace IRacingTools::SDK

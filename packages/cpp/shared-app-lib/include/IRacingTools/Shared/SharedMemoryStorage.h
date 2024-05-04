@@ -121,7 +121,7 @@ namespace IRacingTools::Shared {
   public:
     static std::shared_ptr<SharedMemoryStorage> GetInstance();
 
-    bool loadTrackMapFromLapTrajectoryFile(const fs::path &path);
+    bool loadTrackMapFromTrajectoryFile(const fs::path &path);
     std::optional<TrackMap> setTrackMap(const std::optional<TrackMap> &newTrackMap);
     std::optional<TrackMap> trackMap();
 

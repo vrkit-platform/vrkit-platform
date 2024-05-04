@@ -11,7 +11,7 @@ namespace IRacingTools::SDK {
 
   std::shared_ptr<Client> ClientManager::get(const std::string_view &clientId) {
     std::lock_guard lock(clientMutex_);
-    if (clientId == LiveClientId)
+    if (clientId == Client::LiveClientId)
       return LiveClient::GetPtr();
 
     if (clients_.contains(clientId))
@@ -22,12 +22,12 @@ namespace IRacingTools::SDK {
 
   Expected<bool> ClientManager::remove(const std::string_view &clientId) {
     std::lock_guard lock(clientMutex_);
-    if (clientId == LiveClientId) {
+    if (clientId == Client::LiveClientId) {
       return MakeUnexpected<GeneralError>("LiveClientId can not be deleted");
     }
     if (clients_.contains(clientId)) {
       if (clientId == activeClientId_) {
-        setActive(LiveClientId);
+        setActive(Client::LiveClientId);
       }
       clients_.erase(clientId);
       return true;
@@ -38,7 +38,7 @@ namespace IRacingTools::SDK {
 
   Expected<bool> ClientManager::add(const std::string_view &clientId, std::weak_ptr<Client> client, bool active) {
     std::lock_guard lock(clientMutex_);
-    if (clientId == LiveClientId) {
+    if (clientId == Client::LiveClientId) {
       return MakeUnexpected<GeneralError>("LiveClientId can not be deleted");
     }
 

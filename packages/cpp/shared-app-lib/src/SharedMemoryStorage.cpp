@@ -152,14 +152,10 @@ namespace IRacingTools::Shared {
     return gInstance;
   }
 
-  bool SharedMemoryStorage::loadTrackMapFromLapTrajectoryFile(const fs::path &path) {
-    auto ltResult = IRacingTools::Shared::ReadMessageFromFile<LapTrajectory>(path);
-    if (!ltResult)
-      return false;
-    auto &lt = ltResult.value();
-    auto trackMap = Geometry::ToTrackMap(lt);
+  bool SharedMemoryStorage::loadTrackMapFromTrajectoryFile(const fs::path &path) {
+    auto trackMap = Geometry::LoadTrackMapFromTrajectoryFile(path);
     setTrackMap(trackMap);
-    return true;
+    return trackMap.has_value();
   }
 
   std::optional<TrackMap> SharedMemoryStorage::setTrackMap(const std::optional<TrackMap> &newTrackMap) {

@@ -5,11 +5,19 @@
 #include <tchar.h>
 #include <windows.h>
 
+#include <atomic>
+#include <yaml-cpp/yaml.h>
+
+
 #include "DataHeader.h"
 #include "ErrorTypes.h"
 #include "Resources.h"
 #include "Types.h"
 #include "VarData.h"
+
+#include "SessionInfo/ModelParser.h"
+#include "Types.h"
+
 
 #include "Utils/LUT.h"
 #include "Utils/Singleton.h"
@@ -32,6 +40,8 @@ public:
     const DataHeader *getHeader();
     const char *getData(int index);
     const char *getSessionInfoStr();
+    std::shared_ptr<SessionInfo::SessionInfoMessage> getSessionInfo();
+
     uint32_t getSessionUpdateCount(); // incrementing index that indicates new session info string
 
     const VarDataHeader *getVarHeaderPtr();
@@ -61,6 +71,8 @@ public:
 private:
     friend Singleton;
     explicit LiveConnection(token) {};
+
+  std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfoMessage_{nullptr};
 };
 
 }

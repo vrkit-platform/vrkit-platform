@@ -34,7 +34,7 @@ int WINAPI WinMain(
     LOGD(fmt::format("parsed filename: {}", filename));
 
     auto shm = IRacingTools::Shared::SharedMemoryStorage::GetInstance();
-    winrt::check_bool(shm->loadTrackMapFromLapTrajectoryFile(filename));
+    winrt::check_bool(shm->loadTrackMapFromTrajectoryFile(filename));
 
     // Ignoring the return value because we want to continue running even in the
     // unlikely event that HeapSetInformation fails.

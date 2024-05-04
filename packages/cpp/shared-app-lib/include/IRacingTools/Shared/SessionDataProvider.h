@@ -27,7 +27,42 @@ namespace IRacingTools::Shared {
    */
   class SessionDataProvider : public SDK::Utils::EventEmitter<std::shared_ptr<SessionDataEvent>> {
 
+
   public:
+    using SessionDataProviderPtr = std::shared_ptr<SessionDataProvider>;
+
+    /**
+     * Get the current provider
+     *
+     * @return current provider
+     */
+    static SessionDataProviderPtr GetCurrent();
+
+    /**
+     * Set the current provider & return any previously set provider
+     *
+     * @param next provider to set as current
+     * @return If a previous provider had been set, then it is returned (after being stopped)
+     */
+    static SessionDataProviderPtr SetCurrent(const SessionDataProviderPtr& next);
+
+
+    /**
+     * Timing details for the given session
+     */
+    struct Timing {
+
+      using Unit = std::chrono::milliseconds;
+      using Time = std::chrono::time_point<std::chrono::steady_clock, Unit>;
+
+      bool isLive{false};
+      bool isValid{false};
+      Time start{};
+      Time end{};
+      Unit duration{0};
+      Unit position{0};
+    };
+
     using Ptr = std::shared_ptr<SessionDataProvider>;
 
     virtual ~SessionDataProvider() = default;
@@ -41,144 +76,23 @@ namespace IRacingTools::Shared {
 
     virtual bool isControllable() const = 0;
 
+    virtual bool isLive() const = 0;
+
     virtual bool isPaused() = 0;
     virtual bool pause() = 0;
     virtual bool resume() = 0;
-    //    HANDLE dataValidEvent_{nullptr};
+
+    /**
+     * @brief Get current timing state
+     *
+     * When timing is updated, `SessionDataEvent::Updated` is fired
+     *
+     * @return current timing ref
+     */
+    virtual const Timing timing() = 0;
+
+
   };
 
-
-  class LiveSessionDataProvider : public SessionDataProvider {
-
-  public:
-    LiveSessionDataProvider();
-
-    virtual ~LiveSessionDataProvider() override;
-
-    bool isAvailable() override;
-    bool start() override;
-
-    bool isRunning() override;
-
-    void stop() override;
-
-    virtual bool isControllable() const override {
-      return false;
-    };
-
-    virtual bool isPaused() override;
-    virtual bool pause() override;
-    virtual bool resume() override;
-
-  protected:
-    void runnable();
-
-  private:
-    /**
-     * @brief Initialize, this internal & invoked from the runnable call
-     */
-    void init();
-
-    /**
-     * @brief Called on each data sample/record/entry
-     */
-    void process();
-
-    void processData();
-
-    void processDataUpdate();
-
-    bool processYAMLLiveString();
-
-    void checkConnection();
-
-    SessionDataAccess dataAccess_;
-    std::unique_ptr<std::thread> thread_{nullptr};
-    std::mutex threadMutex_{};
-
-    std::atomic_bool running_{false};
-    std::atomic_bool isConnected_{false};
-    DWORD lastUpdatedTime_{0};
-  };
-
-
-  class DiskSessionDataProvider : public SessionDataProvider {
-
-  public:
-    DiskSessionDataProvider() = delete;
-    DiskSessionDataProvider(const DiskSessionDataProvider &other) = delete;
-    DiskSessionDataProvider(DiskSessionDataProvider &&other) noexcept = delete;
-    DiskSessionDataProvider &operator=(const DiskSessionDataProvider &other) = delete;
-    DiskSessionDataProvider &operator=(DiskSessionDataProvider &&other) noexcept = delete;
-
-    /**
-     * @brief the only acceptable constructor
-     */
-    DiskSessionDataProvider(const std::string &clientId, const std::filesystem::path &file);
-
-    /**
-     * @brief Destructor required to stop any running threads
-     */
-    virtual ~DiskSessionDataProvider() override;
-
-    /**
-     * @inherit
-     */
-    bool isAvailable() override;
-
-    /**
-     * @inherit
-     */
-    bool start() override;
-
-    /**
-     * @inherit
-     */
-    bool isRunning() override;
-
-    /**
-     * @inherit
-     */
-    void stop() override;
-
-    virtual bool isControllable() const override {
-      return false;
-    };
-
-    virtual bool isPaused() override;
-    virtual bool pause() override;
-    virtual bool resume() override;
-
-  protected:
-    void runnable();
-
-  private:
-    void init();
-
-    void process();
-
-    bool processYAMLLiveString();
-
-    void checkConnection();
-
-    void fireDataUpdatedEvent();
-
-    std::string clientId_;
-    std::filesystem::path file_;
-    std::shared_ptr<SDK::DiskClient> diskClient_;
-    std::unique_ptr<SessionDataAccess> dataAccess_;
-
-    std::unique_ptr<std::thread> thread_{nullptr};
-    std::mutex threadMutex_{};
-    std::condition_variable threadProcessCondition_{};
-
-    std::mutex diskClientMutex_{};
-
-    std::atomic_bool paused_{false};
-    std::atomic_bool running_{false};
-    std::atomic_bool isAvailable_{false};
-    DWORD lastUpdatedTime_{0};
-    //    HANDLE dataValidEvent_{nullptr};
-  };
 
 }// namespace IRacingTools::Shared

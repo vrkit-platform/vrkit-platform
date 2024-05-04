@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <climits>
 #include <cstdio>
 #include <ctime>
+#include <stdexcept>
 
 #ifdef _MSC_VER
 #include <crtdbg.h>
@@ -46,9 +47,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <IRacingTools/SDK/DataHeader.h>
 #include <IRacingTools/SDK/LiveConnection.h>
+#include <IRacingTools/SDK/SessionInfo/ModelParser.h>
+#include <IRacingTools/SDK/SessionInfo/SessionInfoMessage.h>
 #include <IRacingTools/SDK/Types.h>
 #include <atomic>
-#include <stdexcept>
+
+#include <yaml-cpp/yaml.h>
 
 // for timeBeginPeriod()
 #pragma comment(lib, "Winmm")
@@ -236,6 +240,23 @@ const char *LiveConnection::getSessionInfoStr() {
         return gSharedMemPtr + gDataHeader->session.offset;
     }
     return nullptr;
+}
+
+std::shared_ptr<SessionInfo::SessionInfoMessage> LiveConnection::getSessionInfo() {
+  if (!sessionInfoMessage_) {
+    auto sessionInfoData = getSessionInfoStr();
+    std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfoMessage{nullptr};
+    if (sessionInfoData) {
+      auto rootNode = YAML::Load(sessionInfoData);
+      sessionInfoMessage = std::make_shared<SessionInfo::SessionInfoMessage>();
+      if (sessionInfoMessage) {
+        *sessionInfoMessage = rootNode.as<SessionInfo::SessionInfoMessage>();
+        sessionInfoMessage_ = sessionInfoMessage;
+      }
+    }
+  }
+
+  return sessionInfoMessage_;
 }
 
 uint32_t LiveConnection::getSessionUpdateCount() {

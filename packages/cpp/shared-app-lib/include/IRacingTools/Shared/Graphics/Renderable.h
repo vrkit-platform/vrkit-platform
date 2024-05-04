@@ -34,7 +34,7 @@ namespace IRacingTools::Shared::Graphics
   public:
     Renderable() = delete;
 
-    Renderable(const std::shared_ptr<DXResources> &resources) : resources_(resources)
+    explicit Renderable(const std::shared_ptr<DXResources> &resources) : resources_(resources)
     {
     }
 

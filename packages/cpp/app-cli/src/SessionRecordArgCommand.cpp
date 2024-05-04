@@ -21,6 +21,7 @@
 #include <ctime>
 #include <windows.h>
 
+#include <IRacingTools/SDK/SessionInfo/ModelParser.h>
 #include <IRacingTools/SDK/LiveConnection.h>
 #include <IRacingTools/SDK/Utils/YamlParser.h>
 #include <IRacingTools/SDK/DiskClient.h>
@@ -29,6 +30,8 @@
 #include <IRacingTools/SDK/Utils/YamlParser.h>
 
 #include "SessionRecordArgCommand.h"
+
+#include <yaml-cpp/yaml.h>
 
 // for timeBeginPeriod
 #pragma comment(lib, "Winmm")
@@ -77,7 +80,7 @@ namespace IRacingTools::App::Commands {
     std::string gOutputPath{};
 
     // open a file for writing, without overwriting any existing files
-    FILE *openUniqueFile(const char *name, const char *ext, time_t t_time, bool asBinary) {
+    std::optional<std::pair<std::string, FILE *>> openUniqueFile(const char *name, const char *ext, time_t t_time, bool asBinary) {
       FILE *file = nullptr;
       char tstr[MAX_PATH] = "";
       int i = 0;
@@ -110,13 +113,12 @@ namespace IRacingTools::App::Commands {
       // failed to find an unused file
       if (file) {
         fclose(file);
-        return nullptr;
+        return std::nullopt;
       }
 
-      if (asBinary)
-        return fopen(tstr, "wb");
-      else
-        return fopen(tstr, "w");
+      std::string filename(tstr);
+      return {{filename,fopen(tstr, asBinary ? "wb" : "w")}};
+
     }
 
     void writeSessionItem(FILE *file, const char *path, const char *desc) {
@@ -240,12 +242,15 @@ namespace IRacingTools::App::Commands {
 
     void logStateToFile(time_t t_time) {
       static auto &conn = LiveConnection::GetInstance();
-      auto sesStr = conn.getSessionInfoStr();
-      if (sesStr) {
-        FILE *file = openUniqueFile("irsdk_session", "txt", t_time, false);
+      if (auto sessionInfoStr = conn.getSessionInfoStr()) {
+        auto fileRes = openUniqueFile("irsdk_session", "txt", t_time, false);
+        if (!fileRes)
+          abort();
+
+        auto [filename, file] = fileRes.value();
         if (file) {
           // dump session information to disk
-          fputs(sesStr, file);
+          fputs(sessionInfoStr, file);
           fclose(file);
         }
       }
@@ -353,16 +358,41 @@ namespace IRacingTools::App::Commands {
     bool open_file(FILE *&file, time_t &t_time) {
       // get current time
       t_time = time(nullptr);
-#ifdef LOG_TO_CSV
-      file = openUniqueFile("irsdk_session", "csv", t_time, false);
-#else
-      file = openUniqueFile("irsdk_session", "ibt", t_time, true);
-#endif
+
+      auto sessionInfoData = LiveConnection::GetInstance().getSessionInfoStr();
+      std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfo{nullptr};
+      if (sessionInfoData) {
+        auto rootNode = YAML::Load(sessionInfoData);
+        sessionInfo = std::make_shared<SessionInfo::SessionInfoMessage>();
+        if (sessionInfo) {
+          SessionInfo::SessionInfoMessage * sessionInfoMessage = sessionInfo.get();
+          *sessionInfoMessage = rootNode.as<SessionInfo::SessionInfoMessage>();
+        }
+      }
+
+      std::string trackName = "UNKNOWN";
+      if (sessionInfo) {
+        auto& weekendInfo = sessionInfo->weekendInfo;
+        trackName = weekendInfo.trackName;
+      }
+
+      #ifdef LOG_TO_CSV
+      #define LOG_FILE_ARGS "csv", t_time, false
+      #else
+      #define LOG_FILE_ARGS "ibt", t_time, true
+      #endif
+
+      std::string prefix = fmt::format("ir_session_track_{}", trackName);
+      auto fileRes = openUniqueFile(prefix.c_str(), LOG_FILE_ARGS);
+      auto [filename, tmpFile] = fileRes.value();
+      file = tmpFile;
 
       if (file) {
-        printf("Session begin.\n\n");
+        fmt::println("Recording session to file ({})", filename);
         return true;
       }
+
+      fmt::println("Failed to create recording file");
       return false;
     }
 
@@ -424,6 +454,7 @@ namespace IRacingTools::App::Commands {
       timeBeginPeriod(1);
       g_data = nullptr;
       g_nData = 0;
+      //auto &client = LiveClient::GetInstance();
       auto &conn = LiveConnection::GetInstance();
 
       while (!_kbhit()) {

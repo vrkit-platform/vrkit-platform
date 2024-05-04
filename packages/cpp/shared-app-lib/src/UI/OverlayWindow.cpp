@@ -6,9 +6,11 @@
 
 #include <IRacingTools/Shared/UI/OverlayWindow.h>
 #include <IRacingTools/Shared/SharedMemoryStorage.h>
-
-
 #include <spdlog/spdlog.h>
+
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx11.h"
 
 #include "Dwmapi.h"
 
@@ -149,6 +151,7 @@ namespace
     //SetLayeredWindowAttributes(window_, RGB(0, 0, 0),0, LWA_COLORKEY);
 
     ShowWindow(window_, SW_SHOW);
+    UpdateWindow(window_);
 
     // MARGINS Margin = {-1, -1, -1, -1};
     // DwmExtendFrameIntoClientArea(window_, &Margin);
@@ -156,6 +159,21 @@ namespace
     dxr_ = std::make_shared<Graphics::DXResources>();
     initializeResources();
     initializeSwapChain();
+
+  //   // Setup Dear ImGui context
+  //   IMGUI_CHECKVERSION();
+  //   ImGui::CreateContext();
+  //   ImGuiIO& io = ImGui::GetIO(); (void)io;
+  //   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+  //   io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+  //
+  // // Setup Dear ImGui style
+  // ImGui::StyleColorsDark();
+  // //ImGui::StyleColorsLight();
+  //
+  // // Setup Platform/Renderer backends
+  // ImGui_ImplWin32_Init(window_);
+  // ImGui_ImplDX11_Init(dxr_->getDXDevice().get(), dxr_->getDXImmediateContext().get());
   }
 
   OverlayWindow::~OverlayWindow() {
@@ -216,12 +234,12 @@ namespace
 
           if (msg.message == WM_QUIT)
             break;
-
+        }
 
           // Process input
           // if (msg.message != WM_PAINT)
           //   continue;
-
+        // Start the Dear ImGui frame
 
           auto dim = getSize();
 
@@ -240,9 +258,12 @@ namespace
           auto ctx = dxr_->getDXImmediateContext();
           auto rtv = renderTarget_->d3d().rtv();
 
+
+
           ctx->ClearRenderTargetView(
               rtv, DirectX::Colors::Transparent);
-          // float color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+
+        // float color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
           // ctx->ClearRenderTargetView(rtv, color);
           // ctx->ClearRenderTargetView(
           //     rtv, clearColor
@@ -257,12 +278,27 @@ namespace
           );
 
 
+
           render(renderTarget_);
+
+        // ImGui_ImplDX11_NewFrame();
+        // ImGui_ImplWin32_NewFrame();
+        // ImGui::NewFrame();
+        // ImGui::ShowDemoWindow(&showDemoWindow_);
+        //
+        // ImGui::Render();
+        //   ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
           swapChain_->Present(1, 0);
 
-        }
+
       }
+
+      // Cleanup
+      // ImGui_ImplDX11_Shutdown();
+      // ImGui_ImplWin32_Shutdown();
+      // ImGui::DestroyContext();
+
     }
 
 

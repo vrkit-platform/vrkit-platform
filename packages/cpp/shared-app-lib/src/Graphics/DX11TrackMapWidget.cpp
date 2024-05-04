@@ -41,10 +41,10 @@ namespace IRacingTools::Shared::Graphics {
 
   } // namespace
 
-  DX11TrackMapWidget::DX11TrackMapWidget(const std::shared_ptr<DXResources> &resources) : Renderable(resources) {
+  DX11TrackMapWidget::DX11TrackMapWidget(const TrackMap& trackMap, const std::shared_ptr<DXResources> &resources) : Renderable(resources), trackMap_(trackMap) {
   }
 
-  void DX11TrackMapWidget::render(const std::shared_ptr<RenderTarget> &target, const TrackMapState& data) {
+  void DX11TrackMapWidget::render(const std::shared_ptr<RenderTarget> &target, const std::shared_ptr<SessionDataUpdatedEvent>& data) {
     static float t = 0.0f;
     static DWORD dwTimeStart = 0;
 
@@ -81,23 +81,24 @@ namespace IRacingTools::Shared::Graphics {
 
   }
 
-  HRESULT DX11TrackMapWidget::createResources(const std::shared_ptr<RenderTarget> &target) {
+  HRESULT DX11TrackMapWidget::createResources(const std::shared_ptr<RenderTarget> &) {
     std::scoped_lock lock(trackMapMutex_);
-    auto trackMapOpt = SharedMemoryStorage::GetInstance()->trackMap();
+    //auto trackMapOpt = SharedMemoryStorage::GetInstance()->trackMap();
     if (pathGeometry_)
-      pathGeometry_ = {};
-
-    if (!trackMapOpt) {
-      spdlog::warn("No track map loaded");
       return S_OK;
-    }
 
-    auto &trackMap = trackMapOpt.value();
+    // if (!trackMapOpt) {
+    //   spdlog::warn("No track map loaded");
+    //   return S_OK;
+    // }
+
+    auto &trackMap = trackMap_;
     auto winSize = renderSize_;
+    auto dxr = resources();
 
     auto scaledTrackMap = Geometry::ScaleTrackMapToFit(trackMap, winSize);
 
-    auto &d2dFactory = resources_->getD2DFactory();
+    auto d2dFactory = dxr->getD2DFactory();
 
     // Create the path geometry.
     winrt::check_hresult(d2dFactory->CreatePathGeometry(pathGeometry_.put()));

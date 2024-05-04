@@ -15,26 +15,26 @@
 #include <memory>
 
 #include "SessionPlayArgCommand.h"
-#include "IRacingTools/Shared/SharedMemoryStorage.h"
-#include "OverlayWindow.h"
-#include <IRacingTools/Shared/Graphics/DXResources.h>
+
+#include <IRacingTools/Shared/DiskSessionDataProvider.h>
 #include <IRacingTools/Shared/Graphics/DX11TrackMapWidget.h>
+#include <IRacingTools/Shared/Graphics/DXResources.h>
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
+#include <IRacingTools/Shared/SharedMemoryStorage.h>
+#include <IRacingTools/Shared/TrackMapGeometry.h>
+#include <IRacingTools/Shared/UI/OverlayWindow.h>
+#include <IRacingTools/Shared/UI/TrackMapOverlayWindow.h>
 
 namespace IRacingTools::App::Commands
 {
   using namespace Shared;
-
-  namespace UI
-  {
-
 
   CLI::App *SessionPlayArgCommand::createCommand(CLI::App *app)
   {
 
     auto cmd = app->add_subcommand("play", "Play Live Session");
 
-    cmd->add_option("--telemetry", telemetryFilename_, "IBT Input file");
+    cmd->add_option("--ibt", ibtFilename_, "IBT Input file");
     cmd->add_option("--trackmap", trackmapFilename_, "Lap Trajectory File")->required(true);
 
     return cmd;
@@ -43,11 +43,15 @@ namespace IRacingTools::App::Commands
   int SessionPlayArgCommand::execute()
   {
     spdlog::info("Loading track map ({})", trackmapFilename_);
-    auto shm = IRacingTools::Shared::SharedMemoryStorage::GetInstance();
-    winrt::check_bool(shm->loadTrackMapFromLapTrajectoryFile(trackmapFilename_));
+    auto trackMap = Geometry::LoadTrackMapFromTrajectoryFile(trackmapFilename_);
+    auto dataProvider = std::make_shared<DiskSessionDataProvider>(ibtFilename_,ibtFilename_);
+    winrt::check_bool(trackMap.has_value());
 
-    UI::OverlayWindow win;
+    dataProvider->start();
+    UI::TrackMapOverlayWindow win(trackMap.value(), dataProvider);
     win.runnable();
+
+    dataProvider->stop();
     // win.start();
     //
     // win.join();

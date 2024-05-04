@@ -64,8 +64,8 @@ namespace IRacingTools::SDK {
       return false;
     }
 
-    if (!available_ || connectionId_ != client->getConnectionId()) {
-      connectionId_ = client->getConnectionId();
+    if (!available_ || !clientId_ || clientId_.value() != client->getClientId()) {
+      clientId_ = client->getClientId();
 
       auto idx = client->getVarIdx(name_);
       if (!idx || idx.value() == 0xffffffff) {

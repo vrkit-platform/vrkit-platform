@@ -15,7 +15,7 @@ namespace IRacingTools::SDK {
 
   class ClientManager : public Singleton<ClientManager> {
   public:
-    static constexpr std::string_view LiveClientId{};
+
 
     ClientManager() = delete;
 
@@ -44,9 +44,9 @@ namespace IRacingTools::SDK {
     explicit ClientManager(token) {
     };
 
-    std::map<std::string_view, std::weak_ptr<Client>> clients_{};
+    std::map<ClientId, std::weak_ptr<Client>> clients_{};
 
-    std::string_view activeClientId_{LiveClientId};
+    ClientId activeClientId_{Client::LiveClientId};
 
     std::recursive_mutex clientMutex_{};
   };

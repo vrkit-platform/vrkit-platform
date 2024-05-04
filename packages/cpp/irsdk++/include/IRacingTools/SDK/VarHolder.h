@@ -61,7 +61,7 @@ protected:
     [[maybe_unused]] std::string_view unit_{};
     [[maybe_unused]] std::string_view description_{};
     uint32_t idx_{0};
-    ConnectionId connectionId_{0};
+    std::optional<ClientId> clientId_{};
 
     ClientProvider * clientProvider_;
 };

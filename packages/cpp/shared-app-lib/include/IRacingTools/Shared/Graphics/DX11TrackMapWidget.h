@@ -6,71 +6,25 @@
 
 #include "../SharedAppLibPCH.h"
 #include "DX11Resources.h"
-#include "Renderable.h"
 #include "RenderTarget.h"
+#include "Renderable.h"
+
 #include <IRacingTools/Models/TrackMapData.pb.h>
+#include <IRacingTools/Shared/SessionDataEvent.h>
 
 namespace IRacingTools::Shared::Graphics {
 
 
-  struct TrackMapState {
-    struct Car {
-      /**
-       * @brief Index in data set
-       *
-       * -1 == unknown
-       */
-      std::int32_t dataIndex{-1};
-
-      /**
-       * @brief Is the primary (focused) car
-       */
-      bool isPrimary{false};
-
-      /**
-       * @brief Position in session (Race/Quali/Practice)
-       */
-      std::uint32_t position{0};
-
-      /**
-       * @brief  ID is car #
-       */
-      std::uint32_t id{0};
-    };
-
-    /**
-     * @brief the primary (focused) car
-     */
-    Car primaryCar{};
-
-    /**
-     * @brief All driver/car data
-     */
-    std::vector<Car> cars{};
-
-    /**
-     * @brief is data valid & available
-     * @return
-     */
-    bool isAvailable() {
-      return primaryCar.position > 0 || cars.size();
-    }
-
-    /**
-     * @see `isAvailable()`
-     */
-    bool isValid() {
-      return isAvailable();
-    }
-  };
 
 
-  class DX11TrackMapWidget : public Renderable<TrackMapState> {
+
+  class DX11TrackMapWidget : public Renderable<std::shared_ptr<SessionDataUpdatedEvent>> {
   public:
 
-    explicit DX11TrackMapWidget(const std::shared_ptr<DXResources>& resources);
 
-    void render(const std::shared_ptr<RenderTarget>& target, const TrackMapState& data) override;
+    explicit DX11TrackMapWidget(const TrackMap& trackMap, const std::shared_ptr<DXResources>& resources);
+
+    void render(const std::shared_ptr<RenderTarget>& target, const std::shared_ptr<SessionDataUpdatedEvent>& data) override;
 
   private:
     HRESULT createResources(const std::shared_ptr<RenderTarget> &target);
@@ -78,8 +32,8 @@ namespace IRacingTools::Shared::Graphics {
     std::atomic_bool ready_{false};
     std::atomic_bool disposed_{false};
     Size<UINT> renderSize_{0,0};
-    std::optional<TrackMapState> trackMapStateOpt_{std::nullopt};
-    std::optional<TrackMap> trackMapOpt_{std::nullopt};
+
+    TrackMap trackMap_;
 
     std::mutex trackMapMutex_{};
     std::mutex renderMutex_{};

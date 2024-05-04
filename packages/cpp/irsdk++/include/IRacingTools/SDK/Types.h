@@ -79,17 +79,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include <magic_enum.hpp>
-#include <tchar.h>
 #include <windows.h>
 
-#include "ErrorTypes.h"
-#include "Resources.h"
 #include <IRacingTools/SDK/Utils/LUT.h>
 
 namespace IRacingTools::SDK {
 
 using ClientId = std::string_view;
-using ConnectionId = std::size_t;
 
 
 template<typename T>

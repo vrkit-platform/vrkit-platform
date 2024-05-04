@@ -40,16 +40,32 @@ namespace IRacingTools::Shared {
     SessionDataEventType type_;
   };
 
+  /**
+   * @brief Flattened tuple per car
+   *
+   * index                int
+   * lap                  int
+   * lapsCompleted        int
+   * lapPercentComplete   float
+   * estimatedTime        float
+   * position.overall     int
+   * position.clazz       int
+   * driver               std::optional<SDK::SessionInfo::Driver>
+   */
   using SessionCarStateRecord =
       std::tuple<int, int, int, float, float, int, int, std::optional<SDK::SessionInfo::Driver> &>;
 
+  /**
+   * @brief Data update event triggered on every new
+   *  data frame/tick received from IRacing
+   */
   class SessionDataUpdatedEvent : public SessionDataEvent {
   public:
     struct SessionCarState {
       int index{};
+
       int lap{};
       int lapsCompleted{};
-
       float lapPercentComplete{};
 
       float estimatedTime{};

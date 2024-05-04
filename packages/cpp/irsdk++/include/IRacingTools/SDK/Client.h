@@ -27,28 +27,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include <IRacingTools/SDK/SessionInfo/SessionInfoMessage.h>
 #include <expected>
 #include <filesystem>
 
+#include <IRacingTools/SDK/SessionInfo/SessionInfoMessage.h>
+
 #include "DataHeader.h"
-#include "DiskSubHeader.h"
 #include "ErrorTypes.h"
 #include "Types.h"
-#include "Utils/Buffer.h"
 
 // A C++ wrapper around the irsdk calls that takes care of reading a .ibt file
 namespace IRacingTools::SDK {
-namespace fs = std::filesystem;
+  namespace fs = std::filesystem;
 
 
-class Client {
-public:
-
+  class Client {
+  public:
+    static constexpr std::string_view LiveClientId{};
 
     virtual ~Client() = default;
     virtual bool isAvailable() = 0;
-    virtual ConnectionId getConnectionId() = 0;
+    virtual ClientId getClientId() = 0;
+
     /**
      * @brief Is index valid based on total number of vars
      * @param idx
@@ -61,10 +61,10 @@ public:
     // return how many variables this .ibt file has in the header
     virtual std::optional<uint32_t> getNumVars() = 0;
 
-    virtual const VarHeaders& getVarHeaders() = 0;
+    virtual const VarHeaders &getVarHeaders() = 0;
 
-    virtual Opt<const VarDataHeader*> getVarHeader(uint32_t idx) = 0;
-    virtual Opt<const VarDataHeader*> getVarHeader(const std::string_view &name) = 0;
+    virtual Opt<const VarDataHeader *> getVarHeader(uint32_t idx) = 0;
+    virtual Opt<const VarDataHeader *> getVarHeader(const std::string_view &name) = 0;
 
     virtual std::optional<uint32_t> getVarIdx(const std::string_view &name) = 0;
 
@@ -111,6 +111,8 @@ public:
   struct ClientProvider {
 
     virtual std::shared_ptr<Client> getClient() = 0;
+
+    virtual ~ClientProvider() = default;
   };
 
-} // namespace IRacingTools::SDK
+}// namespace IRacingTools::SDK

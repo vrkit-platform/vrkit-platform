@@ -78,5 +78,7 @@ protected:
   void initializeSwapChain();
 
 
+private:
+  bool showDemoWindow_{true};
 };
 };

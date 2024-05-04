@@ -1,15 +1,18 @@
 #pragma once
 
-#include "../SharedAppLibPCH.h"
-#include "DX113D.h"
-#include <algorithm>
-
-#include <IRacingTools/SDK/Utils/LockHelpers.h>
-#include <IRacingTools/Shared/Macros.h>
 
 #include <atomic>
 #include <functional>
 #include <mutex>
+
+#include <IRacingTools/SDK/Utils/LockHelpers.h>
+#include <IRacingTools/SDK/Utils/LockHelpers.h>
+
+#include "../Macros.h"
+#include "../SharedAppLibPCH.h"
+#include "DX113D.h"
+
+
 
 
 namespace IRacingTools::Shared::Graphics {
@@ -42,11 +45,6 @@ namespace IRacingTools::Shared::Graphics {
   protected:
     D3D11Resources();
 
-    ~D3D11Resources();
-
-    D3D11Resources(const D3D11Resources &) = delete;
-
-    D3D11Resources &operator=(const D3D11Resources &) = delete;
 
     winrt::com_ptr<IDXGIFactory6> dxgiFactory_;
     winrt::com_ptr<IDXGIAdapter4> dxgiAdapter_;
@@ -58,6 +56,12 @@ namespace IRacingTools::Shared::Graphics {
     winrt::com_ptr<IDXGIDevice2> dxgiDevice_;
 
   public:
+    ~D3D11Resources();
+
+    D3D11Resources(const D3D11Resources &) = delete;
+
+    D3D11Resources &operator=(const D3D11Resources &) = delete;
+
     winrt::com_ptr<IDXGIFactory6> &getDXGIFactory();
 
     winrt::com_ptr<IDXGIAdapter4> &getDXGIAdapter();

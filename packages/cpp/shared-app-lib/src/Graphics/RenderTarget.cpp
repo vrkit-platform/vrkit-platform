@@ -18,6 +18,7 @@
  * USA.
  */
 
+#include <IRacingTools/Shared/Macros.h>
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
 #include <spdlog/spdlog.h>
 
@@ -129,7 +130,7 @@ namespace IRacingTools::Shared::Graphics {
       return;
     }
     released_ = true;
-    unsafeParent_->dxr_->popD2DDraw();
+    check_hresult(unsafeParent_->dxr_->popD2DDraw());
     unsafeParent_->dxr_->getD2DDeviceContext()->SetTarget(nullptr);
 
     auto &mode = parent_->mode_;

@@ -3,129 +3,218 @@
 //
 
 // #include "../resource.h"
+#include <DirectXHelpers.h>
+#include <winrt/base.h>
 
 #include <IRacingTools/Shared/Graphics/DX11TrackMapWidget.h>
 #include <IRacingTools/Shared/Macros.h>
 #include <IRacingTools/Shared/SharedMemoryStorage.h>
 #include <IRacingTools/Shared/TrackMapGeometry.h>
-#include <winrt/base.h>
+#include <IRacingTools/Shared/Graphics/DXPlatformHelpers.h>
+
 
 namespace IRacingTools::Shared::Graphics {
+    using namespace DirectX;
 
-  namespace {
-
-    // struct SimpleVertex {
-    //     [[maybe_unused]] D3DXVECTOR3 Pos;
-    //     [[maybe_unused]] D3DXVECTOR2 Tex;
-    // };
-
-    /******************************************************************
-     *                                                                 *
-     *  Static Data                                                    *
-     *                                                                 *
-     ******************************************************************/
-
-    constexpr WCHAR kHelloWorld[] = L"Hello, World!";
-
-    /*static*/
-    constexpr D3D11_INPUT_ELEMENT_DESC kInputLayout[] = {{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0},
-                                                         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},};
-
-    // /*static*/ static const SimpleVertex kVertexArray[]
-    //     = {{D3DXVECTOR3(-1.0f, -1.0f, 1.0f), D3DXVECTOR2(1.0f, 1.0f)},
-    //        {D3DXVECTOR3(1.0f, -1.0f, 1.0f), D3DXVECTOR2(0.0f, 1.0f)},
-    //        {D3DXVECTOR3(1.0f, 1.0f, 1.0f), D3DXVECTOR2(0.0f, 0.0f)},
-    //        {D3DXVECTOR3(-1.0f, 1.0f, 1.0f), D3DXVECTOR2(1.0f, 0.0f)}};
-    //
-    /*static*/ constexpr SHORT kFacesIndexArray[] = {3, 1, 0, 2, 1, 3};
-
-  } // namespace
-
-  DX11TrackMapWidget::DX11TrackMapWidget(const TrackMap& trackMap, const std::shared_ptr<DXResources> &resources) : Renderable(resources), trackMap_(trackMap) {
-  }
-
-  void DX11TrackMapWidget::render(const std::shared_ptr<RenderTarget> &target, const std::shared_ptr<SessionDataUpdatedEvent>& data) {
-    static float t = 0.0f;
-    static DWORD dwTimeStart = 0;
-
-    // TODO: Check if DXResources->getSize() changed too
-    auto targetSize = target->getDimensions();
-    auto sizeChanged = renderSize_ != targetSize;
-    if (!ready_ || sizeChanged) {
-      renderSize_ = targetSize;
-      check_hresult(createResources(target));
-      ready_ = true;
+    namespace {
+        struct CarWidgetState {
+            SessionDataUpdatedEvent::SessionCarState& data;
+        };
     }
 
-    // Draw a gradient background before we draw the cube
-    auto d2dTarget = target->d2d();//getD2DDeviceContext();
-    if (d2dTarget) {
-      if (!pathGeometry_) {
-        IRT_LOG_AND_FATAL("Track map resources were not created yet");
-      }
-      // create a black brush
-      winrt::com_ptr<ID2D1SolidColorBrush> blackBrush{};
-      // winrt::check_hresult(d2dTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), blackBrush.put()));
-      winrt::check_hresult(d2dTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), blackBrush.put()));
-      // d2dTarget->BeginDraw();
+    class DX11TrackMapWidget::CarWidget : public Renderable<CarWidgetState&> {
+    public:
+        CarWidget() = delete;
+
+        explicit CarWidget(const std::shared_ptr<DXResources>& resources) : Renderable(resources) {}
+
+        CarWidget(CarWidget&&) = delete;
+        CarWidget(const CarWidget&) = delete;
+        virtual ~CarWidget() = default;
+
+        virtual void render(const std::shared_ptr<RenderTarget>& target, CarWidgetState& data) override {}
+    };
 
 
-      d2dTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-
-      // d2dTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
-
-      d2dTarget->DrawGeometry(pathGeometry_.get(), blackBrush.get(), 3);
-
-      // check_hresult(d2dTarget->EndDraw());
+    DX11TrackMapWidget::DX11TrackMapWidget(const TrackMap& trackMap, const std::shared_ptr<DXResources>& resources) :
+        Renderable(resources),
+        trackMap_(trackMap),
+        carWidget_(new CarWidget(resources)) {
+        createResources();
     }
 
-  }
-
-  HRESULT DX11TrackMapWidget::createResources(const std::shared_ptr<RenderTarget> &) {
-    std::scoped_lock lock(trackMapMutex_);
-    //auto trackMapOpt = SharedMemoryStorage::GetInstance()->trackMap();
-    if (pathGeometry_)
-      return S_OK;
-
-    // if (!trackMapOpt) {
-    //   spdlog::warn("No track map loaded");
-    //   return S_OK;
-    // }
-
-    auto &trackMap = trackMap_;
-    auto winSize = renderSize_;
-    auto dxr = resources();
-
-    auto scaledTrackMap = Geometry::ScaleTrackMapToFit(trackMap, winSize);
-
-    auto d2dFactory = dxr->getD2DFactory();
-
-    // Create the path geometry.
-    winrt::check_hresult(d2dFactory->CreatePathGeometry(pathGeometry_.put()));
-
-    winrt::com_ptr<ID2D1GeometrySink> sink{nullptr};
-
-    // Write to the path geometry using the geometry sink. We are going to
-    // create an hour glass.
-    winrt::check_hresult(pathGeometry_->Open(sink.put()));
-
-    sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
-
-    for (int idx = 0; idx < scaledTrackMap.points_size(); idx++) {
-      auto &point = scaledTrackMap.points(idx);
-      auto d2point = D2D1::Point2F(point.x(), point.y());
-      if (idx == 0) {
-        sink->BeginFigure(d2point, D2D1_FIGURE_BEGIN_FILLED);
-      } else {
-        sink->AddLine(d2point);
-      }
+    DX11TrackMapWidget::~DX11TrackMapWidget() {
+        delete carWidget_;
     }
 
-    sink->EndFigure(D2D1_FIGURE_END_CLOSED);
+    void DX11TrackMapWidget::render(
+        const std::shared_ptr<RenderTarget>& target,
+        const std::shared_ptr<SessionDataUpdatedEvent>& data
+    ) {
+        // TODO: Check if DXResources->getSize() changed too
+        auto targetSize = target->getDimensions();
+        auto sizeChanged = renderSize_ != targetSize;
+        if (!targetResCreated_ || sizeChanged) {
+            renderSize_ = targetSize;
+            createTargetResources(target);
+        }
 
-    winrt::check_hresult(sink->Close());
-    return S_OK;
-  }
+        // GET D2D TARGET
+        auto d2dTarget = target->d2d();
+        if (!d2dTarget) {
+            IRT_LOG_AND_FATAL("d2dTarget is null");
+        }
+
+        // SET TRANSFORM TO DEFAULT
+        d2dTarget->SetTransform(D2D1::Matrix3x2F::Identity());
+        // d2dTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+
+        // DRAW THE GEOMETRY CONFIGURED ON GPU
+        d2dTarget->DrawGeometry(pathGeometry_.get(), brushPath_.get(), 3);
+
+        // TRACK IS DRAWN, NOW CARS
+        // GET FROM LATEST DATA
+        if (!data) {
+            spdlog::warn("No data");
+            return;
+        }
+
+        auto& cars = data->cars();
+        auto carCount = cars.size();
+        spdlog::trace("Rendering {} car positions", carCount);
+        if (!carCount) {
+            spdlog::warn("No car data received");
+            return;
+        }
+
+        // DETERMINE THE SIZE OF EACH CAR WIDGET
+        //  Find the minimum window dimension and `std::ceil(dim * 0.025f)`
+        auto& winSize = renderSize_;
+        auto winDimMin = static_cast<float>(std::max<UINT>(std::min<UINT>(winSize.width(), winSize.height()), 1));
+        auto carRadius = std::max<float>(std::ceil(winDimMin * 0.025f), 3.0f);
+
+        spdlog::trace("Rendering {} cars", cars.size());
+        std::size_t idx = 0;
+        for (auto& car : cars) {
+            if (!car.driver || !car.index) {
+                spdlog::warn("No car data received for {}", idx);
+            }
+            else {
+                double carPercent = car.lapPercentComplete;
+                auto carDistance = carPercent * pathTotalDistance_;
+                auto carPointRes = ClosestValue(pathPointDistanceMap_, carDistance);
+                if (!carPointRes.has_value()) {
+                    spdlog::error(
+                        "Unable to find point using percentage ({}).  totalDistance={}: {}",
+                        carPercent,
+                        pathTotalDistance_,
+                        carPointRes.error().what()
+                    );
+                    continue;
+                }
+
+                auto carPoint = carPointRes.value();
+                D2D1_ELLIPSE carEllipse{
+                    .point = {carPoint.x(), carPoint.y()},
+                    .radiusX = carRadius,
+                    .radiusY = carRadius,
+                };
+                d2dTarget->FillEllipse(carEllipse, brushCarOuter_.get());
+            }
+
+            idx++;
+        }
+        // check_hresult(d2dTarget->EndDraw());
+    }
+
+    void DX11TrackMapWidget::resetTargetResources() {
+        brushPath_ = {};
+        brushCarOuter_ = {};
+    }
+
+    void DX11TrackMapWidget::createTargetResources(const std::shared_ptr<RenderTarget>& target) {
+        std::scoped_lock lock(renderMutex_);
+        if (targetResCreated_)
+            return;
+
+        auto dxr = resources();
+        auto d2dFactory = dxr->getD2DFactory();
+        auto dxDevice = dxr->getDXDevice();
+        auto d2dTarget = target->d2d();
+
+        if (!brushPath_)
+            winrt::check_hresult(d2dTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), brushPath_.put()));
+        if (!brushCarOuter_)
+            winrt::check_hresult(
+                d2dTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Aqua), brushCarOuter_.put())
+            );
+
+        auto& trackMap = trackMap_;
+        auto winSize = renderSize_;
+
+        // SCALE THE MAP TO FIT THE WINDOW SIZE
+        auto scaledTrackMap = Geometry::ScaleTrackMapToFit(trackMap, winSize);
+
+        // CREATE THE GEOMETRY
+        winrt::check_hresult(d2dFactory->CreatePathGeometry(pathGeometry_.put()));
+
+        // SETUP A GEOMETRY SINK, WHICH IS
+        // BASICLY A SET OF INSTRUCTIONS TO
+        // CACHE ON GPU
+        winrt::com_ptr<ID2D1GeometrySink> sink{nullptr};
+        winrt::check_hresult(pathGeometry_->Open(sink.put()));
+        sink->SetFillMode(D2D1_FILL_MODE_ALTERNATE);
+
+        // PLOT THE TRACK MAP & CALCULATE DISTANCE -> POINT ON MAP
+        // FOR LIVE CAR RENDERING
+        TrackMap_Point lastPoint{};
+        pathTotalDistance_ = 0.0f;
+        pathPointDistanceMap_.clear();
+        for (auto idx = 0; idx < scaledTrackMap.points_size(); idx++) {
+            auto& point = scaledTrackMap.points(idx);
+            auto d2point = D2D1::Point2F(point.x(), point.y());
+            if (idx == 0) {
+                sink->BeginFigure(d2point, D2D1_FIGURE_BEGIN_FILLED);
+            }
+            else {
+                pathTotalDistance_ += DistanceBetween<double>(lastPoint, point);
+                sink->AddLine(d2point);
+            }
+
+            // IF THIS SEGMENT HAD A VALID DISTANCE FROM THE PREVIOUS
+            // THEN ADD IT TO THE MAP WITH THE POINT IT REPRESENTS
+            if (!pathPointDistanceMap_.contains(pathTotalDistance_)) {
+                pathPointDistanceMap_[pathTotalDistance_] = point;
+            }
+            lastPoint = point;
+        }
+
+        sink->EndFigure(D2D1_FIGURE_END_CLOSED);
+
+        winrt::check_hresult(sink->Close());
 
 
+        targetResCreated_ = true;
+    }
+
+    void DX11TrackMapWidget::createResources() {
+        std::scoped_lock lock(trackMapMutex_);
+        if (pathGeometry_)
+            return;
+
+        auto dxr = resources();
+        auto d2dFactory = dxr->getD2DFactory();
+        auto dxDevice = dxr->getDXDevice();
+
+        states_ = std::make_unique<CommonStates>(dxDevice.get());
+        effect_ = std::make_unique<BasicEffect>(dxDevice.get());
+        effect_->SetVertexColorEnabled(true);
+
+        Utils::ThrowIfFailed(
+            CreateInputLayoutFromEffect<VertexType>(dxDevice.get(), effect_.get(), inputLayout_.put())
+        );
+
+        auto context = dxr->getDXImmediateContext(); // m_deviceResources->GetD3DDeviceContext();
+        batch_ = std::make_unique<PrimitiveBatch<VertexType>>(context.get());
+    }
 } // namespace IRacingTools::Shared::Graphics

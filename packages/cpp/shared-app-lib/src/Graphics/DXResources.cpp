@@ -20,6 +20,7 @@
 
 #include <IRacingTools/Shared/Graphics/DXResources.h>
 #include <IRacingTools/SDK/Utils/ScopeHelpers.h>
+#include <IRacingTools/Shared/Macros.h>
 
 #include <spdlog/spdlog.h>
 

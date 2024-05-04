@@ -23,6 +23,9 @@
 #include <array>
 #include <cmath>
 #include <compare>
+#include <IRacingTools/Models/TrackMapData.pb.h>
+#include <IRacingTools/SDK/ErrorTypes.h>
+
 #include "SharedAppLibPCH.h"
 
 #include <nlohmann/json_fwd.hpp>
@@ -306,6 +309,47 @@ namespace IRacingTools::Shared {
       return staticCastWithBottomRight<FLOAT, D2D1_RECT_F>();
     }
   };
+
+  /**
+   * NOTE: C++26 allows this to be a `constexpr`
+   *
+   * @tparam T type of scalar to use
+   * @param p1 point 1
+   * @param p2 point 2
+   * @return distance between points
+   */
+  template<typename T>
+  T DistanceBetween(const TrackMap_Point& p1, const TrackMap_Point& p2) {
+    return std::sqrt(std::pow(p2.x() - p1.x(), 2) + std::pow(p2.y() - p1.y(), 2));
+  }
+
+template<typename T>
+  constexpr std::expected<T,SDK::NotFoundError> Closest(const std::vector<T> & vec, T value) {
+    auto const it = std::lower_bound(vec.begin(), vec.end(), value);
+    if (it == vec.end()) { return SDK::MakeUnexpected<SDK::NotFoundError>("Unable to find lower bound for value ({})", value); }
+
+    return *it;
+  }
+
+  template<typename K, typename V>
+  constexpr std::expected<K,SDK::NotFoundError> ClosestKey(const std::map<K,V> & map, K value) {
+    auto const it = std::lower_bound(map.begin(), map.end(), value, [](const std::pair<K,V>& entry, K currentValue) {
+      return entry.first < currentValue;
+    });
+    if (it == map.end()) { return SDK::MakeUnexpected<SDK::NotFoundError>("Unable to find lower bound for value ({})", value); }
+
+    return (*it).first;
+  }
+
+  template<typename K, typename V>
+  constexpr std::expected<V,SDK::NotFoundError> ClosestValue(const std::map<K,V> & map, K value) {
+    auto const it = std::lower_bound(map.begin(), map.end(), value, [](const std::pair<K,V>& entry, K currentValue) {
+      return entry.first < currentValue;
+    });
+    if (it == map.end()) { return SDK::MakeUnexpected<SDK::NotFoundError>("Unable to find lower bound for value ({})", value); }
+
+    return (*it).second;
+  }
 
   using PixelSize = Size<uint32_t>;
   using PixelPoint [[maybe_unused]] = Point<uint32_t>;

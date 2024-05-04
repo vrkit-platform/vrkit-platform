@@ -23,7 +23,7 @@ namespace IRacingTools::Shared::UI {
     }
 
     if (dataChanged_) {
-      spdlog::info("Data changed");
+      spdlog::trace("Data changed");
       trackMapWidget_->render(renderTarget_, dataEvent_);
     }
   }

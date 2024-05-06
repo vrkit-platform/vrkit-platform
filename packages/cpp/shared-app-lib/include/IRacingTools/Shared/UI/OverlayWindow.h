@@ -14,9 +14,11 @@
 namespace IRacingTools::Shared::UI {
     template <typename WindowClazz>
     class OverlayWindow : public BaseWindow<WindowClazz> {
-using Base = BaseWindow<WindowClazz>;
+        using Base = BaseWindow<WindowClazz>;
 
         std::mutex resourceMutex_{};
+        static constexpr UINT RenderTimerId = 1;
+        static constexpr UINT FPS_60 = 1000 / 60;
 
     protected:
         winrt::com_ptr<IDCompositionDevice> dComp_{};
@@ -74,6 +76,15 @@ using Base = BaseWindow<WindowClazz>;
             initializeResources();
             initializeSwapChain();
 
+            check_hresult(
+                SetTimer(
+                    Base::windowHandle(),
+                    RenderTimerId,
+                    // timer identifier
+                    FPS_60,
+                    nullptr
+                )
+            );
             return win;
         }
 
@@ -82,18 +93,12 @@ using Base = BaseWindow<WindowClazz>;
         OverlayWindow(const OverlayWindow&) = delete;
 
         OverlayWindow() : BaseWindow<WindowClazz>() {
-
-
             // MARGINS Margin = {-1, -1, -1, -1};
             // DwmExtendFrameIntoClientArea(window_, &Margin);
-
-
         }
 
 
-        virtual ~OverlayWindow() {
-
-        }
+        virtual ~OverlayWindow() {}
 
         virtual bool isReady() override {
             // std::scoped_lock lock(resourceMutex_);
@@ -102,26 +107,23 @@ using Base = BaseWindow<WindowClazz>;
 
 
         virtual LRESULT handleMessage(UINT messageType, WPARAM wParam, LPARAM lParam) override {
-            switch (messageType)
-            {
+            switch (messageType) {
             case WM_DESTROY:
+                KillTimer(Base::windowHandle(), RenderTimerId);
                 PostQuitMessage(0);
+
                 return 0;
-
-            // case WM_PAINT:
-            // {
-            //     render();
-            //     //PAINTSTRUCT ps;
-            //     // render();
-            //     // HDC hdc = BeginPaint(Base::windowHandle(), &ps);
-            //     //FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW+1));
-            //     // EndPaint(m_hwnd, &ps);
-            // }
-                //return 0;
-
+            case WM_TIMER: {
+                switch (wParam) {
+                    case RenderTimerId:
+                        renderWindow();
+                        break;
+                    }
+                    return 0;
+                }
             default:
-                renderWindow();
-                //return DefWindowProc(Base::windowHandle(), messageType, wParam, lParam);
+                //renderWindow();
+                return DefWindowProc(Base::windowHandle(), messageType, wParam, lParam);
             }
             return TRUE;
         }
@@ -234,6 +236,5 @@ using Base = BaseWindow<WindowClazz>;
             }
             //winrt::check_hresult(dxr_->getDXDevice()->CreateRenderTargetView(backBuffer_.get(),nullptr, renderTargetView_.put()));
         }
-
     };
 };

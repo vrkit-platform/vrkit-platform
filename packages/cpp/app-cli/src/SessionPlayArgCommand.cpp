@@ -50,9 +50,10 @@ namespace IRacingTools::App::Commands
     dataProvider->start();
     UI::TrackMapOverlayWindow win(trackMap.value(), dataProvider);
     win.initialize();
-    win.PeekWindowMessageLoop([&] (MSG&) {
-      win.renderWindow();
-    });
+    win.DefaultWindowMessageLoop();
+    // win.PeekWindowMessageLoop([&] (MSG&) {
+    //   //win.renderWindow();
+    // });
 
     dataProvider->stop();
     // win.start();

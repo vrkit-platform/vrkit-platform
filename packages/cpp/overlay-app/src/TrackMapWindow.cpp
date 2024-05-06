@@ -129,7 +129,7 @@ void TrackMapWindow::prepare() {
     }
 
     if (!trackMapResources_) {
-        trackMapResources_ = std::make_unique<DX11TrackMapWidget>(windowResources_.get());
+        trackMapResources_ = std::make_unique<TrackMapWidget>(windowResources_.get());
     }
 }
 

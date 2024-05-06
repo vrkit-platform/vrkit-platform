@@ -4,7 +4,7 @@
 
 #pragma once
 #include "OverlayAppPCH.h"
-#include <IRacingTools/Shared/Graphics/DX11TrackMapWidget.h>
+#include <IRacingTools/Shared/Graphics/TrackMapWidget.h>
 #include <IRacingTools/Shared/Graphics/DXResources.h>
 
 using namespace IRacingTools::Shared::Graphics;
@@ -49,5 +49,5 @@ private:
 
     HWND windowHandle_;
     std::unique_ptr<DX11WindowResources> windowResources_{nullptr};
-    std::unique_ptr<DX11TrackMapWidget> trackMapResources_{nullptr};
+    std::unique_ptr<TrackMapWidget> trackMapResources_{nullptr};
 };

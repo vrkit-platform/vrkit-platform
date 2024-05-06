@@ -17,7 +17,7 @@
 #include "SessionPlayArgCommand.h"
 
 #include <IRacingTools/Shared/DiskSessionDataProvider.h>
-#include <IRacingTools/Shared/Graphics/DX11TrackMapWidget.h>
+#include <IRacingTools/Shared/Graphics/TrackMapWidget.h>
 #include <IRacingTools/Shared/Graphics/DXResources.h>
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
 #include <IRacingTools/Shared/SharedMemoryStorage.h>
@@ -49,7 +49,10 @@ namespace IRacingTools::App::Commands
 
     dataProvider->start();
     UI::TrackMapOverlayWindow win(trackMap.value(), dataProvider);
-    win.runnable();
+    win.initialize();
+    win.PeekWindowMessageLoop([&] (MSG&) {
+      win.renderWindow();
+    });
 
     dataProvider->stop();
     // win.start();

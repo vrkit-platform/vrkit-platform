@@ -22,10 +22,10 @@
 
 namespace IRacingTools::Shared::UI {
 
-class TrackMapOverlayWindow : public OverlayWindow
+class TrackMapOverlayWindow : public OverlayWindow<TrackMapOverlayWindow>
 {
   std::mutex dataMutex_{};
-  std::shared_ptr<Graphics::DX11TrackMapWidget> trackMapWidget_{nullptr};
+  std::shared_ptr<Graphics::TrackMapWidget> trackMapWidget_{nullptr};
   std::shared_ptr<SessionDataProvider> dataProvider_;
   const TrackMap trackMap_;
   SessionDataProvider::UnsubscribeFn unsubscribeFn_;
@@ -33,6 +33,9 @@ class TrackMapOverlayWindow : public OverlayWindow
   std::atomic_bool dataChanged_{false};
 
 public:
+  static constexpr PCWSTR ClassName() {
+    return L"TrackMap Overlay";
+  }
 
   TrackMapOverlayWindow() = delete;
   TrackMapOverlayWindow(const TrackMap& trackMap, const std::shared_ptr<SessionDataProvider>& dataProvider);
@@ -41,9 +44,9 @@ public:
 
   virtual ~TrackMapOverlayWindow() = default;
 
-
   virtual void render(const std::shared_ptr<Graphics::RenderTarget>& target) override;
 
+  void initialize();
 
 
 };

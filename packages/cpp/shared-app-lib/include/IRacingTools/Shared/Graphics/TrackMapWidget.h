@@ -23,10 +23,10 @@ namespace IRacingTools::Shared::Graphics {
     using VertexType = DirectX::VertexPositionColor;
 
 
-    class DX11TrackMapWidget : public Renderable<std::shared_ptr<SessionDataUpdatedEvent>> {
+    class TrackMapWidget : public Renderable<std::shared_ptr<SessionDataUpdatedEvent>> {
     public:
-        explicit DX11TrackMapWidget(const TrackMap& trackMap, const std::shared_ptr<DXResources>& resources);
-        ~DX11TrackMapWidget();
+        explicit TrackMapWidget(const TrackMap& trackMap, const std::shared_ptr<DXResources>& resources);
+        ~TrackMapWidget();
 
         void render(
             const std::shared_ptr<RenderTarget>& target,
@@ -66,8 +66,8 @@ namespace IRacingTools::Shared::Graphics {
         std::unique_ptr<DirectX::PrimitiveBatch<VertexType>> batch_{nullptr};
         winrt::com_ptr<ID3D11InputLayout> inputLayout_{nullptr};
 
-        class CarWidget;
-        CarWidget* carWidget_{nullptr};
+        // class CarWidget;
+        // CarWidget* carWidget_{nullptr};
 
 
         //std::shared_ptr<DXResources> resources_;

@@ -33,35 +33,30 @@
 
 #include <d3d11.h>
 #include <d3d11_4.h>
-// #include <d3dx11.h>
-// #include <d3dx10.h>
+#include <d3dx11effect.h>
 
 #include <DirectXColors.h>
 #include <DirectXMath.h>
-// #include <d3d11_3.h>
 
 #include <d3dkmthk.h>
 
 // C RunTime Header Files
 #include <minwinbase.h>
 #include <cstdlib>
-#include <malloc.h>
-#include <memory.h>
-#include <cwchar>
-
-// #include <d3dx9math.h>
-#include <d3dx11effect.h>
-// #include <d3d11_1.h>
 
 #include <dcomp.h>
 #include <dwrite.h>
 #include <wincodec.h>
 #include <wrl/client.h>
 
+// Desktop window manager API
+#include <Dwmapi.h>
 
-
+// fmt::core lib with wide char support
 #include <fmt/xchar.h>
 #include <fmt/core.h>
+
+// logging
 #include <spdlog/spdlog.h>
 
 #include <winrt/Windows.Foundation.h>

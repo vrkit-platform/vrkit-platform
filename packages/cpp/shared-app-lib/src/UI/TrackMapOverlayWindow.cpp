@@ -18,7 +18,7 @@ namespace IRacingTools::Shared::UI {
       return;
 
     if (!trackMapWidget_) {
-      trackMapWidget_ = std::make_shared<Graphics::DX11TrackMapWidget>(trackMap_, dxr_);
+      trackMapWidget_ = std::make_shared<Graphics::TrackMapWidget>(trackMap_, dxr_);
       dataChanged_ = !!dataEvent_;
     }
 
@@ -40,6 +40,13 @@ namespace IRacingTools::Shared::UI {
             }
           }
         })) {
+
+    //<TrackMapOverlayWindow>
+
+  }
+
+  void TrackMapOverlayWindow::initialize() {
+    OverlayWindow::create(ClassName());
   }
 
 

@@ -6,7 +6,7 @@
 #include <DirectXHelpers.h>
 #include <winrt/base.h>
 
-#include <IRacingTools/Shared/Graphics/DX11TrackMapWidget.h>
+#include <IRacingTools/Shared/Graphics/TrackMapWidget.h>
 #include <IRacingTools/Shared/Macros.h>
 #include <IRacingTools/Shared/SharedMemoryStorage.h>
 #include <IRacingTools/Shared/TrackMapGeometry.h>
@@ -16,38 +16,22 @@
 namespace IRacingTools::Shared::Graphics {
     using namespace DirectX;
 
-    namespace {
-        struct CarWidgetState {
-            SessionDataUpdatedEvent::SessionCarState& data;
-        };
-    }
-
-    class DX11TrackMapWidget::CarWidget : public Renderable<CarWidgetState&> {
-    public:
-        CarWidget() = delete;
-
-        explicit CarWidget(const std::shared_ptr<DXResources>& resources) : Renderable(resources) {}
-
-        CarWidget(CarWidget&&) = delete;
-        CarWidget(const CarWidget&) = delete;
-        virtual ~CarWidget() = default;
-
-        virtual void render(const std::shared_ptr<RenderTarget>& target, CarWidgetState& data) override {}
-    };
 
 
-    DX11TrackMapWidget::DX11TrackMapWidget(const TrackMap& trackMap, const std::shared_ptr<DXResources>& resources) :
+    TrackMapWidget::TrackMapWidget(const TrackMap& trackMap, const std::shared_ptr<DXResources>& resources) :
         Renderable(resources),
-        trackMap_(trackMap),
-        carWidget_(new CarWidget(resources)) {
+        trackMap_(trackMap)
+
+        //carWidget_(new CarWidget(resources))
+        {
         createResources();
     }
 
-    DX11TrackMapWidget::~DX11TrackMapWidget() {
-        delete carWidget_;
+    TrackMapWidget::~TrackMapWidget() {
+        // delete carWidget_;
     }
 
-    void DX11TrackMapWidget::render(
+    void TrackMapWidget::render(
         const std::shared_ptr<RenderTarget>& target,
         const std::shared_ptr<SessionDataUpdatedEvent>& data
     ) {
@@ -127,12 +111,12 @@ namespace IRacingTools::Shared::Graphics {
         // check_hresult(d2dTarget->EndDraw());
     }
 
-    void DX11TrackMapWidget::resetTargetResources() {
+    void TrackMapWidget::resetTargetResources() {
         brushPath_ = {};
         brushCarOuter_ = {};
     }
 
-    void DX11TrackMapWidget::createTargetResources(const std::shared_ptr<RenderTarget>& target) {
+    void TrackMapWidget::createTargetResources(const std::shared_ptr<RenderTarget>& target) {
         std::scoped_lock lock(renderMutex_);
         if (targetResCreated_)
             return;
@@ -197,7 +181,7 @@ namespace IRacingTools::Shared::Graphics {
         targetResCreated_ = true;
     }
 
-    void DX11TrackMapWidget::createResources() {
+    void TrackMapWidget::createResources() {
         std::scoped_lock lock(trackMapMutex_);
         if (pathGeometry_)
             return;

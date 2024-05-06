@@ -6,6 +6,7 @@
 
 #include "../SharedAppLibPCH.h"
 
+#include <IRacingTools/SDK/Utils/Literals.h>
 #include <IRacingTools/Shared/UI/BaseWindow.h>
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
 #include <IRacingTools/Shared/Graphics/TrackMapWidget.h>

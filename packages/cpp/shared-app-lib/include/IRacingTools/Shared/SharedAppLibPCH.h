@@ -61,3 +61,6 @@
 
 #include <winrt/Windows.Foundation.h>
 #include <winrt/base.h>
+
+// IRT Headers
+#include <IRacingTools/Shared/Constants.h>

@@ -8,7 +8,7 @@
 
 #include <IRacingTools/Shared/Graphics/TrackMapWidget.h>
 #include <IRacingTools/Shared/Macros.h>
-#include <IRacingTools/Shared/SharedMemoryStorage.h>
+#include <IRacingTools/Shared/SHM.h>
 #include <IRacingTools/Shared/TrackMapGeometry.h>
 #include <IRacingTools/Shared/Graphics/DXPlatformHelpers.h>
 

@@ -18,6 +18,7 @@
 
 #include <IRacingTools/SDK/Utils/EventEmitter.h>
 #include <IRacingTools/Shared/SessionDataProvider.h>
+#include <IRacingTools/Shared/Graphics/IPCRenderer.h>
 #include <IRacingTools/Shared/UI/OverlayWindow.h>
 
 namespace IRacingTools::Shared::UI {
@@ -27,6 +28,7 @@ class TrackMapOverlayWindow : public OverlayWindow<TrackMapOverlayWindow>
   std::mutex dataMutex_{};
   std::shared_ptr<Graphics::TrackMapWidget> trackMapWidget_{nullptr};
   std::shared_ptr<SessionDataProvider> dataProvider_;
+  std::shared_ptr<Graphics::IPCRenderer> ipcRenderer_{nullptr};
   const TrackMap trackMap_;
   SessionDataProvider::UnsubscribeFn unsubscribeFn_;
   std::shared_ptr<SessionDataUpdatedEvent> dataEvent_{nullptr};
@@ -48,7 +50,7 @@ public:
 
   void initialize();
 
-
+  virtual void renderWindow() override;
 };
 
 

@@ -13,7 +13,7 @@
 #include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/Graphics/DX11Resources.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
-#include <IRacingTools/Shared/SharedMemoryStorage.h>
+#include <IRacingTools/Shared/SHM.h>
 #include <winrt/base.h>
 
 using namespace IRacingTools::SDK::Utils;
@@ -33,7 +33,7 @@ int WINAPI WinMain(
     cli.parse(cmdline, true);
     LOGD(fmt::format("parsed filename: {}", filename));
 
-    auto shm = IRacingTools::Shared::SharedMemoryStorage::GetInstance();
+    auto shm = IRacingTools::Shared::SHM::GetInstance();
     winrt::check_bool(shm->loadTrackMapFromTrajectoryFile(filename));
 
     // Ignoring the return value because we want to continue running even in the

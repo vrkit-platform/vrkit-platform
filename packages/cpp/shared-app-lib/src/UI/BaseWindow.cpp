@@ -10,7 +10,7 @@
 #include <SDL.h>
 #include <spdlog/spdlog.h>
 
-#include <IRacingTools/Shared/SharedMemoryStorage.h>
+#include <IRacingTools/Shared/SHM.h>
 
 // #include "imgui.h"
 // #include "imgui_impl_win32.h"

@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include <IRacingTools/Shared/SharedMemoryStorage.h>
+#include <IRacingTools/Shared/SHM.h>
 #include <IRacingTools/Shared/UI/TrackMapOverlayWindow.h>
 
 #include <spdlog/spdlog.h>
@@ -12,10 +12,13 @@
 namespace IRacingTools::Shared::UI {
 
   void TrackMapOverlayWindow::render(const std::shared_ptr<Graphics::RenderTarget> &target) {
-
     std::scoped_lock lock(dataMutex_);
     if (!dataEvent_)
       return;
+
+    if (!ipcRenderer_ && target) {
+      ipcRenderer_ = Graphics::IPCRenderer::Create(dxr_);
+    }
 
     if (!trackMapWidget_) {
       trackMapWidget_ = std::make_shared<Graphics::TrackMapWidget>(trackMap_, dxr_);
@@ -25,6 +28,10 @@ namespace IRacingTools::Shared::UI {
     if (dataChanged_) {
       spdlog::trace("Data changed");
       trackMapWidget_->render(renderTarget_, dataEvent_);
+
+      if (ipcRenderer_) {
+        ipcRenderer_->renderNow();
+      }
     }
   }
 
@@ -49,5 +56,9 @@ namespace IRacingTools::Shared::UI {
     OverlayWindow::create(ClassName());
   }
 
+  void TrackMapOverlayWindow::renderWindow() {
+    OverlayWindow::renderWindow();
 
+
+  }
 }// namespace IRacingTools::Shared::UI

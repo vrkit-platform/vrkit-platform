@@ -4,7 +4,7 @@
 
 #include "ShmFeederArgCommand.h"
 
-#include <IRacingTools/Shared/SharedMemoryStorage.h>
+#include <IRacingTools/Shared/SHM.h>
 
 namespace IRacingTools::App::Commands {
   using namespace IRacingTools::Shared;
@@ -16,7 +16,7 @@ namespace IRacingTools::App::Commands {
   }
 
   int SHMFeederArgCommand::execute() {
-    auto shm = SharedMemoryStorage::GetInstance();
+    // auto shm = SHM::GetInstance();
 
     return 0;
   }

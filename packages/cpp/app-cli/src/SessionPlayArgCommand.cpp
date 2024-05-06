@@ -20,7 +20,7 @@
 #include <IRacingTools/Shared/Graphics/TrackMapWidget.h>
 #include <IRacingTools/Shared/Graphics/DXResources.h>
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
-#include <IRacingTools/Shared/SharedMemoryStorage.h>
+#include <IRacingTools/Shared/SHM.h>
 #include <IRacingTools/Shared/TrackMapGeometry.h>
 #include <IRacingTools/Shared/UI/OverlayWindow.h>
 #include <IRacingTools/Shared/UI/TrackMapOverlayWindow.h>
@@ -45,6 +45,7 @@ namespace IRacingTools::App::Commands
     spdlog::info("Loading track map ({})", trackmapFilename_);
     auto trackMap = Geometry::LoadTrackMapFromTrajectoryFile(trackmapFilename_);
     auto dataProvider = std::make_shared<DiskSessionDataProvider>(ibtFilename_,ibtFilename_);
+
     winrt::check_bool(trackMap.has_value());
 
     dataProvider->start();
@@ -173,7 +174,7 @@ namespace IRacingTools::App::Commands
     //    //    });
     //    //    std::array<std::string_view, 2> headers = {"Name", "Count"};
     //    //    PrintTabularData<2,std::string, std::size_t>(headers, varNames);
-    //    //    auto shm = IRacingTools::Shared::SharedMemoryStorage::GetInstance();
+    //    //    auto shm = IRacingTools::Shared::SHM::GetInstance();
     //    //    winrt::check_bool(shm->loadTrackMapFromLapTrajectoryFile(filename));
     return 0;
   }

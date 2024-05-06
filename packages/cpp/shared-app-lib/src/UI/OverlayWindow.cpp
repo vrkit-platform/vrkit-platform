@@ -5,7 +5,7 @@
 #include <memory>
 
 #include <IRacingTools/Shared/UI/OverlayWindow.h>
-#include <IRacingTools/Shared/SharedMemoryStorage.h>
+#include <IRacingTools/Shared/SHM.h>
 #include <spdlog/spdlog.h>
 
 // #include "imgui.h"

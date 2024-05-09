@@ -15,65 +15,104 @@
 
 namespace IRacingTools::Shared::UI {
     template <typename WindowClazz>
-    class OverlayWindow : public BaseWindow<WindowClazz> {
+    class NormalWindow : public BaseWindow<WindowClazz> {
         using Base = BaseWindow<WindowClazz>;
 
         std::mutex resourceMutex_{};
         static constexpr UINT RenderTimerId = 1;
         static constexpr UINT FPS_60 = 1000 / 60;
 
-        std::optional<typename SDK::Utils::EventEmitter<WindowClazz*, PixelSize, PixelSize>::UnsubscribeFn>
-        onResizeUnsubscribe_{};
-
     protected:
+        winrt::com_ptr<IDCompositionDevice> dComp_{};
+        winrt::com_ptr<IDCompositionTarget> dCompTarget_{};
+        winrt::com_ptr<IDCompositionVisual> dCompVisual_{};
+
         std::shared_ptr<Graphics::DXResources> dxr_{nullptr};
         std::shared_ptr<Graphics::DXWindowResources> dxwr_{nullptr};
+        // std::shared_ptr<Graphics::RenderTarget> renderTarget_{nullptr};
+        //
+        // winrt::com_ptr<ID3D11Texture2D> backBuffer_{nullptr};
+        // winrt::com_ptr<IDXGISwapChain1> swapChain_{nullptr};
+        // Size<UINT> swapChainDim_{0, 0};
 
+        std::optional<typename  SDK::Utils::EventEmitter<WindowClazz*,PixelSize, PixelSize>::UnsubscribeFn> onResizeUnsubscribe_{};
+
+        std::shared_ptr<Graphics::DXResources>& dxr() {
+            return dxr_;
+        }
+
+        std::shared_ptr<Graphics::DXWindowResources>& dxwr() {
+            return dxwr_;
+        }
     public:
+
         virtual WNDCLASSEX getWindowClassOptions() override {
             auto wc = Base::getWindowClassOptions();
             // fill in the struct with the needed information
             wc.cbSize = sizeof(WNDCLASSEX);
-            wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-            wc.hCursor = LoadCursor(nullptr, IDC_CROSS);
-            wc.hbrBackground = nullptr; //(HBRUSH) COLOR_WINDOW;
+            wc.style = CS_HREDRAW | CS_VREDRAW;
+            wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+            wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW);
 
             return wc;
         }
 
+
+
         virtual Window::CreateOptions getCreateOptions() override {
             auto options = Base::getCreateOptions();
-            options.name = L"OverlayWindow";
+            options.name = L"NormalWindow";
             options.width = 400;
             options.height = 400;
 
             // | WS_POPUP removes the border
-            options.style |= WS_POPUP;
+            options.style |= WS_OVERLAPPEDWINDOW;
 
-            // | WS_EX_TRANSPARENT  - when added to WS_EX makes mouse events pass-through
-            options.extendedStyle |= WS_EX_TOPMOST | WS_EX_LAYERED;
             return options;
         }
 
-        OverlayWindow(OverlayWindow&&) = delete;
-
-        OverlayWindow(const OverlayWindow&) = delete;
-
-        OverlayWindow() : BaseWindow<WindowClazz>() {}
 
 
-        virtual ~OverlayWindow() override {
-            if (onResizeUnsubscribe_) {
-                onResizeUnsubscribe_.value()();
-            }
+        NormalWindow(NormalWindow&&) = delete;
+
+        NormalWindow(const NormalWindow&) = delete;
+
+        NormalWindow() : BaseWindow<WindowClazz>() {
+            // MARGINS Margin = {-1, -1, -1, -1};
+            // DwmExtendFrameIntoClientArea(window_, &Margin);
         }
+
+
+        virtual ~NormalWindow() {}
+
+        virtual bool createResources() override {
+            Base::show();
+
+            dxr_ = std::make_shared<Graphics::DXResources>();
+            dxwr_ = std::make_shared<Graphics::DXWindowResources>(Base::windowHandle(), dxr_);
+            onResizeUnsubscribe_ = Base::events.onResize.subscribe([&] (auto _win, auto _newSize, auto _oldSize) {
+                dxwr_->reset();
+            });
+
+            check_hresult(
+            SetTimer(
+                Base::windowHandle(),
+                RenderTimerId,
+                // timer identifier
+                FPS_60,
+                nullptr
+            )
+        );
+            return true;
+        }
+
 
         virtual bool isReady() override {
-            // std::scoped_lock lock(resourceMutex_);
-            return Base::isCreated() && dxr_;
+            return Base::isCreated() && dxr_ && dxwr_;
         }
 
-        virtual void renderWindow() {
+
+        virtual void paint() {
             {
                 std::scoped_lock lock(resourceMutex_);
                 if (!dxr_ || !dxwr_ || !dxwr_->prepare())
@@ -93,7 +132,9 @@ namespace IRacingTools::Shared::UI {
 
             // constexpr float clearColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
             constexpr float clearColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
+
             auto renderTarget = dxwr_->renderTarget();
+            auto swapChain = dxwr_->swapChain();
             auto ctx = dxr_->getDXImmediateContext();
             auto rtv = renderTarget->d3d().rtv();
 
@@ -112,10 +153,11 @@ namespace IRacingTools::Shared::UI {
 
             render(renderTarget);
 
-            dxwr_->swapChain()->Present(1, 0);
+            swapChain->Present(1, 0);
         }
 
     protected:
+
         virtual LRESULT handleMessage(UINT messageType, WPARAM wParam, LPARAM lParam) override {
             switch (messageType) {
             case WM_DESTROY:
@@ -126,43 +168,24 @@ namespace IRacingTools::Shared::UI {
             case WM_TIMER: {
                 switch (wParam) {
                 case RenderTimerId:
-                    renderWindow();
-                    break;
-                default:
+                    paint();
                     break;
                 }
                 return 0;
             }
+
+            case WM_PAINT:
+                PAINTSTRUCT ps;
+                BeginPaint(Base::windowHandle(), &ps);
+                paint();
+                EndPaint(Base::windowHandle(), &ps);
+                return 0;
             default:
-                return Base::handleMessage(messageType, wParam, lParam);
+                return DefWindowProc(Base::windowHandle(), messageType, wParam, lParam);
             }
         }
 
         virtual void render(const std::shared_ptr<Graphics::RenderTarget>& target) = 0;
 
-    public:
-        virtual bool createResources() override {
-            Base::show();
-
-            dxr_ = std::make_shared<Graphics::DXResources>();
-            dxwr_ = std::make_shared<Graphics::DXWindowResources>(Base::windowHandle(), dxr_);
-            onResizeUnsubscribe_ = Base::events.onResize.subscribe(
-                [&](auto _win, auto _newSize, auto _oldSize) {
-                    dxwr_->reset();
-                }
-            );
-
-            check_hresult(
-                SetTimer(
-                    Base::windowHandle(),
-                    RenderTimerId,
-                    // timer identifier
-                    FPS_60,
-                    nullptr
-                )
-            );
-
-            return Base::createResources();
-        }
     };
 };

@@ -61,7 +61,7 @@ namespace IRacingTools::Shared::Graphics {
             return;
         }
 
-        // OPENKNEEBOARD_TraceLoggingScope("InterprocessRenderer::InitializeCanvas()");
+        // IRT_TraceLoggingScope("InterprocessRenderer::InitializeCanvas()");
 
         D3D11_TEXTURE2D_DESC desc{
             .Width = static_cast<UINT>(size.width()),
@@ -87,7 +87,7 @@ namespace IRacingTools::Shared::Graphics {
         writer_->detach();
     }
 
-    void IPCRenderer::renderNow() noexcept {
+    void IPCRenderer::renderNow(const std::shared_ptr<RenderTarget>& sourceTarget) noexcept {
         if (isRendering_.test_and_set()) {
             spdlog::debug("Two renders in the same instance");
             IRT_BREAK;
@@ -107,23 +107,42 @@ namespace IRacingTools::Shared::Graphics {
         const std::unique_lock dxlock(*dxr_);
         // TraceLoggingWriteTagged(activity, "AcquireDXLock/stop");
         this->initializeCanvas(canvasSize);
-        dxr_->getDXImmediateContext()->ClearRenderTargetView(target_->d3d().rtv(), DirectX::Colors::Transparent);
+        auto ctx = dxr_->getDXImmediateContext();
+        ctx->ClearRenderTargetView(target_->d3d().rtv(), DirectX::Colors::Transparent);
 
         std::vector<SHM::LayerConfig> shmLayers;
         shmLayers.reserve(layerCount);
         uint64_t inputLayerID = 0;
 
-        // for (uint8_t i = 0; i < layerCount; ++i) {
-        //     const auto bounds = Spriting::GetRect(i, layerCount);
-        //     // const auto& renderInfo = renderInfos.at(i);
-        //     // if (renderInfo.mIsActiveForInput) {
-        //     //     inputLayerID = renderInfo.mView->GetRuntimeID().GetTemporaryValue();
-        //     // }
-        //     //
-        //     // mCanvas->SetActiveIdentity(i);
-        //
-        //     shmLayers.push_back(this->RenderLayer(renderInfo, bounds));
-        // }
+        for (uint8_t i = 0; i < layerCount; ++i) {
+            const auto bounds = Spriting::GetRect(i, layerCount);
+            // const auto& renderInfo = renderInfos.at(i);
+            // if (renderInfo.mIsActiveForInput) {
+            //     inputLayerID = renderInfo.mView->GetRuntimeID().GetTemporaryValue();
+            // }
+            //
+            // mCanvas->SetActiveIdentity(i);
+            auto srcDim = sourceTarget->getDimensions();
+            SHM::LayerConfig layerConfig{
+                .layerID = i,
+                .vrEnabled = true,
+                .vr = {
+                    .pose = {},
+                    .physicalSize = {},
+                    .enableGazeZoom = false,
+                    .zoomScale = 1.0f,
+                    .gazeTargetScale = {},
+                    .opacity = {},
+                    .locationOnTexture = {.offset_ = {0, 0},.size_ = srcDim,  .origin_ = PixelRect::Origin::TopLeft}
+                }
+            };
+
+            D3D11_BOX srcBox{0, 0, 0, srcDim.width(), srcDim.height(), 1};
+            ctx->CopySubresourceRegion(target_->d3d().texture(), 0, 0, 0, 0, sourceTarget->d3d().texture(), 0, &srcBox);
+            shmLayers.push_back(layerConfig);
+
+            //this->RenderLayer(renderInfo, bounds)
+        }
 
         this->submitFrame(shmLayers, inputLayerID);
     }
@@ -157,7 +176,7 @@ namespace IRacingTools::Shared::Graphics {
 
         auto fence = destResources->fence.get();
         {
-            // OPENKNEEBOARD_TraceLoggingScope(
+            // IRT_TraceLoggingScope(
             //   "CopyFromCanvas",
             //   TraceLoggingValue(ipcTextureInfo.mTextureIndex, "TextureIndex"),
             //   TraceLoggingValue(ipcTextureInfo.mFenceOut, "FenceOut"));
@@ -166,7 +185,7 @@ namespace IRacingTools::Shared::Graphics {
             ctx->CopySubresourceRegion(destResources->texture.get(), 0, 0, 0, 0, srcTexture, 0, &srcBox);
             //}
             //{
-            // OPENKNEEBOARD_TraceLoggingScope("CopyFromCanvas/FenceOut");
+            // IRT_TraceLoggingScope("CopyFromCanvas/FenceOut");
             check_hresult(ctx->Signal(fence, ipcTextureInfo.fenceOut));
             //}
         }

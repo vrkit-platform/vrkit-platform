@@ -15,13 +15,26 @@ endif()
 # Subprojects & Targets
 set(sdkTarget ${PROJECT_NAME}_sdk)
 set(sdkTargetStatic ${sdkTarget}_static)
+
 set(modelsTarget ${PROJECT_NAME}_models)
 set(modelsTargetStatic ${modelsTarget}_static)
 set(modelsTargetPython ${modelsTarget}_python)
+
+# OpenXR targets
+set(openxrLibTarget ${PROJECT_NAME}_openxr_lib)
+set(openxrLibTargetStatic ${openxrLibTarget}_static)
+
+# Shared App Lib
 set(sharedAppLibTarget ${PROJECT_NAME}_shared_app_lib)
 set(sharedAppLibTargetStatic ${sharedAppLibTarget}_static)
+
+# Overlay tester
 set(overlayAppTarget ${PROJECT_NAME}_overlay_app)
+
+# `irt_app` - maybe/someday
 set(appUIQTTarget ${appNamePrefix}_ui)
+
+# `irt_tool` cli
 set(appCLITarget ${appNamePrefix}_tool)
 
 # Setup

@@ -13,7 +13,7 @@
 #include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/Graphics/DX11Resources.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
-#include <IRacingTools/Shared/SHM.h>
+#include <IRacingTools/Shared/SHM/SHM.h>
 #include <winrt/base.h>
 
 using namespace IRacingTools::SDK::Utils;

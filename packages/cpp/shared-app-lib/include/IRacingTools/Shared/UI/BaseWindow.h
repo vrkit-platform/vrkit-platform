@@ -1,20 +1,65 @@
 #pragma once
 
-#include "../SharedAppLibPCH.h"
-
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
 #include <IRacingTools/Shared/Geometry2D.h>
 
-#include <SDL2pp/Texture.hh>
 #include <SDL2pp/Renderer.hh>
 #include <SDL2pp/Window.hh>
-#include <SDL2pp/SDL.hh>
 #include <SDL_syswm.h>
 #include <SDL.h>
+#include <IRacingTools/SDK/Utils/EventEmitter.h>
 
 #include <spdlog/spdlog.h>
 
 
 namespace IRacingTools::Shared::UI {
+
+class Window {
+public:
+    Window() = default;
+    virtual ~Window() = default;
+
+    struct CreateOptions {
+        PCWSTR name{L""};
+        DWORD style {0};
+        DWORD extendedStyle {0};
+        int x {CW_USEDEFAULT};
+        int y {CW_USEDEFAULT};
+        int width {CW_USEDEFAULT};
+        int height {CW_USEDEFAULT};
+        HWND parent {nullptr};
+        HMENU menu {nullptr};
+    };
+
+
+    static void DefaultWindowMessageLoop() {
+        MSG msg{};
+        while (GetMessage(&msg, nullptr, 0, 0)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
+
+    /**
+     * Peek callback
+     */
+    using PeekWindowMessageCallback = std::function<void(MSG&)>;
+    static void PeekWindowMessageLoop(const PeekWindowMessageCallback& callback) {
+        MSG msg{};
+        while (true) {
+            if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+
+                if (msg.message == WM_QUIT)
+                    break;
+            }
+
+            callback(msg);
+        }
+    }
+
+};
     /**
      * Get native window handle from SDL2pp::Window
      * @param win SDL2pp window instance
@@ -23,20 +68,24 @@ namespace IRacingTools::Shared::UI {
     HWND GetNativeHandleFromSDLWindow(const SDL2pp::Window* win);
 
     template <class WindowClazz>
-    class BaseWindow {
-        std::atomic_bool isCreated_{false};
+    class BaseWindow : public Window {
+
     public:
+
+
+
+
         static LRESULT CALLBACK WindowProc(HWND windowHandle, UINT messageType, WPARAM wParam, LPARAM lParam) {
-            WindowClazz* win{nullptr};
+            BaseWindow* win;
 
             if (messageType == WM_NCCREATE) {
-                CREATESTRUCT* createProps = reinterpret_cast<CREATESTRUCT*>(lParam);
+                auto createProps = reinterpret_cast<CREATESTRUCT*>(lParam);
                 win = static_cast<WindowClazz*>(createProps->lpCreateParams);
                 SetWindowLongPtr(windowHandle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(win));
 
                 win->windowHandle_ = windowHandle;
             } else {
-                win = reinterpret_cast<WindowClazz*>(GetWindowLongPtr(windowHandle, GWLP_USERDATA));
+                win = reinterpret_cast<BaseWindow*>(GetWindowLongPtr(windowHandle, GWLP_USERDATA));
             }
             if (win && win->isReady()) {
                 return win->handleMessage(messageType, wParam, lParam);
@@ -46,34 +95,9 @@ namespace IRacingTools::Shared::UI {
 
         }
 
-        static void DefaultWindowMessageLoop() {
-            MSG msg{};
-            while (GetMessage(&msg, nullptr, 0, 0)) {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
-        }
+        virtual ~BaseWindow() override = default;
 
-        /**
-         * Peek callback
-         */
-        using PeekWindowMessageCallback = std::function<void(MSG&)>;
-        static void PeekWindowMessageLoop(const PeekWindowMessageCallback& callback) {
-            MSG msg{};
-            while (true) {
-                if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-                    TranslateMessage(&msg);
-                    DispatchMessage(&msg);
-
-                    if (msg.message == WM_QUIT)
-                        break;
-                }
-
-                callback(msg);
-            }
-        }
-
-        BaseWindow() {}
+        BaseWindow() = default;
 
         bool isCreated() {
             return isCreated_;
@@ -95,17 +119,11 @@ namespace IRacingTools::Shared::UI {
             // by default don't do anything
         }
 
-        virtual WindowClazz* create(
-            PCWSTR name,
-            DWORD style = 0,
-            DWORD extendedStyle = 0,
-            int x = CW_USEDEFAULT,
-            int y = CW_USEDEFAULT,
-            int width = CW_USEDEFAULT,
-            int height = CW_USEDEFAULT,
-            HWND parent = nullptr,
-            HMENU menu = nullptr
-        ) {
+        virtual CreateOptions getCreateOptions() {
+            return CreateOptions{};
+        }
+
+        virtual WNDCLASSEX getWindowClassOptions() {
             WNDCLASSEX wc;
             ZeroMemory(&wc, sizeof(WNDCLASSEX));
 
@@ -113,29 +131,45 @@ namespace IRacingTools::Shared::UI {
             wc.lpfnWndProc = WindowClazz::WindowProc;
             wc.hInstance = GetModuleHandle(nullptr);
             wc.lpszClassName = WindowClazz::ClassName();
+            return wc;
+        }
+        virtual bool create(
+            const CreateOptions& options
+        ) {
+            std::scoped_lock lock(stateMutex_);
+            if (isCreated_) {
+                return isCreated_;
+            }
 
-            configureWindowClass(wc);
+            auto wc = getWindowClassOptions();
 
             RegisterClassEx(&wc);
 
             windowHandle_ = CreateWindowEx(
-                extendedStyle,
+                options.extendedStyle,
                 WindowClazz::ClassName(),
-                name,
-                style,
-                x,
-                y,
-                width,
-                height,
-                parent,
-                menu,
+                options.name,
+                options.style,
+                options.x,
+                options.y,
+                options.width,
+                options.height,
+                options.parent,
+                options.menu,
                 GetModuleHandle(nullptr),
                 this
             );
 
-            isCreated_ = true;
+            isCreated_ = windowHandle_;
 
-            return windowHandle_ ? static_cast<WindowClazz*>(this) : nullptr;
+            return isCreated_;
+        }
+
+        virtual bool createResources() {
+            if (!isCreated_)
+                return false;
+
+            return true;
         }
 
         virtual void show() {
@@ -151,11 +185,50 @@ namespace IRacingTools::Shared::UI {
 
         HWND windowHandle() const { return windowHandle_; }
 
+        virtual void initialize() {
+            create(getCreateOptions());
+            createResources();
+            show();
+        }
+        
+        struct {
+            SDK::Utils::EventEmitter<WindowClazz*,PixelSize, PixelSize> onResize{};
+        } events;
+
     protected:
-        virtual LRESULT handleMessage(UINT messageType, WPARAM wParam, LPARAM lParam) = 0;
+        virtual void onResize(const PixelSize& newSize, const PixelSize& oldSize) {
+            events.onResize.publish(reinterpret_cast<WindowClazz*>(this), newSize, oldSize);
+        }
+
+        virtual std::optional<LRESULT> defaultHandleMessage(UINT messageType, WPARAM wParam, LPARAM lParam) {
+            switch (messageType) {
+            case WM_SIZE: {
+                UINT width = LOWORD(lParam);
+                UINT height = HIWORD(lParam);
+
+                PixelSize newSize{width, height};
+                PixelSize oldSize = windowSize_;
+
+                windowSize_ = newSize;
+                onResize(newSize, oldSize);
+                return 0;
+            }
+            default:
+                return std::nullopt;
+            }
+        }
+
+
+        virtual LRESULT handleMessage(UINT messageType, WPARAM wParam, LPARAM lParam) {
+            auto defRes = defaultHandleMessage(messageType, wParam, lParam);
+            return defRes.has_value() ? defRes.value() : DefWindowProc(windowHandle_, messageType, wParam, lParam);
+        }
+
 
         HWND windowHandle_{nullptr};
-
-
+        std::atomic_bool isCreated_{false};
+        PixelSize windowSize_{};
+    private:
+        std::mutex stateMutex_{};
     };
 }

@@ -72,11 +72,11 @@ namespace IRacingTools::Shared {
     constexpr Size(const T& width = static_cast<T>(0), const T& height = static_cast<T>(0)) : width_(width), height_(height) {
     }
 
-    template<class TV = T> constexpr auto Width() const noexcept {
+    template<class TV = T> constexpr auto width() const noexcept {
       return static_cast<TV>(width_);
     }
 
-    template<class TV = T> constexpr auto Height() const noexcept {
+    template<class TV = T> constexpr auto height() const noexcept {
       return static_cast<TV>(height_);
     }
 

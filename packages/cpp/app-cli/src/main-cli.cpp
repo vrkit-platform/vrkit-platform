@@ -7,11 +7,11 @@
 #include <CLI/CLI.hpp>
 #include <fmt/core.h>
 
-#include <IRacingTools/SDK/DiskClient.h>
 #include <IRacingTools/SDK/ClientManager.h>
 #include <QCoreApplication>
 #include <QDebug>
 
+#include "SHMViewerArgCommand.h"
 #include "GenerateTrackmapArgCommand.h"
 #include "SessionPlayArgCommand.h"
 #include "SessionRecordArgCommand.h"
@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
     CLI::App app{APP_NAME};
     fmt::println("{}", APP_NAME);
 
-    auto cmds = ArgCommand::build<GenerateTrackmapArgCommand,SessionPlayArgCommand,SessionRecordArgCommand>(&app);
+    auto cmds = ArgCommand::build<GenerateTrackmapArgCommand,SessionPlayArgCommand,SessionRecordArgCommand,SHMViewerArgCommand>(&app);
 
     CLI11_PARSE(app,argc,argv);
 

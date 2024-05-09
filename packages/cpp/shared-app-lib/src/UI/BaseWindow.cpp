@@ -10,7 +10,7 @@
 #include <SDL.h>
 #include <spdlog/spdlog.h>
 
-#include <IRacingTools/Shared/SHM.h>
+#include <IRacingTools/Shared/SHM/SHM.h>
 
 // #include "imgui.h"
 // #include "imgui_impl_win32.h"
@@ -67,7 +67,7 @@ namespace IRacingTools::Shared::UI {
      * @param win
      * @return
      */
-    HWND GetNativeHandleFromSDLWindow(const Window* win) {
+    HWND GetNativeHandleFromSDLWindow(const SDL2pp::Window* win) {
         auto sdlWindow = win->Get();
 
         SDL_SysWMinfo sdlInfo;

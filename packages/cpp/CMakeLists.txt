@@ -2,8 +2,11 @@
 # SDK
 add_subdirectory(irsdk++)
 
-# App Libs
+# Shared App Libs
 add_subdirectory(shared-app-lib)
+
+# OpenXR Libs
+add_subdirectory(openxr-lib)
 
 # App Projects
 add_subdirectory(overlay-app)

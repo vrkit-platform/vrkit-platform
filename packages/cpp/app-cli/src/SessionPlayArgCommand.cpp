@@ -20,7 +20,7 @@
 #include <IRacingTools/Shared/Graphics/TrackMapWidget.h>
 #include <IRacingTools/Shared/Graphics/DXResources.h>
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
-#include <IRacingTools/Shared/SHM.h>
+#include <IRacingTools/Shared/SHM/SHM.h>
 #include <IRacingTools/Shared/TrackMapGeometry.h>
 #include <IRacingTools/Shared/UI/OverlayWindow.h>
 #include <IRacingTools/Shared/UI/TrackMapOverlayWindow.h>

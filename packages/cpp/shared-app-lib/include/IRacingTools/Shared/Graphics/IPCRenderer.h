@@ -6,7 +6,7 @@
 
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
-#include <IRacingTools/Shared/SHM.h>
+#include <IRacingTools/Shared/SHM/SHM.h>
 
 
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
@@ -57,7 +57,7 @@ namespace IRacingTools::Shared::Graphics {
 
         void initializeCanvas(const PixelSize&);
 
-        void renderNow() noexcept;
+        void renderNow(const std::shared_ptr<RenderTarget>& sourceTarget) noexcept;
 
         void submitFrame(
   const std::vector<SHM::LayerConfig>& shmLayers,

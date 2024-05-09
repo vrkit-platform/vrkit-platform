@@ -28,6 +28,13 @@ public:
         const SubscribedFn fn;
 
         Subscription(const int key, const SubscribedFn &fn) : key(key), fn(fn) {}
+
+        friend bool operator==(const Subscription& lhs, const Subscription& rhs) { return lhs.key == rhs.key; }
+        friend bool operator!=(const Subscription& lhs, const Subscription& rhs) { return !(lhs == rhs); }
+
+        // Subscription(const Subscription& other) = delete;
+        // Subscription(Subscription&& other) noexcept = delete;
+
     };
 
     using UnsubscribeFn = std::function<void()>;
@@ -36,7 +43,7 @@ public:
     EventEmitter() = default;
     virtual ~EventEmitter() = default;
 
-    const std::vector<SubscribedFn> subscriptions() {
+    std::vector<SubscribedFn> subscriptions() {
         std::scoped_lock lock(subscriptionMutex_);
         std::vector<SubscribedFn> fns{};
         std::transform(subscriptions_.begin(), subscriptions_.end(), std::back_inserter(fns), [](auto &holder) {
@@ -51,14 +58,14 @@ public:
         int key = nextKey_++;
         subscriptions_.emplace_back(key, listener);
 
-        return [key, this]() { this->unsubscribe(key); };
+        return [key, this] { this->unsubscribe(key); };
     }
 
-    void unsubscribe(const int key) {
+    void unsubscribe(auto key) {
         std::scoped_lock lock(subscriptionMutex_);
-//        std::remove_if(subscriptions_.begin(), subscriptions_.end(),[key] (auto& holder) {
-//            return key == holder.key;
-//        });
+        // std::erase_if(subscriptions_,[key] (auto& holder) {
+        //     return key == holder.key;
+        // });
     }
 
     void publish(Args... args) {

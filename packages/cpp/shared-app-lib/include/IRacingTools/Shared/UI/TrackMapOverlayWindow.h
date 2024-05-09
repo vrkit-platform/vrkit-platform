@@ -5,16 +5,7 @@
 #pragma once
 
 
-#include <Dwmapi.h>
-
-#include <SDL2pp/Texture.hh>
-#include <SDL2pp/Renderer.hh>
-#include <SDL2pp/Window.hh>
-#include <SDL2pp/SDL.hh>
 #include <SDL_syswm.h>
-#include <SDL.h>
-
-#include <spdlog/spdlog.h>
 
 #include <IRacingTools/SDK/Utils/EventEmitter.h>
 #include <IRacingTools/Shared/SessionDataProvider.h>
@@ -48,9 +39,9 @@ public:
 
   virtual void render(const std::shared_ptr<Graphics::RenderTarget>& target) override;
 
-  void initialize();
+  // void initialize();
 
-  virtual void renderWindow() override;
+
 };
 
 

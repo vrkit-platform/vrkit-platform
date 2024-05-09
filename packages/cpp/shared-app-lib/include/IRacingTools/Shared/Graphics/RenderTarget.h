@@ -60,6 +60,8 @@ class RenderTarget : public std::enable_shared_from_this<RenderTarget> {
 
   void setD3DTexture(const winrt::com_ptr<ID3D11Texture2D>&);
 
+ winrt::com_ptr<ID3D11Texture2D>& d3dTexture();
+
   class D2D;
   class D3D;
   friend class D2D;

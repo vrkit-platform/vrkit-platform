@@ -3,12 +3,12 @@
 //
 
 // #include "../resource.h"
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
 #include <DirectXHelpers.h>
-#include <winrt/base.h>
 
 #include <IRacingTools/Shared/Graphics/TrackMapWidget.h>
 #include <IRacingTools/Shared/Macros.h>
-#include <IRacingTools/Shared/SHM.h>
+#include <IRacingTools/Shared/SHM/SHM.h>
 #include <IRacingTools/Shared/TrackMapGeometry.h>
 #include <IRacingTools/Shared/Graphics/DXPlatformHelpers.h>
 

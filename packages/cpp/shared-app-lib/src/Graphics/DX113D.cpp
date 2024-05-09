@@ -26,8 +26,8 @@
 namespace IRacingTools::Shared::Graphics {
 
 struct SavedState::Impl {
-  winrt::com_ptr<ID3D11DeviceContext1> mContext;
-  winrt::com_ptr<ID3DDeviceContextState> mState;
+  winrt::com_ptr<ID3D11DeviceContext1> context;
+  winrt::com_ptr<ID3DDeviceContextState> state;
   static thread_local bool ThreadHasSavedState;
 };
 
@@ -42,7 +42,7 @@ SavedState::SavedState(ID3D11DeviceContext* ctx) {
 
   Impl::ThreadHasSavedState = true;
   impl_ = new Impl {};
-  check_hresult(ctx->QueryInterface(IID_PPV_ARGS(impl_->mContext.put())));
+  check_hresult(ctx->QueryInterface(IID_PPV_ARGS(impl_->context.put())));
 
   winrt::com_ptr<ID3D11Device> device;
   ctx->GetDevice(device.put());
@@ -62,13 +62,13 @@ SavedState::SavedState(ID3D11DeviceContext* ctx) {
       newState.put()));
   }
   {
-    impl_->mContext->SwapDeviceContextState(
-      newState.get(), impl_->mState.put());
+    impl_->context->SwapDeviceContextState(
+      newState.get(), impl_->state.put());
   }
 }
 
 SavedState::~SavedState() {
-  impl_->mContext->SwapDeviceContextState(impl_->mState.get(), nullptr);
+  impl_->context->SwapDeviceContextState(impl_->state.get(), nullptr);
   Impl::ThreadHasSavedState = false;
   delete impl_;
 }
@@ -94,8 +94,8 @@ void SpriteBatch::begin(
   const D3D11_VIEWPORT viewport {
     0,
     0,
-    rtvSize.Width<FLOAT>(),
-    rtvSize.Height<FLOAT>(),
+    rtvSize.width<FLOAT>(),
+    rtvSize.height<FLOAT>(),
     0,
     1,
   };
@@ -103,8 +103,8 @@ void SpriteBatch::begin(
   const D3D11_RECT scissorRect {
     0,
     0,
-    rtvSize.Width<LONG>(),
-    rtvSize.Height<LONG>(),
+    rtvSize.width<LONG>(),
+    rtvSize.height<LONG>(),
   };
 
   auto ctx = deviceContext_.get();

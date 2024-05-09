@@ -36,6 +36,9 @@
     "name" : "boost-system",
     "version>=" : "1.83.0"
   }, {
+    "name" : "boost-hana",
+    "version>=" : "1.83.0"
+  }, {
     "name" : "boost-interprocess",
     "version>=" : "1.83.0"
   }, {

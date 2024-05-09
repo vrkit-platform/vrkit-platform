@@ -70,6 +70,10 @@ namespace IRacingTools::Shared::Graphics {
     dimensions_ = {desc.Width, desc.Height};
   }
 
+  winrt::com_ptr<ID3D11Texture2D>& RenderTarget::d3dTexture() {
+    return d3dTexture_;
+  }
+
   PixelSize RenderTarget::getDimensions() const {
     return dimensions_;
   }

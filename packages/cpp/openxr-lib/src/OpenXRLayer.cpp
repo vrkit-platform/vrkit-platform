@@ -36,7 +36,9 @@ namespace IRacingTools::OpenXR {
         .position = {0.0f, 0.0f, 0.0f},
     };
 
-    constexpr std::string_view OpenXRLayerName{"IRTOpenXRLayer"};
+    // constexpr std::string_view OpenXRLayerName{"IRTOpenXRLayer"};
+    constexpr std::string_view OpenXRLayerName{"IRacingToolsOpenXRLayer"};
+
     static_assert(OpenXRLayerName.size() <= XR_MAX_API_LAYER_NAME_SIZE);
 
     // Don't use a unique_ptr as on process exit, windows doesn't clean these up
@@ -386,6 +388,8 @@ namespace IRacingTools::OpenXR {
                 SHM::SHARED_TEXTURE_IS_PREMULTIPLIED,
                 "Use premultiplied alpha in shared texture, or pass " "XR_COMPOSITION_LAYER_UNPREMULTIPLIED_ALPHA_BIT"
             );
+            auto pose = GetXrPosef(params.kneeboardPose);
+            auto imageRect = destRect.staticCast<int, XrRect2Di>();
             addedXRLayers.push_back(
                 {
                     .type = XR_TYPE_COMPOSITION_LAYER_QUAD,
@@ -396,10 +400,10 @@ namespace IRacingTools::OpenXR {
                     .eyeVisibility = XR_EYE_VISIBILITY_BOTH,
                     .subImage = XrSwapchainSubImage{
                         .swapchain = swapchain_,
-                        .imageRect = destRect.staticCast<int, XrRect2Di>(),
+                        .imageRect = imageRect,
                         .imageArrayIndex = 0,
                     },
-                    .pose = this->GetXrPosef(params.kneeboardPose),
+                    .pose = pose,
                     .size = {params.kneeboardSize.x, params.kneeboardSize.y},
                 }
             );
@@ -455,10 +459,10 @@ namespace IRacingTools::OpenXR {
             const auto codeAsString = xrresult_to_string(nextResult);
 
             if (codeAsString.empty()) {
-                spdlog::debug("next_xrEndFrame() failed: {}", static_cast<int>(nextResult));
+                spdlog::warn("next_xrEndFrame() failed: {}", static_cast<int>(nextResult));
             }
             else {
-                spdlog::debug("next_xrEndFrame() failed: {} ({})", codeAsString, static_cast<int>(nextResult));
+                spdlog::warn("next_xrEndFrame() failed: {} ({})", codeAsString, static_cast<int>(nextResult));
             }
         }
         return nextResult;
@@ -713,7 +717,7 @@ BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved) {
 }
 
 extern "C" {
-XrResult __declspec(dllexport) XRAPI_CALL OpenKneeboard_xrNegotiateLoaderApiLayerInterface(
+XrResult __declspec(dllexport) XRAPI_CALL IRT_xrNegotiateLoaderApiLayerInterface(
     const XrNegotiateLoaderInfo* loaderInfo,
     const char* layerName,
     XrNegotiateApiLayerRequest* apiLayerRequest

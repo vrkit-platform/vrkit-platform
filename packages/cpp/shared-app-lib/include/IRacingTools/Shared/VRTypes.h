@@ -83,7 +83,7 @@ namespace IRacingTools::Shared::VR {
   // Distances in metres, positions in radians.
   struct VRLayer {
     VRPose pose;
-    Size<float> physicalSize;
+    Size<float> physicalSize {0.15f, 0.25f};
 
     bool enableGazeZoom{true};
     float zoomScale = 2.0f;

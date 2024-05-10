@@ -67,7 +67,7 @@ OpenXRDX11Layer::DXGIFormats OpenXRDX11Layer::GetDXGIFormats(
   uint32_t formatCount {0};
   if (XR_FAILED(
         oxr->xrEnumerateSwapchainFormats(session, 0, &formatCount, nullptr))) {
-    spdlog::debug("Failed to get swapchain format count");
+    spdlog::warn("Failed to get swapchain format count");
     return {};
   }
   std::vector<int64_t> formats;
@@ -76,7 +76,7 @@ OpenXRDX11Layer::DXGIFormats OpenXRDX11Layer::GetDXGIFormats(
     XR_FAILED(oxr->xrEnumerateSwapchainFormats(
       session, formatCount, &formatCount, formats.data()))
     || formatCount == 0) {
-    spdlog::debug("Failed to enumerate swapchain formats");
+    spdlog::warn("Failed to enumerate swapchain formats");
     return {};
   }
   for (const auto it: formats) {
@@ -202,7 +202,7 @@ void OpenXRDX11Layer::renderLayers(
   IRT_TraceLoggingScope("OpenXRDX11Layer::RenderLayers()");
   Graphics::SavedState savedState(immediateContext_);
 
-  const auto& sr = swapchainResources_.at(swapchain);
+  // const auto& sr = swapchainResources_.at(swapchain);
 
   renderer_->renderLayers(
     swapchainResources_.at(swapchain),

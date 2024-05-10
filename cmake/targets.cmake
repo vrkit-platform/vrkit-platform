@@ -173,7 +173,6 @@ function(IRT_CONFIGURE_TARGET TARGET)
 
   message(NOTICE "CMAKE_BUILD_TYPE == ${CMAKE_BUILD_TYPE}")
 
-
   target_compile_definitions(
     ${TARGET}
     PRIVATE

@@ -32,7 +32,6 @@ set_target_properties(
   VS_GLOBAL_WindowsAppSDKSelfContained true
 )
 
-
 IRT_CONFIGURE_APP_LIBS(${targetName})
 IRT_CONFIGURE_TARGET(${targetName})
 
@@ -59,34 +58,17 @@ target_link_libraries(${targetName}
   ${DEP_LOG}
   ${DEP_YAML}
 
-#  ${DEP_PROTOBUF}
-#  ${DEP_JSON}
-#  ${DEP_MAGICENUM}
-#  ${DEP_FMT}
-#  ${DEP_QT_CORE}
-#  ${DEP_GSL}
-#  ${DEP_BOOST_DEFAULT}
+  #  ${DEP_PROTOBUF}
+  #  ${DEP_JSON}
+  #  ${DEP_MAGICENUM}
+  #  ${DEP_FMT}
+  #  ${DEP_QT_CORE}
+  #  ${DEP_GSL}
+  #  ${DEP_BOOST_DEFAULT}
 
 )
 
-if(MSVC)
-#  set(CMAKE_EXE_LINKER_FLAGS
-#    "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB")
-#  target_link_options(${targetName}
-#    PRIVATE
-#    CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /NODEFAULTLIB")
-#SET_TARGET_PROPERTIES(${targetName} PROPERTIES LINK_FLAGS  "/NODEFAULTLIB:msvcrtd /NODEFAULTLIB:libcpmtd")
-endif()
-
-
-#target_compile_options()
-#target_compile_options(
-#  ${targetName}
-#  PRIVATE
-#  /NODEFAULTLIB:MSVCRT
-#  /NODEFAULTLIB:libcpmt
-#)
-#
+add_dependencies(${targetName} ${openxrLibTarget})
 
 #install(TARGETS ${targetName}
 #  RUNTIME DESTINATION "${INSTALL_EXAMPLEDIR}"
@@ -94,3 +76,26 @@ endif()
 #  LIBRARY DESTINATION "${INSTALL_EXAMPLEDIR}"
 #)
 
+set(
+  RUNTIME_FILES
+  "${CMAKE_CURRENT_LIST_DIR}/../openxr-lib/openxr-api-layer.json"
+)
+
+install(FILES "${RUNTIME_FILES}" TYPE BIN)
+
+add_custom_target(
+  CopyRuntimeFiles
+  ALL
+  COMMAND
+  "${CMAKE_COMMAND}" -E make_directory
+  "$<TARGET_FILE_DIR:${targetName}>"
+  &&
+  ${CMAKE_COMMAND} -E copy_if_different
+  "${RUNTIME_FILES}"
+  "$<TARGET_FILE_DIR:${targetName}>"
+  COMMAND_EXPAND_LISTS
+)
+
+add_dependencies(CopyRuntimeFiles ${openxrLibTarget})
+
+#add_dependencies(${targetName} CopyRuntimeFiles)

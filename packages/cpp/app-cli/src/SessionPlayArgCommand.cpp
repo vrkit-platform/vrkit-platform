@@ -22,6 +22,7 @@
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
 #include <IRacingTools/Shared/SHM/SHM.h>
 #include <IRacingTools/Shared/TrackMapGeometry.h>
+#include <IRacingTools/Shared/OpenXR/OpenXRSetupHelpers.h>
 #include <IRacingTools/Shared/UI/OverlayWindow.h>
 #include <IRacingTools/Shared/UI/TrackMapOverlayWindow.h>
 
@@ -42,11 +43,16 @@ namespace IRacingTools::App::Commands
 
   int SessionPlayArgCommand::execute()
   {
+    spdlog::info("Session player started with runtime path ({}), enabling openxr layer ({})", GetRuntimeDirectory().string(), OpenXR::GetOpenXRLayerJSONPath().string());
+    OpenXR::EnableOpenXRLayer(HKEY_LOCAL_MACHINE);
+
     spdlog::info("Loading track map ({})", trackmapFilename_);
     auto trackMap = Geometry::LoadTrackMapFromTrajectoryFile(trackmapFilename_);
     auto dataProvider = std::make_shared<DiskSessionDataProvider>(ibtFilename_,ibtFilename_);
 
     winrt::check_bool(trackMap.has_value());
+
+
 
     dataProvider->start();
     UI::TrackMapOverlayWindow win(trackMap.value(), dataProvider);

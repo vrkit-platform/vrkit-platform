@@ -43,8 +43,17 @@ target_link_libraries(
 
 IRT_CONFIGURE_APP_LIBS(${openxrLibTarget})
 
+
+set(
+  RUNTIME_FILES
+  "${CMAKE_CURRENT_LIST_DIR}/openxr-api-layer.json"
+)
+
 ## INSTALL
+#install(TARGETS ${openxrLibTarget} LIBRARY DESTINATION "${CMAKE_INSTALL_BINDIR}")
 install(TARGETS ${openxrLibTarget} FILE_SET publicHeaders DESTINATION ${INCLUDE_INSTALL_DIR})
+install(FILES "${RUNTIME_FILES}" TYPE BIN)
+
 
 # TESTS
 #set(testTargetName ${openxrLibTarget}_tests)

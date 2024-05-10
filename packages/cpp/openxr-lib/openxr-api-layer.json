@@ -1,0 +1,14 @@
+{
+  "file_format_version" : "1.0.0",
+  "api_layer": {
+    "name": "IRacingToolsOpenXRLayer",
+    "library_path": ".\\iracing_tools_openxr_lib.dll",
+    "api_version": "1.0",
+    "implementation_version": "1",
+    "description": "IRacingTools OpenXR Layer",
+    "functions": {
+      "xrNegotiateLoaderApiLayerInterface": "IRT_xrNegotiateLoaderApiLayerInterface"
+    },
+    "disable_environment": "DISABLE_IRacingToolsOpenXRLayer"
+  }
+}

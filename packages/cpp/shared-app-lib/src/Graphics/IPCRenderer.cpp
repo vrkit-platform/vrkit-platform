@@ -127,13 +127,13 @@ namespace IRacingTools::Shared::Graphics {
                 .layerID = i,
                 .vrEnabled = true,
                 .vr = {
-                    .pose = {},
-                    .physicalSize = {},
-                    .enableGazeZoom = false,
-                    .zoomScale = 1.0f,
-                    .gazeTargetScale = {},
-                    .opacity = {},
-                    .locationOnTexture = {.offset_ = {0, 0},.size_ = srcDim,  .origin_ = PixelRect::Origin::TopLeft}
+                    .pose {},
+                    .physicalSize {0.15f, 0.25f},
+                    .enableGazeZoom {false},
+                    .zoomScale {1.0f},
+                    .gazeTargetScale {},
+                    .opacity {},
+                    .locationOnTexture {.offset_ = {0, 0},.size_ = srcDim,  .origin_ = PixelRect::Origin::TopLeft}
                 }
             };
 

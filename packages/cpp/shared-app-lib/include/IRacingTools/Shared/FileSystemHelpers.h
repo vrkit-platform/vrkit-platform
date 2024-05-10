@@ -15,9 +15,14 @@ namespace fs = std::filesystem;
  * it guarantees to be in canonical form */
 fs::path GetTemporaryDirectory();
 fs::path GetRuntimeDirectory();
+fs::path GetInstallationDirectory();
 
 void CleanupTemporaryDirectories();
 
 std::vector<BYTE> ReadFile(const fs::path& path);
+
+namespace Files {
+ extern const std::filesystem::path OPENXR_JSON;
+}
 
 }

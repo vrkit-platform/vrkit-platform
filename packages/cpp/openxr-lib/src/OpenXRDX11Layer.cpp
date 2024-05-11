@@ -176,8 +176,7 @@ XrSwapchain OpenXRDX11Layer::createSwapchain(
       IRT_BREAK;
     }
 #endif
-    buffers.push_back(
-      {device_.get(), image.texture, formats.renderTargetViewFormat});
+    buffers.emplace_back(device_.get(), image.texture, formats.renderTargetViewFormat);
   }
 
   swapchainResources_[swapchain] = {

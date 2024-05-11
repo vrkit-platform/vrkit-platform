@@ -30,10 +30,14 @@ namespace IRacingTools::OpenXR {
     using namespace IRacingTools::SDK;
     using namespace IRacingTools::Shared;
 
-
+    // constexpr XrPosef Default2DPose = {{0, 0, 0, 1}, {0, 0, 0}};
     static constexpr XrPosef XR_POSEF_IDENTITY{
         .orientation = {0.0f, 0.0f, 0.0f, 1.0f},
         .position = {0.0f, 0.0f, 0.0f},
+    };
+
+    static constexpr XrExtent2Df XR_LAYER_DEFAULT_SIZE{
+        0.8f, 0.6f
     };
 
     // constexpr std::string_view OpenXRLayerName{"IRTOpenXRLayer"};
@@ -46,7 +50,7 @@ namespace IRacingTools::OpenXR {
     // thread/process exit
     //
     // In this case, it leads to an infinite hang on ^C
-    static OpenXRLayer* gKneeboard{nullptr};
+    static OpenXRLayer* gLayerInstance{nullptr};
 
     static std::shared_ptr<OpenXRNext> gNext;
     static OpenXRRuntimeID gRuntime{};
@@ -218,7 +222,7 @@ namespace IRacingTools::OpenXR {
         XrReferenceSpaceCreateInfo referenceSpace{
             .type = XR_TYPE_REFERENCE_SPACE_CREATE_INFO,
             .next = nullptr,
-            .referenceSpaceType = XR_REFERENCE_SPACE_TYPE_LOCAL,
+            .referenceSpaceType = XR_REFERENCE_SPACE_TYPE_VIEW,//XR_REFERENCE_SPACE_TYPE_LOCAL,
             .poseInReferenceSpace = XR_POSEF_IDENTITY,
         };
 
@@ -388,7 +392,11 @@ namespace IRacingTools::OpenXR {
                 SHM::SHARED_TEXTURE_IS_PREMULTIPLIED,
                 "Use premultiplied alpha in shared texture, or pass " "XR_COMPOSITION_LAYER_UNPREMULTIPLIED_ALPHA_BIT"
             );
-            auto pose = GetXrPosef(params.kneeboardPose);
+
+            XrPosef pose = XR_POSEF_IDENTITY;
+            pose.position = {-0.25f, 0.0f, -1.0f};
+
+            //auto pose = GetXrPosef(params.kneeboardPose);
             auto imageRect = destRect.staticCast<int, XrRect2Di>();
             addedXRLayers.push_back(
                 {
@@ -404,7 +412,7 @@ namespace IRacingTools::OpenXR {
                         .imageArrayIndex = 0,
                     },
                     .pose = pose,
-                    .size = {params.kneeboardSize.x, params.kneeboardSize.y},
+                    .size = XR_LAYER_DEFAULT_SIZE//{params.kneeboardSize.x, params.kneeboardSize.y},
                 }
             );
 
@@ -561,7 +569,7 @@ namespace IRacingTools::OpenXR {
     template <class T>
     static const T* findInXrNextChain(XrStructureType type, const void* next) {
         while (next) {
-            auto base = reinterpret_cast<const XrBaseInStructure*>(next);
+            auto base = static_cast<const XrBaseInStructure*>(next);
             if (base->type == type) {
                 return reinterpret_cast<const T*>(base);
             }
@@ -570,6 +578,14 @@ namespace IRacingTools::OpenXR {
         return nullptr;
     }
 
+    /**
+     * Entrypoint for an instance
+     *
+     * @param instance
+     * @param createInfo
+     * @param session
+     * @return
+     */
     XrResult xrCreateSession(XrInstance instance, const XrSessionCreateInfo* createInfo, XrSession* session) noexcept {
         XrInstanceProperties instanceProps{XR_TYPE_INSTANCE_PROPERTIES};
         gNext->xrGetInstanceProperties(instance, &instanceProps);
@@ -583,7 +599,7 @@ namespace IRacingTools::OpenXR {
             return ret;
         }
 
-        if (gKneeboard) {
+        if (gLayerInstance) {
             spdlog::debug("Already have a kneeboard, refusing to initialize twice");
             return XR_ERROR_INITIALIZATION_FAILED;
         }
@@ -592,7 +608,7 @@ namespace IRacingTools::OpenXR {
 
         auto d3d11 = findInXrNextChain<XrGraphicsBindingD3D11KHR>(XR_TYPE_GRAPHICS_BINDING_D3D11_KHR, createInfo->next);
         if (d3d11 && d3d11->device) {
-            gKneeboard = new DX11::OpenXRDX11Layer(instance, system, *session, gRuntime, gNext, *d3d11);
+            gLayerInstance = new DX11::OpenXRDX11Layer(instance, system, *session, gRuntime, gNext, *d3d11);
             return ret;
         }
 
@@ -604,20 +620,27 @@ namespace IRacingTools::OpenXR {
 
 
     XrResult xrDestroySession(XrSession session) {
-        delete gKneeboard;
-        gKneeboard = nullptr;
+        delete gLayerInstance;
+        gLayerInstance = nullptr;
         return gNext->xrDestroySession(session);
     }
 
     XrResult xrDestroyInstance(XrInstance instance) {
-        delete gKneeboard;
-        gKneeboard = nullptr;
+        delete gLayerInstance;
+        gLayerInstance = nullptr;
         return gNext->xrDestroyInstance(instance);
     }
 
+    /**
+     * Invoked at the end of each frame
+     *
+     * @param session
+     * @param frameEndInfo
+     * @return
+     */
     XrResult xrEndFrame(XrSession session, const XrFrameEndInfo* frameEndInfo) noexcept {
-        if (gKneeboard) {
-            return gKneeboard->xrEndFrame(session, frameEndInfo);
+        if (gLayerInstance) {
+            return gLayerInstance->xrEndFrame(session, frameEndInfo);
         }
         return gNext->xrEndFrame(session, frameEndInfo);
     }
@@ -651,7 +674,7 @@ namespace IRacingTools::OpenXR {
             return XR_SUCCESS;
         }
 
-        spdlog::debug(
+        spdlog::critical(
             "Unsupported OpenXR call '{}' with instance {:#016x} and no next",
             name,
             reinterpret_cast<uintptr_t>(instance)
@@ -659,12 +682,20 @@ namespace IRacingTools::OpenXR {
         return XR_ERROR_FUNCTION_UNSUPPORTED;
     }
 
+    /**
+     * Create new instance
+     *
+     * @param info
+     * @param layerInfo
+     * @param instance
+     * @return
+     */
     XrResult xrCreateApiLayerInstance(
         const XrInstanceCreateInfo* info,
-        const struct XrApiLayerCreateInfo* layerInfo,
+        const XrApiLayerCreateInfo* layerInfo,
         XrInstance* instance
     ) {
-        spdlog::debug("{}", __FUNCTION__);
+        spdlog::info("{}", __FUNCTION__);
         // TODO: check version fields etc in layerInfo
         XrApiLayerCreateInfo nextLayerInfo = *layerInfo;
         nextLayerInfo.nextInfo = layerInfo->nextInfo->next;
@@ -676,7 +707,7 @@ namespace IRacingTools::OpenXR {
 
         gNext = std::make_shared<OpenXRNext>(*instance, layerInfo->nextInfo->nextGetInstanceProcAddr);
 
-        spdlog::debug("Created API layer instance");
+        spdlog::info("Created API layer instance");
 
         return XR_SUCCESS;
     }

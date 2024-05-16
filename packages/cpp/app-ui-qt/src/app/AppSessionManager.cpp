@@ -3,6 +3,10 @@
 //
 
 #include "AppSessionManager.h"
+
+#include <IRacingTools/Shared/DiskSessionDataProvider.h>
+#include <IRacingTools/Shared/LiveSessionDataProvider.h>
+
 #include "AppSessionDataEvent.h"
 #include "AppState.h"
 

@@ -60,19 +60,19 @@ set(DEP_IMGUI imgui::imgui)
 #set(DEP_WINRT Microsoft::CppWinRT)
 
 function(target_link_sdl2 targetName)
-  target_include_directories(${targetName} PRIVATE ${SDL2PP_INCLUDE_DIRS})
-  target_link_libraries(${targetName}
-    PRIVATE
-    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-    $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
-    SDL2::SDL2_gfx
-    ${SDL2PP_LIBRARIES}
-    $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
-    $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
-    $<IF:$<TARGET_EXISTS:SDL2_mixer_ext::SDL2_mixer_ext>,SDL2_mixer_ext::SDL2_mixer_ext,SDL2_mixer_ext::SDL2_mixer_ext_Static>
-    $<IF:$<TARGET_EXISTS:SDL2_net::SDL2_net>,SDL2_net::SDL2_net,SDL2_net::SDL2_net-static>
-    $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
-  )
+#  target_include_directories(${targetName} PRIVATE ${SDL2PP_INCLUDE_DIRS})
+#  target_link_libraries(${targetName}
+#    PRIVATE
+#    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+#    $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+#    SDL2::SDL2_gfx
+#    ${SDL2PP_LIBRARIES}
+#    $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
+#    $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
+#    $<IF:$<TARGET_EXISTS:SDL2_mixer_ext::SDL2_mixer_ext>,SDL2_mixer_ext::SDL2_mixer_ext,SDL2_mixer_ext::SDL2_mixer_ext_Static>
+#    $<IF:$<TARGET_EXISTS:SDL2_net::SDL2_net>,SDL2_net::SDL2_net,SDL2_net::SDL2_net-static>
+#    $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
+#  )
 endfunction()
 
 set(DEP_DIRECTX

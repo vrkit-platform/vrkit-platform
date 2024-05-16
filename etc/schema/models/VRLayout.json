@@ -1,0 +1,40 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/VRLayout",
+    "definitions": {
+        "VRLayout": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "scale": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "VR Layout"
+        }
+    }
+}

@@ -14,7 +14,7 @@
 namespace IRacingTools::Shared {
 
 
-  class LiveSessionDataProvider : public SessionDataProvider {
+  class LiveSessionDataProvider final : public SessionDataProvider {
 
   public:
     LiveSessionDataProvider();
@@ -60,6 +60,10 @@ namespace IRacingTools::Shared {
 
     void checkConnection();
 
+  public:
+    virtual bool isLive() const override;
+
+  private:
     SessionDataAccess dataAccess_;
     std::unique_ptr<std::thread> thread_{nullptr};
     std::mutex threadMutex_{};

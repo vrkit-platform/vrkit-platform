@@ -1,0 +1,53 @@
+syntax = "proto3";
+import "Geometry.proto";
+
+package irt.models.screen;
+
+
+message Display {
+  string id = 1;
+  string name = 2;
+
+  irt.models.overlay.geometry.RectI rect = 10;
+}
+
+message DisplayLayout {
+  irt.models.overlay.geometry.Position origin = 1;
+  repeated Display displays = 2;
+}
+
+
+message VRLayout {
+  string id = 1;
+  float scale = 2;
+}
+
+/**
+ * Represents a complete screen
+ */
+message Screen {
+
+
+  enum ScreenKind {
+    SK_MONITOR = 0;
+    SK_VR = 1;
+  }
+
+
+
+
+  /**
+   * Must serve as a hash
+   */
+  string id = 1;
+  string name = 2;
+  ScreenKind kind = 3;
+
+  irt.models.overlay.geometry.SizeI size = 5;
+
+  oneof layout {
+    DisplayLayout layout_display = 10;
+    VRLayout layout_vr = 11;
+  };
+
+}

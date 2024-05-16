@@ -153,7 +153,7 @@ namespace IRacingTools::OpenXR {
                 const std::shared_ptr<OpenXRNext>&,
                 const XrGraphicsBindingD3D11KHR&
             );
-            ~OpenXRDX11Layer();
+            virtual ~OpenXRDX11Layer() override;
 
             struct DXGIFormats {
                 DXGI_FORMAT textureFormat;

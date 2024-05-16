@@ -55,13 +55,15 @@ Item {
     Shortcut {
         sequences: [StandardKey.Back, StandardKey.Backspace]
 
-        onActivated: backAction()
+        onActivated: () => {
+            backAction()
+        }
     }
     Shortcut {
         sequences: [StandardKey.Forward]
 
         onActivated: () => {
-            forwardAction();
+            forwardAction()
         }
     }
     Shortcut {
@@ -158,13 +160,11 @@ Item {
     Rectangle {
         id: appContent
 
-        // function onStateChanged() {
-        // }
-        // anchors.fill: parent
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: appHeader.bottom
+
         color: Theme.colorBackground
 
         // Initial state
@@ -180,39 +180,15 @@ Item {
                     target: screenMainView
                     visible: true
                 }
-                PropertyChanges {
-                    enabled: false
-                    target: screenLapTiming
-                    visible: false
-                }
-            },
-            State {
-                name: "LapTiming"
-
-                PropertyChanges {
-                    enabled: false
-                    target: screenMainView
-                    visible: false
-                }
-                PropertyChanges {
-                    enabled: true
-                    focus: true
-                    target: screenLapTiming
-                    visible: true
-                }
             }
         ]
 
         Component.onCompleted: {
-            screenLapTiming.loadScreen();
+            screenMainView.loadScreen();
         }
 
         ScreenMainView {
             id: screenMainView
-
-        }
-        ScreenLapTiming {
-            id: screenLapTiming
 
         }
     }

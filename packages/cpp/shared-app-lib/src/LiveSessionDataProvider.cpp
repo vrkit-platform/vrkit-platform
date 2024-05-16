@@ -88,6 +88,10 @@ namespace IRacingTools::Shared {
     publish(std::make_shared<SessionDataEvent>(SessionDataEventType::Available));
   }
 
+  bool LiveSessionDataProvider::isLive() const {
+    return true;
+  }
+
   bool LiveSessionDataProvider::processYAMLLiveString() {
     bool wasUpdated = false;
 

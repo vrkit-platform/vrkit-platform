@@ -21,7 +21,6 @@ ApplicationWindow {
 
     // User generated events handling //////////////////////////////////////////
     function backAction() {
-
     }
 
     function deselectAction() {
@@ -30,22 +29,22 @@ ApplicationWindow {
     function forwardAction() {
     }
 
-    // color: settingsManager.appThemeCSD ? "transparent" : Theme.colorBackground
-    // flags: settingsManager.appThemeCSD ? Qt.Window | Qt.FramelessWindowHint : Qt.Window
     color: Theme.colorWindowBackground
     flags: Qt.Window | Qt.FramelessWindowHint
+
     height: {
         if (settingsManager.initialSize.height > 0)
             return settingsManager.initialSize.height;
         else
             return isHdpi ? 560 : 720;
     }
-    minimumHeight: 560
 
     // Desktop stuff ///////////////////////////////////////////////////////////
+    minimumHeight: 560
     minimumWidth: 800
     visibility: settingsManager.initialVisibility
     visible: true
+
     width: {
         if (settingsManager.initialSize.width > 0)
             return settingsManager.initialSize.width;

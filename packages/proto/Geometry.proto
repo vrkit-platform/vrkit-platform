@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package irt.models.overlay.geometry;
+package IRacingTools.Models.UI;
 
 message Position {
   int32 x = 1;

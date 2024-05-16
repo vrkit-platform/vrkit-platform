@@ -1,18 +1,18 @@
 syntax = "proto3";
 import "Geometry.proto";
 
-package irt.models.screen;
+package IRacingTools.Models.UI;
 
 
 message Display {
   string id = 1;
   string name = 2;
 
-  irt.models.overlay.geometry.RectI rect = 10;
+  IRacingTools.Models.UI.RectI rect = 10;
 }
 
 message DisplayLayout {
-  irt.models.overlay.geometry.Position origin = 1;
+  IRacingTools.Models.UI.Position origin = 1;
   repeated Display displays = 2;
 }
 
@@ -43,7 +43,7 @@ message Screen {
   string name = 2;
   ScreenKind kind = 3;
 
-  irt.models.overlay.geometry.SizeI size = 5;
+  IRacingTools.Models.UI.SizeI size = 5;
 
   oneof layout {
     DisplayLayout layout_display = 10;

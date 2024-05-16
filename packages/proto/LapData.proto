@@ -1,5 +1,5 @@
 syntax = "proto3";
-
+package IRacingTools.Models.Telemetry;
 message LapMetadata {
   uint32 lap = 1;
   uint32 lap_time = 2;

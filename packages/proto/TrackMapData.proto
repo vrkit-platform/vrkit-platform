@@ -1,5 +1,5 @@
 syntax = "proto3";
-
+package IRacingTools.Models.Telemetry;
 message TrackMap {
   message Point {
     float x = 1;

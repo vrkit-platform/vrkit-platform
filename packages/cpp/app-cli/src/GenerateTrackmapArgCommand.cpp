@@ -3,30 +3,26 @@
 //
 
 
-#define MIN_WIN_VER 0x0501
-
-#ifndef WINVER
-  #define WINVER MIN_WIN_VER
-#endif
-
-#ifndef _WIN32_WINNT
-  #define _WIN32_WINNT MIN_WIN_VER
-#endif
-
-#pragma warning(disable : 4996)//_CRT_SECURE_NO_WARNINGS
+// #define MIN_WIN_VER 0x0501
+//
+// #ifndef WINVER
+//   #define WINVER MIN_WIN_VER
+// #endif
+//
+// #ifndef _WIN32_WINNT
+//   #define _WIN32_WINNT MIN_WIN_VER
+// #endif
+//
+// #pragma warning(disable : 4996)//_CRT_SECURE_NO_WARNINGS
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
 
 #include <conio.h>
 #include <csignal>
 #include <cstdio>
 #include <ctime>
-#include <windows.h>
 
 #include <IRacingTools/SDK/LiveConnection.h>
-#include <IRacingTools/SDK/Utils/YamlParser.h>
 #include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/LiveClient.h>
-#include <IRacingTools/SDK/Types.h>
-#include <IRacingTools/SDK/Utils/YamlParser.h>
 
 #include "GenerateTrackmapArgCommand.h"
 

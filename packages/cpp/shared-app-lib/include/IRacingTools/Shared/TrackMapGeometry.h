@@ -3,10 +3,7 @@
 #include "SharedAppLibPCH.h"
 
 #include <algorithm>
-#include <filesystem>
-#include <numbers>
 #include <numeric>
-#include <type_traits>
 
 #include "Graphics/DXResources.h"
 #include <IRacingTools/Models/LapData.pb.h>
@@ -17,6 +14,9 @@
 #include <IRacingTools/Shared/ProtoHelpers.h>
 
 namespace IRacingTools::Shared::Geometry {
+
+  using namespace Models::Telemetry;
+
   template<typename PixelType = float> class LapTracjectoryConverter {
   public:
     using Pixel = PixelBase<PixelType>;

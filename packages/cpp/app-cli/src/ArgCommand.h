@@ -4,8 +4,9 @@
 
 #pragma once
 
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
+
 #include <CLI/CLI.hpp>
-#include <fmt/core.h>
 
 namespace IRacingTools::App::Commands {
   class ArgCommand;
@@ -14,6 +15,7 @@ namespace IRacingTools::App::Commands {
 
   class ArgCommand {
   public:
+    virtual ~ArgCommand() = default;
 
     [[maybe_unused]] virtual int execute() = 0;
 

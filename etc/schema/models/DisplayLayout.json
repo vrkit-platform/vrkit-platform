@@ -5,7 +5,7 @@
         "DisplayLayout": {
             "properties": {
                 "origin": {
-                    "$ref": "#/definitions/irt.models.overlay.geometry.Position",
+                    "$ref": "#/definitions/IRacingTools.Models.UI.Position",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -21,7 +21,7 @@
                         },
                         {
                             "items": {
-                                "$ref": "#/definitions/irt.models.screen.Display"
+                                "$ref": "#/definitions/IRacingTools.Models.UI.Display"
                             },
                             "type": "array"
                         }
@@ -39,7 +39,51 @@
             ],
             "title": "Display Layout"
         },
-        "irt.models.overlay.geometry.Position": {
+        "IRacingTools.Models.UI.Display": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "rect": {
+                    "$ref": "#/definitions/IRacingTools.Models.UI.RectI",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Display"
+        },
+        "IRacingTools.Models.UI.Position": {
             "properties": {
                 "x": {
                     "oneOf": [
@@ -73,10 +117,10 @@
             ],
             "title": "Position"
         },
-        "irt.models.overlay.geometry.RectI": {
+        "IRacingTools.Models.UI.RectI": {
             "properties": {
                 "size": {
-                    "$ref": "#/definitions/irt.models.overlay.geometry.SizeI",
+                    "$ref": "#/definitions/IRacingTools.Models.UI.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -86,7 +130,7 @@
                     ]
                 },
                 "position": {
-                    "$ref": "#/definitions/irt.models.overlay.geometry.Position",
+                    "$ref": "#/definitions/IRacingTools.Models.UI.Position",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -107,7 +151,7 @@
             ],
             "title": "Rect I"
         },
-        "irt.models.overlay.geometry.SizeI": {
+        "IRacingTools.Models.UI.SizeI": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -140,50 +184,6 @@
                 }
             ],
             "title": "Size I"
-        },
-        "irt.models.screen.Display": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "rect": {
-                    "$ref": "#/definitions/irt.models.overlay.geometry.RectI",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Display"
         }
     }
 }

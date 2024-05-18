@@ -1,31 +1,149 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "$ref": "#/definitions/Display",
+    "$ref": "#/definitions/LapTrajectory",
     "definitions": {
-        "Display": {
+        "IRacingTools.Models.Telemetry.LapMetadata": {
             "properties": {
-                "id": {
+                "lap": {
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {
-                            "type": "string"
+                            "type": "integer"
                         }
                     ]
                 },
-                "name": {
+                "lapTime": {
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {
-                            "type": "string"
+                            "type": "integer"
                         }
                     ]
                 },
-                "rect": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.RectI",
+                "incidentCount": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "valid": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Lap Metadata"
+        },
+        "IRacingTools.Models.Telemetry.LapTrajectoryPoint": {
+            "properties": {
+                "lapTime": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "lapPercentComplete": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "lapDistance": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "latitude": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "longitude": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "altitude": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "speed": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Lap Trajectory Point"
+        },
+        "LapTrajectory": {
+            "properties": {
+                "metadata": {
+                    "$ref": "#/definitions/IRacingTools.Models.Telemetry.LapMetadata",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -33,38 +151,17 @@
                         },
                         {}
                     ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
                 },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Display"
-        },
-        "IRacingTools.Models.UI.Position": {
-            "properties": {
-                "x": {
+                "path": {
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "y": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
+                            "items": {
+                                "$ref": "#/definitions/IRacingTools.Models.Telemetry.LapTrajectoryPoint"
+                            },
+                            "type": "array"
                         }
                     ]
                 }
@@ -78,75 +175,7 @@
                     "type": "object"
                 }
             ],
-            "title": "Position"
-        },
-        "IRacingTools.Models.UI.RectI": {
-            "properties": {
-                "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.SizeI",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "position": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.Position",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Rect I"
-        },
-        "IRacingTools.Models.UI.SizeI": {
-            "properties": {
-                "width": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "height": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Size I"
+            "title": "Lap Trajectory"
         }
     }
 }

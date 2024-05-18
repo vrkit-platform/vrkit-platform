@@ -8,11 +8,11 @@ message Display {
   string id = 1;
   string name = 2;
 
-  IRacingTools.Models.UI.RectI rect = 10;
+  RectI rect = 10;
 }
 
 message DisplayLayout {
-  IRacingTools.Models.UI.Position origin = 1;
+  Position origin = 1;
   repeated Display displays = 2;
 }
 
@@ -22,19 +22,15 @@ message VRLayout {
   float scale = 2;
 }
 
+enum ScreenKind {
+  SK_MONITOR = 0;
+  SK_VR = 1;
+}
+
 /**
  * Represents a complete screen
  */
 message Screen {
-
-
-  enum ScreenKind {
-    SK_MONITOR = 0;
-    SK_VR = 1;
-  }
-
-
-
 
   /**
    * Must serve as a hash
@@ -43,11 +39,11 @@ message Screen {
   string name = 2;
   ScreenKind kind = 3;
 
-  IRacingTools.Models.UI.SizeI size = 5;
+  SizeI size = 5;
 
   oneof layout {
-    DisplayLayout layout_display = 10;
-    VRLayout layout_vr = 11;
+    DisplayLayout display = 10;
+    VRLayout vr = 11;
   };
 
 }

@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/OverlayLayout",
     "definitions": {
-        "OverlayLayout": {
+        "IRacingTools.Models.UI.Dashboard.OverlayPlacement": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -14,92 +14,7 @@
                         }
                     ]
                 },
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "screenId": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "overlays": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "items": {
-                                "$ref": "#/definitions/irt.models.overlay.OverlayLayout.Overlay"
-                            },
-                            "type": "array"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Overlay Layout"
-        },
-        "irt.models.overlay.OverlayLayout.Overlay": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "kind": {
-                    "enum": [
-                        "OK_TRACK_MAP",
-                        0
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Overlay Kind"
-                },
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "description": {
+                "overlayId": {
                     "oneOf": [
                         {
                             "type": "null"
@@ -110,7 +25,7 @@
                     ]
                 },
                 "rect": {
-                    "$ref": "#/definitions/irt.models.overlay.geometry.RectI",
+                    "$ref": "#/definitions/IRacingTools.Models.UI.RectI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -149,9 +64,9 @@
                     "type": "object"
                 }
             ],
-            "title": "Overlay"
+            "title": "Overlay Placement"
         },
-        "irt.models.overlay.geometry.Position": {
+        "IRacingTools.Models.UI.Position": {
             "properties": {
                 "x": {
                     "oneOf": [
@@ -185,10 +100,10 @@
             ],
             "title": "Position"
         },
-        "irt.models.overlay.geometry.RectI": {
+        "IRacingTools.Models.UI.RectI": {
             "properties": {
                 "size": {
-                    "$ref": "#/definitions/irt.models.overlay.geometry.SizeI",
+                    "$ref": "#/definitions/IRacingTools.Models.UI.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -198,7 +113,7 @@
                     ]
                 },
                 "position": {
-                    "$ref": "#/definitions/irt.models.overlay.geometry.Position",
+                    "$ref": "#/definitions/IRacingTools.Models.UI.Position",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -219,7 +134,7 @@
             ],
             "title": "Rect I"
         },
-        "irt.models.overlay.geometry.SizeI": {
+        "IRacingTools.Models.UI.SizeI": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -252,6 +167,83 @@
                 }
             ],
             "title": "Size I"
+        },
+        "OverlayLayout": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "screenId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "kind": {
+                    "enum": [
+                        "SK_MONITOR",
+                        0,
+                        "SK_VR",
+                        1
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Screen Kind"
+                },
+                "placements": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "items": {
+                                "$ref": "#/definitions/IRacingTools.Models.UI.Dashboard.OverlayPlacement"
+                            },
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Overlay Layout"
         }
     }
 }

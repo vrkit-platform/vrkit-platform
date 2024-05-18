@@ -24,7 +24,13 @@
 #include <windows.h>
 #include <winternl.h>
 #include <windowsx.h>
+#include <minwinbase.h>
+#include <shellscalingapi.h>
+#include <shlobj_core.h>
+// #pragma comment(lib, "Shcore.lib")
+// #pragma comment (lib, "user32.lib")
 
+// DX & DXGI
 #include <dxgi1_6.h>
 
 #include <d2d1.h>
@@ -40,10 +46,6 @@
 
 #include <d3dkmthk.h>
 
-// C RunTime Header Files
-#include <minwinbase.h>
-#include <cstdlib>
-
 #include <dcomp.h>
 #include <dwrite.h>
 #include <wincodec.h>
@@ -51,6 +53,10 @@
 
 // Desktop window manager API
 #include <Dwmapi.h>
+
+// C++
+#include <cassert>
+#include <cstdlib>
 
 // fmt::core lib with wide char support
 #include <fmt/xchar.h>

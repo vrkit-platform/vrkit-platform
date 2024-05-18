@@ -8,21 +8,21 @@
 #include <intsafe.h>
 
 namespace IRacingTools::Shared {
+    namespace fs = std::filesystem;
 
-namespace fs = std::filesystem;
+    /** Differs from std::filesystem::temp_directory_path() in that
+     * it guarantees to be in canonical form */
+    fs::path GetTemporaryDirectory();
+    fs::path GetRuntimeDirectory();
+    fs::path GetInstallationDirectory();
+    fs::path GetAppDataPath(std::optional<fs::path> childPath = std::nullopt);
+    fs::path GetUserDataPath(std::optional<fs::path> childPath = std::nullopt);
 
-/** Differs from std::filesystem::temp_directory_path() in that
- * it guarantees to be in canonical form */
-fs::path GetTemporaryDirectory();
-fs::path GetRuntimeDirectory();
-fs::path GetInstallationDirectory();
+    void CleanupTemporaryDirectories();
 
-void CleanupTemporaryDirectories();
+    std::vector<BYTE> ReadFile(const fs::path& path);
 
-std::vector<BYTE> ReadFile(const fs::path& path);
-
-namespace Files {
- extern const std::filesystem::path OPENXR_JSON;
-}
-
+    namespace Files {
+        extern const std::filesystem::path OPENXR_JSON;
+    }
 }

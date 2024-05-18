@@ -1,0 +1,47 @@
+{
+  "id": "simple-track-map",
+  "name": "Simple Track Map",
+  "screens": [
+    {
+      "id": "screen_displays",
+      "name": "displays",
+      "kind": "SK_MONITOR",
+      "display": {
+        "displays": [
+        ],
+        "origin": {
+          "x": 0,
+          "y": 0
+        }
+      }
+    }
+  ],
+  "overlays": [
+    {
+      "kind": "OK_TRACK_MAP",
+      "name": "Track Map",
+      "id": "track-map-01",
+      "parameters": {}
+    }
+  ],
+  "layouts": [
+    {
+      "id": "display-layout",
+      "name": "display-layout",
+      "screenId": "screen_displays",
+      "placements": [
+        {
+          "id": "display-track-map",
+          "overlayId": "track-map-01",
+          "parameters": {},
+          "rect": {
+            "position": {
+              "x": 50,
+              "y": 50
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

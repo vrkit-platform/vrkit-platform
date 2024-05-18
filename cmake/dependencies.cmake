@@ -92,6 +92,7 @@ set(DEP_DIRECTX
   System::D2d1
   System::D3d11
   System::D3d12
+  System::Shcore
   System::WindowsApp
   #  Microsoft::D3DX9
   #  Microsoft::D3DX10

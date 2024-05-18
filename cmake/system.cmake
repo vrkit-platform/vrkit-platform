@@ -14,6 +14,7 @@ set(
   Gdi32
   Msi
   Rpcrt4
+  Shcore
   Shell32
   Shlwapi
   User32

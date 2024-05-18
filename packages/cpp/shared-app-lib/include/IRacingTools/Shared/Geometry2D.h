@@ -126,7 +126,7 @@ namespace IRacingTools::Shared {
 
     template<class TValue, class TSize = Size<TValue>> requires(std::integral<T> || std::floating_point<TValue>)
     constexpr TSize staticCast() const noexcept {
-      return TSize{Width<TValue>(), Height<TValue>(),};
+      return TSize{width<TValue>(), height<TValue>(),};
     }
 
     template<std::integral TValue, class TSize = Size<TValue>> constexpr TSize floor() const noexcept {
@@ -319,7 +319,7 @@ namespace IRacingTools::Shared {
    * @return distance between points
    */
   template<typename T>
-  T DistanceBetween(const TrackMap_Point& p1, const TrackMap_Point& p2) {
+  T DistanceBetween(const Models::Telemetry::TrackMap_Point& p1, const Models::Telemetry::TrackMap_Point& p2) {
     return std::sqrt(std::pow(p2.x() - p1.x(), 2) + std::pow(p2.y() - p1.y(), 2));
   }
 

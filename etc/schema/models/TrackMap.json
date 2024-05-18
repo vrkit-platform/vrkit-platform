@@ -1,19 +1,87 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "$ref": "#/definitions/Display",
+    "$ref": "#/definitions/TrackMap",
     "definitions": {
-        "Display": {
+        "IRacingTools.Models.Telemetry.TrackMap.Point": {
             "properties": {
-                "id": {
+                "x": {
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {
-                            "type": "string"
+                            "type": "number"
                         }
                     ]
                 },
+                "y": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "distance": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Point"
+        },
+        "IRacingTools.Models.Telemetry.TrackMap.Size": {
+            "properties": {
+                "width": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "height": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Size"
+        },
+        "TrackMap": {
+            "properties": {
                 "name": {
                     "oneOf": [
                         {
@@ -24,66 +92,31 @@
                         }
                     ]
                 },
-                "rect": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.RectI",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Display"
-        },
-        "IRacingTools.Models.UI.Position": {
-            "properties": {
-                "x": {
+                "totalDistance": {
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {
-                            "type": "integer"
+                            "type": "number"
                         }
                     ]
                 },
-                "y": {
+                "points": {
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {
-                            "type": "integer"
+                            "items": {
+                                "$ref": "#/definitions/IRacingTools.Models.Telemetry.TrackMap.Point"
+                            },
+                            "type": "array"
                         }
                     ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
                 },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Position"
-        },
-        "IRacingTools.Models.UI.RectI": {
-            "properties": {
                 "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.SizeI",
+                    "$ref": "#/definitions/IRacingTools.Models.Telemetry.TrackMap.Size",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -92,8 +125,8 @@
                         {}
                     ]
                 },
-                "position": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.Position",
+                "scaledSize": {
+                    "$ref": "#/definitions/IRacingTools.Models.Telemetry.TrackMap.Size",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -101,38 +134,14 @@
                         },
                         {}
                     ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
                 },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Rect I"
-        },
-        "IRacingTools.Models.UI.SizeI": {
-            "properties": {
-                "width": {
+                "scaledRatio": {
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "height": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
+                            "type": "number"
                         }
                     ]
                 }
@@ -146,7 +155,7 @@
                     "type": "object"
                 }
             ],
-            "title": "Size I"
+            "title": "Track Map"
         }
     }
 }

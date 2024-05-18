@@ -20,13 +20,14 @@
 #include <IRacingTools/Shared/SessionDataEvent.h>
 
 namespace IRacingTools::Shared::Graphics {
+    using namespace IRacingTools::Models::Telemetry;
     using VertexType = DirectX::VertexPositionColor;
 
 
     class TrackMapWidget : public Renderable<std::shared_ptr<SessionDataUpdatedEvent>> {
     public:
         explicit TrackMapWidget(const TrackMap& trackMap, const std::shared_ptr<DXResources>& resources);
-        ~TrackMapWidget();
+        virtual ~TrackMapWidget() override;
 
         void render(
             const std::shared_ptr<RenderTarget>& target,

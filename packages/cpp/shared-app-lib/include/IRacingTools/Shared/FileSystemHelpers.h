@@ -4,14 +4,18 @@
 
 #pragma once
 
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
 #include <filesystem>
-#include <intsafe.h>
+
 
 namespace IRacingTools::Shared {
     namespace fs = std::filesystem;
 
     constexpr std::string_view TemporaryDirectoryNameA = "IRacingTools";
     constexpr std::wstring_view TemporaryDirectoryNameW = L"IRacingTools";
+
+    std::filesystem::path GetKnownFolderPath(const KNOWNFOLDERID& folderId);
+    fs::path CreateDirIfNeeded(const fs::path& path, const std::optional<fs::path>& childPath = std::nullopt);
 
     /** Differs from std::filesystem::temp_directory_path() in that
      * it guarantees to be in canonical form */

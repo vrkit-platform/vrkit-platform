@@ -175,7 +175,13 @@ namespace IRacingTools::SDK::Utils {
             return std::unexpected(GeneralError(ErrorCode::General, std::format("Unable to open ({}): {}", path.string(), std::string(std::strerror(errno)))));
         }
 
-        auto cleanup = FileResourceCleanup(&file);
+        auto cleanup = gsl::finally([&] {
+            if (file) {
+                std::fclose(file);
+                file = nullptr;
+            }
+        });
+        //FileResourceCleanup(&file);
         size_t writeTotal = 0;
 
         while (writeTotal < size) {

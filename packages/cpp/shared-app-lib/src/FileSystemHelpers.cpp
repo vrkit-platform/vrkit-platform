@@ -13,47 +13,6 @@ namespace IRacingTools::Shared {
         // std::mutex sMutex{};
         // std::map<KNOWNFOLDERID, std::filesystem::path> sPaths{};
 
-        std::filesystem::path GetKnownFolderPath(const KNOWNFOLDERID& folderId) {
-            // std::scoped_lock lock(sMutex);
-            // if (!sPaths.contains(folderId)) {
-            PWSTR tempPath;
-            check_hresult(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, nullptr, &tempPath));
-
-            std::filesystem::path path{ToUtf8(std::wstring(tempPath))};
-
-
-            CoTaskMemFree(tempPath);
-            return path;
-        }
-
-        fs::path CreateDirIfNeeded(const fs::path& path, const std::optional<fs::path>& childPath = std::nullopt) {
-            static std::mutex sMutex{};
-            std::scoped_lock lock(sMutex);
-
-            fs::path finalPath = path;
-            if (childPath.has_value())
-                finalPath /= childPath.value();
-
-            auto exists = fs::exists(finalPath);
-            if (exists && !fs::is_directory(finalPath)) IRT_LOG_AND_FATAL(
-                "Path ({}) is not a directory, but exists",
-                finalPath.string()
-            );
-
-            if (!fs::exists(finalPath)) {
-                std::error_code errorCode;
-                if (!fs::create_directories(finalPath, errorCode)) {
-                    IRT_LOG_AND_FATAL(
-                        "Failed to create directory @ {}: ({}) {}",
-                        finalPath.string(),
-                        errorCode.value(),
-                        errorCode.message()
-                    );
-                }
-            }
-
-            return finalPath;
-        }
 
         fs::path GetLocalAppDataPath() {
             return GetKnownFolderPath(FOLDERID_LocalAppData);
@@ -75,6 +34,46 @@ namespace IRacingTools::Shared {
             auto tempDirLen = GetTempPathW(MAX_PATH, tempDirBuf);
             return std::filesystem::path{std::wstring_view{tempDirBuf, tempDirLen}} / TemporaryDirectoryNameW;
         }
+    }
+    std::filesystem::path GetKnownFolderPath(const KNOWNFOLDERID& folderId) {
+        // std::scoped_lock lock(sMutex);
+        // if (!sPaths.contains(folderId)) {
+        PWSTR tempPath;
+        check_hresult(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, nullptr, &tempPath));
+
+        std::filesystem::path path{ToUtf8(std::wstring(tempPath))};
+
+        CoTaskMemFree(tempPath);
+        return path;
+    }
+
+    fs::path CreateDirIfNeeded(const fs::path& path, const std::optional<fs::path>& childPath) {
+        static std::mutex sMutex{};
+        std::scoped_lock lock(sMutex);
+
+        fs::path finalPath = path;
+        if (childPath.has_value())
+            finalPath /= childPath.value();
+
+        auto exists = fs::exists(finalPath);
+        if (exists && !fs::is_directory(finalPath)) IRT_LOG_AND_FATAL(
+            "Path ({}) is not a directory, but exists",
+            finalPath.string()
+        );
+
+        if (!fs::exists(finalPath)) {
+            std::error_code errorCode;
+            if (!fs::create_directories(finalPath, errorCode)) {
+                IRT_LOG_AND_FATAL(
+                    "Failed to create directory @ {}: ({}) {}",
+                    finalPath.string(),
+                    errorCode.value(),
+                    errorCode.message()
+                );
+            }
+        }
+
+        return finalPath;
     }
 
     std::filesystem::path GetTemporaryDirectory() {

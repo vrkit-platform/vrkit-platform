@@ -1,7 +1,7 @@
+#include <IRacingTools/Shared/System/DisplayInfo.h>
+
 #include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/Macros.h>
-#include <IRacingTools/Shared/ProtoHelpers.h>
-#include <IRacingTools/Shared/System/DisplayInfo.h>
 
 namespace IRacingTools::Shared::System {
     namespace {
@@ -20,8 +20,8 @@ namespace IRacingTools::Shared::System {
 
     std::string DisplayInfo::toString() const {
         return std::format(
-            "DisplayInfo:\n" "Index: {}\n" "ID: {}\n" "Name: {}\n" "Path: {}\n" "Width: {}\n" "Height: {}\n"
-            "Physical Width: {}\n" "Physical Height: {}\n" "dpiX: {}\n" "dpiY: {}\n" "Scale: {}\n" "x: {}\n" "y: {}\n"
+            "DisplayInfo:\n Index: {}\n ID: {}\n Name: {}\n Path: {}\n Width: {}\n Height: {}\n"
+            "Physical Width: {}\n Physical Height: {}\n dpiX: {}\n dpiY: {}\n Scale: {}\n x: {}\n y: {}\n"
             "Is Primary: {}\n",
             index,
             id,
@@ -74,7 +74,7 @@ namespace IRacingTools::Shared::System {
         return display;
     }
 
-    bool DisplayInfo::EqualTo(const Models::UI::Display& d1,const Models::UI::Display& d2) {
+    bool DisplayInfo::EqualTo(const Models::UI::Display& d1, const Models::UI::Display& d2) {
         auto& id1 = d1.id();
         auto scale1 = d1.scale();
         auto& physicalSize1 = d1.physical_size();
@@ -83,10 +83,8 @@ namespace IRacingTools::Shared::System {
         auto scale2 = d2.scale();
         auto& physicalSize2 = d2.physical_size();
         auto& scaledRect2 = d2.scaled_rect();
-        if (d1.primary() != d2.primary() || id1 != id2 || scale1 != scale2 || !IsRectIEqual(scaledRect1, scaledRect2) || !IsSizeIEqual(
-            physicalSize1,
-            physicalSize2
-        )) {
+        if (d1.primary() != d2.primary() || id1 != id2 || scale1 != scale2 || !IsRectIEqual(scaledRect1, scaledRect2) ||
+            !IsSizeIEqual(physicalSize1, physicalSize2)) {
             return false;
         }
 
@@ -98,7 +96,7 @@ namespace IRacingTools::Shared::System {
     }
 
     bool operator==(const Models::UI::Display& lhs, const Models::UI::Display& rhs) {
-        return DisplayInfo::EqualTo(lhs,rhs);
+        return DisplayInfo::EqualTo(lhs, rhs);
     }
 
     bool operator!=(const Models::UI::Display& lhs, const Models::UI::Display& rhs) {
@@ -106,7 +104,7 @@ namespace IRacingTools::Shared::System {
     }
 
     bool operator==(const DisplayInfo& lhs, const DisplayInfo& rhs) {
-        return DisplayInfo::EqualTo(lhs,rhs);
+        return DisplayInfo::EqualTo(lhs, rhs);
     }
 
     bool operator!=(const DisplayInfo& lhs, const DisplayInfo& rhs) {
@@ -203,7 +201,7 @@ namespace IRacingTools::Shared::System {
         return displays;
     }
 
-    std::string ScreenInfo::toString() const {
+    std::string DisplayScreenInfo::toString() const {
         std::string output;
         output.append("Screen Information: \n");
 
@@ -222,7 +220,7 @@ namespace IRacingTools::Shared::System {
         return output;
     }
 
-    Models::UI::Screen* ScreenInfo::toModel(Models::UI::Screen* screen) const {
+    Models::UI::Screen* DisplayScreenInfo::toModel(Models::UI::Screen* screen) const {
         screen->set_id("IMPLEMENT ID SCHEME");
         screen->set_name(screen->id());
         screen->set_kind(Models::UI::SK_MONITOR);
@@ -255,20 +253,23 @@ namespace IRacingTools::Shared::System {
         return screen;
     }
 
-    Models::UI::Screen ScreenInfo::toModel() const {
+    Models::UI::Screen DisplayScreenInfo::toModel() const {
         Models::UI::Screen screen;
         toModel(&screen);
         return screen;
     }
 
-    bool ScreenInfo::equalTo(const ScreenInfo& other) const {
+    bool DisplayScreenInfo::equalTo(const DisplayScreenInfo& other) const {
         auto otherModel = other.toModel();
         return equalTo(otherModel);
     }
 
-    bool ScreenInfo::equalTo(const Models::UI::Screen& other) const {
+    bool DisplayScreenInfo::equalTo(const Models::UI::Screen& other) const {
         auto screen = toModel();
-        if (screen.kind() != other.kind() || !IsSizeIEqual(screen.size(), other.size()))
+        if (screen.kind() != Models::UI::SK_MONITOR || screen.kind() != other.kind() || !IsSizeIEqual(
+            screen.size(),
+            other.size()
+        ))
             return false;
 
         if (screen.kind() == Models::UI::SK_MONITOR) {
@@ -317,7 +318,7 @@ namespace IRacingTools::Shared::System {
     /**
      * @inheritDoc
      */
-    ScreenInfo ScreenInfo::create(const std::vector<DisplayInfo>& displays) {
+    DisplayScreenInfo DisplayScreenInfo::create(const std::vector<DisplayInfo>& displays) {
         RECT screenRect;
         std::optional<DisplayInfo> primaryOpt;
         SetRectEmpty(&screenRect);
@@ -337,7 +338,7 @@ namespace IRacingTools::Shared::System {
         // ReSharper disable once CppDFAUnusedValue
         auto top = static_cast<std::int32_t>(screenRect.top);
 
-        return ScreenInfo{
+        return DisplayScreenInfo{
             .displays = displays,
             .x = left,
             .y = top,
@@ -349,7 +350,7 @@ namespace IRacingTools::Shared::System {
     }
 
 
-    SDK::Expected<ScreenInfo> ScreenInfo::generate() {
+    SDK::Expected<DisplayScreenInfo> DisplayScreenInfo::generate() {
         auto displays = GetAllDisplayInfo();
 
         if (displays.has_value()) {
@@ -359,5 +360,74 @@ namespace IRacingTools::Shared::System {
         return SDK::MakeUnexpected<SDK::GeneralError>(SDK::ErrorCode::General, "Unable to get displays");
     }
 
+    std::string VRScreenInfo::toString() const {
+        std::stringstream ss;
+        ss << "VRScreenInfo{" "scale: " << scale << ", width: " << width << ", height: " << height << "}";
+        return ss.str();
+    }
 
+    Models::UI::Screen* VRScreenInfo::toModel(Models::UI::Screen* screen) const {
+        screen->set_id("VR");
+        screen->set_name(screen->id());
+        screen->set_kind(Models::UI::SK_VR);
+        {
+            auto size = screen->mutable_size();
+            size->set_width(width);
+            size->set_height(height);
+        }
+
+        {
+            auto layout = screen->mutable_vr();
+            layout->set_scale(1.0);
+            {
+                auto scaledSize = layout->mutable_scaled_size();
+                scaledSize->set_width(1);
+                scaledSize->set_height(1);
+            }
+        }
+
+        return screen;
+    }
+
+    /**
+     * @brief Convert VRScreenInfo to serializable version
+     *
+     * @return new `VRScreenInfo` instance
+     */
+    Models::UI::Screen VRScreenInfo::toModel() const {
+        Models::UI::Screen screen;
+        toModel(&screen);
+        return screen;
+    }
+
+    bool VRScreenInfo::equalTo(const VRScreenInfo& otherInfo) const {
+        auto other = otherInfo.toModel();
+        return equalTo(other);
+    }
+
+    bool VRScreenInfo::equalTo(const Models::UI::Screen& other) const {
+        auto screen = toModel();
+        if (screen.kind() != Models::UI::SK_VR || screen.kind() != other.kind() || !IsSizeIEqual(
+            screen.size(),
+            other.size()
+        ))
+            return false;
+
+
+        if (!screen.has_vr() || !other.has_vr())
+            return false;
+
+        auto& layout1 = screen.vr();
+        auto& layout2 = other.vr();
+
+        if (!IsSizeIEqual(layout1.scaled_size(), layout2.scaled_size()) || layout1.scale() != layout2.scale()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    SDK::Expected<VRScreenInfo> VRScreenInfo::generate() {
+        return VRScreenInfo{.scale = 1.0, .width = 1, .height = 1};
+    }
 }

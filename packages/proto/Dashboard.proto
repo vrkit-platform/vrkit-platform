@@ -38,8 +38,7 @@ message OverlayLayout {
 }
 
 message DashboardConfig {
-  string id = 1;
-  string name = 2;
+  string description = 2;
 
   repeated Screen screens = 10;
   repeated Overlay overlays = 20;

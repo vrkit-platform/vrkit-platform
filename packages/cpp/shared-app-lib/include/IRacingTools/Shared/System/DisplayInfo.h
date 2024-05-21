@@ -58,7 +58,7 @@ namespace IRacingTools::Shared::System {
     /**
      * @brief Represents an entire `Screen` (`1..n` displays married together)
      */
-    struct ScreenInfo {
+    struct DisplayScreenInfo {
         std::vector<DisplayInfo> displays{};
 
         std::int32_t x{0};
@@ -75,11 +75,11 @@ namespace IRacingTools::Shared::System {
         Models::UI::Screen * toModel(Models::UI::Screen* screen) const;
         Models::UI::Screen toModel() const;
 
-        bool equalTo(const ScreenInfo& other) const;
+        bool equalTo(const DisplayScreenInfo& other) const;
         bool equalTo(const Models::UI::Screen&) const;
 
 
-        static ScreenInfo create(const std::vector<DisplayInfo>& displays);
+        static DisplayScreenInfo create(const std::vector<DisplayInfo>& displays);
 
         /**
          * @brief Generates the ScreenInfo object.
@@ -89,13 +89,33 @@ namespace IRacingTools::Shared::System {
          * @return Returns an Expected object containing the generated ScreenInfo object if successful,
          *         or an Unexpected object containing an error message if unsuccessful.
          */
-        static SDK::Expected<ScreenInfo> generate();
+        static SDK::Expected<DisplayScreenInfo> generate();
     };
 
+    struct VRScreenInfo {
+        double scale{0.0};
 
-    bool operator==(const DisplayInfo& lhs, const DisplayInfo& rhs);
+        std::size_t width{0};
+        std::size_t height{0};
 
-    bool operator!=(const DisplayInfo& lhs, const DisplayInfo& rhs);
+        std::string toString() const;
+        Models::UI::Screen * toModel(Models::UI::Screen* screen) const;
+        Models::UI::Screen toModel() const;
+
+        bool equalTo(const VRScreenInfo& other) const;
+        bool equalTo(const Models::UI::Screen&) const;
+
+
+        /**
+         * @brief Generates the ScreenInfo object.
+         *
+         * This method generates a ScreenInfo object by retrieving information about all displays.
+         *
+         * @return Returns an Expected object containing the generated ScreenInfo object if successful,
+         *         or an Unexpected object containing an error message if unsuccessful.
+         */
+        static SDK::Expected<VRScreenInfo> generate();
+    };
 
     template <std::derived_from<std::ostream> S>
     S& operator<<(S& os, const DisplayInfo& displayInfo) {

@@ -25,7 +25,7 @@ TEST_F(DisplayInfoTests, GetAll) {
 }
 
 TEST_F(DisplayInfoTests, GenerateScreenInfo) {
-    auto res = ScreenInfo::generate();
+    auto res = DisplayScreenInfo::generate();
     ASSERT_TRUE(res.has_value());
 
     auto screenInfo = res.value();
@@ -37,11 +37,11 @@ TEST_F(DisplayInfoTests, GenerateScreenInfo) {
 }
 
 TEST_F(DisplayInfoTests, ScreenInfo_equalTo) {
-    auto res1 = ScreenInfo::generate();
+    auto res1 = DisplayScreenInfo::generate();
     ASSERT_TRUE(res1.has_value());
     auto& screenInfo1 = res1.value();
 
-    auto res2 = ScreenInfo::generate();
+    auto res2 = DisplayScreenInfo::generate();
     ASSERT_TRUE(res2.has_value());
     auto& screenInfo2 = res2.value();
 

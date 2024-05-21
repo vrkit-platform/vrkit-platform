@@ -1,40 +1,143 @@
-
 #include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/Macros.h>
+#include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/System/DisplayInfo.h>
 
 namespace IRacingTools::Shared::System {
+    namespace {
+        auto IsSizeIEqual = [](const Models::UI::SizeI& s1, const Models::UI::SizeI& s2) -> bool {
+            return s1.width() == s2.width() && s1.height() == s2.height();
+        };
+
+        auto IsPositionEqual = [](const Models::UI::Position& o1, const Models::UI::Position& o2) -> bool {
+            return o1.x() == o2.x() && o1.y() == o2.y();
+        };
+
+        auto IsRectIEqual = [](const Models::UI::RectI& o1, const Models::UI::RectI& o2) -> bool {
+            return IsPositionEqual(o1.position(), o2.position()) && IsSizeIEqual(o1.size(), o2.size());
+        };
+    }
 
     std::string DisplayInfo::toString() const {
         return std::format(
-            "DisplayInfo:\n"
-            "Index: {}\n"
-            "Key: {}\n"
-            "Name: {}\n"
-            "Path: {}\n"
-            "Width: {}\n"
-            "Height: {}\n"
-            "Physical Width: {}\n"
-            "Physical Height: {}\n"
-            "dpiX: {}\n"
-            "dpiY: {}\n"
-            "Scale: {}\n"
-            "x: {}\n"
-            "y: {}\n"
+            "DisplayInfo:\n" "Index: {}\n" "ID: {}\n" "Name: {}\n" "Path: {}\n" "Width: {}\n" "Height: {}\n"
+            "Physical Width: {}\n" "Physical Height: {}\n" "dpiX: {}\n" "dpiY: {}\n" "Scale: {}\n" "x: {}\n" "y: {}\n"
             "Is Primary: {}\n",
-            index, key, name, path, width, height, physicalWidth, physicalHeight, dpiX, dpiY, scale, x, y, isPrimary ? "Yes" : "No"
+            index,
+            id,
+            name,
+            path,
+            width,
+            height,
+            physicalWidth,
+            physicalHeight,
+            dpiX,
+            dpiY,
+            scale,
+            x,
+            y,
+            isPrimary ? "Yes" : "No"
         );
     }
 
-    void DisplayInfoSetup()
-    {
-        check_hresult(SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE));
-        check_hresult(SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2));
+    Models::UI::Display* DisplayInfo::toModel(Models::UI::Display* display) const {
+        display->set_id(id);
+        display->set_name(name);
+        display->set_primary(isPrimary);
+        display->set_scale(scale);
 
+        auto physicalSize = display->mutable_physical_size();
+        physicalSize->set_width(physicalWidth);
+        physicalSize->set_height(physicalHeight);
+
+        {
+            auto scaledSize = display->mutable_scaled_size();
+            scaledSize->set_width(width);
+            scaledSize->set_height(height);
+        }
+
+        {
+            auto scaledRect = display->mutable_scaled_rect();
+            auto scaledSize = scaledRect->mutable_size();
+            auto scaledPos = scaledRect->mutable_position();
+            scaledSize->set_width(width);
+            scaledSize->set_height(height);
+            scaledPos->set_x(x);
+            scaledPos->set_y(y);
+        }
+        return display;
     }
 
-    std::optional<std::vector<DisplayInfo>> GetAllDisplayInfo()
-    {
+    Models::UI::Display DisplayInfo::toModel() const {
+        Models::UI::Display display;
+        toModel(&display);
+        return display;
+    }
+
+    bool DisplayInfo::EqualTo(const Models::UI::Display& d1,const Models::UI::Display& d2) {
+        auto& id1 = d1.id();
+        auto scale1 = d1.scale();
+        auto& physicalSize1 = d1.physical_size();
+        auto& scaledRect1 = d1.scaled_rect();
+        auto& id2 = d2.id();
+        auto scale2 = d2.scale();
+        auto& physicalSize2 = d2.physical_size();
+        auto& scaledRect2 = d2.scaled_rect();
+        if (d1.primary() != d2.primary() || id1 != id2 || scale1 != scale2 || !IsRectIEqual(scaledRect1, scaledRect2) || !IsSizeIEqual(
+            physicalSize1,
+            physicalSize2
+        )) {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool DisplayInfo::EqualTo(const DisplayInfo& di1, const DisplayInfo& di2) {
+        return EqualTo(di1.toModel(), di2.toModel());
+    }
+
+    bool operator==(const Models::UI::Display& lhs, const Models::UI::Display& rhs) {
+        return DisplayInfo::EqualTo(lhs,rhs);
+    }
+
+    bool operator!=(const Models::UI::Display& lhs, const Models::UI::Display& rhs) {
+        return !(lhs == rhs);
+    }
+
+    bool operator==(const DisplayInfo& lhs, const DisplayInfo& rhs) {
+        return DisplayInfo::EqualTo(lhs,rhs);
+    }
+
+    bool operator!=(const DisplayInfo& lhs, const DisplayInfo& rhs) {
+        return !(lhs == rhs);
+    }
+
+    bool DisplayInfo::equalTo(const Models::UI::Display& display) const {
+        return EqualTo(toModel(), display);
+    }
+
+    bool DisplayInfoSetup(bool skipAbortOnFailure) {
+        auto result = SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+        if (result != S_OK && !skipAbortOnFailure)
+            check_hresult(result);
+
+        if (result == S_OK) {
+            result = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+            if (result != S_OK && !skipAbortOnFailure) {
+                check_hresult(result);
+            }
+        }
+
+        return result == S_OK;
+    }
+
+    /**
+     * @brief Retrieve all display info by enumerating displays
+     *
+     * @return Either a vector of DisplayInfo instances OR an error
+     */
+    std::optional<std::vector<DisplayInfo>> GetAllDisplayInfo() {
         DWORD idx = 0;
         DISPLAY_DEVICE displayDevice;
         DEVMODE mode;
@@ -45,61 +148,52 @@ namespace IRacingTools::Shared::System {
         ZeroMemory(&displayDevice, sizeof(displayDevice));
         displayDevice.cb = sizeof(displayDevice);
 
-        // GetMonitorFromDisplayId()
-        // get all display devices
-        while (EnumDisplayDevices(nullptr, idx, &displayDevice, 0))
-        {
+        // ENUMERATE ALL DISPLAY DEVICES
+        while (EnumDisplayDevices(nullptr, idx, &displayDevice, 0)) {
             ZeroMemory(&mode, sizeof(DEVMODE));
             mode.dmSize = sizeof(DEVMODE);
-            if (!EnumDisplaySettings(displayDevice.DeviceName, ENUM_REGISTRY_SETTINGS, &mode))
-            {
-                OutputDebugString(L"Store default failed\n");
+
+            // GET DISPLAY SETTINGS FROM REGISTRY
+            if (!EnumDisplaySettings(displayDevice.DeviceName, ENUM_REGISTRY_SETTINGS, &mode)) {
+                spdlog::warn("Store default failed");
                 break;
             }
 
-            auto isPrimary = (displayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) > 0;
-            if (auto isAttached = (displayDevice.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) > 0)
-            {
+            // SKIP DISPLAY IF NOT ATTACHED
+            if (displayDevice.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) {
                 auto pos = mode.dmPosition;
-                POINT posTemp{
-                    .x = pos.x,
-                    .y = pos.y
-                };
+                POINT posTemp{.x = pos.x, .y = pos.y};
 
                 HMONITOR displayHandle = MonitorFromPoint(posTemp, MONITOR_DEFAULTTONULL);
                 double scale = 1.0f;
                 UINT dpiX{96}, dpiY{96};
-                if (displayHandle)
-                {
+                if (displayHandle) {
                     HRESULT dpiRes = GetDpiForMonitor(displayHandle, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
-                    if (dpiRes == S_OK) // && !scaleIsOk
-                    {
+                    if (dpiRes == S_OK) {
                         scale = static_cast<double>(dpiY) / 96.0;
-                    }
-                    else
-                    {
-                        std::wcout << L"Failed to get monitor scale info: " << idx << L"\n";
+                    } else {
+                        spdlog::warn("Failed to get monitor scale info: {}");
                     }
                 }
 
-                displays.emplace_back(DisplayInfo{
-                    .index = displays.size(),
-                    .key = SDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceKey)),
-                    .name = SDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceName)),
-                    .path = SDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceString)),
-                    .width = mode.dmPanningWidth,
-                    .height = mode.dmPanningHeight,
-                    .physicalWidth = mode.dmPelsWidth,
-                    .physicalHeight = mode.dmPelsHeight,
-
-                    .dpiX = dpiX,
-                    .dpiY = dpiY,
-                    .scale = scale,
-
-                    .x = static_cast<std::int32_t>(pos.x),
-                    .y = static_cast<std::int32_t>(pos.y),
-                    .isPrimary = isPrimary
-                });
+                displays.emplace_back(
+                    DisplayInfo{
+                        .index = displays.size(),
+                        .id = SDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceKey)),
+                        .name = SDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceName)),
+                        .path = SDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceString)),
+                        .width = static_cast<std::size_t>(std::floor(static_cast<double>(mode.dmPelsWidth) / scale)),
+                        .height = static_cast<std::size_t>(std::floor(static_cast<double>(mode.dmPelsHeight) / scale)),
+                        .physicalWidth = mode.dmPelsWidth,
+                        .physicalHeight = mode.dmPelsHeight,
+                        .dpiX = dpiX,
+                        .dpiY = dpiY,
+                        .scale = scale,
+                        .x = static_cast<std::int32_t>(pos.x),
+                        .y = static_cast<std::int32_t>(pos.y),
+                        .isPrimary = (displayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) > 0
+                    }
+                );
             }
             ZeroMemory(&displayDevice, sizeof(displayDevice));
             displayDevice.cb = sizeof(displayDevice);
@@ -109,31 +203,152 @@ namespace IRacingTools::Shared::System {
         return displays;
     }
 
+    std::string ScreenInfo::toString() const {
+        std::string output;
+        output.append("Screen Information: \n");
+
+        for (const auto& display : displays) {
+            output.append(display.toString());
+            output.append("\n");
+        }
+
+        output.append("X: " + std::to_string(x) + "\n");
+        output.append("Y: " + std::to_string(y) + "\n");
+        output.append("X Origin Offset: " + std::to_string(xOriginOffset) + "\n");
+        output.append("Y Origin Offset: " + std::to_string(yOriginOffset) + "\n");
+        output.append("Width: " + std::to_string(width) + "\n");
+        output.append("Height: " + std::to_string(height) + "\n");
+
+        return output;
+    }
+
+    Models::UI::Screen* ScreenInfo::toModel(Models::UI::Screen* screen) const {
+        screen->set_id("IMPLEMENT ID SCHEME");
+        screen->set_name(screen->id());
+        screen->set_kind(Models::UI::SK_MONITOR);
+        {
+            auto size = screen->mutable_size();
+            size->set_width(width);
+            size->set_height(height);
+        }
+
+        {
+            auto layout = screen->mutable_display();
+
+            {
+                auto origin = layout->mutable_origin();
+                origin->set_x(x);
+                origin->set_y(y);
+            }
+
+            {
+                auto offset = layout->mutable_origin_offset();
+                offset->set_x(xOriginOffset);
+                offset->set_y(yOriginOffset);
+            }
+
+            for (auto& info : displays) {
+                info.toModel(layout->add_displays());
+            }
+        }
+
+        return screen;
+    }
+
+    Models::UI::Screen ScreenInfo::toModel() const {
+        Models::UI::Screen screen;
+        toModel(&screen);
+        return screen;
+    }
+
+    bool ScreenInfo::equalTo(const ScreenInfo& other) const {
+        auto otherModel = other.toModel();
+        return equalTo(otherModel);
+    }
+
+    bool ScreenInfo::equalTo(const Models::UI::Screen& other) const {
+        auto screen = toModel();
+        if (screen.kind() != other.kind() || !IsSizeIEqual(screen.size(), other.size()))
+            return false;
+
+        if (screen.kind() == Models::UI::SK_MONITOR) {
+            if (!screen.has_display() || !other.has_display())
+                return false;
+
+            auto& layout1 = screen.display();
+            auto& layout2 = other.display();
+
+            if (!IsPositionEqual(layout1.origin(), layout2.origin()) || !IsPositionEqual(
+                layout1.origin_offset(),
+                layout2.origin_offset()
+            )) {
+                return false;
+            }
+
+            auto& displays1 = layout1.displays();
+            auto& displays2 = layout2.displays();
+
+            if (displays1.size() != displays2.size())
+                return false;
+
+            for (auto i = 0; i < displays1.size(); i++) {
+                auto& d1 = displays1.at(i);
+                auto& id1 = d1.id();
+                auto scale1 = d1.scale();
+                auto& physicalSize1 = d1.physical_size();
+                auto& scaledRect1 = d1.scaled_rect();
+                auto& d2 = displays2.at(i);
+                auto& id2 = d2.id();
+                auto scale2 = d2.scale();
+                auto& physicalSize2 = d2.physical_size();
+                auto& scaledRect2 = d2.scaled_rect();
+                if (id1 != id2 || scale1 != scale2 || !IsRectIEqual(scaledRect1, scaledRect2) || !IsSizeIEqual(
+                    physicalSize1,
+                    physicalSize2
+                )) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     /**
      * @inheritDoc
      */
     ScreenInfo ScreenInfo::create(const std::vector<DisplayInfo>& displays) {
         RECT screenRect;
+        std::optional<DisplayInfo> primaryOpt;
         SetRectEmpty(&screenRect);
         for (auto& d : displays) {
+            if (d.isPrimary)
+                primaryOpt = d;
             RECT rect = {d.x, d.y, static_cast<LONG>(d.physicalWidth), static_cast<LONG>(d.physicalHeight)};
 
             UnionRect(&screenRect, &screenRect, &rect);
         }
 
+        assert(primaryOpt.has_value());
+        auto primary = primaryOpt.value();
+        // ReSharper disable once CppDFAUnusedValue
+        auto left = static_cast<std::int32_t>(screenRect.left);
+
+        // ReSharper disable once CppDFAUnusedValue
+        auto top = static_cast<std::int32_t>(screenRect.top);
+
         return ScreenInfo{
             .displays = displays,
-            .x = static_cast<std::int32_t>(screenRect.left),
-            .y = static_cast<std::int32_t>(screenRect.bottom),
+            .x = left,
+            .y = top,
+            .xOriginOffset = primary.x - left,
+            .yOriginOffset = primary.y - top,
             .width = static_cast<std::size_t>(screenRect.right),
             .height = static_cast<std::size_t>(screenRect.bottom)
         };
     }
 
 
-    /**
-     * @inheritDoc
-     */
     SDK::Expected<ScreenInfo> ScreenInfo::generate() {
         auto displays = GetAllDisplayInfo();
 
@@ -144,39 +359,5 @@ namespace IRacingTools::Shared::System {
         return SDK::MakeUnexpected<SDK::GeneralError>(SDK::ErrorCode::General, "Unable to get displays");
     }
 
-    bool operator==(const DisplayInfo& lhs, const DisplayInfo& rhs) {
-        return std::tie(
-            lhs.index,
-            lhs.key,
-            lhs.name,
-            lhs.path,
-            lhs.width,
-            lhs.height,
-            lhs.physicalWidth,
-            lhs.physicalHeight,
-            lhs.dpiX,
-            lhs.dpiY,
-            lhs.scale,
-            lhs.x,
-            lhs.y,
-            lhs.isPrimary
-        ) == std::tie(
-            rhs.index,
-            rhs.key,
-            rhs.name,
-            rhs.path,
-            rhs.width,
-            rhs.height,
-            rhs.physicalWidth,
-            rhs.physicalHeight,
-            rhs.dpiX,
-            rhs.dpiY,
-            rhs.scale,
-            rhs.x,
-            rhs.y,
-            rhs.isPrimary
-        );
-    }
 
-    bool operator!=(const DisplayInfo& lhs, const DisplayInfo& rhs) { return !(lhs == rhs); }
 }

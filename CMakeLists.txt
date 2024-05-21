@@ -53,11 +53,12 @@ else ()
   message(WARNING "Could not find ccache, skipping!")
 endif ()
 
-
 # Windows
 set(CMAKE_CXX_VISIBILITY_PRESET visible)
 #set(CMAKE_CXX_VISIBILITY_PRESET default)
 
+# Add WCHAR def for `spdlog` header inclusion
+add_compile_definitions(SPDLOG_WCHAR_TO_UTF8_SUPPORT SPDLOG_WCHAR_SUPPORT)
 
 # Include CMake helper libs
 include(cmake/system.cmake)
@@ -70,6 +71,7 @@ include(cmake/hybrid_crt.cmake NO_POLICY_SCOPE)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP> $<$<CXX_COMPILER_ID:MSVC>:/MTd>)
+
 
 # Include test tools
 include(CTest)

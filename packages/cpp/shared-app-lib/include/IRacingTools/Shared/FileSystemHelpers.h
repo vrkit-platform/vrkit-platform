@@ -10,8 +10,12 @@
 namespace IRacingTools::Shared {
     namespace fs = std::filesystem;
 
+    constexpr std::string_view TemporaryDirectoryNameA = "IRacingTools";
+    constexpr std::wstring_view TemporaryDirectoryNameW = L"IRacingTools";
+
     /** Differs from std::filesystem::temp_directory_path() in that
      * it guarantees to be in canonical form */
+    fs::path GetTemporaryDirectoryRootA();
     fs::path GetTemporaryDirectory();
     fs::path GetRuntimeDirectory();
     fs::path GetInstallationDirectory();
@@ -20,7 +24,7 @@ namespace IRacingTools::Shared {
 
     void CleanupTemporaryDirectories();
 
-    std::vector<BYTE> ReadFile(const fs::path& path);
+
 
     namespace Files {
         extern const std::filesystem::path OPENXR_JSON;

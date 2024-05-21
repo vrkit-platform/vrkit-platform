@@ -8,7 +8,7 @@ foreach(exampleDir ${exampleDirs})
     add_subdirectory(${exampleDir})
     continue()
   elseif (NOT EXISTS ${exampleDir}/.enable)
-    message(WARNING "Example (${exampleDir}) is missing CMakeLists.txt")
+    message(VERBOSE "Example (${exampleDir}) is missing CMakeLists.txt")
     continue()
   endif()
 

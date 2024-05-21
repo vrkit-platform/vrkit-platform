@@ -9,10 +9,19 @@ constexpr Geometry::Coordinate kCoordinate_NYC = {40.7468831, -73.994756};
 constexpr Geometry::Coordinate kCoordinate_SFO = {37.6164442, -122.3886441};
 } // namespace
 
-TEST(GeoTests, float_conversion) {
+class GeoTests : public testing::Test {
+    protected:
+    GeoTests() = default;
+
+    virtual void TearDown() override {
+        spdlog::default_logger()->flush();
+    }
+};
+
+TEST_F(GeoTests, float_conversion) {
     Geometry::CoordinateToPixelConverter pixelFConverter{};
 
-    fmt::println(
+    spdlog::trace(
         "Input\nNYC lat={},lon={} \t\tSFO lat={},lon={}",
         kCoordinate_NYC.latitude,
         kCoordinate_NYC.longitude,
@@ -23,12 +32,12 @@ TEST(GeoTests, float_conversion) {
     auto pixelNYC = pixelFConverter.coordinateToPixel(kCoordinate_NYC);
     auto pixelSFO = pixelFConverter.coordinateToPixel(kCoordinate_SFO);
 
-    fmt::println("NYC x={},y={} \t\tSFO x={},y={}", pixelNYC.x, pixelNYC.y, pixelSFO.x, pixelSFO.y);
+    spdlog::trace("NYC x={},y={} \t\tSFO x={},y={}", pixelNYC.x, pixelNYC.y, pixelSFO.x, pixelSFO.y);
 
     auto coordNYC = pixelFConverter.pixelToCoordinate(pixelNYC);
     auto coordSFO = pixelFConverter.pixelToCoordinate(pixelSFO);
 
-    fmt::println(
+    spdlog::trace(
         "NYC lat={},lon={} \t\tSFO lat={},lon={}",
         coordNYC.latitude,
         coordNYC.longitude,
@@ -45,13 +54,13 @@ TEST(GeoTests, float_conversion) {
     EXPECT_LT(std::abs(coordSFO.longitude - kCoordinate_SFO.longitude), 1.0f);
 }
 
-TEST(GeoTests, calculate_distance) {
+TEST_F(GeoTests, calculate_distance) {
     constexpr auto distTestPairs = {std::make_tuple(Geometry::MetricUnit::Kilometer, 4023.0, 500.0),
                                     std::make_tuple(Geometry::MetricUnit::Meter, 4023000.0, 500000.0),};
     for (auto &[unit, match, errBias] : distTestPairs) {
         auto distance = Geometry::CalculateDistance(kCoordinate_NYC, kCoordinate_SFO, unit);
 
-        fmt::println(
+        spdlog::trace(
             "Distance from NYC(lat={},lon={}) to SFO(lat={},lon={}): {} {}",
             kCoordinate_NYC.latitude,
             kCoordinate_NYC.longitude,

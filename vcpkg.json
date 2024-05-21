@@ -95,11 +95,9 @@
   }, {
     "name" : "imgui",
     "version>=" : "1.90.2",
-    "features": [
-      "win32-binding",
-      "dx11-binding",
-      "freetype",
-      "sdl2-binding"
-    ]
+    "features" : [ "win32-binding", "dx11-binding", "freetype", "sdl2-binding" ]
+  }, {
+    "name" : "boost",
+    "version>=" : "1.83.0"
   } ]
 }

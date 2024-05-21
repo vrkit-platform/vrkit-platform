@@ -19,7 +19,7 @@
 */
 
 
-#include <IRacingTools/SDK/Utils/tracing.h>
+#include <IRacingTools/SDK/Utils/Tracing.h>
 #include <IRacingTools/Shared/Macros.h>
 #include <IRacingTools/Shared/SHM/SHMDX11.h>
 

@@ -33,6 +33,8 @@ namespace IRacingTools::Shared::UI {
         friend DashboardStorage;
 
     public:
+        static constexpr auto DashboardIRTExtension = ".dashboard.irt.json";
+
         struct GenerateOptions {
             bool noVR{false};
             bool noDisplays{false};
@@ -45,8 +47,39 @@ namespace IRacingTools::Shared::UI {
         DashboardManager& operator=(const DashboardManager& other) = delete;
         DashboardManager& operator=(DashboardManager&& other) = delete;
 
+        /**
+         * @brief Load a dashboard configuration
+         *
+         * @param filename Either the base filename (excluding `.dashboard.irt.json` suffix or absolute)
+         * @return A fully hydrated `DashboardConfig` or an error
+         */
+        SDK::Expected<Models::UI::Dashboard::DashboardConfig> load(const fs::path& filename);
+
+        /**
+         * @brief List all files in store path on type `.dashboard.irt.json`
+         *
+         * @return List all `.dashboard.irt.json` files in the store's path
+         */
         std::vector<fs::path> listFiles();
+
+        /**
+         * @brief Parse & load all configs & return them
+         *
+         * @return all available configs
+         */
         std::vector<Models::UI::Dashboard::DashboardConfig> list();
-        fs::path generate(const std::string& id, const std::string& name = id, const fs::path& configBaseName = fs::path(id), const GenerateOptions& options = GenerateOptions{});
+
+        /**
+         * @brief Generate a new dashboard config
+         * @param id
+         * @param options
+         * @return
+         */
+        SDK::Expected<Models::UI::Dashboard::DashboardConfig> generate(const std::string& id, const GenerateOptions& options = GenerateOptions{});
+
+
+        SDK::Expected<std::pair<fs::path,Models::UI::Dashboard::DashboardConfig>> save(const Models::UI::Dashboard::DashboardConfig& config, const std::optional<fs::path>& filenameOverride = std::nullopt);
+
+
     };
 }

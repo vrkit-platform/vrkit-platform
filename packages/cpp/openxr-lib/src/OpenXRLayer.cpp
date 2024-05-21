@@ -17,7 +17,7 @@
 
 #include "loader_interfaces.h"
 
-#include <IRacingTools/SDK/Utils/tracing.h>
+#include <IRacingTools/SDK/Utils/Tracing.h>
 #include <IRacingTools/Shared/Graphics/RayIntersectsRect.h>
 #include <IRacingTools/Shared/Graphics/Spriting.h>
 #include <openxr/openxr.h>

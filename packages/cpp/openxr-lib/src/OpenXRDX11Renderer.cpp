@@ -1,7 +1,7 @@
 #define XR_USE_GRAPHICS_API_D3D11
 
 #include <IRacingTools/OpenXR/OpenXRDX11Renderer.h>
-#include <IRacingTools/SDK/Utils/tracing.h>
+#include <IRacingTools/SDK/Utils/Tracing.h>
 #include <IRacingTools/Shared/Graphics/DX113D.h>
 
 #include <spdlog/spdlog.h>

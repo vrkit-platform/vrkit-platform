@@ -7,13 +7,19 @@ package IRacingTools.Models.UI;
 message Display {
   string id = 1;
   string name = 2;
+  bool primary = 5;
 
-  RectI rect = 10;
+  SizeI physical_size = 10;
+
+  double scale = 20;
+  SizeI scaled_size = 21;
+  RectI scaled_rect = 22;
 }
 
 message DisplayLayout {
   Position origin = 1;
-  repeated Display displays = 2;
+  Position origin_offset = 2;
+  repeated Display displays = 5;
 }
 
 
@@ -39,7 +45,7 @@ message Screen {
   string name = 2;
   ScreenKind kind = 3;
 
-  SizeI size = 5;
+  SizeI size = 6;
 
   oneof layout {
     DisplayLayout display = 10;

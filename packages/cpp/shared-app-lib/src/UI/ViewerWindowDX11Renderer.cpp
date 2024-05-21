@@ -21,7 +21,7 @@
 #include <IRacingTools/Shared/UI/ViewerWindowDX11Renderer.h>
 
 #include <directxtk/ScreenGrab.h>
-#include <IRacingTools/SDK/Utils/tracing.h>
+#include <IRacingTools/SDK/Utils/Tracing.h>
 
 namespace IRacingTools::Shared::UI {
 

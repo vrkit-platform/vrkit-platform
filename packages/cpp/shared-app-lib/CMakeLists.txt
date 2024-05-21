@@ -59,7 +59,9 @@ install(TARGETS ${sharedAppLibTargetStatic} FILE_SET publicHeaders DESTINATION $
 # TESTS
 set(testTargetName ${sharedAppLibTarget}_tests)
 add_executable(${testTargetName} ${sharedAppLibTestSources})
-target_link_libraries(${testTargetName} PUBLIC
-  ${sharedAppLibTargetStatic})
+target_link_libraries(${testTargetName} PRIVATE
+  ${sharedAppLibTargetStatic}
+  ${sdkTargetStatic}
+  ${modelsTargetStatic})
 irt_configure_test_libs(${testTargetName})
 

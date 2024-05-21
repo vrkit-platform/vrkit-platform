@@ -35,7 +35,7 @@
 
 #include "loader_interfaces.h"
 
-#include <IRacingTools/SDK/Utils/tracing.h>
+#include <IRacingTools/SDK/Utils/Tracing.h>
 
 namespace IRacingTools::OpenXR::DX11 {
 using namespace DirectX::SimpleMath;

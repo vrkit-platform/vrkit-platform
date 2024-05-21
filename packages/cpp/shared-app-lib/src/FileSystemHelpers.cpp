@@ -10,23 +10,20 @@ namespace IRacingTools::Shared {
     using namespace IRacingTools::SDK::Utils;
 
     namespace {
+        // std::mutex sMutex{};
+        // std::map<KNOWNFOLDERID, std::filesystem::path> sPaths{};
 
         std::filesystem::path GetKnownFolderPath(const KNOWNFOLDERID& folderId) {
-            static std::mutex sMutex{};
-            static std::map<KNOWNFOLDERID, std::filesystem::path> sPaths{};
+            // std::scoped_lock lock(sMutex);
+            // if (!sPaths.contains(folderId)) {
+            PWSTR tempPath;
+            check_hresult(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, nullptr, &tempPath));
 
-            std::scoped_lock lock(sMutex);
-            if (!sPaths.contains(folderId)) {
-                PWSTR tempPath;
-                check_hresult(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, nullptr, &tempPath));
+            std::filesystem::path path{ToUtf8(std::wstring(tempPath))};
 
-                std::filesystem::path path{ToUtf8(std::wstring(tempPath))};
-                sPaths[folderId] = path;
 
-                CoTaskMemFree(tempPath);
-            }
-
-            return sPaths[folderId];
+            CoTaskMemFree(tempPath);
+            return path;
         }
 
         fs::path CreateDirIfNeeded(const fs::path& path, const std::optional<fs::path>& childPath = std::nullopt) {
@@ -38,18 +35,24 @@ namespace IRacingTools::Shared {
                 finalPath /= childPath.value();
 
             auto exists = fs::exists(finalPath);
-            if (exists && !fs::is_directory(finalPath))
-                IRT_LOG_AND_FATAL("Path ({}) is not a directory, but exists", finalPath.string());
+            if (exists && !fs::is_directory(finalPath)) IRT_LOG_AND_FATAL(
+                "Path ({}) is not a directory, but exists",
+                finalPath.string()
+            );
 
             if (!fs::exists(finalPath)) {
                 std::error_code errorCode;
                 if (!fs::create_directories(finalPath, errorCode)) {
-                    IRT_LOG_AND_FATAL("Failed to create directory @ {}: ({}) {}", finalPath.string(), errorCode.value(),errorCode.message());
+                    IRT_LOG_AND_FATAL(
+                        "Failed to create directory @ {}: ({}) {}",
+                        finalPath.string(),
+                        errorCode.value(),
+                        errorCode.message()
+                    );
                 }
             }
 
             return finalPath;
-
         }
 
         fs::path GetLocalAppDataPath() {
@@ -61,10 +64,16 @@ namespace IRacingTools::Shared {
         }
 
 
+        std::filesystem::path GetTemporaryDirectoryRootA() {
+            char tempDirBuf[MAX_PATH];
+            auto tempDirLen = GetTempPathA(MAX_PATH, tempDirBuf);
+            return std::filesystem::path{std::string_view{tempDirBuf, tempDirLen}} / TemporaryDirectoryNameA;
+        }
+
         std::filesystem::path GetTemporaryDirectoryRoot() {
             wchar_t tempDirBuf[MAX_PATH];
             auto tempDirLen = GetTempPathW(MAX_PATH, tempDirBuf);
-            return std::filesystem::path{std::wstring_view{tempDirBuf, tempDirLen}} / L"IRacingTools";
+            return std::filesystem::path{std::wstring_view{tempDirBuf, tempDirLen}} / TemporaryDirectoryNameW;
         }
     }
 
@@ -111,33 +120,6 @@ namespace IRacingTools::Shared {
         }
     }
 
-    std::vector<BYTE> ReadFile(const fs::path& path) {
-        size_t size;
-        if (!exists(path) || (size = file_size(path)) == 0) {
-            return {};
-        }
-
-        std::vector<BYTE> data(size);
-        auto buf = data.data();
-        auto pathStr = ToUtf8(path);
-        auto file = std::fopen(pathStr.c_str(), "rb");
-        {
-            size_t readTotal = 0;
-
-            while (readTotal < size) {
-                size_t read = std::fread(buf + readTotal, 1, size - readTotal, file);
-                if (!read) {
-                    break;
-                }
-                readTotal += read;
-            }
-
-            AssertMsg(readTotal == size, "Did not read correct number of bytes");
-        }
-
-        std::fclose(file);
-        return data;
-    }
 
     std::filesystem::path GetRuntimeDirectory() {
         static std::filesystem::path sCache;

@@ -23,10 +23,11 @@
 #include <array>
 #include <cmath>
 #include <compare>
+#include "SharedAppLibPCH.h"
 #include <IRacingTools/Models/TrackMapData.pb.h>
 #include <IRacingTools/SDK/ErrorTypes.h>
 
-#include "SharedAppLibPCH.h"
+
 
 #include <nlohmann/json_fwd.hpp>
 #include <nlohmann/json.hpp>

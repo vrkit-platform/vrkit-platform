@@ -8,6 +8,8 @@
 #include <iostream>
 #include <optional>
 #include <string>
+#include <IRacingTools/Models/Screen.pb.h>
+#include <IRacingTools/SDK/ErrorTypes.h>
 
 namespace IRacingTools::Shared::System {
     /**
@@ -15,7 +17,7 @@ namespace IRacingTools::Shared::System {
      */
     struct DisplayInfo {
         std::size_t index{0};
-        std::string key{};
+        std::string id{};
         std::string name{};
         std::string path{};
 
@@ -34,16 +36,48 @@ namespace IRacingTools::Shared::System {
         bool isPrimary{false};
 
         std::string toString() const;
+
+        Models::UI::Display* toModel(Models::UI::Display* display) const;
+        Models::UI::Display toModel() const;
+
+        bool equalTo(const Models::UI::Display& display) const;
+        static bool EqualTo(const Models::UI::Display& d1,const Models::UI::Display& d2);
+        static bool EqualTo(const DisplayInfo& di1,const DisplayInfo& di2);
+
+
     };
 
+    bool operator==(const Models::UI::Display& lhs, const Models::UI::Display& rhs);
+
+    bool operator!=(const Models::UI::Display& lhs, const Models::UI::Display& rhs);
+
+    bool operator==(const DisplayInfo& lhs, const DisplayInfo& rhs);
+
+    bool operator!=(const DisplayInfo& lhs, const DisplayInfo& rhs);
+
+    /**
+     * @brief Represents an entire `Screen` (`1..n` displays married together)
+     */
     struct ScreenInfo {
         std::vector<DisplayInfo> displays{};
 
         std::int32_t x{0};
         std::int32_t y{0};
 
+        std::int32_t xOriginOffset{0};
+        std::int32_t yOriginOffset{0};
+
         std::size_t width{0};
         std::size_t height{0};
+
+
+        std::string toString() const;
+        Models::UI::Screen * toModel(Models::UI::Screen* screen) const;
+        Models::UI::Screen toModel() const;
+
+        bool equalTo(const ScreenInfo& other) const;
+        bool equalTo(const Models::UI::Screen&) const;
+
 
         static ScreenInfo create(const std::vector<DisplayInfo>& displays);
 
@@ -55,7 +89,7 @@ namespace IRacingTools::Shared::System {
          * @return Returns an Expected object containing the generated ScreenInfo object if successful,
          *         or an Unexpected object containing an error message if unsuccessful.
          */
-        static SDK::Expected<ScreenInfo> ScreenInfo::generate();
+        static SDK::Expected<ScreenInfo> generate();
     };
 
 
@@ -73,7 +107,7 @@ namespace IRacingTools::Shared::System {
     /**
      * @brief Configure process awareness of display info (DPI, etc)
      */
-    void DisplayInfoSetup();
+    bool DisplayInfoSetup(bool skipAbortOnFailure = false);
 
     /**
      * @brief Get all attached displays with info

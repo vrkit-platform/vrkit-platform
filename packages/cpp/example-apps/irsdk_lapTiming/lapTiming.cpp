@@ -23,6 +23,7 @@
 
 #include "console.h"
 #include <IRacingTools/SDK/LiveClient.h>
+#include <IRacingTools/SDK/LiveConnection.h>
 #include <IRacingTools/SDK/VarData.h>
 #include <IRacingTools/SDK/VarHolder.h>
 
@@ -88,6 +89,8 @@ VarHolder g_CarIdxP2P_Status("CarIdxP2P_Status"); // (bool) Push2Pass active or 
 VarHolder g_CarIdxP2P_Count("CarIdxP2P_Count"); // (int) Push2Pass count of usage (or remaining in Race)
 
 VarHolder g_PaceMode("PaceMode"); // (int) PaceMode, Are we pacing or not
+VarHolder g_Latitude("Lat");
+VarHolder g_Longitude("Lon");
 VarHolder g_CarIdxPaceLine("CarIdxPaceLine"); // (int) What line cars are pacing in, or -1 if not pacing
 VarHolder g_CarIdxPaceRow("CarIdxPaceRow"); // (int) What row cars are pacing in, or -1 if not pacing
 VarHolder g_CarIdxPaceFlags("CarIdxPaceFlags"); // (int) PaceFlagType, Pacing status flags for each car
@@ -606,7 +609,7 @@ void updateDisplay()
     printTime(g_SessionTime.getDouble());
 
     printf(" Session: %d", g_SessionNum.getInt());
-
+    printf(" Coordinate: %f,%f", g_Longitude.getDouble(), g_Latitude.getDouble());
     printf(" LapsComplete: %03d", g_RaceLaps.getInt());
 
     if (g_SessionLapsRemainEx.getInt() < 32767)
@@ -710,9 +713,18 @@ void monitorConnectionStatus()
 
 void run()
 {
+    static bool telemetryEnabled = false;
+    auto& client = LiveClient::GetInstance();
     // wait up to 16 ms for start of session or new data
-    if (LiveClient::GetInstance().waitForData(16))
+    if (client.waitForData(16))
     {
+        if (!telemetryEnabled) {
+            LiveConnection::Get().broadcastMessage(
+                BroadcastMessage::TelemCommand, magic_enum::enum_integer(TelemetryCommandMode::Start), 0, 0
+                );
+
+            telemetryEnabled = true;
+        }
         bool wasUpdated = false;
 
         // and grab the data

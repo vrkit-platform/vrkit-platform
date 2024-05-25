@@ -1,5 +1,5 @@
 #include <cassert>
-#include <gsl/util>
+
 #include <IRacingTools/SDK/Utils/FileHelpers.h>
 #include <IRacingTools/SDK/Utils/StringHelpers.h>
 #include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
@@ -7,27 +7,8 @@
 namespace IRacingTools::SDK::Utils {
     namespace fs = std::filesystem;
 
-    namespace {
-        /**
-         * @brief Cleans up a file resource.
-         *
-         * This function takes a pointer to a file pointer and closes the file resource
-         * pointed to by it, ensuring that the pointer is set to nullptr after the cleanup.
-         *
-         * @param filePtr A pointer to a file pointer.
-         *
-         * @return A function object that cleans up the file resource when invoked.
-         */
-        auto FileResourceCleanup(FILE** filePtr) {
-            return gsl::finally([&filePtr] {
-                if (*filePtr) {
-                    std::fclose(*filePtr);
-                    *filePtr = nullptr;
-                }
-            });
 
-        }
-    }
+
 
     /**
      * @brief Fully reads data from a file stream into a buffer.
@@ -111,7 +92,7 @@ namespace IRacingTools::SDK::Utils {
             return std::unexpected(GeneralError(ErrorCode::General, std::format("Unable to open ({}): {}", path.string(), std::string(std::strerror(errno)))));
         }
 
-        auto cleanup = FileResourceCleanup(&file);
+        auto cleanup = FILE_RESOURCE_DISPOSER(file);
 
         {
             size_t readTotal = 0;
@@ -175,13 +156,7 @@ namespace IRacingTools::SDK::Utils {
             return std::unexpected(GeneralError(ErrorCode::General, std::format("Unable to open ({}): {}", path.string(), std::string(std::strerror(errno)))));
         }
 
-        auto cleanup = gsl::finally([&] {
-            if (file) {
-                std::fclose(file);
-                file = nullptr;
-            }
-        });
-        //FileResourceCleanup(&file);
+        auto cleanup = FILE_RESOURCE_DISPOSER(file);
         size_t writeTotal = 0;
 
         while (writeTotal < size) {

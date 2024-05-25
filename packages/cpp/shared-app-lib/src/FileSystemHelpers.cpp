@@ -10,9 +10,6 @@ namespace IRacingTools::Shared {
     using namespace IRacingTools::SDK::Utils;
 
     namespace {
-        // std::mutex sMutex{};
-        // std::map<KNOWNFOLDERID, std::filesystem::path> sPaths{};
-
 
         fs::path GetLocalAppDataPath() {
             return GetKnownFolderPath(FOLDERID_LocalAppData);
@@ -23,31 +20,34 @@ namespace IRacingTools::Shared {
         }
 
 
-        std::filesystem::path GetTemporaryDirectoryRootA() {
-            char tempDirBuf[MAX_PATH];
-            auto tempDirLen = GetTempPathA(MAX_PATH, tempDirBuf);
-            return std::filesystem::path{std::string_view{tempDirBuf, tempDirLen}} / TemporaryDirectoryNameA;
-        }
 
-        std::filesystem::path GetTemporaryDirectoryRoot() {
-            wchar_t tempDirBuf[MAX_PATH];
-            auto tempDirLen = GetTempPathW(MAX_PATH, tempDirBuf);
-            return std::filesystem::path{std::wstring_view{tempDirBuf, tempDirLen}} / TemporaryDirectoryNameW;
-        }
     }
-    std::filesystem::path GetKnownFolderPath(const KNOWNFOLDERID& folderId) {
+
+    fs::path GetTemporaryDirectoryRootA() {
+        char tempDirBuf[MAX_PATH];
+        auto tempDirLen = GetTempPathA(MAX_PATH, tempDirBuf);
+        return fs::path{std::string_view{tempDirBuf, tempDirLen}} / TemporaryDirectoryNameA;
+    }
+
+    fs::path GetTemporaryDirectoryRoot() {
+        wchar_t tempDirBuf[MAX_PATH];
+        auto tempDirLen = GetTempPathW(MAX_PATH, tempDirBuf);
+        return fs::path{std::wstring_view{tempDirBuf, tempDirLen}} / TemporaryDirectoryNameW;
+    }
+
+    fs::path GetKnownFolderPath(const KNOWNFOLDERID& folderId) {
         // std::scoped_lock lock(sMutex);
         // if (!sPaths.contains(folderId)) {
         PWSTR tempPath;
         check_hresult(SHGetKnownFolderPath(folderId, KF_FLAG_DEFAULT, nullptr, &tempPath));
 
-        std::filesystem::path path{ToUtf8(std::wstring(tempPath))};
+        fs::path path{ToUtf8(std::wstring(tempPath))};
 
         CoTaskMemFree(tempPath);
         return path;
     }
 
-    fs::path CreateDirIfNeeded(const fs::path& path, const std::optional<fs::path>& childPath) {
+    fs::path CreateDirectories(const fs::path& path, const std::optional<fs::path>& childPath) {
         static std::mutex sMutex{};
         std::scoped_lock lock(sMutex);
 
@@ -76,17 +76,14 @@ namespace IRacingTools::Shared {
         return finalPath;
     }
 
-    std::filesystem::path GetTemporaryDirectory() {
-        static std::filesystem::path gCachePath;
+    fs::path GetTemporaryDirectory(const std::optional<std::string>& prefixOpt) {
         static std::mutex gCachePathMutex;
-        thread_local std::filesystem::path gThreadCachePath;
-        if (!gThreadCachePath.empty()) {
-            return gThreadCachePath;
-        }
+        static std::map<std::string,fs::path> gCachePathMap;
+
         std::unique_lock lock(gCachePathMutex);
-        if (!gCachePath.empty()) {
-            gThreadCachePath = gCachePath;
-            return gCachePath;
+        std::string prefix = prefixOpt.has_value() ? prefixOpt.value() : "";
+        if (gCachePathMap.contains(prefix)) {
+            return gCachePathMap[prefix];
         }
 
         wchar_t tempDirBuf[MAX_PATH];
@@ -97,31 +94,29 @@ namespace IRacingTools::Shared {
             GetCurrentProcessId()
         );
 
-        if (!std::filesystem::exists(tempDir)) {
-            std::filesystem::create_directories(tempDir);
+        if (!fs::exists(tempDir)) {
+            fs::create_directories(tempDir);
         }
 
-        gCachePath = std::filesystem::canonical(tempDir);
-        gThreadCachePath = gCachePath;
-
-        return gCachePath;
+        gCachePathMap[prefix] = fs::canonical(tempDir);
+        return gCachePathMap[prefix];
     }
 
     void CleanupTemporaryDirectories() {
         const auto root = GetTemporaryDirectoryRoot();
-        if (!std::filesystem::exists(root)) {
+        if (!fs::exists(root)) {
             return;
         }
 
         std::error_code ignored;
-        for (const auto& it : std::filesystem::directory_iterator(root)) {
-            std::filesystem::remove_all(it.path(), ignored);
+        for (const auto& it : fs::directory_iterator(root)) {
+            fs::remove_all(it.path(), ignored);
         }
     }
 
 
-    std::filesystem::path GetRuntimeDirectory() {
-        static std::filesystem::path sCache;
+    fs::path GetRuntimeDirectory() {
+        static fs::path sCache;
         if (!sCache.empty()) {
             return sCache;
         }
@@ -129,7 +124,7 @@ namespace IRacingTools::Shared {
         wchar_t exePathStr[MAX_PATH];
         const auto exePathStrLen = GetModuleFileNameW(nullptr, exePathStr, MAX_PATH);
 
-        const std::filesystem::path exePath = std::filesystem::canonical(std::wstring_view{exePathStr, exePathStrLen});
+        const fs::path exePath = fs::canonical(std::wstring_view{exePathStr, exePathStrLen});
 
         sCache = exePath.parent_path();
         return sCache;
@@ -140,14 +135,14 @@ namespace IRacingTools::Shared {
     }
 
     fs::path GetAppDataPath(std::optional<fs::path> childPath) {
-        return CreateDirIfNeeded(GetLocalAppDataPath() / APP_NAME, childPath);
+        return CreateDirectories(GetLocalAppDataPath() / APP_NAME, childPath);
     }
 
     fs::path GetUserDataPath(std::optional<fs::path> childPath) {
-        return CreateDirIfNeeded(GetDocumentsPath() / APP_NAME, childPath);
+        return CreateDirectories(GetDocumentsPath() / APP_NAME, childPath);
     }
 
     namespace Files {
-        const std::filesystem::path OPENXR_JSON{"openxr-api-layer.json"};
+        const fs::path OPENXR_JSON{"openxr-api-layer.json"};
     }
 }

@@ -56,7 +56,7 @@ namespace IRacingTools::App::Commands {
      * @return
      */
     template<typename... Ctors> static ArgCommandList build(CLI::App *app) {
-      constexpr size_t size = sizeof...(Ctors);
+      constexpr auto size = sizeof...(Ctors);
       ArgCommandList instances(size);
       return assemble<size, 0, Ctors...>(app, instances);
     }

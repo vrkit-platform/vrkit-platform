@@ -15,12 +15,13 @@ namespace IRacingTools::Shared {
     constexpr std::wstring_view TemporaryDirectoryNameW = L"IRacingTools";
 
     std::filesystem::path GetKnownFolderPath(const KNOWNFOLDERID& folderId);
-    fs::path CreateDirIfNeeded(const fs::path& path, const std::optional<fs::path>& childPath = std::nullopt);
+    fs::path CreateDirectories(const fs::path& path, const std::optional<fs::path>& childPath = std::nullopt);
 
     /** Differs from std::filesystem::temp_directory_path() in that
      * it guarantees to be in canonical form */
     fs::path GetTemporaryDirectoryRootA();
-    fs::path GetTemporaryDirectory();
+    fs::path GetTemporaryDirectoryRoot();
+    fs::path GetTemporaryDirectory(const std::optional<std::string>& prefixOpt = std::nullopt);
     fs::path GetRuntimeDirectory();
     fs::path GetInstallationDirectory();
     fs::path GetAppDataPath(std::optional<fs::path> childPath = std::nullopt);

@@ -13,3 +13,4 @@ CMakeLists.txt.user
 *orig.json
 irsdk_session*/
 *.7z
+/dist

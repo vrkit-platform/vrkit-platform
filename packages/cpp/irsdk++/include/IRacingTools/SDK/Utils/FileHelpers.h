@@ -8,7 +8,27 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+
+#include <gsl/util>
+
 #include <IRacingTools/SDK/ErrorTypes.h>
+
+/**
+ * @brief Cleans up a file resource.
+ *
+ * This function takes a pointer to a file pointer and closes the file resource
+ * pointed to by it, ensuring that the pointer is set to nullptr after the cleanup.
+ *
+ * @param file variable name of file
+ *
+ * @return A function object that cleans up the file resource when invoked.
+ */
+#define FILE_RESOURCE_DISPOSER(file) gsl::finally([&] {\
+    if (file) {\
+        std::fclose(file);\
+        file = nullptr;\
+    }\
+})
 
 namespace IRacingTools::SDK::Utils {
     bool HasFileExtension(const std::filesystem::path& file, const std::string& ext);

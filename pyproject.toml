@@ -1,9 +1,14 @@
+
 [build-system]
-requires = ["hatchling"]
+requires = [
+  "hatchling",
+  "hatch-pyinstaller",
+]
 build-backend = "hatchling.build"
 
 [project]
-name = "irsdk"
+name = "irsdk_tool"
+
 dynamic = ["version"]
 description = ''
 readme = "README.md"
@@ -53,6 +58,7 @@ dependencies = [
   "pytest",
   'jupyter',
   "types-protobuf",
+  "py2exe"
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -116,3 +122,13 @@ packages = [
   "packages/python/irsdk",
   "packages/python/irsdk_tool"
 ]
+
+[tool.hatch.build.targets.pyinstaller]
+scriptname= 'packages/python/irsdk_tool/__main__.py'
+require-runtime-dependencies = true
+flags = ["--clean", "--onefile", "-p","packages/python", "-n", "irsdk_tool"]
+collect-submodules = [
+  "packages/python/irsdk",
+  "packages/python/irsdk_tool"
+]
+log-level = "DEBUG"

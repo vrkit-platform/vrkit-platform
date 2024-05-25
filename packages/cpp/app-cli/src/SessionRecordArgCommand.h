@@ -34,7 +34,7 @@ protected:
 
 private:
   std::string outputPath_{};
-  bool printHeader_{false};
-  bool printData_{false};
+  bool printHeader_{true};
+  bool printData_{true};
 };
 }

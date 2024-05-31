@@ -47,7 +47,7 @@ target_compile_definitions(
   QT_QML_DEBUG
 )
 
-target_link_sdl2(${targetName})
+
 
 target_link_libraries(${targetName}
   PRIVATE

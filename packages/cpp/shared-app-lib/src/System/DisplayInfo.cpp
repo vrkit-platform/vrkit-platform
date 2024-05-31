@@ -40,7 +40,7 @@ namespace IRacingTools::Shared::System {
         );
     }
 
-    Models::UI::Display* DisplayInfo::toModel(Models::UI::Display* display) const {
+    Models::UI::DisplayConfig* DisplayInfo::toModel(Models::UI::DisplayConfig* display) const {
         display->set_id(id);
         display->set_name(name);
         display->set_primary(isPrimary);
@@ -68,13 +68,13 @@ namespace IRacingTools::Shared::System {
         return display;
     }
 
-    Models::UI::Display DisplayInfo::toModel() const {
-        Models::UI::Display display;
+    Models::UI::DisplayConfig DisplayInfo::toModel() const {
+        Models::UI::DisplayConfig display;
         toModel(&display);
         return display;
     }
 
-    bool DisplayInfo::EqualTo(const Models::UI::Display& d1, const Models::UI::Display& d2) {
+    bool DisplayInfo::EqualTo(const Models::UI::DisplayConfig& d1, const Models::UI::DisplayConfig& d2) {
         auto& id1 = d1.id();
         auto scale1 = d1.scale();
         auto& physicalSize1 = d1.physical_size();
@@ -95,11 +95,11 @@ namespace IRacingTools::Shared::System {
         return EqualTo(di1.toModel(), di2.toModel());
     }
 
-    bool operator==(const Models::UI::Display& lhs, const Models::UI::Display& rhs) {
+    bool operator==(const Models::UI::DisplayConfig& lhs, const Models::UI::DisplayConfig& rhs) {
         return DisplayInfo::EqualTo(lhs, rhs);
     }
 
-    bool operator!=(const Models::UI::Display& lhs, const Models::UI::Display& rhs) {
+    bool operator!=(const Models::UI::DisplayConfig& lhs, const Models::UI::DisplayConfig& rhs) {
         return !(lhs == rhs);
     }
 
@@ -111,7 +111,7 @@ namespace IRacingTools::Shared::System {
         return !(lhs == rhs);
     }
 
-    bool DisplayInfo::equalTo(const Models::UI::Display& display) const {
+    bool DisplayInfo::equalTo(const Models::UI::DisplayConfig& display) const {
         return EqualTo(toModel(), display);
     }
 
@@ -220,7 +220,7 @@ namespace IRacingTools::Shared::System {
         return output;
     }
 
-    Models::UI::Screen* DisplayScreenInfo::toModel(Models::UI::Screen* screen) const {
+    Models::UI::ScreenConfig* DisplayScreenInfo::toModel(Models::UI::ScreenConfig* screen) const {
         screen->set_id("IMPLEMENT ID SCHEME");
         screen->set_name(screen->id());
         screen->set_kind(Models::UI::SK_MONITOR);
@@ -253,8 +253,8 @@ namespace IRacingTools::Shared::System {
         return screen;
     }
 
-    Models::UI::Screen DisplayScreenInfo::toModel() const {
-        Models::UI::Screen screen;
+    Models::UI::ScreenConfig DisplayScreenInfo::toModel() const {
+        Models::UI::ScreenConfig screen;
         toModel(&screen);
         return screen;
     }
@@ -264,7 +264,7 @@ namespace IRacingTools::Shared::System {
         return equalTo(otherModel);
     }
 
-    bool DisplayScreenInfo::equalTo(const Models::UI::Screen& other) const {
+    bool DisplayScreenInfo::equalTo(const Models::UI::ScreenConfig& other) const {
         auto screen = toModel();
         if (screen.kind() != Models::UI::SK_MONITOR || screen.kind() != other.kind() || !IsSizeIEqual(
             screen.size(),
@@ -366,7 +366,7 @@ namespace IRacingTools::Shared::System {
         return ss.str();
     }
 
-    Models::UI::Screen* VRScreenInfo::toModel(Models::UI::Screen* screen) const {
+    Models::UI::ScreenConfig* VRScreenInfo::toModel(Models::UI::ScreenConfig* screen) const {
         screen->set_id("VR");
         screen->set_name(screen->id());
         screen->set_kind(Models::UI::SK_VR);
@@ -394,8 +394,8 @@ namespace IRacingTools::Shared::System {
      *
      * @return new `VRScreenInfo` instance
      */
-    Models::UI::Screen VRScreenInfo::toModel() const {
-        Models::UI::Screen screen;
+    Models::UI::ScreenConfig VRScreenInfo::toModel() const {
+        Models::UI::ScreenConfig screen;
         toModel(&screen);
         return screen;
     }
@@ -405,7 +405,7 @@ namespace IRacingTools::Shared::System {
         return equalTo(other);
     }
 
-    bool VRScreenInfo::equalTo(const Models::UI::Screen& other) const {
+    bool VRScreenInfo::equalTo(const Models::UI::ScreenConfig& other) const {
         auto screen = toModel();
         if (screen.kind() != Models::UI::SK_VR || screen.kind() != other.kind() || !IsSizeIEqual(
             screen.size(),

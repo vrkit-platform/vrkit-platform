@@ -25,6 +25,7 @@
 #include <winternl.h>
 #include <windowsx.h>
 #include <minwinbase.h>
+#include <timeapi.h>
 #include <shellscalingapi.h>
 #include <shlobj_core.h>
 // #pragma comment(lib, "Shcore.lib")
@@ -57,6 +58,7 @@
 // C++
 #include <cassert>
 #include <cstdlib>
+#include <filesystem>
 
 // fmt::core lib with wide char support
 #include <fmt/xchar.h>
@@ -68,5 +70,12 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/base.h>
 
+// Boost DI
+#include <boost/di.hpp>
+
 // IRT Headers
 #include <IRacingTools/Shared/Constants.h>
+#include <IRacingTools/Models/TrackMapDataFile.pb.h>
+#include <IRacingTools/SDK/Utils/Singleton.h>
+
+namespace fs = std::filesystem;

@@ -4,7 +4,7 @@ import "Geometry.proto";
 package IRacingTools.Models.UI;
 
 
-message Display {
+message DisplayConfig {
   string id = 1;
   string name = 2;
   bool primary = 5;
@@ -16,14 +16,14 @@ message Display {
   RectI scaled_rect = 22;
 }
 
-message DisplayLayout {
+message DisplayLayoutConfig {
   Position origin = 1;
   Position origin_offset = 2;
-  repeated Display displays = 5;
+  repeated DisplayConfig displays = 5;
 }
 
 
-message VRLayout {
+message VRLayoutConfig {
   double scale = 10;
   SizeI scaled_size = 11;
 }
@@ -36,7 +36,7 @@ enum ScreenKind {
 /**
  * Represents a complete screen
  */
-message Screen {
+message ScreenConfig {
 
   /**
    * Must serve as a hash
@@ -48,8 +48,8 @@ message Screen {
   SizeI size = 6;
 
   oneof layout {
-    DisplayLayout display = 10;
-    VRLayout vr = 11;
+    DisplayLayoutConfig display = 10;
+    VRLayoutConfig vr = 11;
   };
 
 }

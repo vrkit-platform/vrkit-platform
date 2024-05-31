@@ -3,7 +3,7 @@
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 #include <format>
 
-#include <IRacingTools/Models/Dashboard.pb.h>
+#include <IRacingTools/Models/DashboardConfig.pb.h>
 #include <IRacingTools/SDK/Utils/Singleton.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 

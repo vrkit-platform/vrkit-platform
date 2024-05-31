@@ -104,8 +104,7 @@ double g_lapStartTime[g_maxCars] = {-1};
 // lap time for last lap, or -1 if not yet completed a lap
 float g_lapTime[g_maxCars] = {-1};
 
-struct DriverEntry
-{
+struct DriverEntry {
     int carIdx;
     int carClassId;
     char driverName[g_maxNameLen];
@@ -136,19 +135,15 @@ if(hDataValidEvent)
 
 //---------------------------
 
-bool parceYamlInt(const char* yamlStr, const char* path, int* dest)
-{
-    if (dest)
-    {
+bool parceYamlInt(const char* yamlStr, const char* path, int* dest) {
+    if (dest) {
         (*dest) = 0;
 
-        if (yamlStr && path)
-        {
+        if (yamlStr && path) {
             int count;
             const char* strPtr;
 
-            if (ParseYaml(yamlStr, path, &strPtr, &count))
-            {
+            if (ParseYaml(yamlStr, path, &strPtr, &count)) {
                 (*dest) = atoi(strPtr);
                 return true;
             }
@@ -158,22 +153,17 @@ bool parceYamlInt(const char* yamlStr, const char* path, int* dest)
     return false;
 }
 
-bool parseYamlStr(const char* yamlStr, const char* path, char* dest, int maxCount)
-{
-    if (dest && maxCount > 0)
-    {
+bool parseYamlStr(const char* yamlStr, const char* path, char* dest, int maxCount) {
+    if (dest && maxCount > 0) {
         dest[0] = '\0';
 
-        if (yamlStr && path)
-        {
+        if (yamlStr && path) {
             int count;
             const char* strPtr;
 
-            if (ParseYaml(yamlStr, path, &strPtr, &count))
-            {
+            if (ParseYaml(yamlStr, path, &strPtr, &count)) {
                 // strip leading quotes
-                if (*strPtr == '"')
-                {
+                if (*strPtr == '"') {
                     strPtr++;
                     count--;
                 }
@@ -196,13 +186,11 @@ bool parseYamlStr(const char* yamlStr, const char* path, char* dest, int maxCoun
 
 //---------------------------
 
-void resetState(bool isNewConnection)
-{
+void resetState(bool isNewConnection) {
     if (isNewConnection)
         memset(g_driverTableTable, 0, sizeof(g_driverTableTable));
 
-    for (int i = 0; i < g_maxCars; i++)
-    {
+    for (int i = 0; i < g_maxCars; i++) {
         g_lastTime = -1;
         g_lastDistPct[i] = -1;
         g_lapStartTime[i] = -1;
@@ -214,8 +202,7 @@ void resetState(bool isNewConnection)
 // p1,t1 are position and time before checkpoint
 // p2,t2 are position and time after checkpoint
 // pCheck is position of checkpoint
-double interpolateTimeAcrossPoint(double t1, double t2, float p1, float p2, float pCheck)
-{
+double interpolateTimeAcrossPoint(double t1, double t2, float p1, float p2, float pCheck) {
     // unwrap if crossing start/finish line
     //****Note, assumes p1 is a percent from 0 to 1
     // if that is not true then unwrap the numbers before calling this function
@@ -228,8 +215,7 @@ double interpolateTimeAcrossPoint(double t1, double t2, float p1, float p2, floa
     return t1 + (t2 - t1) * pct;
 }
 
-void processLapInfo()
-{
+void processLapInfo() {
     // work out lap times for all cars
     const double curTime = g_SessionTime.getDouble();
 
@@ -237,18 +223,20 @@ void processLapInfo()
     if (g_lastTime > curTime)
         resetState(false);
 
-    for (int i = 0; i < g_maxCars; i++)
-    {
+    for (int i = 0; i < g_maxCars; i++) {
         const float curDistPct = g_CarIdxLapDistPct.getFloat(i);
         // reject if the car blinked out of the world
-        if (curDistPct != -1)
-        {
+        if (curDistPct != -1) {
             // did we cross the lap?
-            if (g_lastDistPct[i] > 0.9f && curDistPct < 0.1f)
-            {
+            if (g_lastDistPct[i] > 0.9f && curDistPct < 0.1f) {
                 // calculate exact time of lap crossing
-                const double curLapStartTime = interpolateTimeAcrossPoint(g_lastTime, curTime, g_lastDistPct[i], curDistPct,
-                                                                          0);
+                const double curLapStartTime = interpolateTimeAcrossPoint(
+                    g_lastTime,
+                    curTime,
+                    g_lastDistPct[i],
+                    curDistPct,
+                    0
+                );
 
                 // calculate lap time, if already crossed start/finish
                 if (g_lapStartTime[i] != -1)
@@ -265,8 +253,7 @@ void processLapInfo()
     g_lastTime = curTime;
 }
 
-const char* generateLiveYAMLString()
-{
+const char* generateLiveYAMLString() {
     //****Warning, shared static memory!
     static const int m_len = 50000;
     static char tstr[m_len] = "";
@@ -328,8 +315,7 @@ const char* generateLiveYAMLString()
     // PaceMode, Are we pacing or not
 
     len += _snprintf(tstr + len, m_len - len, " Cars:\n");
-    for (int i = 0; i < g_maxCars; i++)
-    {
+    for (int i = 0; i < g_maxCars; i++) {
         len += _snprintf(tstr + len, m_len - len, " - CarIdx: %d\n", i);
         // for convenience, the index into the array is the carIdx
         len += _snprintf(tstr + len, m_len - len, "   CarIdxEstTime: %.6f\n", g_CarIdxEstTime.getFloat(i));
@@ -356,8 +342,12 @@ const char* generateLiveYAMLString()
         // rad, Steering wheel angle by car index
         len += _snprintf(tstr + len, m_len - len, "   CarIdxTrackSurface: %d\n", g_CarIdxTrackSurface.getInt(i));
         // TrackLocation, Track surface type by car index
-        len += _snprintf(tstr + len, m_len - len, "   CarIdxTrackSurfaceMaterial: %d\n",
-                         g_CarIdxTrackSurfaceMaterial.getInt(i));
+        len += _snprintf(
+            tstr + len,
+            m_len - len,
+            "   CarIdxTrackSurfaceMaterial: %d\n",
+            g_CarIdxTrackSurfaceMaterial.getInt(i)
+        );
         // TrackSurface, Track surface material type by car index
 
         //****Note, don't use this one any more, it is replaced by CarIdxLastLapTime
@@ -406,8 +396,7 @@ const char* generateLiveYAMLString()
 }
 
 // called 60 times a second, if we are connected
-bool processYAMLLiveString()
-{
+bool processYAMLLiveString() {
     static DWORD lastTime = 0;
     bool wasUpdated = false;
 
@@ -417,17 +406,14 @@ bool processYAMLLiveString()
     // output file once every 1 seconds
     const DWORD minTime = static_cast<DWORD>(1.0f * 1000);
     const DWORD curTime = timeGetTime(); // millisecond resolution
-    if (abs(static_cast<long long>(curTime - lastTime)) > minTime)
-    {
+    if (abs(static_cast<long long>(curTime - lastTime)) > minTime) {
         lastTime = curTime;
 
         const char* yamlStr = generateLiveYAMLString();
         // validate string
-        if (yamlStr && yamlStr[0])
-        {
+        if (yamlStr && yamlStr[0]) {
             FILE* f = fopen("liveStr.txt", "w");
-            if (f)
-            {
+            if (f) {
                 fputs(yamlStr, f);
                 fclose(f);
                 f = nullptr;
@@ -440,14 +426,11 @@ bool processYAMLLiveString()
 }
 
 // called only when it changes
-void processYAMLSessionString(const char* yamlStr)
-{
+void processYAMLSessionString(const char* yamlStr) {
     // validate string
-    if (yamlStr && yamlStr[0])
-    {
+    if (yamlStr && yamlStr[0]) {
         FILE* f = fopen("sessionStr.txt", "w");
-        if (f)
-        {
+        if (f) {
             fputs(yamlStr, f);
             fclose(f);
             f = nullptr;
@@ -458,25 +441,31 @@ void processYAMLSessionString(const char* yamlStr)
         // Pull some driver info into a local array
 
         char tstr[256];
-        for (int i = 0; i < g_maxCars; i++)
-        {
+        for (int i = 0; i < g_maxCars; i++) {
             // skip the rest if carIdx not found
             sprintf(tstr, "DriverInfo:Drivers:CarIdx:{%d}", i);
-            if (parceYamlInt(yamlStr, tstr, &(g_driverTableTable[i].carIdx)))
-            {
+            if (parceYamlInt(yamlStr, tstr, &(g_driverTableTable[i].carIdx))) {
                 sprintf(tstr, "DriverInfo:Drivers:CarIdx:{%d}CarClassID:", i);
                 parceYamlInt(yamlStr, tstr, &(g_driverTableTable[i].carClassId));
 
                 sprintf(tstr, "DriverInfo:Drivers:CarIdx:{%d}UserName:", i);
                 parseYamlStr(
-                    yamlStr, tstr, g_driverTableTable[i].driverName, sizeof(g_driverTableTable[i].driverName) - 1
+                    yamlStr,
+                    tstr,
+                    g_driverTableTable[i].driverName,
+                    sizeof(g_driverTableTable[i].driverName) - 1
                 );
 
                 sprintf(tstr, "DriverInfo:Drivers:CarIdx:{%d}TeamName:", i);
                 parseYamlStr(yamlStr, tstr, g_driverTableTable[i].teamName, sizeof(g_driverTableTable[i].teamName) - 1);
 
                 sprintf(tstr, "DriverInfo:Drivers:CarIdx:{%d}CarNumber:", i);
-                parseYamlStr(yamlStr, tstr, g_driverTableTable[i].carNumStr, sizeof(g_driverTableTable[i].carNumStr) - 1);
+                parseYamlStr(
+                    yamlStr,
+                    tstr,
+                    g_driverTableTable[i].carNumStr,
+                    sizeof(g_driverTableTable[i].carNumStr) - 1
+                );
 
                 // TeamID
             }
@@ -490,99 +479,117 @@ void processYAMLSessionString(const char* yamlStr)
     }
 }
 
-void printFlags(int flags)
-{
+void printFlags(int flags) {
     // global flags
-    if (IsFlagSet(flags, FlagType::Checkered)) printf("checkered ");
-    if (IsFlagSet(flags, FlagType::White)) printf("white ");
-    if (IsFlagSet(flags, FlagType::Green)) printf("green ");
-    if (IsFlagSet(flags, FlagType::Yellow)) printf("yellow ");
-    if (IsFlagSet(flags, FlagType::Red)) printf("red ");
-    if (IsFlagSet(flags, FlagType::Blue)) printf("blue ");
-    if (IsFlagSet(flags, FlagType::Debris)) printf("debris ");
-    if (IsFlagSet(flags, FlagType::Crossed)) printf("crossed ");
-    if (IsFlagSet(flags, FlagType::YellowWaving)) printf("yellowWaving ");
-    if (IsFlagSet(flags, FlagType::OneLapToGreen)) printf("oneLapToGreen ");
-    if (IsFlagSet(flags, FlagType::GreenHeld)) printf("greenHeld ");
-    if (IsFlagSet(flags, FlagType::TenToGo)) printf("tenToGo ");
-    if (IsFlagSet(flags, FlagType::FiveToGo)) printf("fiveToGo ");
-    if (IsFlagSet(flags, FlagType::RandomWaving)) printf("randomWaving ");
-    if (IsFlagSet(flags, FlagType::Caution)) printf("caution ");
-    if (IsFlagSet(flags, FlagType::CautionWaving)) printf("cautionWaving ");
+    if (IsFlagSet(flags, FlagType::Checkered))
+        printf("checkered ");
+    if (IsFlagSet(flags, FlagType::White))
+        printf("white ");
+    if (IsFlagSet(flags, FlagType::Green))
+        printf("green ");
+    if (IsFlagSet(flags, FlagType::Yellow))
+        printf("yellow ");
+    if (IsFlagSet(flags, FlagType::Red))
+        printf("red ");
+    if (IsFlagSet(flags, FlagType::Blue))
+        printf("blue ");
+    if (IsFlagSet(flags, FlagType::Debris))
+        printf("debris ");
+    if (IsFlagSet(flags, FlagType::Crossed))
+        printf("crossed ");
+    if (IsFlagSet(flags, FlagType::YellowWaving))
+        printf("yellowWaving ");
+    if (IsFlagSet(flags, FlagType::OneLapToGreen))
+        printf("oneLapToGreen ");
+    if (IsFlagSet(flags, FlagType::GreenHeld))
+        printf("greenHeld ");
+    if (IsFlagSet(flags, FlagType::TenToGo))
+        printf("tenToGo ");
+    if (IsFlagSet(flags, FlagType::FiveToGo))
+        printf("fiveToGo ");
+    if (IsFlagSet(flags, FlagType::RandomWaving))
+        printf("randomWaving ");
+    if (IsFlagSet(flags, FlagType::Caution))
+        printf("caution ");
+    if (IsFlagSet(flags, FlagType::CautionWaving))
+        printf("cautionWaving ");
 
     // drivers black flags
-    if (IsFlagSet(flags, FlagType::Black)) printf("black ");
-    if (IsFlagSet(flags, FlagType::Disqualify)) printf("disqualify ");
-    if (IsFlagSet(flags, FlagType::Servicible)) printf("servicible ");
-    if (IsFlagSet(flags, FlagType::Furled)) printf("furled ");
-    if (IsFlagSet(flags, FlagType::Repair)) printf("repair ");
+    if (IsFlagSet(flags, FlagType::Black))
+        printf("black ");
+    if (IsFlagSet(flags, FlagType::Disqualify))
+        printf("disqualify ");
+    if (IsFlagSet(flags, FlagType::Servicible))
+        printf("servicible ");
+    if (IsFlagSet(flags, FlagType::Furled))
+        printf("furled ");
+    if (IsFlagSet(flags, FlagType::Repair))
+        printf("repair ");
 
     // start lights
-    if (IsFlagSet(flags, FlagType::StartHidden)) printf("startHidden ");
-    if (IsFlagSet(flags, FlagType::StartReady)) printf("startReady ");
-    if (IsFlagSet(flags, FlagType::StartSet)) printf("startSet ");
-    if (IsFlagSet(flags, FlagType::StartGo)) printf("startGo ");
+    if (IsFlagSet(flags, FlagType::StartHidden))
+        printf("startHidden ");
+    if (IsFlagSet(flags, FlagType::StartReady))
+        printf("startReady ");
+    if (IsFlagSet(flags, FlagType::StartSet))
+        printf("startSet ");
+    if (IsFlagSet(flags, FlagType::StartGo))
+        printf("startGo ");
 }
 
-void printTime(double time_s)
-{
+void printTime(double time_s) {
     const int minutes = static_cast<int>(time_s / 60);
     const float seconds = static_cast<float>(time_s - (60 * minutes));
     printf("%03d:%05.2f", minutes, seconds);
 }
 
-void printSessionState(SessionState state)
-{
-    switch (state)
-    {
-        case SessionState::Invalid:
-            printf("Invalid");
+void printSessionState(SessionState state) {
+    switch (state) {
+    case SessionState::Invalid:
+        printf("Invalid");
         break;
-        case SessionState::GetInCar:
-            printf("GetInCar");
+    case SessionState::GetInCar:
+        printf("GetInCar");
         break;
-        case SessionState::Warmup:
-            printf("Warmup");
+    case SessionState::Warmup:
+        printf("Warmup");
         break;
-        case SessionState::ParadeLaps:
-            printf("ParadeLap");
+    case SessionState::ParadeLaps:
+        printf("ParadeLap");
         break;
-        case SessionState::Racing:
-            printf("Racing");
+    case SessionState::Racing:
+        printf("Racing");
         break;
-        case SessionState::Checkered:
-            printf("Checkered");
+    case SessionState::Checkered:
+        printf("Checkered");
         break;
-        case SessionState::CoolDown:
-            printf("CoolDown");
+    case SessionState::CoolDown:
+        printf("CoolDown");
         break;
     }
 }
 
-void printPaceMode(PaceMode mode)
-{
-    switch (mode)
-    {
-        case PaceMode::SingleFileStart:
-            printf("SingleFileStart");
+void printPaceMode(PaceMode mode) {
+    switch (mode) {
+    case PaceMode::SingleFileStart:
+        printf("SingleFileStart");
         break;
-        case PaceMode::DoubleFileStart:
-            printf("DoubleFileStart");
+    case PaceMode::DoubleFileStart:
+        printf("DoubleFileStart");
         break;
-        case PaceMode::SingleFileRestart:
-            printf("SingleFileRestart");
+    case PaceMode::SingleFileRestart:
+        printf("SingleFileRestart");
         break;
-        case PaceMode::DoubleFileRestart:
-            printf("DoubleFileRestart:");
+    case PaceMode::DoubleFileRestart:
+        printf("DoubleFileRestart:");
         break;
-        case PaceMode::NotPacing:
-            printf("NotPacing");
+    case PaceMode::NotPacing:
+        printf("NotPacing");
         break;
     }
 }
 
-void printPaceFlags(uint32_t flags)
-{
+void printPaceFlags(uint32_t flags) {
     if (IsPaceFlagSet(flags, PaceFlagType::EndOfLine))
         printf("EndOfLine|");
     if (IsPaceFlagSet(flags, PaceFlagType::FreePass))
@@ -591,8 +598,7 @@ void printPaceFlags(uint32_t flags)
         printf("WavedAround|");
 }
 
-void updateDisplay()
-{
+void updateDisplay() {
     // force console to scroll to top line
     setCursorPosition(0, 0);
 
@@ -634,8 +640,7 @@ void updateDisplay()
     printSessionState(magic_enum::enum_cast<SessionState>(g_SessionState.getInt()).value());
 
     // new variables check if on members
-    if (g_PaceMode.isValid())
-    {
+    if (g_PaceMode.isValid()) {
         printf(" PaceMode: ");
         printPaceMode(magic_enum::enum_cast<PaceMode>(g_PaceMode.getInt()).value());
     }
@@ -645,13 +650,11 @@ void updateDisplay()
     // don't scroll off the end of the buffer
     int linesUsed = 0;
     const int maxLines = min(g_maxCars, maxCarLines);
-    for (int i = 0; i < g_maxCars; i++)
-    {
-        if (linesUsed < maxLines)
-        {
+    for (int i = 0; i < g_maxCars; i++) {
+        if (linesUsed < maxLines) {
             // is the car in the world, or did we at least collect data on it when it was?
-            if (g_CarIdxTrackSurface.getInt(i) != -1 || g_CarIdxLap.getInt(i) != -1 || g_CarIdxPosition.getInt(i) != 0)
-            {
+            if (g_CarIdxTrackSurface.getInt(i) != -1 || g_CarIdxLap.getInt(i) != -1 || g_CarIdxPosition.getInt(i) !=
+                0) {
                 printf(
                     " %2d %3s %7.3f %2d %2d %2d %6.3f %2d %8.2f %5.2f %2d %2d %2d %2d %7.3f %7.3f %7.3f %7.3f %2d %d %2d %2d %2d 0x%02x\n",
                     i,
@@ -666,7 +669,9 @@ void updateDisplay()
                     g_CarIdxSteer.getFloat(i),
                     g_CarIdxTrackSurface.getInt(i),
                     g_CarIdxTrackSurfaceMaterial.getInt(i),
-                    g_CarIdxPosition.getInt(i), g_CarIdxClassPosition.getInt(i), g_CarIdxF2Time.getFloat(i),
+                    g_CarIdxPosition.getInt(i),
+                    g_CarIdxClassPosition.getInt(i),
+                    g_CarIdxF2Time.getFloat(i),
                     //****Note, don't use this one any more, it is replaced by CarIdxLastLapTime
                     g_lapTime[i],
                     // new variables, check if they exist on members
@@ -688,21 +693,17 @@ void updateDisplay()
         printf("                                                                     \n");
 }
 
-void monitorConnectionStatus()
-{
+void monitorConnectionStatus() {
     // keep track of connection status
     static bool wasConnected = false;
 
     const auto isConnected = LiveClient::GetInstance().isConnected();
-    if (wasConnected != isConnected)
-    {
+    if (wasConnected != isConnected) {
         setCursorPosition(0, 1);
-        if (isConnected)
-        {
+        if (isConnected) {
             printf("Connected to iRacing              \n");
             resetState(true);
-        }
-        else
+        } else
             printf("Lost connection to iRacing        \n");
 
         //****Note, put your connection handling here
@@ -711,20 +712,18 @@ void monitorConnectionStatus()
     }
 }
 
-void run()
-{
-    static bool telemetryEnabled = false;
+void run() {
+    // static bool telemetryEnabled = false;
     auto& client = LiveClient::GetInstance();
     // wait up to 16 ms for start of session or new data
-    if (client.waitForData(16))
-    {
-        if (!telemetryEnabled) {
-            LiveConnection::Get().broadcastMessage(
-                BroadcastMessage::TelemCommand, magic_enum::enum_integer(TelemetryCommandMode::Start), 0, 0
-                );
-
-            telemetryEnabled = true;
-        }
+    if (client.waitForData(16)) {
+        // if (!telemetryEnabled) {
+        //     LiveConnection::Get().broadcastMessage(
+        //         BroadcastMessage::TelemCommand, magic_enum::enum_integer(TelemetryCommandMode::Start), 0, 0
+        //         );
+        //
+        //     telemetryEnabled = true;
+        // }
         bool wasUpdated = false;
 
         // and grab the data
@@ -733,8 +732,7 @@ void run()
             wasUpdated = true;
 
         // only process session string if it changed
-        if (LiveClient::GetInstance().wasSessionStrUpdated())
-        {
+        if (LiveClient::GetInstance().wasSessionStrUpdated()) {
             //processYAMLSessionString(LiveClient::GetInstance().getSessionStr());
             wasUpdated = true;
         }
@@ -759,8 +757,7 @@ void run()
 
 //-----------------------
 
-void ex_program(int sig)
-{
+void ex_program(int sig) {
     (void)sig;
 
     printf("recieved ctrl-c, exiting\n\n");
@@ -771,8 +768,7 @@ void ex_program(int sig)
     exit(0);
 }
 
-bool init()
-{
+bool init() {
     // trap ctrl-c
     signal(SIGINT, ex_program);
 
@@ -790,13 +786,11 @@ bool init()
     return true;
 }
 
-void deInit()
-{
+void deInit() {
     printf("Shutting down.\n\n");
 
     // shutdown
-    if (hDataValidEvent)
-    {
+    if (hDataValidEvent) {
         //make sure event not left triggered (probably redundant)
         ResetEvent(hDataValidEvent);
         CloseHandle(hDataValidEvent);
@@ -806,63 +800,17 @@ void deInit()
     timeEndPeriod(1);
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     printf("lapTiming 1.1, press any key to exit\n");
 
-    if (init())
-    {
-        while (!_kbhit())
-        {
+    if (init()) {
+        while (!_kbhit()) {
             run();
         }
 
         deInit();
-    }
-    else
+    } else
         printf("init failed\n");
 
     return 0;
 }
-
-/*
-Session Info:
-Flag State
-Laps Complete
-Laps To Go
-Session Elapsed Time
-Cautions
-Caution Laps
-
-Competitor Info:
-Name
-Number
-Manufacturer
-Running Position
-Laps Completed
-Delta To Leader
-Delta To Next Car
-Last Lap Time
-Best Lap Time
-On Track/In Pits
-Laps Led
-Times Led
-Last Pit Stop
-Times Pitted
-Service Completed (2 tires,4 tires, fuel only, etc)
-Resets Remaining
-Pit Stops:
-Lap Number
-Car Number
-Time in Pits
-Service Completed (2 tires, 4 tires, fuel)
-Damage repaired (reset?)
-
-Other telemetry that we might be able to play with that would be impossible in real world
-racing?
-Tire temps
-Tire life remaining
-Fuel percentage remaining
-??? Anything that we would never be able to actually know in a live race, but that we can see
-now because we are simming, that we can play up or talk about. 
-*/

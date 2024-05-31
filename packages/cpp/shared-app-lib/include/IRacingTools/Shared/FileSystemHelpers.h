@@ -14,7 +14,10 @@ namespace IRacingTools::Shared {
     constexpr std::string_view TemporaryDirectoryNameA = "IRacingTools";
     constexpr std::wstring_view TemporaryDirectoryNameW = L"IRacingTools";
 
-    std::filesystem::path GetKnownFolderPath(const KNOWNFOLDERID& folderId);
+    constexpr std::string_view TracksPath = "tracks";
+    constexpr std::string_view TrackDataPath = "track-data.jsonl";
+
+    fs::path GetKnownFolderPath(const KNOWNFOLDERID& folderId);
     fs::path CreateDirectories(const fs::path& path, const std::optional<fs::path>& childPath = std::nullopt);
 
     /** Differs from std::filesystem::temp_directory_path() in that
@@ -24,8 +27,10 @@ namespace IRacingTools::Shared {
     fs::path GetTemporaryDirectory(const std::optional<std::string>& prefixOpt = std::nullopt);
     fs::path GetRuntimeDirectory();
     fs::path GetInstallationDirectory();
+
     fs::path GetAppDataPath(std::optional<fs::path> childPath = std::nullopt);
     fs::path GetUserDataPath(std::optional<fs::path> childPath = std::nullopt);
+    std::expected<fs::path, SDK::NotFoundError> GetIRacingDocumentPath(std::optional<fs::path> childPath = std::nullopt);
 
     void CleanupTemporaryDirectories();
 

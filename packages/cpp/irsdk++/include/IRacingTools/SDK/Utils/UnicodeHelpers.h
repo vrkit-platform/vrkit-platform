@@ -60,6 +60,7 @@
 //                              Includes
 //==============================================================================
 
+#pragma once
 #include <windows.h>    // Win32 Platform SDK
 
 #include <crtdbg.h>     // _ASSERTE

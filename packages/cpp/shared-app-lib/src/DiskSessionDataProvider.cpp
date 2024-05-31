@@ -7,6 +7,8 @@
 #include <iostream>
 #include <utility>
 
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
+
 #include <IRacingTools/SDK/Utils/ChronoHelpers.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/DiskSessionDataProvider.h>

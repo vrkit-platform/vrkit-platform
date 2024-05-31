@@ -8,7 +8,7 @@
 #include <iostream>
 #include <optional>
 #include <string>
-#include <IRacingTools/Models/Screen.pb.h>
+#include <IRacingTools/Models/ScreenConfig.pb.h>
 #include <IRacingTools/SDK/ErrorTypes.h>
 
 namespace IRacingTools::Shared::System {
@@ -37,19 +37,19 @@ namespace IRacingTools::Shared::System {
 
         std::string toString() const;
 
-        Models::UI::Display* toModel(Models::UI::Display* display) const;
-        Models::UI::Display toModel() const;
+        Models::UI::DisplayConfig* toModel(Models::UI::DisplayConfig* display) const;
+        Models::UI::DisplayConfig toModel() const;
 
-        bool equalTo(const Models::UI::Display& display) const;
-        static bool EqualTo(const Models::UI::Display& d1,const Models::UI::Display& d2);
+        bool equalTo(const Models::UI::DisplayConfig& display) const;
+        static bool EqualTo(const Models::UI::DisplayConfig& d1,const Models::UI::DisplayConfig& d2);
         static bool EqualTo(const DisplayInfo& di1,const DisplayInfo& di2);
 
 
     };
 
-    bool operator==(const Models::UI::Display& lhs, const Models::UI::Display& rhs);
+    bool operator==(const Models::UI::DisplayConfig& lhs, const Models::UI::DisplayConfig& rhs);
 
-    bool operator!=(const Models::UI::Display& lhs, const Models::UI::Display& rhs);
+    bool operator!=(const Models::UI::DisplayConfig& lhs, const Models::UI::DisplayConfig& rhs);
 
     bool operator==(const DisplayInfo& lhs, const DisplayInfo& rhs);
 
@@ -72,11 +72,11 @@ namespace IRacingTools::Shared::System {
 
 
         std::string toString() const;
-        Models::UI::Screen * toModel(Models::UI::Screen* screen) const;
-        Models::UI::Screen toModel() const;
+        Models::UI::ScreenConfig * toModel(Models::UI::ScreenConfig* screen) const;
+        Models::UI::ScreenConfig toModel() const;
 
         bool equalTo(const DisplayScreenInfo& other) const;
-        bool equalTo(const Models::UI::Screen&) const;
+        bool equalTo(const Models::UI::ScreenConfig&) const;
 
 
         static DisplayScreenInfo create(const std::vector<DisplayInfo>& displays);
@@ -99,11 +99,11 @@ namespace IRacingTools::Shared::System {
         std::size_t height{0};
 
         std::string toString() const;
-        Models::UI::Screen * toModel(Models::UI::Screen* screen) const;
-        Models::UI::Screen toModel() const;
+        Models::UI::ScreenConfig * toModel(Models::UI::ScreenConfig* screen) const;
+        Models::UI::ScreenConfig toModel() const;
 
         bool equalTo(const VRScreenInfo& other) const;
-        bool equalTo(const Models::UI::Screen&) const;
+        bool equalTo(const Models::UI::ScreenConfig&) const;
 
 
         /**

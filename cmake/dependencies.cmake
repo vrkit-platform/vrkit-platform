@@ -1,14 +1,4 @@
 # VCPkg & QT Deps
-set(DEP_SDL2_PACKAGES
-  SDL2
-  SDL2-GFX
-  SDL2_IMAGE
-  SDL2_MIXER
-  SDL2_MIXER_EXT
-  SDL2_NET
-  SDL2_TTF
-  Freetype
-)
 
 set(DEP_PACKAGES
   Microsoft.GSL
@@ -19,19 +9,21 @@ set(DEP_PACKAGES
   fmt
   spdlog
   OpenXR
+  reproc
+  reproc++
+  cli
   protobuf
   effects11
   CLI11
   GTest
   yaml-cpp
   magic_enum
-  nlohmann_json
-  ${DEP_SDL2_PACKAGES})
+  nlohmann_json)
 foreach(depPkgName ${DEP_PACKAGES})
   find_package(${depPkgName} CONFIG REQUIRED)
 endforeach()
 
-find_package(SDL2PP REQUIRED)
+
 
 # QT
 include(${CMAKE_CURRENT_LIST_DIR}/qt.cmake NO_POLICY_SCOPE)
@@ -59,21 +51,6 @@ set(DEP_LOG spdlog::spdlog)
 set(DEP_IMGUI imgui::imgui)
 #set(DEP_WINRT Microsoft::CppWinRT)
 
-function(target_link_sdl2 targetName)
-#  target_include_directories(${targetName} PRIVATE ${SDL2PP_INCLUDE_DIRS})
-#  target_link_libraries(${targetName}
-#    PRIVATE
-#    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-#    $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
-#    SDL2::SDL2_gfx
-#    ${SDL2PP_LIBRARIES}
-#    $<IF:$<TARGET_EXISTS:SDL2_image::SDL2_image>,SDL2_image::SDL2_image,SDL2_image::SDL2_image-static>
-#    $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
-#    $<IF:$<TARGET_EXISTS:SDL2_mixer_ext::SDL2_mixer_ext>,SDL2_mixer_ext::SDL2_mixer_ext,SDL2_mixer_ext::SDL2_mixer_ext_Static>
-#    $<IF:$<TARGET_EXISTS:SDL2_net::SDL2_net>,SDL2_net::SDL2_net,SDL2_net::SDL2_net-static>
-#    $<IF:$<TARGET_EXISTS:SDL2_ttf::SDL2_ttf>,SDL2_ttf::SDL2_ttf,SDL2_ttf::SDL2_ttf-static>
-#  )
-endfunction()
 
 set(DEP_DIRECTX
   #  d2d1.lib
@@ -107,7 +84,11 @@ set(DEP_DIRECTX
 set(DEP_FMT fmt::fmt)
 set(DEP_LOG spdlog::spdlog ${DEP_FMT})
 set(DEP_OPENXR OpenXR::headers)
+set(DEP_REPROC reproc reproc++)
+set(DEP_CLI_CMD cli::cli)
 set(DEP_BOOST_DEFAULT Boost::system)
+find_path(DEP_BOOST_DI_INCLUDES "boost/di.hpp")
+
 set(ALL_APP_DEPS
   ${DEP_PROTOBUF}
   ${DEP_JSON}
@@ -121,10 +102,18 @@ set(ALL_APP_DEPS
   ${DEP_YAML}
   ${DEP_GSL}
   ${DEP_BOOST_DEFAULT}
+  ${DEP_REPROC}
+  ${DEP_CLI_CMD}
 )
 
 set(ALL_SDK_DEPS
-  ${DEP_MAGICENUM} ${DEP_GSL} ${DEP_FMT} ${DEP_YAML}  ${DEP_LOG}
+  ${DEP_MAGICENUM}
+  ${DEP_GSL}
+  ${DEP_FMT}
+  ${DEP_YAML}
+  ${DEP_LOG}
+  ${DEP_REPROC}
+  ${DEP_CLI_CMD}
 )
 
 set(DEP_GTEST_MAIN GTest::gtest_main)
@@ -132,12 +121,15 @@ set(DEP_GTEST GTest::gtest)
 
 function(IRT_CONFIGURE_SDK_LIBS TARGET)
   target_link_libraries(${TARGET} PUBLIC ${ALL_SDK_DEPS})
+  target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
 endfunction()
 
 function(IRT_CONFIGURE_APP_LIBS TARGET)
   target_link_libraries(${TARGET} PRIVATE ${ALL_APP_DEPS})
+  target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
 endfunction()
 
 function(IRT_CONFIGURE_TEST_LIBS TARGET)
   target_link_libraries(${TARGET} PUBLIC ${ALL_APP_DEPS} ${DEP_GTEST_MAIN})
+  target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
 endfunction()

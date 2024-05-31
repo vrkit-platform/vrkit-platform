@@ -20,8 +20,6 @@ add_library(${sharedAppLibTargetStatic} STATIC ${sharedAppLibSources} ${sharedAp
 
 IRT_CONFIGURE_TARGET(${sharedAppLibTargetStatic})
 
-target_link_sdl2(${sharedAppLibTargetStatic})
-
 ## INCLUDES
 target_include_directories(${sharedAppLibTargetStatic} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>

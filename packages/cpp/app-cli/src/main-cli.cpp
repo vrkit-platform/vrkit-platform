@@ -8,10 +8,7 @@
 #include <algorithm>
 #include <CLI/CLI.hpp>
 
-#include <QCoreApplication>
-#include <QDebug>
-
-
+#include <boost/di.hpp>
 
 #include "SHMViewerArgCommand.h"
 #include "GenerateTrackmapArgCommand.h"
@@ -26,7 +23,10 @@ using namespace IRacingTools::SDK;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::App::Commands;
 
+namespace di = boost::di;
+
 int main(int argc, char** argv) {
+
     System::DisplayInfoSetup();
     System::GetAllDisplayInfo();
 

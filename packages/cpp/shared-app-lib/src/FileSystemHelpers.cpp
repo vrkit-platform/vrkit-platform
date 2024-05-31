@@ -142,6 +142,24 @@ namespace IRacingTools::Shared {
         return CreateDirectories(GetDocumentsPath() / APP_NAME, childPath);
     }
 
+    std::expected<fs::path, SDK::NotFoundError> GetIRacingDocumentPath(std::optional<fs::path> childPath) {
+        fs::path finalPath = GetDocumentsPath() / "iRacing";
+        if (childPath.has_value())
+            finalPath /= childPath.value();
+
+        auto exists = fs::exists(finalPath);
+        if (exists && !is_directory(finalPath)) IRT_LOG_AND_FATAL(
+            "Path ({}) is not a directory, but exists",
+            finalPath.string()
+        );
+
+        if (!exists) {
+            return std::unexpected(SDK::NotFoundError(SDK::ErrorCode::NotFound, fmt::format("iRacing Path ({}) does not exist", finalPath.string())));
+        }
+
+        return finalPath;
+    }
+
     namespace Files {
         const fs::path OPENXR_JSON{"openxr-api-layer.json"};
     }

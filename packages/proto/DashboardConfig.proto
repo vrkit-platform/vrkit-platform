@@ -1,6 +1,6 @@
 syntax = "proto3";
 import "Geometry.proto";
-import "Screen.proto";
+import "ScreenConfig.proto";
 
 package IRacingTools.Models.UI.Dashboard;
 
@@ -8,7 +8,7 @@ enum OverlayKind {
   OK_TRACK_MAP = 0;
 }
 
-message Overlay {
+message OverlayConfig {
   string id = 1;
   OverlayKind kind = 2;
 
@@ -18,7 +18,7 @@ message Overlay {
   map<string,string> parameters = 20;
 }
 
-message OverlayPlacement {
+message OverlayPlacementConfig {
   string id = 1;
   string overlay_id = 2;
 
@@ -27,22 +27,22 @@ message OverlayPlacement {
   map<string,string> parameters = 20;
 }
 
-message OverlayLayout {
+message OverlayLayoutConfig {
   string id = 1;
   string name = 2;
 
   string screen_id = 5;
   ScreenKind kind = 6;
 
-  repeated OverlayPlacement placements = 10;
+  repeated OverlayPlacementConfig placements = 10;
 }
 
 message DashboardConfig {
   string description = 2;
 
-  repeated Screen screens = 10;
-  repeated Overlay overlays = 20;
-  repeated OverlayLayout layouts = 30;
+  repeated ScreenConfig screens = 10;
+  repeated OverlayConfig overlays = 20;
+  repeated OverlayLayoutConfig layouts = 30;
 }
 
 

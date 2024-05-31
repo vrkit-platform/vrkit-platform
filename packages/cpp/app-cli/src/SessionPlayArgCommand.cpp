@@ -5,13 +5,6 @@
 #include "Dwmapi.h"
 
 #include <spdlog/spdlog.h>
-#include <SDL.h>
-#include <SDL_syswm.h>
-
-#include <SDL2pp/SDL.hh>
-#include <SDL2pp/Window.hh>
-#include <SDL2pp/Renderer.hh>
-#include <SDL2pp/Texture.hh>
 #include <memory>
 
 #include "SessionPlayArgCommand.h"

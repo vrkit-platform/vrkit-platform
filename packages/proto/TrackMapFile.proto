@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package IRacingTools.Models.UI.Config;
 
-message TrackMapDataFile {
+message TrackMapFile {
   string id = 1;
   string alias = 2;
   string track_config_name = 3;

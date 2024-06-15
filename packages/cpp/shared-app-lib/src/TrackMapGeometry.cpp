@@ -34,7 +34,7 @@ TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Size<UINT> &size) {
 }
 
 std::optional<TrackMap> LoadTrackMapFromTrajectoryFile(const std::filesystem::path &path) {
-  auto ltResult = IRacingTools::Shared::ReadMessageFromFile<LapTrajectory>(path);
+  auto ltResult = IRacingTools::Shared::Utils::ReadMessageFromFile<LapTrajectory>(path);
   if (!ltResult)
     return std::nullopt;
   auto &lt = ltResult.value();

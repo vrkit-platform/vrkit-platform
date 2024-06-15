@@ -23,42 +23,74 @@
 
 #include <IRacingTools/SDK/LiveConnection.h>
 #include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
 
 #include "GenerateTrackmapArgCommand.h"
 
-namespace IRacingTools::App::Commands
-{
-  namespace
-  {
+#include <IRacingTools/Models/LapData.pb.h>
+#include <IRacingTools/Shared/Chrono.h>
 
+namespace IRacingTools::App::Commands {
     using namespace IRacingTools::SDK;
 
+    namespace {
+        class LapTrajectoryBuilder {
+            public:
+                struct Context {};
 
-  }// namespace
+                explicit LapTrajectoryBuilder(
+                    const fs::path& ibtPath,
+                    const std::optional<fs::path>& outputPath = std::nullopt
+                ): ibtPath_{ibtPath}, outputPath_{outputPath} {}
 
+                std::expected<Models::Telemetry::LapTrajectory, GeneralError> execute() {
+                    using DataFrameProcessor = DiskClientDataFrameProcessor<Context>;
 
-  CLI::App *GenerateTrackmapArgCommand::createCommand(CLI::App *app)
-  {
+                    Models::Telemetry::LapTrajectory lap{};
+                    Context data{};
+                    DataFrameProcessor processor(ibtPath_);
 
-    auto cmd = app->add_subcommand("generate-trackmap", "Generate trackmap from IBT");
+                    auto res = processor.run(
+                        [&](const DataFrameProcessor::Context& context, Context& result) -> bool {
+                            // TODO: Implement the logic here
+                            return true;
+                        },
+                        data
+                    );
 
-    cmd->add_option("-o,--output", outputPath_, "Output path")->required(false)->default_val("");
+                    return lap;
+                }
 
-    cmd->add_option("--ibt", ibtPath_, "IBT Input file to use")->required(true);
+            private:
+                fs::path ibtPath_{};
+                std::optional<fs::path> outputPath_{};
+        };
+    }
 
-    return cmd;
-  }
+    CLI::App* GenerateTrackmapArgCommand::createCommand(CLI::App* app) {
+        auto cmd = app->add_subcommand("generate-trackmap", "Generate trackmap from IBT");
 
-  int GenerateTrackmapArgCommand::execute()
-  {
-    auto outputPath = outputPath_;
-    fmt::println("outputPath: {}", outputPath);
-    assert((!outputPath.empty() && "Output path is invalid"));
-    outputPath = std::filesystem::absolute(outputPath).string();
-    fmt::println("Absolute Output Path: {}", outputPath);
-    std::filesystem::create_directories(outputPath);
-    assert((std::filesystem::is_directory(outputPath) && "Fail create output path"));
+        cmd->add_option("-o,--output", outputPath_, "Output path")->required(false)->default_val("");
 
-    throw NotImplementedError("GenerateTrackmapArgCommand");
-  }
+        cmd->add_option("--ibt", ibtPath_, "IBT Input file to use")->required(true);
+
+        return cmd;
+    }
+
+    int GenerateTrackmapArgCommand::execute() {
+        auto ibtPath = ibtPath_;
+
+        auto outputPath = outputPath_;
+        fmt::println("outputPath: {}", outputPath);
+        assert((!outputPath.empty() && "Output path is invalid"));
+        outputPath = std::filesystem::absolute(outputPath).string();
+
+        fmt::println("Absolute Output Path: {}", outputPath);
+        std::filesystem::create_directories(outputPath);
+        assert((std::filesystem::is_directory(outputPath) && "Fail create output path"));
+
+        LapTrajectoryBuilder(ibtPath, outputPath).execute();
+
+        throw NotImplementedError("GenerateTrackmapArgCommand");
+    }
 }

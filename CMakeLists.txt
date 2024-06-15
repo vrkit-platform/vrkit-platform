@@ -38,7 +38,7 @@ set(appUIQTTarget ${appNamePrefix}_ui)
 set(appCLITarget ${appNamePrefix}_tool)
 
 # Setup
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

@@ -17,22 +17,15 @@
           "name": "PATH",
           "value": "${env:PATH};${command:cmake.launchTargetDirectory};C:/Qt/6.5.0;C:/Qt/6.5.0/bin;;C:/Qt/6.5.0/lib"
         }
-      ],
-      // "MIMode": "gdb",
-      // "miDebuggerPath": "/path/to/gdb",
-      // "setupCommands": [
-      //     {
-      //         "description": "Enable pretty-printing for gdb",
-      //         "text": "-enable-pretty-printing",
-      //         "ignoreFailures": true
-      //     },
-      //     {
-      //         "description": "Set Disassembly Flavor to Intel",
-      //         "text": "-gdb-set disassembly-flavor intel",
-      //         "ignoreFailures": true
-      //     }
-      // ],
-      // "console": "externalTerminal"
+      ]
+    },
+    {
+      "type": "cmake",
+      "request": "launch",
+      "name": "Debug portfile(s)",
+      "cmakeDebugType": "external",
+      "pipeName": "\\\\.\\pipe\\vcpkg_ext_portfile_dbg",
+      "preLaunchTask": "Debug vcpkg commands"
     }
   ]
 }

@@ -8,7 +8,6 @@
 #include <chrono>
 #include <format>
 #include <iostream>
-#include <QtCore>
 
 #include <CLI/CLI.hpp>
 #include <fmt/core.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SharedAppLibPCH.h"
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
 
 #include <algorithm>
 #include <numeric>

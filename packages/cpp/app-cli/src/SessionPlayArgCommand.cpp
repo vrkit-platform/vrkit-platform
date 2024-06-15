@@ -45,8 +45,6 @@ namespace IRacingTools::App::Commands
 
     winrt::check_bool(trackMap.has_value());
 
-
-
     dataProvider->start();
     UI::TrackMapOverlayWindow win(trackMap.value(), dataProvider);
     win.initialize();

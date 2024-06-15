@@ -54,7 +54,7 @@ namespace IRacingTools::SDK {
      * @param idx
      * @return
      */
-    inline bool isVarIndexOk(uint32_t idx, std::optional<uint32_t> entry = std::nullopt) {
+    bool isVarIndexOk(uint32_t idx, std::optional<uint32_t> entry = std::nullopt) {
         return idx < getNumVars() && (!entry.has_value() || entry.value() < getVarCount(idx));
     }
 
@@ -65,8 +65,10 @@ namespace IRacingTools::SDK {
 
     virtual Opt<const VarDataHeader *> getVarHeader(uint32_t idx) = 0;
     virtual Opt<const VarDataHeader *> getVarHeader(const std::string_view &name) = 0;
+    virtual Opt<const VarDataHeader*> getVarHeader(KnownVarName name);
 
     virtual std::optional<uint32_t> getVarIdx(const std::string_view &name) = 0;
+    virtual std::optional<uint32_t> getVarIdx(KnownVarName name);
 
     // get info on the var
     virtual std::optional<std::string_view> getVarName(uint32_t idx) = 0;
@@ -76,24 +78,32 @@ namespace IRacingTools::SDK {
     // what is the base type of the data
     virtual std::optional<VarDataType> getVarType(uint32_t idx) = 0;
     virtual std::optional<VarDataType> getVarType(const std::string_view &name) = 0;
+    virtual std::optional<VarDataType> getVarType(KnownVarName name);
 
     // how many elements in array, or 1 if not an array
     virtual std::optional<uint32_t> getVarCount(uint32_t idx) = 0;
     virtual std::optional<uint32_t> getVarCount(const std::string_view &name) = 0;
+    std::optional<uint32_t> getVarCount(KnownVarName name);
 
     // idx is the variables index, entry is the array offset, or 0 if not an array element
     // will convert data to requested type
     virtual std::optional<bool> getVarBool(uint32_t idx, uint32_t entry = 0) = 0;
     virtual std::optional<bool> getVarBool(const std::string_view &name, uint32_t entry = 0) = 0;
+    virtual std::optional<bool> getVarBool(KnownVarName name, uint32_t entry = 0);
 
     virtual std::optional<int> getVarInt(uint32_t idx, uint32_t entry = 0) = 0;
     virtual std::optional<int> getVarInt(const std::string_view &name, uint32_t entry = 0) = 0;
+    virtual std::optional<int> getVarInt(KnownVarName name, uint32_t entry = 0);
 
     virtual std::optional<float> getVarFloat(uint32_t idx, uint32_t entry = 0) = 0;
     virtual std::optional<float> getVarFloat(const std::string_view &name, uint32_t entry = 0) = 0;
+    virtual std::optional<float> getVarFloat(KnownVarName name, uint32_t entry = 0);
+
 
     virtual std::optional<double> getVarDouble(uint32_t idx, uint32_t entry = 0) = 0;
     virtual std::optional<double> getVarDouble(const std::string_view &name, uint32_t entry = 0) = 0;
+    virtual std::optional<double> getVarDouble(KnownVarName name, uint32_t entry = 0);
+
 
     // 1 success, 0 failure, -n minimum buffer size
     virtual Expected<std::string_view> getSessionStr() = 0;

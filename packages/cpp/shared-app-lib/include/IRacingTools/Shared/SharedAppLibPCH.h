@@ -75,7 +75,7 @@
 
 // IRT Headers
 #include <IRacingTools/Shared/Constants.h>
-#include <IRacingTools/Models/TrackMapDataFile.pb.h>
+#include <IRacingTools/Models/TrackMapFile.pb.h>
 #include <IRacingTools/SDK/Utils/Singleton.h>
 
 namespace fs = std::filesystem;

@@ -14,8 +14,6 @@ using namespace IRacingTools::SDK::Utils;
 using namespace IRacingTools::SDK;
 
 
-
-
 class GenerateTrackmapArgCommand: public ArgCommand {
 public:
 

@@ -83,7 +83,7 @@ namespace IRacingTools::SDK {
     // how many elements in array, or 1 if not an array
     virtual std::optional<uint32_t> getVarCount(uint32_t idx) = 0;
     virtual std::optional<uint32_t> getVarCount(const std::string_view &name) = 0;
-    std::optional<uint32_t> getVarCount(KnownVarName name);
+    virtual std::optional<uint32_t> getVarCount(KnownVarName name);
 
     // idx is the variables index, entry is the array offset, or 0 if not an array element
     // will convert data to requested type

@@ -60,7 +60,7 @@ namespace IRacingTools::SDK {
                     auto sessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
                     if (!sessionTimeVal) {
                         spdlog::error("No session time");
-                        return std::unexpected(GeneralError::create<GeneralError>(ErrorCode::General, "No session time in frame index {}", diskClient.getSampleIndex()));
+                        return std::unexpected(GeneralError(ErrorCode::General, fmt::format("No session time in frame index {}", diskClient.getSampleIndex())));
                     }
 
                     auto sessionTimeSeconds = sessionTimeVal.value();

@@ -78,6 +78,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #pragma once
 
+#include <chrono>
+
 #include <magic_enum.hpp>
 #include <windows.h>
 
@@ -89,7 +91,7 @@ namespace IRacingTools::SDK {
     template <typename T>
     using Opt = std::optional<T>;
 
-    using SessionTime = std::chrono::duration<std::chrono::milliseconds>;
+    using SessionTime = std::chrono::milliseconds;
 
     enum class ConnectionStatus : int {
         NotConnected = 0,

@@ -23,6 +23,12 @@ macro(SETUP_TARGET_COMPILE_DEFS targetName)
     SPDLOG_WCHAR_TO_UTF8_SUPPORT=1
   )
 
+  if (MSVC)
+    target_compile_options(${targetName}
+      PRIVATE
+      $<$<CONFIG:Debug>:/DEBUG:FASTLINK>
+    )
+  endif()
 #  if (DEBUG)
 #    target_compile_definitions(
 #      ${targetName}

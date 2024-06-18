@@ -9,22 +9,20 @@
 #include <CLI/CLI.hpp>
 
 namespace IRacingTools::App::Commands {
-using namespace std::literals;
-using namespace IRacingTools::SDK::Utils;
-using namespace IRacingTools::SDK;
+    using namespace std::literals;
+    using namespace IRacingTools::SDK::Utils;
+    using namespace IRacingTools::SDK;
 
 
-class GenerateTrackmapArgCommand: public ArgCommand {
-public:
+    class GenerateTrackmapArgCommand : public ArgCommand {
+        public:
+            int execute() override;
 
-  int execute() override;
+        protected:
+            CLI::App* createCommand(CLI::App* app) override;
 
-protected:
-  CLI::App * createCommand(CLI::App * app) override;
-
-private:
-  std::string ibtPath_{};
-  std::string outputPath_{};
-
-};
+        private:
+            std::string ibtPath_{};
+            std::string outputPath_{};
+    };
 }

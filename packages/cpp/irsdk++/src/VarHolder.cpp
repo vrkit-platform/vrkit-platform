@@ -43,6 +43,9 @@ namespace IRacingTools::SDK {
     setVarName(name);
   }
 
+  VarHolder::VarHolder(KnownVarName name, ClientProvider* clientProvider) : VarHolder{KnownVarNameToStringView(name), clientProvider} {
+  }
+
   void VarHolder::setVarName(const std::string_view &name) {
     reset();
     name_ = name;

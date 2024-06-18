@@ -26,7 +26,6 @@ using namespace IRacingTools::App::Commands;
 namespace di = boost::di;
 
 int main(int argc, char** argv) {
-
     System::DisplayInfoSetup();
     System::GetAllDisplayInfo();
 
@@ -42,9 +41,10 @@ int main(int argc, char** argv) {
     app.set_help_all_flag("--help-all", "Show all help details");
     app.set_version_flag("--version", appVerion);
 
-    auto cmds = ArgCommand::build<DashboardArgCommand,GenerateTrackmapArgCommand,SessionPlayArgCommand,SessionRecordArgCommand,SHMViewerArgCommand>(&app);
+    auto cmds = ArgCommand::build<DashboardArgCommand, GenerateTrackmapArgCommand, SessionPlayArgCommand,
+                                  SessionRecordArgCommand, SHMViewerArgCommand>(&app);
 
-    CLI11_PARSE(app,argc,argv);
+    CLI11_PARSE(app, argc, argv);
 
     return 0;
 }

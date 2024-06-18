@@ -22,14 +22,15 @@ namespace IRacingTools::Shared {
 
   DiskSessionDataProvider::DiskSessionDataProvider(const std::filesystem::path &file,ClientId clientId)
       : clientId_(clientId), file_(file), diskClient_(std::make_shared<DiskClient>(file, clientId)),
-        dataAccess_(std::make_unique<SessionDataAccess>(diskClient_)) {
+        dataAccess_(std::make_unique<SessionDataAccess>(diskClient_->getProvider())) {
 
     std::scoped_lock lock(diskClientMutex_);
 
     auto &diskClient = *diskClient_;
-    timing_ = std::make_unique<Timing>(Timing{.isLive = false, .isValid = false});
 
     spdlog::info("Disk client opened {}: ready={},sampleCount={}",file.string(),diskClient.isFileOpen(),diskClient.getSampleCount());
+
+    timing_ = std::make_unique<Timing>(Timing{.isLive = false, .isValid = false});
   }
 
 
@@ -48,10 +49,12 @@ namespace IRacingTools::Shared {
     std::chrono::milliseconds previousSessionDuration{0};
     std::chrono::milliseconds previousTimeMillis = TimeEpoch();
     std::chrono::milliseconds lastPrintTime{0};
+    auto &diskClient = *diskClient_;
+
 
     while (true) {
       std::scoped_lock lock(diskClientMutex_);
-      auto &diskClient = *diskClient_;
+
       {
         std::scoped_lock threadLock(threadMutex_);
         if (!running_)
@@ -63,8 +66,8 @@ namespace IRacingTools::Shared {
         }
       }
 
-      auto posCountRes = diskClient.getVarCount("CarIdxPosition");
-      auto sessionTimeVal = diskClient.getVarDouble("SessionTime");
+      auto posCountRes = diskClient.getVarCount(KnownVarName::CarIdxPosition);
+      auto sessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
       if (!sessionTimeVal) {
         spdlog::error("No session time");
         abort();
@@ -83,7 +86,7 @@ namespace IRacingTools::Shared {
       auto sessionTime = sessionTimeVal.value();
 
       long long int sessionMillis = Utils::SessionTimeToMillis(sessionTime);
-      std::chrono::milliseconds sessionDuration{sessionMillis};
+      SessionTime sessionDuration{sessionMillis};
       long long int millis = sessionMillis % 1000;
       auto intervalDuration = sessionDuration - previousSessionDuration;
 

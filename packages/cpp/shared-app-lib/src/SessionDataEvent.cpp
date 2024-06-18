@@ -37,8 +37,12 @@ namespace IRacingTools::Shared {
     return {index, lap, lapsCompleted, lapPercentComplete, estimatedTime, position.overall, position.clazz, driver};
   }
 
+  std::shared_ptr<SDK::ClientProvider> SessionDataAccess::getClientProvider() {
+    return clientProvider_;
+  }
+
   std::shared_ptr<Client> SessionDataAccess::getClient() {
-    return client_.lock();
+    return clientProvider_->getClient();
   }
 
 #define IRVAR(Name) dataAccess_->Name

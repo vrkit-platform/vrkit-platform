@@ -31,7 +31,7 @@ def laps(ctx, ibt_file):
 
 
 @laps.command("summary")
-@click.option('--invalid', 'include_invalid_laps', type=bool, default=False)
+@click.option('--invalid', 'include_invalid_laps', is_flag=True, default=False)
 @click.pass_context
 def summary(ctx, include_invalid_laps: bool):
     client = ctx.obj.disk_client

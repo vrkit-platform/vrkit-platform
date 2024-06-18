@@ -391,6 +391,7 @@ namespace IRacingTools::SDK {
         PitSvRRP,
         PlayerCarClassPosition,
         PlayerCarPosition,
+        PlayerCarMyIncidentCount,
         RaceLaps,
         RadioTransmitCarIdx,
         RadioTransmitFrequencyIdx,

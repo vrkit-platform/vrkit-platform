@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace IRacingTools::SDK {
   namespace fs = std::filesystem;
 
+  struct ClientProvider;
 
   class Client {
   public:
@@ -49,6 +50,7 @@ namespace IRacingTools::SDK {
     virtual bool isAvailable() = 0;
     virtual ClientId getClientId() = 0;
 
+    virtual std::shared_ptr<ClientProvider> getProvider() = 0;
     /**
      * @brief Is index valid based on total number of vars
      * @param idx

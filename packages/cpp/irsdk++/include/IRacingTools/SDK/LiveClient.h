@@ -39,7 +39,7 @@ namespace IRacingTools::SDK {
 
 // A C++ wrapper around the irsdk calls that takes care of the details of maintaining a connection.
 // reads out the data into a cache, so you don't have to worry about timing
-class LiveClient : public Client, public Utils::Singleton<LiveClient> {
+class LiveClient : public Client, public Utils::Singleton<LiveClient>, public std::enable_shared_from_this<LiveClient> {
 public:
     LiveClient() = delete;
     LiveClient(const LiveClient &other) = delete;
@@ -48,6 +48,8 @@ public:
     LiveClient &operator=(LiveClient &&other) noexcept = delete;
 
     virtual ~LiveClient() override { shutdown(); }
+
+    std::shared_ptr<ClientProvider> getProvider() override;
 
     // wait for live data, or if a .ibt file is open
     // then read the next line from the file.
@@ -127,6 +129,7 @@ private:
 
     Opt<std::string_view> sessionInfoStr_{std::nullopt};
     std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfo_{nullptr};
+    std::shared_ptr<ClientProvider> clientProvider_{};
 
 };
 

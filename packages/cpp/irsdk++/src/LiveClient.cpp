@@ -1,6 +1,7 @@
 #include <cstring>
 
 #include <magic_enum.hpp>
+#include <mutex>
 #include <yaml-cpp/yaml.h>
 
 #include <IRacingTools/SDK/LiveClient.h>
@@ -13,6 +14,30 @@
 #pragma warning(disable : 4996)
 namespace IRacingTools::SDK {
   using namespace Utils;
+
+  namespace {
+    struct LiveClientProvider : ClientProvider {
+      std::shared_ptr<Client> client;
+
+      explicit LiveClientProvider(std::shared_ptr<Client> client) : client(client) {}
+
+      virtual std::shared_ptr<Client> getClient() override {
+        return client;
+      }
+
+      virtual ~LiveClientProvider() = default;
+    };
+  }
+
+  std::shared_ptr<ClientProvider> LiveClient::getProvider() {
+    static std::mutex sProviderMutex{};
+
+    std::scoped_lock lock(sProviderMutex);
+    if (!clientProvider_)
+      clientProvider_ = std::make_shared<LiveClientProvider>(shared_from_this());
+
+    return clientProvider_;
+  }
 
   bool LiveClient::waitForData(int timeoutMS) {
     auto &conn = LiveConnection::GetInstance();

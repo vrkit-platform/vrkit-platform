@@ -12,11 +12,11 @@ namespace IRacingTools::SDK {
 
     template <typename Data>
     class DiskClientDataFrameProcessor {
-        DiskClient client_;
+        std::shared_ptr<DiskClient> client_;
 
         public:
             struct Context {
-                DiskClient* client{nullptr};
+                std::shared_ptr<DiskClient> client{nullptr};
                 DiskClientDataFrameProcessor* processor{nullptr};
 
                 double sessionTimeSeconds{};
@@ -32,7 +32,7 @@ namespace IRacingTools::SDK {
              */
             using Callback = std::function<bool(const Context& context, Data& result)>;
 
-            explicit DiskClientDataFrameProcessor(const std::filesystem::path& file) : client_(file, file.string()) {}
+            explicit DiskClientDataFrameProcessor(const std::filesystem::path& file) : client_(std::make_shared<DiskClient>(file, file.string())) {}
 
             DiskClientDataFrameProcessor() = delete;
             DiskClientDataFrameProcessor(const DiskClientDataFrameProcessor& other) = delete;
@@ -42,6 +42,10 @@ namespace IRacingTools::SDK {
 
             virtual ~DiskClientDataFrameProcessor() = default;
 
+            std::shared_ptr<DiskClient> getClient() {
+                return client_;
+            }
+            
             /**
              * @brief Session update string (yaml)
              *
@@ -51,31 +55,31 @@ namespace IRacingTools::SDK {
                 auto& diskClient = client_;
                 std::size_t processedFrameCount{0};
                 while (true) {
-                    if (!diskClient.next()) {
-                        spdlog::error("Unable to get next: {}", diskClient.getSampleIndex());
+                    if (!diskClient->next()) {
+                        spdlog::error("Unable to get next: {}", diskClient->getSampleIndex());
                         break;
                     }
 
 
-                    auto sessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
+                    auto sessionTimeVal = diskClient->getVarDouble(KnownVarName::SessionTime);
                     if (!sessionTimeVal) {
                         spdlog::error("No session time");
                         return std::unexpected(
                             GeneralError(
                                 ErrorCode::General,
-                                fmt::format("No session time in frame index {}", diskClient.getSampleIndex())
+                                fmt::format("No session time in frame index {}", diskClient->getSampleIndex())
                             )
                         );
                     }
 
                     auto sessionTimeSeconds = sessionTimeVal.value();
                     Context context{
-                        .client = &diskClient,
+                        .client = diskClient,
                         .processor = this,
                         .sessionTimeSeconds = sessionTimeSeconds,
                         .sessionTime = Utils::SessionTimeToDuration(sessionTimeSeconds),
-                        .frameIndex = diskClient.getSampleIndex(),
-                        .frameCount = diskClient.getSampleCount()
+                        .frameIndex = diskClient->getSampleIndex(),
+                        .frameCount = diskClient->getSampleCount()
                     };
 
                     auto shouldContinue = callback(context, data);

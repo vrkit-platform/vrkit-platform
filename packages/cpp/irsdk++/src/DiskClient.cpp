@@ -40,6 +40,10 @@ namespace IRacingTools::SDK {
     }
 
     DiskClient::~DiskClient() {
+        close();
+    }
+
+    void DiskClient::close() {
         reset();
 
         if (ibtFile_)

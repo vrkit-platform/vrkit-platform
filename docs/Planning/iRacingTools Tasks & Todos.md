@@ -46,3 +46,8 @@ _Bundle artifacts so its easy to copy_
 		- [ ] `run`
 		      Launches a dashboard in either `live` (default) or `replay/disk` mode if `--ibt <file>` argument is provided
 		- [ ] 
+
+
+## Clients
+
+ - [ ] move `DiskClient::getProvider()` to `Client::getProvider()`

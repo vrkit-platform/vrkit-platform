@@ -42,7 +42,7 @@ def all_lap_metadata(ir: IRDiskClient, include_invalid_laps: bool = False) -> li
             )
         )
 
-    return results if not include_invalid_laps else list(filter(lambda lap: lap.valid, results))
+    return results if include_invalid_laps else list(filter(lambda lap: lap.valid, results))
 
 
 def get_lap_trajectory(ir: IRDiskClient, lap: int) -> LapTrajectory:

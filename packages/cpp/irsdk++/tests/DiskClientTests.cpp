@@ -1,13 +1,18 @@
+#include <ranges>
+
 #include <IRacingTools/SDK/Utils/LUT.h>
 #include <IRacingTools/SDK/Utils/Singleton.h>
 #include <IRacingTools/SDK/Utils/Traits.h>
+
 #include <gtest/gtest.h>
 #include <fmt/core.h>
 #include <IRacingTools/SDK/ClientManager.h>
 #include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
 #include <IRacingTools/SDK/VarHolder.h>
 #include <spdlog/spdlog.h>
 
+using namespace IRacingTools::SDK;
 using namespace IRacingTools::SDK::Utils;
 
 
@@ -18,6 +23,9 @@ namespace fs = std::filesystem;
 namespace {
 
     constexpr auto IBTTestFile1 = "ibt-fixture-superformulalights324_montreal.ibt";
+
+    // LMP3 @ motegi
+    constexpr auto IBTTestFile2 = "ligierjsp320_twinring.ibt";
 
     std::filesystem::path ToIBTTestFile(const std::string & filename) {
         return fs::current_path() / "data" / "ibt" / filename;
@@ -59,33 +67,105 @@ TEST_F(DiskClientTests, can_open) {
 
     info("SampleCount({})", client->getSampleCount());
 
-    // Setup the time holder
-    IRacingTools::SDK::VarHolder VarSessionTime(IRacingTools::SDK::KnownVarName::SessionTime, provider.get());
+    // Setup the variable holders
+    // "Lap", "LapCurrentLapTime", 'PlayerCarMyIncidentCount'
+    VarHolder sessionTimeVar(IRacingTools::SDK::KnownVarName::SessionTime, provider.get());
 
     // Get start time value
-    auto sessionStartTime = VarSessionTime.getDouble();
+    auto sessionStartTime = sessionTimeVar.getDouble();
 
     // Skip to the target index `total - 1`
     auto targetIndex = client->getSampleCount() - 1;
     ASSERT_TRUE(client->seek(targetIndex));
 
     // Get the end time
-    auto sessionEndTime = VarSessionTime.getDouble();
+    auto sessionEndTime = sessionTimeVar.getDouble();
     EXPECT_NE(sessionStartTime,sessionEndTime);
 
     info("sessionStartTime={}, sessionEndTime={}",sessionStartTime,sessionEndTime);
-    // IRacingTools::SDK::DiskClient client()
-    // EXPECT_EQ(testMap.lookup("t1"), 0);
-    // EXPECT_EQ(testMap["t1"], 0);
-    // EXPECT_EQ(testMap["t2"], 1);
-    //
-    // auto values = testMap.values();
-    // EXPECT_EQ(values[1], 1);
+    
+    client->close();
+
+    
+
 }
 
-// TEST_F(DiskClientTests, is_container) {
-//     // std::vector<int> vints = {0,123};
-//
-//     EXPECT_EQ(is_container<std::vector<int>>, true);
-//     EXPECT_EQ(is_container<int>, false);
-// }
+TEST_F(DiskClientTests, aggregate_laps) {
+ 
+    auto file = ToIBTTestFile(IBTTestFile2);
+    
+    
+    DiskClientDataFrameProcessor<std::size_t> frameProc(file);
+    auto client = frameProc.getClient();
+    auto provider = client->getProvider();
+
+    using LapDataFrame = std::tuple<double, int, double, int, double, double>;
+    using LapDataWithPath = std::tuple<double, int, double, int, std::vector<std::pair<double, double>>>;
+    VarHolder sessionTimeVar(IRacingTools::SDK::KnownVarName::SessionTime, provider.get());
+    VarHolder lapVar(IRacingTools::SDK::KnownVarName::Lap, provider.get());
+    VarHolder lapTimeCurrentVar(IRacingTools::SDK::KnownVarName::LapCurrentLapTime, provider.get());
+    VarHolder incidentCountVar(IRacingTools::SDK::KnownVarName::PlayerCarMyIncidentCount, provider.get());
+    VarHolder latVar(IRacingTools::SDK::KnownVarName::Lat, provider.get());
+    VarHolder lonVar(IRacingTools::SDK::KnownVarName::Lon, provider.get());
+
+    std::vector<LapDataFrame> frames{client->getSampleCount()};
+    auto addCurrentFrameData = [&] (const DiskClientDataFrameProcessor<std::size_t>::Context& context) {
+        // info("Adding frame ({} of {}), session time ({})", context.frameIndex, context.frameCount, context.sessionTimeSeconds);
+        frames.emplace_back(sessionTimeVar.getDouble(), lapVar.getInt(), lapTimeCurrentVar.getDouble(), incidentCountVar.getInt(),
+            latVar.getDouble(), lonVar.getDouble());
+    };
+
+    std::size_t lapCount = 0;
+    auto res = frameProc.run([&] (const auto& context, auto& currentLap) {
+        addCurrentFrameData(context);
+        auto lap = lapVar.getInt();
+        if (lap > currentLap) {
+            currentLap += 1;
+        }
+        return true;
+    }, lapCount);
+
+    EXPECT_TRUE(res.has_value());
+
+    EXPECT_GT(lapCount, 0);
+    info("lapCount={},frameCount={}", lapCount, res.value_or(0));
+
+    auto frameLapChunkFn = [](const LapDataFrame & o1, const LapDataFrame & o2) {
+        //return std::get<0>(o1) < std::get<0>(o2) && std::get<1>(o1) < std::get<1>(o2);
+        return std::get<1>(o1) == std::get<1>(o2);
+    };
+    auto frameLapChunks = frames | std::views::chunk_by(frameLapChunkFn);
+    int32_t totalIncidients = 0;
+    std::vector<LapDataWithPath> laps{};
+    for (auto const& chunk : frameLapChunks) {
+        LapDataWithPath lap{};
+        for (auto const& frame : chunk) {
+            if (std::get<0>(frame) > std::get<0>(lap)) {
+                std::get<0>(lap) = std::get<0>(frame);
+                std::get<1>(lap) = std::get<1>(frame);
+                std::get<2>(lap) = std::get<2>(frame);
+                std::get<3>(lap) = std::get<3>(frame);
+                auto lat = std::get<4>(frame);
+                auto lon = std::get<5>(frame);
+                if (lat != 0.0 && lon != 0.0) {
+                    std::get<4>(lap).emplace_back(lat,std::get<5>(frame));
+                }
+            }
+        }
+        auto lapSessionTime = std::get<0>(lap);
+        if (lapSessionTime && (laps.empty() || std::get<0>(laps.back()) < lapSessionTime)) {
+            auto incidentCount = std::get<3>(lap);
+            std::get<3>(lap) = incidentCount - totalIncidients;
+            totalIncidients = incidentCount;
+
+            laps.push_back(std::move(lap));
+        }
+    }
+
+    for (auto& lap: laps) {
+        auto&[sessionTime, lapNumber, lapTime, incidientCount, coordinates] = lap;
+        info("sessionTime={},lap={},lapTimeSeconds={},incidentCount={},coordinateCount={}", sessionTime, lapNumber, lapTime, incidientCount, coordinates.size());
+    }
+
+
+}

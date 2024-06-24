@@ -159,7 +159,7 @@ namespace IRacingTools::Shared {
     thread_.reset();
   }
 
-  LiveSessionDataProvider::LiveSessionDataProvider() : SessionDataProvider(), dataAccess_(LiveClient::GetPtr()) {
+  LiveSessionDataProvider::LiveSessionDataProvider() : SessionDataProvider(), dataAccess_(LiveClient::GetPtr()->getProvider()) {
   }
 
   bool LiveSessionDataProvider::isAvailable() {

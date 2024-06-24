@@ -3,7 +3,10 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/packages/cpp/*/include",
+                "${workspaceFolder}/build/debug-vscode/packages/proto",
+                "${workspaceFolder}/build/debug-vscode/vcpkg_installed/x64-windows-static/include",
+                "${workspaceFolder}/build/debug-vscode/vcpkg_installed/x64-windows-static/include/Effects11"
             ],
             "defines": [
                 "_DEBUG",

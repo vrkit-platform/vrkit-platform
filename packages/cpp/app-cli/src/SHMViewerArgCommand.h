@@ -5,7 +5,7 @@
 #pragma once
 
 #include "ArgCommand.h"
-#include <QtCore>
+
 
 #include <CLI/CLI.hpp>
 

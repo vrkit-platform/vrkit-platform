@@ -1,4 +1,4 @@
-#include <IRacingTools/Shared/App/Services/TrackMapDataService.h>
+#include <IRacingTools/Shared/Services/TrackMapDataService.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 
 #include <fstream>
@@ -8,7 +8,7 @@
 #include <IRacingTools/SDK/Utils/CollectionHelpers.h>
 #include <google/protobuf/util/json_util.h>
 
-namespace IRacingTools::Shared::App::Services {
+namespace IRacingTools::Shared::Services {
 
   TrackMapDataService::TrackMapDataService(token)
       : dataFileHandler_(GetAppDataPath() / TrackDataPath),
@@ -93,4 +93,4 @@ namespace IRacingTools::Shared::App::Services {
     dataFiles_ = std::move(newDataFiles);
     return &dataFiles_[id];
   }
-}// namespace IRacingTools::Shared::App::Services
+}// namespace IRacingTools::Shared::Services

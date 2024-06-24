@@ -5,7 +5,7 @@
 #include <IRacingTools/Models/TrackMapFile.pb.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 
-namespace IRacingTools::Shared::App::Services {
+namespace IRacingTools::Shared::Services {
     
     using Models::UI::Config::TrackMapFile;
     class TrackMapDataService : public SDK::Utils::Singleton<TrackMapDataService> {
@@ -39,7 +39,7 @@ namespace IRacingTools::Shared::App::Services {
             /**
              * @brief
              *
-             * @param newConfig
+             * @param config
              * @return
              */
             std::expected<const TrackMapFile*,SDK::GeneralError> set(const TrackMapFile& config);

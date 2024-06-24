@@ -24,53 +24,25 @@
 #include <IRacingTools/SDK/LiveConnection.h>
 #include <IRacingTools/SDK/DiskClient.h>
 #include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
+#include <IRacingTools/SDK/VarHolder.h>
 
 #include "GenerateTrackmapArgCommand.h"
 
 #include <IRacingTools/Models/LapData.pb.h>
 #include <IRacingTools/Shared/Chrono.h>
+#include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
 
 namespace IRacingTools::App::Commands {
     using namespace IRacingTools::SDK;
-
-    namespace {
-        class LapTrajectoryBuilder {
-            public:
-                struct Context {};
-
-                explicit LapTrajectoryBuilder(
-                    const fs::path& ibtPath,
-                    const std::optional<fs::path>& outputPath = std::nullopt
-                ): ibtPath_{ibtPath}, outputPath_{outputPath} {}
-
-                std::expected<Models::Telemetry::LapTrajectory, GeneralError> execute() {
-                    using DataFrameProcessor = DiskClientDataFrameProcessor<Context>;
-
-                    Models::Telemetry::LapTrajectory lap{};
-                    Context data{};
-                    DataFrameProcessor processor(ibtPath_);
-
-                    auto res = processor.run(
-                        [&](const DataFrameProcessor::Context& context, Context& result) -> bool {
-                            // TODO: Implement the logic here
-                            return true;
-                        },
-                        data
-                    );
-
-                    return lap;
-                }
-
-            private:
-                fs::path ibtPath_{};
-                std::optional<fs::path> outputPath_{};
-        };
-    }
+    using namespace IRacingTools::SDK::Utils;
+    using namespace IRacingTools::Shared;
+    using namespace spdlog;
+    
 
     CLI::App* GenerateTrackmapArgCommand::createCommand(CLI::App* app) {
         auto cmd = app->add_subcommand("generate-trackmap", "Generate trackmap from IBT");
 
-        cmd->add_option("-o,--output", outputPath_, "Output path")->required(false)->default_val("");
+        cmd->add_option("-o,--output", outputPath_, "Output filename for lap trajectory")->required(false)->default_val("");
 
         cmd->add_option("--ibt", ibtPath_, "IBT Input file to use")->required(true);
 
@@ -80,17 +52,29 @@ namespace IRacingTools::App::Commands {
     int GenerateTrackmapArgCommand::execute() {
         auto ibtPath = ibtPath_;
 
-        auto outputPath = outputPath_;
-        fmt::println("outputPath: {}", outputPath);
-        assert((!outputPath.empty() && "Output path is invalid"));
-        outputPath = std::filesystem::absolute(outputPath).string();
+        auto outputPath = fs::path(outputPath_);
+        assert((!outputPath_.empty() && "Output path is invalid"));
 
-        fmt::println("Absolute Output Path: {}", outputPath);
-        std::filesystem::create_directories(outputPath);
-        assert((std::filesystem::is_directory(outputPath) && "Fail create output path"));
+        // Create output path if needed
+        outputPath = std::filesystem::absolute(outputPath);        
+        if (outputPath.has_parent_path()) {
+            auto outputDir = outputPath.parent_path();
+            if (!fs::exists(outputDir))
+                std::filesystem::create_directories(outputPath);
+            
+            assert((std::filesystem::is_directory(outputPath) && "Fail create output path"));
+        }
 
-        LapTrajectoryBuilder(ibtPath, outputPath).execute();
-
-        throw NotImplementedError("GenerateTrackmapArgCommand");
+        // Convert IBT -> LapTrajectory
+        Services::LapTrajectoryTool tool;
+        auto lapRes  = tool.createLapTrajectory(ibtPath);
+        if (!lapRes) {
+            critical("Failed to create lap trajectory: {}", lapRes.error().what());
+            return 1;
+        }
+        
+        auto& lap = lapRes.value();
+        WriteTextFile(outputPath, lap.SerializeAsString());
+        
     }
 }

@@ -1,10 +1,12 @@
 #pragma once
 
+#include <boost/di.hpp>
+
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 #include <IRacingTools/SDK/Utils/Singleton.h>
 
 
-namespace IRacingTools::Shared::App {
+namespace IRacingTools::Shared::Services {
     namespace di = boost::di;
 
     class DefaultObjectFactory : public SDK::Utils::Singleton<DefaultObjectFactory> {
@@ -14,9 +16,7 @@ namespace IRacingTools::Shared::App {
             di::bind<int>.to<1>
         };
 
-        DefaultObjectFactory() : injector_(di::make_injector(Bindings...)) {
-
-        }
+        DefaultObjectFactory() : injector_(di::make_injector(Bindings...)) = default;
 
 
     private:

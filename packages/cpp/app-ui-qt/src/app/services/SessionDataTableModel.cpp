@@ -11,7 +11,7 @@
 #include "AppSessionDataEvent.h"
 #include "SessionDataTableModel.h"
 
-namespace IRacingTools::App::Services {
+namespace IRacingTools::Services {
   using namespace IRacingTools::SDK;
 
   /**
@@ -83,4 +83,4 @@ namespace IRacingTools::App::Services {
                                    : "Unknown");
   }
 
-}// namespace IRacingTools::App::Services
+}// namespace IRacingTools::Services

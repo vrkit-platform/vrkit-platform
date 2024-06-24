@@ -5,11 +5,12 @@
 #include <algorithm>
 #include <numeric>
 
-#include "Graphics/DXResources.h"
+
 #include <IRacingTools/Models/LapData.pb.h>
 #include <IRacingTools/Models/TrackMapData.pb.h>
 
-#include "Graphics/CoordinateToPixelConverter.h"
+#include <IRacingTools/Shared/Graphics/DXResources.h>
+#include <IRacingTools/Shared/Graphics/CoordinateToPixelConverter.h>
 
 #include <IRacingTools/Shared/ProtoHelpers.h>
 

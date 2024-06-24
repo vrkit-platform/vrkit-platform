@@ -43,4 +43,15 @@ namespace IRacingTools::SDK::Utils {
 
         return list;
     }
+
+    template <template <typename, typename...> class C, typename V, typename...Other>
+    bool ContainsValue(const C<V,Other...>& container, const V& value) {
+        for (auto& it : container) {
+            if (value == it) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

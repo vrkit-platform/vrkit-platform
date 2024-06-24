@@ -1,0 +1,2182 @@
+{
+    "metadata": {
+        "vars": [
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Seconds since session start",
+                "name": "SessionTime",
+                "type": "Double",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Current update number",
+                "name": "SessionTick",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Session number",
+                "name": "SessionNum",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Session state",
+                "name": "SessionState",
+                "type": "Int32",
+                "unit": "irsdk_SessionState"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Session ID",
+                "name": "SessionUniqueID",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Session flags",
+                "name": "SessionFlags",
+                "type": "Bitmask",
+                "unit": "irsdk_Flags"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Seconds left till session ends",
+                "name": "SessionTimeRemain",
+                "type": "Double",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Old laps left till session ends use SessionLapsRemainEx",
+                "name": "SessionLapsRemain",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "New improved laps left till session ends",
+                "name": "SessionLapsRemainEx",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Total number of seconds in session",
+                "name": "SessionTimeTotal",
+                "type": "Double",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Total number of laps in session",
+                "name": "SessionLapsTotal",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Joker laps remaining to be taken",
+                "name": "SessionJokerLapsRemain",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Player is currently completing a joker lap",
+                "name": "SessionOnJokerLap",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Time of day in seconds",
+                "name": "SessionTimeOfDay",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Driver activated flag",
+                "name": "DriverMarker",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Push to talk button state",
+                "name": "PushToTalk",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Push to pass button state",
+                "name": "PushToPass",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Hybrid manual boost state",
+                "name": "ManualBoost",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Hybrid manual no boost state",
+                "name": "ManualNoBoost",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "1=Car on track physics running with player in car",
+                "name": "IsOnTrack",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Average frames per second",
+                "name": "FrameRate",
+                "type": "Float",
+                "unit": "fps"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Percent of available tim fg thread took with a 1 sec avg",
+                "name": "CpuUsageFG",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Percent of available tim gpu took with a 1 sec avg",
+                "name": "GpuUsage",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Communications average latency",
+                "name": "ChanAvgLatency",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Communications latency",
+                "name": "ChanLatency",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Communications quality",
+                "name": "ChanQuality",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Partner communications quality",
+                "name": "ChanPartnerQuality",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Percent of available tim bg thread took with a 1 sec avg",
+                "name": "CpuUsageBG",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Communications server clock skew",
+                "name": "ChanClockSkew",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Memory page faults per second",
+                "name": "MemPageFaultSec",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Memory soft page faults per second",
+                "name": "MemSoftPageFaultSec",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players position in race",
+                "name": "PlayerCarPosition",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players class position in race",
+                "name": "PlayerCarClassPosition",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Player car class id",
+                "name": "PlayerCarClass",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players car track surface type",
+                "name": "PlayerTrackSurface",
+                "type": "Int32",
+                "unit": "irsdk_TrkLoc"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players car track surface material type",
+                "name": "PlayerTrackSurfaceMaterial",
+                "type": "Int32",
+                "unit": "irsdk_TrkSurf"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players carIdx",
+                "name": "PlayerCarIdx",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players team incident count for this session",
+                "name": "PlayerCarTeamIncidentCount",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players own incident count for this session",
+                "name": "PlayerCarMyIncidentCount",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Teams current drivers incident count for this session",
+                "name": "PlayerCarDriverIncidentCount",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players weight penalty",
+                "name": "PlayerCarWeightPenalty",
+                "type": "Float",
+                "unit": "kg"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players power adjust",
+                "name": "PlayerCarPowerAdjust",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players dry tire set limit",
+                "name": "PlayerCarDryTireSetLimit",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players car is being towed if time is greater than zero",
+                "name": "PlayerCarTowTime",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players car is properly in their pitstall",
+                "name": "PlayerCarInPitStall",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players car pit service status bits",
+                "name": "PlayerCarPitSvStatus",
+                "type": "Int32",
+                "unit": "irsdk_PitSvStatus"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players car current tire compound",
+                "name": "PlayerTireCompound",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players car number of fast repairs used",
+                "name": "PlayerFastRepairsUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Are we pacing or not",
+                "name": "PaceMode",
+                "type": "Int32",
+                "unit": "irsdk_PaceMode"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Is the player car on pit road between the cones",
+                "name": "OnPitRoad",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Steering wheel angle",
+                "name": "SteeringWheelAngle",
+                "type": "Float",
+                "unit": "rad"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "0=off throttle to 1=full throttle",
+                "name": "Throttle",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "0=brake released to 1=max pedal force",
+                "name": "Brake",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "0=disengaged to 1=fully engaged",
+                "name": "Clutch",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "-1=reverse  0=neutral  1..n=current gear",
+                "name": "Gear",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine rpm",
+                "name": "RPM",
+                "type": "Float",
+                "unit": "revs/min"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Laps started count",
+                "name": "Lap",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Laps completed count",
+                "name": "LapCompleted",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Meters traveled from S/F this lap",
+                "name": "LapDist",
+                "type": "Float",
+                "unit": "m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Percentage distance around lap",
+                "name": "LapDistPct",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players best lap number",
+                "name": "LapBestLap",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players best lap time",
+                "name": "LapBestLapTime",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players last lap time",
+                "name": "LapLastLapTime",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Estimate of players current lap time as shown in F3 box",
+                "name": "LapCurrentLapTime",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Player num consecutive clean laps completed for N average",
+                "name": "LapLasNLapSeq",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Player last N average lap time",
+                "name": "LapLastNLapTime",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Player last lap in best N average lap time",
+                "name": "LapBestNLapLap",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Player best N average lap time",
+                "name": "LapBestNLapTime",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Delta time for best lap",
+                "name": "LapDeltaToBestLap",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Rate of change of delta time for best lap",
+                "name": "LapDeltaToBestLap_DD",
+                "type": "Float",
+                "unit": "s/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Delta time for best lap is valid",
+                "name": "LapDeltaToBestLap_OK",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Delta time for optimal lap",
+                "name": "LapDeltaToOptimalLap",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Rate of change of delta time for optimal lap",
+                "name": "LapDeltaToOptimalLap_DD",
+                "type": "Float",
+                "unit": "s/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Delta time for optimal lap is valid",
+                "name": "LapDeltaToOptimalLap_OK",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Delta time for session best lap",
+                "name": "LapDeltaToSessionBestLap",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Rate of change of delta time for session best lap",
+                "name": "LapDeltaToSessionBestLap_DD",
+                "type": "Float",
+                "unit": "s/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Delta time for session best lap is valid",
+                "name": "LapDeltaToSessionBestLap_OK",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Delta time for session optimal lap",
+                "name": "LapDeltaToSessionOptimalLap",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Rate of change of delta time for session optimal lap",
+                "name": "LapDeltaToSessionOptimalLap_DD",
+                "type": "Float",
+                "unit": "s/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Delta time for session optimal lap is valid",
+                "name": "LapDeltaToSessionOptimalLap_OK",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Delta time for session last lap",
+                "name": "LapDeltaToSessionLastlLap",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Rate of change of delta time for session last lap",
+                "name": "LapDeltaToSessionLastlLap_DD",
+                "type": "Float",
+                "unit": "s/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Delta time for session last lap is valid",
+                "name": "LapDeltaToSessionLastlLap_OK",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "GPS vehicle speed",
+                "name": "Speed",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Yaw orientation",
+                "name": "Yaw",
+                "type": "Float",
+                "unit": "rad"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Yaw orientation relative to north",
+                "name": "YawNorth",
+                "type": "Float",
+                "unit": "rad"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitch orientation",
+                "name": "Pitch",
+                "type": "Float",
+                "unit": "rad"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Roll orientation",
+                "name": "Roll",
+                "type": "Float",
+                "unit": "rad"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Indicate action the reset key will take 0 enter 1 exit 2 reset",
+                "name": "EnterExitReset",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Latitude in decimal degrees",
+                "name": "Lat",
+                "type": "Double",
+                "unit": "deg"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Longitude in decimal degrees",
+                "name": "Lon",
+                "type": "Double",
+                "unit": "deg"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Altitude in meters",
+                "name": "Alt",
+                "type": "Float",
+                "unit": "m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Deprecated  set to TrackTempCrew",
+                "name": "TrackTemp",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Temperature of track measured by crew around track",
+                "name": "TrackTempCrew",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Temperature of air at start/finish line",
+                "name": "AirTemp",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Weather dynamics type",
+                "name": "WeatherType",
+                "type": "Int32",
+                "unit": "irsdk_WeatherDynamics"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Weather version",
+                "name": "WeatherVersion",
+                "type": "Int32",
+                "unit": "irsdk_WeatherVersion"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Skies (0=clear/1=p cloudy/2=m cloudy/3=overcast)",
+                "name": "Skies",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Density of air at start/finish line",
+                "name": "AirDensity",
+                "type": "Float",
+                "unit": "kg/m^3"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pressure of air at start/finish line",
+                "name": "AirPressure",
+                "type": "Float",
+                "unit": "Pa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Wind velocity at start/finish line",
+                "name": "WindVel",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Wind direction at start/finish line",
+                "name": "WindDir",
+                "type": "Float",
+                "unit": "rad"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Relative Humidity at start/finish line",
+                "name": "RelativeHumidity",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Fog level at start/finish line",
+                "name": "FogLevel",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Precipitation at start/finish line",
+                "name": "Precipitation",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Sun angle above horizon in radians",
+                "name": "SolarAltitude",
+                "type": "Float",
+                "unit": "rad"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Sun angle clockwise from north in radians",
+                "name": "SolarAzimuth",
+                "type": "Float",
+                "unit": "rad"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "True if pit stop is allowed for the current player",
+                "name": "PitsOpen",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Time left for mandatory pit repairs if repairs are active",
+                "name": "PitRepairLeft",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Time left for optional repairs if repairs are active",
+                "name": "PitOptRepairLeft",
+                "type": "Float",
+                "unit": "s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Is the player getting pit stop service",
+                "name": "PitstopActive",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many fast repairs used so far",
+                "name": "FastRepairUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many fast repairs left  255 is unlimited",
+                "name": "FastRepairAvailable",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many left front tires used so far",
+                "name": "LFTiresUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many right front tires used so far",
+                "name": "RFTiresUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many left rear tires used so far",
+                "name": "LRTiresUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many right rear tires used so far",
+                "name": "RRTiresUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many left tire sets used so far",
+                "name": "LeftTireSetsUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many right tire sets used so far",
+                "name": "RightTireSetsUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many front tire sets used so far",
+                "name": "FrontTireSetsUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many rear tire sets used so far",
+                "name": "RearTireSetsUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many tire sets used so far",
+                "name": "TireSetsUsed",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many left front tires are remaining  255 is unlimited",
+                "name": "LFTiresAvailable",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many right front tires are remaining  255 is unlimited",
+                "name": "RFTiresAvailable",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many left rear tires are remaining  255 is unlimited",
+                "name": "LRTiresAvailable",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many right rear tires are remaining  255 is unlimited",
+                "name": "RRTiresAvailable",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many left tire sets are remaining  255 is unlimited",
+                "name": "LeftTireSetsAvailable",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many right tire sets are remaining  255 is unlimited",
+                "name": "RightTireSetsAvailable",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many front tire sets are remaining  255 is unlimited",
+                "name": "FrontTireSetsAvailable",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many rear tire sets are remaining  255 is unlimited",
+                "name": "RearTireSetsAvailable",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "How many tire sets are remaining  255 is unlimited",
+                "name": "TireSetsAvailable",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "1=Car on track physics running",
+                "name": "IsOnTrackCar",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Steering wheel max angle",
+                "name": "SteeringWheelAngleMax",
+                "type": "Float",
+                "unit": "rad"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Friction torque applied to gears when shifting or grinding",
+                "name": "ShiftPowerPct",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RPM of shifter grinding noise",
+                "name": "ShiftGrindRPM",
+                "type": "Float",
+                "unit": "RPM"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Raw throttle input 0=off throttle to 1=full throttle",
+                "name": "ThrottleRaw",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Raw brake input 0=brake released to 1=max pedal force",
+                "name": "BrakeRaw",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Raw clutch input 0=disengaged to 1=fully engaged",
+                "name": "ClutchRaw",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Raw handbrake input 0=handbrake released to 1=max force",
+                "name": "HandbrakeRaw",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "true if abs is currently reducing brake force pressure",
+                "name": "BrakeABSactive",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Percent of brake force reduction caused by ABS system",
+                "name": "BrakeABScutPct",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Bitfield for warning lights",
+                "name": "EngineWarnings",
+                "type": "Bitmask",
+                "unit": "irsdk_EngineWarnings"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Percent fuel remaining",
+                "name": "FuelLevelPct",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Bitfield of pit service checkboxes",
+                "name": "PitSvFlags",
+                "type": "Bitmask",
+                "unit": "irsdk_PitSvFlags"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pit service left front tire pressure",
+                "name": "PitSvLFP",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pit service right front tire pressure",
+                "name": "PitSvRFP",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pit service left rear tire pressure",
+                "name": "PitSvLRP",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pit service right rear tire pressure",
+                "name": "PitSvRRP",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pit service fuel add amount",
+                "name": "PitSvFuel",
+                "type": "Float",
+                "unit": "l or kWh"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pit service pending tire compound",
+                "name": "PitSvTireCompound",
+                "type": "Int32",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Force feedback % max torque on steering shaft unsigned",
+                "name": "SteeringWheelPctTorque",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Force feedback % max torque on steering shaft signed",
+                "name": "SteeringWheelPctTorqueSign",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Force feedback % max torque on steering shaft signed stops",
+                "name": "SteeringWheelPctTorqueSignStops",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Force feedback % max intensity",
+                "name": "SteeringWheelPctIntensity",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Force feedback % max smoothing",
+                "name": "SteeringWheelPctSmoothing",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Force feedback % max damping",
+                "name": "SteeringWheelPctDamper",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Force feedback limiter strength limits impacts and oscillation",
+                "name": "SteeringWheelLimiter",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Value of strength or max force slider in Nm for FFB",
+                "name": "SteeringWheelMaxForceNm",
+                "type": "Float",
+                "unit": "N*m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "True if steering wheel force is using linear mode",
+                "name": "SteeringWheelUseLinear",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "DEPRECATED use DriverCarSLBlinkRPM instead",
+                "name": "ShiftIndicatorPct",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players LF Tire Sound rumblestrip pitch",
+                "name": "TireLF_RumblePitch",
+                "type": "Float",
+                "unit": "Hz"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players RF Tire Sound rumblestrip pitch",
+                "name": "TireRF_RumblePitch",
+                "type": "Float",
+                "unit": "Hz"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players LR Tire Sound rumblestrip pitch",
+                "name": "TireLR_RumblePitch",
+                "type": "Float",
+                "unit": "Hz"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Players RR Tire Sound rumblestrip pitch",
+                "name": "TireRR_RumblePitch",
+                "type": "Float",
+                "unit": "Hz"
+            },
+            {
+                "count": 6,
+                "countAsTime": true,
+                "desc": "Output torque on steering shaft at 360 Hz",
+                "name": "SteeringWheelTorque_ST",
+                "type": "Float",
+                "unit": "N*m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Output torque on steering shaft",
+                "name": "SteeringWheelTorque",
+                "type": "Float",
+                "unit": "N*m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Z velocity",
+                "name": "VelocityZ",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Y velocity",
+                "name": "VelocityY",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "X velocity",
+                "name": "VelocityX",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Yaw rate",
+                "name": "YawRate",
+                "type": "Float",
+                "unit": "rad/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitch rate",
+                "name": "PitchRate",
+                "type": "Float",
+                "unit": "rad/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Roll rate",
+                "name": "RollRate",
+                "type": "Float",
+                "unit": "rad/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Vertical acceleration (including gravity)",
+                "name": "VertAccel",
+                "type": "Float",
+                "unit": "m/s^2"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Lateral acceleration (including gravity)",
+                "name": "LatAccel",
+                "type": "Float",
+                "unit": "m/s^2"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Longitudinal acceleration (including gravity)",
+                "name": "LongAccel",
+                "type": "Float",
+                "unit": "m/s^2"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "In car trigger car starter",
+                "name": "dcStarter",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "In car traction control active",
+                "name": "dcPitSpeedLimiterToggle",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "In car traction control active",
+                "name": "dcTractionControlToggle",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "In car headlight flash control active",
+                "name": "dcHeadlightFlash",
+                "type": "Bool",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop windshield tearoff",
+                "name": "dpWindshieldTearoff",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop rf tire change request",
+                "name": "dpRFTireChange",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop lf tire change request",
+                "name": "dpLFTireChange",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop rr tire change request",
+                "name": "dpRRTireChange",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop lr tire change request",
+                "name": "dpLRTireChange",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop fuel fill flag",
+                "name": "dpFuelFill",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop fuel add amount",
+                "name": "dpFuelAddKg",
+                "type": "Float",
+                "unit": "kg"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop fast repair set",
+                "name": "dpFastRepair",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "In car brake bias adjustment",
+                "name": "dcBrakeBias",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop lf tire cold pressure adjustment",
+                "name": "dpLFTireColdPress",
+                "type": "Float",
+                "unit": "Pa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop rf cold tire pressure adjustment",
+                "name": "dpRFTireColdPress",
+                "type": "Float",
+                "unit": "Pa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop lr tire cold pressure adjustment",
+                "name": "dpLRTireColdPress",
+                "type": "Float",
+                "unit": "Pa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop rr cold tire pressure adjustment",
+                "name": "dpRRTireColdPress",
+                "type": "Float",
+                "unit": "Pa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "In car throttle shape adjustment",
+                "name": "dcThrottleShape",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "In car traction control adjustment",
+                "name": "dcTractionControl",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop auto fill fuel system enabled",
+                "name": "dpFuelAutoFillEnabled",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Pitstop auto fill fuel next stop flag",
+                "name": "dpFuelAutoFillActive",
+                "type": "Float",
+                "unit": ""
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF brake line pressure",
+                "name": "RFbrakeLinePress",
+                "type": "Float",
+                "unit": "bar"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF wheel speed",
+                "name": "RFspeed",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire pressure",
+                "name": "RFpressure",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire cold pressure  as set in the garage",
+                "name": "RFcoldPressure",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire left surface temperature",
+                "name": "RFtempL",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire middle surface temperature",
+                "name": "RFtempM",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire right surface temperature",
+                "name": "RFtempR",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire left carcass temperature",
+                "name": "RFtempCL",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire middle carcass temperature",
+                "name": "RFtempCM",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire right carcass temperature",
+                "name": "RFtempCR",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire left percent tread remaining",
+                "name": "RFwearL",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire middle percent tread remaining",
+                "name": "RFwearM",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF tire right percent tread remaining",
+                "name": "RFwearR",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF brake line pressure",
+                "name": "LFbrakeLinePress",
+                "type": "Float",
+                "unit": "bar"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF wheel speed",
+                "name": "LFspeed",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire pressure",
+                "name": "LFpressure",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire cold pressure  as set in the garage",
+                "name": "LFcoldPressure",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire left surface temperature",
+                "name": "LFtempL",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire middle surface temperature",
+                "name": "LFtempM",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire right surface temperature",
+                "name": "LFtempR",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire left carcass temperature",
+                "name": "LFtempCL",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire middle carcass temperature",
+                "name": "LFtempCM",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire right carcass temperature",
+                "name": "LFtempCR",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire left percent tread remaining",
+                "name": "LFwearL",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire middle percent tread remaining",
+                "name": "LFwearM",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF tire right percent tread remaining",
+                "name": "LFwearR",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine fuel used instantaneous",
+                "name": "FuelUsePerHour",
+                "type": "Float",
+                "unit": "kg/h"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine voltage",
+                "name": "Voltage",
+                "type": "Float",
+                "unit": "V"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine coolant temp",
+                "name": "WaterTemp",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine coolant level",
+                "name": "WaterLevel",
+                "type": "Float",
+                "unit": "l"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine fuel pressure",
+                "name": "FuelPress",
+                "type": "Float",
+                "unit": "bar"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine oil temperature",
+                "name": "OilTemp",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine oil pressure",
+                "name": "OilPress",
+                "type": "Float",
+                "unit": "bar"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine oil level",
+                "name": "OilLevel",
+                "type": "Float",
+                "unit": "l"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine manifold pressure",
+                "name": "ManifoldPress",
+                "type": "Float",
+                "unit": "bar"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Liters of fuel remaining",
+                "name": "FuelLevel",
+                "type": "Float",
+                "unit": "l"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Engine0Engine rpm",
+                "name": "Engine0_RPM",
+                "type": "Float",
+                "unit": "revs/min"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR brake line pressure",
+                "name": "RRbrakeLinePress",
+                "type": "Float",
+                "unit": "bar"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR wheel speed",
+                "name": "RRspeed",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire pressure",
+                "name": "RRpressure",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire cold pressure  as set in the garage",
+                "name": "RRcoldPressure",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire left surface temperature",
+                "name": "RRtempL",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire middle surface temperature",
+                "name": "RRtempM",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire right surface temperature",
+                "name": "RRtempR",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire left carcass temperature",
+                "name": "RRtempCL",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire middle carcass temperature",
+                "name": "RRtempCM",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire right carcass temperature",
+                "name": "RRtempCR",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire left percent tread remaining",
+                "name": "RRwearL",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire middle percent tread remaining",
+                "name": "RRwearM",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR tire right percent tread remaining",
+                "name": "RRwearR",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR brake line pressure",
+                "name": "LRbrakeLinePress",
+                "type": "Float",
+                "unit": "bar"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR wheel speed",
+                "name": "LRspeed",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire pressure",
+                "name": "LRpressure",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire cold pressure  as set in the garage",
+                "name": "LRcoldPressure",
+                "type": "Float",
+                "unit": "kPa"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire left surface temperature",
+                "name": "LRtempL",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire middle surface temperature",
+                "name": "LRtempM",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire right surface temperature",
+                "name": "LRtempR",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire left carcass temperature",
+                "name": "LRtempCL",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire middle carcass temperature",
+                "name": "LRtempCM",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire right carcass temperature",
+                "name": "LRtempCR",
+                "type": "Float",
+                "unit": "C"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire left percent tread remaining",
+                "name": "LRwearL",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire middle percent tread remaining",
+                "name": "LRwearM",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR tire right percent tread remaining",
+                "name": "LRwearR",
+                "type": "Float",
+                "unit": "%"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR shock deflection",
+                "name": "LRshockDefl",
+                "type": "Float",
+                "unit": "m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR shock velocity",
+                "name": "LRshockVel",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR shock deflection",
+                "name": "RRshockDefl",
+                "type": "Float",
+                "unit": "m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR shock velocity",
+                "name": "RRshockVel",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF shock deflection",
+                "name": "LFshockDefl",
+                "type": "Float",
+                "unit": "m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF shock velocity",
+                "name": "LFshockVel",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF shock deflection",
+                "name": "RFshockDefl",
+                "type": "Float",
+                "unit": "m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF shock velocity",
+                "name": "RFshockVel",
+                "type": "Float",
+                "unit": "m/s"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LF ride height",
+                "name": "LFrideHeight",
+                "type": "Float",
+                "unit": "m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RF ride height",
+                "name": "RFrideHeight",
+                "type": "Float",
+                "unit": "m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "LR ride height",
+                "name": "LRrideHeight",
+                "type": "Float",
+                "unit": "m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "RR ride height",
+                "name": "RRrideHeight",
+                "type": "Float",
+                "unit": "m"
+            },
+            {
+                "count": 1,
+                "countAsTime": false,
+                "desc": "Center front splitter ride height",
+                "name": "CFSRrideHeight",
+                "type": "Float",
+                "unit": "m"
+            }
+        ]
+    }
+}

@@ -134,7 +134,7 @@
 			"xutility": "cpp",
 			"*.ipp": "cpp"
 		},
-		"autoHide.autoHideSideBar": true
+		"autoHide.autoHideSideBar": false
 	},
 	"launch": {
 		"configurations": [

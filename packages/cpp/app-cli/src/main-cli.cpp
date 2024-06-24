@@ -13,6 +13,7 @@
 #include "SHMViewerArgCommand.h"
 #include "GenerateTrackmapArgCommand.h"
 #include "SessionPlayArgCommand.h"
+#include "TelemetryDumpArgCommand.h"
 #include "SessionRecordArgCommand.h"
 #include "DashboardArgCommand.h"
 
@@ -29,8 +30,8 @@ int main(int argc, char** argv) {
     System::DisplayInfoSetup();
     System::GetAllDisplayInfo();
 
-    QCoreApplication::setApplicationName(APP_NAME);
-    QCoreApplication::setApplicationVersion(APP_VERSION);
+    // QCoreApplication::setApplicationName(APP_NAME);
+    // QCoreApplication::setApplicationVersion(APP_VERSION);
 
     CLI::App app{APP_NAME};
     std::string appVerion{APP_VERSION};
@@ -41,7 +42,7 @@ int main(int argc, char** argv) {
     app.set_help_all_flag("--help-all", "Show all help details");
     app.set_version_flag("--version", appVerion);
 
-    auto cmds = ArgCommand::build<DashboardArgCommand, GenerateTrackmapArgCommand, SessionPlayArgCommand,
+    auto cmds = ArgCommand::build<TelemetryDumpArgCommand, DashboardArgCommand, GenerateTrackmapArgCommand, SessionPlayArgCommand,
                                   SessionRecordArgCommand, SHMViewerArgCommand>(&app);
 
     CLI11_PARSE(app, argc, argv);

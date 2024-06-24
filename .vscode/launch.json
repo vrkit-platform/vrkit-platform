@@ -20,6 +20,54 @@
       ]
     },
     {
+      "name": "irt_tool: TelemetryDump",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetDirectory}\\irt_tool.exe",
+      "args": [
+        "telemetry-dump",
+        "--ibt",
+        "data\\ibt\\ligierjsp320_twinring.ibt",
+        "-o",
+        "data\\telemetry-dump\\telemetry-dump-01",
+        "--json",
+        // "-f",
+        // "YAML"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:PATH};${command:cmake.launchTargetDirectory};C:/Qt/6.5.0;C:/Qt/6.5.0/bin;;C:/Qt/6.5.0/lib"
+        }
+      ]
+    },
+    {
+      "name": "irt_tool: Generate Track Map",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetDirectory}\\irt_tool.exe",
+      "args": [
+        "generate-trackmap",
+        "--ibt",
+        "data\\ibt\\ligierjsp320_twinring.ibt",
+        "-o",
+        "tmp\\lmp3",
+        "--json",
+        // "-f",
+        // "YAML"
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:PATH};${command:cmake.launchTargetDirectory};C:/Qt/6.5.0;C:/Qt/6.5.0/bin;;C:/Qt/6.5.0/lib"
+        }
+      ]
+    },
+    {
       "type": "cmake",
       "request": "launch",
       "name": "Debug portfile(s)",

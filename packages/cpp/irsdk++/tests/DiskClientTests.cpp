@@ -93,8 +93,7 @@ TEST_F(DiskClientTests, can_open) {
 TEST_F(DiskClientTests, aggregate_laps) {
  
     auto file = ToIBTTestFile(IBTTestFile2);
-    
-    
+
     DiskClientDataFrameProcessor<std::size_t> frameProc(file);
     auto client = frameProc.getClient();
     auto provider = client->getProvider();
@@ -131,7 +130,6 @@ TEST_F(DiskClientTests, aggregate_laps) {
     info("lapCount={},frameCount={}", lapCount, res.value_or(0));
 
     auto frameLapChunkFn = [](const LapDataFrame & o1, const LapDataFrame & o2) {
-        //return std::get<0>(o1) < std::get<0>(o2) && std::get<1>(o1) < std::get<1>(o2);
         return std::get<1>(o1) == std::get<1>(o2);
     };
     auto frameLapChunks = frames | std::views::chunk_by(frameLapChunkFn);
@@ -166,6 +164,26 @@ TEST_F(DiskClientTests, aggregate_laps) {
         auto&[sessionTime, lapNumber, lapTime, incidientCount, coordinates] = lap;
         info("sessionTime={},lap={},lapTimeSeconds={},incidentCount={},coordinateCount={}", sessionTime, lapNumber, lapTime, incidientCount, coordinates.size());
     }
+
+    auto getLap = [] (const LapDataWithPath & it) { return std::get<1>(it);};
+    auto getLapTime = [] (const LapDataWithPath & it) { return std::get<2>(it);};
+    auto getIncidentCount = [] (const LapDataWithPath & it) { return std::get<3>(it);};
+    auto isIncompleteLap = [&](const LapDataWithPath & it) { return getLap(it) == 0 || getLap(it) == (laps.size() - 1);};
+    auto isBadLap = [&](const LapDataWithPath & it) { return getIncidentCount(it) > 0;};
+    auto badLapCount = std::ranges::distance(std::ranges::filter_view(laps | std::views::filter(std::not_fn(isIncompleteLap)),isBadLap));
+
+    info("Bad lap count == {}", badLapCount);
+    EXPECT_GT(badLapCount, 0);
+
+    LapDataWithPath emptyLap {0,0,0,0,{}};
+    auto bestLap = std::ranges::fold_left(
+        laps | std::views::filter(std::not_fn(isBadLap)), emptyLap , [&] (const LapDataWithPath& currentBest,const LapDataWithPath& it) {
+            if (getLap(currentBest) == 0 || getLapTime(it) < getLapTime(currentBest))
+                return it;
+            return currentBest;
+        });
+
+    info("Best lap ({}), seconds: {}", getLap(bestLap), getLapTime(bestLap));
 
 
 }

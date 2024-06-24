@@ -45,7 +45,7 @@
 /* ************************************************************************** */
 
 using namespace IRacingTools::App;
-using namespace IRacingTools::App::Services;
+using namespace IRacingTools::Services;
 
 namespace {
 const QString &EngineContextEntryKey(const QMLEngineContextEntry &entry) {

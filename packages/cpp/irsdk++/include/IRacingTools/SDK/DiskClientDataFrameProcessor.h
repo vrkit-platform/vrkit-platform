@@ -32,7 +32,11 @@ namespace IRacingTools::SDK {
              */
             using Callback = std::function<bool(const Context& context, Data& result)>;
 
-            explicit DiskClientDataFrameProcessor(const std::filesystem::path& file) : client_(std::make_shared<DiskClient>(file, file.string())) {}
+            explicit DiskClientDataFrameProcessor(const std::filesystem::path& file) : client_(
+                std::make_shared<DiskClient>(file, file.string())
+            ) {}
+
+            explicit DiskClientDataFrameProcessor(const std::shared_ptr<DiskClient>& client) : client_(client) {}
 
             DiskClientDataFrameProcessor() = delete;
             DiskClientDataFrameProcessor(const DiskClientDataFrameProcessor& other) = delete;
@@ -45,7 +49,7 @@ namespace IRacingTools::SDK {
             std::shared_ptr<DiskClient> getClient() {
                 return client_;
             }
-            
+
             /**
              * @brief Session update string (yaml)
              *

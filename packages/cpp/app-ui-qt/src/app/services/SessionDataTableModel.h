@@ -14,7 +14,7 @@
 #include "../AppSessionConfig.h"
 #include "AppSessionDataEvent.h"
 
-namespace IRacingTools::App::Services {
+namespace IRacingTools::Services {
 
 /**
  * @brief IRacing Data Service
@@ -45,4 +45,4 @@ private:
     //    HANDLE dataValidEvent_{nullptr};
 };
 
-} // namespace IRacingTools::App::Services
+} // namespace IRacingTools::Services

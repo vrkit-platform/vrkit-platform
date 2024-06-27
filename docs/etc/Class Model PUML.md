@@ -117,9 +117,9 @@ namespace IRacingTools {
 			+{abstract} stop() : void
 		}
 
-		class SessionDataUpdatedEvent {
-			+SessionDataUpdatedEvent(SessionDataEventType type, SessionDataAccess* dataAccess)
-			+~SessionDataUpdatedEvent()
+		class SessionDataUpdatedDataEvent {
+			+SessionDataUpdatedDataEvent(SessionDataEventType type, SessionDataAccess* dataAccess)
+			+~SessionDataUpdatedDataEvent()
 			-dataAccess_ : SessionDataAccess*
 			+sessionTimeMillis() : int
 			+cars() : std::vector<SessionCarState>&
@@ -204,12 +204,12 @@ namespace IRacingTools {
 		class SessionDataProvider::Timing {
 		}
 
-		class SessionDataUpdatedEvent::SessionCarState {
+		class SessionDataUpdatedDataEvent::SessionCarState {
 			+toTuple() : SessionCarStateRecord
 			+driver : std::optional<SDK::SessionInfo::Driver>
 		}
 
-		class SessionDataUpdatedEvent::SessionCarState::anon_struct_1 {
+		class SessionDataUpdatedDataEvent::SessionCarState::anon_struct_1 {
 		}
 
 		class Size <template<class T>> {
@@ -784,7 +784,7 @@ namespace IRacingTools {
 				-trackMapChanged_ : std::atomic_flag
 				-createResources() : void
 				-createTargetResources(const std::shared_ptr<RenderTarget>& target) : void
-				+render(const std::shared_ptr<RenderTarget>& target, const std::shared_ptr<SessionDataUpdatedEvent>& data) : void
+				+render(const std::shared_ptr<RenderTarget>& target, const std::shared_ptr<SessionDataUpdatedDataEvent>& data) : void
 				-resetTargetResources() : void
 			}
 
@@ -901,7 +901,7 @@ IRacingTools.Shared.UI.Renderer <|-- IRacingTools.Shared.UI.D3D11Renderer
 IRacingTools.Shared.SHM.SHMReader <|-- IRacingTools.Shared.SHM.SHMCachedReader
 
 
-IRacingTools.Shared.SessionDataEvent <|-- IRacingTools.Shared.SessionDataUpdatedEvent
+IRacingTools.Shared.SessionDataEvent <|-- IRacingTools.Shared.SessionDataUpdatedDataEvent
 
 
 IRacingTools.Shared.SessionDataProvider <|-- IRacingTools.Shared.DiskSessionDataProvider
@@ -975,7 +975,7 @@ IRacingTools.Shared.SHM.SHMCachedReader *-- IRacingTools.Shared.SHM.Snapshot
 IRacingTools.Shared.SessionDataEvent *-- IRacingTools.Shared.SessionDataEventType
 
 
-IRacingTools.Shared.SessionDataUpdatedEvent o-- IRacingTools.Shared.SessionDataAccess
+IRacingTools.Shared.SessionDataUpdatedDataEvent o-- IRacingTools.Shared.SessionDataAccess
 
 
 IRacingTools.Shared.SHM.Snapshot *-- IRacingTools.Shared.SHM.FrameMetadata
@@ -1029,10 +1029,10 @@ IRacingTools.Shared.SHM.DX11.SHMDX11CachedReader +-- IRacingTools.Shared.SHM.DX1
 IRacingTools.Shared.SessionDataProvider +-- IRacingTools.Shared.SessionDataProvider::Timing
 
 
-IRacingTools.Shared.SessionDataUpdatedEvent +-- IRacingTools.Shared.SessionDataUpdatedEvent::SessionCarState
+IRacingTools.Shared.SessionDataUpdatedDataEvent +-- IRacingTools.Shared.SessionDataUpdatedDataEvent::SessionCarState
 
 
-IRacingTools.Shared.SessionDataUpdatedEvent::SessionCarState +-- IRacingTools.Shared.SessionDataUpdatedEvent::SessionCarState::anon_struct_1
+IRacingTools.Shared.SessionDataUpdatedDataEvent::SessionCarState +-- IRacingTools.Shared.SessionDataUpdatedDataEvent::SessionCarState::anon_struct_1
 
 
 IRacingTools.Shared.SHM.Snapshot +-- IRacingTools.Shared.SHM.Snapshot::State

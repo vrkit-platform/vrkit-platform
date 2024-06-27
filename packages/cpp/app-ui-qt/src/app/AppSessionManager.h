@@ -72,7 +72,7 @@ namespace IRacingTools::App {
     void setConfig(QSharedPointer<AppSessionConfig> config = {nullptr});
 
     std::atomic_bool stopped_{false};
-    std::vector<Shared::SessionDataUpdatedEvent::SessionCarState> cars_{};
+    std::vector<Shared::SessionDataUpdatedDataEvent::SessionCarState> cars_{};
     std::mutex dataMutex_{};
 
     QSharedPointer<AppSessionState> session_;

@@ -3,6 +3,7 @@
 //
 
 #include <cstdio>
+#include <spdlog/spdlog.h>
 
 #include <IRacingTools/SDK/Utils/ChronoHelpers.h>
 #include <IRacingTools/Shared/Chrono.h>
@@ -26,6 +27,9 @@ namespace IRacingTools::Shared {
     }
   }
 
+  /**
+   * @brief Initialize the live session data provider
+   */
   void LiveSessionDataProvider::init() {
     std::scoped_lock lock(threadMutex_);
     if (!running_) {
@@ -39,21 +43,19 @@ namespace IRacingTools::Shared {
     timeBeginPeriod(1);
   }
 
+  /**
+   * @brief Process newly received data frame
+   * 
+   */
   void LiveSessionDataProvider::processData() {
-    //    auto &client = LiveClient::GetInstance();
-    //    bool wasUpdated = false;
-
-    // and grab the data
-    processDataUpdate();
-    processYAMLLiveString();
-
-    //    if (processYAMLLiveString())
-    //        wasUpdated = true;
-    //
-    //    // only process session string if it changed
-    //    if (client.wasSessionStrUpdated()) {
-    //        wasUpdated = true;
-    //    }
+    auto& client = LiveClient::GetInstance();
+    if (client.wasSessionInfoUpdated()) {
+      spdlog::info("SessionInfoUpdated (updateCount={})", client.getSessionInfoUpdateCount().value());
+      publish(std::make_shared<SessionDataUpdatedInfoEvent>(client.getSessionInfo()));    
+    }
+    
+    publish(std::make_shared<SessionDataUpdatedDataEvent>(SessionDataEventType::UpdatedData, &dataAccess_));
+    
   }
 
   void LiveSessionDataProvider::process() {
@@ -65,12 +67,6 @@ namespace IRacingTools::Shared {
     checkConnection();
   }
 
-  void LiveSessionDataProvider::processDataUpdate() {
-    auto event = std::make_shared<SessionDataUpdatedEvent>(SessionDataEventType::Updated, &dataAccess_);
-
-    publish(event);
-    //emit sessionUpdated(event);
-  }
 
   void LiveSessionDataProvider::checkConnection() {
     auto isConnected = LiveClient::GetInstance().isConnected();
@@ -90,37 +86,6 @@ namespace IRacingTools::Shared {
 
   bool LiveSessionDataProvider::isLive() const {
     return true;
-  }
-
-  bool LiveSessionDataProvider::processYAMLLiveString() {
-    bool wasUpdated = false;
-
-    //****Note, your code goes here
-    // can write to disk, parse, etc
-
-    // output file once every 1 seconds
-    constexpr auto minTime = static_cast<DWORD>(1000);
-    const auto curTime = timeGetTime();// millisecond resolution
-    if (abs(static_cast<long long>(curTime - lastUpdatedTime_)) > minTime) {
-      lastUpdatedTime_ = curTime;
-      wasUpdated = true;
-      //        qDebug() << "Updated session str at: " << curTime;
-      //        const char* yamlStr = generateLiveYAMLString();
-      //        // validate string
-      //        if (yamlStr && yamlStr[0])
-      //        {
-      //            FILE* f = fopen("liveStr.txt", "w");
-      //            if (f)
-      //            {
-      //                fputs(yamlStr, f);
-      //                fclose(f);
-      //                f = nullptr;
-      //                wasUpdated = true;
-      //            }
-      //        }
-    }
-
-    return wasUpdated;
   }
 
   bool LiveSessionDataProvider::isRunning() {

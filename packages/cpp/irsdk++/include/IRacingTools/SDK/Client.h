@@ -44,6 +44,9 @@ namespace IRacingTools::SDK {
 
   class Client {
   public:
+    using SessionInfoWithUpdateCount = std::pair<std::int32_t, std::shared_ptr<SessionInfo::SessionInfoMessage>>;
+    using WeakSessionInfoWithUpdateCount = std::pair<std::int32_t, std::weak_ptr<SessionInfo::SessionInfoMessage>>;
+    
     static constexpr std::string_view LiveClientId{};
 
     virtual ~Client() = default;
@@ -64,6 +67,7 @@ namespace IRacingTools::SDK {
     virtual std::optional<uint32_t> getNumVars() = 0;
 
     virtual const VarHeaders &getVarHeaders() = 0;
+    
 
     virtual Opt<const VarDataHeader *> getVarHeader(uint32_t idx) = 0;
     virtual Opt<const VarDataHeader *> getVarHeader(const std::string_view &name) = 0;
@@ -108,12 +112,14 @@ namespace IRacingTools::SDK {
 
 
     // 1 success, 0 failure, -n minimum buffer size
-    virtual Expected<std::string_view> getSessionStr() = 0;
+    virtual Expected<std::string_view> getSessionInfoStr() = 0;
+    virtual std::optional<std::int32_t> getSessionInfoUpdateCount() = 0;
+    virtual std::optional<WeakSessionInfoWithUpdateCount> getSessionInfoWithUpdateCount() = 0;
     virtual std::weak_ptr<SessionInfo::SessionInfoMessage> getSessionInfo() = 0;
 //    virtual int getSessionStrVal(const std::string_view &path, char *val, int valLen) = 0;
 
     // get the whole string
-//    virtual const char *getSessionStr() = 0;
+//    virtual const char *getSessionInfoStr() = 0;
 
 
 

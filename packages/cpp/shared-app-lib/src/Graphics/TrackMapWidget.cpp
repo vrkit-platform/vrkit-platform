@@ -33,7 +33,7 @@ namespace IRacingTools::Shared::Graphics {
 
     void TrackMapWidget::render(
         const std::shared_ptr<RenderTarget>& target,
-        const std::shared_ptr<SessionDataUpdatedEvent>& data
+        const std::shared_ptr<SessionDataUpdatedDataEvent>& data
     ) {
         // TODO: Check if DXResources->getSize() changed too
         auto targetSize = target->getDimensions();

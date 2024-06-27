@@ -1,7 +1,8 @@
 #include <cstring>
+#include <mutex>
 
 #include <magic_enum.hpp>
-#include <mutex>
+#include <spdlog/spdlog.h>
 #include <yaml-cpp/yaml.h>
 
 #include <IRacingTools/SDK/LiveClient.h>
@@ -16,6 +17,11 @@ namespace IRacingTools::SDK {
   using namespace Utils;
 
   namespace {
+
+    /**
+     * @brief `ClientProvider` implementation for `LiveClient` implementation
+     * 
+     */
     struct LiveClientProvider : ClientProvider {
       std::shared_ptr<Client> client;
 
@@ -29,6 +35,11 @@ namespace IRacingTools::SDK {
     };
   }
 
+  /**
+   * @brief Get the data provider for `VarHolder` instances
+   * 
+   * @return std::shared_ptr<ClientProvider> 
+   */
   std::shared_ptr<ClientProvider> LiveClient::getProvider() {
     static std::mutex sProviderMutex{};
 
@@ -39,41 +50,77 @@ namespace IRacingTools::SDK {
     return clientProvider_;
   }
 
+  /**
+   * @brief Calculates whether or not session info & 
+   *  other dependencies are properly flagged & updated
+   * 
+   */
+  void LiveClient::onNewClientData() {
+    std::scoped_lock lock(sessionInfoMutex_);
+    
+    // Increment the sample count
+    sessionSampleCount_++;
+    auto res = updateSessionInfo();
+    if (!res.has_value()) {
+      spdlog::critical("Unable to updateSessionInfo: {}", res.error().what());
+      return;
+    }
+
+    auto infoChanged = res.value();
+    if (infoChanged) {
+      sessionInfoChangedFlag_.test_and_set();
+    } else {
+      sessionInfoChangedFlag_.clear();
+    }
+  }
+
+  /**
+   * @brief Reset all session/frame/sample trackers
+   * 
+   */
+  void LiveClient::resetSession() {
+    std::scoped_lock lock(sessionInfoMutex_);
+    sessionInfo_ = {-1,nullptr};
+    sessionId_ = -1;
+    sessionSampleCount_ = -1;
+    sessionInfoChangedFlag_.clear();
+  }
+
   bool LiveClient::waitForData(int timeoutMS) {
+    std::scoped_lock lock(sessionInfoMutex_);
     auto &conn = LiveConnection::GetInstance();
 
     // wait for start of session or new data
     if (conn.waitForDataReady(timeoutMS, data_) && conn.getHeader()) {
       // if new connection, or data changed lenght then init
-      if (!data_ || nData_ != conn.getHeader()->bufLen) {
+      if (!data_ || nData_ != conn.getHeader()->bufLen || !sessionInfo_.second || sessionInfo_.second->weekendInfo.sessionID != sessionId_) {
         // allocate memory to hold incoming data from sim
         delete[] data_;
 
         nData_ = conn.getHeader()->bufLen;
         data_ = new char[nData_];
 
-        // indicate a new connection
-        // TODO: Revisit old `connectionId` incrementer
-        //connectionChangedSeqId_++;
-
         // reset session info str status
-        previousSessionInfoUpdateCount_ = -1;
+        resetSession();
 
         // and try to fill in the data
-        if (conn.getNewData(data_))
+        if (conn.getNewData(data_)){
+          onNewClientData();
           return true;
+        }
       } else {
-        // else we are already initialized, and data is ready for processing
+        updateSessionInfo();
         return true;
       }
     } else if (!isConnected()) {
       // else session ended
       if (data_)
         delete[] data_;
+      
       data_ = nullptr;
 
       // reset session info str status
-      previousSessionInfoUpdateCount_ = -1;
+      resetSession();
     }
 
     return false;
@@ -87,7 +134,7 @@ namespace IRacingTools::SDK {
     data_ = nullptr;
 
     // reset session info str status
-    previousSessionInfoUpdateCount_ = -1;
+    sessionInfo_.first = -1;
   }
 
   bool LiveClient::isConnected() const {
@@ -252,7 +299,8 @@ namespace IRacingTools::SDK {
     return std::nullopt;
   }
 
-  Opt<std::size_t> LiveClient::getSessionUpdateCount() {
+  Opt<std::int32_t> LiveClient::getSessionInfoUpdateCount() {
+    std::scoped_lock lock(sessionInfoMutex_);
     if (isConnected()) {
       auto &conn = LiveConnection::GetInstance();
       return conn.getSessionUpdateCount();
@@ -261,86 +309,80 @@ namespace IRacingTools::SDK {
     return std::nullopt;
   }
 
-  //
   /**
- * @brief Get the session update string
- *
- * Get a session update string for a given path
- *
- * @param path string with format "DriverInfo:Drivers:CarIdx:{%d}UserName:"
- * @param val
- * @param valLen
- * @return
- */
-  //int LiveClient::getSessionStrVal(const std::string_view &path, char *val, int valLen) {
-  //    auto &conn = LiveConnection::GetInstance();
-  //    auto sessionUpdateCount = getSessionUpdateCount();
-  //    if (!isConnected() || !sessionUpdateCount || path.empty() || !val || !valLen) {
-  //        return 0;
-  //    }
-  //
-  //    // track changes in string
-  //    previousSessionInfoUpdateCount_ = sessionUpdateCount.value();
-  //
-  //    const char *tVal = nullptr;
-  //    int tValLen = 0;
-  //    if (ParseYaml(conn.getSessionInfoStr(), path, &tVal, &tValLen)) {
-  //        // dont overflow out buffer
-  //        int len = tValLen;
-  //        if (len > valLen)
-  //            len = valLen;
-  //
-  //        // copy what we can, even if buffer too small
-  //        memcpy(val, tVal, len);
-  //        val[len] = '\0'; // original string has no null termination...
-  //
-  //        // if buffer was big enough, return success
-  //        if (valLen >= tValLen)
-  //            return 1;
-  //        else // return size of buffer needed
-  //            return -tValLen;
-  //    }
-  //
-  //    return 0;
-  //}
-
-  std::weak_ptr<SessionInfo::SessionInfoMessage> LiveClient::getSessionInfo() {
-    if (!sessionInfo_ && isConnected()) {
-      getSessionStr();
-    }
-    return sessionInfo_;
+   * @brief Get session info with the current update count
+   * 
+   * @return std::optional<Client::WeakSessionInfoWithUpdateCount> 
+   */
+  std::optional<Client::WeakSessionInfoWithUpdateCount> LiveClient::getSessionInfoWithUpdateCount() {        
+      return isAvailable() ? std::make_optional<WeakSessionInfoWithUpdateCount>({sessionInfo_.first, sessionInfo_.second}) : std::nullopt;
   }
 
-  // get the whole string
-  Expected<std::string_view> LiveClient::getSessionStr() {
+  std::weak_ptr<SessionInfo::SessionInfoMessage> LiveClient::getSessionInfo() {
+    std::scoped_lock lock(sessionInfoMutex_);
+    auto res = updateSessionInfo();
+    return res.has_value() && isConnected() && sessionInfo_.second ? sessionInfo_.second : nullptr;
+  }
+
+  Expected<bool> LiveClient::updateSessionInfo() {
+    std::scoped_lock lock(sessionInfoMutex_);
     auto &conn = LiveConnection::GetInstance();
-    auto countOpt = getSessionUpdateCount();
+    auto countOpt = getSessionInfoUpdateCount();
     if (isConnected() && countOpt) {
       auto count = countOpt.value();
-      if (!sessionInfoStr_ || !sessionInfoStr_.value().empty() || previousSessionInfoUpdateCount_ != count) {
-        previousSessionInfoUpdateCount_ = count;
-
+      if (!sessionInfoStr_ || sessionInfoStr_.value().empty() || sessionInfo_.first != count) {
         auto data = conn.getSessionInfoStr();
-        if (data) {
+        
+        if (data) {          
+          sessionInfo_.first = count;
           sessionInfoStr_ = std::make_optional<std::string_view>(data);
           auto rootNode = YAML::Load(data);
-          if (!sessionInfo_) {
-            sessionInfo_ = std::make_shared<SessionInfo::SessionInfoMessage>();
+          if (!sessionInfo_.second) {
+            sessionInfo_.second = std::make_shared<SessionInfo::SessionInfoMessage>();
           }
 
-          SessionInfo::SessionInfoMessage *sessionInfo = sessionInfo_.get();
+          SessionInfo::SessionInfoMessage *sessionInfo = sessionInfo_.second.get();
           *sessionInfo = rootNode.as<SessionInfo::SessionInfoMessage>();
+          sessionId_ = sessionInfo_.second->weekendInfo.sessionID;
+          return true;
         }
-      }
-      if (sessionInfoStr_)
-        return sessionInfoStr_.value();
+      }      
+    } else {
+      sessionInfo_ = {-1,nullptr};      
     }
+    return false;
+  }
+
+  /**
+   * @brief Get the session update string
+   *
+   * Get a session update string for a given path
+   *
+   * @return
+   */
+  Expected<std::string_view> LiveClient::getSessionInfoStr() {
+    std::scoped_lock lock(sessionInfoMutex_);
+    auto res = updateSessionInfo();
+    if (!res.has_value()) 
+      return std::unexpected(res.error());
+
+    if (sessionInfoStr_)
+        return sessionInfoStr_.value();
 
     return MakeUnexpected<GeneralError>("Session Str not found");
   }
-  bool LiveClient::wasSessionStrUpdated() {
-    return previousSessionInfoUpdateCount_ != getSessionUpdateCount();
+  
+  /**
+   * @brief Check to see if `sessionInfoChangedFlag_` flag is set
+   * 
+   * @return true when session update count OR session id changes and/or is reset
+   * @return false if no session info changes were detected & session remains constant
+   */
+  bool LiveClient::wasSessionInfoUpdated() {
+    std::scoped_lock lock(sessionInfoMutex_);
+    return sessionInfoChangedFlag_.test();
   }
+
   Opt<double> LiveClient::getVarDouble(const std::string_view &name, uint32_t entry) {
     auto res = getVarIdx(name);
     return res ? getVarDouble(res.value(), entry) : std::nullopt;

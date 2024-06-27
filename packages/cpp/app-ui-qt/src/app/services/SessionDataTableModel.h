@@ -40,7 +40,7 @@ public:
 
 private:
 
-    std::vector<Shared::SessionDataUpdatedEvent::SessionCarState> cars_{};
+    std::vector<Shared::SessionDataUpdatedDataEvent::SessionCarState> cars_{};
 
     //    HANDLE dataValidEvent_{nullptr};
 };

@@ -77,6 +77,8 @@ namespace IRacingTools::SDK {
     std::size_t getFileSize();
 
     virtual bool isAvailable() override;
+    
+    
 
     // return how many variables this .ibt file has in the header
     std::optional<uint32_t> getNumVars() override;
@@ -156,13 +158,17 @@ namespace IRacingTools::SDK {
              *
              * @return string_view or error if unavailable
              */
-    Expected<std::string_view> getSessionStr() override;
+    Expected<std::string_view> getSessionInfoStr() override;
+
+    virtual std::optional<std::int32_t> getSessionInfoUpdateCount() override;
 
     virtual std::weak_ptr<SessionInfo::SessionInfoMessage> getSessionInfo() override;
-
+    virtual std::optional<WeakSessionInfoWithUpdateCount> getSessionInfoWithUpdateCount() override;
     virtual ClientId getClientId() override;
 
   protected:
+    std::expected<bool, GeneralError> updateSessionInfo(std::FILE * ibtFile = nullptr);
+    
     bool openFile();
 
     const std::string_view clientId_;
@@ -179,7 +185,8 @@ namespace IRacingTools::SDK {
     std::atomic_int64_t sampleIndex_{};
 
     std::shared_ptr<Utils::DynamicBuffer<char>> sessionInfoBuf_;
-    std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfo_{nullptr};
+    SessionInfoWithUpdateCount sessionInfo_{-1, nullptr};
+    // std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfo_{nullptr};
 
     std::vector<VarDataHeader> varHeaders_{};
     Utils::DynamicBuffer<char> varBuf_{};

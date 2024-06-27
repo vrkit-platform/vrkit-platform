@@ -38,7 +38,6 @@ namespace IRacingTools::App::Commands {
   using namespace IRacingTools::SDK::Utils;
 
   namespace {
-    // static constexpr std::string_view LogCategory = PrettyType<TelemetryFileHandler>();
     log::logger L = GetCategoryWithType<TelemetryDumpArgCommand>();
   }// namespace
 

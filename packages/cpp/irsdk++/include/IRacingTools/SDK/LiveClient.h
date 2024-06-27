@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Client.h"
 #include "Utils/Buffer.h"
+#include <mutex>
 
 namespace IRacingTools::SDK {
 
@@ -41,6 +42,7 @@ namespace IRacingTools::SDK {
 // reads out the data into a cache, so you don't have to worry about timing
 class LiveClient : public Client, public Utils::Singleton<LiveClient>, public std::enable_shared_from_this<LiveClient> {
 public:
+
     LiveClient() = delete;
     LiveClient(const LiveClient &other) = delete;
     LiveClient(LiveClient &&other) noexcept = delete;
@@ -59,6 +61,8 @@ public:
     virtual ClientId getClientId() override;
 
     virtual bool isAvailable() override;
+
+    
 
     // what is the base type of the data
     // returns VarDataType as int, so we don't depend on IRTypes.h
@@ -104,31 +108,38 @@ public:
 
     // get the whole string
     // get the whole string
-    virtual Expected<std::string_view> getSessionStr() override;
-
+    
+    virtual Expected<std::string_view> getSessionInfoStr() override;
+    virtual std::optional<WeakSessionInfoWithUpdateCount> getSessionInfoWithUpdateCount() override;
     virtual std::weak_ptr<SessionInfo::SessionInfoMessage> getSessionInfo() override;
 
     // value that increments with each update to string
-    Opt<std::size_t> getSessionUpdateCount();
+    Opt<std::int32_t> getSessionInfoUpdateCount();
 
     // has string changed since we last read any values from it
-    bool wasSessionStrUpdated();
+    bool wasSessionInfoUpdated();
 
 private:
-    explicit LiveClient(token) : data_(nullptr), nData_(0), previousSessionInfoUpdateCount_(-1) {}
+    explicit LiveClient(token) {}
 
     friend Singleton;
 
-
     void shutdown();
 
-    char *data_;
-    int nData_;
+    Expected<bool> updateSessionInfo();
+    void onNewClientData();
+    void resetSession();
 
-    std::size_t previousSessionInfoUpdateCount_{0};
-
+    char *data_ {nullptr};
+    int nData_ {0};
+    std::int32_t sessionId_{-1};
+    std::int32_t sessionSampleCount_{-1};
+    std::atomic_flag sessionInfoChangedFlag_{};
+    std::recursive_mutex sessionInfoMutex_{};
+    
     Opt<std::string_view> sessionInfoStr_{std::nullopt};
-    std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfo_{nullptr};
+    
+    SessionInfoWithUpdateCount sessionInfo_{0,nullptr};
     std::shared_ptr<ClientProvider> clientProvider_{};
 
 };

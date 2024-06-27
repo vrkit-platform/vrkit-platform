@@ -144,7 +144,7 @@ namespace IRacingTools::Shared {
     //        wasUpdated = true;
     //
     //    // only process session string if it changed
-    //    if (client.wasSessionStrUpdated()) {
+    //    if (client.wasSessionInfoUpdated()) {
     //        wasUpdated = true;
     //    }
 
@@ -153,7 +153,7 @@ namespace IRacingTools::Shared {
   }
 
   void DiskSessionDataProvider::fireDataUpdatedEvent() {
-    publish(std::make_shared<SessionDataUpdatedEvent>(SessionDataEventType::Updated, dataAccess_.get()));
+    publish(std::make_shared<SessionDataUpdatedDataEvent>(SessionDataEventType::UpdatedData, dataAccess_.get()));
   }
 
   void DiskSessionDataProvider::checkConnection() {

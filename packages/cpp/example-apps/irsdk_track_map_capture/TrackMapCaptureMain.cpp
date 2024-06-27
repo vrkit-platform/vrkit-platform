@@ -644,9 +644,9 @@ void run()
         //     wasUpdated = true;
         //
         // // only process session string if it changed
-        // if (IRClient::instance().wasSessionStrUpdated())
+        // if (IRClient::instance().wasSessionInfoUpdated())
         // {
-        //     processYAMLSessionString(IRClient::instance().getSessionStr());
+        //     processYAMLSessionString(IRClient::instance().getSessionInfoStr());
         //     wasUpdated = true;
         // }
         //

@@ -22,6 +22,7 @@ namespace fs = std::filesystem;
 
 namespace {
 
+    // Formula C Lights @ montreal
     constexpr auto IBTTestFile1 = "ibt-fixture-superformulalights324_montreal.ibt";
 
     // LMP3 @ motegi
@@ -34,9 +35,6 @@ namespace {
     std::shared_ptr<IRacingTools::SDK::DiskClient> CreateDiskClient(const std::string& filename) {
         auto file = ToIBTTestFile(filename);
         auto client = std::make_shared<IRacingTools::SDK::DiskClient>(file, file.string());
-
-        //IRacingTools::SDK::ClientManager::Get().add(file.string(), client);
-
         return client;
     }
 }

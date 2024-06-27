@@ -21,13 +21,13 @@ namespace IRacingTools::Shared::Services {
 
 
   std::expected<Models::Telemetry::LapTrajectory, GeneralError>
-  LapTrajectoryTool::createLapTrajectory(const std::filesystem::path &file, bool includeInvalidLaps) {
+  LapTrajectoryTool::createLapTrajectory(const std::filesystem::path &file, const CreateOptions& options) {
     auto client = std::make_shared<SDK::DiskClient>(file, file.string());
-    return createLapTrajectory(client,includeInvalidLaps);
+    return createLapTrajectory(client,options);
   }
 
   std::expected<Models::Telemetry::LapTrajectory, GeneralError>
-  LapTrajectoryTool::createLapTrajectory(const std::shared_ptr<SDK::DiskClient> &client, bool includeInvalidLaps) {
+  LapTrajectoryTool::createLapTrajectory(const std::shared_ptr<SDK::DiskClient> &client, const CreateOptions& options) {
     TelemetryFileHandler telemFile(client);
     auto lapsRes = telemFile.getLapData();
     if (!lapsRes) {
@@ -71,6 +71,12 @@ namespace IRacingTools::Shared::Services {
       point->set_altitude(std::get<5>(coord));
     }
 
+    if (options.outputDir) {
+      client->getSessionInfo();
+      // auto& outputFile = options.outputFile.value();
+      // WriteTextFile(outputFile, trajectory.SerializeAsString());
+    }
+    
     return trajectory;
   }
 

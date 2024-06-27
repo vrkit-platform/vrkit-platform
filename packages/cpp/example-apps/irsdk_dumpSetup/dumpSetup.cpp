@@ -136,7 +136,7 @@ void run()
 				}
 
 				// get the current setup and dump it
-				auto res = LiveClient::GetInstance().getSessionStr();
+				auto res = LiveClient::GetInstance().getSessionInfoStr();
 				if(res.has_value())
 				{
 					auto& sesStr = res.value();
@@ -227,7 +227,7 @@ void processFile(const char *path)
 		}
 
 		// get the current setup and dump it
-		const char *sesStr = idk.getSessionStr();
+		const char *sesStr = idk.getSessionInfoStr();
 		if(sesStr)
 		{
 			//****Note, this assumes CarSetup is the last section of the session string.

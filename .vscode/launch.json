@@ -44,6 +44,22 @@
       ]
     },
     {
+      "name": "irt_example_lapTiming",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetDirectory}\\iracing_tools_example_irsdk_lapTiming.exe",
+      "args": [        
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:PATH};${command:cmake.launchTargetDirectory};C:/Qt/6.5.0;C:/Qt/6.5.0/bin;;C:/Qt/6.5.0/lib"
+        }
+      ]
+    },
+    {
       "name": "irt_tool: Generate Track Map",
       "type": "cppvsdbg",
       "request": "launch",

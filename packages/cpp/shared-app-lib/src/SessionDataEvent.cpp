@@ -9,6 +9,7 @@
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/SessionDataAccess.h>
 #include <IRacingTools/Shared/SessionDataProvider.h>
+#include <IRacingTools/Shared/SessionDataEvent.h>
 
 namespace IRacingTools::Shared {
   using namespace std::chrono_literals;
@@ -20,7 +21,7 @@ namespace IRacingTools::Shared {
     }
   }// namespace
 
-    SessionDataEvent::SessionDataEvent(SessionDataEventType type) : type_(type) {
+  SessionDataEvent::SessionDataEvent(SessionDataEventType type) : type_(type) {
   }
 
 
@@ -28,12 +29,12 @@ namespace IRacingTools::Shared {
     return type_;
   }
 
-  SessionDataUpdatedEvent::SessionDataUpdatedEvent(SessionDataEventType type, SessionDataAccess *dataAccess)
+  SessionDataUpdatedDataEvent::SessionDataUpdatedDataEvent(SessionDataEventType type, SessionDataAccess *dataAccess)
       : SessionDataEvent(type), dataAccess_(dataAccess) {
     refresh();
   }
 
-  SessionCarStateRecord SessionDataUpdatedEvent::SessionCarState::toTuple() {
+  SessionCarStateRecord SessionDataUpdatedDataEvent::SessionCarState::toTuple() {
     return {index, lap, lapsCompleted, lapPercentComplete, estimatedTime, position.overall, position.clazz, driver};
   }
 
@@ -47,7 +48,7 @@ namespace IRacingTools::Shared {
 
 #define IRVAR(Name) dataAccess_->Name
 
-  void SessionDataUpdatedEvent::refresh() {
+  void SessionDataUpdatedDataEvent::refresh() {
     auto &sessionTimeVar = IRVAR(SessionTime);
     auto &lapVar = IRVAR(CarIdxLap);
     auto &lapsCompletedVar = IRVAR(CarIdxLapCompleted);
@@ -91,17 +92,24 @@ namespace IRacingTools::Shared {
     }
   }
 
-  const std::vector<SessionDataUpdatedEvent::SessionCarState> &SessionDataUpdatedEvent::cars() {
+  const std::vector<SessionDataUpdatedDataEvent::SessionCarState> &SessionDataUpdatedDataEvent::cars() {
     return cars_;
   }
 
-  int SessionDataUpdatedEvent::sessionTimeMillis() {
+  int SessionDataUpdatedDataEvent::sessionTimeMillis() {
     return sessionTimeMillis_;
   }
 
-  std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedEvent::sessionInfo() {
+  std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedDataEvent::sessionInfo() {
     return sessionInfo_;
   }
 
+  SessionDataUpdatedInfoEvent::SessionDataUpdatedInfoEvent(
+      std::weak_ptr<SessionInfo::SessionInfoMessage> newSessionInfo)
+      : SessionDataEvent(SessionDataEventType::UpdatedInfo), sessionInfo_(newSessionInfo) {
+  }
 
+  std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedInfoEvent::sessionInfo() {
+    return sessionInfo_;
+  }
 }// namespace IRacingTools::Shared

@@ -24,14 +24,14 @@ namespace IRacingTools::Shared::Graphics {
     using VertexType = DirectX::VertexPositionColor;
 
 
-    class TrackMapWidget : public Renderable<std::shared_ptr<SessionDataUpdatedEvent>> {
+    class TrackMapWidget : public Renderable<std::shared_ptr<SessionDataUpdatedDataEvent>> {
     public:
         explicit TrackMapWidget(const TrackMap& trackMap, const std::shared_ptr<DXResources>& resources);
         virtual ~TrackMapWidget() override;
 
         void render(
             const std::shared_ptr<RenderTarget>& target,
-            const std::shared_ptr<SessionDataUpdatedEvent>& data
+            const std::shared_ptr<SessionDataUpdatedDataEvent>& data
         ) override;
 
     private:

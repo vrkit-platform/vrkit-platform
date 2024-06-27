@@ -19,7 +19,7 @@ namespace IRacingTools::Shared::UI {
         std::shared_ptr<Graphics::IPCRenderer> ipcRenderer_{nullptr};
         const TrackMap trackMap_;
         SessionDataProvider::UnsubscribeFn unsubscribeFn_;
-        std::shared_ptr<SessionDataUpdatedEvent> dataEvent_{nullptr};
+        std::shared_ptr<SessionDataUpdatedDataEvent> dataEvent_{nullptr};
         std::atomic_bool dataChanged_{false};
 
     public:

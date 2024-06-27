@@ -100,39 +100,9 @@ namespace IRacingTools::SDK {
         }
 
         spdlog::info("IBT file read disk subheader");
-        auto sessionLength = header_.session.len;
-        auto sessionOffset = header_.session.offset;
+        updateSessionInfo(ibtFile);
+
         auto varHeaderOffset = header_.varHeaderOffset;
-
-        sessionInfoBuf_->reset(); // = new char[header_.sessionInfo.len];
-        if (!sessionInfoBuf_->resize(header_.session.len)) {
-            return false;
-        }
-
-        spdlog::info("IBT session info buf resized");
-
-        // Read session info
-        if (std::fseek(ibtFile, sessionOffset, SEEK_SET)) {
-            return false;
-        }
-
-        spdlog::info("IBT file about to read session info {} bytes", sessionLength);
-        {
-            auto data = sessionInfoBuf_->data();
-            if (!FileReadDataFully(data, 1, sessionLength, ibtFile)) {
-                return false;
-            }
-
-            data[sessionLength - 1] = '\0';
-
-            auto rootNode = YAML::Load(data);
-            if (!sessionInfo_) {
-                sessionInfo_ = std::make_shared<SessionInfo::SessionInfoMessage>();
-            }
-
-            SessionInfo::SessionInfoMessage* sessionInfo = sessionInfo_.get();
-            *sessionInfo = rootNode.as<SessionInfo::SessionInfoMessage>();
-        }
 
         // Read Headers
         spdlog::info("IBT file parsed session info, seeking header offset {}", varHeaderOffset);
@@ -177,6 +147,52 @@ namespace IRacingTools::SDK {
         // sessionInfoString_ = nullptr;
 
         //    return false;
+    }
+
+    std::expected<bool, GeneralError> DiskClient::updateSessionInfo(std::FILE * ibtFile) {
+        if (!ibtFile) {
+            ibtFile = ibtFile_;
+        }
+        
+        if(ibtFile == nullptr) {
+            return std::unexpected(GeneralError("IBT file is null"));
+        }
+        
+        auto sessionLength = header_.session.len;
+        auto sessionOffset = header_.session.offset;
+        
+        sessionInfoBuf_->reset(); // = new char[header_.sessionInfo.len];
+        if (!sessionInfoBuf_->resize(header_.session.len)) {
+            return std::unexpected(GeneralError("Unable to resize sessionInfoBuf"));
+        }
+
+        spdlog::info("IBT session info buf resized");
+
+        // Read session info
+        if (std::fseek(ibtFile, sessionOffset, SEEK_SET)) {
+            return false;
+        }
+
+        spdlog::info("IBT file about to read session info {} bytes", sessionLength);
+        {
+            auto data = sessionInfoBuf_->data();
+            if (!FileReadDataFully(data, 1, sessionLength, ibtFile)) {
+                return false;
+            }
+
+            data[sessionLength - 1] = '\0';
+
+            auto rootNode = YAML::Load(data);
+            
+            if (!sessionInfo_.second) {
+                sessionInfo_.second = std::make_shared<SessionInfo::SessionInfoMessage>();
+                sessionInfo_.first = 1;
+            }
+
+            SessionInfo::SessionInfoMessage* sessionInfo = sessionInfo_.second.get();
+            *sessionInfo = rootNode.as<SessionInfo::SessionInfoMessage>();
+        }
+
     }
 
     void DiskClient::reset() {
@@ -227,8 +243,8 @@ namespace IRacingTools::SDK {
     std::optional<uint32_t> DiskClient::getVarIdx(const std::string_view& name) {
         if (isFileOpen() && !name.empty()) {
             for (uint32_t idx = 0; idx < getNumVars(); idx++) {
-                if (name == varHeaders_[idx].name) {
-                    //0 == strncmp(name, varHeaders_[idx].name, Resources::MaxStringLength)) {
+                if (std::strcmp(name.data(),varHeaders_[idx].name) == 0) {
+                    
                     return idx;
                 }
             }
@@ -454,7 +470,11 @@ namespace IRacingTools::SDK {
         return res.has_value() ? getVarDouble(res.value(), entry) : std::nullopt;
     }
 
-    Expected<std::string_view> DiskClient::getSessionStr() {
+    Opt<std::int32_t> DiskClient::getSessionInfoUpdateCount() {
+        return header_.session.count;
+    }
+
+    Expected<std::string_view> DiskClient::getSessionInfoStr() {
         if (!sessionInfoBuf_)
             return MakeUnexpected<GeneralError>("Session str not available");
 
@@ -502,6 +522,12 @@ namespace IRacingTools::SDK {
     }
 
     std::weak_ptr<SessionInfo::SessionInfoMessage> DiskClient::getSessionInfo() {
-        return sessionInfo_;
+        return sessionInfo_.second;
     }
+
+    std::optional<Client::WeakSessionInfoWithUpdateCount> DiskClient::getSessionInfoWithUpdateCount() {        
+        return isAvailable() ? std::make_optional<WeakSessionInfoWithUpdateCount>({sessionInfo_.first, sessionInfo_.second}) : std::nullopt;
+    }
+
 } // namespace IRacingTools::SDK
+

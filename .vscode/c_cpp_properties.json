@@ -11,8 +11,10 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "APP_NAME=\"irt\""
             ],
+
             "cStandard": "c23",
             "cppStandard": "c++23"
             

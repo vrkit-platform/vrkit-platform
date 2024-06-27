@@ -56,8 +56,6 @@ namespace IRacingTools::Shared {
 
     void processDataUpdate();
 
-    bool processYAMLLiveString();
-
     void checkConnection();
 
   public:

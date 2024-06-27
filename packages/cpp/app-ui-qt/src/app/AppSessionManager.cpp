@@ -71,8 +71,8 @@ void AppSessionManager::createProvider() {
 
     // Subscribe
     provider_->subscribe([&](std::shared_ptr<Shared::SessionDataEvent> srcEvent) {
-        if (srcEvent->type() == Shared::SessionDataEventType::Updated) {
-            auto srcUpdatedEvent = static_pointer_cast<Shared::SessionDataUpdatedEvent>(srcEvent);
+        if (srcEvent->type() == Shared::SessionDataEventType::UpdatedData) {
+            auto srcUpdatedEvent = static_pointer_cast<Shared::SessionDataUpdatedDataEvent>(srcEvent);
             auto event = QSharedPointer<AppSessionDataEvent>::create(srcUpdatedEvent);
 
             emit dataEvent(event);

@@ -16,15 +16,14 @@
 #include <IRacingTools/SDK/Utils/EventEmitter.h>
 #include <IRacingTools/SDK/VarHolder.h>
 
-#include "Chrono.h"
-#include "SessionDataAccess.h"
 
 namespace IRacingTools::Shared {
 
   class SessionDataEvent;
-  class SessionDataUpdatedEvent;
-
-  enum class SessionDataEventType { Updated, Session, Available };
+  class SessionDataUpdatedDataEvent;
+  class SessionDataAccess;
+  
+  enum class SessionDataEventType { UpdatedData, UpdatedInfo, Session, Available };
 
   class SessionDataEvent {
 
@@ -40,6 +39,19 @@ namespace IRacingTools::Shared {
     SessionDataEventType type_;
   };
 
+  
+
+  class SessionDataUpdatedInfoEvent : public SessionDataEvent {
+  public:
+    SessionDataUpdatedInfoEvent() = delete;
+    explicit SessionDataUpdatedInfoEvent(std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> newSessionInfo);
+    virtual ~SessionDataUpdatedInfoEvent() = default;
+
+    std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo();
+  private:
+    std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo_{};    
+  };
+  
   /**
    * @brief Flattened tuple per car
    *
@@ -59,7 +71,7 @@ namespace IRacingTools::Shared {
    * @brief Data update event triggered on every new
    *  data frame/tick received from IRacing
    */
-  class SessionDataUpdatedEvent : public SessionDataEvent {
+  class SessionDataUpdatedDataEvent : public SessionDataEvent {
   public:
     struct SessionCarState {
       int index{};
@@ -80,9 +92,9 @@ namespace IRacingTools::Shared {
       SessionCarStateRecord toTuple();
     };
 
-    SessionDataUpdatedEvent() = delete;
-    explicit SessionDataUpdatedEvent(SessionDataEventType type, SessionDataAccess *dataAccess);
-    virtual ~SessionDataUpdatedEvent() = default;
+    SessionDataUpdatedDataEvent() = delete;
+    explicit SessionDataUpdatedDataEvent(SessionDataEventType type, SessionDataAccess *dataAccess);
+    virtual ~SessionDataUpdatedDataEvent() = default;
 
     void refresh();
 

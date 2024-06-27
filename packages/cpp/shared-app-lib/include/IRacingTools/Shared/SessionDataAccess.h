@@ -69,6 +69,6 @@ namespace IRacingTools::Shared {
 
 #undef DeclareVarHolder
 
-            //    std::shared_ptr<SessionDataUpdatedEvent> createDataEvent();
+            //    std::shared_ptr<SessionDataUpdatedDataEvent> createDataEvent();
     };
 }

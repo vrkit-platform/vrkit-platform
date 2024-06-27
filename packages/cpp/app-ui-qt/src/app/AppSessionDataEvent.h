@@ -18,10 +18,10 @@ namespace IRacingTools::App {
     Q_OBJECT
 
   public:
-    explicit AppSessionDataEvent(std::shared_ptr<IRacingTools::Shared::SessionDataUpdatedEvent> dataEvent,
+    explicit AppSessionDataEvent(std::shared_ptr<IRacingTools::Shared::SessionDataUpdatedDataEvent> dataEvent,
                                  QObject *parent = nullptr);
 
-    std::vector<IRacingTools::Shared::SessionDataUpdatedEvent::SessionCarState> &cars();
+    std::vector<IRacingTools::Shared::SessionDataUpdatedDataEvent::SessionCarState> &cars();
 
     std::weak_ptr<SessionInfo::SessionInfoMessage> sessionInfo();
 
@@ -30,7 +30,7 @@ namespace IRacingTools::App {
   private:
     int time_;
     std::weak_ptr<SessionInfo::SessionInfoMessage> sessionInfo_;
-    std::vector<IRacingTools::Shared::SessionDataUpdatedEvent::SessionCarState> cars_;
+    std::vector<IRacingTools::Shared::SessionDataUpdatedDataEvent::SessionCarState> cars_;
   };
 
 }

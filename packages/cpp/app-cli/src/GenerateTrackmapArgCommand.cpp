@@ -67,14 +67,11 @@ namespace IRacingTools::App::Commands {
 
         // Convert IBT -> LapTrajectory
         Services::LapTrajectoryTool tool;
-        auto lapRes  = tool.createLapTrajectory(ibtPath);
+        auto lapRes  = tool.createLapTrajectory(ibtPath, {.outputDir = outputPath});
         if (!lapRes) {
             critical("Failed to create lap trajectory: {}", lapRes.error().what());
             return 1;
         }
-        
-        auto& lap = lapRes.value();
-        WriteTextFile(outputPath, lap.SerializeAsString());
-        
+        return 0;        
     }
 }

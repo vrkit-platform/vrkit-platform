@@ -43,8 +43,8 @@ namespace IRacingTools::Shared::UI {
           unsubscribeFn_(
               dataProvider->subscribe(
                   [&](std::shared_ptr<SessionDataEvent> event) {
-                      if (event->type() == SessionDataEventType::Updated) {
-                          if (auto dataEvent = std::dynamic_pointer_cast<SessionDataUpdatedEvent>(event)) {
+                      if (event->type() == SessionDataEventType::UpdatedData) {
+                          if (auto dataEvent = std::dynamic_pointer_cast<SessionDataUpdatedDataEvent>(event)) {
                               std::scoped_lock lock(dataMutex_);
                               dataChanged_ = true;
                               dataEvent_ = dataEvent;

@@ -22,8 +22,13 @@ namespace IRacingTools::Shared::Services {
   class LapTrajectoryTool {
   
   public:    
-    std::expected<Models::Telemetry::LapTrajectory, GeneralError> createLapTrajectory(const std::filesystem::path &file, bool includeInvalidLaps = false);
-    std::expected<Models::Telemetry::LapTrajectory, GeneralError> createLapTrajectory(const std::shared_ptr<SDK::DiskClient> &client, bool includeInvalidLaps = false);
+    struct CreateOptions {
+      std::optional<std::filesystem::path> outputDir {std::nullopt};
+      bool includeInvalidLaps{false};
+    };
+
+    std::expected<Models::Telemetry::LapTrajectory, GeneralError> createLapTrajectory(const std::filesystem::path &file, const CreateOptions& options = {});
+    std::expected<Models::Telemetry::LapTrajectory, GeneralError> createLapTrajectory(const std::shared_ptr<SDK::DiskClient> &client, const CreateOptions& options = {});
 
   
     

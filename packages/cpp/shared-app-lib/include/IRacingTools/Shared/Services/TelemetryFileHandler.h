@@ -24,6 +24,7 @@ namespace IRacingTools::Shared::Services {
     
   public:
     using LapPositionCoordinate = std::tuple<int,
+    double,
                                              float, // Lap Dist Pct (%)
                                              float, // Lap Dist (meters)
                                              double,// Lat

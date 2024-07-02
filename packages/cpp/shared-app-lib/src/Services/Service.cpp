@@ -1,24 +1,33 @@
 
 #include <IRacingTools/Shared/Services/Service.h>
 
-namespace IRacingTools::Shared {
+namespace IRacingTools::Shared::Services {
     Service::~Service() {
         stop();
-        assert(running_ == false);
+        assert(running_.load() == false);
     }
 
-    void Service::init() {
-        assert(running_ == false);
+    std::expected<bool, SDK::GeneralError>  Service::init() {
+        assert(running_.load() == false);
         spdlog::debug("Service::init default");
+
+        return true;
     }
 
-    void Service::start() {
+    std::expected<bool, SDK::GeneralError>  Service::start() {
         spdlog::debug("Service::start default");
         setRunning(true);
+
+        return true;
     }
 
     void Service::stop() {
         spdlog::debug("Service::stop default");
+        setRunning(false);
+    }
+
+    void Service::destroy() {
+        spdlog::debug("Service::destroy default");
         setRunning(false);
     }
 

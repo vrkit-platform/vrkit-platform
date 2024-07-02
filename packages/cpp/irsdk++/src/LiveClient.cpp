@@ -93,7 +93,8 @@ namespace IRacingTools::SDK {
     // wait for start of session or new data
     if (conn.waitForDataReady(timeoutMS, data_) && conn.getHeader()) {
       // if new connection, or data changed lenght then init
-      if (!data_ || nData_ != conn.getHeader()->bufLen || !sessionInfo_.second || sessionInfo_.second->weekendInfo.sessionID != sessionId_) {
+      //|| !sessionInfo_.second || sessionInfo_.second->weekendInfo.sessionID != sessionId_
+      if (!data_ || nData_ != conn.getHeader()->bufLen) {
         // allocate memory to hold incoming data from sim
         delete[] data_;
 
@@ -109,7 +110,7 @@ namespace IRacingTools::SDK {
           return true;
         }
       } else {
-        updateSessionInfo();
+        onNewClientData();
         return true;
       }
     } else if (!isConnected()) {
@@ -347,9 +348,10 @@ namespace IRacingTools::SDK {
           return true;
         }
       }      
-    } else {
-      sessionInfo_ = {-1,nullptr};      
-    }
+    } 
+    // else {
+    //   // sessionInfo_ = {-1,nullptr};      
+    // }
     return false;
   }
 

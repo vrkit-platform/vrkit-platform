@@ -1,8 +1,26 @@
 syntax = "proto3";
 
-package IRacingTools.Models.UI.Config;
+package IRacingTools.Models.Telemetry;
+
+
 
 message TelemetryDataFile {
+  // enum PipelineType {
+  //   PIPELINE_TRACKMAP = 0;
+  // };
+
+  enum PipelineStage {
+    STAGE_QUEUED = 0;
+    STAGE_PROCESSING = 1;
+    STAGE_COMPLETE = 2;
+    STAGE_ERROR = 10;
+  };
+
+  message Pipelines {
+    PipelineStage track_map = 1;
+    PipelineStage lap_database = 2;
+  };
+
   string id = 1;
   string alias = 2;
 
@@ -10,7 +28,9 @@ message TelemetryDataFile {
   int64 updated_at = 6;
 
   string filename = 10;
-
+  
+  // Pipeline (i.e. TRACK_MAP)
+  Pipelines pipelines = 20;
 
 }
 

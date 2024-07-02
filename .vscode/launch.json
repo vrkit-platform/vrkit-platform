@@ -20,6 +20,23 @@
       ]
     },
     {
+      "name": "irt-tests: shared_app_lib",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetDirectory}\\iracing_tools_shared_app_lib_tests.exe",
+      "args": [
+        
+      ],      
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:PATH};${command:cmake.launchTargetDirectory};C:/Qt/6.5.0;C:/Qt/6.5.0/bin;;C:/Qt/6.5.0/lib"
+        }
+      ]
+    },
+    {
       "name": "irt_tool: TelemetryDump",
       "type": "cppvsdbg",
       "request": "launch",
@@ -52,6 +69,7 @@
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
+      "console":"externalTerminal",
       "environment": [
         {
           "name": "PATH",

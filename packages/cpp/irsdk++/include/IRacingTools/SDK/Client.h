@@ -47,7 +47,7 @@ namespace IRacingTools::SDK {
     using SessionInfoWithUpdateCount = std::pair<std::int32_t, std::shared_ptr<SessionInfo::SessionInfoMessage>>;
     using WeakSessionInfoWithUpdateCount = std::pair<std::int32_t, std::weak_ptr<SessionInfo::SessionInfoMessage>>;
     
-    static constexpr std::string_view LiveClientId{};
+    static constexpr std::string_view LiveClientId{"LIVE"};
 
     virtual ~Client() = default;
     virtual bool isAvailable() = 0;

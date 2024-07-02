@@ -36,6 +36,11 @@ namespace IRacingTools::Shared::Services {
 
     auto& laps = lapsRes.value();
     
+    auto sessionInfo = client->getSessionInfo().lock();
+    if (!sessionInfo) {
+      return std::unexpected(GeneralError(ErrorCode::General, "session info from weak ptr was not available"));
+    }
+    
     // FIND BEST LAP TIME
     // TODO: Add optional predicate command to allow
     //  User specified optimization/selection
@@ -72,7 +77,7 @@ namespace IRacingTools::Shared::Services {
     }
 
     if (options.outputDir) {
-      client->getSessionInfo();
+      
       // auto& outputFile = options.outputFile.value();
       // WriteTextFile(outputFile, trajectory.SerializeAsString());
     }

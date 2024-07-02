@@ -100,6 +100,7 @@ namespace {
   VarHolder g_CarIdxPaceLine("CarIdxPaceLine");  // (int) What line cars are pacing in, or -1 if not pacing
   VarHolder g_CarIdxPaceRow("CarIdxPaceRow");    // (int) What row cars are pacing in, or -1 if not pacing
   VarHolder g_CarIdxPaceFlags("CarIdxPaceFlags");// (int) PaceFlagType, Pacing status flags for each car
+  VarHolder g_LapLastLapTime("LapLastLapTime");
 
   const int g_maxCars = 64;
   const int g_maxNameLen = 64;
@@ -618,6 +619,8 @@ if(hDataValidEvent)
 
     // print flag status
     setCursorPosition(0, statusOffset + 1);
+    printf("Last lap time: %f ", g_LapLastLapTime.getFloat());
+
     printf(" flags: ");
     printFlags(g_SessionFlags.getInt());
 
@@ -774,6 +777,9 @@ if(hDataValidEvent)
 }// namespace
 
 int main(int argc, char *argv[]) {
+  //L->enable_backtrace();
+  L->set_level(spdlog::level::level_enum::trace);
+  L->flush_on(spdlog::level::level_enum::trace);
   printf("lapTiming 1.1, press any key to exit\n");
 
   if (init()) {

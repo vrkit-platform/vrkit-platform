@@ -5,12 +5,19 @@ message LapMetadata {
   uint32 lap_time = 2;
   uint32 incident_count = 3;
   bool valid = 4;
+
 }
 
 message LapTrajectory  {
   LapMetadata metadata = 1;
-
+  
+  string track_config_id = 2;
+  int64 timestamp = 3;
+  
   repeated LapTrajectoryPoint path = 10;
+  
+
+  
 }
 
 message LapTrajectoryPoint {

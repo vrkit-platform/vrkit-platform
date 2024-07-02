@@ -64,6 +64,9 @@ namespace IRacingTools::SDK {
   }
 
   std::shared_ptr<Client> ClientManager::getActive() {
+    if (activeClientId_.empty() || activeClientId_ == Client::LiveClientId)
+      return LiveClient::GetPtr();
+
     return clients_.size() ? get(activeClientId_) : nullptr;
   }
 } // namespace SDK

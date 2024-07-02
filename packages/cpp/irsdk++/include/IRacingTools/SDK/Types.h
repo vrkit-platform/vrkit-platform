@@ -183,6 +183,11 @@ namespace IRacingTools::SDK {
         StartGo = 0x80000000,
     };
 
+    template<FlagType FT>
+    bool IsFlagSet(uint32_t bitmask) {
+        return magic_enum::enum_underlying(FT) & bitmask > 0;
+    }
+    
     inline bool IsFlagSet(uint32_t bitmask, FlagType flag) {
         return magic_enum::enum_underlying(flag) & bitmask > 0;
     }

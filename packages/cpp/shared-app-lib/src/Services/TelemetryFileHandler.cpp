@@ -89,7 +89,7 @@ namespace IRacingTools::Shared::Services {
           auto lat = std::get<6>(frame);
           auto lon = std::get<7>(frame);
           if (lat != 0.0 && lon != 0.0) {
-            std::get<4>(lap).emplace_back(std::get<2>(frame),std::get<3>(frame), std::get<4>(frame), lat, lon, std::get<8>(frame));
+            std::get<4>(lap).emplace_back(std::get<1>(frame),std::get<2>(frame),std::get<3>(frame), std::get<4>(frame), lat, lon, std::get<8>(frame));
           }
         }
       }

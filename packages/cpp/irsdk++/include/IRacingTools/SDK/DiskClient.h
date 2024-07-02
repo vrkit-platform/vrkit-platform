@@ -47,7 +47,7 @@ namespace IRacingTools::SDK {
 
   class DiskClient : public Client, public std::enable_shared_from_this<DiskClient> {
   public:
-    DiskClient(const std::filesystem::path &file, const ClientId &clientId);
+    DiskClient(const std::filesystem::path &file, const std::optional<ClientId> &clientId);
     DiskClient() = delete;
     DiskClient(const DiskClient &other) = delete;
     DiskClient(DiskClient &&other) noexcept = delete;

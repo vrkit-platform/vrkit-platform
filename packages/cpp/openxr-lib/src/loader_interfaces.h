@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <../../../../build/debug-ninja-new/vcpkg_installed/x64-windows-static/include/openxr/openxr.h>
+#include <openxr/openxr.h>
 
 #ifdef __cplusplus
 extern "C" {

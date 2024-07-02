@@ -21,7 +21,7 @@ namespace IRacingTools::SDK {
         struct DiskClientProvider : ClientProvider {
             std::shared_ptr<Client> client;
 
-            explicit DiskClientProvider(std::shared_ptr<Client> client) : client(client) {}
+            explicit DiskClientProvider(std::shared_ptr<Client> client) : client(std::move(client)) {}
 
             virtual std::shared_ptr<Client> getClient() override {
                 return client;
@@ -31,8 +31,8 @@ namespace IRacingTools::SDK {
         };
     }
 
-    DiskClient::DiskClient(const fs::path& file, const ClientId& clientId)
-        : clientId_(clientId), filePath_(file), sessionInfoBuf_(std::make_shared<DynamicBuffer<char>>()) {
+    DiskClient::DiskClient(const fs::path& file, const std::optional<ClientId>& clientId)
+        : clientId_(clientId.value_or(file.string())), filePath_(file), sessionInfoBuf_(std::make_shared<DynamicBuffer<char>>()) {
         memset(&header_, 0, sizeof(header_));
         memset(&diskSubHeader_, 0, sizeof(diskSubHeader_));
 

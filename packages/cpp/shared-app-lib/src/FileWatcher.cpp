@@ -9,15 +9,16 @@
 namespace IRacingTools::Shared {
     using namespace IRacingTools::SDK::Utils;
 
-    FileSystem::FileWatcher::FileWatcher(std::wstring path, UnderpinningRegex pattern, Callback callback): path_(fs::absolute(path)),
+    FileSystem::FileWatcher::FileWatcher(std::wstring path, UnderpinningRegex pattern, Callback callback, bool autostart): path_(fs::absolute(path)),
         pattern_(pattern),
         callback_(callback),
         directory_(getDirectoryHandle(path)) {
-        init();
+        if (autostart)
+            start();
     }
 
     FileSystem::FileWatcher::~FileWatcher() {
-        destroy();
+        stop();
     }
 
     FileSystem::FileWatcher::FileWatcher(const FileWatcher& other): FileWatcher(other.path_, other.callback_) {}
@@ -26,20 +27,20 @@ namespace IRacingTools::Shared {
             return *this;
         }
 
-        destroy();
+        stop();
         path_ = other.path_;
         callback_ = other.callback_;
         directory_ = getDirectoryHandle(other.path_);
-        init();
+        start();
         return *this;
     }
 
-    void FileSystem::FileWatcher::destroy() {
-        std::scoped_lock lock(destroyMutex_);
-        if (destroy_)
+    void FileSystem::FileWatcher::stop() {
+        std::scoped_lock lock(runningMutex_);
+        if (!running_)
             return;
-        destroy_ = true;
-        running_ = std::promise<void>();
+        running_ = false;
+        runningPromise_ = std::promise<void>();
 
 
         SetEvent(closeEvent_);
@@ -51,38 +52,50 @@ namespace IRacingTools::Shared {
         CloseHandle(directory_);
     }
 
-    void FileSystem::FileWatcher::init() {
-        closeEvent_ = CreateEvent(nullptr, TRUE, FALSE, nullptr);
-        if (!closeEvent_) {
-            throw std::system_error(static_cast<int>(GetLastError()), std::system_category());
+    bool FileSystem::FileWatcher::isRunning() {
+      std::scoped_lock lock(runningMutex_);
+      return running_.load();      
+    }
+
+    void FileSystem::FileWatcher::start() {
+      std::scoped_lock lock(runningMutex_);
+      if (running_) {
+        spdlog::warn("Watcher already running ({})", path_.string());
+        return;
+      }
+
+      running_ = true;
+
+      closeEvent_ = CreateEvent(nullptr, TRUE, FALSE, nullptr);
+      if (!closeEvent_) {
+        running_ = false;
+        throw std::system_error(static_cast<int>(GetLastError()), std::system_category());
+      }
+
+
+      callbackThread_ = std::thread([this] {
+        try {
+          callbackThread();
+        } catch (...) {
+          try {
+            runningPromise_.set_exception(std::current_exception());
+          } catch (...) {
+          }// set_exception() may throw too
         }
+      });
 
+      watchThread_ = std::thread([this] {
+        try {
+          monitorDirectory();
+        } catch (...) {
+          try {
+            runningPromise_.set_exception(std::current_exception());
+          } catch (...) {
+          }// set_exception() may throw too
+        }
+      });
 
-        callbackThread_ = std::thread(
-            [this] {
-                try {
-                    callbackThread();
-                } catch (...) {
-                    try {
-                        running_.set_exception(std::current_exception());
-                    } catch (...) {} // set_exception() may throw too
-                }
-            }
-        );
-
-        watchThread_ = std::thread(
-            [this] {
-                try {
-                    monitorDirectory();
-                } catch (...) {
-                    try {
-                        running_.set_exception(std::current_exception());
-                    } catch (...) {} // set_exception() may throw too
-                }
-            }
-        );
-
-        std::future<void> future = running_.get_future();
-        future.get(); //block until the monitor_directory is up and running
+      std::future<void> future = runningPromise_.get_future();
+      future.get();//block until the monitor_directory is up and running
     }
 }

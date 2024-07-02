@@ -26,6 +26,10 @@ namespace IRacingTools::SDK {
 
         explicit GeneralError(const std::string& msg = "") : std::logic_error(msg), code_(ErrorCode::General) {};
 
+        virtual ErrorCode code() {
+            return code_;
+        };
+        
     protected:
         ErrorCode code_{ErrorCode::General};
     };

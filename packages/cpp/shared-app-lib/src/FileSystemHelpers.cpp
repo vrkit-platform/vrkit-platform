@@ -76,30 +76,49 @@ namespace IRacingTools::Shared {
         return finalPath;
     }
 
-    fs::path GetTemporaryDirectory(const std::optional<std::string>& prefixOpt) {
-        static std::mutex gCachePathMutex;
-        static std::map<std::string,fs::path> gCachePathMap;
 
-        std::unique_lock lock(gCachePathMutex);
-        std::string prefix = prefixOpt.has_value() ? prefixOpt.value() : "";
-        if (gCachePathMap.contains(prefix)) {
-            return gCachePathMap[prefix];
+    std::vector<fs::path> ListAllFilesRecursively(const std::vector<fs::path>& paths, const std::string &ext) {
+        std::vector<fs::path> files{};
+        
+        for (auto& path : paths) {
+            auto fileIterator = fs::recursive_directory_iterator(path);
+            for(auto& fileEntry : fileIterator) {
+            auto& file = fileEntry.path();
+                if (ext.empty() || file.string().ends_with(ext)) {
+                    files.push_back(file);
+                }
+            }
         }
+        return files;
+    }
+    
+    std::vector<fs::path> ListAllFilesRecursively(const fs::path& path, const std::string &ext) {
+      return ListAllFilesRecursively(std::vector<fs::path>{path}, ext);
+    }
 
-        wchar_t tempDirBuf[MAX_PATH];
-        GetTempPathW(MAX_PATH, tempDirBuf);
-        auto tempDir = GetTemporaryDirectoryRoot() / std::format(
-            "{:%F %H-%M-%S} {}",
-            std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now()),
-            GetCurrentProcessId()
-        );
+    fs::path GetTemporaryDirectory(const std::optional<std::string> &prefixOpt) {
+      static std::mutex gCachePathMutex;
+      static std::map<std::string, fs::path> gCachePathMap;
 
-        if (!fs::exists(tempDir)) {
-            fs::create_directories(tempDir);
-        }
-
-        gCachePathMap[prefix] = fs::canonical(tempDir);
+      std::unique_lock lock(gCachePathMutex);
+      std::string prefix = prefixOpt.has_value() ? prefixOpt.value() : "";
+      if (gCachePathMap.contains(prefix)) {
         return gCachePathMap[prefix];
+      }
+
+      wchar_t tempDirBuf[MAX_PATH];
+      GetTempPathW(MAX_PATH, tempDirBuf);
+      auto tempDir = GetTemporaryDirectoryRoot() /
+                     std::format("{:%F %H-%M-%S}_{}_{}",
+                                 std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now()), prefix,
+                                 GetCurrentProcessId());
+
+      if (!fs::exists(tempDir)) {
+        fs::create_directories(tempDir);
+      }
+
+      gCachePathMap[prefix] = fs::canonical(tempDir);
+      return gCachePathMap[prefix];
     }
 
     void CleanupTemporaryDirectories() {
@@ -140,6 +159,21 @@ namespace IRacingTools::Shared {
 
     fs::path GetUserDataPath(std::optional<fs::path> childPath) {
         return CreateDirectories(GetDocumentsPath() / APP_NAME, childPath);
+    }
+    fs::path GetOrCreateIRacingDocumentPath(const std::string_view& childPath) {
+        fs::path finalPath = GetDocumentsPath() / "iRacing";
+        if (!childPath.empty())
+            finalPath /= childPath;
+        if (!fs::exists(finalPath)) {
+           fs::create_directories(finalPath); 
+        }
+        assert(fs::exists(finalPath) && fs::is_directory(finalPath));
+
+        return finalPath;
+    }
+
+    fs::path GetIRacingTelemetryPath() {
+        return GetOrCreateIRacingDocumentPath(DocumentsTelemetry);
     }
 
     std::expected<fs::path, SDK::NotFoundError> GetIRacingDocumentPath(std::optional<fs::path> childPath) {

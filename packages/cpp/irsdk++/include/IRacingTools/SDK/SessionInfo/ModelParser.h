@@ -562,7 +562,7 @@ namespace YAML {
       rhs.driverCarSLLastRPM = node["DriverCarSLLastRPM"].as<float>();
       rhs.driverCarSLBlinkRPM = node["DriverCarSLBlinkRPM"].as<float>();
       rhs.driverCarVersion = node["DriverCarVersion"].as<std::string>("");
-      rhs.driverPitTrkPct = node["DriverPitTrkPct"].as<float>();
+      //rhs.driverPitTrkPct = node["DriverPitTrkPct"].as<float>();
       rhs.driverCarEstLapTime = node["DriverCarEstLapTime"].as<float>();
       rhs.driverSetupName = node["DriverSetupName"].as<std::string>("");
       rhs.driverSetupIsModified = node["DriverSetupIsModified"].as<std::int32_t>(0);

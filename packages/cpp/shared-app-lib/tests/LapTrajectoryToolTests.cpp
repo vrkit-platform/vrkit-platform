@@ -20,6 +20,9 @@ namespace {
   // LMP3 @ motegi
   constexpr auto IBTTestFile2 = "ligierjsp320_twinring.ibt";
 
+  // Radical SR10 @ Austria/Spielberg
+  constexpr auto IBTTestFile3 = "radicalsr10_spielberg gp 2024-06-28 21-13-04.ibt";
+  
   std::filesystem::path ToIBTTestFile(const std::string &filename) {
     return fs::current_path() / "data" / "ibt" / filename;
   }

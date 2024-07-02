@@ -61,13 +61,25 @@ namespace IRacingTools::Shared::FileSystem {
                 std::wstring pathString;
             };
 
-            using Callback = std::function<void(const WatchEventData& file, WatchEvent event_type)>;
+            using Callback = std::function<void(const WatchEventData& file, WatchEvent eventType)>;
 
 
-            FileWatcher(std::wstring path, UnderpinningRegex pattern, Callback callback);
+            explicit FileWatcher(std::wstring path, UnderpinningRegex pattern, Callback callback, bool autostart = false);
 
-            FileWatcher(std::wstring path, Callback callback) : FileWatcher(
+            explicit FileWatcher(std::wstring path, Callback callback) : FileWatcher(
                 path,
+                UnderpinningRegex(sRegexAll_),
+                callback
+            ) {}
+
+            explicit FileWatcher(const fs::path& path, UnderpinningRegex pattern, Callback callback) : FileWatcher(
+                path.wstring(),
+                pattern,
+                callback
+            ) {}
+
+            explicit FileWatcher(const fs::path& path, Callback callback) : FileWatcher(
+                path.wstring(),
                 UnderpinningRegex(sRegexAll_),
                 callback
             ) {}
@@ -81,8 +93,11 @@ namespace IRacingTools::Shared::FileSystem {
             // Const memeber varibles don't let me implent moves nicely, if moves are really wanted std::unique_ptr should be used and move that.
             FileWatcher(FileWatcher&&) = delete;
             FileWatcher& operator=(FileWatcher&&) & = delete;
+            
+            void start();
+            void stop();
 
-            void destroy();
+            bool isRunning();
 
         private:
             static constexpr C sRegexAll_[] = {'.', '*', '\0'};
@@ -109,13 +124,13 @@ namespace IRacingTools::Shared::FileSystem {
 
             std::condition_variable cv_{};
             std::mutex callbackMutex_{};
-            std::mutex destroyMutex_{};
+            std::recursive_mutex runningMutex_{};
 
             std::vector<std::pair<WatchEventData, WatchEvent>> callbackInformation_;
             std::thread callbackThread_;
 
-            std::promise<void> running_{};
-            std::atomic_bool destroy_{false};
+            std::promise<void> runningPromise_{};
+            std::atomic_bool running_{false};
             bool watchingSingleFile_{false};
 
             HANDLE directory_{nullptr};
@@ -132,9 +147,6 @@ namespace IRacingTools::Shared::FileSystem {
                 {FILE_ACTION_RENAMED_OLD_NAME, WatchEvent::RenamedOld},
                 {FILE_ACTION_RENAMED_NEW_NAME, WatchEvent::RenamedNew}
             };
-
-            void init();
-
 
             bool passFilter(const UnderpinningString& filePath) {
                 return std::regex_match(filePath, pattern_);
@@ -192,34 +204,6 @@ namespace IRacingTools::Shared::FileSystem {
                 return directory;
             }
 
-            // void convertWString(const std::wstring& wstr, std::string& out) {
-            //     int size_needed = WideCharToMultiByte(
-            //         CP_UTF8,
-            //         0,
-            //         &wstr[0],
-            //         static_cast<int>(wstr.size()),
-            //         nullptr,
-            //         0,
-            //         nullptr,
-            //         nullptr
-            //     );
-            //     out.resize(size_needed, '\0');
-            //     WideCharToMultiByte(
-            //         CP_UTF8,
-            //         0,
-            //         &wstr[0],
-            //         static_cast<int>(wstr.size()),
-            //         &out[0],
-            //         size_needed,
-            //         nullptr,
-            //         nullptr
-            //     );
-            // }
-            //
-            // void convertWString(const std::wstring& wstr, std::wstring& out) {
-            //     out = wstr;
-            // }
-
             void monitorDirectory() {
                 std::vector<BYTE> buffer(sBufferSize_);
                 DWORD bytesReturned = 0;
@@ -233,7 +217,7 @@ namespace IRacingTools::Shared::FileSystem {
                 std::array handles{overlappedBuffer.hEvent, closeEvent_};
 
                 bool asyncPending;
-                running_.set_value();
+                runningPromise_.set_value();
                 do {
                     std::vector<std::pair<WatchEventData, WatchEvent>> parsedInfo;
                     ReadDirectoryChangesW(
@@ -297,7 +281,7 @@ namespace IRacingTools::Shared::FileSystem {
                         callbackInformation_.insert(callbackInformation_.end(), parsedInfo.begin(), parsedInfo.end());
                     }
                     cv_.notify_all();
-                } while (destroy_ == false);
+                } while (running_);
 
                 if (asyncPending) {
                     //clean up running async io
@@ -308,13 +292,13 @@ namespace IRacingTools::Shared::FileSystem {
 
 
             void callbackThread() {
-                while (destroy_ == false) {
+                while (running_) {
                     std::unique_lock lock(callbackMutex_);
-                    if (callbackInformation_.empty() && destroy_ == false) {
+                    if (callbackInformation_.empty() && running_) {
                         cv_.wait(
                             lock,
                             [this] {
-                                return !callbackInformation_.empty() || destroy_;
+                                return !callbackInformation_.empty() || !running_;
                             }
                         );
                     }

@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package IRacingTools.Models;
+
+enum TrackType {
+  TRACK_TYPE_ROAD = 0;
+  TRACK_TYPE_OVAL = 1;
+}
+
+message Track {
+  // WeekendInfo::trackID
+  int32 id = 1;
+  
+  // WeekendInfo::trackName
+  string name = 2;
+
+  // WeekendInfo::trackType
+  TrackType type = 3;
+
+  string display_name = 5;
+  string display_short_name = 6;
+
+  double altitude = 10;
+  double latitude = 11;
+  double longitude = 12;
+  string north_offset = 15;
+
+  string country = 20;
+  string city = 21;
+
+  int32 pit_speed_limit = 50;
+}
+
+message TrackConfig {
+  // `id` is a compound key that we generate when processing IBT files
+  string id = 1;
+
+  // Reference to `Track::id`
+  int32 track_id = 2;
+
+  // `WeekendInfo::trackConfigName`
+  string name = 5;
+
+  string length = 10;
+  string length_official = 11;
+
+  int32 num_turns = 15;
+  string direction = 16;
+}

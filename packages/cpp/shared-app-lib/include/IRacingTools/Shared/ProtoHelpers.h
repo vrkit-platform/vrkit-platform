@@ -36,20 +36,31 @@ namespace IRacingTools::Shared::Utils {
     return std::make_optional(std::move(msg));
   };
 
-  template<typename MessageClazz> class JSONLinesMessageFileHandler {
-    
+  /**
+   * @brief 
+   */
+  template<typename MessageClazz> 
+  class JSONLinesMessageFileHandler {
 
   private:
     std::mutex persistMutex_{};
     fs::path file_;
 
   public:
+    /**
+     * @brief Event emitters
+     */
     struct {
-      SDK::Utils::EventEmitter<std::vector<MessageClazz> &> onRead{};
-      SDK::Utils::EventEmitter<std::vector<MessageClazz> &> onWrite{};
+      SDK::Utils::EventEmitter<std::vector<std::shared_ptr<MessageClazz>> &> onRead{};
+      SDK::Utils::EventEmitter<const std::vector<std::shared_ptr<MessageClazz>> &> onWrite{};
     } events{};
 
-    virtual std::expected<std::vector<MessageClazz>, GeneralError> read() {
+    /**
+     * @brief Read the underlying `jsonl` file
+     * 
+     * @return std::expected<std::vector<std::shared_ptr<MessageClazz>>, GeneralError> 
+     */
+    virtual std::expected<std::vector<std::shared_ptr<MessageClazz>>, GeneralError> read() {
       std::scoped_lock lock(persistMutex_);
 
       auto fileExists = fs::exists(file_);
@@ -58,7 +69,7 @@ namespace IRacingTools::Shared::Utils {
       if (!fileExists)
         return std::unexpected(SDK::GeneralError(ErrorCode::NotFound, "File not found"));
 
-      std::vector<MessageClazz> msgs;
+      std::vector<std::shared_ptr<MessageClazz>> msgs;
       auto jsonLinesRes = SDK::Utils::ReadTextFile(file_);
       assert(jsonLinesRes.has_value());
 
@@ -69,13 +80,13 @@ namespace IRacingTools::Shared::Utils {
       google::protobuf::util::JsonParseOptions jsonParseOptions{};
 
       while (std::getline(jsonLinesStream, jsonLine)) {
-        MessageClazz msg{};
+        auto msg = std::make_shared<MessageClazz>();;
 
         if (!jsonLine.starts_with("{") || !jsonLine.ends_with("}")) {
           warn("Invalid json line, skipping remainder: {}", jsonLine);
           break;
         }
-        auto jsonParseRes = JsonStringToMessage(jsonLine, &msg, jsonParseOptions);
+        auto jsonParseRes = JsonStringToMessage(jsonLine, msg.get(), jsonParseOptions);
         if (!jsonParseRes.ok()) {
           warn("Json parse error ({}), skipping remainder: {}", magic_enum::enum_name(jsonParseRes.code()).data(),
                jsonParseRes.message().ToString());
@@ -85,38 +96,41 @@ namespace IRacingTools::Shared::Utils {
         msgs.push_back(std::move(msg));
       }
 
+      events.onRead.publish(msgs);
+
       return msgs;
     }
-
-    virtual std::expected<std::size_t, GeneralError> write(const std::vector<MessageClazz> &messages) {
+    
+    virtual std::expected<std::size_t, GeneralError> write(const std::vector<std::shared_ptr<MessageClazz>> &messages) {
       std::scoped_lock lock(persistMutex_);
 
       std::stringstream data{};
       google::protobuf::util::JsonPrintOptions jsonOptions{};
-      for (auto &msg: messages) {
+      for (auto& msg: messages) {
         std::string msgStr;
-        
-        auto jsonSerializeRes = MessageToJsonString(msg, &msgStr, jsonOptions);
+
+        auto jsonSerializeRes = MessageToJsonString(*msg.get(), &msgStr, jsonOptions);
         if (!jsonSerializeRes.ok()) {
           warn("Json serialize error ({}), skipping remainder: {}",
                magic_enum::enum_name(jsonSerializeRes.code()).data(), jsonSerializeRes.message().ToString());
 
-          return std::unexpected(
-              GeneralError(ErrorCode::General, fmt::format("Serialize error: {}", jsonSerializeRes.message().ToString())));
-        
+          return std::unexpected(GeneralError(
+              ErrorCode::General, fmt::format("Serialize error: {}", jsonSerializeRes.message().ToString())));
         }
 
         data << msgStr << "\n";
       }
 
-        auto writeRes = SDK::Utils::WriteTextFile(file_, data.str());
-        if (!writeRes) {
-            return std::unexpected(
-              GeneralError(ErrorCode::General, fmt::format("Failed to write error: {}", writeRes.error().what())));
-        }
-        return writeRes.value();
+      auto writeRes = SDK::Utils::WriteTextFile(file_, data.str());
+      if (!writeRes) {
+        return std::unexpected(
+            GeneralError(ErrorCode::General, fmt::format("Failed to write error: {}", writeRes.error().what())));
+      }
+
+      events.onWrite.publish(messages);
+      return writeRes.value();
     };
-  
+
 
     JSONLinesMessageFileHandler(const fs::path &file) : file_(file) {
     }

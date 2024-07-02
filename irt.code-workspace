@@ -135,7 +135,8 @@
 			"*.ipp": "cpp",
 			"resumable": "cpp"
 		},
-		"autoHide.autoHideSideBar": false
+		"autoHide.autoHideSideBar": false,
+		"autoHide.autoHideAuxiliaryBar": false
 	},
 	"launch": {
 		"configurations": [

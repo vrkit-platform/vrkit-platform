@@ -26,7 +26,7 @@ endforeach()
 
 
 # QT
-include(${CMAKE_CURRENT_LIST_DIR}/qt.cmake NO_POLICY_SCOPE)
+# include(${CMAKE_CURRENT_LIST_DIR}/qt.cmake NO_POLICY_SCOPE)
 
 # Boost
 find_package(Boost REQUIRED COMPONENTS system)
@@ -98,7 +98,7 @@ set(ALL_APP_DEPS
   ${DEP_FMT}
   ${DEP_LOG}
   ${DEP_OPENXR}
-  ${DEP_QT_CORE}
+  # ${DEP_QT_CORE}
   ${DEP_YAML}
   ${DEP_GSL}
   ${DEP_BOOST_DEFAULT}

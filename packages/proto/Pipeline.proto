@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package IRacingTools.Models;
+
+enum PipelineType {
+  PIPELINE_TYPE_UNKNOWN = 0;
+  PIPELINE_TYPE_TRACK_MAP = 1;
+}
+
+enum PipelineStatus {
+  PIPELINE_STATUS_CREATED = 0;
+  PIPELINE_STATUS_QUEUED = 1;
+  PIPELINE_STATUS_PROCESSING = 2;
+  PIPELINE_STATUS_COMPLETE = 10;
+  PIPELINE_STATUS_ERROR = 20;
+};
+
+message Pipeline {
+  
+  message Attempt {
+    string id = 1;
+    int64 timestamp = 2;
+    PipelineStatus status = 3;
+    
+    int32 attempt_number = 10;
+
+    repeated string logs = 50;
+  }
+
+  string id = 1;
+  PipelineType type = 2;
+  PipelineStatus status = 5;
+
+  repeated Attempt attempts = 50;
+};

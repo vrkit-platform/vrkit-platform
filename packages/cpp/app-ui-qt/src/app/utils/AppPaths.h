@@ -5,8 +5,8 @@
 #pragma once
 #include <windows.h>
 
-#include <QtCore>
-#include <QtQml>
+// #include <QtCore>
+// #include <QtQml>
 
 #include <magic_enum.hpp>
 

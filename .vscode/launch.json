@@ -20,6 +20,42 @@
       ]
     },
     {
+      "name": "vrkit_service: install",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetDirectory}\\vrkit_service.exe",
+      "args": [
+        "install",
+        "-start-type",
+        "3"
+      ],      
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:PATH};${command:cmake.launchTargetDirectory};C:/Qt/6.5.0;C:/Qt/6.5.0/bin;;C:/Qt/6.5.0/lib"
+        }
+      ]
+    },
+    {
+      "name": "vrkit_service: run",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetDirectory}\\vrkit_service.exe",
+      "args": [
+        "run"
+      ],      
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:PATH};${command:cmake.launchTargetDirectory};C:/Qt/6.5.0;C:/Qt/6.5.0/bin;;C:/Qt/6.5.0/lib"
+        }
+      ]
+    },
+    {
       "name": "irt-tests: shared_app_lib",
       "type": "cppvsdbg",
       "request": "launch",
@@ -78,19 +114,33 @@
       ]
     },
     {
-      "name": "irt_tool: Generate Track Map",
+      "name": "vrkit_tool: Process All Telemetry",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${command:cmake.launchTargetDirectory}\\irt_tool.exe",
+      "program": "${command:cmake.launchTargetDirectory}\\vrkit_tool.exe",
+      "args": [
+        "process-all-telemetry",        
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:PATH};${command:cmake.launchTargetDirectory};C:/Qt/6.5.0;C:/Qt/6.5.0/bin;;C:/Qt/6.5.0/lib"
+        }
+      ]
+    },
+    {
+      "name": "vrkit_tool: Generate Track Map",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetDirectory}\\vrkit_tool.exe",
       "args": [
         "generate-trackmap",
         "--ibt",
         "data\\ibt\\ligierjsp320_twinring.ibt",
-        "-o",
-        "tmp\\lmp3",
-        "--json",
-        // "-f",
-        // "YAML"
+        "--output",
+        "tmp\\lmp3"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

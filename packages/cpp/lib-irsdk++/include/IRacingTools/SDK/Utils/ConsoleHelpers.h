@@ -1,13 +1,12 @@
 #pragma once
 
 #include <cstdio>
+#include <cstdlib>
 #include <format>
 #include <iostream>
 #include <list>
 #include <map>
 #include <ranges>
-#include <spdlog/spdlog.h>
-#include <cstdlib>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -15,22 +14,11 @@
 #include <boost/type_index.hpp>
 
 namespace IRacingTools::SDK::Utils {
-  namespace log = spdlog;
-
-
-  template<typename T> struct PrettyType {
+  template<typename T>
+  struct PrettyType {
     constexpr std::string_view name() {
       return boost::typeindex::type_id_with_cvr<T>().pretty_name();
     };
-
-    // std::string_view operator() {
-    //     return name();
-    // };
-  };
-
-
-  template<typename T> log::logger GetCategoryWithType() {
-    return log::logger(std::string(PrettyType<T>().name()));
   };
 
   template<::std::size_t ColumnCount>
@@ -41,12 +29,9 @@ namespace IRacingTools::SDK::Utils {
     return (*res).length();
   }
 
-  template<typename TupleLike, ::std::size_t I = 0> void printTupleValues(TupleLike &values, ::std::size_t ColLength) {
-    //    if constexpr (I == 0)
-    //        std::cout << typeid(TupleLike).name() << '\n';
-    //
+  template<typename TupleLike, ::std::size_t I = 0>
+  void printTupleValues(TupleLike &values, ::std::size_t ColLength) {
     if constexpr (I < std::tuple_size_v<TupleLike>) {
-      //        std::cout << std::get<I>(values);
       std::cout << std::format("{: >{}}", std::get<I>(values), ColLength);
       printTupleValues<TupleLike, I + 1>(values, ColLength);
     }
@@ -72,10 +57,11 @@ namespace IRacingTools::SDK::Utils {
       std::cout << '\n';
     }
   }
-} 
+}// namespace IRacingTools::SDK::Utils
 
 
-  template<class T, class CharT, class Traits> ::std::basic_ostream<CharT, Traits> &
-  operator<<(::std::basic_ostream<CharT, Traits> &os, IRacingTools::SDK::Utils::PrettyType<T> type) {
-    return os << type.name();
-  };
+template<class T, class CharT, class Traits>
+::std::basic_ostream<CharT, Traits> &operator<<(::std::basic_ostream<CharT, Traits> &os,
+                                                IRacingTools::SDK::Utils::PrettyType<T> type) {
+  return os << type.name();
+};

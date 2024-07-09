@@ -133,7 +133,8 @@
 			"xtree": "cpp",
 			"xutility": "cpp",
 			"*.ipp": "cpp",
-			"resumable": "cpp"
+			"resumable": "cpp",
+			"sml2": "cpp"
 		},
 		"autoHide.autoHideSideBar": false,
 		"autoHide.autoHideAuxiliaryBar": false

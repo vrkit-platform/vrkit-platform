@@ -13,7 +13,8 @@
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
-                "APP_NAME=\"irt\""
+                "APP_NAME=\"irt\"",
+                "APP_VERSION=\"1.0.0\""
             ],
 
             "cStandard": "c23",

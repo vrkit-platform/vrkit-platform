@@ -2,6 +2,8 @@
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
+#include <memory>
+
 #include <IRacingTools/Models/Pipeline.pb.h>
 #include <IRacingTools/Models/TelemetryData.pb.h>
 
@@ -19,7 +21,7 @@ namespace IRacingTools::Shared::Services {
   using Models::Telemetry::TelemetryDataFile;
   using namespace Models;
 
-  class TelemetryDataService : public std::enable_shared_from_this<TelemetryDataService>, public Services::Service {
+  class TelemetryDataService : public std::enable_shared_from_this<TelemetryDataService>, public Service {
 
   public:
     /**
@@ -30,7 +32,9 @@ namespace IRacingTools::Shared::Services {
       std::vector<fs::path> ibtPaths{};
     };
 
-    TelemetryDataService() = delete;
+    TelemetryDataService();
+
+    explicit TelemetryDataService(const Options &options);
 
     /**
      * @brief check if `TelemetryDataFile` exists.
@@ -76,8 +80,8 @@ namespace IRacingTools::Shared::Services {
     std::size_t size();
 
     /**
-             * @brief Initialize the service
-             */
+     * @brief Initialize the service
+     */
     virtual std::expected<bool, SDK::GeneralError> init() override;
 
     /**
@@ -86,21 +90,22 @@ namespace IRacingTools::Shared::Services {
     virtual std::expected<bool, SDK::GeneralError> start() override;
 
     /**
-             * @brief Must set running == false in overriden implementation
-             */
-    virtual void stop() override;
-
-    virtual void destroy() override;
+     * @brief Must set running == false in overriden implementation
+     */
+    virtual std::optional<SDK::GeneralError> destroy() override;
 
     std::vector<fs::path> listAvailableIBTFiles();
 
-    explicit TelemetryDataService(const Options &options = Options{});
+    void setOptions(const Options &options);
+
+    void reset(bool skipPrepare = false);
 
   private:
-    Utils::JSONLinesMessageFileHandler<TelemetryDataFile> dataFileHandler_;
-    std::vector<fs::path> filePaths_;
+    Options options_{};
+    std::unique_ptr<Utils::JSONLinesMessageFileHandler<TelemetryDataFile>> dataFileHandler_{nullptr};
+    std::vector<fs::path> filePaths_{};
     std::vector<std::unique_ptr<FileSystem::FileWatcher>> fileWatchers_{};
-    std::recursive_mutex persistMutex_{};
+    
     std::map<std::string, std::shared_ptr<TelemetryDataFile>> dataFiles_{};
   };
 }// namespace IRacingTools::Shared::Services

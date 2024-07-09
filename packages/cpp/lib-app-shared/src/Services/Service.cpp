@@ -2,47 +2,60 @@
 #include <IRacingTools/Shared/Services/Service.h>
 
 namespace IRacingTools::Shared::Services {
-    Service::~Service() {
-        stop();
-        assert(running_.load() == false);
+  Service::~Service() {
+    {
+        std::scoped_lock lock(stateMutex_);
+        destroy();
     }
+    assert(state() != State::Running);
+  }
 
-    std::expected<bool, SDK::GeneralError>  Service::init() {
-        assert(running_.load() == false);
-        spdlog::debug("Service::init default");
+  std::expected<bool, SDK::GeneralError> Service::init() {
+    std::scoped_lock lock(stateMutex_);
+    assert(state() == State::Created);
+    spdlog::debug("Service::init default");
 
-        return true;
-    }
+    return true;
+  }
 
-    std::expected<bool, SDK::GeneralError>  Service::start() {
-        spdlog::debug("Service::start default");
-        setRunning(true);
+  std::expected<bool, SDK::GeneralError> Service::start() {
+    std::scoped_lock lock(stateMutex_);
+    spdlog::debug("Service::start default");
+    setState(State::Running);
 
-        return true;
-    }
+    return true;
+  }
 
-    void Service::stop() {
-        spdlog::debug("Service::stop default");
-        setRunning(false);
-    }
 
-    void Service::destroy() {
-        spdlog::debug("Service::destroy default");
-        setRunning(false);
-    }
+  std::optional<SDK::GeneralError> Service::destroy() {
+    std::scoped_lock lock(stateMutex_);
+    spdlog::debug("Service::destroy default");
+    if (state() >= State::Destroyed)
+        return std::nullopt;    
 
-    bool Service::isRunning() {
-        return running_;
-    }
+    setState(State::Destroyed);
+    return std::nullopt;
+  }
 
-    void Service::setRunning(bool running) {
-        running_ = running;
-    }
+  Service::State Service::state() const {
+    return state_.load();
+  }
 
-    const std::string_view& Service::name() const {
-        return name_;
-    }
+  bool Service::isRunning() {
+    return state() == State::Running;
+  }
 
-    Service::Service(const std::string_view &name) : name_(name) {
-    }
-} // namespace IRacingTools::Shared::Geometry
+  Service::State Service::setState(State newState) {
+    std::scoped_lock lock(stateMutex_);
+    auto oldState = state_.exchange(newState);
+    ServiceStateTransitionCheck(newState, oldState);
+    return oldState;
+  }
+
+  const std::string_view &Service::name() const {
+    return name_;
+  }
+
+  Service::Service(const std::string_view &name) : name_(name) {
+  }
+}// namespace IRacingTools::Shared::Services

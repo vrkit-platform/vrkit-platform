@@ -17,7 +17,7 @@
 #define IRT_PROTO_CMP(O1, O2, MEMBER) O1.MEMBER() == O2.MEMBER()
 
 namespace IRacingTools::Shared::Utils {
-  using namespace IRacingTools::SDK;
+  using namespace ::IRacingTools::SDK;
   using namespace spdlog;
 
   template<typename MessageClazz> std::optional<MessageClazz> ReadMessageFromFile(const std::filesystem::path &path) {
@@ -89,7 +89,7 @@ namespace IRacingTools::Shared::Utils {
         auto jsonParseRes = JsonStringToMessage(jsonLine, msg.get(), jsonParseOptions);
         if (!jsonParseRes.ok()) {
           warn("Json parse error ({}), skipping remainder: {}", magic_enum::enum_name(jsonParseRes.code()).data(),
-               jsonParseRes.message().ToString());
+               std::string{jsonParseRes.message()});
           break;
         }
 
@@ -112,10 +112,10 @@ namespace IRacingTools::Shared::Utils {
         auto jsonSerializeRes = MessageToJsonString(*msg.get(), &msgStr, jsonOptions);
         if (!jsonSerializeRes.ok()) {
           warn("Json serialize error ({}), skipping remainder: {}",
-               magic_enum::enum_name(jsonSerializeRes.code()).data(), jsonSerializeRes.message().ToString());
+               magic_enum::enum_name(jsonSerializeRes.code()).data(), std::string{jsonSerializeRes.message()});
 
           return std::unexpected(GeneralError(
-              ErrorCode::General, fmt::format("Serialize error: {}", jsonSerializeRes.message().ToString())));
+              ErrorCode::General, fmt::format("Serialize error: {}", std::string{jsonSerializeRes.message()})));
         }
 
         data << msgStr << "\n";

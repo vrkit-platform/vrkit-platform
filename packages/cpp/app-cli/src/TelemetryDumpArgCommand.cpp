@@ -32,10 +32,12 @@
 #include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/SDK/Utils/FileHelpers.h>
 #include <IRacingTools/Shared/Chrono.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 namespace IRacingTools::App::Commands {
   using namespace IRacingTools::SDK;
   using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingTools::Shared::Logging;
 
   namespace {
     log::logger L = GetCategoryWithType<TelemetryDumpArgCommand>();

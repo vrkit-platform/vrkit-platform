@@ -32,15 +32,17 @@
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
+
 
 namespace IRacingTools::App::Commands {
     using namespace IRacingTools::SDK;
     using namespace IRacingTools::SDK::Utils;
     using namespace IRacingTools::Shared;
-    using namespace spdlog;
+    using namespace IRacingTools::Shared::Logging;    
     
     namespace {
-        log::logger L = GetCategoryWithType<ProcessAllTelemetryArgCommand>();
+        auto L = GetCategoryWithType<ProcessAllTelemetryArgCommand>();
     }
 
     CLI::App* ProcessAllTelemetryArgCommand::createCommand(CLI::App* app) {
@@ -54,7 +56,7 @@ namespace IRacingTools::App::Commands {
     }
 
     int ProcessAllTelemetryArgCommand::execute() {
-        auto& extraInputPaths = std::accumulate(extraInputPaths_.begin(), extraInputPaths_.end(), std::vector<fs::path>{}, [&] (auto & paths, auto& path) {
+        auto extraInputPaths = std::accumulate(extraInputPaths_.begin(), extraInputPaths_.end(), std::vector<fs::path>{}, [&] (std::vector<fs::path> paths, const std::string& path) {
             if (fs::exists(path) && fs::is_directory(path)){
                 L.info("Valid input path provided ({})", path);
                 paths.push_back(path);
@@ -80,12 +82,12 @@ namespace IRacingTools::App::Commands {
         }
 
         // Convert IBT -> LapTrajectory
-        Services::LapTrajectoryTool tool;
-        auto lapRes  = tool.createLapTrajectory(ibtPath, {.outputDir = outputPath});
-        if (!lapRes) {
-            critical("Failed to create lap trajectory: {}", lapRes.error().what());
-            return 1;
-        }
+        // Services::LapTrajectoryTool tool;
+        // auto lapRes  = tool.createLapTrajectory(ibtPath, {.outputDir = outputPath});
+        // if (!lapRes) {
+        //     critical("Failed to create lap trajectory: {}", lapRes.error().what());
+        //     return 1;
+        // }
         return 0;        
     }
 }

@@ -1,10 +1,12 @@
 #include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/FileWatcher.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 #include <fmt/core.h>
 #include <gtest/gtest.h>
 
+using namespace IRacingTools::Shared::Logging;
 using namespace IRacingTools::SDK;
 using namespace IRacingTools::SDK::Utils;
 using namespace IRacingTools::Shared;

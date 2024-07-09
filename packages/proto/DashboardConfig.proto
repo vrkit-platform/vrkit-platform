@@ -15,7 +15,7 @@ message OverlayConfig {
   string name = 3;
   string description = 4;
 
-  map<string,string> parameters = 20;
+  // map<string,string> parameters = 20;
 }
 
 message OverlayPlacementConfig {
@@ -24,7 +24,7 @@ message OverlayPlacementConfig {
 
   IRacingTools.Models.UI.RectI rect = 10;
 
-  map<string,string> parameters = 20;
+  // map<string,string> parameters = 30;
 }
 
 message OverlayLayoutConfig {

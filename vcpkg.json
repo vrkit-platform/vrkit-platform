@@ -1,7 +1,7 @@
 {
   "name": "irsdk-cpp",
   "version": "0.0.1",
-  "builtin-baseline": "83972272512ce4ede5fc3b2ba98f6468b179f192",
+  "builtin-baseline": "47bf3d1ac192b3fa0feb6e6ac9c845de179eebe9",
   "dependencies": [
     {
       "name": "fmt",
@@ -128,6 +128,10 @@
     {
       "name": "bext-di",
       "version>=": "1.3.0#1"
+    },
+    {
+      "name": "bext-sml2",
+      "version>=": "2024-02-02"
     },
     {
       "name": "reproc",

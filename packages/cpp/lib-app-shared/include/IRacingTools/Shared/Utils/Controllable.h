@@ -24,11 +24,7 @@ namespace IRacingTools::Shared::Utils {
      */
     virtual std::expected<bool, SDK::GeneralError> start() = 0;
 
-    /**
-     * @brief Must set running == false in overriden implementation
-     */
-    virtual void stop() = 0;
+    virtual std::optional<SDK::GeneralError> destroy() = 0;
+  };
 
-    virtual void destroy() = 0;
-  }
-}// namespace IRacingTools::Shared::Services
+}// namespace IRacingTools::Shared::Utils

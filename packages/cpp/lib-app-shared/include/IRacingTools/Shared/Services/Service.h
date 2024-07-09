@@ -2,10 +2,13 @@
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 #include <expected>
+#include <mutex>
+
+#include <IRacingTools/SDK/ErrorTypes.h>
 
 #include <IRacingTools/Shared/ProtoHelpers.h>
+#include <IRacingTools/Shared/Services/ServiceTypes.h>
 #include <IRacingTools/Shared/Utils/Controllable.h>
-#include <IRacingTools/SDK/ErrorTypes.h>
 
 namespace IRacingTools::Shared::Services {
     
@@ -13,6 +16,8 @@ namespace IRacingTools::Shared::Services {
         
         
         public:
+            using State = ServiceState;
+
             Service() = delete;
             
             virtual ~Service();
@@ -30,9 +35,9 @@ namespace IRacingTools::Shared::Services {
             /**
              * @brief Must set running == false in overriden implementation
              */
-            virtual void stop() override;
+            virtual std::optional<SDK::GeneralError> destroy() override;
 
-            virtual void destroy() override;
+            State state() const;
 
             /**
              * @brief Check if the service is running
@@ -56,10 +61,13 @@ namespace IRacingTools::Shared::Services {
              *
              * @param running new running value
              */
-            void setRunning(bool running);
+            State setState(State newState);
+            
+            std::recursive_mutex stateMutex_{};
 
         private:
+            
             const std::string_view name_;
-            std::atomic_bool running_{false};
+            std::atomic<State> state_{State::Created};
     };
 } // namespace IRacingTools::Shared::Geometry

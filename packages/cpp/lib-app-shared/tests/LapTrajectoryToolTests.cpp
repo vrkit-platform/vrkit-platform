@@ -5,6 +5,9 @@
 #include <fmt/core.h>
 #include <gtest/gtest.h>
 
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
+
+using namespace IRacingTools::Shared::Logging;
 using namespace IRacingTools::SDK;
 using namespace IRacingTools::SDK::Utils;
 using namespace IRacingTools::Shared;

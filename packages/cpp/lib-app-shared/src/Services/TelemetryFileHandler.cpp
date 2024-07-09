@@ -1,9 +1,11 @@
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/SDK/Utils/CollectionHelpers.h>
 #include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
 #include <IRacingTools/SDK/VarHolder.h>
 
 #include <IRacingTools/Shared/Services/TelemetryFileHandler.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 #include <fstream>
 #include <iostream>
@@ -14,6 +16,7 @@
 
 namespace IRacingTools::Shared::Services {
   using namespace IRacingTools::SDK;
+  using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::SDK::Utils;
   using namespace spdlog;
 

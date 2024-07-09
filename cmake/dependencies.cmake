@@ -85,7 +85,7 @@ set(DEP_FMT fmt::fmt)
 set(DEP_LOG spdlog::spdlog ${DEP_FMT})
 set(DEP_OPENXR OpenXR::headers)
 set(DEP_REPROC reproc reproc++)
-set(DEP_CLI_CMD cli::cli)
+set(DEP_CLI_CMD CLI11::CLI11)
 set(DEP_BOOST_DEFAULT Boost::system)
 find_path(DEP_BOOST_DI_INCLUDES "boost/di.hpp")
 

@@ -114,9 +114,9 @@ namespace IRacingTools::Shared::UI {
                 return CreateOptions{};
             }
 
-            virtual WNDCLASSEX getWindowClassOptions() {
-                WNDCLASSEX wc;
-                ZeroMemory(&wc, sizeof(WNDCLASSEX));
+            virtual WNDCLASSEXW getWindowClassOptions() {
+                WNDCLASSEXW wc;
+                ZeroMemory(&wc, sizeof(WNDCLASSEXW));
 
 
                 wc.lpfnWndProc = WindowClazz::WindowProc;
@@ -133,9 +133,9 @@ namespace IRacingTools::Shared::UI {
 
                 auto wc = getWindowClassOptions();
 
-                RegisterClassEx(&wc);
+                RegisterClassExW(&wc);
 
-                windowHandle_ = CreateWindowEx(
+                windowHandle_ = CreateWindowExW(
                     options.extendedStyle,
                     WindowClazz::ClassName(),
                     options.name,

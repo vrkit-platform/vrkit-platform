@@ -31,12 +31,17 @@
 #include <IRacingTools/Models/LapData.pb.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 namespace IRacingTools::App::Commands {
     using namespace IRacingTools::SDK;
     using namespace IRacingTools::SDK::Utils;
     using namespace IRacingTools::Shared;
-    using namespace spdlog;
+    using namespace IRacingTools::Shared::Logging;    
+    
+    namespace {
+        auto L = GetCategoryWithType<GenerateTrackmapArgCommand>();
+    }
     
 
     CLI::App* GenerateTrackmapArgCommand::createCommand(CLI::App* app) {
@@ -69,7 +74,7 @@ namespace IRacingTools::App::Commands {
         Services::LapTrajectoryTool tool;
         auto lapRes  = tool.createLapTrajectory(ibtPath, {.outputDir = outputPath});
         if (!lapRes) {
-            critical("Failed to create lap trajectory: {}", lapRes.error().what());
+            L.critical("Failed to create lap trajectory: {}", lapRes.error().what());
             return 1;
         }
         return 0;        

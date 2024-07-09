@@ -30,10 +30,10 @@ namespace IRacingTools::Shared::UI {
         std::shared_ptr<Graphics::DXWindowResources> dxwr_{nullptr};
 
     public:
-        virtual WNDCLASSEX getWindowClassOptions() override {
+        virtual WNDCLASSEXW getWindowClassOptions() override {
             auto wc = Base::getWindowClassOptions();
             // fill in the struct with the needed information
-            wc.cbSize = sizeof(WNDCLASSEX);
+            wc.cbSize = sizeof(WNDCLASSEXW);
             wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
             wc.hCursor = LoadCursor(nullptr, IDC_CROSS);
             wc.hbrBackground = nullptr; //(HBRUSH) COLOR_WINDOW;

@@ -131,6 +131,23 @@
       ]
     },
     {
+      "name": "vrkit_tool: Service Daemon start",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetDirectory}\\vrkit_tool.exe",
+      "args": [
+        "service-daemon",        
+      ],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:PATH};${command:cmake.launchTargetDirectory};C:/Qt/6.5.0;C:/Qt/6.5.0/bin;;C:/Qt/6.5.0/lib"
+        }
+      ]
+    },
+    {
       "name": "vrkit_tool: Generate Track Map",
       "type": "cppvsdbg",
       "request": "launch",

@@ -34,7 +34,9 @@ namespace IRacingTools::Shared::UI {
             if (result.ok())
                 return config;
 
-            return std::unexpected(SDK::GeneralError(SDK::ErrorCode::General, std::format("protobuf JSON parse error (code={}): {}", magic_enum::enum_name<StatusCode>(result.code()).data(), result.message().as_string())));
+            return std::unexpected(SDK::GeneralError(SDK::ErrorCode::General, 
+                std::format("protobuf JSON parse error (code={}): {}", 
+                magic_enum::enum_name<absl::StatusCode>(result.code()).data(), std::string{result.message()})));
             // SDK::MakeUnexpected<SDK::GeneralError>();
         }
     }

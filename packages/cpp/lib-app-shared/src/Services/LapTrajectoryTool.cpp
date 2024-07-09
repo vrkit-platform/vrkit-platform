@@ -1,6 +1,7 @@
 
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 #include <fstream>
 #include <iostream>
@@ -9,6 +10,8 @@
 
 #include <google/protobuf/util/json_util.h>
 
+
+using namespace IRacingTools::Shared::Logging;
 namespace IRacingTools::Shared::Services {
   using namespace IRacingTools::SDK;
   using namespace IRacingTools::SDK::Utils;

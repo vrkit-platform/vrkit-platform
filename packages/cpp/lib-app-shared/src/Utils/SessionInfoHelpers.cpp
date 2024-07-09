@@ -1,6 +1,12 @@
 #include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 namespace IRacingTools::Shared::Utils {
+  using namespace IRacingTools::Shared::Logging;
+  
+  namespace {
+    auto L = LoggingManager::Get().getCategory(__FILE__);
+  }
   const std::expected<std::string_view, SDK::GeneralError> GetSessionInfoTrackLayoutId(const SessionInfoMessage& sessionInfo) {
     auto& winfo = sessionInfo.weekendInfo;
     auto& trackId = winfo.trackID;
@@ -12,6 +18,7 @@ namespace IRacingTools::Shared::Utils {
     }
 
     auto trackLayoutId = std::format("{}::{}::{}",trackId, trackName, trackConfigName);
+
 
   }
 }

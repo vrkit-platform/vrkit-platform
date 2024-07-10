@@ -58,10 +58,10 @@ namespace IRacingTools::App::Commands {
     int ProcessAllTelemetryArgCommand::execute() {
         auto extraInputPaths = std::accumulate(extraInputPaths_.begin(), extraInputPaths_.end(), std::vector<fs::path>{}, [&] (std::vector<fs::path> paths, const std::string& path) {
             if (fs::exists(path) && fs::is_directory(path)){
-                L.info("Valid input path provided ({})", path);
+                L->info("Valid input path provided ({})", path);
                 paths.push_back(path);
             }else {
-                L.warn("Invalid input path provided ({}), ignoring", path);
+                L->warn("Invalid input path provided ({}), ignoring", path);
             }
             return paths;
         });

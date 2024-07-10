@@ -16,8 +16,13 @@
 namespace IRacingTools::SDK::Utils {
   template<typename T>
   struct PrettyType {
-    constexpr std::string_view name() {
-      return boost::typeindex::type_id_with_cvr<T>().pretty_name();
+    std::string name() {
+      // std::string_view prettyName = boost::typeindex::type_id_with_cvr<T>().pretty_name();
+      auto& info = boost::typeindex::type_id_with_cvr<T>().type_info();
+      auto id = boost::typeindex::type_id_with_cvr<T>();
+      std::string prettyName = id.pretty_name();
+      std::string name = id.name();
+      return name;
     };
   };
 
@@ -60,8 +65,8 @@ namespace IRacingTools::SDK::Utils {
 }// namespace IRacingTools::SDK::Utils
 
 
-template<class T, class CharT, class Traits>
-::std::basic_ostream<CharT, Traits> &operator<<(::std::basic_ostream<CharT, Traits> &os,
-                                                IRacingTools::SDK::Utils::PrettyType<T> type) {
-  return os << type.name();
-};
+// template<class T, class CharT, class Traits>
+// ::std::basic_ostream<CharT, Traits> &operator<<(::std::basic_ostream<CharT, Traits> &os,
+//                                                 IRacingTools::SDK::Utils::PrettyType<T> type) {
+//   return os << type.name();
+// };

@@ -40,7 +40,7 @@ namespace IRacingTools::App::Commands {
   using namespace IRacingTools::Shared::Logging;
 
   namespace {
-    log::logger L = GetCategoryWithType<TelemetryDumpArgCommand>();
+    auto L = GetCategoryWithType<TelemetryDumpArgCommand>();
   }// namespace
 
   CLI::App *TelemetryDumpArgCommand::createCommand(CLI::App *app) {
@@ -93,19 +93,19 @@ namespace IRacingTools::App::Commands {
         std::cout << jsonStr << std::endl;
 
       if (!outputBaseFilename_.empty()) {
-        L.info("Writing JSON to {}", outputBaseFilename_.string());
+        L->info("Writing JSON to {}", outputBaseFilename_.string());
         auto jsonFile = fs::path(outputBaseFilename_.string() + ".json");
 
         auto res = Utils::WriteTextFile(jsonFile, jsonStr);
         if (!res || res.value() < jsonStr.length()) {
           if (res && !res.value()) {
             // std::cerr << std::format("Unable to write to {}: {} ",jsonFile.string());
-            L.error("Unable to write to {}", jsonFile.string());
+            L->error("Unable to write to {}", jsonFile.string());
           } else {
-            L.error("Unable to write to {}: {} ", jsonFile.string(), res.error().what());
+            L->error("Unable to write to {}: {} ", jsonFile.string(), res.error().what());
           }
         } else
-          L.info("Wrote JSON to {}", outputBaseFilename_.string());
+          L->info("Wrote JSON to {}", outputBaseFilename_.string());
       }
     }
 

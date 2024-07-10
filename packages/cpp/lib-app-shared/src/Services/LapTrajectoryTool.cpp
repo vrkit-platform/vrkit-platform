@@ -11,15 +11,16 @@
 #include <google/protobuf/util/json_util.h>
 
 
-using namespace IRacingTools::Shared::Logging;
+
 namespace IRacingTools::Shared::Services {
+  using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::SDK;
   using namespace IRacingTools::SDK::Utils;
   using namespace spdlog;
 
   namespace {
     // static constexpr std::string_view LogCategory = PrettyType<LapTrajectoryTool>();
-    log::logger L = GetCategoryWithType<LapTrajectoryTool>();
+    static Logger L{GetCategoryWithType<LapTrajectoryTool>()};
   }// namespace
 
 

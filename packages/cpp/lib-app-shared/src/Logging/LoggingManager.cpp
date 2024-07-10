@@ -17,5 +17,21 @@ namespace IRacingTools::Shared::Logging {
     }
 
     fileSink_ = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFile.string(), LogFileMaxSize, 1u);
+    fileSink_->set_level(spdlog::level::debug);
   }
+
+  /**
+       * @brief Get Logging Category with a user provided name
+       * 
+       * @param name 
+       * @return log::logger 
+       */
+  Logger LoggingManager::getCategory(const std::string &name) {
+    std::scoped_lock lock(mutex_);
+    if (!loggers_.contains(name)){
+      loggers_[name] = std::make_shared<log::logger>(name, fileSink_);
+      loggers_[name]->set_level(spdlog::level::debug);
+      }
+    return loggers_[name];
+  };
 }// namespace IRacingTools::Shared::Logging

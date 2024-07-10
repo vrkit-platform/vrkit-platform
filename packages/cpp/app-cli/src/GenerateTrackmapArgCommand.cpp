@@ -74,7 +74,7 @@ namespace IRacingTools::App::Commands {
         Services::LapTrajectoryTool tool;
         auto lapRes  = tool.createLapTrajectory(ibtPath, {.outputDir = outputPath});
         if (!lapRes) {
-            L.critical("Failed to create lap trajectory: {}", lapRes.error().what());
+            L->critical("Failed to create lap trajectory: {}", lapRes.error().what());
             return 1;
         }
         return 0;        

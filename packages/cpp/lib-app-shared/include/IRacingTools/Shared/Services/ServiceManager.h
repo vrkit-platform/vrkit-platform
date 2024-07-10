@@ -18,7 +18,7 @@ namespace IRacingTools::Shared::Services {
 
   template<typename... ServiceTypes>
   class ServiceManager  {
-    inline static spdlog::logger Log{Logging::GetCategoryWithType<ServiceManager>()};
+    static inline Logging::Logger Log{Logging::GetCategoryWithType<ServiceManager>()};
 
   public:
     using State = ServiceState;
@@ -34,27 +34,27 @@ namespace IRacingTools::Shared::Services {
       std::scoped_lock lock(stateMutex_);
 
       if (!ServiceStateTransitionCheck(state(), State::Initializing, true)) {
-        Log.warn("init() can only be called when new state > {}, currently state is {}. Skipping init()",
+        Log->warn("init() can only be called when new state > {}, currently state is {}. Skipping init()",
                  E::enum_name(ServiceState::Created).data(), E::enum_name(state()).data());
         return std::nullopt;
       }
 
       setState(State::Initializing);
-      Log.info("Creating services");
+      Log->info("Creating services");
       createServices<0>();
 
-      Log.info("Created services");
+      Log->info("Created services");
       for (auto &service: services_) {
-        Log.info("Initializing service >> {}", service->name());
+        Log->info("Initializing service >> {}", service->name());
         auto res = service->init();
 
         if (!res) {
           auto err = res.error();
-          Log.critical("Initialize service ({}) failed: {}", service->name(), err.what());
+          Log->critical("Initialize service ({}) failed: {}", service->name(), err.what());
           throw err;
         }
 
-        Log.info("Initialized service >> {}", service->name());
+        Log->info("Initialized service >> {}", service->name());
       }
 
       setState(State::Initialized);
@@ -70,7 +70,7 @@ namespace IRacingTools::Shared::Services {
 
       std::scoped_lock lock(stateMutex_);
       if (!ServiceStateTransitionCheck(state(), State::Starting, true)) {
-        Log.warn("start() can only be called when new state > {}, currently state is {}. Skipping init()",
+        Log->warn("start() can only be called when new state > {}, currently state is {}. Skipping init()",
                  E::enum_name(ServiceState::Initialized).data(), E::enum_name(state()).data());
         return std::nullopt;
       }
@@ -82,18 +82,18 @@ namespace IRacingTools::Shared::Services {
       }
 
       setState(State::Starting);
-      Log.info("Starting services");
+      Log->info("Starting services");
       for (auto &service: services_) {
-        Log.info("Starting service >> {}", service->name());
+        Log->info("Starting service >> {}", service->name());
         auto res = service->start();
 
         if (!res) {
           auto err = res.error();
-          Log.critical("Start service ({}) failed: {}", service->name(), err.what());
+          Log->critical("Start service ({}) failed: {}", service->name(), err.what());
           throw err;
         }
 
-        Log.info("Initialized service >> {}", service->name());
+        Log->info("Initialized service >> {}", service->name());
       }
 
       setState(State::Running);
@@ -108,20 +108,20 @@ namespace IRacingTools::Shared::Services {
     std::optional<SDK::GeneralError> destroy() {
       std::scoped_lock lock(stateMutex_);
       if (!ServiceStateTransitionCheck(state(), State::Destroying, true)) {
-        Log.warn("destroy() can only be called when new state > {}, currently state is {}. Skipping init()",
+        Log->warn("destroy() can only be called when new state > {}, currently state is {}. Skipping init()",
                  E::enum_name(ServiceState::Running).data(), E::enum_name(state()).data());
         return std::nullopt;
       }
 
       setState(State::Destroying);
-      Log.info("Destroying services");
+      Log->info("Destroying services");
       for (auto &service: services_) {
-        Log.info("Destroy service >> {}", service->name());
+        Log->info("Destroy service >> {}", service->name());
         auto res = service->destroy();
 
         if (res) {
           auto err = res.value();
-          Log.critical("Destroy service ({}) failed: {}", service->name(), err.what());
+          Log->critical("Destroy service ({}) failed: {}", service->name(), err.what());
           throw err;
         } else if (service->state() < State::Destroyed) {
           throw SDK::GeneralError(SDK::ErrorCode::General,
@@ -129,7 +129,7 @@ namespace IRacingTools::Shared::Services {
                                               service->name(), E::enum_name(service->state()).data()));
         }
 
-        Log.info("Destroyed service >> {}", service->name());
+        Log->info("Destroyed service >> {}", service->name());
       }
 
       setState(State::Destroyed);
@@ -190,21 +190,21 @@ namespace IRacingTools::Shared::Services {
       std::scoped_lock lock(stateMutex_);
       std::unique_lock changeLock(stateChangeMutex_);
       if (state() < State::Starting && !waitEvenIfNotRunning) {
-        Log.warn("Services are not yet Starting, ignoring wait");
+        Log->warn("Services are not yet Starting, ignoring wait");
         return std::nullopt;
       }
 
-      Log.debug("Waiting on all services to complete before returning");
+      Log->debug("Waiting on all services to complete before returning");
       auto checkIfDone = [this, waitEvenIfNotRunning] () -> bool {
         auto current = this->state();
         return current >= State::Destroyed || (current < State::Starting && !waitEvenIfNotRunning);
       };
 
       if (checkIfDone()) {
-        Log.warn("Already passes blocking wait, skipping");
+        Log->warn("Already passes blocking wait, skipping");
       } else {
         stateChangedCondition_.wait(changeLock, checkIfDone);
-        Log.debug("Woke from wait");
+        Log->debug("Woke from wait");
       }
 
       return std::nullopt;
@@ -219,7 +219,7 @@ namespace IRacingTools::Shared::Services {
     ~ServiceManager() {
       if (auto res = destroy()) {
         auto &err = res.value();
-        Log.error("Unable to cleanly shutdown all services: {}", err.what());
+        Log->error("Unable to cleanly shutdown all services: {}", err.what());
       }
     }
 
@@ -235,7 +235,7 @@ namespace IRacingTools::Shared::Services {
     void createServices() {
       if constexpr (I < std::tuple_size_v<ServiceTypesTuple>) {
         auto &service = std::get<I>(services_) = std::make_shared<std::tuple_element_t<I, ServiceTypesTuple>>();
-        Log.info("CREATED >> {}", service->name());
+        Log->info("CREATED >> {}", service->name());
         createServices<I + 1>();
       }
     };

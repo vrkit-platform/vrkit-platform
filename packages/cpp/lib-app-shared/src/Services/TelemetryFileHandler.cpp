@@ -22,16 +22,16 @@ namespace IRacingTools::Shared::Services {
 
   namespace {
     // static constexpr std::string_view LogCategory = PrettyType<TelemetryFileHandler>();
-    log::logger L = GetCategoryWithType<TelemetryFileHandler>();
+    auto L = GetCategoryWithType<TelemetryFileHandler>();
   }// namespace
 
   TelemetryFileHandler::TelemetryFileHandler(const std::filesystem::path &file)
       : client_(std::make_shared<SDK::DiskClient>(file, file.string())) {
-    L.info("Created with {}", file.string());
+    L->info("Created with {}", file.string());
   }
 
   TelemetryFileHandler::TelemetryFileHandler(const std::shared_ptr<SDK::DiskClient> &client) : client_(client) {
-    L.info("Created with disk client {}", client->getFilePath().value().string());
+    L->info("Created with disk client {}", client->getFilePath().value().string());
   }
 
   std::expected<std::vector<TelemetryFileHandler::LapDataWithPath>, GeneralError>

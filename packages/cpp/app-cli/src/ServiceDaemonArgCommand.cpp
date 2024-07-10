@@ -52,8 +52,8 @@ namespace IRacingTools::App::Commands {
         void SignalHandler(int signal)
         {
             std::cerr << "Interrupted by Signal" << signal << "\n";
-            L.info("Interrupted ({})", signal);
-            
+            L->info("Interrupted ({})", signal);
+
             if (gServiceManager)
                 gServiceManager->destroy();
         }
@@ -71,16 +71,17 @@ namespace IRacingTools::App::Commands {
 
     int ServiceDaemonArgCommand::execute() {
         
-         
+         L->info("test 123");
+         L->flush();
         auto & manager = gServiceManager = std::make_shared<ServiceManagerType>();
         
 
         std::signal(SIGINT, SignalHandler);
-        L.info("Initializing");
+        L->info("Initializing");
         manager->init();
-        L.info("Starting");
+        L->info("Starting");
         manager->start();
-        L.info("Waiting");
+        L->info("Waiting");
         manager->wait();
 
         return 0;        

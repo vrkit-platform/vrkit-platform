@@ -41,6 +41,8 @@ namespace IRacingTools::Shared::Logging {
     {LogCategoryDefault::Service, magic_enum::enum_name(LogCategoryDefault::Service).data()}
   };
 
+  using Logger = std::shared_ptr<log::logger>;
+
   class LoggingManager : public SDK::Utils::Singleton<LoggingManager> {
     public:
       LoggingManager() = delete;
@@ -54,26 +56,25 @@ namespace IRacingTools::Shared::Logging {
        * @param name 
        * @return log::logger 
        */
-      log::logger getCategory(const std::string_view& name = GlobalCategory) {
-        return log::logger(std::string(name), fileSink_);
-      };
+      Logger getCategory(const std::string& name = std::string{GlobalCategory});
 
   protected:
     explicit LoggingManager(token);
     friend Singleton;
 
   private:
+    std::mutex mutex_{};
     std::shared_ptr<log::sinks::rotating_file_sink_mt> fileSink_{nullptr};
-
+    std::map<std::string_view,Logger> loggers_{};
 
   };
 
   
-  template<typename T> log::logger GetCategoryWithType() {
-    return LoggingManager::Get().getCategory(std::string(PrettyType<T>().name()));
+  template<typename T> Logger GetCategoryWithType() {
+    return LoggingManager::Get().getCategory(PrettyType<T>().name());
   };
 
-  template<LogCategoryDefault C> log::logger GetCategory() {
+  template<LogCategoryDefault C> Logger GetCategory() {
     std::string name = LogCategoryDefaultMap[C];
     return LoggingManager::Get().getCategory(name);
   };
@@ -82,9 +83,9 @@ namespace IRacingTools::Shared::Logging {
    * @brief Get logging category with explicit name
    * 
    * @param name 
-   * @return log::logger 
+   * @return Logger
    */
-  inline log::logger GetCategoryWithName(const std::string_view& name) {
+  inline Logger GetCategoryWithName(const std::string_view& name) {
     return LoggingManager::Get().getCategory(std::string(name));
   };
 

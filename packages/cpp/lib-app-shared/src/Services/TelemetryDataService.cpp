@@ -16,7 +16,7 @@ namespace IRacingTools::Shared::Services {
   using namespace IRacingTools::SDK::Utils;
   using namespace IRacingTools::Shared::Logging;
   namespace {
-    auto L = GetCategoryWithType<TelemetryDataService>();
+    static Logger L = GetCategoryWithType<TelemetryDataService>();
   }
 
   TelemetryDataService::TelemetryDataService() : TelemetryDataService(Options{}) {
@@ -78,11 +78,11 @@ namespace IRacingTools::Shared::Services {
     }
 
     for (auto &path: filePaths_) {
-      L.info("Creating watcher @ {}", path.string());
+      L->info("Creating watcher @ {}", path.string());
       fileWatchers_.push_back(std::make_unique<FileSystem::FileWatcher>(
           path.wstring(), [&](const FileSystem::FileWatcher::WatchEventData &file, FileSystem::WatchEvent eventType) {
             std::scoped_lock lock(stateMutex_);
-            L.info("EVENT({}) FILE({}) PATH({})", std::string(magic_enum::enum_name(eventType).data()),
+            L->info("EVENT({}) FILE({}) PATH({})", std::string(magic_enum::enum_name(eventType).data()),
                     file.path.string(), path.string());
             if (eventType == FileSystem::WatchEvent::Removed) {
               return;

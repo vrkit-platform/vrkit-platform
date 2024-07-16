@@ -78,16 +78,30 @@ namespace IRacingTools::Shared {
 
 
     std::vector<fs::path> ListAllFilesRecursively(const std::vector<fs::path>& paths, const std::string &ext) {
+        return ListAllFiles(paths, true, ext);
+    }
+    std::vector<fs::path> ListAllFiles(const std::vector<fs::path>& paths, bool recursive, const std::string &ext) {
         std::vector<fs::path> files{};
         
         for (auto& path : paths) {
-            auto fileIterator = fs::recursive_directory_iterator(path);
-            for(auto& fileEntry : fileIterator) {
-            auto& file = fileEntry.path();
-                if (ext.empty() || file.string().ends_with(ext)) {
-                    files.push_back(file);
+            auto iterateFiles = [&](auto it) {
+                for(auto& fileEntry : it) {
+                    auto& file = fileEntry.path();
+                    if (ext.empty() || file.string().ends_with(ext)) {
+                        files.push_back(file);
+                    }
                 }
-            }
+            };
+            if (recursive)
+            iterateFiles(fs::recursive_directory_iterator(path));
+            else iterateFiles(fs::directory_iterator(path));
+            // auto fileIterator = recursive ? fs::recursive_directory_iterator(path) : fs::directory_iterator(path);
+            // for(auto& fileEntry : fileIterator) {
+            //     auto& file = fileEntry.path();
+            //     if (ext.empty() || file.string().ends_with(ext)) {
+            //         files.push_back(file);
+            //     }
+            // }
         }
         return files;
     }
@@ -154,14 +168,16 @@ namespace IRacingTools::Shared {
     }
 
     fs::path GetAppDataPath(std::optional<fs::path> childPath) {
-        return CreateDirectories(GetLocalAppDataPath() / APP_NAME, childPath);
+        fs::path appDataPath = GetLocalAppDataPath();
+        appDataPath /= Directories::APP_FOLDER;
+        return CreateDirectories(appDataPath,childPath);
     }
 
     fs::path GetUserDataPath(std::optional<fs::path> childPath) {
-        return CreateDirectories(GetDocumentsPath() / APP_NAME, childPath);
+        return CreateDirectories(GetDocumentsPath() / Directories::APP_FOLDER, childPath);
     }
     fs::path GetOrCreateIRacingDocumentPath(const std::string_view& childPath) {
-        fs::path finalPath = GetDocumentsPath() / "iRacing";
+        fs::path finalPath = GetDocumentsPath() / Directories::IRACING_APP_FOLDER;
         if (!childPath.empty())
             finalPath /= childPath;
         if (!fs::exists(finalPath)) {
@@ -174,6 +190,10 @@ namespace IRacingTools::Shared {
 
     fs::path GetIRacingTelemetryPath() {
         return GetOrCreateIRacingDocumentPath(DocumentsTelemetry);
+    }
+
+    fs::path GetTrackMapsPath() {
+        return GetAppDataPath(Directories::TRACK_MAPS);
     }
 
     std::expected<fs::path, SDK::NotFoundError> GetIRacingDocumentPath(std::optional<fs::path> childPath) {
@@ -193,8 +213,9 @@ namespace IRacingTools::Shared {
 
         return finalPath;
     }
-
+    
     namespace Files {
         const fs::path OPENXR_JSON{"openxr-api-layer.json"};
+        // const fs::path LOG_FILENAME{APP_NAME ".log"};
     }
 }

@@ -19,26 +19,30 @@ namespace {
 
   class FileWatcherTests;
 
-  log::logger L = GetCategoryWithType<FileWatcherTests>();
+  auto L = GetCategoryWithType<FileWatcherTests>();
 
   class FileWatcherTests : public testing::Test {
   protected:
     FileWatcherTests() = default;
 
+    virtual void SetUp() override {
+      L->flush_on(Level::trace);
+    }
+
     virtual void TearDown() override {
-      L.flush();
+      L->flush();
     }
   };
 }// namespace
 
 TEST_F(FileWatcherTests, watch) {
     auto tmpPath = GetTemporaryDirectory("filewatch-tests");
-    spdlog::info("FileUtilTests using temp dir ({})", tmpPath.string());
+    L->info("FileUtilTests using temp dir ({})", tmpPath.string());
     std::atomic_int changeCount = 0;
     FileWatcher watch(
         tmpPath,
         [&](auto& data, auto changeType) {
-            spdlog::info("File ({}) changed ({})", fs::absolute(data.path).string(), magic_enum::enum_name(changeType));
+            L->info("File ({}) changed ({})", fs::absolute(data.path).string(), magic_enum::enum_name(changeType));
             ++changeCount;
         }
     );

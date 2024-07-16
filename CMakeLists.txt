@@ -43,9 +43,13 @@ set(appCLITarget ${appNamePrefix}_tool)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GR")
+
 # CCACHE
 find_program(CCACHE_PROGRAM ccache)
+if (NOT CCACHE_PROGRAM)
+  find_program(CCACHE_PROGRAM ccache PATHS "$ENV{HOME}\\AppData\\Local\\Microsoft\\WinGet\\Links")
+endif()
+
 if (CCACHE_PROGRAM)
   message(NOTICE "Selected CCache: ${CCACHE_PROGRAM}")
   set(CCACHE_CMDLINE ${CCACHE_PROGRAM} base_dir=${PROJECT_SOURCE_DIR} hash_dir=false log_file=${PROJECT_SOURCE_DIR}/tmp_ccache.log)

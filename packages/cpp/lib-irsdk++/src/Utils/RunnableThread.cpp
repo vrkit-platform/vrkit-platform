@@ -37,6 +37,10 @@ namespace IRacingTools::SDK::Utils {
             thread_->join();
     }
 
+    bool RunnableThread::isRunning() {
+        return running_;
+    }
+
     void RunnableThread::runnableWrapper() {
         auto cleanup = gsl::finally(
             [&] {

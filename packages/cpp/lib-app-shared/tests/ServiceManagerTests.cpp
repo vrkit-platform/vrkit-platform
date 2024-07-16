@@ -22,7 +22,7 @@ namespace {
   
   class ServiceManagerTests;
 
-  log::logger L = GetCategoryWithType<ServiceManagerTests>();
+  auto L = GetCategoryWithType<ServiceManagerTests>();
 
 
   class ServiceManagerTests : public testing::Test {
@@ -30,7 +30,7 @@ namespace {
     ServiceManagerTests() = default;
 
     virtual void TearDown() override {
-      L.flush();
+      L->flush();
     }
   };
 

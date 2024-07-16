@@ -5,14 +5,21 @@ import "Pipeline.proto";
 package IRacingTools.Models.Telemetry;
 
 message TelemetryDataFile {
-  
+  enum Status {
+    AVAILABLE = 0;
+    ERROR = 1;
+  }
+
   string id = 1;
   string alias = 2;
+  Status status = 3;
 
   int64 created_at = 5;
   int64 updated_at = 6;
 
   string filename = 10;
+  
+  string error_details = 20;
   
   // Pipeline (i.e. TRACK_MAP)
   repeated Pipeline pipelines = 50;

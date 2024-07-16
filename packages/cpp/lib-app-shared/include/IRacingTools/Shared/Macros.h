@@ -63,9 +63,12 @@ namespace IRacingTools::Shared {
 #define IRT_LOG_SOURCE_LOCATION_AND_FATAL(\
   message, ...) \
   { \
-    std::cerr << std::format("FATAL: " message "\n", ##__VA_ARGS__); \
+    auto msg = std::format("FATAL: " message "\n", ##__VA_ARGS__); \
+    std::cerr << msg << "\n"; \
     IRT_FATAL; \
   }
+
+  //GetCategory<LogCategoryDefault::Global>()->critical(msg);
 
   //spdlog::critical("FATAL: " message "\n", ##__VA_ARGS__);
   /** Use this if something is so wrong that we're almost certainly going to
@@ -80,6 +83,12 @@ namespace IRacingTools::Shared {
 #define IRT_LOG_AND_FATAL(message, ...) \
   IRT_LOG_SOURCE_LOCATION_AND_FATAL( \
     message, ##__VA_ARGS__)
+
+#define IRT_LOG_AND_FATAL_IF(cond, message, ...) \
+  { \
+    if (cond) \
+      IRT_LOG_AND_FATAL(message, ##__VA_ARGS__); \
+  }
 
 
   inline void check_hresult(

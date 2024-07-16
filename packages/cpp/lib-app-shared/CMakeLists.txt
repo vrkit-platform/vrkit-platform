@@ -1,3 +1,5 @@
+set(APP_NAME "VRKitShared")
+set(APP_VERSION ${appVersion})
 
 # SDK Source & headers
 file(GLOB_RECURSE sharedAppLibTestSources tests/*.cpp)
@@ -55,6 +57,7 @@ IRT_CONFIGURE_APP_LIBS(${sharedAppLibTargetStatic})
 install(TARGETS ${sharedAppLibTargetStatic} FILE_SET publicHeaders DESTINATION ${INCLUDE_INSTALL_DIR})
 
 # TESTS
+set(APP_NAME "VRKitSharedTests")
 set(testTargetName ${sharedAppLibTarget}_tests)
 add_executable(${testTargetName} ${sharedAppLibTestSources})
 target_link_libraries(${testTargetName} PRIVATE
@@ -62,4 +65,4 @@ target_link_libraries(${testTargetName} PRIVATE
   ${sdkTargetStatic}
   ${modelsTargetStatic})
 irt_configure_test_libs(${testTargetName})
-
+IRT_CONFIGURE_TARGET(${testTargetName})

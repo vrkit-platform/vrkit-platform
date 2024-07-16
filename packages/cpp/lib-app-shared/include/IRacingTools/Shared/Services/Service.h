@@ -8,12 +8,14 @@
 
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/Services/ServiceTypes.h>
+
 #include <IRacingTools/Shared/Utils/Controllable.h>
 
 namespace IRacingTools::Shared::Services {
     
+    class ServiceContainer;
+
     class Service : public Utils::Controllable {
-        
         
         public:
             using State = ServiceState;
@@ -46,7 +48,9 @@ namespace IRacingTools::Shared::Services {
              */
             bool isRunning();
 
-            const std::string_view &name() const;
+            std::string name() const;
+
+            std::shared_ptr<ServiceContainer> getContainer() const;
 
         protected:
             /**
@@ -54,7 +58,7 @@ namespace IRacingTools::Shared::Services {
              * 
              * @param name 
              */
-            explicit Service(const std::string_view& name);
+            explicit Service(const std::shared_ptr<ServiceContainer>& serviceContainer, const std::string& name);
 
             /**
              * @brief Set the running value
@@ -66,8 +70,10 @@ namespace IRacingTools::Shared::Services {
             std::recursive_mutex stateMutex_{};
 
         private:
-            
-            const std::string_view name_;
+            const std::shared_ptr<ServiceContainer> serviceContainer_;
+            std::string name_;
             std::atomic<State> state_{State::Created};
     };
 } // namespace IRacingTools::Shared::Geometry
+
+#include <IRacingTools/Shared/Services/ServiceContainer.h>

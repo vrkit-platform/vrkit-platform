@@ -20,6 +20,8 @@ namespace IRacingTools::SDK::Utils {
 
         virtual void runnable() = 0;
 
+        bool isRunning();
+
     protected:
         void runnableWrapper();
 

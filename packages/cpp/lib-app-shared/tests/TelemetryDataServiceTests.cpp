@@ -4,9 +4,13 @@
 #include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
-#include <IRacingTools/Shared/TrackMapGeometry.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <IRacingTools/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
+#include <IRacingTools/Shared/Services/ServiceContainer.h>
+#include <IRacingTools/Shared/Services/TelemetryDataService.h>
+
+#include <IRacingTools/Shared/TrackMapGeometry.h>
+
 
 using namespace IRacingTools::Shared::Logging;
 using namespace IRacingTools::SDK;
@@ -14,6 +18,7 @@ using namespace IRacingTools::SDK::Utils;
 using namespace IRacingTools::Shared;
 
 using namespace IRacingTools::Shared::Services;
+using namespace IRacingTools::Shared::Services::Pipelines;
 
 namespace fs = std::filesystem;
 
@@ -37,30 +42,41 @@ namespace {
 
   class TelemetryDataServiceTests;
 
-  log::logger L = GetCategoryWithType<TelemetryDataServiceTests>();
-
-
+  auto L = GetCategoryWithType<TelemetryDataServiceTests>();
 
   class TelemetryDataServiceTests : public testing::Test {
   protected:
     TelemetryDataServiceTests() = default;
 
+    virtual void SetUp() override {
+      L->flush_on(Level::trace);
+    }
+
     virtual void TearDown() override {
-      L.flush();
+      L->flush();
     }
   };
 
 }// namespace
 
+TEST_F(TelemetryDataServiceTests, get_track_map_pipeline_executor) {
+  PipelineExecutorRegistrySetup();
+  
+  auto& reg = PipelineExecutorRegistry<PipelineType::PIPELINE_TYPE_TRACK_MAP,std::shared_ptr<TelemetryDataFile>>::Get();
+  auto executor = reg.build();
+  EXPECT_TRUE(!!executor) << "Executor factory was not registered";
+}
+
 TEST_F(TelemetryDataServiceTests, list_ibt_files) {
   auto pwd = fs::current_path();
   auto fixturePath = ToIBTTestFile(IBTTestFile1);
+  auto serviceContainer = std::make_shared<ServiceContainer>();
   {
-    auto service = std::make_shared<TelemetryDataService>(TelemetryDataService::Options{
+    auto service = std::make_shared<TelemetryDataService>(serviceContainer, TelemetryDataService::Options{
       .ibtPaths = {GetIBTFixturePath()}
     });
 
-    auto ibtFiles = service->listAvailableIBTFiles();
+    auto ibtFiles = service->listTelemetryFiles();
     EXPECT_GT(ibtFiles.size(), 0);
   }
 }
@@ -68,9 +84,9 @@ TEST_F(TelemetryDataServiceTests, list_ibt_files) {
 TEST_F(TelemetryDataServiceTests, service_setup_and_load) {
   auto tmpDir = GetTemporaryDirectory();
   auto trackDataFile = tmpDir / TrackDataPath; 
-  
+  auto serviceContainer = std::make_shared<ServiceContainer>();
   {
-    auto service = std::make_shared<TelemetryDataService>(TelemetryDataService::Options{
+    auto service = std::make_shared<TelemetryDataService>(serviceContainer, TelemetryDataService::Options{
       .dataFile = trackDataFile
     });
     auto res = service->load();
@@ -88,7 +104,7 @@ TEST_F(TelemetryDataServiceTests, service_setup_and_load) {
   }
 
   {
-    auto service = std::make_shared<TelemetryDataService>(TelemetryDataService::Options{
+    auto service = std::make_shared<TelemetryDataService>(serviceContainer, TelemetryDataService::Options{
       .dataFile = trackDataFile
     });
 

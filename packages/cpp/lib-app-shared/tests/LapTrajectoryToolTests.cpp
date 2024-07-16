@@ -33,14 +33,18 @@ namespace {
 
   class LapTrajectoryToolTests;
 
-  log::logger L = GetCategoryWithType<LapTrajectoryToolTests>();
+  auto L = GetCategoryWithType<LapTrajectoryToolTests>();
 
   class LapTrajectoryToolTests : public testing::Test {
   protected:
     LapTrajectoryToolTests() = default;
 
+    virtual void SetUp() override {
+      L->flush_on(Level::trace);
+    }
+
     virtual void TearDown() override {
-      L.flush();
+      L->flush();
     }
   };
 

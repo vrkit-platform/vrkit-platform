@@ -13,14 +13,15 @@
 #include <IRacingTools/SDK/Utils/EventEmitter.h>
 #include <IRacingTools/SDK/Utils/FileHelpers.h>
 
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 #define IRT_PROTO_CMP(O1, O2, MEMBER) O1.MEMBER() == O2.MEMBER()
 
 namespace IRacingTools::Shared::Utils {
   using namespace ::IRacingTools::SDK;
-  using namespace spdlog;
 
-  template<typename MessageClazz> std::optional<MessageClazz> ReadMessageFromFile(const std::filesystem::path &path) {
+  template<typename MessageClazz>
+  std::optional<MessageClazz> ReadMessageFromFile(const std::filesystem::path &path) {
     auto res = SDK::Utils::ReadFile(path);
     if (!res.has_value()) {
       return std::nullopt;
@@ -36,15 +37,30 @@ namespace IRacingTools::Shared::Utils {
     return std::make_optional(std::move(msg));
   };
 
+  template<typename MessageClazz>
+  bool WriteMessageToFile(const MessageClazz& msg, const std::filesystem::path &path) {
+    std::vector<uint8_t> msgData;
+    msgData.resize(msg.ByteSizeLong());
+    msg.SerializeToArray(msgData.data(), msgData.size());
+    auto res = SDK::Utils::WriteFile(path, msgData);
+    if (!res.has_value()) {
+      return false;
+    }
+    
+    return true;
+  };
+
   /**
    * @brief 
    */
-  template<typename MessageClazz> 
+  template<typename MessageClazz>
   class JSONLinesMessageFileHandler {
 
   private:
+    inline static Logging::Logger L{Logging::GetCategoryWithType<JSONLinesMessageFileHandler<MessageClazz>>()};
     std::mutex persistMutex_{};
     fs::path file_;
+
 
   public:
     /**
@@ -55,16 +71,21 @@ namespace IRacingTools::Shared::Utils {
       SDK::Utils::EventEmitter<const std::vector<std::shared_ptr<MessageClazz>> &> onWrite{};
     } events{};
 
+    virtual fs::path file() {
+      return file_;
+    };
+
     /**
      * @brief Read the underlying `jsonl` file
      * 
      * @return std::expected<std::vector<std::shared_ptr<MessageClazz>>, GeneralError> 
      */
     virtual std::expected<std::vector<std::shared_ptr<MessageClazz>>, GeneralError> read() {
+      // static auto L{Logging::GetCategoryWithType<}
       std::scoped_lock lock(persistMutex_);
 
       auto fileExists = fs::exists(file_);
-      info("Loading messages from ({}), exists={}", file_.string(), fileExists);
+      L->info("Loading messages from ({}), exists={}", file_.string(), fileExists);
 
       if (!fileExists)
         return std::unexpected(SDK::GeneralError(ErrorCode::NotFound, "File not found"));
@@ -80,16 +101,17 @@ namespace IRacingTools::Shared::Utils {
       google::protobuf::util::JsonParseOptions jsonParseOptions{};
 
       while (std::getline(jsonLinesStream, jsonLine)) {
-        auto msg = std::make_shared<MessageClazz>();;
+        auto msg = std::make_shared<MessageClazz>();
+        ;
 
         if (!jsonLine.starts_with("{") || !jsonLine.ends_with("}")) {
-          warn("Invalid json line, skipping remainder: {}", jsonLine);
+          L->warn("Invalid json line, skipping remainder: {}", jsonLine);
           break;
         }
         auto jsonParseRes = JsonStringToMessage(jsonLine, msg.get(), jsonParseOptions);
         if (!jsonParseRes.ok()) {
-          warn("Json parse error ({}), skipping remainder: {}", magic_enum::enum_name(jsonParseRes.code()).data(),
-               std::string{jsonParseRes.message()});
+          L->warn("Json parse error ({}), skipping remainder: {}", magic_enum::enum_name(jsonParseRes.code()).data(),
+                  std::string{jsonParseRes.message()});
           break;
         }
 
@@ -100,19 +122,25 @@ namespace IRacingTools::Shared::Utils {
 
       return msgs;
     }
-    
+
+    /**
+     * @brief Write the message vector to disk
+     * 
+     * @param messages 
+     * @return std::expected<std::size_t, GeneralError> 
+     */
     virtual std::expected<std::size_t, GeneralError> write(const std::vector<std::shared_ptr<MessageClazz>> &messages) {
       std::scoped_lock lock(persistMutex_);
 
       std::stringstream data{};
       google::protobuf::util::JsonPrintOptions jsonOptions{};
-      for (auto& msg: messages) {
+      for (auto &msg: messages) {
         std::string msgStr;
 
         auto jsonSerializeRes = MessageToJsonString(*msg.get(), &msgStr, jsonOptions);
         if (!jsonSerializeRes.ok()) {
-          warn("Json serialize error ({}), skipping remainder: {}",
-               magic_enum::enum_name(jsonSerializeRes.code()).data(), std::string{jsonSerializeRes.message()});
+          L->warn("Json serialize error ({}), skipping remainder: {}",
+                  magic_enum::enum_name(jsonSerializeRes.code()).data(), std::string{jsonSerializeRes.message()});
 
           return std::unexpected(GeneralError(
               ErrorCode::General, fmt::format("Serialize error: {}", std::string{jsonSerializeRes.message()})));
@@ -131,6 +159,20 @@ namespace IRacingTools::Shared::Utils {
       return writeRes.value();
     };
 
+    /**
+     * @brief Remove/Delete/Clear the underlying data file
+     * 
+     * @return std::expected<std::size_t, GeneralError> 
+     */
+    virtual std::optional<GeneralError> clear() {
+      std::scoped_lock lock(persistMutex_);
+      if (fs::exists(file_)) {
+        L->info("Clearing file ({})", file_.string());
+        fs::remove(file_);
+      }
+
+      return std::nullopt;
+    }
 
     JSONLinesMessageFileHandler(const fs::path &file) : file_(file) {
     }

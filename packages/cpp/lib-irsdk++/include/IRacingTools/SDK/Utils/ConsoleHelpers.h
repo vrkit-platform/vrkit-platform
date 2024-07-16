@@ -11,21 +11,9 @@
 #include <string_view>
 #include <tuple>
 
-#include <boost/type_index.hpp>
+#include <IRacingTools/SDK/Utils/Traits.h>
 
 namespace IRacingTools::SDK::Utils {
-  template<typename T>
-  struct PrettyType {
-    std::string name() {
-      // std::string_view prettyName = boost::typeindex::type_id_with_cvr<T>().pretty_name();
-      auto& info = boost::typeindex::type_id_with_cvr<T>().type_info();
-      auto id = boost::typeindex::type_id_with_cvr<T>();
-      std::string prettyName = id.pretty_name();
-      std::string name = id.name();
-      return name;
-    };
-  };
-
   template<::std::size_t ColumnCount>
   size_t GetStringViewMaxLength(const ::std::array<::std::string_view, ColumnCount> &headers) {
     auto res = std::ranges::max_element(headers, [](const auto &a, const auto &b) {

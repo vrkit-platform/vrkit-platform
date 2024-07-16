@@ -33,9 +33,11 @@
 #include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <IRacingTools/Shared/Utils/TypeIdHelpers.h>
 
 #include <IRacingTools/Shared/Services/ServiceManager.h>
 #include <IRacingTools/Shared/Services/TelemetryDataService.h>
+#include <IRacingTools/Shared/Services/TrackMapService.h>
 
 namespace IRacingTools::App::Commands {
     using namespace IRacingTools::SDK;
@@ -43,12 +45,14 @@ namespace IRacingTools::App::Commands {
     using namespace IRacingTools::Shared;
     using namespace IRacingTools::Shared::Logging;    
     using namespace IRacingTools::Shared::Services;
+    using namespace IRacingTools::Shared::Utils;
     
     namespace {
-        using ServiceManagerType = ServiceManager<TelemetryDataService>;
-        std::shared_ptr<ServiceManagerType> gServiceManager{nullptr};
         auto L = GetCategoryWithType<ServiceDaemonArgCommand>();
 
+        using ServiceManagerType = ServiceManager<TelemetryDataService, TrackMapService>;
+        std::shared_ptr<ServiceManagerType> gServiceManager{nullptr};
+        
         void SignalHandler(int signal)
         {
             std::cerr << "Interrupted by Signal" << signal << "\n";
@@ -61,18 +65,13 @@ namespace IRacingTools::App::Commands {
 
     CLI::App* ServiceDaemonArgCommand::createCommand(CLI::App* app) {
         auto cmd = app->add_subcommand("service-daemon", "Run the default service daemon by itself");
-
-        // cmd->add_option("-i,--input", extraInputPaths_, "Additional input paths");
-
-        // cmd->add_option("-o,--output", outputPath_, "Override the output path");
-
         return cmd;
     }
 
     int ServiceDaemonArgCommand::execute() {
+        std::string clazzName = IRacingTools::Shared::Utils::GetPrettyTypeId<ServiceDaemonArgCommand>().value().name;
+        L->info("Starting " APP_NAME " Command >> {}", clazzName);
         
-         L->info("test 123");
-         L->flush();
         auto & manager = gServiceManager = std::make_shared<ServiceManagerType>();
         
 

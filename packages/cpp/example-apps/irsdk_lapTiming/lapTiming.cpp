@@ -42,7 +42,7 @@
 using namespace IRacingTools::SDK;
 using namespace IRacingTools::SDK::Utils;
 namespace {
-    
+      
   std::shared_ptr<spdlog::logger> L{spdlog::basic_logger_mt("LapTimingExample", "tmp/lap-timing.log")};
 
   VarHolder g_AirDensity("AirDensity");            // (float) kg/m^3, Density of air at start/finish line

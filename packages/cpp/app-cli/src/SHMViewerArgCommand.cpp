@@ -7,6 +7,7 @@
 #include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/Shared/SHM/SHM.h>
 #include <IRacingTools/Shared/UI/ViewerWindow.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 namespace IRacingTools::App::Commands {
     using namespace IRacingTools::Shared;
@@ -16,7 +17,11 @@ namespace IRacingTools::App::Commands {
 
     using namespace IRacingTools::SDK::Utils;
     using namespace IRacingTools::SDK;
-
+    
+    namespace {
+        auto L = Logging::GetCategoryWithType<SHMViewerArgCommand>();
+    }
+    
     CLI::App* SHMViewerArgCommand::createCommand(CLI::App* app) {
         auto cmd = app->add_subcommand("shm-viewer", "SHM Viewer (for testing)");
 
@@ -24,7 +29,7 @@ namespace IRacingTools::App::Commands {
     }
 
     int SHMViewerArgCommand::execute() {
-        spdlog::info("SHM-Viewer");
+        L->info("SHM-Viewer");
         ViewerWindow<Graphics::GraphicsPlatform::D3D11> win{};
         win.initialize();
         Window::DefaultWindowMessageLoop();

@@ -5,6 +5,7 @@
 #include <condition_variable>
 #include <expected>
 #include <memory>
+#include <type_traits>
 
 // #include <boost/sml2>
 
@@ -12,12 +13,15 @@
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/Services/Service.h>
+#include <IRacingTools/Shared/Services/ServiceContainer.h>
 
 
 namespace IRacingTools::Shared::Services {
 
   template<typename... ServiceTypes>
-  class ServiceManager  {
+  class ServiceManager : public ServiceContainer {
+    static_assert((std::is_base_of_v<Service, ServiceTypes> && ...), "Only services can be passed.");
+
     static inline Logging::Logger Log{Logging::GetCategoryWithType<ServiceManager>()};
 
   public:
@@ -116,6 +120,8 @@ namespace IRacingTools::Shared::Services {
       setState(State::Destroying);
       Log->info("Destroying services");
       for (auto &service: services_) {
+        if (!service)
+          continue;
         Log->info("Destroy service >> {}", service->name());
         auto res = service->destroy();
 
@@ -234,8 +240,12 @@ namespace IRacingTools::Shared::Services {
     template<::std::size_t I = 0>
     void createServices() {
       if constexpr (I < std::tuple_size_v<ServiceTypesTuple>) {
-        auto &service = std::get<I>(services_) = std::make_shared<std::tuple_element_t<I, ServiceTypesTuple>>();
-        Log->info("CREATED >> {}", service->name());
+        using ServiceType = std::tuple_element_t<I, ServiceTypesTuple>;
+        // auto self = ServiceContainer::shared_from_this();
+        auto container = ServiceContainer::shared_from_this(); //std::static_pointer_cast<ServiceContainer>(self);
+        auto service = std::make_shared<ServiceType>(container);
+        std::get<I>(services_) = service;
+        setService<ServiceType>(service);
         createServices<I + 1>();
       }
     };

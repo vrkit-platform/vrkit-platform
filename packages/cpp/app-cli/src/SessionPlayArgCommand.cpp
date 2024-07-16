@@ -18,11 +18,15 @@
 #include <IRacingTools/Shared/OpenXR/OpenXRSetupHelpers.h>
 #include <IRacingTools/Shared/UI/OverlayWindow.h>
 #include <IRacingTools/Shared/UI/TrackMapOverlayWindow.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 namespace IRacingTools::App::Commands
 {
   using namespace Shared;
-
+  namespace {
+    auto L = Logging::GetCategoryWithType<SessionPlayArgCommand>();
+  }
+  
   CLI::App *SessionPlayArgCommand::createCommand(CLI::App *app)
   {
 
@@ -36,10 +40,10 @@ namespace IRacingTools::App::Commands
 
   int SessionPlayArgCommand::execute()
   {
-    spdlog::info("Session player started with runtime path ({}), enabling openxr layer ({})", GetRuntimeDirectory().string(), OpenXR::GetOpenXRLayerJSONPath().string());
+    L->info("Session player started with runtime path ({}), enabling openxr layer ({})", GetRuntimeDirectory().string(), OpenXR::GetOpenXRLayerJSONPath().string());
     OpenXR::EnableOpenXRLayer(HKEY_LOCAL_MACHINE);
 
-    spdlog::info("Loading track map ({})", trackmapFilename_);
+    L->info("Loading track map ({})", trackmapFilename_);
     auto trackMap = Geometry::LoadTrackMapFromTrajectoryFile(trackmapFilename_);
     auto dataProvider = std::make_shared<DiskSessionDataProvider>(ibtFilename_,ibtFilename_);
 

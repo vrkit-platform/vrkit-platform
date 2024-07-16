@@ -19,8 +19,7 @@ namespace IRacingTools::Shared::Services {
   using namespace spdlog;
 
   namespace {
-    // static constexpr std::string_view LogCategory = PrettyType<LapTrajectoryTool>();
-    static Logger L{GetCategoryWithType<LapTrajectoryTool>()};
+    auto L = GetCategoryWithType<LapTrajectoryTool>();
   }// namespace
 
 

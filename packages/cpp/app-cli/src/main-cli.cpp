@@ -17,6 +17,7 @@
 #include "SessionPlayArgCommand.h"
 #include "SessionRecordArgCommand.h"
 #include "TelemetryDumpArgCommand.h"
+#include "ProcessAllTelemetryArgCommand.h"
 
 
 using namespace std::literals;
@@ -45,7 +46,7 @@ int main(int argc, char **argv) {
   app.set_version_flag("--version", appVerion);
 
   auto cmds =
-      ArgCommand::build<TelemetryDumpArgCommand, DashboardArgCommand, GenerateTrackmapArgCommand, SessionPlayArgCommand,
+      ArgCommand::build<TelemetryDumpArgCommand, ProcessAllTelemetryArgCommand,DashboardArgCommand, GenerateTrackmapArgCommand, SessionPlayArgCommand,
                         SessionRecordArgCommand, SHMViewerArgCommand, ServiceDaemonArgCommand>(&app);
 
   CLI11_PARSE(app, argc, argv);

@@ -52,10 +52,16 @@ namespace IRacingTools::Shared::Services {
     return oldState;
   }
 
-  const std::string_view &Service::name() const {
+  
+  std::string Service::name() const {
     return name_;
   }
 
-  Service::Service(const std::string_view &name) : name_(name) {
+  std::shared_ptr<ServiceContainer> Service::getContainer() const {
+    return serviceContainer_;
+  }
+
+  Service::Service(const std::shared_ptr<ServiceContainer>& serviceContainer, const std::string &name) :
+    serviceContainer_(serviceContainer), name_(name) {
   }
 }// namespace IRacingTools::Shared::Services

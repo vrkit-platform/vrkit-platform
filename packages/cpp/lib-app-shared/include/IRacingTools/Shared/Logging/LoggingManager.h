@@ -25,7 +25,10 @@
 
 namespace IRacingTools::Shared::Logging {
   using namespace IRacingTools::SDK::Utils;
-  namespace log = spdlog;
+  
+  
+  namespace Level = spdlog::level;
+  using Logger = std::shared_ptr<spdlog::logger>;
 
   constexpr std::string_view GlobalCategory {"GLOBAL"};
 
@@ -41,8 +44,6 @@ namespace IRacingTools::Shared::Logging {
     {LogCategoryDefault::Service, magic_enum::enum_name(LogCategoryDefault::Service).data()}
   };
 
-  using Logger = std::shared_ptr<log::logger>;
-
   class LoggingManager : public SDK::Utils::Singleton<LoggingManager> {
     public:
       LoggingManager() = delete;
@@ -54,7 +55,7 @@ namespace IRacingTools::Shared::Logging {
        * @brief Get Logging Category with a user provided name
        * 
        * @param name 
-       * @return log::logger 
+       * @return Logger 
        */
       Logger getCategory(const std::string& name = std::string{GlobalCategory});
 
@@ -64,8 +65,8 @@ namespace IRacingTools::Shared::Logging {
 
   private:
     std::mutex mutex_{};
-    std::shared_ptr<log::sinks::rotating_file_sink_mt> fileSink_{nullptr};
-    std::map<std::string_view,Logger> loggers_{};
+    std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> fileSink_{nullptr};
+    std::map<std::string,Logger> loggers_{};
 
   };
 
@@ -74,8 +75,8 @@ namespace IRacingTools::Shared::Logging {
     return LoggingManager::Get().getCategory(PrettyType<T>().name());
   };
 
-  template<LogCategoryDefault C> Logger GetCategory() {
-    std::string name = LogCategoryDefaultMap[C];
+  template<LogCategoryDefault Cat> Logger GetCategory() {
+    std::string name = LogCategoryDefaultMap[Cat];
     return LoggingManager::Get().getCategory(name);
   };
 

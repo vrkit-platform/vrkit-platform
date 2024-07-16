@@ -18,7 +18,8 @@ namespace IRacingTools::Shared::Utils {
     }
 
     auto trackLayoutId = std::format("{}::{}::{}",trackId, trackName, trackConfigName);
-
+    L->info("Computed track layout id from session info >> {}", trackLayoutId);
+    return trackLayoutId;
 
   }
 }

@@ -61,7 +61,7 @@ namespace IRacingTools::Shared {
           break;
 
         if (!diskClient.next()) {
-          spdlog::error("Unable to get next: {}",diskClient.getSampleIndex());
+          spdlog::debug("Unable to get next: {}",diskClient.getSampleIndex());
           break;
         }
       }

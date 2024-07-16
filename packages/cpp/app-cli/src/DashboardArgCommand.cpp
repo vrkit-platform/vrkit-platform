@@ -9,6 +9,7 @@
 #include "DashboardArgCommand.h"
 
 #include <IRacingTools/Shared/FileSystemHelpers.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/OpenXR/OpenXRSetupHelpers.h>
 #include <IRacingTools/Shared/System/DisplayInfo.h>
 
@@ -16,6 +17,7 @@ namespace IRacingTools::App::Commands {
     using namespace Shared;
 
     namespace {
+        auto L = Logging::GetCategoryWithType<DashboardArgCommand>();
         class NewArgCommand : public ArgCommand {
         public:
             int execute() override {
@@ -63,7 +65,7 @@ namespace IRacingTools::App::Commands {
         class ListArgCommand : public ArgCommand {
         public:
             int execute() override {
-                spdlog::info("List dashboards");
+                L->info("List dashboards");
                 return 0;
             }
 
@@ -87,14 +89,14 @@ namespace IRacingTools::App::Commands {
         auto cmd = app->add_subcommand("dashboard", "Dashboard commands for creating and managing layouts in both VR & on Displays");
         cmd->add_option("--dir,-d", dir_, "Override the Dashboard storage directory");
         cmd->parse_complete_callback([&] {
-            spdlog::info("Parse complete callback. dir_ = {}", dir_);
+            L->info("Parse complete callback. dir_ = {}", dir_);
         });
         cmds_ = build<ListArgCommand, ValidateArgCommand, NewArgCommand>(cmd);
         return cmd;
     }
 
     int DashboardArgCommand::execute() {
-        spdlog::info(
+        L->info(
             "Dashboard command started with runtime path ({}), enabling openxr layer ({})",
             GetRuntimeDirectory().string(),
             OpenXR::GetOpenXRLayerJSONPath().string()

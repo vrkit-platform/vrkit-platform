@@ -15,6 +15,7 @@
 
 #include <IRacingTools/Shared/UI/NormalWindow.h>
 #include <IRacingTools/Shared/UI/ViewerSettings.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 #include "ViewerWindowDX11Renderer.h"
 #include "ViewerWindowRenderer.h"
@@ -23,6 +24,7 @@
 namespace IRacingTools::Shared::UI {
     template <Graphics::GraphicsPlatform GP>
     class ViewerWindow : public NormalWindow<ViewerWindow<GP>> {
+        inline static auto L = Logging::GetCategoryWithType<ViewerWindow>();
         using Base = BaseWindow<ViewerWindow>;
         using Normal = NormalWindow<ViewerWindow>;
 
@@ -229,7 +231,7 @@ namespace IRacingTools::Shared::UI {
 
             const auto snapshot = renderer_->getSHM()->maybeGet();
             if (!snapshot.hasTexture()) {
-                spdlog::debug("No texture in SHM");
+                L->debug("No texture in SHM");
                 return;
             }
 
@@ -237,7 +239,7 @@ namespace IRacingTools::Shared::UI {
             const auto layerId = 0;
             const auto frameNumber = renderer_->getSHM()->getFrameCountForMetricsOnly();
             if (frameNumber % 60 == 0)
-                spdlog::info("Frame number ({})", frameNumber);
+                L->info("Frame number ({})", frameNumber);
 
             const auto& layer = *snapshot.getLayerConfig(layerId);
 

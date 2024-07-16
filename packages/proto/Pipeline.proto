@@ -3,8 +3,7 @@ syntax = "proto3";
 package IRacingTools.Models;
 
 enum PipelineType {
-  PIPELINE_TYPE_UNKNOWN = 0;
-  PIPELINE_TYPE_TRACK_MAP = 1;
+  PIPELINE_TYPE_TRACK_MAP = 0;
 }
 
 enum PipelineStatus {

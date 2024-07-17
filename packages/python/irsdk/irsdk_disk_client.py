@@ -3,7 +3,7 @@ import struct
 import pandas as pd
 
 from irsdk.irsdk_common_client import IRSDKStruct, Header, VarHeader
-from packages.python.irsdk.irsdk_constants import VAR_TYPE_MAP
+from irsdk.irsdk_constants import VAR_TYPE_MAP
 
 
 class DiskSubHeader(IRSDKStruct):

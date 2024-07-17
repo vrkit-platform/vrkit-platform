@@ -11,7 +11,7 @@ from urllib import request, error
 from yaml.reader import Reader as YamlReader
 
 from irsdk.irsdk_common_client import Header, VarHeader
-from packages.python.irsdk.irsdk_constants import VERSION, \
+from irsdk.irsdk_constants import VERSION, \
     SIM_STATUS_URL, \
     DATAVALIDEVENTNAME, \
     MEMMAPFILE, \

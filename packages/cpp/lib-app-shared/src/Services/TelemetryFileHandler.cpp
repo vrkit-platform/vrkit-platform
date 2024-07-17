@@ -18,11 +18,12 @@ namespace IRacingTools::Shared::Services {
   using namespace IRacingTools::SDK;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::SDK::Utils;
-  using namespace spdlog;
-
+  
   namespace {
-    // static constexpr std::string_view LogCategory = PrettyType<TelemetryFileHandler>();
     auto L = GetCategoryWithType<TelemetryFileHandler>();
+    constexpr std::size_t MinimumDataFrameCountValidLap = 
+      60 // 60 data frames per second from iRacing
+      * 30; // using 30 seconds as the minimum lap time
   }// namespace
 
   TelemetryFileHandler::TelemetryFileHandler(const std::filesystem::path &file)
@@ -37,7 +38,6 @@ namespace IRacingTools::Shared::Services {
   std::expected<std::vector<TelemetryFileHandler::LapDataWithPath>, GeneralError>
   TelemetryFileHandler::getLapData(bool includeInvalidLaps) {
     using DataFrameProcessor = DiskClientDataFrameProcessor<GetLapDataContext>;
-
 
     GetLapDataContext data{};
     DataFrameProcessor processor(client_);
@@ -109,7 +109,7 @@ namespace IRacingTools::Shared::Services {
 
     for (auto &lap: laps) {
       auto &[sessionTime, lapNumber, lapTime, incidientCount, coordinates] = lap;
-      debug("sessionTime={},lap={},lapTimeSeconds={},incidentCount={},coordinateCount={}", sessionTime, lapNumber,
+      L->debug("sessionTime={},lap={},lapTimeSeconds={},incidentCount={},coordinateCount={}", sessionTime, lapNumber,
             lapTime, incidientCount, coordinates.size());
     }
 
@@ -118,6 +118,27 @@ namespace IRacingTools::Shared::Services {
         return std::get<3>(lap) > 0;
       });
     }
+
+    if (laps.empty()) {
+      return std::unexpected(SDK::GeneralError(ErrorCode::General, "No lap data found"));
+    }
+
+    auto& firstLap = laps[0];
+    auto firstLapNumber = std::get<1>(firstLap);
+    auto& lastLap = laps.back();
+    auto lastLapNumber = std::get<1>(lastLap);
+    
+    std::erase_if(laps, [&](auto &lap) {
+      auto lapNumber = std::get<1>(lap);
+      auto& coordinates = std::get<4>(lap);
+      return coordinates.size() < MinimumDataFrameCountValidLap || lapNumber == firstLapNumber || lapNumber == lastLapNumber;
+    });
+
+    auto lapCount = laps.size();
+    if (lapCount < 3) {
+      return std::unexpected(SDK::GeneralError(ErrorCode::General, "At least 3 laps must exist in a telemetry file to be valid"));
+    }
+
 
     return laps;
   }

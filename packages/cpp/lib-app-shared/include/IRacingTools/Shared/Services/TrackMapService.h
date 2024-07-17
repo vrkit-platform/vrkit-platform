@@ -83,15 +83,9 @@ namespace IRacingTools::Shared::Services {
     std::expected<const std::shared_ptr<LapTrajectory>, SDK::GeneralError>
     set(const std::string &id, const std::shared_ptr<LapTrajectory> &config);
 
-    std::expected<std::shared_ptr<TrackMapService>, SDK::GeneralError> load(bool reload = false);
-    std::expected<std::shared_ptr<TrackMapService>, SDK::GeneralError> save();
-
     std::optional<fs::path> findFile(const std::shared_ptr<LapTrajectory> &dataFile);
-
-    std::vector<std::shared_ptr<LapTrajectory>> toDataFileList();
-    DataFileMap &getDataFileMapRef();
-
-    std::size_t size();
+    std::optional<fs::path> findFile(const std::string& trackLayoutId);
+    std::size_t cacheSize();
 
     /**
      * @brief Initialize the service

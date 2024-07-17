@@ -1,7 +1,7 @@
-
 #include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
+#include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
 
 #include <fstream>
 #include <iostream>
@@ -23,13 +23,13 @@ namespace IRacingTools::Shared::Services {
   }// namespace
 
 
-  std::expected<Models::Telemetry::LapTrajectory, GeneralError>
+  std::expected<std::shared_ptr<Models::Telemetry::LapTrajectory>, GeneralError>
   LapTrajectoryTool::createLapTrajectory(const std::filesystem::path &file, const CreateOptions& options) {
     auto client = std::make_shared<SDK::DiskClient>(file, file.string());
     return createLapTrajectory(client,options);
   }
 
-  std::expected<Models::Telemetry::LapTrajectory, GeneralError>
+  std::expected<std::shared_ptr<Models::Telemetry::LapTrajectory>, GeneralError>
   LapTrajectoryTool::createLapTrajectory(const std::shared_ptr<SDK::DiskClient> &client, const CreateOptions& options) {
     TelemetryFileHandler telemFile(client);
     auto lapsRes = telemFile.getLapData();
@@ -43,34 +43,53 @@ namespace IRacingTools::Shared::Services {
     if (!sessionInfo) {
       return std::unexpected(GeneralError(ErrorCode::General, "session info from weak ptr was not available"));
     }
-    
+
+    std::string trackLayoutId;
+    {
+      auto res = Shared::Utils::GetSessionInfoTrackLayoutId(sessionInfo);
+      if (!res) {
+        return std::unexpected(GeneralError(ErrorCode::General, "session info could not determine trackLayoutId"));
+      }
+
+      trackLayoutId = res.value();
+    }
     // FIND BEST LAP TIME
     // TODO: Add optional predicate command to allow
     //  User specified optimization/selection
-    TelemetryFileHandler::LapDataWithPath lap{};
-    for (auto& it : laps) {
-      auto& lapNum = std::get<1>(lap);
-      auto& lapTime = std::get<2>(lap);
-      auto& itLapTime = std::get<2>(it);
+    TelemetryFileHandler::LapDataWithPath bestLap{};
+    for (auto& currentLap : laps) {
+      auto& lapNum = std::get<1>(bestLap);
+      auto& lapTime = std::get<2>(bestLap);
+      auto& itLapTime = std::get<2>(currentLap);
       if (!lapNum || itLapTime < lapTime) {
-        lap = it;
+        bestLap = currentLap;
       }
     }
+    
+    auto trajectory = std::make_shared<Models::Telemetry::LapTrajectory>();    
+    {
+      auto timestamp = TimeEpoch<std::chrono::milliseconds>().count();
+      trajectory->set_timestamp(timestamp);
+      
+      auto& winfo = sessionInfo->weekendInfo;
+      trajectory->set_track_id(winfo.trackID);
+      trajectory->set_track_name(winfo.trackName);
+      trajectory->set_track_layout_name(winfo.trackConfigName);      
+      trajectory->set_track_layout_id(trackLayoutId);
+    }
 
+    auto lapMeta = trajectory->mutable_metadata();
+    auto lapPath = trajectory->mutable_path();
 
-    Models::Telemetry::LapTrajectory trajectory;
-    auto lapMeta = trajectory.mutable_metadata();
-    auto lapPath = trajectory.mutable_path();
-
-    lapMeta->set_lap(std::get<1>(lap));
-    lapMeta->set_incident_count(std::get<3>(lap));
-    lapMeta->set_lap_time(std::floor(std::get<2>(lap) * 1000.0));
-    lapMeta->set_valid(std::get<3>(lap) == 0);
+    lapMeta->set_lap(std::get<1>(bestLap));
+    lapMeta->set_incident_count(std::get<3>(bestLap));
+    lapMeta->set_lap_time(std::floor(std::get<2>(bestLap) * 1000.0));
+    lapMeta->set_valid(std::get<3>(bestLap) == 0);
 
     // Get the coords from the lap data tuple
-    auto& coords = std::get<4>(lap);    
+    auto& coords = std::get<4>(bestLap);    
     for (auto& coord : coords) {
-      auto point = trajectory.add_path();
+      auto point = trajectory->add_path();
       point->set_lap_time(std::floor<int32_t>(std::get<0>(coord) * 1000.0));
       point->set_lap_percent_complete(std::get<1>(coord));
       point->set_lap_distance(std::get<2>(coord));
@@ -80,9 +99,9 @@ namespace IRacingTools::Shared::Services {
     }
 
     if (options.outputDir) {
-      
+      // TODO: Specify output directory in TelemetryDataService
       // auto& outputFile = options.outputFile.value();
-      // WriteTextFile(outputFile, trajectory.SerializeAsString());
+      // WriteTextFile(outputFile, trajectory->SerializeAsString());
     }
     
     return trajectory;

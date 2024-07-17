@@ -8,6 +8,9 @@
 
 namespace IRacingTools::Shared::Utils {
   using SDK::SessionInfo::SessionInfoMessage;
-  const std::expected<std::string_view, SDK::GeneralError> GetSessionInfoTrackLayoutId(const SessionInfoMessage& sessionInfo);
+  
+  std::expected<std::string, SDK::GeneralError> GetSessionInfoTrackLayoutId(const SessionInfoMessage& sessionInfoMessage);
+  std::expected<std::string, SDK::GeneralError> GetSessionInfoTrackLayoutId(const std::shared_ptr<SessionInfoMessage>& sessionInfoMessage);
+  std::expected<std::string, SDK::GeneralError> GetSessionInfoTrackLayoutId(const SessionInfoMessage* sessionInfoMessage);
   
 }// namespace IRacingTools::Shared::Services

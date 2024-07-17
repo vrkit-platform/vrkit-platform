@@ -6,8 +6,10 @@ package IRacingTools.Models.Telemetry;
 
 message TelemetryDataFile {
   enum Status {
-    AVAILABLE = 0;
-    ERROR = 1;
+    STATUS_CREATED = 0;
+    STATUS_AVAILABLE = 5;
+    STATUS_INVALID = 10;
+    STATUS_ERROR = 20;
   }
 
   string id = 1;

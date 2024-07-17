@@ -241,8 +241,7 @@ namespace IRacingTools::Shared::Services {
     void createServices() {
       if constexpr (I < std::tuple_size_v<ServiceTypesTuple>) {
         using ServiceType = std::tuple_element_t<I, ServiceTypesTuple>;
-        // auto self = ServiceContainer::shared_from_this();
-        auto container = ServiceContainer::shared_from_this(); //std::static_pointer_cast<ServiceContainer>(self);
+        auto container = ServiceContainer::shared_from_this(); 
         auto service = std::make_shared<ServiceType>(container);
         std::get<I>(services_) = service;
         setService<ServiceType>(service);

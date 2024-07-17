@@ -27,7 +27,7 @@ namespace IRacingTools::Shared::Services {
     std::mutex gProcessorMutex{};
     std::atomic_size_t gRequestIdSeq{0};
 
-    auto CreateTelemetryDataFile(const fs::path &file) {
+    auto CreateTelemetryDataFile(TelemetryDataService *service, const fs::path &file) {
       auto fileEncoded = Base64::encode(file.string());
       auto timestamp = TimeEpoch<std::chrono::milliseconds>().count();
       auto dataFile = std::make_shared<TelemetryDataFile>();
@@ -38,14 +38,64 @@ namespace IRacingTools::Shared::Services {
 
       dataFile->set_created_at(timestamp);
       dataFile->set_updated_at(timestamp);
+      dataFile->set_status(TelemetryDataFile::STATUS_CREATED);
+      
+      service->set(dataFile);
 
       return dataFile;
     }
+    
+    /**
+     * @brief Hold result info for a pipeline
+     */
+    struct ExecutePipelineResult {
+      fs::path file;
+      std::string dataFileId;
+      PipelineType type;
+      PipelineStatus status;
+      
+      std::string pipelineId{""};
+      std::string attemptId{""};
+      std::optional<SDK::GeneralError> error{std::nullopt};
+
+      /**
+       * @brief Set the result error info
+       * 
+       * @tparam Args 
+       * @param fmt 
+       * @param args 
+       * @return auto 
+       */
+      template <typename... Args>
+      auto setError(fmt::format_string<Args...> fmt, Args&&... args) {
+        auto msg = fmt::format(fmt, std::forward<Args>(args)...);
+        error = SDK::GeneralError(ErrorCode::General, msg);
+        status = PipelineStatus::PIPELINE_STATUS_ERROR;
+        return this;
+      }
+    };
+
     template<PipelineType Type>
-    bool ExecutePipeline(TelemetryDataService *service, const std::shared_ptr<TelemetryDataFile> &dataFile,
+    ExecutePipelineResult ExecutePipeline(TelemetryDataService *service, const std::shared_ptr<TelemetryDataFile> &dataFile,
                          const fs::path &file) {
       Models::Pipeline *pipeline{nullptr};
       Models::Pipeline::Attempt *attempt{nullptr};
+
+      ExecutePipelineResult result {
+        .file = file,
+        .dataFileId = dataFile->id(),
+        .type = Type,
+        .status = PipelineStatus::PIPELINE_STATUS_CREATED
+      };
+
+      auto persistDataFile = [&] () {
+        if (auto res = service->save(); !res) {
+          L->warn("Failed to save data file ({}), error: {}", dataFile->filename(), res.error().what());
+        } else {
+          L->debug("Save data file ({})", dataFile->filename());
+        }
+      };
+
       {
         std::string id{magic_enum::enum_name<Type>().data()};
         // FIND PIPELINE IF ALREADY EXISTS
@@ -80,20 +130,32 @@ namespace IRacingTools::Shared::Services {
         attempt->set_status(Models::PipelineStatus::PIPELINE_STATUS_CREATED);
       }
 
+      
       auto executor = PipelineExecutorRegistry<Type, std::shared_ptr<TelemetryDataFile>>::GetPtr()->build();
-      if (!executor)
-        return false;
+      if (!executor) {
+        // result.setError("Executor not found for type ({})", Type);
+        result.setError("Executor not found for type ({})", magic_enum::enum_name(Type).data());
+        return result;
+      }
 
-      auto res = executor->execute(attempt, service->getContainer(), dataFile);
+      PipelineExecutor<std::shared_ptr<TelemetryDataFile>>::PipelineAttemptEditor attemptEditor(pipeline, attempt);
+      auto res = executor->execute(attemptEditor, service->getContainer(), dataFile);
+      if (res) {
+        auto error = res.value();
+        result.setError("Failed to execute pipeline: {}", error.what());        
+        return result;
+      }
 
-
-      return true;
+      result.status = PIPELINE_STATUS_COMPLETE;
+      return result;
     }
-    bool ExecutePipelines(TelemetryDataService *service, const std::shared_ptr<TelemetryDataFile> &dataFile,
+    
+    std::expected<std::vector<ExecutePipelineResult>, SDK::GeneralError> ExecutePipelines(TelemetryDataService *service, const std::shared_ptr<TelemetryDataFile> &dataFile,
                           const fs::path &file) {
-      ExecutePipeline<PIPELINE_TYPE_TRACK_MAP>(service, dataFile, file);
-
-      return true;
+      
+      std::vector<ExecutePipelineResult> results{};
+      results.push_back(ExecutePipeline<PIPELINE_TYPE_TRACK_MAP>(service, dataFile, file));
+      return results;
     }
   }
 
@@ -178,25 +240,31 @@ namespace IRacingTools::Shared::Services {
             unprocessedFiles.pop_front();
 
             auto dataFile = service_->getByFile(file);
-            if (dataFile) {
+            if (dataFile && dataFile->status() != TelemetryDataFile::STATUS_CREATED && dataFile->status() != TelemetryDataFile::STATUS_ERROR) {
               L->debug("Ignoring telemetry file ({}) as it has already been ingested");
-              processedFiles.emplace_back(Result::ProcessedType{file, dataFile});
+              processedFiles.emplace_back(Result::ProcessedType{file, dataFile});              
               continue;
             }
 
-            dataFile = CreateTelemetryDataFile(file);
-            if (!ExecutePipelines(service_, dataFile, file)) {
+            if (!dataFile)
+              dataFile = CreateTelemetryDataFile(service_, file);
+            
+            if (ExecutePipelines(service_, dataFile, file)) {
+              processedFiles.emplace_back(Result::ProcessedType{file, dataFile});
+              dataFile->set_status(TelemetryDataFile::STATUS_AVAILABLE);
+            } else {
               failedFiles.emplace_back(Result::FailedType{
                   file, SDK::GeneralError(ErrorCode::General, "Unknown error occurred while processing file")});
               L->error("Pipelines failed to process, skipping {} & subsequent files", file.string());
-              break;
+              dataFile->set_status(TelemetryDataFile::STATUS_INVALID);
             }
 
-            processedFiles.emplace_back(Result::ProcessedType{file, dataFile});
+            service_->set(dataFile);
+            
+            
           }
 
-          result->status =
-              failedFiles.empty() && unprocessedFiles.empty() ? Result::Status::Complete : Result::Status::Failed;
+          result->status = Result::Status::Complete;
           
           L->info("Processed request (id={},status={})", request->id, magic_enum::enum_name(result->status).data());
 
@@ -424,19 +492,23 @@ namespace IRacingTools::Shared::Services {
   }
 
   std::expected<const std::shared_ptr<TelemetryDataFile>, SDK::GeneralError>
-  TelemetryDataService::set(const std::shared_ptr<TelemetryDataFile> &config) {
-    return set(config->id(), config);
+  TelemetryDataService::set(const std::shared_ptr<TelemetryDataFile> &dataFile) {
+    return set(dataFile->id(), dataFile);
   }
 
   std::expected<const std::shared_ptr<TelemetryDataFile>, SDK::GeneralError>
-  TelemetryDataService::set(const std::string &id, const std::shared_ptr<TelemetryDataFile> &config) {
+  TelemetryDataService::set(const std::string &id, const std::shared_ptr<TelemetryDataFile> &dataFile) {
     std::scoped_lock lock(stateMutex_);
 
     // COPY CURRENT MAP
     auto newDataFiles = dataFiles_;
 
+    // TIMESTAMP UPDATED_AT
+    auto timestamp = TimeEpoch<std::chrono::milliseconds>().count();
+    dataFile->set_updated_at(timestamp);
+
     // SET MAPPING TO DATA FILE
-    newDataFiles[id] = config;
+    newDataFiles[id] = dataFile;
 
     // WRITE CHANGES TO DISK
     auto res = dataFileHandler_->write(SDK::Utils::ValuesOf(newDataFiles));

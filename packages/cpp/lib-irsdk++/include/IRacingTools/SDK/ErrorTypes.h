@@ -18,7 +18,7 @@ namespace IRacingTools::SDK {
     public:
         template <typename E, typename... T>
         static E create(ErrorCode code, fmt::format_string<T...> fmt, T&&... args) {
-            return E(code, fmt::format(fmt, args...));
+            return E(code, fmt::format(fmt, std::forward(args)...));
         }
 
         explicit GeneralError(ErrorCode code = ErrorCode::General, const std::string& msg = "") : std::logic_error(msg),

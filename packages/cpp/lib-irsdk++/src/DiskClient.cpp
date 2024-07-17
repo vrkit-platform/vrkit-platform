@@ -99,9 +99,11 @@ namespace IRacingTools::SDK {
             return false;
         }
 
+        spdlog::info("IBT file read disk session info");
+        if (!updateSessionInfo(ibtFile)) {            
+            return false;
+        }
         spdlog::info("IBT file read disk subheader");
-        updateSessionInfo(ibtFile);
-
         auto varHeaderOffset = header_.varHeaderOffset;
 
         // Read Headers
@@ -182,17 +184,33 @@ namespace IRacingTools::SDK {
 
             data[sessionLength - 1] = '\0';
 
-            auto rootNode = YAML::Load(data);
-            
-            if (!sessionInfo_.second) {
-                sessionInfo_.second = std::make_shared<SessionInfo::SessionInfoMessage>();
-                sessionInfo_.first = 1;
-            }
+            try {
+                auto rootNode = YAML::Load(data);
+                
+                if (!sessionInfo_.second) {
+                    sessionInfo_.second = std::make_shared<SessionInfo::SessionInfoMessage>();
+                    sessionInfo_.first = 1;
+                }
 
-            SessionInfo::SessionInfoMessage* sessionInfo = sessionInfo_.second.get();
-            *sessionInfo = rootNode.as<SessionInfo::SessionInfoMessage>();
+                SessionInfo::SessionInfoMessage* sessionInfo = sessionInfo_.second.get();
+                *sessionInfo = rootNode.as<SessionInfo::SessionInfoMessage>();
+                return true;
+            } catch (const YAML::ParserException& ex) {
+                auto msg = std::format("ParserException: Failed to parse session info: {}", ex.what());
+                spdlog::error(msg);
+                return std::unexpected(SDK::GeneralError(ErrorCode::General, msg));
+            } catch (const YAML::Exception& ex) {
+                auto msg = std::format("Failed to parse session info: {}", ex.what());
+                spdlog::error(msg);
+                return std::unexpected(SDK::GeneralError(ErrorCode::General, msg));
+            } catch (...) {
+                auto msg = std::format("Failed to parse session info: UNKNOWN");
+                spdlog::error(msg);
+                return std::unexpected(SDK::GeneralError(ErrorCode::General, msg));
+            }            
         }
-
+        
+        
     }
 
     void DiskClient::reset() {

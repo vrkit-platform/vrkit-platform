@@ -7,19 +7,33 @@ namespace IRacingTools::Shared::Utils {
   namespace {
     auto L = LoggingManager::Get().getCategory(__FILE__);
   }
-  const std::expected<std::string_view, SDK::GeneralError> GetSessionInfoTrackLayoutId(const SessionInfoMessage& sessionInfo) {
-    auto& winfo = sessionInfo.weekendInfo;
+  
+  std::expected<std::string, SDK::GeneralError> GetSessionInfoTrackLayoutId(const SessionInfoMessage& sessionInfoMessage) {
+    return GetSessionInfoTrackLayoutId(&sessionInfoMessage);
+  }
+
+  std::expected<std::string, SDK::GeneralError> GetSessionInfoTrackLayoutId(const std::shared_ptr<SessionInfoMessage>& sessionInfoMessage) {
+    return GetSessionInfoTrackLayoutId(sessionInfoMessage.get());
+  }
+
+  std::expected<std::string, SDK::GeneralError> GetSessionInfoTrackLayoutId(const SessionInfoMessage* sessionInfoMessage) {
+    if (!sessionInfoMessage) {
+      return std::unexpected(SDK::GeneralError(SDK::ErrorCode::General, "NULL SessionInfoMessage"));
+    }
+    auto& winfo = sessionInfoMessage->weekendInfo;
     auto& trackId = winfo.trackID;
     auto& trackName = winfo.trackName;
-    auto& trackConfigName = winfo.trackConfigName;
+    std::string trackConfigName = winfo.trackConfigName;
+    if (trackConfigName == "null")
+      trackConfigName = "NO_CONFIG_NAME";
+
     if (!trackId || trackName.empty() || trackConfigName.empty()) {
       return std::unexpected(SDK::GeneralError(SDK::ErrorCode::General, "To determine the track id, the `sessionInfo.weekendInfo` must have the following valid, non-empty, members "
-      "`trackID`, `trackName`, `trackConfigName`"));
+      "`trackID`, `trackName`,  `trackConfigName`"));
     }
 
-    auto trackLayoutId = std::format("{}::{}::{}",trackId, trackName, trackConfigName);
+    auto trackLayoutId = fmt::format("{}::{}::{}",trackId, trackName, trackConfigName);
     L->info("Computed track layout id from session info >> {}", trackLayoutId);
     return trackLayoutId;
-
   }
 }

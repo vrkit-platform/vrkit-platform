@@ -27,36 +27,42 @@ namespace IRacingTools::Shared::Services {
     auto L = GetCategoryWithType<TrackMapService>();
     std::mutex gProcessorMutex{};
 
-    std::string LapTrajectoryToFilename(const LapTrajectory* it) {
-      return std::format("{}{}", it->track_config_id(),Extensions::TRACK_MAP);
+    std::string TrackLayoutIdToFilename(const std::string &trackLayoutId) {
+      std::string rawFilename = std::format("{}{}", trackLayoutId, Extensions::TRACK_MAP);
+      std::regex invalidCharsExp{"[\\s:]"};
+      std::string filename = std::regex_replace(rawFilename, invalidCharsExp, "_");
+      return filename;
     }
-    std::string LapTrajectoryToFilename(const LapTrajectory& it) {
+
+    std::string LapTrajectoryToFilename(const LapTrajectory *it) {
+      return TrackLayoutIdToFilename(it->track_layout_id());
+    }
+    std::string LapTrajectoryToFilename(const LapTrajectory &it) {
       return LapTrajectoryToFilename(&it);
     }
-    
-  }
-    
+  } // namespace
 
-  TrackMapService::TrackMapService(const std::shared_ptr<ServiceContainer>& serviceContainer) : TrackMapService(serviceContainer, Options{}) {
+
+  TrackMapService::TrackMapService(const std::shared_ptr<ServiceContainer> &serviceContainer)
+      : TrackMapService(serviceContainer, Options{}) {
   }
 
-  TrackMapService::TrackMapService(const std::shared_ptr<ServiceContainer>& serviceContainer, const Options &options)
+  TrackMapService::TrackMapService(const std::shared_ptr<ServiceContainer> &serviceContainer, const Options &options)
       : Service(serviceContainer, PrettyType<TrackMapService>{}.name()), options_(options) {
     reset();
   }
 
   void TrackMapService::reset(bool skipPrepare) {
-    
-      filePaths_.clear();
 
-      // NOW PREPARE
-      if (!skipPrepare) {
-        
-        filePaths_ = options_.paths.empty() ? std::vector<fs::path>{GetTrackMapsPath()} : options_.paths;
+    filePaths_.clear();
 
-      }
+    // NOW PREPARE
+    if (!skipPrepare) {
+
+      filePaths_ = options_.paths.empty() ? std::vector<fs::path>{GetTrackMapsPath()} : options_.paths;
     }
-  
+  }
+
 
   void TrackMapService::setOptions(const Options &options) {
     std::scoped_lock lock(stateMutex_);
@@ -69,7 +75,7 @@ namespace IRacingTools::Shared::Services {
 
     // READ THE UNDERLYING DATA FILE, THE RESULT (IF SUCCESSFUL) IS HANDLED BY
     // THE `onRead` EVENT HANDLER
-    
+
     return true;
   }
 
@@ -81,7 +87,6 @@ namespace IRacingTools::Shared::Services {
 
     setState(State::Starting);
 
-    
 
     setState(State::Running);
 
@@ -102,53 +107,36 @@ namespace IRacingTools::Shared::Services {
 
   /**
    * @brief Remove underlying data file & clear the map
-   * 
-   * @return std::optional<SDK::GeneralError> 
+   *
+   * @return std::optional<SDK::GeneralError>
    */
   std::optional<SDK::GeneralError> TrackMapService::clearTrackMapCache() {
     dataFiles_.clear();
-    
+
     return std::nullopt;
   }
 
   std::vector<fs::path> TrackMapService::listTrackMaps() {
     return ListAllFiles(filePaths_, false, Extensions::TRACK_MAP);
   }
-  std::expected<std::shared_ptr<TrackMapService>, SDK::GeneralError> TrackMapService::load(bool reload) {
-    
 
-    return shared_from_this();
-  }
-
-  std::expected<std::shared_ptr<TrackMapService>, SDK::GeneralError> TrackMapService::save() {
-
-
-    return shared_from_this();
-  }
-
-  std::size_t TrackMapService::size() {
+  std::size_t TrackMapService::cacheSize() {
     std::scoped_lock lock(stateMutex_);
     return dataFiles_.size();
   }
 
-  TrackMapService::DataFileMap &TrackMapService::getDataFileMapRef() {
-    return dataFiles_;
-  }
-
-  std::vector<std::shared_ptr<LapTrajectory>> TrackMapService::toDataFileList() {
+  bool TrackMapService::exists(const std::string &trackLayoutId) {
     std::scoped_lock lock(stateMutex_);
-
-    return SDK::Utils::ValuesOf(dataFiles_);
+    return dataFiles_.contains(trackLayoutId) || findFile(trackLayoutId).has_value();
+  }
+  std::optional<fs::path> TrackMapService::findFile(const std::shared_ptr<LapTrajectory> &lt) {
+    return findFile(lt->track_layout_id());
   }
 
-  bool TrackMapService::exists(const std::string &nameOrAlias) {
-    std::scoped_lock lock(stateMutex_);
-    return dataFiles_.contains(nameOrAlias);
-  }
-
-  std::optional<fs::path> TrackMapService::findFile(const std::shared_ptr<LapTrajectory> &dataFile) {
+  std::optional<fs::path> TrackMapService::findFile(const std::string &trackLayoutId) {
+    auto ltFilename = TrackLayoutIdToFilename(trackLayoutId);
     for (auto &filePath: filePaths_) {
-      auto file = filePath / LapTrajectoryToFilename(dataFile.get());
+      auto file = filePath / ltFilename;
       if (fs::exists(file)) {
         return file;
       }
@@ -158,26 +146,28 @@ namespace IRacingTools::Shared::Services {
   }
 
 
-  bool TrackMapService::isAvailable(const std::string &nameOrAlias) {
+  bool TrackMapService::isAvailable(const std::string &trackLayoutId) {
     std::scoped_lock lock(stateMutex_);
-    if (dataFiles_.contains(nameOrAlias)) {
-      return findFile(dataFiles_[nameOrAlias]).has_value();
-    }
-
-    return false;
+    auto filename = TrackLayoutIdToFilename(trackLayoutId);
+    return dataFiles_.contains(filename) || findFile(trackLayoutId).has_value();
   }
 
-  std::shared_ptr<LapTrajectory> TrackMapService::get(const std::string &nameOrAlias) {
+  std::shared_ptr<LapTrajectory> TrackMapService::get(const std::string &trackLayoutId) {
     std::scoped_lock lock(stateMutex_);
-    if (dataFiles_.contains(nameOrAlias)) {
-      return dataFiles_[nameOrAlias];
-    }
-    return std::shared_ptr<LapTrajectory>();
+    auto res = findFile(trackLayoutId);
+    if (!res)
+      return nullptr;
+    
+    auto dataRes = ReadMessageFromFile<LapTrajectory>(res.value());
+    if (!dataRes)
+      return nullptr;
+
+    return std::make_shared<LapTrajectory>(dataRes.value());
   }
 
   std::expected<const std::shared_ptr<LapTrajectory>, SDK::GeneralError>
   TrackMapService::set(const std::shared_ptr<LapTrajectory> &trajectory) {
-    return set(trajectory->track_config_id(), trajectory);
+    return set(trajectory->track_layout_id(), trajectory);
   }
 
   std::expected<const std::shared_ptr<LapTrajectory>, SDK::GeneralError>
@@ -187,14 +177,15 @@ namespace IRacingTools::Shared::Services {
     auto path = filePaths_[0];
     auto filename = LapTrajectoryToFilename(trajectory.get());
     auto file = path / filename;
+    L->info("Writing lap trajectory ({}) to: {}", trajectory->track_layout_id(), file.string());
 
     if (!WriteMessageToFile(*trajectory.get(), file)) {
       L->error("Failed to write {}", file.string());
       return std::unexpected(SDK::GeneralError(SDK::ErrorCode::General, "Unknown error occured"));
     }
-    
+
     return trajectory;
   }
 
 
-}// namespace IRacingTools::Shared::Services
+} // namespace IRacingTools::Shared::Services

@@ -14,6 +14,21 @@ enum PipelineStatus {
   PIPELINE_STATUS_ERROR = 20;
 };
 
+message PipelineLog {
+  enum Level {
+    TRACE = 0;
+    DEBUG = 1;
+    INFO = 2;
+    WARN = 3;
+    ERR = 4;
+    CRITICAL = 5;
+    OFF = 6;
+  }
+
+  Level level = 1;
+  string message = 5;
+}
+
 message Pipeline {
   
   message Attempt {
@@ -23,7 +38,7 @@ message Pipeline {
     
     int32 attempt_number = 10;
 
-    repeated string logs = 50;
+    repeated PipelineLog logs = 50;
   }
 
   string id = 1;

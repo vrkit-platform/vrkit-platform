@@ -10,7 +10,7 @@ echo Building python protos in %rootDir%
 path %rootDir%\build\debug-vscode\vcpkg_installed\x64-windows\tools\protobuf;%rootDir%\venv\Scripts;%path%
 
 echo Starting python protos in %rootDir%
-protoc.exe -I %rootDir%\packages\proto --python_out=%rootDir%/packages/python/irsdk/models --mypy_out=%rootDir%/packages/python/irsdk/models %rootDir%\packages\proto\LapData.proto
+protoc.exe -I %rootDir%\packages\proto --python_out=%rootDir%/packages/python/irsdk/models --mypy_out=%rootDir%/packages/python/irsdk/models %rootDir%\packages\proto\*.proto
 echo Completed python protos in %rootDir%
 
 popd

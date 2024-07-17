@@ -58,7 +58,8 @@ dependencies = [
   "pytest",
   'jupyter',
   "types-protobuf",
-  "py2exe"
+  "py2exe",
+  "mypy-protobuf",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
@@ -85,7 +86,7 @@ dependencies = [
 #python -m grpc_tools.protoc -I packages/proto --python_betterproto_out=packages/python/irsdk/models packages/proto/irsdk_models.proto
 #"""
 protoc = """
-python -m grpc_tools.protoc -I packages/proto --python_out=packages/python/irsdk/models --mypy_out=packages/python/irsdk/models packages/proto/LapData.proto
+python -m grpc_tools.protoc -I packages/proto --python_out=packages/python/irsdk/models --mypy_out=packages/python/irsdk/models packages/proto/*.proto
 """
 
 [[tool.hatch.envs.all.matrix]]

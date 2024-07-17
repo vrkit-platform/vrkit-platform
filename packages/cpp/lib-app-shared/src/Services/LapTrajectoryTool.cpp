@@ -79,7 +79,7 @@ namespace IRacingTools::Shared::Services {
     }
 
     auto lapMeta = trajectory->mutable_metadata();
-    auto lapPath = trajectory->mutable_path();
+    // auto lapPath = trajectory->mutable_path();
 
     lapMeta->set_lap(std::get<1>(bestLap));
     lapMeta->set_incident_count(std::get<3>(bestLap));
@@ -89,14 +89,22 @@ namespace IRacingTools::Shared::Services {
     // Get the coords from the lap data tuple
     auto& coords = std::get<4>(bestLap);    
     for (auto& coord : coords) {
+      auto lat = std::get<4>(coord);
+      auto lon = std::get<5>(coord);
+      if (lat == 0.0 || lon == 0.0)
+        continue;
+      
       auto point = trajectory->add_path();
-      point->set_lap_time(std::floor<int32_t>(std::get<0>(coord) * 1000.0));
-      point->set_lap_percent_complete(std::get<1>(coord));
-      point->set_lap_distance(std::get<2>(coord));
-      point->set_latitude(std::get<3>(coord));
-      point->set_longitude(std::get<4>(coord));
-      point->set_altitude(std::get<5>(coord));
+      point->set_lap_time(std::floor<int32_t>(std::get<1>(coord) * 1000.0));
+      point->set_lap_percent_complete(std::get<2>(coord));
+      point->set_lap_distance(std::get<3>(coord));
+      point->set_latitude(std::get<4>(coord));
+      point->set_longitude(std::get<5>(coord));
+      point->set_altitude(std::get<6>(coord));
     }
+
+    if (trajectory->path_size() == 0)
+      return std::unexpected(GeneralError(ErrorCode::General, "no valid path points found"));
 
     if (options.outputDir) {
       // TODO: Specify output directory in TelemetryDataService

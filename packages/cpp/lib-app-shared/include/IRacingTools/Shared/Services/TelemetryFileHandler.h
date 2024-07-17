@@ -21,26 +21,25 @@ namespace IRacingTools::Shared::Services {
   // using Models::UI::;
 
   class TelemetryFileHandler {
-    
+
   public:
-    using LapPositionCoordinate = std::tuple<int,
-    double,
-                                             float, // Lap Dist Pct (%)
-                                             float, // Lap Dist (meters)
-                                             double,// Lat
-                                             double,// Lon
-                                             float  // Altitude
+    using LapPositionCoordinate = std::tuple<int, double,
+                                             float,  // Lap Dist Pct (%)
+                                             float,  // Lap Dist (meters)
+                                             double, // Lat
+                                             double, // Lon
+                                             float   // Altitude
                                              >;
 
-    using DataFrame = std::tuple<double,// Session Time
-                                 int,   // Lap
-                                 double,// Lap time
-                                 float, // Lap dist pct (%)
-                                 float, // Lap dist (meters)
-                                 int,   // incident count
-                                 double,// lat (deg)
-                                 double,// lon (deg)
-                                 float  // altitude (meters),
+    using DataFrame = std::tuple<double, // Session Time
+                                 int,    // Lap
+                                 double, // Lap time
+                                 float,  // Lap dist pct (%)
+                                 float,  // Lap dist (meters)
+                                 int,    // incident count
+                                 double, // lat (deg)
+                                 double, // lon (deg)
+                                 float   // altitude (meters),
 
                                  >;
 
@@ -71,4 +70,4 @@ namespace IRacingTools::Shared::Services {
 
     explicit TelemetryFileHandler(const std::shared_ptr<SDK::DiskClient> &client);
   };
-}// namespace IRacingTools::Shared::Services
+} // namespace IRacingTools::Shared::Services

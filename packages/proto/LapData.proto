@@ -27,8 +27,8 @@ message LapTrajectoryPoint {
   float lap_percent_complete = 2;
   float lap_distance = 3;
 
-  float latitude = 10;
-  float longitude = 11;
+  double latitude = 10;
+  double longitude = 11;
   float altitude = 12;
   float speed = 20;
 }

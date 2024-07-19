@@ -9,7 +9,7 @@ file(GLOB_RECURSE openxrLibHeadersPublic include/*.h)
 ## SETUP
 add_library(${openxrLibTarget} SHARED ${openxrLibSources} ${openxrLibHeaders} ${openxrLibHeadersPublic})
 
-IRT_CONFIGURE_TARGET(${openxrLibTarget})
+VRK_CONFIGURE_TARGET(${openxrLibTarget})
 
 ## INCLUDES
 target_include_directories(${openxrLibTarget} PUBLIC
@@ -41,7 +41,7 @@ target_link_libraries(
   ${sharedAppLibTargetStatic}
 )
 
-IRT_CONFIGURE_APP_LIBS(${openxrLibTarget})
+VRK_CONFIGURE_APP_LIBS(${openxrLibTarget})
 
 
 set(
@@ -60,5 +60,5 @@ install(FILES "${RUNTIME_FILES}" TYPE BIN)
 #add_executable(${testTargetName} ${openxrLibTestSources})
 #target_link_libraries(${testTargetName} PUBLIC
 #  ${openxrLibTarget})
-#irt_configure_test_libs(${testTargetName})
+#vrk_configure_test_libs(${testTargetName})
 #

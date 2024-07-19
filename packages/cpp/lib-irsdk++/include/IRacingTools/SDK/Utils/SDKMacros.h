@@ -19,35 +19,30 @@
  */
 #pragma once
 
-// Helper macros when joining or stringifying other macros, e.g.:
-//
-// `FOO##__COUNTER__` becomes `FOO__COUNTER__`
-// IRT_CONCAT2(FOO, __COUNTER__) might become `FOO1`, for example
+#define VRK_CONCAT1(x, y) x##y
+#define VRK_CONCAT2(x, y) VRK_CONCAT1(x, y)
 
-#define IRT_CONCAT1(x, y) x##y
-#define IRT_CONCAT2(x, y) IRT_CONCAT1(x, y)
-
-#define IRT_STRINGIFY1(x) #x
-#define IRT_STRINGIFY2(x) IRT_STRINGIFY1(x)
+#define VRK_STRINGIFY1(x) #x
+#define VRK_STRINGIFY2(x) VRK_STRINGIFY1(x)
 
 // Helper for testing __VA_ARG__ behavior
-#define IRT_THIRD_ARG(a, b, c, ...) c
+#define VRK_THIRD_ARG(a, b, c, ...) c
 
-#define IRT_VA_OPT_SUPPORTED_IMPL(...) \
-  IRT_THIRD_ARG(__VA_OPT__(, ), true, false, __VA_ARGS__)
-#define IRT_VA_OPT_SUPPORTED IRT_VA_OPT_SUPPORTED_IMPL(JUNK)
+#define VRK_VA_OPT_SUPPORTED_IMPL(...) \
+  VRK_THIRD_ARG(__VA_OPT__(, ), true, false, __VA_ARGS__)
+#define VRK_VA_OPT_SUPPORTED VRK_VA_OPT_SUPPORTED_IMPL(JUNK)
 
-#define IRT_HAVE_NONSTANDARD_VA_ARGS_COMMA_ELISION_HELPER(X, ...) \
+#define VRK_HAVE_NONSTANDARD_VA_ARGS_COMMA_ELISION_HELPER(X, ...) \
   X##__VA_ARGS__
-#define IRT_HAVE_NONSTANDARD_VA_ARGS_COMMA_ELISION \
-  IRT_THIRD_ARG( \
-    IRT_HAVE_NONSTANDARD_VA_ARGS_COMMA_ELISION_HELPER(JUNK), \
+#define VRK_HAVE_NONSTANDARD_VA_ARGS_COMMA_ELISION \
+  VRK_THIRD_ARG( \
+    VRK_HAVE_NONSTANDARD_VA_ARGS_COMMA_ELISION_HELPER(JUNK), \
     false, \
     true)
 
-#if IRT_HAVE_NONSTANDARD_VA_ARGS_COMMA_ELISION
+#if VRK_HAVE_NONSTANDARD_VA_ARGS_COMMA_ELISION
 static_assert(
-  IRT_HAVE_NONSTANDARD_VA_ARGS_COMMA_ELISION_HELPER(123) == 123);
+  VRK_HAVE_NONSTANDARD_VA_ARGS_COMMA_ELISION_HELPER(123) == 123);
 #endif
 
 // #pragma section(".CRT$XCU",read)
@@ -73,6 +68,8 @@ static_assert(
       fn;                                                                   \
   static void __cdecl fn(void)
 #endif    
+
+
 // #ifdef _WIN64
 //     #define (f) INITIALIZER2_(f,"")
 // #else
@@ -100,3 +97,4 @@ static_assert(
 //         static void f(void) __attribute__((constructor)); \
 //         static void f(void)
 // #endif
+

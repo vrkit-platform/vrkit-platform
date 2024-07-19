@@ -15,7 +15,7 @@ namespace IRacingTools::Shared::UI {
 
     namespace {
         using namespace google::protobuf::util;
-        using namespace Models::UI::Dashboard;
+        using namespace Models::Dashboard;
         SDK::Expected<DashboardConfig> LoadDashboardConfigFileInternal(const fs::path& file) {
             if (!exists(file) || is_directory(file)) {
                 return std::unexpected(SDK::GeneralError(SDK::ErrorCode::General, std::format("config file not found ({})", file.string())));

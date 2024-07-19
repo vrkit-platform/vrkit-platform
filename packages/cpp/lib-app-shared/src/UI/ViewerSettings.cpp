@@ -93,7 +93,7 @@ namespace IRacingTools::Shared::UI {
         }
     )
 
-    // IRT_DEFINE_SPARSE_JSON(
+    // VRK_DEFINE_SPARSE_JSON(
     //   ViewerSettings,
     //   windowWidth,
     //   windowHeight,

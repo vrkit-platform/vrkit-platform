@@ -56,7 +56,7 @@ namespace IRacingTools::Shared {
             finalPath /= childPath.value();
 
         auto exists = fs::exists(finalPath);
-        if (exists && !fs::is_directory(finalPath)) IRT_LOG_AND_FATAL(
+        if (exists && !fs::is_directory(finalPath)) VRK_LOG_AND_FATAL(
             "Path ({}) is not a directory, but exists",
             finalPath.string()
         );
@@ -64,7 +64,7 @@ namespace IRacingTools::Shared {
         if (!fs::exists(finalPath)) {
             std::error_code errorCode;
             if (!fs::create_directories(finalPath, errorCode)) {
-                IRT_LOG_AND_FATAL(
+                VRK_LOG_AND_FATAL(
                     "Failed to create directory @ {}: ({}) {}",
                     finalPath.string(),
                     errorCode.value(),
@@ -202,7 +202,7 @@ namespace IRacingTools::Shared {
             finalPath /= childPath.value();
 
         auto exists = fs::exists(finalPath);
-        if (exists && !is_directory(finalPath)) IRT_LOG_AND_FATAL(
+        if (exists && !is_directory(finalPath)) VRK_LOG_AND_FATAL(
             "Path ({}) is not a directory, but exists",
             finalPath.string()
         );

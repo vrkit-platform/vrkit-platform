@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "Pipeline.proto";
 
-package IRacingTools.Models.Telemetry;
+package IRacingTools.Models;
 
 message TelemetryDataFile {
   enum Status {

@@ -37,7 +37,7 @@ namespace IRacingTools::OpenXR::DX11 {
       const SHM::Snapshot& snapshot,
       const std::span<SHM::LayerSprite>& layers,
       RenderMode renderMode) {
-        IRT_TraceLoggingScope("D3D11::OpenXRDX11Renderer::RenderLayers()");
+        VRK_TraceLoggingScope("D3D11::OpenXRDX11Renderer::RenderLayers()");
 
         auto source
           = snapshot.getTexture<SHM::DX11::Texture>()->getD3D11ShaderResourceView();

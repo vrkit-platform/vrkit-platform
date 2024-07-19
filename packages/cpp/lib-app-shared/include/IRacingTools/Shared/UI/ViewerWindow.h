@@ -77,7 +77,7 @@ namespace IRacingTools::Shared::UI {
             check_hresult(dev->CreateFence(fenceValue_, D3D11_FENCE_FLAG_SHARED, IID_PPV_ARGS(fence_.put())));
             check_hresult(fence_->CreateSharedHandle(nullptr, GENERIC_ALL, nullptr, fenceHandle_.put()));
 
-            if (!dxr) IRT_LOG_AND_FATAL("DXR is invalid");
+            if (!dxr) VRK_LOG_AND_FATAL("DXR is invalid");
 
             if (!renderer_) {
                 if constexpr (GP == Graphics::GraphicsPlatform::D3D11) {
@@ -85,7 +85,7 @@ namespace IRacingTools::Shared::UI {
                     //cachedReader_ = std::make_shared<SHM::DX11::SHMDX11CachedReader>(SHM::ConsumerKind::Viewer);
                 }
                 else {
-                    IRT_LOG_AND_FATAL("Only D3D11 is currently supported");
+                    VRK_LOG_AND_FATAL("Only D3D11 is currently supported");
                 }
             }
 
@@ -94,7 +94,7 @@ namespace IRacingTools::Shared::UI {
                 // dynamic_pointer_cast<SHM::DX11::SHMDX11CachedReader>(cachedReader_)->initializeCache(Normal::dxr_->getDXDevice().get(), SHMSwapchainLength);
             }
             else {
-                IRT_LOG_AND_FATAL("Only D3D11 is currently supported");
+                VRK_LOG_AND_FATAL("Only D3D11 is currently supported");
             }
 
             onResizeUnsubscribe_ = Base::events.onResize.subscribe(
@@ -218,7 +218,7 @@ namespace IRacingTools::Shared::UI {
             auto& dxr = Normal::dxr_;
             auto d2dTarget = target->d2d();
             if (!d2dTarget) {
-                IRT_LOG_AND_FATAL("d2dTarget is null");
+                VRK_LOG_AND_FATAL("d2dTarget is null");
             }
 
             auto windowTexture = target->d3dTexture().get();

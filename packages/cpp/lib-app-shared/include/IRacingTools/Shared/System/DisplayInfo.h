@@ -37,19 +37,19 @@ namespace IRacingTools::Shared::System {
 
         std::string toString() const;
 
-        Models::UI::DisplayConfig* toModel(Models::UI::DisplayConfig* display) const;
-        Models::UI::DisplayConfig toModel() const;
+        Models::DisplayConfig* toModel(Models::DisplayConfig* display) const;
+        Models::DisplayConfig toModel() const;
 
-        bool equalTo(const Models::UI::DisplayConfig& display) const;
-        static bool EqualTo(const Models::UI::DisplayConfig& d1,const Models::UI::DisplayConfig& d2);
+        bool equalTo(const Models::DisplayConfig& display) const;
+        static bool EqualTo(const Models::DisplayConfig& d1,const Models::DisplayConfig& d2);
         static bool EqualTo(const DisplayInfo& di1,const DisplayInfo& di2);
 
 
     };
 
-    bool operator==(const Models::UI::DisplayConfig& lhs, const Models::UI::DisplayConfig& rhs);
+    bool operator==(const Models::DisplayConfig& lhs, const Models::DisplayConfig& rhs);
 
-    bool operator!=(const Models::UI::DisplayConfig& lhs, const Models::UI::DisplayConfig& rhs);
+    bool operator!=(const Models::DisplayConfig& lhs, const Models::DisplayConfig& rhs);
 
     bool operator==(const DisplayInfo& lhs, const DisplayInfo& rhs);
 
@@ -72,11 +72,11 @@ namespace IRacingTools::Shared::System {
 
 
         std::string toString() const;
-        Models::UI::ScreenConfig * toModel(Models::UI::ScreenConfig* screen) const;
-        Models::UI::ScreenConfig toModel() const;
+        Models::ScreenConfig * toModel(Models::ScreenConfig* screen) const;
+        Models::ScreenConfig toModel() const;
 
         bool equalTo(const DisplayScreenInfo& other) const;
-        bool equalTo(const Models::UI::ScreenConfig&) const;
+        bool equalTo(const Models::ScreenConfig&) const;
 
 
         static DisplayScreenInfo create(const std::vector<DisplayInfo>& displays);
@@ -99,11 +99,11 @@ namespace IRacingTools::Shared::System {
         std::size_t height{0};
 
         std::string toString() const;
-        Models::UI::ScreenConfig * toModel(Models::UI::ScreenConfig* screen) const;
-        Models::UI::ScreenConfig toModel() const;
+        Models::ScreenConfig * toModel(Models::ScreenConfig* screen) const;
+        Models::ScreenConfig toModel() const;
 
         bool equalTo(const VRScreenInfo& other) const;
-        bool equalTo(const Models::UI::ScreenConfig&) const;
+        bool equalTo(const Models::ScreenConfig&) const;
 
 
         /**

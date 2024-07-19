@@ -4,25 +4,24 @@
 
 #pragma once
 
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
+
 #include <directxtk/CommonStates.h>
 #include <directxtk/Effects.h>
 #include <directxtk/GeometricPrimitive.h>
 #include <directxtk/PrimitiveBatch.h>
 #include <directxtk/VertexTypes.h>
 
+#include <IRacingTools/Shared/Graphics/DX11Resources.h>
+#include <IRacingTools/Shared/Graphics/RenderTarget.h>
+#include <IRacingTools/Shared/Graphics/Renderable.h>
 
-#include "../SharedAppLibPCH.h"
-#include "DX11Resources.h"
-#include "RenderTarget.h"
-#include "Renderable.h"
-
-#include <IRacingTools/Models/TrackMapData.pb.h>
+#include <IRacingTools/Models/TrackMap.pb.h>
 #include <IRacingTools/Shared/SessionDataEvent.h>
 
 namespace IRacingTools::Shared::Graphics {
-    using namespace IRacingTools::Models::Telemetry;
+    using namespace IRacingTools::Models;
     using VertexType = DirectX::VertexPositionColor;
-
 
     class TrackMapWidget : public Renderable<std::shared_ptr<SessionDataUpdatedDataEvent>> {
     public:
@@ -59,7 +58,7 @@ namespace IRacingTools::Shared::Graphics {
         winrt::com_ptr<ID2D1EllipseGeometry> carBaseGeometry_{nullptr};
 
         double pathTotalDistance_{0.0f};
-        std::map<double, TrackMap_Point> pathPointDistanceMap_{};
+        std::map<double, LapCoordinate> pathPointDistanceMap_{};
 
 
         std::unique_ptr<DirectX::CommonStates> states_{nullptr};

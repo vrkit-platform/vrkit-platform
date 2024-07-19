@@ -5,7 +5,7 @@ import folium
 
 from irsdk import IRDiskClient
 from irsdk.irsdk_disk_client import IRDiskClientIterator
-from irsdk.models import LapMetadata, LapTrajectory, LapTrajectoryPoint
+from irsdk.models import LapMetadata, LapTrajectory, LapCoordinate
 
 
 def all_lap_metadata(ir: IRDiskClient, include_invalid_laps: bool = False) -> list[LapMetadata]:
@@ -88,7 +88,7 @@ def get_lap_trajectory(ir: IRDiskClient, lap: int) -> LapTrajectory:
             ))
             started = True
 
-        trajectory.path.append(LapTrajectoryPoint(
+        trajectory.path.append(LapCoordinate(
             lap_time=int(current_lap_time * 1000.0),
             lap_percent_complete=lap_percent_complete,
             lap_distance=lap_distance,

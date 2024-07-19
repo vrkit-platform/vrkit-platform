@@ -20,7 +20,7 @@ list(APPEND sharedAppLibSources ${RC_OUT_SRC_FILES})
 add_library(${sharedAppLibTargetStatic} STATIC ${sharedAppLibSources} ${sharedAppLibHeaders} ${sharedAppLibHeadersPublic} )
 #target_link_libraries(${sharedAppLibTargetStatic} PUBLIC ${sdkTargetStatic} ${modelsTargetStatic} ${ALL_APP_DEPS})
 
-IRT_CONFIGURE_TARGET(${sharedAppLibTargetStatic})
+VRK_CONFIGURE_TARGET(${sharedAppLibTargetStatic})
 
 ## INCLUDES
 target_include_directories(${sharedAppLibTargetStatic} PUBLIC
@@ -51,7 +51,7 @@ target_link_libraries(
   ${modelsTargetStatic}
 )
 
-IRT_CONFIGURE_APP_LIBS(${sharedAppLibTargetStatic})
+VRK_CONFIGURE_APP_LIBS(${sharedAppLibTargetStatic})
 
 ## INSTALL
 install(TARGETS ${sharedAppLibTargetStatic} FILE_SET publicHeaders DESTINATION ${INCLUDE_INSTALL_DIR})
@@ -64,5 +64,5 @@ target_link_libraries(${testTargetName} PRIVATE
   ${sharedAppLibTargetStatic}
   ${sdkTargetStatic}
   ${modelsTargetStatic})
-irt_configure_test_libs(${testTargetName})
-IRT_CONFIGURE_TARGET(${testTargetName})
+vrk_configure_test_libs(${testTargetName})
+VRK_CONFIGURE_TARGET(${testTargetName})

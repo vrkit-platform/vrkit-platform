@@ -19,7 +19,7 @@
 
 
 # App
-set(targetName irt_winui3)
+set(targetName vrk_winui3)
 
 # Patch up the generated vcxproj
 configure_file(
@@ -164,7 +164,7 @@ endforeach()
 target_include_directories(${targetName} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Link configured deps
-IRT_CONFIGURE_APP_LIBS(${targetName})
+VRK_CONFIGURE_APP_LIBS(${targetName})
 
 # Link other local project targets
 #target_link_libraries(${targetName} PRIVATE ${sdkTargetStatic} ${sharedAppLibTargetStatic} ${modelsTargetStatic} ${Protobuf_LIBRARY_DEBUG})

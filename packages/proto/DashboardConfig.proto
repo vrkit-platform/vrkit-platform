@@ -2,7 +2,7 @@ syntax = "proto3";
 import "Geometry.proto";
 import "ScreenConfig.proto";
 
-package IRacingTools.Models.UI.Dashboard;
+package IRacingTools.Models.Dashboard;
 
 enum OverlayKind {
   OK_TRACK_MAP = 0;
@@ -22,7 +22,7 @@ message OverlayPlacementConfig {
   string id = 1;
   string overlay_id = 2;
 
-  IRacingTools.Models.UI.RectI rect = 10;
+  RectI rect = 10;
 
   // map<string,string> parameters = 30;
 }

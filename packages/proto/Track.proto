@@ -2,12 +2,32 @@ syntax = "proto3";
 
 package IRacingTools.Models;
 
-enum TrackType {
-  TRACK_TYPE_ROAD = 0;
-  TRACK_TYPE_OVAL = 1;
-}
+
 
 message Track {
+  enum Type {
+    TRACK_TYPE_ROAD = 0;
+    TRACK_TYPE_OVAL = 1;
+  }
+
+  message Layout {
+    // `id` is a compound key that we generate when processing IBT files
+    string id = 1;
+  
+    // Reference to `Track::id`
+    int32 track_id = 2;
+  
+    // `WeekendInfo::trackConfigName`
+    string name = 5;
+  
+    string length = 10;
+    string length_official = 11;
+  
+    int32 num_turns = 15;
+    string direction = 16;
+  }
+  
+
   // WeekendInfo::trackID
   int32 id = 1;
   
@@ -15,7 +35,7 @@ message Track {
   string name = 2;
 
   // WeekendInfo::trackType
-  TrackType type = 3;
+  Type type = 3;
 
   string display_name = 5;
   string display_short_name = 6;
@@ -29,21 +49,7 @@ message Track {
   string city = 21;
 
   int32 pit_speed_limit = 50;
+
+  repeated Layout layouts = 60;
 }
 
-message TrackConfig {
-  // `id` is a compound key that we generate when processing IBT files
-  string id = 1;
-
-  // Reference to `Track::id`
-  int32 track_id = 2;
-
-  // `WeekendInfo::trackConfigName`
-  string name = 5;
-
-  string length = 10;
-  string length_official = 11;
-
-  int32 num_turns = 15;
-  string direction = 16;
-}

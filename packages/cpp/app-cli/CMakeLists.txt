@@ -32,8 +32,8 @@ set_target_properties(
   VS_GLOBAL_WindowsAppSDKSelfContained true
 )
 
-IRT_CONFIGURE_APP_LIBS(${targetName})
-IRT_CONFIGURE_TARGET(${targetName})
+VRK_CONFIGURE_APP_LIBS(${targetName})
+VRK_CONFIGURE_TARGET(${targetName})
 
 target_compile_definitions(
   ${targetName}

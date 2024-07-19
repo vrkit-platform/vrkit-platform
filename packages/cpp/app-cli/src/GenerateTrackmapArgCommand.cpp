@@ -28,7 +28,7 @@
 
 #include "GenerateTrackmapArgCommand.h"
 
-#include <IRacingTools/Models/LapData.pb.h>
+#include <IRacingTools/Models/LapTrajectory.pb.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>

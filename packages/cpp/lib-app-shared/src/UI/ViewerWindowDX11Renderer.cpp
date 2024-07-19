@@ -54,7 +54,7 @@ uint64_t D3D11Renderer::render(
   const PixelRect& destRect,
   [[maybe_unused]] HANDLE fence,
   uint64_t fenceValueIn) {
-  //IRT_TraceLoggingScope("Viewer::D3D11Renderer::Render");
+  //VRK_TraceLoggingScope("Viewer::D3D11Renderer::Render");
   if (destDimensions_ != destTextureDimensions) {
     destHandle_ = {};
   }

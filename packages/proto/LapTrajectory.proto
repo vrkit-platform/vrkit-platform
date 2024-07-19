@@ -1,0 +1,22 @@
+syntax = "proto3";
+package IRacingTools.Models;
+
+import "LapCoordinate.proto";
+import "TrackMetadata.proto";
+
+message LapTrajectory  {
+  message Metadata {
+    uint32 lap = 1;
+    uint32 lap_time = 2;
+    uint32 incident_count = 3;
+    bool valid = 4;
+  }
+  
+  Metadata metadata = 1;
+  TrackMetadata track_metadata = 2;
+  
+  int64 timestamp = 5;
+  
+  repeated LapCoordinate path = 20;
+}
+

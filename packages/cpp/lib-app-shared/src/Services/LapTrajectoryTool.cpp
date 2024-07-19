@@ -23,13 +23,13 @@ namespace IRacingTools::Shared::Services {
   }// namespace
 
 
-  std::expected<std::shared_ptr<Models::Telemetry::LapTrajectory>, GeneralError>
+  std::expected<std::shared_ptr<Models::LapTrajectory>, GeneralError>
   LapTrajectoryTool::createLapTrajectory(const std::filesystem::path &file, const CreateOptions& options) {
     auto client = std::make_shared<SDK::DiskClient>(file, file.string());
     return createLapTrajectory(client,options);
   }
 
-  std::expected<std::shared_ptr<Models::Telemetry::LapTrajectory>, GeneralError>
+  std::expected<std::shared_ptr<Models::LapTrajectory>, GeneralError>
   LapTrajectoryTool::createLapTrajectory(const std::shared_ptr<SDK::DiskClient> &client, const CreateOptions& options) {
     TelemetryFileHandler telemFile(client);
     auto lapsRes = telemFile.getLapData();
@@ -66,16 +66,17 @@ namespace IRacingTools::Shared::Services {
       }
     }
     
-    auto trajectory = std::make_shared<Models::Telemetry::LapTrajectory>();    
+    auto trajectory = std::make_shared<Models::LapTrajectory>();    
     {
       auto timestamp = TimeEpoch<std::chrono::milliseconds>().count();
       trajectory->set_timestamp(timestamp);
       
       auto& winfo = sessionInfo->weekendInfo;
-      trajectory->set_track_id(winfo.trackID);
-      trajectory->set_track_name(winfo.trackName);
-      trajectory->set_track_layout_name(winfo.trackConfigName);      
-      trajectory->set_track_layout_id(trackLayoutId);
+      auto trackMetadata = trajectory->mutable_track_metadata();
+      trackMetadata->set_id(winfo.trackID);
+      trackMetadata->set_name(winfo.trackName);
+      trackMetadata->set_layout_name(winfo.trackConfigName);      
+      trackMetadata->set_layout_id(trackLayoutId);
     }
 
     auto lapMeta = trajectory->mutable_metadata();

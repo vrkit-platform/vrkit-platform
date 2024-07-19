@@ -5,8 +5,8 @@
 #include <memory>
 
 #include <IRacingTools/Models/Pipeline.pb.h>
-#include <IRacingTools/Models/TelemetryData.pb.h>
-#include <IRacingTools/Models/LapData.pb.h>
+// #include <IRacingTools/Models/TelemetryData.pb.h>
+#include <IRacingTools/Models/LapTrajectory.pb.h>
 
 #include <IRacingTools/SDK/Utils/LUT.h>
 
@@ -18,8 +18,6 @@
 namespace IRacingTools::Shared::Services {
 
   using namespace Models;
-  using Telemetry::LapTrajectory;
-  using Telemetry::LapTrajectory;
   
   /**
    * @brief Responsible for handling telemetry data files

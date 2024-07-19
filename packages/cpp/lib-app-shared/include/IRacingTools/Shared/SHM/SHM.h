@@ -266,13 +266,13 @@ namespace IRacingTools::Shared::SHM {
         template <std::derived_from<IPCClientTexture> T>
         T* getTexture() const {
             if (state_ != State::ValidWithTexture) [[unlikely]] {
-                IRT_LOG_AND_FATAL(
+                VRK_LOG_AND_FATAL(
                   "Called SHM::Snapshot::GetTexture() with invalid state {}",
                   static_cast<uint8_t>(state_));
             }
             const auto ret = std::dynamic_pointer_cast<T>(ipcTexture_);
             if (!ret) [[unlikely]] {
-                IRT_LOG_AND_FATAL("Layer texture cache type mismatch");
+                VRK_LOG_AND_FATAL("Layer texture cache type mismatch");
             }
             return ret.get();
         }

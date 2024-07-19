@@ -55,7 +55,7 @@ class LapTrajectory(google.protobuf.message.Message):
     @property
     def metadata(self) -> global___LapMetadata: ...
     @property
-    def path(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___LapTrajectoryPoint]: ...
+    def path(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___LapCoordinate]: ...
     def __init__(
         self,
         *,
@@ -65,7 +65,7 @@ class LapTrajectory(google.protobuf.message.Message):
         track_name: builtins.str = ...,
         track_layout_name: builtins.str = ...,
         track_layout_id: builtins.str = ...,
-        path: collections.abc.Iterable[global___LapTrajectoryPoint] | None = ...,
+        path: collections.abc.Iterable[global___LapCoordinate] | None = ...,
     ) -> None: ...
     def HasField(self, field_name: typing.Literal["metadata", b"metadata"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing.Literal["metadata", b"metadata", "path", b"path", "timestamp", b"timestamp", "track_id", b"track_id", "track_layout_id", b"track_layout_id", "track_layout_name", b"track_layout_name", "track_name", b"track_name"]) -> None: ...
@@ -73,7 +73,7 @@ class LapTrajectory(google.protobuf.message.Message):
 global___LapTrajectory = LapTrajectory
 
 @typing.final
-class LapTrajectoryPoint(google.protobuf.message.Message):
+class LapCoordinate(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 
     LAP_TIME_FIELD_NUMBER: builtins.int
@@ -103,4 +103,4 @@ class LapTrajectoryPoint(google.protobuf.message.Message):
     ) -> None: ...
     def ClearField(self, field_name: typing.Literal["altitude", b"altitude", "lap_distance", b"lap_distance", "lap_percent_complete", b"lap_percent_complete", "lap_time", b"lap_time", "latitude", b"latitude", "longitude", b"longitude", "speed", b"speed"]) -> None: ...
 
-global___LapTrajectoryPoint = LapTrajectoryPoint
+global___LapCoordinate = LapCoordinate

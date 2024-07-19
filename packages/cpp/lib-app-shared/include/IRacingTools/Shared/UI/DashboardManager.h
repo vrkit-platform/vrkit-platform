@@ -12,7 +12,7 @@ namespace IRacingTools::Shared::UI {
     struct DashboardState {
         std::string id{};
         fs::path file{};
-        Models::UI::Dashboard::DashboardConfig config{};
+        Models::Dashboard::DashboardConfig config{};
     };
 
     SDK::Expected<std::string> GetDashboardIdFromFilename(const fs::path& file);
@@ -74,7 +74,7 @@ namespace IRacingTools::Shared::UI {
              * @param filename Either the base filename (excluding `.dashboard.irt.json` suffix or absolute)
              * @return A fully hydrated `DashboardConfig` or an error
              */
-            SDK::Expected<Models::UI::Dashboard::DashboardConfig> load(const fs::path& filename);
+            SDK::Expected<Models::Dashboard::DashboardConfig> load(const fs::path& filename);
 
             /**
              * @brief List all files in store path on type `.dashboard.irt.json`
@@ -108,7 +108,7 @@ namespace IRacingTools::Shared::UI {
 
             SDK::Expected<DashboardState> save(
                 const std::string& id,
-                const Models::UI::Dashboard::DashboardConfig& config
+                const Models::Dashboard::DashboardConfig& config
             );
     };
 }

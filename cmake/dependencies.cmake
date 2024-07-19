@@ -119,17 +119,17 @@ set(ALL_SDK_DEPS
 set(DEP_GTEST_MAIN GTest::gtest_main)
 set(DEP_GTEST GTest::gtest)
 
-function(IRT_CONFIGURE_SDK_LIBS TARGET)
+function(VRK_CONFIGURE_SDK_LIBS TARGET)
   target_link_libraries(${TARGET} PUBLIC ${ALL_SDK_DEPS})
   target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
 endfunction()
 
-function(IRT_CONFIGURE_APP_LIBS TARGET)
+function(VRK_CONFIGURE_APP_LIBS TARGET)
   target_link_libraries(${TARGET} PRIVATE ${ALL_APP_DEPS})
   target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
 endfunction()
 
-function(IRT_CONFIGURE_TEST_LIBS TARGET)
+function(VRK_CONFIGURE_TEST_LIBS TARGET)
   target_link_libraries(${TARGET} PUBLIC ${ALL_APP_DEPS} ${DEP_GTEST_MAIN})
   target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
 endfunction()

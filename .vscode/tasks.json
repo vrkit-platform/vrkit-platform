@@ -17,10 +17,10 @@
 		},
 		{
 			"type": "cmake",
-			"label": "irt_ui",
+			"label": "vrk_ui",
 			"command": "build",
 			"targets": [
-				"irt_ui"
+				"vrk_ui"
 			],
 			"group": {
 				"kind": "build",
@@ -31,10 +31,10 @@
 		},
 		{
 			"type": "cmake",
-			"label": "irt_tool",
+			"label": "vrk_tool",
 			"command": "build",
 			"targets": [
-				"irt_tool"
+				"vrk_tool"
 			],
 			"group": {
 				"kind": "build",

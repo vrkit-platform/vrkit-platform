@@ -28,7 +28,7 @@
 
 #include "ProcessAllTelemetryArgCommand.h"
 
-#include <IRacingTools/Models/LapData.pb.h>
+#include <IRacingTools/Models/LapTrajectory.pb.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
@@ -99,7 +99,7 @@ namespace IRacingTools::App::Commands {
         manager->start();
         
         auto service = manager->getService<TelemetryDataService>();
-        IRT_LOG_AND_FATAL_IF(!service, "Unable to find service >> {}", GetPrettyTypeId<TelemetryDataService>().value().name);
+        VRK_LOG_AND_FATAL_IF(!service, "Unable to find service >> {}", GetPrettyTypeId<TelemetryDataService>().value().name);
         auto submitRes = service->submitRequest({});
         if (!submitRes) {
             auto& err = submitRes.error();

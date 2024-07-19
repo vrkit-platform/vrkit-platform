@@ -61,7 +61,7 @@ namespace IRacingTools::Shared::Graphics {
             return;
         }
 
-        // IRT_TraceLoggingScope("InterprocessRenderer::InitializeCanvas()");
+        // VRK_TraceLoggingScope("InterprocessRenderer::InitializeCanvas()");
 
         D3D11_TEXTURE2D_DESC desc{
             .Width = static_cast<UINT>(size.width()),
@@ -90,7 +90,7 @@ namespace IRacingTools::Shared::Graphics {
     void IPCRenderer::renderNow(const std::shared_ptr<RenderTarget>& sourceTarget) noexcept {
         if (isRendering_.test_and_set()) {
             spdlog::debug("Two renders in the same instance");
-            IRT_BREAK;
+            VRK_BREAK;
             return;
         }
 
@@ -176,7 +176,7 @@ namespace IRacingTools::Shared::Graphics {
 
         auto fence = destResources->fence.get();
         {
-            // IRT_TraceLoggingScope(
+            // VRK_TraceLoggingScope(
             //   "CopyFromCanvas",
             //   TraceLoggingValue(ipcTextureInfo.mTextureIndex, "TextureIndex"),
             //   TraceLoggingValue(ipcTextureInfo.mFenceOut, "FenceOut"));
@@ -185,7 +185,7 @@ namespace IRacingTools::Shared::Graphics {
             ctx->CopySubresourceRegion(destResources->texture.get(), 0, 0, 0, 0, srcTexture, 0, &srcBox);
             //}
             //{
-            // IRT_TraceLoggingScope("CopyFromCanvas/FenceOut");
+            // VRK_TraceLoggingScope("CopyFromCanvas/FenceOut");
             check_hresult(ctx->Signal(fence, ipcTextureInfo.fenceOut));
             //}
         }

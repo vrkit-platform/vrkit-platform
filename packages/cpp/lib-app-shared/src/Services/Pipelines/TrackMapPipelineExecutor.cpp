@@ -1,4 +1,4 @@
-#include <IRacingTools/SDK/Utils/macros.h>
+#include <IRacingTools/SDK/Utils/SDKMacros.h>
 #include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
 #include <IRacingTools/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
 #include <IRacingTools/Shared/Services/Pipelines/TrackMapPipelineExecutor.h>
@@ -33,7 +33,7 @@ namespace IRacingTools::Shared::Services::Pipelines {
     }
 
     auto tmService = serviceContainer->getService<TrackMapService>();
-    IRT_LOG_AND_FATAL_IF(!tmService, "Unable to get valid TrackMapService");
+    VRK_LOG_AND_FATAL_IF(!tmService, "Unable to get valid TrackMapService");
 
     L->info("Calling createLapTrajectory with ({})", file.string());
     auto client = std::make_shared<SDK::DiskClient>(file, file.string());
@@ -61,12 +61,12 @@ namespace IRacingTools::Shared::Services::Pipelines {
     }
 
     auto& lt = res.value();
-    L->info("Created LapTrajectory for trackLayoutId ({})", lt->track_layout_id());
+    L->info("Created LapTrajectory for trackLayoutId ({})", lt->track_metadata().layout_id());
     if (auto res = tmService->set(lt); !res) {
       auto err = res.error();
       return onError("Failed to generate lap trajectory >> {}", err.what());
     }
-    L->info("Saved LapTrajectory for trackLayoutId ({})", lt->track_layout_id());
+    L->info("Saved LapTrajectory for trackLayoutId ({})", lt->track_metadata().layout_id());
     attempt.setStatus(PipelineStatus::PIPELINE_STATUS_COMPLETE);
     return std::nullopt;
   }

@@ -1,11 +1,11 @@
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
 #include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
+#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
 #include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
-#include <IRacingTools/Shared/Services/TelemetryFileHandler.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <IRacingTools/Shared/Services/TelemetryFileHandler.h>
 
 #include <fstream>
 #include <iostream>
@@ -18,25 +18,29 @@ namespace IRacingTools::Shared::Services {
   using namespace IRacingTools::SDK;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::SDK::Utils;
-  
+
   namespace {
     auto L = GetCategoryWithType<TelemetryFileHandler>();
-    constexpr std::size_t MinimumDataFrameCountValidLap = 
-      60 // 60 data frames per second from iRacing
-      * 30; // using 30 seconds as the minimum lap time
-  }// namespace
+    constexpr std::size_t MinimumDataFrameCountValidLap =
+        60    // 60 data frames per second from iRacing
+        * 30; // using 30 seconds as the minimum lap time
+  } // namespace
 
   TelemetryFileHandler::TelemetryFileHandler(const std::filesystem::path &file)
       : client_(std::make_shared<SDK::DiskClient>(file, file.string())) {
     L->info("Created with {}", file.string());
   }
 
-  TelemetryFileHandler::TelemetryFileHandler(const std::shared_ptr<SDK::DiskClient> &client) : client_(client) {
-    L->info("Created with disk client {}", client->getFilePath().value().string());
+  TelemetryFileHandler::TelemetryFileHandler(
+      const std::shared_ptr<SDK::DiskClient> &client)
+      : client_(client) {
+    L->info(
+        "Created with disk client {}", client->getFilePath().value().string());
   }
 
-  std::expected<std::vector<TelemetryFileHandler::LapDataWithPath>, GeneralError>
-  TelemetryFileHandler::getLapData(bool includeInvalidLaps) {
+  std::
+      expected<std::vector<TelemetryFileHandler::LapDataWithPath>, GeneralError>
+      TelemetryFileHandler::getLapData(bool includeInvalidLaps) {
     using DataFrameProcessor = DiskClientDataFrameProcessor<GetLapDataContext>;
 
     GetLapDataContext data{};
@@ -44,23 +48,40 @@ namespace IRacingTools::Shared::Services {
     auto client = processor.getClient();
     auto provider = client->getProvider();
 
-    VarHolder sessionTimeVar(IRacingTools::SDK::KnownVarName::SessionTime, provider.get());
+    VarHolder sessionTimeVar(
+        IRacingTools::SDK::KnownVarName::SessionTime, provider.get());
     VarHolder lapVar(IRacingTools::SDK::KnownVarName::Lap, provider.get());
-    VarHolder lapTimeCurrentVar(IRacingTools::SDK::KnownVarName::LapCurrentLapTime, provider.get());
-    VarHolder lapDistPctVar(IRacingTools::SDK::KnownVarName::LapDistPct, provider.get());
-    VarHolder lapDistVar(IRacingTools::SDK::KnownVarName::LapDist, provider.get());
-    VarHolder incidentCountVar(IRacingTools::SDK::KnownVarName::PlayerCarMyIncidentCount, provider.get());
+    VarHolder lapTimeCurrentVar(
+        IRacingTools::SDK::KnownVarName::LapCurrentLapTime, provider.get());
+    VarHolder lapDistPctVar(
+        IRacingTools::SDK::KnownVarName::LapDistPct, provider.get());
+    VarHolder lapDistVar(
+        IRacingTools::SDK::KnownVarName::LapDist, provider.get());
+    VarHolder incidentCountVar(
+        IRacingTools::SDK::KnownVarName::PlayerCarMyIncidentCount,
+        provider.get());
     VarHolder latVar(IRacingTools::SDK::KnownVarName::Lat, provider.get());
     VarHolder lonVar(IRacingTools::SDK::KnownVarName::Lon, provider.get());
     VarHolder altVar(IRacingTools::SDK::KnownVarName::Alt, provider.get());
 
     std::vector<DataFrame> frames{client->getSampleCount()};
-    auto addCurrentFrameData = [&](const DiskClientDataFrameProcessor<GetLapDataContext>::Context &context) {
-      // info("Adding frame ({} of {}), session time ({})", context.frameIndex, context.frameCount, context.sessionTimeSeconds);
-      frames.emplace_back(sessionTimeVar.getDouble(), lapVar.getInt(), lapTimeCurrentVar.getDouble(),
-                          lapDistPctVar.getFloat(), lapDistVar.getFloat(), incidentCountVar.getInt(),
-                          latVar.getDouble(), lonVar.getDouble(), altVar.getFloat());
-    };
+    auto addCurrentFrameData =
+        [&](const DiskClientDataFrameProcessor<GetLapDataContext>::Context
+                &context) {
+          // info("Adding frame ({} of {}), session time ({})",
+          // context.frameIndex, context.frameCount,
+          // context.sessionTimeSeconds);
+          frames.emplace_back(
+              sessionTimeVar.getDouble(),
+              lapVar.getInt(),
+              lapTimeCurrentVar.getDouble(),
+              lapDistPctVar.getFloat(),
+              lapDistVar.getFloat(),
+              incidentCountVar.getInt(),
+              latVar.getDouble(),
+              lonVar.getDouble(),
+              altVar.getFloat());
+        };
 
 
     auto res = processor.run(
@@ -92,17 +113,23 @@ namespace IRacingTools::Shared::Services {
           double lat = std::get<6>(frame);
           double lon = std::get<7>(frame);
           if (lat != 0.0 && lon != 0.0) {
-            std::get<4>(lap).emplace_back(
-              std::get<1>(frame),
-              std::get<2>(frame),
-              std::get<3>(frame), 
-              std::get<4>(frame), lat, lon, std::get<8>(frame));
+            auto coord = LapPositionCoordinateTuple{
+                std::get<1>(frame),
+                std::get<2>(frame),
+                std::get<3>(frame),
+                std::get<4>(frame),
+                lat,
+                lon,
+                std::get<8>(frame)};
+
+            std::get<4>(lap).emplace_back(std::move(coord));
           }
         }
       }
 
       auto lapSessionTime = std::get<0>(lap);
-      if (lapSessionTime && (laps.empty() || std::get<0>(laps.back()) < lapSessionTime)) {
+      if (lapSessionTime &&
+          (laps.empty() || std::get<0>(laps.back()) < lapSessionTime)) {
         auto incidentCount = std::get<3>(lap);
         std::get<3>(lap) = incidentCount - totalIncidients;
         totalIncidients = incidentCount;
@@ -112,9 +139,16 @@ namespace IRacingTools::Shared::Services {
     }
 
     for (auto &lap: laps) {
-      auto &[sessionTime, lapNumber, lapTime, incidientCount, coordinates] = lap;
-      L->debug("sessionTime={},lap={},lapTimeSeconds={},incidentCount={},coordinateCount={}", sessionTime, lapNumber,
-            lapTime, incidientCount, coordinates.size());
+      auto &[sessionTime, lapNumber, lapTime, incidientCount, coordinates] =
+          lap;
+      L->debug(
+          "sessionTime={},lap={},lapTimeSeconds={},incidentCount={},"
+          "coordinateCount={}",
+          sessionTime,
+          lapNumber,
+          lapTime,
+          incidientCount,
+          coordinates.size());
     }
 
     if (!includeInvalidLaps) {
@@ -124,23 +158,27 @@ namespace IRacingTools::Shared::Services {
     }
 
     if (laps.empty()) {
-      return std::unexpected(SDK::GeneralError(ErrorCode::General, "No lap data found"));
+      return std::unexpected(
+          SDK::GeneralError(ErrorCode::General, "No lap data found"));
     }
 
-    auto& firstLap = laps[0];
+    auto &firstLap = laps[0];
     auto firstLapNumber = std::get<1>(firstLap);
-    auto& lastLap = laps.back();
+    auto &lastLap = laps.back();
     auto lastLapNumber = std::get<1>(lastLap);
-    
+
     std::erase_if(laps, [&](auto &lap) {
       auto lapNumber = std::get<1>(lap);
-      auto& coordinates = std::get<4>(lap);
-      return coordinates.size() < MinimumDataFrameCountValidLap || lapNumber == firstLapNumber || lapNumber == lastLapNumber;
+      auto &coordinates = std::get<4>(lap);
+      return coordinates.size() < MinimumDataFrameCountValidLap ||
+             lapNumber == firstLapNumber || lapNumber == lastLapNumber;
     });
 
     auto lapCount = laps.size();
     if (lapCount < 3) {
-      return std::unexpected(SDK::GeneralError(ErrorCode::General, "At least 3 laps must exist in a telemetry file to be valid"));
+      return std::unexpected(SDK::GeneralError(
+          ErrorCode::General,
+          "At least 3 laps must exist in a telemetry file to be valid"));
     }
 
 
@@ -148,4 +186,4 @@ namespace IRacingTools::Shared::Services {
   }
 
 
-}// namespace IRacingTools::Shared::Services
+} // namespace IRacingTools::Shared::Services

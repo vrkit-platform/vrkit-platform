@@ -27,7 +27,7 @@
 
 #include "TelemetryDumpArgCommand.h"
 
-#include <IRacingTools/Models/LapData.pb.h>
+#include <IRacingTools/Models/LapTrajectory.pb.h>
 #include <IRacingTools/SDK/Utils/CollectionHelpers.h>
 #include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/SDK/Utils/FileHelpers.h>

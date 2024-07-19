@@ -33,10 +33,10 @@ set(overlayAppTarget ${PROJECT_NAME}_overlay_app)
 
 set(appServiceTarget ${PROJECT_NAME}_service)
 
-# `irt_app` - maybe/someday
+# `vrk_app` - maybe/someday
 set(appUIQTTarget ${appNamePrefix}_ui)
 
-# `irt_tool` cli
+# `vrk_tool` cli
 set(appCLITarget ${appNamePrefix}_tool)
 
 # Setup

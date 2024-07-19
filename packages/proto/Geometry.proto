@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package IRacingTools.Models.UI;
+package IRacingTools.Models;
 
 message Position {
   int32 x = 1;
@@ -10,6 +10,11 @@ message Position {
 message SizeI {
   uint32 width = 1;
   uint32 height = 2;
+}
+
+message SizeF {
+  float width = 1;
+  float height = 2;
 }
 
 message RectI {

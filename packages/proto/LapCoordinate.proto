@@ -1,0 +1,19 @@
+syntax = "proto3";
+package IRacingTools.Models;
+
+message LapCoordinate {
+  uint32 lap_time = 1;
+  float lap_percent_complete = 2;
+  float lap_distance = 3;
+
+  double latitude = 10;
+  double longitude = 11;
+  float altitude = 12;
+  
+  float x = 20;
+  float y = 21;
+  float lap_distance_calculated = 22;
+
+  float speed = 30;
+}
+

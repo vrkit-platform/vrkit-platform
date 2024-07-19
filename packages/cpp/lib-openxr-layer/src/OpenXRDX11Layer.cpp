@@ -49,7 +49,7 @@ OpenXRDX11Layer::OpenXRDX11Layer(
   const XrGraphicsBindingD3D11KHR& binding)
   : OpenXRLayer(instance, systemID, session, runtimeID, next) {
   spdlog::debug("{}", __FUNCTION__);
-  IRT_TraceLoggingScope("OpenXRDX11Layer()");
+  VRK_TraceLoggingScope("OpenXRDX11Layer()");
 
   device_.copy_from(binding.device);
   device_->GetImmediateContext(immediateContext_.put());
@@ -58,7 +58,7 @@ OpenXRDX11Layer::OpenXRDX11Layer(
 }
 
 OpenXRDX11Layer::~OpenXRDX11Layer() {
-  IRT_TraceLoggingScope("~OpenXRDX11Layer()");
+  VRK_TraceLoggingScope("~OpenXRDX11Layer()");
 }
 
 OpenXRDX11Layer::DXGIFormats OpenXRDX11Layer::GetDXGIFormats(
@@ -103,7 +103,7 @@ XrSwapchain OpenXRDX11Layer::createSwapchain(
   XrSession session,
   const PixelSize& size) {
   spdlog::debug("{}", __FUNCTION__);
-  IRT_TraceLoggingScope("OpenXRDX11Layer::CreateSwapchain()");
+  VRK_TraceLoggingScope("OpenXRDX11Layer::CreateSwapchain()");
 
   auto oxr = this->getOpenXR();
 
@@ -162,7 +162,7 @@ XrSwapchain OpenXRDX11Layer::createSwapchain(
 
   if (images.at(0).type != XR_TYPE_SWAPCHAIN_IMAGE_D3D11_KHR) {
     spdlog::debug("Swap chain is not a D3D11 swapchain");
-    IRT_BREAK;
+    VRK_BREAK;
     oxr->xrDestroySwapchain(swapchain);
     return nullptr;
   }
@@ -173,7 +173,7 @@ XrSwapchain OpenXRDX11Layer::createSwapchain(
     auto& image = images.at(i);
 #ifdef DEBUG
     if (image.type != XR_TYPE_SWAPCHAIN_IMAGE_D3D11_KHR) {
-      IRT_BREAK;
+      VRK_BREAK;
     }
 #endif
     buffers.emplace_back(device_.get(), image.texture, formats.renderTargetViewFormat);
@@ -198,7 +198,7 @@ void OpenXRDX11Layer::renderLayers(
   uint32_t swapchainTextureIndex,
   const SHM::Snapshot& snapshot,
   const std::span<SHM::LayerSprite>& layers) {
-  IRT_TraceLoggingScope("OpenXRDX11Layer::RenderLayers()");
+  VRK_TraceLoggingScope("OpenXRDX11Layer::RenderLayers()");
   Graphics::SavedState savedState(immediateContext_);
 
   // const auto& sr = swapchainResources_.at(swapchain);

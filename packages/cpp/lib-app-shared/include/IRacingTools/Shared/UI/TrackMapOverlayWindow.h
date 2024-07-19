@@ -10,7 +10,7 @@
 #include <IRacingTools/Shared/UI/OverlayWindow.h>
 
 namespace IRacingTools::Shared::UI {
-    using namespace IRacingTools::Models::Telemetry;
+    using namespace IRacingTools::Models;
 
     class TrackMapOverlayWindow : public OverlayWindow<TrackMapOverlayWindow> {
         std::mutex dataMutex_{};

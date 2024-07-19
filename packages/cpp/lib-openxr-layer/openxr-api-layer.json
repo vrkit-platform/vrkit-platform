@@ -7,7 +7,7 @@
     "implementation_version": "1",
     "description": "IRacingTools OpenXR Layer",
     "functions": {
-      "xrNegotiateLoaderApiLayerInterface": "IRT_xrNegotiateLoaderApiLayerInterface"
+      "xrNegotiateLoaderApiLayerInterface": "VRK_xrNegotiateLoaderApiLayerInterface"
     },
     "disable_environment": "DISABLE_IRacingToolsOpenXRLayer"
   }

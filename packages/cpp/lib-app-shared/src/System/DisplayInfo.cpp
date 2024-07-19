@@ -5,15 +5,15 @@
 
 namespace IRacingTools::Shared::System {
     namespace {
-        auto IsSizeIEqual = [](const Models::UI::SizeI& s1, const Models::UI::SizeI& s2) -> bool {
+        auto IsSizeIEqual = [](const Models::SizeI& s1, const Models::SizeI& s2) -> bool {
             return s1.width() == s2.width() && s1.height() == s2.height();
         };
 
-        auto IsPositionEqual = [](const Models::UI::Position& o1, const Models::UI::Position& o2) -> bool {
+        auto IsPositionEqual = [](const Models::Position& o1, const Models::Position& o2) -> bool {
             return o1.x() == o2.x() && o1.y() == o2.y();
         };
 
-        auto IsRectIEqual = [](const Models::UI::RectI& o1, const Models::UI::RectI& o2) -> bool {
+        auto IsRectIEqual = [](const Models::RectI& o1, const Models::RectI& o2) -> bool {
             return IsPositionEqual(o1.position(), o2.position()) && IsSizeIEqual(o1.size(), o2.size());
         };
     }
@@ -40,7 +40,7 @@ namespace IRacingTools::Shared::System {
         );
     }
 
-    Models::UI::DisplayConfig* DisplayInfo::toModel(Models::UI::DisplayConfig* display) const {
+    Models::DisplayConfig* DisplayInfo::toModel(Models::DisplayConfig* display) const {
         display->set_id(id);
         display->set_name(name);
         display->set_primary(isPrimary);
@@ -68,13 +68,13 @@ namespace IRacingTools::Shared::System {
         return display;
     }
 
-    Models::UI::DisplayConfig DisplayInfo::toModel() const {
-        Models::UI::DisplayConfig display;
+    Models::DisplayConfig DisplayInfo::toModel() const {
+        Models::DisplayConfig display;
         toModel(&display);
         return display;
     }
 
-    bool DisplayInfo::EqualTo(const Models::UI::DisplayConfig& d1, const Models::UI::DisplayConfig& d2) {
+    bool DisplayInfo::EqualTo(const Models::DisplayConfig& d1, const Models::DisplayConfig& d2) {
         auto& id1 = d1.id();
         auto scale1 = d1.scale();
         auto& physicalSize1 = d1.physical_size();
@@ -95,11 +95,11 @@ namespace IRacingTools::Shared::System {
         return EqualTo(di1.toModel(), di2.toModel());
     }
 
-    bool operator==(const Models::UI::DisplayConfig& lhs, const Models::UI::DisplayConfig& rhs) {
+    bool operator==(const Models::DisplayConfig& lhs, const Models::DisplayConfig& rhs) {
         return DisplayInfo::EqualTo(lhs, rhs);
     }
 
-    bool operator!=(const Models::UI::DisplayConfig& lhs, const Models::UI::DisplayConfig& rhs) {
+    bool operator!=(const Models::DisplayConfig& lhs, const Models::DisplayConfig& rhs) {
         return !(lhs == rhs);
     }
 
@@ -111,7 +111,7 @@ namespace IRacingTools::Shared::System {
         return !(lhs == rhs);
     }
 
-    bool DisplayInfo::equalTo(const Models::UI::DisplayConfig& display) const {
+    bool DisplayInfo::equalTo(const Models::DisplayConfig& display) const {
         return EqualTo(toModel(), display);
     }
 
@@ -220,10 +220,10 @@ namespace IRacingTools::Shared::System {
         return output;
     }
 
-    Models::UI::ScreenConfig* DisplayScreenInfo::toModel(Models::UI::ScreenConfig* screen) const {
+    Models::ScreenConfig* DisplayScreenInfo::toModel(Models::ScreenConfig* screen) const {
         screen->set_id("IMPLEMENT ID SCHEME");
         screen->set_name(screen->id());
-        screen->set_kind(Models::UI::SK_MONITOR);
+        screen->set_kind(Models::SK_MONITOR);
         {
             auto size = screen->mutable_size();
             size->set_width(width);
@@ -253,8 +253,8 @@ namespace IRacingTools::Shared::System {
         return screen;
     }
 
-    Models::UI::ScreenConfig DisplayScreenInfo::toModel() const {
-        Models::UI::ScreenConfig screen;
+    Models::ScreenConfig DisplayScreenInfo::toModel() const {
+        Models::ScreenConfig screen;
         toModel(&screen);
         return screen;
     }
@@ -264,15 +264,15 @@ namespace IRacingTools::Shared::System {
         return equalTo(otherModel);
     }
 
-    bool DisplayScreenInfo::equalTo(const Models::UI::ScreenConfig& other) const {
+    bool DisplayScreenInfo::equalTo(const Models::ScreenConfig& other) const {
         auto screen = toModel();
-        if (screen.kind() != Models::UI::SK_MONITOR || screen.kind() != other.kind() || !IsSizeIEqual(
+        if (screen.kind() != Models::SK_MONITOR || screen.kind() != other.kind() || !IsSizeIEqual(
             screen.size(),
             other.size()
         ))
             return false;
 
-        if (screen.kind() == Models::UI::SK_MONITOR) {
+        if (screen.kind() == Models::SK_MONITOR) {
             if (!screen.has_display() || !other.has_display())
                 return false;
 
@@ -366,10 +366,10 @@ namespace IRacingTools::Shared::System {
         return ss.str();
     }
 
-    Models::UI::ScreenConfig* VRScreenInfo::toModel(Models::UI::ScreenConfig* screen) const {
+    Models::ScreenConfig* VRScreenInfo::toModel(Models::ScreenConfig* screen) const {
         screen->set_id("VR");
         screen->set_name(screen->id());
-        screen->set_kind(Models::UI::SK_VR);
+        screen->set_kind(Models::SK_VR);
         {
             auto size = screen->mutable_size();
             size->set_width(width);
@@ -394,8 +394,8 @@ namespace IRacingTools::Shared::System {
      *
      * @return new `VRScreenInfo` instance
      */
-    Models::UI::ScreenConfig VRScreenInfo::toModel() const {
-        Models::UI::ScreenConfig screen;
+    Models::ScreenConfig VRScreenInfo::toModel() const {
+        Models::ScreenConfig screen;
         toModel(&screen);
         return screen;
     }
@@ -405,9 +405,9 @@ namespace IRacingTools::Shared::System {
         return equalTo(other);
     }
 
-    bool VRScreenInfo::equalTo(const Models::UI::ScreenConfig& other) const {
+    bool VRScreenInfo::equalTo(const Models::ScreenConfig& other) const {
         auto screen = toModel();
-        if (screen.kind() != Models::UI::SK_VR || screen.kind() != other.kind() || !IsSizeIEqual(
+        if (screen.kind() != Models::SK_VR || screen.kind() != other.kind() || !IsSizeIEqual(
             screen.size(),
             other.size()
         ))

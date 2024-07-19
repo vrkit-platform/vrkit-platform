@@ -14,9 +14,9 @@
 
 
 #ifdef DEBUG
-  #define IRT_BREAK __debugbreak()
+  #define VRK_BREAK __debugbreak()
 #else
-  #define IRT_BREAK
+  #define VRK_BREAK
 #endif
 
 // template<class CharT>
@@ -35,7 +35,7 @@
 //     std::basic_string<CharT> converted;
 //     if (!message) {
 //       converted = std::format("{:#010x}", static_cast<uint32_t>(hresult.value));
-//       IRT_BREAK;
+//       VRK_BREAK;
 //     } else {
 //       converted = std::format(
 //           "{:#010x} (\"{}\")", static_cast<uint32_t>(hresult.value), message
@@ -57,15 +57,15 @@ namespace IRacingTools::Shared {
     __fastfail(fast_fail_fatal_app_exit);
   }
 
-#define IRT_FATAL \
+#define VRK_FATAL \
   { fatal(); }
 
-#define IRT_LOG_SOURCE_LOCATION_AND_FATAL(\
+#define VRK_LOG_SOURCE_LOCATION_AND_FATAL(\
   message, ...) \
   { \
     auto msg = std::format("FATAL: " message "\n", ##__VA_ARGS__); \
     std::cerr << msg << "\n"; \
-    IRT_FATAL; \
+    VRK_FATAL; \
   }
 
   //GetCategory<LogCategoryDefault::Global>()->critical(msg);
@@ -77,17 +77,17 @@ namespace IRacingTools::Shared {
    * Crashing earlier is better than crashing later, as we get more usable
    * debugging information.
    *
-   * @see `IRT_LOG_SOURCE_LOCATION_AND_FATAL` if you need to provide a
+   * @see `VRK_LOG_SOURCE_LOCATION_AND_FATAL` if you need to provide a
    * source location.
    */
-#define IRT_LOG_AND_FATAL(message, ...) \
-  IRT_LOG_SOURCE_LOCATION_AND_FATAL( \
+#define VRK_LOG_AND_FATAL(message, ...) \
+  VRK_LOG_SOURCE_LOCATION_AND_FATAL( \
     message, ##__VA_ARGS__)
 
-#define IRT_LOG_AND_FATAL_IF(cond, message, ...) \
+#define VRK_LOG_AND_FATAL_IF(cond, message, ...) \
   { \
     if (cond) \
-      IRT_LOG_AND_FATAL(message, ##__VA_ARGS__); \
+      VRK_LOG_AND_FATAL(message, ##__VA_ARGS__); \
   }
 
 
@@ -95,7 +95,7 @@ namespace IRacingTools::Shared {
       HRESULT code) {
     //winrt::check_hresult(code);
     // if (FAILED(code)) [[unlikely]] {
-    //   IRT_LOG_SOURCE_LOCATION_AND_FATAL("HRESULT {}", static_cast<int32_t>(code));
+    //   VRK_LOG_SOURCE_LOCATION_AND_FATAL("HRESULT {}", static_cast<int32_t>(code));
     // }
   }
 
@@ -120,7 +120,7 @@ OutputDebugStringA(c); \
 #define Assert(b) \
     if (!(b)) { \
         OutputDebugStringA("Assert: " #b "\n"); \
-        IRT_LOG_AND_FATAL(#b);\
+        VRK_LOG_AND_FATAL(#b);\
     }
 #else
 #define Assert(b)
@@ -133,7 +133,7 @@ OutputDebugStringA(c); \
     if (!(b)) { \
         OutputDebugStringA("Assert: " #b " " msg "\n"); \
             __debugbreak();\
-            IRT_LOG_AND_FATAL(#b);\
+            VRK_LOG_AND_FATAL(#b);\
     }
 #else
 #define AssertMsg(b, msg)

@@ -288,8 +288,8 @@ namespace IRacingTools::Shared::Graphics {
         spdlog::debug("Starting a D2D draw while one already in progress:");
         // spdlog::debug("First: {} (thread ID {})", prev.location_, GetCurrentThreadId());
         // spdlog::debug("Second: {} (thread ID {})", loc, prev.threadID_);
-        // IRT_BREAK;
-        IRT_BREAK;
+        // VRK_BREAK;
+        VRK_BREAK;
       } else {
         locks_->currentDraw_ = {GetCurrentThreadId()};
       }
@@ -301,13 +301,13 @@ namespace IRacingTools::Shared::Graphics {
     {
       std::unique_lock lock(locks_->currentDrawMutex_);
       if (!locks_->currentDraw_) {
-        IRT_BREAK;
+        VRK_BREAK;
       }
       locks_->currentDraw_ = {};
     }
     const auto result = d2dDeviceContext_->EndDraw();
     if (result != S_OK) [[unlikely]] {
-      IRT_BREAK;
+      VRK_BREAK;
     }
     return result;
   }
@@ -329,7 +329,7 @@ namespace IRacingTools::Shared::Graphics {
   }
 
   void D3D11Resources::lock() {
-    // IRT_TraceLoggingScope("D3D11Resources::lock()");
+    // VRK_TraceLoggingScope("D3D11Resources::lock()");
 
     // If we've locked D2D, we don't need to separately lock D3D; keeping it
     // here anyway as:
@@ -347,12 +347,12 @@ namespace IRacingTools::Shared::Graphics {
   }
 
   void D3D11Resources::unlock() {
-    // IRT_TraceLoggingScope("D3D11Resources::unlock()");
+    // VRK_TraceLoggingScope("D3D11Resources::unlock()");
     locks_->mutex_.unlock();
   }
 
   bool D3D11Resources::try_lock() {
-    // IRT_TraceLoggingScope("D3D11Resources::try_lock()");
+    // VRK_TraceLoggingScope("D3D11Resources::try_lock()");
     return locks_->mutex_.try_lock();
   }
 

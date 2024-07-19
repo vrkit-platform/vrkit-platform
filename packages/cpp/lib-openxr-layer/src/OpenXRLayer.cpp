@@ -82,13 +82,13 @@ namespace IRacingTools::OpenXR {
         const auto codeAsString = xrresult_to_string(code);
 
         if (codeAsString.empty()) {
-            // IRT_LOG_SOURCE_LOCATION_AND_FATAL(
+            // VRK_LOG_SOURCE_LOCATION_AND_FATAL(
             //   loc, "OpenXR call failed: {}", static_cast<int>(code));
-            IRT_LOG_AND_FATAL("OpenXR call failed: {}", static_cast<int>(code));
+            VRK_LOG_AND_FATAL("OpenXR call failed: {}", static_cast<int>(code));
         }
         else {
-            IRT_LOG_AND_FATAL("OpenXR call failed: {} ({})", codeAsString, static_cast<int>(code));
-            // IRT_LOG_SOURCE_LOCATION_AND_FATAL(
+            VRK_LOG_AND_FATAL("OpenXR call failed: {} ({})", codeAsString, static_cast<int>(code));
+            // VRK_LOG_SOURCE_LOCATION_AND_FATAL(
             //   loc, "OpenXR call failed: {} ({})", codeAsString, static_cast<int>(code));
         }
     }
@@ -196,7 +196,7 @@ namespace IRacingTools::OpenXR {
     )
         : openXR_(next) {
         spdlog::debug("{}", __FUNCTION__);
-        IRT_TraceLoggingScope("OpenXRLayer::OpenXRLayer()");
+        VRK_TraceLoggingScope("OpenXRLayer::OpenXRLayer()");
 
         XrSystemProperties systemProperties{.type = XR_TYPE_SYSTEM_PROPERTIES,};
         check_xrresult(next->xrGetSystemProperties(instance, system, &systemProperties));
@@ -240,7 +240,7 @@ namespace IRacingTools::OpenXR {
     }
 
     OpenXRLayer::~OpenXRLayer() {
-        IRT_TraceLoggingScope("OpenXRLayer::OpenXRLayer()");
+        VRK_TraceLoggingScope("OpenXRLayer::OpenXRLayer()");
 
         if (localSpace_) {
             openXR_->xrDestroySpace(localSpace_);
@@ -259,7 +259,7 @@ namespace IRacingTools::OpenXR {
     }
 
     XrResult OpenXRLayer::xrEndFrame(XrSession session, const XrFrameEndInfo* frameEndInfo) {
-        IRT_TraceLoggingScopedActivity(activity, "OpenXRLayer::xrEndFrame()");
+        VRK_TraceLoggingScopedActivity(activity, "OpenXRLayer::xrEndFrame()");
         if (frameEndInfo->layerCount == 0) {
             TraceLoggingWriteTagged(activity, "No game layers.");
             return openXR_->xrEndFrame(session, frameEndInfo);
@@ -287,7 +287,7 @@ namespace IRacingTools::OpenXR {
 
         if (swapchain_) {
             if ((swapchainDimensions_ != swapchainDimensions) || (sessionID_ != snapshot.getSessionID())) {
-                IRT_TraceLoggingScope("DestroySwapchain");
+                VRK_TraceLoggingScope("DestroySwapchain");
                 this->releaseSwapchainResources(swapchain_);
                 openXR_->xrDestroySwapchain(swapchain_);
                 swapchain_ = {};
@@ -295,14 +295,14 @@ namespace IRacingTools::OpenXR {
         }
 
         if (!swapchain_) {
-            IRT_TraceLoggingScope(
+            VRK_TraceLoggingScope(
                 "CreateSwapchain",
                 TraceLoggingValue(swapchainDimensions.width_, "width"),
                 TraceLoggingValue(swapchainDimensions.height_, "height")
             );
             swapchain_ = this->createSwapchain(session, swapchainDimensions);
             if (!swapchain_) [[unlikely]] {
-                IRT_LOG_AND_FATAL("Failed to create swapchain");
+                VRK_LOG_AND_FATAL("Failed to create swapchain");
             }
             swapchainDimensions_ = swapchainDimensions;
             sessionID_ = snapshot.getSessionID();
@@ -426,12 +426,12 @@ namespace IRacingTools::OpenXR {
         if (needRender) {
             uint32_t swapchainTextureIndex;
             {
-                IRT_TraceLoggingScope("AcquireSwapchainImage");
+                VRK_TraceLoggingScope("AcquireSwapchainImage");
                 check_xrresult(openXR_->xrAcquireSwapchainImage(swapchain_, nullptr, &swapchainTextureIndex));
             }
 
             {
-                IRT_TraceLoggingScope("WaitSwapchainImage");
+                VRK_TraceLoggingScope("WaitSwapchainImage");
                 XrSwapchainImageWaitInfo waitInfo{
                     .type = XR_TYPE_SWAPCHAIN_IMAGE_WAIT_INFO,
                     .timeout = XR_INFINITE_DURATION,
@@ -440,12 +440,12 @@ namespace IRacingTools::OpenXR {
             }
 
             {
-                IRT_TraceLoggingScope("RenderLayers()");
+                VRK_TraceLoggingScope("RenderLayers()");
                 this->renderLayers(swapchain_, swapchainTextureIndex, snapshot, layerSprites);
             }
 
             {
-                IRT_TraceLoggingScope("xrReleaseSwapchainImage()");
+                VRK_TraceLoggingScope("xrReleaseSwapchainImage()");
                 check_xrresult(openXR_->xrReleaseSwapchainImage(swapchain_, nullptr));
             }
 
@@ -460,7 +460,7 @@ namespace IRacingTools::OpenXR {
 
         XrResult nextResult{};
         {
-            IRT_TraceLoggingScope("next_xrEndFrame");
+            VRK_TraceLoggingScope("next_xrEndFrame");
             nextResult = openXR_->xrEndFrame(session, &nextFrameEndInfo);
         }
         if (!XR_SUCCEEDED(nextResult)) [[unlikely]] {
@@ -748,7 +748,7 @@ BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved) {
 }
 
 extern "C" {
-XrResult __declspec(dllexport) XRAPI_CALL IRT_xrNegotiateLoaderApiLayerInterface(
+XrResult __declspec(dllexport) XRAPI_CALL VRK_xrNegotiateLoaderApiLayerInterface(
     const XrNegotiateLoaderInfo* loaderInfo,
     const char* layerName,
     XrNegotiateApiLayerRequest* apiLayerRequest

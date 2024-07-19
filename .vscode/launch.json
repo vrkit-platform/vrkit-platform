@@ -73,10 +73,10 @@
       ]
     },
     {
-      "name": "irt_tool: TelemetryDump",
+      "name": "vrk_tool: TelemetryDump",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${command:cmake.launchTargetDirectory}\\irt_tool.exe",
+      "program": "${command:cmake.launchTargetDirectory}\\vrk_tool.exe",
       "args": [
         "telemetry-dump",
         "--ibt",
@@ -97,7 +97,7 @@
       ]
     },
     {
-      "name": "irt_example_lapTiming",
+      "name": "vrk_example_lapTiming",
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${command:cmake.launchTargetDirectory}\\iracing_tools_example_irsdk_lapTiming.exe",

@@ -2,9 +2,8 @@
 // Created by jglanz on 1/7/2024.
 //
 
-// #include "../resource.h"
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
-#include <DirectXHelpers.h>
+#include <directxtk/DirectXHelpers.h>
 
 #include <IRacingTools/Shared/Graphics/TrackMapWidget.h>
 #include <IRacingTools/Shared/Macros.h>
@@ -46,7 +45,7 @@ namespace IRacingTools::Shared::Graphics {
         // GET D2D TARGET
         auto d2dTarget = target->d2d();
         if (!d2dTarget) {
-            IRT_LOG_AND_FATAL("d2dTarget is null");
+            VRK_LOG_AND_FATAL("d2dTarget is null");
         }
 
         // SET TRANSFORM TO DEFAULT
@@ -151,7 +150,7 @@ namespace IRacingTools::Shared::Graphics {
 
         // PLOT THE TRACK MAP & CALCULATE DISTANCE -> POINT ON MAP
         // FOR LIVE CAR RENDERING
-        TrackMap_Point lastPoint{};
+        LapCoordinate lastPoint{};
         pathTotalDistance_ = 0.0f;
         pathPointDistanceMap_.clear();
         for (auto idx = 0; idx < scaledTrackMap.points_size(); idx++) {

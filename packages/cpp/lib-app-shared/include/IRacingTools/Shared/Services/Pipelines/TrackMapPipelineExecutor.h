@@ -16,8 +16,7 @@
 namespace IRacingTools::Shared::Services::Pipelines {
 
   using namespace Models;
-  using Telemetry::TelemetryDataFile;
-
+  
   class TrackMapPipelineExecutor : public PipelineExecutor<std::shared_ptr<TelemetryDataFile>> {
 
   public:

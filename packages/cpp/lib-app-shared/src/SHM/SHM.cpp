@@ -3,7 +3,8 @@
 //
 
 
-#include <IRacingTools/Models/LapData.pb.h>
+#include <IRacingTools/Models/LapTrajectory.pb.h>
+#include <IRacingTools/Models/TrackMap.pb.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/SHM/SHM.h>
 #include <IRacingTools/Shared/TrackMapGeometry.h>
@@ -82,7 +83,7 @@ namespace IRacingTools::Shared::SHM {
             //        using namespace OpenKneeboard::ADL;
             //        dprintf(
             //            "Closing SHM with invalid state: {}", formattable_state(state_.Get()));
-            //        IRT_BREAK;
+            //        VRK_BREAK;
             //        std::terminate();
             //      }
         }
@@ -107,7 +108,7 @@ namespace IRacingTools::Shared::SHM {
                     "Unexpected result from SHM WaitForSingleObject in lock(): " "{:#016x}",
                     static_cast<uint64_t>(result)
                 );
-                IRT_BREAK;
+                VRK_BREAK;
                 return;
             }
 
@@ -130,7 +131,7 @@ namespace IRacingTools::Shared::SHM {
                 return false;
             default:
                 spdlog::error("Unexpected result from SHM WaitForSingleObject in try_lock()");
-                IRT_BREAK;
+                VRK_BREAK;
                 return false;
             }
 
@@ -211,7 +212,7 @@ namespace IRacingTools::Shared::SHM {
 
         impl_ = std::make_shared<Impl>();
         if (!impl_->isValid()) {
-            IRT_BREAK;
+            VRK_BREAK;
             impl_.reset();
             return;
         }
@@ -272,7 +273,7 @@ namespace IRacingTools::Shared::SHM {
 
 
         // if (layers.size() > MaxViewCount) [[unlikely]] {
-        //   IRT_LOG_AND_FATAL(
+        //   VRK_LOG_AND_FATAL(
         //     "Asked to publish {} layers, but max is {}", layers.size(), MaxViewCount);
         // }
 
@@ -307,7 +308,7 @@ namespace IRacingTools::Shared::SHM {
     Snapshot::Snapshot(incorrect_gpu_t) : state_(State::IncorrectGPU) {}
 
     Snapshot::Snapshot(FrameMetadata* metadata) : state_(State::Empty) {
-        // IRT_TraceLoggingScope("SHM::Snapshot::Snapshot(FrameMetadata)");
+        // VRK_TraceLoggingScope("SHM::Snapshot::Snapshot(FrameMetadata)");
         metadata_ = std::make_shared<FrameMetadata>(*metadata);
 
         if (metadata_ && metadata_->haveFeeder()) {
@@ -330,7 +331,7 @@ namespace IRacingTools::Shared::SHM {
         const std::shared_ptr<IPCClientTexture>& dest
     )
         : ipcTexture_(dest), state_(State::Empty) {
-        // IRT_TraceLoggingScopedActivity(
+        // VRK_TraceLoggingScopedActivity(
         //   activity, "SHM::Snapshot::Snapshot(metadataAndTextures)");
 
         const auto textureIndex = metadata->frameNumber % SHMSwapchainLength;
@@ -340,7 +341,7 @@ namespace IRacingTools::Shared::SHM {
         metadata_ = std::make_shared<FrameMetadata>(*metadata);
 
         {
-            // IRT_TraceLoggingScope("CopyTexture");
+            // VRK_TraceLoggingScope("CopyTexture");
             copier->copy(source->textureHandle.get(), dest.get(), source->fenceHandle.get(), fenceIn);
         }
 
@@ -393,7 +394,7 @@ namespace IRacingTools::Shared::SHM {
 
     const LayerConfig* Snapshot::getLayerConfig(uint8_t layerIndex) const {
         if (layerIndex >= this->getLayerCount()) [[unlikely]] {
-            IRT_LOG_AND_FATAL("Asked for layer {}, but there are {} layers", layerIndex, this->getLayerCount());
+            VRK_LOG_AND_FATAL("Asked for layer {}, but there are {} layers", layerIndex, this->getLayerCount());
         }
 
         return &metadata_->layers[layerIndex];
@@ -407,7 +408,7 @@ namespace IRacingTools::Shared::SHM {
         std::array<std::unique_ptr<IPCHandles>, SHMSwapchainLength> handles_;
 
         void updateSession() {
-            // IRT_TraceLoggingScope("SHM::Reader::Impl::UpdateSession()");
+            // VRK_TraceLoggingScope("SHM::Reader::Impl::UpdateSession()");
             const auto& metadata = *this->metadata_;
 
             if (sessionID_ != metadata.sessionId) {
@@ -432,7 +433,7 @@ namespace IRacingTools::Shared::SHM {
 
 
     SHMReader::SHMReader() {
-        // IRT_TraceLoggingScope("SHM::Reader::Reader()");
+        // VRK_TraceLoggingScope("SHM::Reader::Reader()");
         const auto path = SHMPath();
         //spdlog::info(L"Initializing SHM reader with path {}", path);
 
@@ -445,7 +446,7 @@ namespace IRacingTools::Shared::SHM {
     }
 
     SHMReader::~SHMReader() {
-        //IRT_TraceLoggingScope("SHM::Reader::~Reader()");
+        //VRK_TraceLoggingScope("SHM::Reader::~Reader()");
     }
 
 
@@ -488,7 +489,7 @@ namespace IRacingTools::Shared::SHM {
       IPCTextureCopier* copier,
       const std::shared_ptr<IPCClientTexture>& dest,
       ConsumerKind kind) const {
-        // IRT_TraceLoggingScopedActivity(
+        // VRK_TraceLoggingScopedActivity(
         //   activity, "SHM::Reader::MaybeGetUncached()");
         // const auto transitions = make_scoped_state_transitions<
         //   State::Locked,
@@ -531,7 +532,7 @@ namespace IRacingTools::Shared::SHM {
           (handles->foreignTextureHandle != p->metadata_->texture) )) {
             // Impl::UpdateSession() should have nuked the whole lot
             spdlog::info("Replacing handles without new session ID");
-            IRT_BREAK;
+            VRK_BREAK;
             handles = {};
           }
         if (!handles) {
@@ -572,8 +573,8 @@ Snapshot SHMCachedReader::maybeGet() {
 
   const auto swapchainIndex = swapchainIndex_;
   if (swapchainIndex >= clientTextures_.size()) [[unlikely]] {
-      IRT_LOG_AND_FATAL("swapchainIndex > lnegth - initializeCache?");
-      // IRT_LOG_SOURCE_LOCATION_AND_FATAL(
+      VRK_LOG_AND_FATAL("swapchainIndex > lnegth - initializeCache?");
+      // VRK_LOG_SOURCE_LOCATION_AND_FATAL(
     //   loc,
     //   "swapchainIndex {} >= swapchainLength {}; did you call "
     //   "InitializeCache()?",
@@ -600,7 +601,7 @@ Snapshot SHMCachedReader::maybeGet() {
   // TraceLoggingWriteTagged(activity, "LockingSHM");
   std::unique_lock lock(*p);
   // TraceLoggingWriteTagged(activity, "LockedSHM");
-  // IRT_TraceLoggingScopedActivity(
+  // VRK_TraceLoggingScopedActivity(
   //   maybeGetActivity, "MaybeGetUncached");
 
   if (p->metadata_->layerCount == 0) {
@@ -643,7 +644,7 @@ Snapshot SHMCachedReader::maybeGet() {
 std::shared_ptr<IPCClientTexture> SHMCachedReader::getIPCClientTexture(
   const PixelSize& dimensions,
   uint8_t swapchainIndex) noexcept {
-  // IRT_TraceLoggingScope(
+  // VRK_TraceLoggingScope(
   //   "SHMCachedReader::GetIPCClientTexture",
   //   TraceLoggingValue(swapchainIndex, "swapchainIndex"));
   auto& ret = clientTextures_.at(swapchainIndex);
@@ -652,14 +653,14 @@ std::shared_ptr<IPCClientTexture> SHMCachedReader::getIPCClientTexture(
   }
 
   if (!ret) {
-    // IRT_TraceLoggingScope("SHMCachedReader::CreateIPCClientTexture");
+    // VRK_TraceLoggingScope("SHMCachedReader::CreateIPCClientTexture");
     ret = this->createIPCClientTexture(dimensions, swapchainIndex);
   }
   return ret;
 }
 
 Snapshot SHMCachedReader::maybeGetMetadata() {
-  // IRT_TraceLoggingScope("SHMCachedReader::MaybeGetMetadata()");
+  // VRK_TraceLoggingScope("SHMCachedReader::MaybeGetMetadata()");
 
   if (!*this) {
     return {nullptr};
@@ -698,7 +699,7 @@ void SHMCachedReader::updateSession() {
 }
 
     void SHMCachedReader::initializeCache(uint64_t gpuLUID, uint8_t swapchainLength) {
-        // IRT_TraceLoggingScope(
+        // VRK_TraceLoggingScope(
         //   "SHM::CachedReader::InitializeCache()",
         //   TraceLoggingValue(swapchainLength, "SwapchainLength"));
         gpuluid_ = gpuLUID;

@@ -35,7 +35,7 @@ namespace IRacingTools::Shared::Services {
     }
 
     std::string LapTrajectoryToFilename(const LapTrajectory *it) {
-      return TrackLayoutIdToFilename(it->track_layout_id());
+      return TrackLayoutIdToFilename(it->track_metadata().layout_id());
     }
     std::string LapTrajectoryToFilename(const LapTrajectory &it) {
       return LapTrajectoryToFilename(&it);
@@ -130,7 +130,7 @@ namespace IRacingTools::Shared::Services {
     return dataFiles_.contains(trackLayoutId) || findFile(trackLayoutId).has_value();
   }
   std::optional<fs::path> TrackMapService::findFile(const std::shared_ptr<LapTrajectory> &lt) {
-    return findFile(lt->track_layout_id());
+    return findFile(lt->track_metadata().layout_id());
   }
 
   std::optional<fs::path> TrackMapService::findFile(const std::string &trackLayoutId) {
@@ -167,7 +167,7 @@ namespace IRacingTools::Shared::Services {
 
   std::expected<const std::shared_ptr<LapTrajectory>, SDK::GeneralError>
   TrackMapService::set(const std::shared_ptr<LapTrajectory> &trajectory) {
-    return set(trajectory->track_layout_id(), trajectory);
+    return set(trajectory->track_metadata().layout_id(), trajectory);
   }
 
   std::expected<const std::shared_ptr<LapTrajectory>, SDK::GeneralError>
@@ -177,7 +177,7 @@ namespace IRacingTools::Shared::Services {
     auto path = filePaths_[0];
     auto filename = LapTrajectoryToFilename(trajectory.get());
     auto file = path / filename;
-    L->info("Writing lap trajectory ({}) to: {}", trajectory->track_layout_id(), file.string());
+    L->info("Writing lap trajectory ({}) to: {}", trajectory->track_metadata().layout_id(), file.string());
 
     if (!WriteMessageToFile(*trajectory.get(), file)) {
       L->error("Failed to write {}", file.string());

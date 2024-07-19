@@ -15,7 +15,7 @@
 
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 
-#define IRT_PROTO_CMP(O1, O2, MEMBER) O1.MEMBER() == O2.MEMBER()
+#define VRK_PROTO_CMP(O1, O2, MEMBER) O1.MEMBER() == O2.MEMBER()
 
 namespace IRacingTools::Shared::Utils {
   using namespace ::IRacingTools::SDK;

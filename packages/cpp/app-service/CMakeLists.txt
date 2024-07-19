@@ -28,8 +28,8 @@ set_target_properties(
   VS_GLOBAL_WindowsAppSDKSelfContained true
 )
 
-IRT_CONFIGURE_APP_LIBS(${targetName})
-IRT_CONFIGURE_TARGET(${targetName})
+VRK_CONFIGURE_APP_LIBS(${targetName})
+VRK_CONFIGURE_TARGET(${targetName})
 
 target_compile_definitions(
   ${targetName}
@@ -40,7 +40,7 @@ target_compile_definitions(
   _USE_MATH_DEFINES
 )
 
-# IRT_CONFIGURE_APP_LIBS(${targetName})
+# VRK_CONFIGURE_APP_LIBS(${targetName})
 
 # Link other local project targets
 #target_link_libraries(${targetName} PRIVATE ${sdkTargetStatic} ${sharedAppLibTargetStatic} ${modelsTargetStatic} ${Protobuf_LIBRARY_DEBUG})

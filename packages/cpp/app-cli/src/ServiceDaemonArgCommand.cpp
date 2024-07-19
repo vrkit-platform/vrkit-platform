@@ -28,7 +28,7 @@
 
 #include "ServiceDaemonArgCommand.h"
 
-#include <IRacingTools/Models/LapData.pb.h>
+#include <IRacingTools/Models/LapTrajectory.pb.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/Shared/Services/LapTrajectoryTool.h>

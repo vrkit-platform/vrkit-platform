@@ -17,8 +17,7 @@
 namespace IRacingTools::Shared::Services {
 
   using namespace Models;
-  using Telemetry::TelemetryDataFile;
-
+  
   class TelemetryDataFileProcessorInternal;
 
   /**

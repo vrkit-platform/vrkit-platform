@@ -29,8 +29,8 @@ target_include_directories(
 )
 
 # Link configured deps
-IRT_CONFIGURE_APP_LIBS(${targetName})
-#IRT_CONFIGURE_TARGET(${targetName})
+VRK_CONFIGURE_APP_LIBS(${targetName})
+#VRK_CONFIGURE_TARGET(${targetName})
 
 target_compile_definitions(
   ${targetName}

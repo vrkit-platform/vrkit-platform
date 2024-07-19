@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include "Geometry2D.h"
+#include <IRacingTools/Shared/Geometry2D.h>
 
 namespace IRacingTools::Shared {
 

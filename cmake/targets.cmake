@@ -170,7 +170,7 @@ macro(SETUP_MOD_EXPORTS)
   endforeach()
 endmacro()
 
-function(IRT_CONFIGURE_TARGET TARGET)
+function(VRK_CONFIGURE_TARGET TARGET)
   set_property(TARGET ${TARGET} PROPERTY
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 

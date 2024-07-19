@@ -830,7 +830,7 @@ namespace IRacingTools {
 			class LapTracjectoryConverter <template<typename PixelType=float>> {
 				+LapTracjectoryConverter(ZoomLevel zoomLevel)
 				-pixelConverter_ : CoordinateToPixelConverter<PixelType>
-				+toPixels(const LapTrajectory& trajectory) : PixelCoordinateData
+				+toPixels(const LapTrajectory& trajectory) : LapCoordinateData
 				+toTrackMap(const LapTrajectory& trajectory) : TrackMap
 				+{static} kConvertToInteger : static constexpr bool
 			}
@@ -847,12 +847,12 @@ namespace IRacingTools {
 				+longitude : T
 			}
 
-			class LapTracjectoryConverter::PixelCoordinateData {
+			class LapTracjectoryConverter::LapCoordinateData {
 				+max : PixelBase<PixelType>
-				+steps : std::vector<PixelCoordinateStep>
+				+steps : std::vector<LapCoordinateStep>
 			}
 
-			class LapTracjectoryConverter::PixelCoordinateStep {
+			class LapTracjectoryConverter::LapCoordinateStep {
 				+pixel : PixelBase<PixelType>
 				+meters : double
 			}
@@ -945,10 +945,10 @@ IRacingTools.Shared.Graphics.IPCRenderer *-- IRacingTools.Shared.SHM.Writer
 IRacingTools.Shared.Geometry.LapTracjectoryConverter *-- IRacingTools.Shared.Geometry.CoordinateToPixelConverter
 
 
-IRacingTools.Shared.Geometry.LapTracjectoryConverter::PixelCoordinateData *-- IRacingTools.Shared.Geometry.PixelBase
+IRacingTools.Shared.Geometry.LapTracjectoryConverter::LapCoordinateData *-- IRacingTools.Shared.Geometry.PixelBase
 
 
-IRacingTools.Shared.Geometry.LapTracjectoryConverter::PixelCoordinateStep *-- IRacingTools.Shared.Geometry.PixelBase
+IRacingTools.Shared.Geometry.LapTracjectoryConverter::LapCoordinateStep *-- IRacingTools.Shared.Geometry.PixelBase
 
 
 IRacingTools.Shared.LiveSessionDataProvider *-- IRacingTools.Shared.SessionDataAccess
@@ -1011,10 +1011,10 @@ IRacingTools.Shared.VR.VRLayer *-- IRacingTools.Shared.VR.VRPose
 IRacingTools.Shared.UI.BaseWindow +-- IRacingTools.Shared.UI.BaseWindow::anon_struct_1
 
 
-IRacingTools.Shared.Geometry.LapTracjectoryConverter +-- IRacingTools.Shared.Geometry.LapTracjectoryConverter::PixelCoordinateData
+IRacingTools.Shared.Geometry.LapTracjectoryConverter +-- IRacingTools.Shared.Geometry.LapTracjectoryConverter::LapCoordinateData
 
 
-IRacingTools.Shared.Geometry.LapTracjectoryConverter +-- IRacingTools.Shared.Geometry.LapTracjectoryConverter::PixelCoordinateStep
+IRacingTools.Shared.Geometry.LapTracjectoryConverter +-- IRacingTools.Shared.Geometry.LapTracjectoryConverter::LapCoordinateStep
 
 
 IRacingTools.Shared.Rect +-- IRacingTools.Shared.Rect::Origin

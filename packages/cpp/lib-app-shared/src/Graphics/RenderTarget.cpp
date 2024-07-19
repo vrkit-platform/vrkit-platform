@@ -84,14 +84,14 @@ namespace IRacingTools::Shared::Graphics {
 
   RenderTarget::D2D RenderTarget::d2d() {
     if (!d3dTexture_) {
-      IRT_LOG_SOURCE_LOCATION_AND_FATAL("Attempted to start D2D without a texture");
+      VRK_LOG_SOURCE_LOCATION_AND_FATAL("Attempted to start D2D without a texture");
     }
     return {this->shared_from_this()};
   }
 
   RenderTarget::D3D RenderTarget::d3d() {
     if (!d3dTexture_) {
-      IRT_LOG_SOURCE_LOCATION_AND_FATAL("Attempted to start D3D without a texture");
+      VRK_LOG_SOURCE_LOCATION_AND_FATAL("Attempted to start D3D without a texture");
     }
     return {this->shared_from_this()};
   }
@@ -100,7 +100,7 @@ namespace IRacingTools::Shared::Graphics {
   RenderTarget::D2D::D2D(
       const std::shared_ptr<RenderTarget> &parent) : parent_(parent) {
     if (!parent) {
-      IRT_BREAK;
+      VRK_BREAK;
       return;
     }
     unsafeParent_ = parent_.get();
@@ -113,7 +113,7 @@ namespace IRacingTools::Shared::Graphics {
       parent_ = nullptr;
       spdlog::debug(
           "Attempted to activate D2D for a render target in mode {}", static_cast<int>(mode));
-      IRT_BREAK;
+      VRK_BREAK;
       return;
     }
 
@@ -130,7 +130,7 @@ namespace IRacingTools::Shared::Graphics {
     }
     if (released_) {
       spdlog::debug("{}: double-release", __FUNCTION__);
-      IRT_BREAK;
+      VRK_BREAK;
       return;
     }
     released_ = true;
@@ -141,7 +141,7 @@ namespace IRacingTools::Shared::Graphics {
     if (mode != Mode::D2D) {
       spdlog::debug(
           "{}: attempting to release D2D, but mode is {}", __FUNCTION__, static_cast<int>(mode));
-      IRT_BREAK;
+      VRK_BREAK;
       return;
     }
 
@@ -151,7 +151,7 @@ namespace IRacingTools::Shared::Graphics {
   void RenderTarget::D2D::reacquire() {
     if (!released_) {
       spdlog::debug("Attempting to re-acquire without release");
-      IRT_BREAK;
+      VRK_BREAK;
       return;
     }
     this->acquire();
@@ -175,7 +175,7 @@ namespace IRacingTools::Shared::Graphics {
 
   RenderTarget::D3D::D3D(const std::shared_ptr<RenderTarget> &parent) : parent_(parent) {
     if (!parent) {
-      IRT_BREAK;
+      VRK_BREAK;
       return;
     }
     unsafeParent_ = parent.get();
@@ -185,7 +185,7 @@ namespace IRacingTools::Shared::Graphics {
       parent_ = nullptr;
       spdlog::debug(
           "Attempted to activate D3D for a render target in mode {}", static_cast<int>(mode));
-      IRT_BREAK;
+      VRK_BREAK;
       return;
     }
     mode = Mode::D3D;
@@ -200,7 +200,7 @@ namespace IRacingTools::Shared::Graphics {
     if (mode != Mode::D3D) {
       spdlog::debug(
           "Attempting to leave D3D for render target in mode {}", static_cast<int>(mode));
-      IRT_BREAK;
+      VRK_BREAK;
       return;
     }
     mode = Mode::Unattached;

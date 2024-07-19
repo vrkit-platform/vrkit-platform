@@ -29,7 +29,7 @@ OpenXRNext::OpenXRNext(XrInstance instance, PFN_xrGetInstanceProcAddr getNext) {
 #define IT(func) \
   getNext( \
     instance, #func, reinterpret_cast<PFN_xrVoidFunction*>(&this->_CONCAT(##func,_)));
-  IRT_NEXT_OPENXR_FUNCS
+  VRK_NEXT_OPENXR_FUNCS
 #undef IT
 }
 

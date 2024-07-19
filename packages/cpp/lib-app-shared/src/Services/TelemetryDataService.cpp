@@ -285,7 +285,7 @@ namespace IRacingTools::Shared::Services {
 
   void TelemetryDataService::reset(bool skipPrepare) {
     auto onReadHandler =
-        [&](std::vector<std::shared_ptr<IRacingTools::Models::Telemetry::TelemetryDataFile>> &dataFiles) {
+        [&](std::vector<std::shared_ptr<IRacingTools::Models::TelemetryDataFile>> &dataFiles) {
           std::scoped_lock lock(stateMutex_);
           dataFiles_.clear();
           for (auto &dataFile: dataFiles) {

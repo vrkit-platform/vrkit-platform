@@ -1,8 +1,7 @@
 syntax = "proto3";
 import "Geometry.proto";
 
-package IRacingTools.Models.UI;
-
+package IRacingTools.Models;
 
 message DisplayConfig {
   string id = 1;

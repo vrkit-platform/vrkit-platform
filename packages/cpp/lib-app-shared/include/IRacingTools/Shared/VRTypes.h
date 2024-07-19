@@ -4,17 +4,17 @@
 
 #pragma once
 
-#include "SharedAppLibPCH.h"
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
 
-#include <IRacingTools/Models/TrackMapData.pb.h>
+#include <IRacingTools/Models/TrackMap.pb.h>
 
 #include <numbers>
 #include <optional>
 #include <random>
 #include <shared_mutex>
 
-#include "FileSystemHelpers.h"
-#include "Geometry2D.h"
+#include <IRacingTools/Shared/FileSystemHelpers.h>
+#include <IRacingTools/Shared/Geometry2D.h>
 
 namespace IRacingTools::Shared::VR {
 

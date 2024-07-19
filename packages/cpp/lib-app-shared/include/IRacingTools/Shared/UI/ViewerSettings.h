@@ -53,5 +53,5 @@ namespace IRacingTools::Shared::UI {
         constexpr auto operator<=>(const ViewerSettings&) const noexcept = default;
     };
 
-    // IRT_DECLARE_SPARSE_JSON(ViewerSettings);
+    // VRK_DECLARE_SPARSE_JSON(ViewerSettings);
 }

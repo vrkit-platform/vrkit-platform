@@ -38,7 +38,7 @@
 
 #include <utility>
 
-#define IRT_NEXT_OPENXR_FUNCS \
+#define VRK_NEXT_OPENXR_FUNCS \
   IT(xrAcquireSwapchainImage) \
   IT(xrCreateReferenceSpace) \
   IT(xrCreateSession) \
@@ -68,13 +68,13 @@ class OpenXRNext final {
     return this->_CONCAT(##func,_)(std::forward<Args>(args)...); \
   }
   IT(xrGetInstanceProcAddr)
-  IRT_NEXT_OPENXR_FUNCS
+  VRK_NEXT_OPENXR_FUNCS
 #undef IT
 
  private:
 #define IT(func) PFN_##func _CONCAT(##func,_) {nullptr};
   IT(xrGetInstanceProcAddr)
-  IRT_NEXT_OPENXR_FUNCS
+  VRK_NEXT_OPENXR_FUNCS
 #undef IT
 };
 

@@ -55,10 +55,10 @@ void Texture::copyFrom(
   uint64_t fenceInValue,
   ID3D11Fence* fenceOut,
   uint64_t fenceOutValue) noexcept {
-  // IRT_TraceLoggingScope("SHM::D3D11::Texture::copyFrom");
+  // VRK_TraceLoggingScope("SHM::D3D11::Texture::copyFrom");
 
   if (!cacheTexture_) {
-    // IRT_TraceLoggingScope("SHM/D3D11/CreateCacheTexture");
+    // VRK_TraceLoggingScope("SHM/D3D11/CreateCacheTexture");
     D3D11_TEXTURE2D_DESC desc;
     sourceTexture->GetDesc(&desc);
     check_hresult(
@@ -66,34 +66,34 @@ void Texture::copyFrom(
   }
 
   {
-    // IRT_TraceLoggingScope("SHM/D3D11/FenceIn");
+    // VRK_TraceLoggingScope("SHM/D3D11/FenceIn");
     check_hresult(context_->Wait(fenceIn, fenceInValue));
   }
 
   {
-    // IRT_TraceLoggingScope("SHM/D3D11/CopySubresourceRegion");
+    // VRK_TraceLoggingScope("SHM/D3D11/CopySubresourceRegion");
     context_->CopySubresourceRegion(
       cacheTexture_.get(), 0, 0, 0, 0, sourceTexture, 0, nullptr);
   }
 
   {
-    // IRT_LoggingScope("SHM/D3D11/FenceOut");
+    // VRK_LoggingScope("SHM/D3D11/FenceOut");
     check_hresult(context_->Signal(fenceOut, fenceOutValue));
   }
 }
 
 SHMDX11CachedReader::SHMDX11CachedReader(ConsumerKind consumerKind)
   : SHM::SHMCachedReader(this, consumerKind) {
-  // IRT_TraceLoggingScope("SHM::D3D11::SHMDX11CachedReader::cachedReader()");
+  // VRK_TraceLoggingScope("SHM::D3D11::SHMDX11CachedReader::cachedReader()");
 }
 
 SHMDX11CachedReader::~SHMDX11CachedReader() {
-  // IRT_TraceLoggingScope("SHM::D3D11::SHMDX11CachedReader::~SHMDX11CachedReader()");
+  // VRK_TraceLoggingScope("SHM::D3D11::SHMDX11CachedReader::~SHMDX11CachedReader()");
   this->waitForPendingCopies();
 }
 
 void SHMDX11CachedReader::waitForPendingCopies() {
-  // IRT_TraceLoggingScope(
+  // VRK_TraceLoggingScope(
   //   "SHM::D3D11::SHMDX11CachedReader::waitForPendingCopies()");
   if (!copyFence_) {
     return;
@@ -106,7 +106,7 @@ void SHMDX11CachedReader::waitForPendingCopies() {
 void SHMDX11CachedReader::initializeCache(
   ID3D11Device* device,
   uint8_t swapchainLength) {
-  // IRT_TraceLoggingScope(
+  // VRK_TraceLoggingScope(
   //   "SHM::D3D11::SHMDX11CachedReader::initializeCache()",
   //   TraceLoggingValue(swapchainLength, "swapchainLength"));
 
@@ -142,7 +142,7 @@ void SHMDX11CachedReader::initializeCache(
 }
 
 void SHMDX11CachedReader::releaseIPCHandles() {
-  // IRT_TraceLoggingScope(
+  // VRK_TraceLoggingScope(
   //   "SHM::D3D11::SHMDX11CachedReader::releaseIPCHandles");
   if (ipcFences_.empty()) {
     return;
@@ -170,7 +170,7 @@ void SHMDX11CachedReader::copy(
   IPCClientTexture* destinationTexture,
   HANDLE fenceHandle,
   uint64_t fenceValueIn) noexcept {
-  //IRT_TraceLoggingScope("SHM::D3D11::SHMDX11CachedReader::copy()");
+  //VRK_TraceLoggingScope("SHM::D3D11::SHMDX11CachedReader::copy()");
   const auto source = this->getIPCTexture(sourceHandle);
 
   auto fenceAndValue = this->getIPCFence(fenceHandle);
@@ -188,7 +188,7 @@ void SHMDX11CachedReader::copy(
 std::shared_ptr<SHM::IPCClientTexture> SHMDX11CachedReader::createIPCClientTexture(
   const PixelSize& dimensions,
   uint8_t swapchainIndex) noexcept {
-  // IRT_TraceLoggingScope(
+  // VRK_TraceLoggingScope(
   //   "SHM::D3D11::SHMDX11CachedReader::createIPCClientTexture()");
   return std::make_shared<SHM::DX11::Texture>(
     dimensions, swapchainIndex, device_, deviceContext_);
@@ -199,7 +199,7 @@ SHMDX11CachedReader::FenceAndValue* SHMDX11CachedReader::getIPCFence(HANDLE hand
     return &ipcFences_.at(handle);
   }
 
-  // IRT_TraceLoggingScope("SHM::D3D11::SHMDX11CachedReader::getIPCFence()");
+  // VRK_TraceLoggingScope("SHM::D3D11::SHMDX11CachedReader::getIPCFence()");
   winrt::com_ptr<ID3D11Fence> fence;
   check_hresult(device_->OpenSharedFence(handle, IID_PPV_ARGS(fence.put())));
   ipcFences_.emplace(handle, FenceAndValue {fence});
@@ -211,7 +211,7 @@ ID3D11Texture2D* SHMDX11CachedReader::getIPCTexture(HANDLE handle) noexcept {
     return ipcTextures_.at(handle).get();
   }
 
-  // IRT_TraceLoggingScope("SHM::D3D11::SHMDX11CachedReader::getIPCTexture()");
+  // VRK_TraceLoggingScope("SHM::D3D11::SHMDX11CachedReader::getIPCTexture()");
 
   winrt::com_ptr<ID3D11Texture2D> texture;
   check_hresult(

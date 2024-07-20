@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 
+# Windows SDK/Kit
+set(WINDOWS_SDK_VERSION "10.0.22621.0")
+
 set(appNamePrefix vrkit)
 set(appVersionMajor 1)
 set(appVersionMinor 0)

@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="vrk_tool (process-all-telemetry)" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="process-all-telemetry" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$ProjectFileDir$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_tool" CONFIG_NAME="DebugClionMsBuild" RUN_TARGET_PROJECT_NAME="vrkit" RUN_TARGET_NAME="vrkit_tool">
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

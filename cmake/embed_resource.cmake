@@ -4,7 +4,9 @@ file(MAKE_DIRECTORY ${RC_DATA_DIR})
 #set(RC_DATA_SHADER_DIR ${RC_DATA_DIR}/shaders)
 #file(MAKE_DIRECTORY ${RC_DATA_SHADER_DIR})
 
-find_program(CMAKE_MC_COMPILER mc.exe DOC "WinSDK message compiler")
+find_program(CMAKE_MC_COMPILER mc.exe
+  PATHS "C:/Program Files (x86)/Windows Kits/10/bin/${WINDOWS_SDK_VERSION}/x64"
+  DOC "WinSDK message compiler")
 if(NOT CMAKE_MC_COMPILER)
     message(FATAL_ERROR "mc.exe was not found")
 else()
@@ -30,7 +32,6 @@ function(EMBED_MC_RESOURCE MC_FILE OUTPUT_HEADER_FILE OUTPUT_BIN_FILE)
 endfunction()
 
 function(EMBED_RESOURCE RC_DATA_FILE RC_VAR_NAME OUTPUT_SRC_FILE_LIST)
-
   set(OUTPUT_SRC_FILE "${RC_DATA_DIR}/${RC_VAR_NAME}.c")
   add_custom_command(
     OUTPUT ${OUTPUT_SRC_FILE}

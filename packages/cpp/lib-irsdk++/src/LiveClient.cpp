@@ -7,9 +7,9 @@
 
 #include <IRacingTools/SDK/LiveClient.h>
 #include <IRacingTools/SDK/LiveConnection.h>
+#include <IRacingTools/SDK/LogInstance.h>
 #include <IRacingTools/SDK/SessionInfo/ModelParser.h>
 #include <IRacingTools/SDK/Types.h>
-#include <IRacingTools/SDK/Utils/YamlParser.h>
 #include <IRacingTools/SDK/VarData.h>
 
 #pragma warning(disable : 4996)

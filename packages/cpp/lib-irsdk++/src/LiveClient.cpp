@@ -17,7 +17,7 @@ namespace IRacingTools::SDK {
   using namespace Utils;
 
   namespace {
-
+    auto L = GetDefaultLogger();
     /**
      * @brief `ClientProvider` implementation for `LiveClient` implementation
      * 
@@ -62,7 +62,7 @@ namespace IRacingTools::SDK {
     sessionSampleCount_++;
     auto res = updateSessionInfo();
     if (!res.has_value()) {
-      spdlog::critical("Unable to updateSessionInfo: {}", res.error().what());
+      L->critical("Unable to updateSessionInfo: {}", res.error().what());
       return;
     }
 

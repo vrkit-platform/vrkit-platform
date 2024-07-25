@@ -83,11 +83,11 @@ TEST_F(TelemetryDataServiceTests, list_ibt_files) {
 
 TEST_F(TelemetryDataServiceTests, service_setup_and_load) {
   auto tmpDir = GetTemporaryDirectory();
-  auto trackDataFile = tmpDir / TrackDataPath; 
+  auto trackDataFile = tmpDir / TelemetryDataFileJSONLFilename; 
   auto serviceContainer = std::make_shared<ServiceContainer>();
   {
     auto service = std::make_shared<TelemetryDataService>(serviceContainer, TelemetryDataService::Options{
-      .dataFile = trackDataFile
+      .jsonlFile = trackDataFile
     });
     auto res = service->load();
     
@@ -97,7 +97,7 @@ TEST_F(TelemetryDataServiceTests, service_setup_and_load) {
     auto msg = std::make_shared<TelemetryDataFile>();
     msg->set_id("id-1");
     msg->set_alias("id-1-alias");
-    msg->set_filename("test-file-1.ibt");
+    msg->mutable_file_info()->set_filename("test-file-1.ibt");
     EXPECT_TRUE(service->set(msg).has_value());
 
     EXPECT_TRUE(service->save().has_value());
@@ -105,7 +105,7 @@ TEST_F(TelemetryDataServiceTests, service_setup_and_load) {
 
   {
     auto service = std::make_shared<TelemetryDataService>(serviceContainer, TelemetryDataService::Options{
-      .dataFile = trackDataFile
+      .jsonlFile = trackDataFile
     });
 
     auto res = service->load();

@@ -19,6 +19,7 @@
   #define VRK_BREAK
 #endif
 
+
 // template<class CharT>
 // struct std::formatter<winrt::hresult, CharT> : std::formatter<std::basic_string_view<CharT>, CharT> {
 //   template<class FormatContext> auto format(const winrt::hresult &hresult, FormatContext &fc) const {

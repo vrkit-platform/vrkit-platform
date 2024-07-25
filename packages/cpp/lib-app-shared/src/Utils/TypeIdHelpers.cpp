@@ -6,9 +6,9 @@ namespace IRacingTools::Shared::Utils {
                        templateString, basename, name, fullname);
   }
 
-  std::optional<PrettyTypeId> GetPrettyTypeId(const std::string &src, const std::vector<std::string> &omitPrefixes) {
+  std::optional<PrettyTypeId> GetPrettyTypeId(const std::string &src, const std::vector<std::string> &omitPrefixes, bool omitTemplate) {
     static const std::regex typePartsExp(
-        "^(class|struct)?\\s?(([A-Za-z0-9_:]+)::)?([A-Za-z0-9_]+)((\\<[A-Za-z0-9_:\\<\\>,\\s]+\\>|)$)");
+        R"(^(class|struct)?\s?(([A-Za-z0-9_:]+)::)?([A-Za-z0-9_]+)((\<[A-Za-z0-9_:\<\>,\s]+\>|)$))");
 
     std::smatch typePartsMatch;
 
@@ -32,7 +32,10 @@ namespace IRacingTools::Shared::Utils {
       typeId.nsString = nsStr;
 
       // CREATE NAME & FULLNAME
-      typeId.name = typeId.basename + typeId.templateString;
+      typeId.name = typeId.basename;
+      if (!omitTemplate)
+        typeId.name+= typeId.templateString;
+
       typeId.fullname = nsStr + "::" + typeId.name;
 
       // TOKENIZE THE NAMESPACE

@@ -8,17 +8,53 @@
 #include <google/protobuf/util/json_util.h>
 #include <magic_enum.hpp>
 
-#include "Macros.h"
+#include <IRacingTools/Models/FileInfo.pb.h>
 #include <IRacingTools/SDK/ErrorTypes.h>
 #include <IRacingTools/SDK/Utils/EventEmitter.h>
 #include <IRacingTools/SDK/Utils/FileHelpers.h>
 
+#include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <IRacingTools/Shared/Macros.h>
 
 #define VRK_PROTO_CMP(O1, O2, MEMBER) O1.MEMBER() == O2.MEMBER()
 
 namespace IRacingTools::Shared::Utils {
   using namespace ::IRacingTools::SDK;
+  using FileInfoClock = std::chrono::system_clock;
+  std::expected<std::shared_ptr<Models::FileInfo>, SDK::GeneralError> GetFileInfo(const fs::path& path);
+
+  /**
+   * @copydoc GetFileInfo
+   */
+  std::expected<std::shared_ptr<Models::FileInfo>, SDK::GeneralError> GetFileInfo(const std::shared_ptr<Models::FileInfo>& fileInfo, std::optional<fs::path> path = std::nullopt);
+  /**
+   * @brief Populate an instance of `Models::FileInfo` based on the provided
+   * path
+   *
+   * @param fileInfo to populate based on `path`
+   * @param path
+   * @return `FileInfo*` or `GeneralError`
+   */
+  std::expected<Models::FileInfo*, SDK::GeneralError> GetFileInfo(Models::FileInfo* fileInfo, std::optional<fs::path> path = std::nullopt);
+
+
+  bool FileInfoPathMatch(const Models::FileInfo* fileInfo1, const Models::FileInfo* fileInfo2);
+
+  /**
+   * @brief Update `Models::FileInfo` timestamps based on the file specified
+   *  in the protobuf
+   *
+   * @see FileInfo.proto
+   * @param fileInfo shared pointer to `Models::FileInfo`
+   * @return if an error occurs then its return, otherwise `std::nullopt`
+   */
+  std::optional<SDK::GeneralError> UpdateFileInfoTimestamps(const std::shared_ptr<Models::FileInfo>& fileInfo);
+
+  /**
+   * @copydoc UpdateFileInfoTimestamps(const std::shared_ptr<Models::FileInfo>&)
+   */
+  std::optional<SDK::GeneralError> UpdateFileInfoTimestamps(Models::FileInfo * fileInfo);
 
   template<typename MessageClazz>
   std::optional<MessageClazz> ReadMessageFromFile(const std::filesystem::path &path) {
@@ -174,7 +210,7 @@ namespace IRacingTools::Shared::Utils {
       return std::nullopt;
     }
 
-    JSONLinesMessageFileHandler(const fs::path &file) : file_(file) {
+    explicit JSONLinesMessageFileHandler(const fs::path &file) : file_(file) {
     }
 
     virtual ~JSONLinesMessageFileHandler() = default;

@@ -1,18 +1,20 @@
 syntax = "proto3";
 import "Geometry.proto";
 import "LapCoordinate.proto";
+import "TrackLayoutMetadata.proto";
 
 package IRacingTools.Models;
 
 message TrackMap {
 
-  string name = 1;
+  TrackLayoutMetadata track_layout_metadata = 1;
 
   float total_distance = 2;
-  repeated LapCoordinate points = 10;
+  repeated LapCoordinate path = 10;
 
   SizeF size = 20;
   SizeF scaled_size = 21;
   float scaled_ratio = 22;
+
 }
 

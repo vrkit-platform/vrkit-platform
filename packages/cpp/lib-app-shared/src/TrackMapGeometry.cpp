@@ -23,9 +23,9 @@ TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Size<UINT> &size) {
   float scaleRatio = std::min<float>(scaleX, scaleY);
   scaled.set_scaled_ratio(scaleRatio);
 
-  auto pointCount = scaled.points_size();
+  auto pointCount = scaled.path_size();
   for (int idx = 0; idx < pointCount; idx++) {
-    auto point = scaled.mutable_points(idx);
+    auto point = scaled.mutable_path(idx);
     point->set_x(point->x() * scaleRatio);
     point->set_y(point->y() * scaleRatio);
   }

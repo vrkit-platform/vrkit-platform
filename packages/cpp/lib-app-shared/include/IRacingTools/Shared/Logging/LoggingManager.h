@@ -18,7 +18,7 @@
 #include <tuple>
 
 #include <magic_enum.hpp>
-#include <spdlog/sinks/rotating_file_sink.h>
+
 #include <spdlog/spdlog.h>
 
 
@@ -37,11 +37,14 @@ namespace IRacingTools::Shared::Logging {
     Service = 1
   };
 
-  constexpr std::size_t LogCategoryDefaultCount = magic_enum::enum_count<LogCategoryDefault>();
+  constexpr std::size_t LogCategoryDefaultCount =
+      magic_enum::enum_count<LogCategoryDefault>();
 
-  constexpr LUT<LogCategoryDefault, std::string_view, LogCategoryDefaultCount> LogCategoryDefaultMap = {
-      {LogCategoryDefault::Global, GlobalCategory},
-      {LogCategoryDefault::Service, magic_enum::enum_name(LogCategoryDefault::Service).data()}};
+  constexpr LUT<LogCategoryDefault, std::string_view, LogCategoryDefaultCount>
+      LogCategoryDefaultMap = {
+          {LogCategoryDefault::Global, GlobalCategory},
+          {LogCategoryDefault::Service,
+           magic_enum::enum_name(LogCategoryDefault::Service).data()}};
 
   class LoggingManager : public SDK::Utils::Singleton<LoggingManager> {
   public:
@@ -58,14 +61,16 @@ namespace IRacingTools::Shared::Logging {
      */
     Logger getCategory(const std::string &name = std::string{GlobalCategory});
 
+    Logger getConsoleLogger();
+
   protected:
     explicit LoggingManager(token);
     friend Singleton;
 
   private:
     std::mutex mutex_{};
-    std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> fileSink_{nullptr};
     std::map<std::string, Logger> loggers_{};
+    Logger consoleLogger_{nullptr};
   };
 
 
@@ -86,16 +91,19 @@ namespace IRacingTools::Shared::Logging {
    * @param name
    * @return Logger
    */
-  inline Logger GetCategoryWithName(const std::string_view &name) {
-    return LoggingManager::Get().getCategory(std::string(name));
+  inline Logger GetCategoryWithName(const std::string &name) {
+    return LoggingManager::Get().getCategory(name);
   };
 
 
 } // namespace IRacingTools::Shared::Logging
 
 template<typename E>
-struct fmt::formatter<E, std::enable_if_t<std::is_enum_v<E>>> : fmt::formatter<std::string> {
-  auto format(const E &enumValue, fmt::format_context &ctx) const -> fmt::format_context::iterator {
-    return fmt::formatter<std::string>::format(std::string(magic_enum::enum_name<E>(enumValue).data()), ctx);
+struct fmt::formatter<E, std::enable_if_t<std::is_enum_v<E>>>
+    : fmt::formatter<std::string> {
+  auto format(const E &enumValue, fmt::format_context &ctx) const
+      -> fmt::format_context::iterator {
+    return fmt::formatter<std::string>::format(
+        std::string(magic_enum::enum_name<E>(enumValue).data()), ctx);
   }
 };

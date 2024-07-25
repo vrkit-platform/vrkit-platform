@@ -18,9 +18,6 @@ namespace IRacingTools::Shared {
         fs::path GetDocumentsPath() {
             return GetKnownFolderPath(FOLDERID_Documents);
         }
-
-
-
     }
 
     fs::path GetTemporaryDirectoryRootA() {
@@ -189,7 +186,7 @@ namespace IRacingTools::Shared {
     }
 
     fs::path GetIRacingTelemetryPath() {
-        return GetOrCreateIRacingDocumentPath(DocumentsTelemetry);
+        return GetOrCreateIRacingDocumentPath(DocumentsIRacingTelemetryPath);
     }
 
     fs::path GetTrackMapsPath() {
@@ -216,6 +213,5 @@ namespace IRacingTools::Shared {
     
     namespace Files {
         const fs::path OPENXR_JSON{"openxr-api-layer.json"};
-        // const fs::path LOG_FILENAME{APP_NAME ".log"};
     }
 }

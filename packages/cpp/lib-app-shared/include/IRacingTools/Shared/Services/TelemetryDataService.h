@@ -5,7 +5,7 @@
 #include <memory>
 
 #include <IRacingTools/Models/Pipeline.pb.h>
-#include <IRacingTools/Models/TelemetryData.pb.h>
+#include <IRacingTools/Models/TelemetryDataFile.pb.h>
 
 #include <IRacingTools/SDK/Utils/LUT.h>
 
@@ -18,7 +18,7 @@ namespace IRacingTools::Shared::Services {
 
   using namespace Models;
   
-  class TelemetryDataFileProcessorInternal;
+  class TelemetryDataFileProcessor;
 
   /**
    * @brief Responsible for handling telemetry data files
@@ -62,7 +62,7 @@ namespace IRacingTools::Shared::Services {
      * @brief Options to customize the service.
      */
     struct Options {
-      std::optional<fs::path> dataFile{std::nullopt};
+      std::optional<fs::path> jsonlFile{std::nullopt};
       std::vector<fs::path> ibtPaths{};
     };
 
@@ -111,32 +111,25 @@ namespace IRacingTools::Shared::Services {
     std::shared_ptr<TelemetryDataFile> getByFile(const fs::path &file);
 
     /**
-     * @brief process telemetry files
-     *
-     * @param files if NOT empty, then only specific files 
-     *   will be processed.  if empty, all IBT files in paths 
-     *   will be processed.
-     */
-    std::expected<Result::SharedFuture, SDK::GeneralError> submitRequest(const std::vector<fs::path>& files = {});
-    /**
      * @brief
      *
-     * @param config
+     * @param dataFile
+     * @param skipFileChangedEvent
      * @return
      */
     std::expected<const std::shared_ptr<TelemetryDataFile>, SDK::GeneralError>
-    set(const std::shared_ptr<TelemetryDataFile> &config);
+    set(const std::shared_ptr<TelemetryDataFile> &dataFile, bool skipFileChangedEvent = false);
 
-    std::expected<const std::shared_ptr<TelemetryDataFile>, SDK::GeneralError>
-    set(const std::string &id, const std::shared_ptr<TelemetryDataFile> &config);
+    std::expected<const std::vector<std::shared_ptr<TelemetryDataFile>>, SDK::GeneralError>
+    set(const std::vector<std::shared_ptr<TelemetryDataFile>> &changedDataFiles, bool skipFileChangedEvent = false);
 
     std::expected<std::shared_ptr<TelemetryDataService>, SDK::GeneralError> load(bool reload = false);
     std::expected<std::shared_ptr<TelemetryDataService>, SDK::GeneralError> save();
 
     std::optional<fs::path> findFile(const std::shared_ptr<TelemetryDataFile> &dataFile);
 
-    std::vector<std::shared_ptr<TelemetryDataFile>> toDataFileList();
-    DataFileMap &getDataFileMapRef();
+    std::vector<std::shared_ptr<TelemetryDataFile>> toList();
+
 
     std::size_t size();
 
@@ -163,12 +156,24 @@ namespace IRacingTools::Shared::Services {
 
     std::optional<SDK::GeneralError> clearTelemetryFileCache();
 
+    bool isProcessing();
+
+    std::expected<std::shared_ptr<TrackLayoutMetadata>, GeneralError> getTrackLayoutMetadata(const std::shared_ptr<TelemetryDataFile>& dataFile);
+    std::expected<std::shared_ptr<TrackLayoutMetadata>, GeneralError> getTrackLayoutMetadata(const fs::path& file);
+
+    struct {
+      EventEmitter<TelemetryDataService*> onReady{};
+      EventEmitter<TelemetryDataService*, std::shared_ptr<Result>, std::shared_ptr<Request>> onRequestComplete{};
+      EventEmitter<TelemetryDataService*, const std::vector<std::shared_ptr<TelemetryDataFile>>&> onFilesChanged{};
+    } events;
+
   private:
     Options options_{};
-    std::unique_ptr<Utils::JSONLinesMessageFileHandler<TelemetryDataFile>> dataFileHandler_{nullptr};
+    std::unique_ptr<JSONLinesMessageFileHandler<TelemetryDataFile>> dataFileHandler_{nullptr};
     std::vector<fs::path> filePaths_{};
     std::vector<std::unique_ptr<FileSystem::FileWatcher>> fileWatchers_{};
-    std::shared_ptr<TelemetryDataFileProcessorInternal> processorThread_{nullptr};
+    std::shared_ptr<TelemetryDataFileProcessor> processorThread_{nullptr};
     DataFileMap dataFiles_{};
+    // std::vector<std::shared_ptr<Request>> pendingRequests_{};
   };
 } // namespace IRacingTools::Shared::Services

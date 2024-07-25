@@ -71,9 +71,8 @@ namespace IRacingTools::App::Commands {
     int ServiceDaemonArgCommand::execute() {
         std::string clazzName = IRacingTools::Shared::Utils::GetPrettyTypeId<ServiceDaemonArgCommand>().value().name;
         L->info("Starting " APP_NAME " Command >> {}", clazzName);
-        
+
         auto & manager = gServiceManager = std::make_shared<ServiceManagerType>();
-        
 
         std::signal(SIGINT, SignalHandler);
         L->info("Initializing");

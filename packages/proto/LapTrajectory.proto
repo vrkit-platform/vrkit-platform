@@ -2,7 +2,9 @@ syntax = "proto3";
 package IRacingTools.Models;
 
 import "LapCoordinate.proto";
-import "TrackMetadata.proto";
+
+import "TrackLayoutMetadata.proto";
+import "FileInfo.proto";
 
 message LapTrajectory  {
   message Metadata {
@@ -13,7 +15,9 @@ message LapTrajectory  {
   }
   
   Metadata metadata = 1;
-  TrackMetadata track_metadata = 2;
+
+  TrackLayoutMetadata track_layout_metadata = 2;
+  FileInfo file_info = 3;
   
   int64 timestamp = 5;
   

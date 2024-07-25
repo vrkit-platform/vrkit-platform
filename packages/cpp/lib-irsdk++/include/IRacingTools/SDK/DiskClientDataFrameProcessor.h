@@ -1,10 +1,10 @@
 #pragma once
 
 #include <filesystem>
-#include <spdlog/spdlog.h>
-
-#include "DiskClient.h"
-#include "Utils/ChronoHelpers.h"
+#include <fmt/core.h>
+#include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingTools/SDK/LogInstance.h>
+#include <IRacingTools/SDK/Utils/ChronoHelpers.h>
 
 // A C++ wrapper around the irsdk calls that takes care of reading a .ibt file
 namespace IRacingTools::SDK {
@@ -56,18 +56,19 @@ namespace IRacingTools::SDK {
              * @return string_view or error if unavailable
              */
             std::expected<std::size_t, GeneralError> run(const Callback& callback, Data& data) {
+                static auto L = GetDefaultLogger();
                 auto& diskClient = client_;
                 std::size_t processedFrameCount{0};
                 while (true) {
                     if (!diskClient->next()) {
-                        spdlog::error("Unable to get next: {}", diskClient->getSampleIndex());
+                        L->error("Unable to get next: {}", diskClient->getSampleIndex());
                         break;
                     }
 
 
                     auto sessionTimeVal = diskClient->getVarDouble(KnownVarName::SessionTime);
                     if (!sessionTimeVal) {
-                        spdlog::error("No session time");
+                        L->error("No session time");
                         return std::unexpected(
                             GeneralError(
                                 ErrorCode::General,
@@ -90,7 +91,7 @@ namespace IRacingTools::SDK {
                     processedFrameCount++;
 
                     if (!shouldContinue) {
-                        spdlog::info(
+                        L->info(
                             "Stopped processing due to callback returning false on frame {} of {}",
                             context.frameIndex,
                             context.frameCount

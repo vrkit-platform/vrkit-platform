@@ -120,7 +120,7 @@ namespace IRacingTools::Shared::Geometry {
       TrackMap tm;
       std::for_each(
           pathData.steps.begin(), pathData.steps.end(), [&](auto &step) {
-            auto point = tm.add_points();
+            auto point = tm.add_path();
             point->CopyFrom(step.coordinate);
           });
       auto size = tm.mutable_size();

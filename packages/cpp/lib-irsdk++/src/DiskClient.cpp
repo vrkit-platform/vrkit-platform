@@ -6,6 +6,7 @@
 
 #include <IRacingTools/SDK/ClientManager.h>
 #include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingTools/SDK/LogInstance.h>
 #include <IRacingTools/SDK/SessionInfo/ModelParser.h>
 #include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/FileHelpers.h>
@@ -18,6 +19,7 @@ namespace IRacingTools::SDK {
     using namespace Utils;
 
     namespace {
+        auto L = GetDefaultLogger();
         struct DiskClientProvider : ClientProvider {
             std::shared_ptr<Client> client;
 
@@ -66,7 +68,8 @@ namespace IRacingTools::SDK {
 
 
     bool DiskClient::openFile() {
-        spdlog::info("Opening IBT file {}", filePath_.string());
+    
+      L->info("Opening IBT file {}", filePath_.string());
         reset();
 
         if (!fs::exists(filePath_)) {
@@ -74,12 +77,12 @@ namespace IRacingTools::SDK {
         }
 
         fileSize_ = fs::file_size(filePath_);
-        spdlog::info("IBT file size {}", fileSize_);
+        L->info("IBT file size {}", fileSize_);
         std::FILE* ibtFile = std::fopen(ToUtf8(filePath_).c_str(), "rb");
         if (!ibtFile)
             return false;
 
-        spdlog::info("IBT file opened {}", filePath_.string());
+        L->info("IBT file opened {}", filePath_.string());
         auto fileDisposer = gsl::finally(
             [&] {
                 if (ibtFile) {
@@ -93,21 +96,21 @@ namespace IRacingTools::SDK {
             return false;
         }
 
-        spdlog::info("IBT file read header");
+        L->info("IBT file read header");
 
         if (!FileReadDataFully(&diskSubHeader_, 1, DiskSubHeaderSize, ibtFile)) {
             return false;
         }
 
-        spdlog::info("IBT file read disk session info");
+        L->info("IBT file read disk session info");
         if (!updateSessionInfo(ibtFile)) {            
             return false;
         }
-        spdlog::info("IBT file read disk subheader");
+        L->info("IBT file read disk subheader");
         auto varHeaderOffset = header_.varHeaderOffset;
 
         // Read Headers
-        spdlog::info("IBT file parsed session info, seeking header offset {}", varHeaderOffset);
+        L->info("IBT file parsed session info, seeking header offset {}", varHeaderOffset);
         if (std::fseek(ibtFile, varHeaderOffset, SEEK_SET)) {
             return false;
         }
@@ -118,7 +121,7 @@ namespace IRacingTools::SDK {
             return false;
         }
 
-        spdlog::info("IBT read headers {}", header_.numVars);
+        L->info("IBT read headers {}", header_.numVars);
 
         // Swap file pointer
         ibtFile_ = ibtFile;
@@ -134,7 +137,7 @@ namespace IRacingTools::SDK {
         if (std::fseek(ibtFile_, sampleDataOffset_, SEEK_SET)) {
             return false;
         }
-        spdlog::info("IBT disk client ready, sampleDataSize {} bytes", sampleDataSize_);
+        L->info("IBT disk client ready, sampleDataSize {} bytes", sampleDataSize_);
 
         return true;
 
@@ -168,14 +171,14 @@ namespace IRacingTools::SDK {
             return std::unexpected(GeneralError("Unable to resize sessionInfoBuf"));
         }
 
-        spdlog::info("IBT session info buf resized");
+        L->info("IBT session info buf resized");
 
         // Read session info
         if (std::fseek(ibtFile, sessionOffset, SEEK_SET)) {
             return false;
         }
 
-        spdlog::info("IBT file about to read session info {} bytes", sessionLength);
+        L->info("IBT file about to read session info {} bytes", sessionLength);
         {
             auto data = sessionInfoBuf_->data();
             if (!FileReadDataFully(data, 1, sessionLength, ibtFile)) {
@@ -197,15 +200,15 @@ namespace IRacingTools::SDK {
                 return true;
             } catch (const YAML::ParserException& ex) {
                 auto msg = std::format("ParserException: Failed to parse session info: {}", ex.what());
-                spdlog::error(msg);
+                L->error(msg);
                 return std::unexpected(SDK::GeneralError(ErrorCode::General, msg));
             } catch (const YAML::Exception& ex) {
                 auto msg = std::format("Failed to parse session info: {}", ex.what());
-                spdlog::error(msg);
+                L->error(msg);
                 return std::unexpected(SDK::GeneralError(ErrorCode::General, msg));
             } catch (...) {
                 auto msg = std::format("Failed to parse session info: UNKNOWN");
-                spdlog::error(msg);
+                L->error(msg);
                 return std::unexpected(SDK::GeneralError(ErrorCode::General, msg));
             }            
         }

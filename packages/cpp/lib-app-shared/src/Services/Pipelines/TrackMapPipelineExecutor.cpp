@@ -27,7 +27,7 @@ namespace IRacingTools::Shared::Services::Pipelines {
       return GeneralError(ErrorCode::General, message);
     };
 
-    fs::path file{data->filename()};
+    fs::path file{data->file_info().filename()};
     if (!fs::exists(file)) {
       return onError("File does not exist >> {}", file.string());
     }
@@ -60,14 +60,14 @@ namespace IRacingTools::Shared::Services::Pipelines {
       return onError("Failed to generate lap trajectory >> {}", err.what());
     }
 
-    auto& lt = res.value();
-    L->info("Created LapTrajectory for trackLayoutId ({})", lt->track_metadata().layout_id());
-    if (auto res = tmService->set(lt); !res) {
-      auto err = res.error();
-      return onError("Failed to generate lap trajectory >> {}", err.what());
-    }
-    L->info("Saved LapTrajectory for trackLayoutId ({})", lt->track_metadata().layout_id());
-    attempt.setStatus(PipelineStatus::PIPELINE_STATUS_COMPLETE);
+    // auto& lt = res.value();
+    // L->info("Created LapTrajectory for trackLayoutId ({})", lt->track_layout_metadata().id());
+    // if (auto setRes = tmService->set(lt); !setRes) {
+    //   auto err = setRes.error();
+    //   return onError("Failed to generate lap trajectory >> {}", err.what());
+    // }
+    // L->info("Saved LapTrajectory for trackLayoutId ({})", lt->track_layout_metadata().id());
+    // attempt.setStatus(PipelineStatus::PIPELINE_STATUS_COMPLETE);
     return std::nullopt;
   }
 

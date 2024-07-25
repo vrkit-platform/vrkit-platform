@@ -153,8 +153,8 @@ namespace IRacingTools::Shared::Graphics {
         LapCoordinate lastPoint{};
         pathTotalDistance_ = 0.0f;
         pathPointDistanceMap_.clear();
-        for (auto idx = 0; idx < scaledTrackMap.points_size(); idx++) {
-            auto& point = scaledTrackMap.points(idx);
+        for (auto idx = 0; idx < scaledTrackMap.path_size(); idx++) {
+            auto& point = scaledTrackMap.path(idx);
             auto d2point = D2D1::Point2F(point.x(), point.y());
             if (idx == 0) {
                 sink->BeginFigure(d2point, D2D1_FIGURE_BEGIN_FILLED);

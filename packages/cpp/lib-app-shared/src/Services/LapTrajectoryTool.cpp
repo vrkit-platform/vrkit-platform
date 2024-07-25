@@ -72,11 +72,13 @@ namespace IRacingTools::Shared::Services {
       trajectory->set_timestamp(timestamp);
       
       auto& winfo = sessionInfo->weekendInfo;
-      auto trackMetadata = trajectory->mutable_track_metadata();
+      auto trackLayoutMetadata = trajectory->mutable_track_layout_metadata();
+      auto trackMetadata = trackLayoutMetadata->mutable_track_metadata();
       trackMetadata->set_id(winfo.trackID);
       trackMetadata->set_name(winfo.trackName);
-      trackMetadata->set_layout_name(winfo.trackConfigName);      
-      trackMetadata->set_layout_id(trackLayoutId);
+
+      trackLayoutMetadata->set_name(winfo.trackConfigName);
+      trackLayoutMetadata->set_id(trackLayoutId);
     }
 
     auto lapMeta = trajectory->mutable_metadata();

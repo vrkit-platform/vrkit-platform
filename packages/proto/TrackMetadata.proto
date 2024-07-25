@@ -4,6 +4,6 @@ package IRacingTools.Models;
 message TrackMetadata {
   uint32 id = 1;
   string name = 2;
-  string layout_name = 10;
-  string layout_id = 11;
+
+  string version = 3;
 }

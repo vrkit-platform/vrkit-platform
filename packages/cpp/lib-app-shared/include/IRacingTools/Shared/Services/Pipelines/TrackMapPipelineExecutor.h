@@ -2,7 +2,7 @@
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
-#include <IRacingTools/Models/TelemetryData.pb.h>
+#include <IRacingTools/Models/TelemetryDataFile.pb.h>
 
 #include <IRacingTools/Shared/FileWatcher.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>

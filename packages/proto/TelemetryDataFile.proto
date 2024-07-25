@@ -1,8 +1,11 @@
 syntax = "proto3";
 
-import "Pipeline.proto";
+
 
 package IRacingTools.Models;
+
+import "FileInfo.proto";
+import "TrackLayoutMetadata.proto";
 
 message TelemetryDataFile {
   enum Status {
@@ -14,17 +17,19 @@ message TelemetryDataFile {
 
   string id = 1;
   string alias = 2;
+
   Status status = 3;
 
-  int64 created_at = 5;
-  int64 updated_at = 6;
+  /**
+   * Track Layout ID
+   */
+  TrackLayoutMetadata track_layout_metadata = 5;
 
-  string filename = 10;
-  
+  FileInfo file_info = 10;
+
   string error_details = 20;
   
-  // Pipeline (i.e. TRACK_MAP)
-  repeated Pipeline pipelines = 50;
+
 
 };
 

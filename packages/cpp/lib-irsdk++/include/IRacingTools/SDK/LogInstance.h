@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <spdlog/logger.h>
+#include <spdlog/spdlog.h>
 #include <IRacingTools/SDK/Utils/Singleton.h>
 
 namespace IRacingTools::SDK {
@@ -24,7 +24,13 @@ namespace IRacingTools::SDK {
     std::shared_ptr<spdlog::logger> setDefaultLogger(const std::shared_ptr<spdlog::logger>& newLogger);
 
     std::shared_ptr<spdlog::logger> getDefaultLogger();
+
+
   };
+
+  static std::shared_ptr<spdlog::logger> GetDefaultLogger() {
+    return LogInstance::GetPtr()->getDefaultLogger();
+  }
 
 
 } // namespace IRacingTools::SDK

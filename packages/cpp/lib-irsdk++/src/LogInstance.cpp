@@ -26,8 +26,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-
 #include <IRacingTools/SDK/LogInstance.h>
+#include <mutex>
 
 namespace IRacingTools::SDK {
 

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://lnav.org/schemas/format-v1.schema.json",
+  "vrkit_log": {
+    "title": "VRKit Log",
+    "description": "VRKit Log",
+    "url": "http://schemas.3form.ventures/VRKit_Log_Format",
+    "multiline": true,
+    "regex": {
+      "basic": {
+        "pattern": "^\\[(?<timestamp>\\d{4}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3})?)\\]\\s\\[(?<module>[A-Za-z0-9:\\-\\/\\.<>\\s`'\"\\\\]+)\\]\\s\\[(?<level>[A-Za-z]+)\\]\\s?(?<body>.*)$"
+      }
+    },
+    "level-field": "level",
+    "value": {
+      "module": {
+        "kind": "string",
+        "identifier": true
+      },
+      "level": {
+        "kind": "string",
+        "identifier": true
+      }
+    },
+    "sample": [
+      {
+        "line": "[2024-07-22 21:28:11.720] [Shared::Services::TelemetryFileHandler] [debug] sessionTime=2099.18333384108,lap=18,lapTimeSeconds=7.275833606719971,incidentCount=0,coordinateCount=436",
+        "level": "debug"
+      }
+    ]
+  }
+}

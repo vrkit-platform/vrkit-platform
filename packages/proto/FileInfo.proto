@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package IRacingTools.Models;
+
+message FileInfo {
+  string file = 1;
+  string filename = 2;
+  string parent_dir = 3;
+  bool is_deleted = 5;
+
+  int64 created_at = 10;
+  int64 modified_at = 11;
+
+}

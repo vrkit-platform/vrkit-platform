@@ -1,0 +1,12 @@
+syntax = "proto3";
+package IRacingTools.Models;
+
+import "TrackMetadata.proto";
+
+message TrackLayoutMetadata {
+  string id = 1;
+  string name = 2;
+
+  TrackMetadata track_metadata = 5;
+}
+

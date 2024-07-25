@@ -1,15 +1,16 @@
 #pragma once
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
-#include <expected>
 #include <optional>
 #include <regex>
 
-#include <IRacingTools/SDK/ErrorTypes.h>
 #include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
 
 namespace IRacingTools::Shared::Utils {
   using namespace SDK::Utils;
+
+  constexpr auto OmitTemplateDefault = true;
+
   struct PrettyTypeId {
     /**
      * @brief namespace breadcrumbs
@@ -45,15 +46,17 @@ namespace IRacingTools::Shared::Utils {
   };
 
   std::optional<PrettyTypeId> GetPrettyTypeId(const std::string &src,
-                                              const std::vector<std::string> &omitPrefixes = {});
+                                              const std::vector<std::string> &omitPrefixes = {},
+                                              bool omitTemplate = OmitTemplateDefault);
 
   template<typename T>
-  std::optional<PrettyTypeId> GetPrettyTypeId(const std::vector<std::string> &omitPrefixes) {
-    return GetPrettyTypeId(PrettyType<T>().name(), omitPrefixes);
+  std::optional<PrettyTypeId> GetPrettyTypeId(const std::vector<std::string> &omitPrefixes,
+                                              bool omitTemplate = false) {
+    return GetPrettyTypeId(PrettyType<T>().name(), omitPrefixes, OmitTemplateDefault);
   }
 
   template<typename T>
-  std::optional<PrettyTypeId> GetPrettyTypeId() {
-    return GetPrettyTypeId<T>(std::vector<std::string>{});
+  std::optional<PrettyTypeId> GetPrettyTypeId(bool omitTemplate = false) {
+    return GetPrettyTypeId<T>(std::vector<std::string>{}, OmitTemplateDefault);
   }
 } // namespace IRacingTools::Shared::Utils

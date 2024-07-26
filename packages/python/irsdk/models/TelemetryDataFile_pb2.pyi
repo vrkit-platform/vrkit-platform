@@ -3,11 +3,10 @@
 isort:skip_file
 """
 
-import Pipeline_pb2
+import FileInfo_pb2
+import TrackLayoutMetadata_pb2
 import builtins
-import collections.abc
 import google.protobuf.descriptor
-import google.protobuf.internal.containers
 import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.message
 import sys
@@ -44,34 +43,32 @@ class TelemetryDataFile(google.protobuf.message.Message):
     ID_FIELD_NUMBER: builtins.int
     ALIAS_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
-    CREATED_AT_FIELD_NUMBER: builtins.int
-    UPDATED_AT_FIELD_NUMBER: builtins.int
-    FILENAME_FIELD_NUMBER: builtins.int
+    TRACK_LAYOUT_METADATA_FIELD_NUMBER: builtins.int
+    FILE_INFO_FIELD_NUMBER: builtins.int
     ERROR_DETAILS_FIELD_NUMBER: builtins.int
-    PIPELINES_FIELD_NUMBER: builtins.int
     id: builtins.str
     alias: builtins.str
     status: global___TelemetryDataFile.Status.ValueType
-    created_at: builtins.int
-    updated_at: builtins.int
-    filename: builtins.str
     error_details: builtins.str
     @property
-    def pipelines(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[Pipeline_pb2.Pipeline]:
-        """Pipeline (i.e. TRACK_MAP)"""
+    def track_layout_metadata(self) -> TrackLayoutMetadata_pb2.TrackLayoutMetadata:
+        """*
+        Track Layout ID
+        """
 
+    @property
+    def file_info(self) -> FileInfo_pb2.FileInfo: ...
     def __init__(
         self,
         *,
         id: builtins.str = ...,
         alias: builtins.str = ...,
         status: global___TelemetryDataFile.Status.ValueType = ...,
-        created_at: builtins.int = ...,
-        updated_at: builtins.int = ...,
-        filename: builtins.str = ...,
+        track_layout_metadata: TrackLayoutMetadata_pb2.TrackLayoutMetadata | None = ...,
+        file_info: FileInfo_pb2.FileInfo | None = ...,
         error_details: builtins.str = ...,
-        pipelines: collections.abc.Iterable[Pipeline_pb2.Pipeline] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["alias", b"alias", "created_at", b"created_at", "error_details", b"error_details", "filename", b"filename", "id", b"id", "pipelines", b"pipelines", "status", b"status", "updated_at", b"updated_at"]) -> None: ...
+    def HasField(self, field_name: typing.Literal["file_info", b"file_info", "track_layout_metadata", b"track_layout_metadata"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["alias", b"alias", "error_details", b"error_details", "file_info", b"file_info", "id", b"id", "status", b"status", "track_layout_metadata", b"track_layout_metadata"]) -> None: ...
 
 global___TelemetryDataFile = TelemetryDataFile

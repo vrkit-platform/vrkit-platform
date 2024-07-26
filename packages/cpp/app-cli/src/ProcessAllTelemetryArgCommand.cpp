@@ -88,30 +88,31 @@ namespace IRacingTools::App::Commands {
     std::signal(SIGINT, SignalHandler);
     L->info("Initializing");
     manager->init();
-    auto service = manager->getService<TelemetryDataService>();
+    auto tdService = manager->getService<TelemetryDataService>();
+    auto tmService = manager->getService<TrackMapService>();
     VRK_LOG_AND_FATAL_IF(
-        !service,
+        !tdService,
         "Unable to find service >> {}",
         GetPrettyTypeId<TelemetryDataService>().value().name);
     std::mutex resultMutex{};
     std::condition_variable resultCV{};
     std::atomic_bool resultReceived{};
 
-    service->events.onRequestComplete.subscribe(
-        [&](auto _, auto res, auto req) {
-          L->info(
-              "Request ({}) completed\n"
-              "Processed: {}\n"
-              "Failed: {}\n"
-              "Unprocessed: {}\n",
-              req->id,
-              res->processedFiles.size(),
-              res->failedFiles.size(),
-              res->unprocessedFiles.size());
-          std::scoped_lock lock(resultMutex);
-          resultReceived = true;
-          resultCV.notify_all();
-        });
+    auto checkPending = [&] {
+      std::scoped_lock lock(resultMutex);
+
+      resultReceived =
+          !tdService->hasPendingTasks() && !tmService->hasPendingTasks();
+      resultCV.notify_all();
+    };
+
+    tdService->events.onFilesChanged.subscribe([&](auto, auto) {
+      checkPending();
+    });
+
+    tmService->events.onFilesChanged.subscribe([&](auto, auto) {
+      checkPending();
+    });
 
     L->info("Starting");
     manager->start();
@@ -125,45 +126,9 @@ namespace IRacingTools::App::Commands {
       }
     }
 
-    // auto submitRes = service->submitRequest({});
-    // if (!submitRes) {
-    //     auto& err = submitRes.error();
-    //     // TODO: Handle error
-    //     L->error("Failed to submit request: {}", err.what());
-    // } else {
-    //     auto future = submitRes.value();
-    //     L->info("submitted request, waiting on future");
-    //     auto result = future.get();
-    //
-    //     L->info("result received (status={})",
-    //     magic_enum::enum_name(result->status).data());
-    //
-    // }
-
     L->info("Destroying services");
     manager->destroy();
 
-    // auto outputPath = fs::path(outputPath_);
-    // assert((!outputPath_.empty() && "Output path is invalid"));
-
-    // // Create output path if needed
-    // outputPath = std::filesystem::absolute(outputPath);
-    // if (outputPath.has_parent_path()) {
-    //     auto outputDir = outputPath.parent_path();
-    //     if (!fs::exists(outputDir))
-    //         std::filesystem::create_directories(outputPath);
-
-    //     assert((std::filesystem::is_directory(outputPath) && "Fail create
-    //     output path"));
-    // }
-
-    // Convert IBT -> LapTrajectory
-    // Services::LapTrajectoryTool tool;
-    // auto lapRes  = tool.createLapTrajectory(ibtPath, {.outputDir =
-    // outputPath}); if (!lapRes) {
-    //     critical("Failed to create lap trajectory: {}",
-    //     lapRes.error().what()); return 1;
-    // }
     return 0;
   }
 } // namespace IRacingTools::App::Commands

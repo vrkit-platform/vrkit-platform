@@ -79,7 +79,7 @@ namespace IRacingTools::Shared::Common {
       destroy();
     }
 
-    FutureType enqueue(Args &&...args) {
+    FutureType enqueue(Args ...args) {
       FutureType future{};
       {
         std::scoped_lock lock(mutex_);
@@ -114,6 +114,16 @@ namespace IRacingTools::Shared::Common {
 
     Options options() const {
       return options_;
+    }
+
+    std::size_t pendingTaskCount() {
+      std::scoped_lock lock(mutex_);
+
+      return queue_.size();
+    }
+
+    bool hasPendingTasks() {
+      return pendingTaskCount() > 0;
     }
 
   protected:

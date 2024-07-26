@@ -16,21 +16,21 @@ import Geometry_pb2 as Geometry__pb2
 import ScreenConfig_pb2 as ScreenConfig__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x44\x61shboardConfig.proto\x12 IRacingTools.Models.UI.Dashboard\x1a\x0eGeometry.proto\x1a\x12ScreenConfig.proto\"{\n\rOverlayConfig\x12\n\n\x02id\x18\x01 \x01(\t\x12;\n\x04kind\x18\x02 \x01(\x0e\x32-.IRacingTools.Models.UI.Dashboard.OverlayKind\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\"e\n\x16OverlayPlacementConfig\x12\n\n\x02id\x18\x01 \x01(\t\x12\x12\n\noverlay_id\x18\x02 \x01(\t\x12+\n\x04rect\x18\n \x01(\x0b\x32\x1d.IRacingTools.Models.UI.RectI\"\xc2\x01\n\x13OverlayLayoutConfig\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tscreen_id\x18\x05 \x01(\t\x12\x30\n\x04kind\x18\x06 \x01(\x0e\x32\".IRacingTools.Models.UI.ScreenKind\x12L\n\nplacements\x18\n \x03(\x0b\x32\x38.IRacingTools.Models.UI.Dashboard.OverlayPlacementConfig\"\xe8\x01\n\x0f\x44\x61shboardConfig\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\x35\n\x07screens\x18\n \x03(\x0b\x32$.IRacingTools.Models.UI.ScreenConfig\x12\x41\n\x08overlays\x18\x14 \x03(\x0b\x32/.IRacingTools.Models.UI.Dashboard.OverlayConfig\x12\x46\n\x07layouts\x18\x1e \x03(\x0b\x32\x35.IRacingTools.Models.UI.Dashboard.OverlayLayoutConfig*\x1f\n\x0bOverlayKind\x12\x10\n\x0cOK_TRACK_MAP\x10\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x15\x44\x61shboardConfig.proto\x12\x1dIRacingTools.Models.Dashboard\x1a\x0eGeometry.proto\x1a\x12ScreenConfig.proto\"x\n\rOverlayConfig\x12\n\n\x02id\x18\x01 \x01(\t\x12\x38\n\x04kind\x18\x02 \x01(\x0e\x32*.IRacingTools.Models.Dashboard.OverlayKind\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\"b\n\x16OverlayPlacementConfig\x12\n\n\x02id\x18\x01 \x01(\t\x12\x12\n\noverlay_id\x18\x02 \x01(\t\x12(\n\x04rect\x18\n \x01(\x0b\x32\x1a.IRacingTools.Models.RectI\"\xbc\x01\n\x13OverlayLayoutConfig\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tscreen_id\x18\x05 \x01(\t\x12-\n\x04kind\x18\x06 \x01(\x0e\x32\x1f.IRacingTools.Models.ScreenKind\x12I\n\nplacements\x18\n \x03(\x0b\x32\x35.IRacingTools.Models.Dashboard.OverlayPlacementConfig\"\xdf\x01\n\x0f\x44\x61shboardConfig\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\x12\x32\n\x07screens\x18\n \x03(\x0b\x32!.IRacingTools.Models.ScreenConfig\x12>\n\x08overlays\x18\x14 \x03(\x0b\x32,.IRacingTools.Models.Dashboard.OverlayConfig\x12\x43\n\x07layouts\x18\x1e \x03(\x0b\x32\x32.IRacingTools.Models.Dashboard.OverlayLayoutConfig*\x1f\n\x0bOverlayKind\x12\x10\n\x0cOK_TRACK_MAP\x10\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'DashboardConfig_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_OVERLAYKIND']._serialized_start=755
-  _globals['_OVERLAYKIND']._serialized_end=786
-  _globals['_OVERLAYCONFIG']._serialized_start=95
-  _globals['_OVERLAYCONFIG']._serialized_end=218
-  _globals['_OVERLAYPLACEMENTCONFIG']._serialized_start=220
-  _globals['_OVERLAYPLACEMENTCONFIG']._serialized_end=321
-  _globals['_OVERLAYLAYOUTCONFIG']._serialized_start=324
-  _globals['_OVERLAYLAYOUTCONFIG']._serialized_end=518
-  _globals['_DASHBOARDCONFIG']._serialized_start=521
-  _globals['_DASHBOARDCONFIG']._serialized_end=753
+  _globals['_OVERLAYKIND']._serialized_start=731
+  _globals['_OVERLAYKIND']._serialized_end=762
+  _globals['_OVERLAYCONFIG']._serialized_start=92
+  _globals['_OVERLAYCONFIG']._serialized_end=212
+  _globals['_OVERLAYPLACEMENTCONFIG']._serialized_start=214
+  _globals['_OVERLAYPLACEMENTCONFIG']._serialized_end=312
+  _globals['_OVERLAYLAYOUTCONFIG']._serialized_start=315
+  _globals['_OVERLAYLAYOUTCONFIG']._serialized_end=503
+  _globals['_DASHBOARDCONFIG']._serialized_start=506
+  _globals['_DASHBOARDCONFIG']._serialized_end=729
 # @@protoc_insertion_point(module_scope)

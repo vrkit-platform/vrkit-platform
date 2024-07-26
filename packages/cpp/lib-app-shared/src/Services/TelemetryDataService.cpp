@@ -36,6 +36,10 @@ namespace IRacingTools::Shared::Services {
       const Options &options)
       : Service(serviceContainer, PrettyType<TelemetryDataService>{}.name()),
         options_(options) {
+    fileTaskQueue_ = std::make_unique<TaskQueueType>(
+            [&](fs::path file, std::shared_ptr<TelemetryDataFile> dataFile) -> TQReturnType {
+              return taskQueueFn(file,dataFile);
+            });
     reset();
   }
 
@@ -57,9 +61,9 @@ namespace IRacingTools::Shared::Services {
         dataFileHandler_.release();
       }
 
-      if (processorThread_) {
-        processorThread_->stop();
-      }
+      // if (fileTaskQueue_) {
+      //   fileTaskQueue_->destroy();
+      // }
 
       for (auto &watcher: fileWatchers_) {
         watcher->stop();
@@ -69,7 +73,6 @@ namespace IRacingTools::Shared::Services {
 
       // NOW PREPARE
       if (!skipPrepare) {
-        processorThread_ = std::make_shared<TelemetryDataFileProcessor>(this);
         dataFileHandler_ = std::make_unique<
             Utils::JSONLinesMessageFileHandler<TelemetryDataFile>>(
             options_.jsonlFile.value_or(GetAppDataPath() / TelemetryDataFileJSONLFilename));
@@ -98,12 +101,11 @@ namespace IRacingTools::Shared::Services {
         "Reading telemetry data jsonl file: {}",
         dataFileHandler_->file().string());
 
-    auto res = dataFileHandler_->read();
-
-    // IF THERE WAS AN ERROR, THEN RETURN HERE
-    if (!res && res.error().code() != SDK::ErrorCode::NotFound) {
-      return std::unexpected(res.error());
+    auto loadError = load(true);
+    if (loadError.has_value()) {
+      return std::unexpected(loadError.value());
     }
+
 
     // CREATE FILE WATCHERS
     for (auto &path: filePaths_) {
@@ -125,24 +127,29 @@ namespace IRacingTools::Shared::Services {
             }
 
             std::scoped_lock handlerLock(stateMutex_);
-            auto req = processorThread_->submitRequest({file.path});
-            if (!req) {
-              L->error("No request received for {}", file.path.string());
-            } else {
-              L->debug(
-                  "FileWatcher submitted request for processing "
-                  "(id={},file={})",
-                  req->id,
-                  file.path.string());
-            }
+            enqueueFiles({file.path});
+            // if (!req) {
+            //   L->error("No request received for {}", file.path.string());
+            // } else {
+            //   L->debug(
+            //       "FileWatcher submitted request for processing "
+            //       "(id={},file={})",
+            //       req->id,
+            //       file.path.string());
+            // }
           }));
     }
 
     return true;
   }
 
+  std::size_t TelemetryDataService::scanAllFiles() {
+    return enqueueFiles(listTelemetryFiles());
+  }
+
+
   std::expected<bool, GeneralError> TelemetryDataService::start() {
-    std::shared_ptr<Request> request{nullptr};
+
     {
       std::scoped_lock lock(stateMutex_);
 
@@ -151,15 +158,10 @@ namespace IRacingTools::Shared::Services {
 
       setState(State::Starting);
 
-      // START THE PROCESSOR
-      processorThread_->start();
-
-      // SUBMIT A GLOBAL REQUEST
-
-      request = processorThread_->submitRequest();
+      scanAllFiles();
     }
 
-    auto result = request->future.get();
+    // auto result = request->future.get();
 
     // START ALL FILE WATCHERS
     for (auto &watcher: fileWatchers_) {
@@ -199,9 +201,16 @@ namespace IRacingTools::Shared::Services {
     return std::nullopt;
   }
 
-  bool TelemetryDataService::isProcessing() {
-    return processorThread_->isProcessing();
+  bool TelemetryDataService::hasPendingTasks() {
+    return fileTaskQueue_->hasPendingTasks();
   }
+
+  std::size_t TelemetryDataService::pendingTaskCount() {
+    return fileTaskQueue_->pendingTaskCount();
+  }
+
+
+
   std::expected<std::shared_ptr<TrackLayoutMetadata>, GeneralError>
   TelemetryDataService::getTrackLayoutMetadata(
       const std::shared_ptr<TelemetryDataFile> &dataFile) {
@@ -235,18 +244,71 @@ namespace IRacingTools::Shared::Services {
 
     return tlm;
   }
+  std::size_t TelemetryDataService::enqueueFiles(const std::vector<fs::path>& files) {
+    std::atomic_int queueCount = 0;
+    {
+      std::scoped_lock lock(stateMutex_);
+
+      for (auto& file : files) {
+        if (pendingFileMap_.contains(file.string()))
+          continue;
+
+        fs::path finalFile = file;
+        if (!finalFile.is_absolute()) {
+          finalFile = fs::absolute(file);
+        }
+
+        auto dataFile = getByFile(finalFile);
+        if (dataFile) {
+          auto tsRes = CheckFileInfoModified(dataFile, finalFile);
+          if (!tsRes) {
+            L->warn("Unable to check timestamps for {}: {}", finalFile.string(), tsRes.error().what());
+            continue;
+          }
+
+          if (!tsRes.value().first) {
+            continue;
+          }
+        }
+
+        pendingFileMap_[file.string()] = fileTaskQueue_->enqueue(finalFile, dataFile);
+        ++queueCount;
+      }
+    }
+
+    return queueCount;
+    // const auto queueFiles = std::ranges::unique(changedFiles);
+  }
+  TelemetryDataService::TQReturnType TelemetryDataService::taskQueueFn(fs::path file,std::shared_ptr<TelemetryDataFile> dataFile) {
+    auto res = ProcessTelemetryDataFile(shared_from_this(), file, dataFile);
+    if (!res) {
+      L->error("Failed to process {}", file.string());
+      return nullptr;
+    }
+    auto tdf = res.value();
+    if (tdf) {
+      set(tdf);
+    }
+
+    return tdf;
+  }
 
   std::vector<fs::path> TelemetryDataService::listTelemetryFiles() {
     return ListAllFilesRecursively(filePaths_);
   }
-  std::expected<std::shared_ptr<TelemetryDataService>, SDK::GeneralError>
+  std::optional<SDK::GeneralError>
   TelemetryDataService::load(bool reload) {
+    std::scoped_lock lock(stateMutex_);
+    if (!reload && !dataFiles_.empty())
+      return std::nullopt;
+
     auto res = dataFileHandler_->read();
-    if (!res) {
-      return std::unexpected(res.error());
+    // IF THERE WAS AN ERROR, THEN RETURN HERE
+    if (!res && res.error().code() != SDK::ErrorCode::NotFound) {
+      return res.error();
     }
 
-    return shared_from_this();
+    return std::nullopt;
   }
 
   std::expected<std::shared_ptr<TelemetryDataService>, SDK::GeneralError>
@@ -254,9 +316,8 @@ namespace IRacingTools::Shared::Services {
 
     auto res = dataFileHandler_->write(toList());
 
-    if (!res) {
-      return std::unexpected(
-          SDK::GeneralError(SDK::ErrorCode::General, "Unknown"));
+    if (!res && res.error().code() != SDK::ErrorCode::NotFound)  {
+      return std::unexpected(res.error());
     }
 
     return shared_from_this();
@@ -352,6 +413,7 @@ namespace IRacingTools::Shared::Services {
       const std::vector<std::shared_ptr<TelemetryDataFile>> &changedDataFiles,
       bool skipFileChangedEvent) {
     {
+
       std::scoped_lock lock(stateMutex_);
 
       // COPY CURRENT MAP
@@ -386,8 +448,7 @@ namespace IRacingTools::Shared::Services {
     return changedDataFiles;
   }
 
-  using SubmitRequestResult = std::
-      expected<TelemetryDataService::Result::SharedFuture, SDK::GeneralError>;
+
 
 
 } // namespace IRacingTools::Shared::Services

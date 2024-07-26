@@ -14,17 +14,19 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0eGeometry.proto\x12\x16IRacingTools.Models.UI\" \n\x08Position\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\"&\n\x05SizeI\x12\r\n\x05width\x18\x01 \x01(\r\x12\x0e\n\x06height\x18\x02 \x01(\r\"h\n\x05RectI\x12+\n\x04size\x18\x01 \x01(\x0b\x32\x1d.IRacingTools.Models.UI.SizeI\x12\x32\n\x08position\x18\x02 \x01(\x0b\x32 .IRacingTools.Models.UI.Positionb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0eGeometry.proto\x12\x13IRacingTools.Models\" \n\x08Position\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\"&\n\x05SizeI\x12\r\n\x05width\x18\x01 \x01(\r\x12\x0e\n\x06height\x18\x02 \x01(\r\"&\n\x05SizeF\x12\r\n\x05width\x18\x01 \x01(\x02\x12\x0e\n\x06height\x18\x02 \x01(\x02\"b\n\x05RectI\x12(\n\x04size\x18\x01 \x01(\x0b\x32\x1a.IRacingTools.Models.SizeI\x12/\n\x08position\x18\x02 \x01(\x0b\x32\x1d.IRacingTools.Models.Positionb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'Geometry_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
-  _globals['_POSITION']._serialized_start=42
-  _globals['_POSITION']._serialized_end=74
-  _globals['_SIZEI']._serialized_start=76
-  _globals['_SIZEI']._serialized_end=114
-  _globals['_RECTI']._serialized_start=116
-  _globals['_RECTI']._serialized_end=220
+  _globals['_POSITION']._serialized_start=39
+  _globals['_POSITION']._serialized_end=71
+  _globals['_SIZEI']._serialized_start=73
+  _globals['_SIZEI']._serialized_end=111
+  _globals['_SIZEF']._serialized_start=113
+  _globals['_SIZEF']._serialized_end=151
+  _globals['_RECTI']._serialized_start=153
+  _globals['_RECTI']._serialized_end=251
 # @@protoc_insertion_point(module_scope)

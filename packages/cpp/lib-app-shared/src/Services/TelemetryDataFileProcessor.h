@@ -20,47 +20,11 @@
 namespace IRacingTools::Shared::Services {
 
   using namespace Models;
-  
-  class TelemetryDataFileProcessor : public RunnableThread {
-  public:
-    using Request = TelemetryDataService::Request;
-    using Result = TelemetryDataService::Result;
 
-  private:
-    TelemetryDataService *service_;
-    std::mutex requestMutex_{};
-    std::condition_variable requestCondition_{};
-    std::atomic_bool isProcessing_{false};
-    std::deque<std::shared_ptr<Request>> requests_{};
+  using ProcessResult =
+      std::expected<std::shared_ptr<TelemetryDataFile>, GeneralError>;
 
-
-  public:
-    explicit TelemetryDataFileProcessor(TelemetryDataService *service);
-    ;
-
-    std::shared_ptr<Request>
-    findRequestInternal(const std::vector<fs::path> &files = {});
-
-    std::shared_ptr<Request>
-    findRequest(const std::vector<fs::path> &files = {});
-
-    /**
-     * @brief Submit a new request
-     *
-     * @param files
-     * @return std::shared_ptr<Request>
-     */
-    std::shared_ptr<Request>
-    submitRequest(const std::vector<fs::path> &files = {});
-
-    virtual void runnable() override;
-
-    /**
-     * @brief
-     * @return true if either a request is being processed or if there are any
-     * pending requests
-     */
-    bool isProcessing();
-  };
+  ProcessResult ProcessTelemetryDataFile(
+    const std::shared_ptr<TelemetryDataService> & service, const fs::path& file, std::shared_ptr<TelemetryDataFile> dataFile);
 
 } // namespace IRacingTools::Shared::Services

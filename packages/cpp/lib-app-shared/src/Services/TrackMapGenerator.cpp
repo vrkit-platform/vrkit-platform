@@ -54,7 +54,7 @@ namespace IRacingTools::Shared::Services {
       L->error(message);
       if (tmFile) {
         tmFile->set_status(
-            TrackMapFile::Status::TrackMapFile_Status_STATUS_ERROR);
+            TrackMapFile::STATUS_ERROR);
         return tmFile;
       }
       return std::unexpected(GeneralError(ErrorCode::General, message));

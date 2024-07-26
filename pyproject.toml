@@ -16,7 +16,10 @@ requires-python = ">=3.8"
 license = "MIT"
 keywords = []
 authors = [
-  { name = "Jonathan Glanz", email = "jonathan.glanz@gmail.com" },
+  {
+    name = "Jonathan Glanz",
+    email = "jonathan.glanz@gmail.com"
+  },
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -41,7 +44,8 @@ dependencies = [
   'protobuf',
   "betterproto",
   "CppHeaderParser",
-  "clang-format"
+  "clang-format",
+  "mypy-protobuf"
 ]
 
 [project.urls]

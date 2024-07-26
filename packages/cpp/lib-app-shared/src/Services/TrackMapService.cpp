@@ -142,11 +142,11 @@ namespace IRacingTools::Shared::Services {
       L->info(
           "Reading TrackMapFile jsonl file: {}", fileHandler_->file().string());
 
-      auto res = fileHandler_->read();
+      auto loadError = load(true);
 
       // IF THERE WAS AN ERROR, THEN RETURN HERE
-      if (!res && res.error().code() != SDK::ErrorCode::NotFound) {
-        return std::unexpected(res.error());
+      if (loadError) {
+        return std::unexpected(loadError.value());
       }
 
       // TODO: Add JSONLines data file loading here
@@ -267,37 +267,53 @@ namespace IRacingTools::Shared::Services {
   TrackMapService::set(
       const std::string &trackLayoutId,
       const std::shared_ptr<TrackMapFile> &tmFile) {
-    std::scoped_lock lock(stateMutex_);
+    {
+      std::scoped_lock lock(stateMutex_);
 
-    // COPY CURRENT MAP
-    auto newFiles = files_;
+      // COPY CURRENT MAP
+      auto newFiles = files_;
 
-    // SET MAPPING TO DATA FILE
+      // SET MAPPING TO DATA FILE
 
-    newFiles[trackLayoutId] = tmFile;
+      newFiles[trackLayoutId] = tmFile;
 
-    // WRITE CHANGES TO DISK
-    auto res = fileHandler_->write(SDK::Utils::ValuesOf(newFiles));
+      // WRITE CHANGES TO DISK
+      auto res = fileHandler_->write(SDK::Utils::ValuesOf(newFiles));
 
-    // CHECK ERROR
-    if (!res.has_value()) {
-      return std::unexpected(res.error());
+      // CHECK ERROR
+      if (!res.has_value()) {
+        return std::unexpected(res.error());
+      }
+
+      // MOVE NEW DATA FILES WITH CHANGES ON TO `dataFiles_` member
+      files_ = std::move(newFiles);
     }
 
-    // MOVE NEW DATA FILES WITH CHANGES ON TO `dataFiles_` member
-    files_ = std::move(newFiles);
+    events.onFilesChanged.publish(this, {tmFile});
 
     return tmFile;
   }
 
-  std::expected<std::shared_ptr<TrackMapService>, SDK::GeneralError>
+  std::optional<SDK::GeneralError>
   TrackMapService::load(bool reload) {
+    std::scoped_lock lock(stateMutex_);
+    if (!reload && !files_.empty())
+      return std::nullopt;
+
     auto res = fileHandler_->read();
-    if (!res) {
-      return std::unexpected(res.error());
+    if (!res && res.error().code() != SDK::ErrorCode::NotFound) {
+      return res.error();
     }
 
-    return shared_from_this();
+    return std::nullopt;
+  }
+
+  bool TrackMapService::hasPendingTasks() {
+    return dataFileTaskQueue_->hasPendingTasks();
+  }
+
+  std::size_t TrackMapService::pendingTaskCount() {
+    return dataFileTaskQueue_->pendingTaskCount();
   }
 
   std::expected<std::shared_ptr<TrackMapService>, SDK::GeneralError>

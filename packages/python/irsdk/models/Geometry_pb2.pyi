@@ -47,6 +47,24 @@ class SizeI(google.protobuf.message.Message):
 global___SizeI = SizeI
 
 @typing.final
+class SizeF(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    WIDTH_FIELD_NUMBER: builtins.int
+    HEIGHT_FIELD_NUMBER: builtins.int
+    width: builtins.float
+    height: builtins.float
+    def __init__(
+        self,
+        *,
+        width: builtins.float = ...,
+        height: builtins.float = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing.Literal["height", b"height", "width", b"width"]) -> None: ...
+
+global___SizeF = SizeF
+
+@typing.final
 class RectI(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
 

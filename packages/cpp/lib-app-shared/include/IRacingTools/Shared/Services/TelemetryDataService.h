@@ -4,21 +4,19 @@
 
 #include <memory>
 
-#include <IRacingTools/Models/Pipeline.pb.h>
 #include <IRacingTools/Models/TelemetryDataFile.pb.h>
 
-#include <IRacingTools/SDK/Utils/LUT.h>
-
+#include <IRacingTools/Shared/Common/TaskQueue.h>
 #include <IRacingTools/Shared/FileWatcher.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/Services/Pipelines/PipelineExecutor.h>
 #include <IRacingTools/Shared/Services/Service.h>
 
+
 namespace IRacingTools::Shared::Services {
 
   using namespace Models;
-  
-  class TelemetryDataFileProcessor;
+  using namespace Common;
 
   /**
    * @brief Responsible for handling telemetry data files
@@ -26,35 +24,14 @@ namespace IRacingTools::Shared::Services {
   class TelemetryDataService : public std::enable_shared_from_this<TelemetryDataService>, public Service {
 
   public:
-    struct Result {
-        using ProcessedType = std::pair<fs::path, std::shared_ptr<TelemetryDataFile>>;
-        using FailedType = std::pair<fs::path, SDK::GeneralError>;
-        using Promise = std::promise<std::shared_ptr<Result>>;
-        using Future = std::future<std::shared_ptr<Result>>;
-        using SharedFuture = std::shared_future<std::shared_ptr<Result>>;
-        enum class Status {
-          Created,
-          Processing,
-          Complete,
-          Failed
-        };
+    using TaskQueueType =
+        TaskQueue<std::shared_ptr<TelemetryDataFile>, fs::path, std::shared_ptr<TelemetryDataFile>>;
+    using TQFutureType = TaskQueueType::FutureType;
+    using TQReturnType = TaskQueueType::ReturnType;
+    using TQArgsType = TaskQueueType::ArgsType;
+    using TQFnType = TaskQueueType::FnType;
 
-        Status status{Status::Created};
-        std::optional<SDK::GeneralError> error{std::nullopt};
-        std::deque<fs::path> unprocessedFiles{};
-        std::vector<ProcessedType> processedFiles{};
-        std::vector<FailedType> failedFiles{};
-      };
-      struct Request {
-        std::size_t id;
-        // TODO: Add future support for sync
-        std::chrono::time_point<std::chrono::high_resolution_clock> timestamp;
-        std::vector<fs::path> files;
-        Result::Promise promise;
-        Result::Future future;
-
-        std::shared_ptr<Result> result{nullptr};
-      };
+    using TQPendingFileMap = std::map<std::string, TQFutureType>;
 
     using DataFileMap = std::map<std::string, std::shared_ptr<TelemetryDataFile>>;
 
@@ -123,7 +100,7 @@ namespace IRacingTools::Shared::Services {
     std::expected<const std::vector<std::shared_ptr<TelemetryDataFile>>, SDK::GeneralError>
     set(const std::vector<std::shared_ptr<TelemetryDataFile>> &changedDataFiles, bool skipFileChangedEvent = false);
 
-    std::expected<std::shared_ptr<TelemetryDataService>, SDK::GeneralError> load(bool reload = false);
+    std::optional<SDK::GeneralError> load(bool reload = false);
     std::expected<std::shared_ptr<TelemetryDataService>, SDK::GeneralError> save();
 
     std::optional<fs::path> findFile(const std::shared_ptr<TelemetryDataFile> &dataFile);
@@ -156,24 +133,30 @@ namespace IRacingTools::Shared::Services {
 
     std::optional<SDK::GeneralError> clearTelemetryFileCache();
 
-    bool isProcessing();
+    bool hasPendingTasks();
+    std::size_t pendingTaskCount();
+
+    std::size_t scanAllFiles();
 
     std::expected<std::shared_ptr<TrackLayoutMetadata>, GeneralError> getTrackLayoutMetadata(const std::shared_ptr<TelemetryDataFile>& dataFile);
     std::expected<std::shared_ptr<TrackLayoutMetadata>, GeneralError> getTrackLayoutMetadata(const fs::path& file);
 
     struct {
-      EventEmitter<TelemetryDataService*> onReady{};
-      EventEmitter<TelemetryDataService*, std::shared_ptr<Result>, std::shared_ptr<Request>> onRequestComplete{};
       EventEmitter<TelemetryDataService*, const std::vector<std::shared_ptr<TelemetryDataFile>>&> onFilesChanged{};
     } events;
 
   private:
+    std::size_t enqueueFiles(const std::vector<fs::path>& files);
+    TQReturnType taskQueueFn(fs::path file,std::shared_ptr<TelemetryDataFile> dataFile);
+
     Options options_{};
     std::unique_ptr<JSONLinesMessageFileHandler<TelemetryDataFile>> dataFileHandler_{nullptr};
     std::vector<fs::path> filePaths_{};
     std::vector<std::unique_ptr<FileSystem::FileWatcher>> fileWatchers_{};
-    std::shared_ptr<TelemetryDataFileProcessor> processorThread_{nullptr};
     DataFileMap dataFiles_{};
+
+    std::unique_ptr<TaskQueueType> fileTaskQueue_{nullptr};
+    TQPendingFileMap pendingFileMap_{};
     // std::vector<std::shared_ptr<Request>> pendingRequests_{};
   };
 } // namespace IRacingTools::Shared::Services

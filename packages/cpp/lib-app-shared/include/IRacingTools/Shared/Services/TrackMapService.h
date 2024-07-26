@@ -138,8 +138,17 @@ namespace IRacingTools::Shared::Services {
 
     std::expected<std::shared_ptr<TrackMapService>, SDK::GeneralError> save();
 
-    std::expected<std::shared_ptr<TrackMapService>, SDK::GeneralError>
-    load(bool reload = false);
+    std::optional<SDK::GeneralError> load(bool reload = false);
+    bool hasPendingTasks();
+    std::size_t pendingTaskCount();
+
+    struct {
+      EventEmitter<TrackMapService *> onReady{};
+      EventEmitter<
+          TrackMapService *,
+          const std::vector<std::shared_ptr<TrackMapFile>> &>
+          onFilesChanged{};
+    } events;
 
   private:
     void enqueueDataFiles(const std::vector<std::shared_ptr<TelemetryDataFile>>

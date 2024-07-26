@@ -4,7 +4,9 @@ isort:skip_file
 """
 
 import builtins
+import collections.abc
 import google.protobuf.descriptor
+import google.protobuf.internal.containers
 import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.message
 import sys
@@ -17,24 +19,56 @@ else:
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
-class _TrackType:
-    ValueType = typing.NewType("ValueType", builtins.int)
-    V: typing_extensions.TypeAlias = ValueType
-
-class _TrackTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_TrackType.ValueType], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
-    TRACK_TYPE_ROAD: _TrackType.ValueType  # 0
-    TRACK_TYPE_OVAL: _TrackType.ValueType  # 1
-
-class TrackType(_TrackType, metaclass=_TrackTypeEnumTypeWrapper): ...
-
-TRACK_TYPE_ROAD: TrackType.ValueType  # 0
-TRACK_TYPE_OVAL: TrackType.ValueType  # 1
-global___TrackType = TrackType
-
 @typing.final
 class Track(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    class _Type:
+        ValueType = typing.NewType("ValueType", builtins.int)
+        V: typing_extensions.TypeAlias = ValueType
+
+    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[Track._Type.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        TRACK_TYPE_ROAD: Track._Type.ValueType  # 0
+        TRACK_TYPE_OVAL: Track._Type.ValueType  # 1
+
+    class Type(_Type, metaclass=_TypeEnumTypeWrapper): ...
+    TRACK_TYPE_ROAD: Track.Type.ValueType  # 0
+    TRACK_TYPE_OVAL: Track.Type.ValueType  # 1
+
+    @typing.final
+    class Layout(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+        ID_FIELD_NUMBER: builtins.int
+        TRACK_ID_FIELD_NUMBER: builtins.int
+        NAME_FIELD_NUMBER: builtins.int
+        LENGTH_FIELD_NUMBER: builtins.int
+        LENGTH_OFFICIAL_FIELD_NUMBER: builtins.int
+        NUM_TURNS_FIELD_NUMBER: builtins.int
+        DIRECTION_FIELD_NUMBER: builtins.int
+        id: builtins.str
+        """`id` is a compound key that we generate when processing IBT files"""
+        track_id: builtins.int
+        """Reference to `Track::id`"""
+        name: builtins.str
+        """`WeekendInfo::trackConfigName`"""
+        length: builtins.str
+        length_official: builtins.str
+        num_turns: builtins.int
+        direction: builtins.str
+        def __init__(
+            self,
+            *,
+            id: builtins.str = ...,
+            track_id: builtins.int = ...,
+            name: builtins.str = ...,
+            length: builtins.str = ...,
+            length_official: builtins.str = ...,
+            num_turns: builtins.int = ...,
+            direction: builtins.str = ...,
+        ) -> None: ...
+        def ClearField(self, field_name: typing.Literal["direction", b"direction", "id", b"id", "length", b"length", "length_official", b"length_official", "name", b"name", "num_turns", b"num_turns", "track_id", b"track_id"]) -> None: ...
 
     ID_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
@@ -48,11 +82,12 @@ class Track(google.protobuf.message.Message):
     COUNTRY_FIELD_NUMBER: builtins.int
     CITY_FIELD_NUMBER: builtins.int
     PIT_SPEED_LIMIT_FIELD_NUMBER: builtins.int
+    LAYOUTS_FIELD_NUMBER: builtins.int
     id: builtins.int
     """WeekendInfo::trackID"""
     name: builtins.str
     """WeekendInfo::trackName"""
-    type: global___TrackType.ValueType
+    type: global___Track.Type.ValueType
     """WeekendInfo::trackType"""
     display_name: builtins.str
     display_short_name: builtins.str
@@ -63,12 +98,14 @@ class Track(google.protobuf.message.Message):
     country: builtins.str
     city: builtins.str
     pit_speed_limit: builtins.int
+    @property
+    def layouts(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Track.Layout]: ...
     def __init__(
         self,
         *,
         id: builtins.int = ...,
         name: builtins.str = ...,
-        type: global___TrackType.ValueType = ...,
+        type: global___Track.Type.ValueType = ...,
         display_name: builtins.str = ...,
         display_short_name: builtins.str = ...,
         altitude: builtins.float = ...,
@@ -78,43 +115,8 @@ class Track(google.protobuf.message.Message):
         country: builtins.str = ...,
         city: builtins.str = ...,
         pit_speed_limit: builtins.int = ...,
+        layouts: collections.abc.Iterable[global___Track.Layout] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["altitude", b"altitude", "city", b"city", "country", b"country", "display_name", b"display_name", "display_short_name", b"display_short_name", "id", b"id", "latitude", b"latitude", "longitude", b"longitude", "name", b"name", "north_offset", b"north_offset", "pit_speed_limit", b"pit_speed_limit", "type", b"type"]) -> None: ...
+    def ClearField(self, field_name: typing.Literal["altitude", b"altitude", "city", b"city", "country", b"country", "display_name", b"display_name", "display_short_name", b"display_short_name", "id", b"id", "latitude", b"latitude", "layouts", b"layouts", "longitude", b"longitude", "name", b"name", "north_offset", b"north_offset", "pit_speed_limit", b"pit_speed_limit", "type", b"type"]) -> None: ...
 
 global___Track = Track
-
-@typing.final
-class TrackConfig(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-
-    ID_FIELD_NUMBER: builtins.int
-    TRACK_ID_FIELD_NUMBER: builtins.int
-    NAME_FIELD_NUMBER: builtins.int
-    LENGTH_FIELD_NUMBER: builtins.int
-    LENGTH_OFFICIAL_FIELD_NUMBER: builtins.int
-    NUM_TURNS_FIELD_NUMBER: builtins.int
-    DIRECTION_FIELD_NUMBER: builtins.int
-    id: builtins.str
-    """`id` is a compound key that we generate when processing IBT files"""
-    track_id: builtins.int
-    """Reference to `Track::id`"""
-    name: builtins.str
-    """`WeekendInfo::trackConfigName`"""
-    length: builtins.str
-    length_official: builtins.str
-    num_turns: builtins.int
-    direction: builtins.str
-    def __init__(
-        self,
-        *,
-        id: builtins.str = ...,
-        track_id: builtins.int = ...,
-        name: builtins.str = ...,
-        length: builtins.str = ...,
-        length_official: builtins.str = ...,
-        num_turns: builtins.int = ...,
-        direction: builtins.str = ...,
-    ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["direction", b"direction", "id", b"id", "length", b"length", "length_official", b"length_official", "name", b"name", "num_turns", b"num_turns", "track_id", b"track_id"]) -> None: ...
-
-global___TrackConfig = TrackConfig

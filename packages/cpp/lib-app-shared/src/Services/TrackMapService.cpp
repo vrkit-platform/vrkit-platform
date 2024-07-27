@@ -88,6 +88,7 @@ namespace IRacingTools::Shared::Services {
     auto res = GenerateTrackMap(getContainer(), dataFile);
     if (!res) {
       L->error("Failed to generate trackmap: {}", res.error().what());
+      events.onFilesChanged.publish(this, {});
     } else {
       auto &tmFile = res.value();
       if (auto setRes = set(tmFile); !setRes) {

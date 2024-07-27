@@ -283,6 +283,7 @@ namespace IRacingTools::Shared::Services {
     auto res = ProcessTelemetryDataFile(shared_from_this(), file, dataFile);
     if (!res) {
       L->error("Failed to process {}", file.string());
+      events.onFilesChanged.publish(this, {});
       return nullptr;
     }
     auto tdf = res.value();

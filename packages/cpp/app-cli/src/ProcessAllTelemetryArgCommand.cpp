@@ -119,7 +119,7 @@ namespace IRacingTools::App::Commands {
 
     {
       std::unique_lock lock(resultMutex);
-      if (!resultReceived) {
+      if (tdService->hasPendingTasks() || tmService->hasPendingTasks()) {
         resultCV.wait(lock, [&] {
           return resultReceived.load();
         });

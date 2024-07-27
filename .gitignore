@@ -16,3 +16,5 @@ irsdk_session*/
 *.7z
 /dist
 /*.spec
+node_modules
+/packages/js/vrkit-native-interop/out

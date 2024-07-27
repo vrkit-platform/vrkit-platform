@@ -1,0 +1,26 @@
+{
+  "name": "vrkit-native-interop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/js/NodeAddon.js",
+  "binary": {
+    "napi_versions": [
+      9
+    ]
+  },
+  "cmake-js": {
+    "runtime": "electron",
+    "runtimeVersion": "31.3.0",
+    "arch": "x64"
+  },
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "cmake-js": "^7.3.0",
+    "electron": "^31.3.0",
+    "electron-rebuild": "^3.2.9",
+    "node-addon-api": "^8.1.0"
+  }
+}

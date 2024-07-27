@@ -2,7 +2,7 @@
   "name": "vrkit-native-interop",
   "version": "1.0.0",
   "description": "",
-  "main": "src/js/NodeAddon.js",
+  "main": "src/web/NodeAddon.js",
   "binary": {
     "napi_versions": [
       9
@@ -13,7 +13,9 @@
     "runtimeVersion": "31.3.0",
     "arch": "x64"
   },
-  "scripts": {},
+  "scripts": {
+    "build:watch": "tsc -p tsconfig.json -w"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -22,5 +24,11 @@
     "electron": "^31.3.0",
     "electron-rebuild": "^3.2.9",
     "node-addon-api": "^8.1.0"
+  },
+  "devDependencies": {
+    "@protobuf-ts/plugin": "^2.9.4",
+    "@types/node": "^20.14.12",
+    "@tsconfig/node16": "^16.1.3",
+    "typescript": "^5.5.4"
   }
 }

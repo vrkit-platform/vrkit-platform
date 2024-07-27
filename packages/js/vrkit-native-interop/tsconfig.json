@@ -1,0 +1,21 @@
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "compilerOptions": {
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "target": "ESNext",
+    "strict": false,
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "incremental": true,
+    "noImplicitAny": false,
+    
+    "inlineSourceMap": true,
+    "preserveConstEnums": true
+  },
+  "include": ["src/web/**/*.ts"],
+  "exclude": ["**/*.spec.ts"]
+}

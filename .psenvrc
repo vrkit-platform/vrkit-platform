@@ -1,0 +1,2 @@
+Add-PathVariable "$PWD\node_modules\.bin"
+. .\venv\Scripts\activate.ps1

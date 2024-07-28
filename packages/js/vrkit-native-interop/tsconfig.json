@@ -12,7 +12,10 @@
     "esModuleInterop": true,
     "incremental": true,
     "noImplicitAny": false,
-    
+    "resolveJsonModule": true,
+    "jsx": "react",
+    "outDir": "lib",
+    "rootDir": "src/web",
     "inlineSourceMap": true,
     "preserveConstEnums": true
   },

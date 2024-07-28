@@ -6,8 +6,7 @@ set(APP_VERSION ${appVersion})
 
 # GET SOURCES & HEADERS
 file(GLOB_RECURSE libSources
-  src/native/*.cpp
-  src/native/*.h
+  src/native/*.[h,cpp]
 )
 file(GLOB_RECURSE libHeaders include/*.h)
 

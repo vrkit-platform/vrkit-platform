@@ -2,7 +2,7 @@
   "name": "vrkit-native-interop",
   "version": "1.0.0",
   "description": "",
-  "main": "src/web/NodeAddon.js",
+  "main": "lib/NodeAddon.js",
   "binary": {
     "napi_versions": [
       9

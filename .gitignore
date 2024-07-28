@@ -1,3 +1,4 @@
+*.tsbuildinfo
 /.jupyter
 /.idea
 /.vs
@@ -18,3 +19,17 @@ irsdk_session*/
 /*.spec
 node_modules
 /packages/js/vrkit-native-interop/out
+/packages/js/vrkit-native-interop/lib/models/DashboardConfig.js
+/packages/js/vrkit-native-interop/lib/models/FileInfo.js
+/packages/js/vrkit-native-interop/lib/models/Geometry.js
+/packages/js/vrkit-native-interop/lib/models/LapCoordinate.js
+/packages/js/vrkit-native-interop/lib/models/LapTrajectory.js
+/packages/js/vrkit-native-interop/lib/models/Pipeline.js
+/packages/js/vrkit-native-interop/lib/models/ScreenConfig.js
+/packages/js/vrkit-native-interop/lib/models/TelemetryDataFile.js
+/packages/js/vrkit-native-interop/lib/models/Track.js
+/packages/js/vrkit-native-interop/lib/models/TrackLayoutMetadata.js
+/packages/js/vrkit-native-interop/lib/models/TrackMap.js
+/packages/js/vrkit-native-interop/lib/models/TrackMapFile.js
+/packages/js/vrkit-native-interop/lib/models/TrackMetadata.js
+/packages/js/vrkit-native-interop/lib/NodeAddon.js

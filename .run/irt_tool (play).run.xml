@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="irt_tool (play)" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="play --ibt &quot;Y:\code\sim-racing\irsdk-interop\tmp\ir_session_track_spielberg gp 2024-05-05 14-14-17.ibt&quot; --trackmap &quot;Y:\\code\\sim-racing\\irsdk-interop\\data\\track_maps\\spielberg.bin&quot;" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_tool" CONFIG_NAME="DebugClionMsBuild" RUN_TARGET_PROJECT_NAME="vrkit" RUN_TARGET_NAME="vrkit_tool">
+  <configuration default="false" name="irt_tool (play)" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="play --ibt &quot;Y:\code\sim-racing\irsdk-interop\tmp\ir_session_track_spielberg gp 2024-05-05 14-14-17.ibt&quot; --trackmap &quot;Y:\\code\\sim-racing\\irsdk-interop\\data\\track_maps\\spielberg.bin&quot;" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_tool" CONFIG_NAME="DebugClionNinja" RUN_TARGET_PROJECT_NAME="vrkit" RUN_TARGET_NAME="vrkit_tool">
     <envs>
       <env name="Path" value="c:\qt\6.5.0\bin;c:\qt\6.5.0\lib" />
     </envs>

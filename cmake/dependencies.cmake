@@ -6,7 +6,7 @@ set(DEP_PACKAGES
   cppwinrt
   directxmath
   directxtk
-  imgui
+#  imgui
   fmt
   spdlog
   OpenXR
@@ -30,7 +30,9 @@ endforeach()
 # include(${CMAKE_CURRENT_LIST_DIR}/qt.cmake NO_POLICY_SCOPE)
 
 # Boost
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system uuid)
+set(DEP_BOOST_DEFAULT Boost::system Boost::uuid)
+find_path(DEP_BOOST_DI_INCLUDES "boost/di.hpp")
 
 # Other deps
 #target_link_libraries(${targetName} PRIVATE Microsoft::CppWinRT)
@@ -49,7 +51,7 @@ set(DEP_JSON nlohmann_json::nlohmann_json)
 set(DEP_MAGICENUM magic_enum::magic_enum)
 set(DEP_GSL Microsoft.GSL::GSL)
 set(DEP_LOG spdlog::spdlog)
-set(DEP_IMGUI imgui::imgui)
+#set(DEP_IMGUI imgui::imgui)
 #set(DEP_WINRT Microsoft::CppWinRT)
 
 
@@ -87,15 +89,14 @@ set(DEP_LOG spdlog::spdlog ${DEP_FMT})
 set(DEP_OPENXR OpenXR::headers)
 set(DEP_REPROC reproc reproc++)
 set(DEP_CLI_CMD CLI11::CLI11)
-set(DEP_BOOST_DEFAULT Boost::system)
-find_path(DEP_BOOST_DI_INCLUDES "boost/di.hpp")
+
 
 set(ALL_APP_DEPS
   ${DEP_PROTOBUF}
   ${DEP_JSON}
   ${DEP_MAGICENUM}
   ${DEP_DIRECTX}
-  ${DEP_IMGUI}
+#  ${DEP_IMGUI}
   ${DEP_FMT}
   ${DEP_LOG}
   ${DEP_OPENXR}

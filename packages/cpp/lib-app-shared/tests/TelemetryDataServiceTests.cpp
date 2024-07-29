@@ -89,10 +89,10 @@ TEST_F(TelemetryDataServiceTests, service_setup_and_load) {
     auto service = std::make_shared<TelemetryDataService>(serviceContainer, TelemetryDataService::Options{
       .jsonlFile = trackDataFile
     });
-    auto res = service->load();
+    auto res = service->load(true);
     
-    EXPECT_FALSE(res.has_value());
-    EXPECT_EQ(res.error().code(),ErrorCode::NotFound);
+    EXPECT_TRUE(res.has_value());
+    EXPECT_EQ(res.value().code(),ErrorCode::NotFound);
 
     auto msg = std::make_shared<TelemetryDataFile>();
     msg->set_id("id-1");
@@ -109,7 +109,7 @@ TEST_F(TelemetryDataServiceTests, service_setup_and_load) {
     });
 
     auto res = service->load();
-    EXPECT_TRUE(res.has_value());
+    EXPECT_TRUE(!res.has_value());
     EXPECT_EQ(service->size(), 1);
 
   }

@@ -305,7 +305,7 @@ namespace IRacingTools::Shared::Services {
 
     auto res = dataFileHandler_->read();
     // IF THERE WAS AN ERROR, THEN RETURN HERE
-    if (!res && res.error().code() != SDK::ErrorCode::NotFound) {
+    if (!res) { // && res.error().code() != SDK::ErrorCode::NotFound
       return res.error();
     }
 

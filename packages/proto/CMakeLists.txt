@@ -38,6 +38,7 @@ foreach(target ${modelsTarget} ${modelsTargetStatic})
   target_link_libraries(${target} PUBLIC protobuf::libprotobuf)
   target_include_directories(${target} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    ${PROTO_INCLUDE_DEST}
     $<INSTALL_INTERFACE:include>
   )
 endforeach()

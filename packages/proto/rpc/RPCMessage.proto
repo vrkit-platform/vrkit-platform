@@ -1,0 +1,35 @@
+syntax = "proto3";
+import "google/protobuf/any.proto";
+
+import "Geometry.proto";
+import "ScreenConfig.proto";
+
+package IRacingTools.Models.RPC;
+
+
+message RPCMessage {
+  enum Kind {
+    KIND_REQUEST = 0;
+    KIND_RESPONSE = 1;
+  }
+
+  enum Status {
+    STATUS_CREATED = 0;
+    STATUS_IN_PROGRESS = 5;
+    STATUS_DONE = 10;
+    STATUS_ERROR = 20;
+  };
+
+  string id = 1;
+  Kind kind = 2;
+  Status status = 3;
+
+  string request_path = 10;
+
+  google.protobuf.Any payload = 50;
+
+  string error_details = 60;
+
+
+  // map<string,string> parameters = 20;
+}

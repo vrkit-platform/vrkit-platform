@@ -86,5 +86,12 @@ TEST_F(RPCServerServiceTests, SimpleRouteSync) {
   EXPECT_EQ(sampleRouteResponse.width(),sampleRouteRequest.width() * 2);
   EXPECT_EQ(sampleRouteResponse.height(),sampleRouteRequest.height() * 2);
 
+
+  messageIn->set_id(NewUUID());
+  messageIn->set_request_path("/sample2");
+
+  messageOut = rpcService->execute(messageIn);
+
+  EXPECT_EQ(messageOut->status(), RPC::RPCMessage::STATUS_ERROR);
   manager->destroy();
 }

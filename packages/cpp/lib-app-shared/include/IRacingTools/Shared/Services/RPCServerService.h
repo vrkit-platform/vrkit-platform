@@ -91,7 +91,7 @@ namespace IRacingTools::Shared::Services {
         return messageOut;
       }
 
-      static std::shared_ptr<Route>
+      static std::shared_ptr<TypedRoute>
       Create(Executor executor, const std::string &matchExpression = "") {
         return std::make_shared<TypedRoute>(std::move(executor),matchExpression);
       }

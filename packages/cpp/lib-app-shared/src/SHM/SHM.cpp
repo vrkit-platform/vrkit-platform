@@ -159,7 +159,7 @@ namespace IRacingTools::Shared::SHM {
         if (!sCache.empty()) [[likely]] {
             return sCache;
         }
-        sCache = std::format(L"{}/IRT-s{:x}", ProjectReverseDomainW, SHMSize);
+        sCache = fmt::format(L"{}/IRT-s{:x}", ProjectReverseDomainW, static_cast<std::size_t>(SHMSize));
         return sCache;
     }
 

@@ -74,27 +74,27 @@ namespace IRacingTools::Shared::Services {
   RPCServerService::execute(const Envelope &messageIn) {
     auto requestPath = messageIn->request_path();
 
-    auto messageOut = std::make_shared<Models::RPC::RPCMessage>();
+    auto messageOut = std::make_shared<Models::RPC::Envelope>();
     messageOut->set_id(messageIn->id());
     messageOut->set_request_path(messageIn->request_path());
-    messageOut->set_kind(RPC::RPCMessage::KIND_RESPONSE);
-    messageOut->set_status(RPC::RPCMessage::STATUS_IN_PROGRESS);
+    messageOut->set_kind(RPC::Envelope::KIND_RESPONSE);
+    messageOut->set_status(RPC::Envelope::STATUS_IN_PROGRESS);
 
     for (auto &route: routes_) {
       if (route->accepts(requestPath)) {
         auto result = route->execute(messageIn, messageOut);
         if (result) {
           messageOut = result.value();
-          messageOut->set_status(Models::RPC::RPCMessage::STATUS_DONE);
+          messageOut->set_status(Models::RPC::Envelope::STATUS_DONE);
         } else {
           auto &err = result.error();
-          messageOut->set_status(Models::RPC::RPCMessage::STATUS_ERROR);
+          messageOut->set_status(Models::RPC::Envelope::STATUS_ERROR);
           messageOut->set_error_details(err.what());
         }
         return messageOut;
       }
     }
-    messageOut->set_status(Models::RPC::RPCMessage::STATUS_ERROR);
+    messageOut->set_status(Models::RPC::Envelope::STATUS_ERROR);
     messageOut->set_error_details("No matching route found");
     return messageOut;
 

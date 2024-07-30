@@ -1,0 +1,29 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "vrkit-native-interop":
+      [  "./packages/js/vrkit-native-interop"],
+      "vrkit-native-interop/*":
+      [  "./packages/js/vrkit-native-interop/src/*"],
+      "vrkit-app":
+      [  "./packages/js/vrkit-app"],
+      "vrkit-app/*":
+      [  "./packages/js/vrkit-app/src/*"]
+      
+    }
+  },
+  "references": [
+    {
+      "path": "./packages/js/vrkit-native-interop"
+    },
+    {
+      "path": "./packages/js/vrkit-app"
+    },
+    {
+      "path": "./etc/webpack"
+    }
+  ],
+  "include": [],
+  "exclude": ["**/**"]
+}

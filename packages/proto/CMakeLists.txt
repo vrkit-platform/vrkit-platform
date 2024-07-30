@@ -41,4 +41,5 @@ foreach(target ${modelsTarget} ${modelsTargetStatic})
     ${PROTO_INCLUDE_DEST}
     $<INSTALL_INTERFACE:include>
   )
+  target_compile_options(${target} PRIVATE "/permissive")
 endforeach()

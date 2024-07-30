@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include <IRacingTools/Models/rpc/RPCMessage.pb.h>
+#include <IRacingTools/Models/rpc/Envelope.pb.h>
 
 #include <IRacingTools/Shared/Common/TaskQueue.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
@@ -24,7 +24,7 @@ namespace IRacingTools::Shared::Services {
         public Service {
 
   public:
-    using Envelope = std::shared_ptr<Models::RPC::RPCMessage>;
+    using Envelope = std::shared_ptr<Models::RPC::Envelope>;
     class Route {
       std::string matchExpression_;
       std::regex matcher_;
@@ -50,7 +50,7 @@ namespace IRacingTools::Shared::Services {
       using Executor = std::function<
           std::expected<std::shared_ptr<ResponseType>, SDK::GeneralError>(
               const std::shared_ptr<RequestType> &,
-              const std::shared_ptr<RPC::RPCMessage> &)>;
+              const std::shared_ptr<RPC::Envelope> &)>;
 
       /**
        * @brief Constructor
@@ -67,11 +67,6 @@ namespace IRacingTools::Shared::Services {
       virtual std::expected<Envelope, SDK::GeneralError>
       execute(const Envelope &messageIn, const Envelope& messageOut) override {
         auto req = std::make_shared<RequestType>();
-        // L->info(
-        //     "Handling (path={},RequestType={},ResponseType={})",
-        //     messageIn->request_path(),
-        //     PrettyType<RequestType>{}.name(),
-        //     PrettyType<ResponseType>{}.name());
         if (!messageIn->payload().UnpackTo(req.get())) {
           return std::unexpected(SDK::GeneralError("Failed to unpack payload"));
         }
@@ -101,7 +96,6 @@ namespace IRacingTools::Shared::Services {
 
       Executor executor_;
 
-      // Logging::Logger L{Logging::GetCategoryWithType<TypedRoute>()};
     };
 
     struct Options {

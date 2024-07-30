@@ -1,13 +1,9 @@
 syntax = "proto3";
 import "google/protobuf/any.proto";
 
-import "Geometry.proto";
-import "ScreenConfig.proto";
-
 package IRacingTools.Models.RPC;
 
-
-message RPCMessage {
+message Envelope {
   enum Kind {
     KIND_REQUEST = 0;
     KIND_RESPONSE = 1;

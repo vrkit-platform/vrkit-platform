@@ -51,7 +51,7 @@ TEST_F(RPCServerServiceTests, SimpleRouteSync) {
   manager->init();
   manager->start();
   auto sampleRouteExecutor = [&] (const std::shared_ptr<SizeI> & request,
-              const std::shared_ptr<RPC::RPCMessage> & envelope) -> std::expected<std::shared_ptr<SizeI>, GeneralError> {
+              const std::shared_ptr<RPC::Envelope> & envelope) -> std::expected<std::shared_ptr<SizeI>, GeneralError> {
     L->info("Processing request path: {}", envelope->request_path());
     auto response = std::make_shared<SizeI>();
     response->set_width(request->width() * 2);
@@ -64,10 +64,10 @@ TEST_F(RPCServerServiceTests, SimpleRouteSync) {
   auto rpcService = manager->getService<RPCServerService>();
   rpcService->addRoute(sampleRoute);
 
-  auto messageIn = std::make_shared<IRacingTools::Models::RPC::RPCMessage>();
+  auto messageIn = std::make_shared<IRacingTools::Models::RPC::Envelope>();
   messageIn->set_id(NewUUID());
   messageIn->set_request_path("/sample");
-  messageIn->set_kind(RPC::RPCMessage::KIND_REQUEST);
+  messageIn->set_kind(RPC::Envelope::KIND_REQUEST);
 
   SizeI sampleRouteRequest {};
 
@@ -79,7 +79,7 @@ TEST_F(RPCServerServiceTests, SimpleRouteSync) {
   ASSERT_TRUE(messageIn->mutable_payload()->PackFrom(sampleRouteRequest));
 
   auto messageOut = rpcService->execute(messageIn);
-  EXPECT_EQ(messageOut->status(), RPC::RPCMessage::STATUS_DONE);
+  EXPECT_EQ(messageOut->status(), RPC::Envelope::STATUS_DONE);
 
   ASSERT_TRUE(messageOut->mutable_payload()->UnpackTo(&sampleRouteResponse));
 
@@ -92,6 +92,6 @@ TEST_F(RPCServerServiceTests, SimpleRouteSync) {
 
   messageOut = rpcService->execute(messageIn);
 
-  EXPECT_EQ(messageOut->status(), RPC::RPCMessage::STATUS_ERROR);
+  EXPECT_EQ(messageOut->status(), RPC::Envelope::STATUS_ERROR);
   manager->destroy();
 }

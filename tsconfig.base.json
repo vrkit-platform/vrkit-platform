@@ -1,0 +1,30 @@
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "module": "commonjs",
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "target": "ESNext",
+    "lib": [
+      "DOM",
+      "ESNext",
+      "Decorators",
+      "WebWorker"
+    ],
+    "strict": false,
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "noImplicitAny": false,
+    
+    "outDir": "lib",
+    "inlineSourceMap": true,
+    "preserveConstEnums": true
+  }
+}

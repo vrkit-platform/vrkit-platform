@@ -1,0 +1,83 @@
+diff --git a/node_modules/webpack-cli/lib/webpack-cli.js b/node_modules/webpack-cli/lib/webpack-cli.js
+index 8e07613..bf62322 100644
+--- a/node_modules/webpack-cli/lib/webpack-cli.js
++++ b/node_modules/webpack-cli/lib/webpack-cli.js
+@@ -366,7 +366,7 @@ class WebpackCLI {
+             defaultPackages = [...defaultPackages, ...options.additionalPackage];
+         }
+         defaultInformation.npmPackages = `{${defaultPackages.map((item) => `*${item}*`).join(",")}}`;
+-        const envinfo = await this.tryRequireThenImport("envinfo", false);
++        const envinfo = await this.tryRequireThenImport("envinfo", false, "commonjs");
+         let info = await envinfo.run(defaultInformation, envinfoConfig);
+         info = info.replace(/npmPackages/g, "Packages");
+         info = info.replace(/npmGlobalPackages/g, "Global Packages");
+@@ -835,7 +835,7 @@ class WebpackCLI {
+         return options;
+     }
+     async loadWebpack(handleError = true) {
+-        return this.tryRequireThenImport(WEBPACK_PACKAGE, handleError);
++        return this.tryRequireThenImport(WEBPACK_PACKAGE, handleError, "commonjs");
+     }
+     async run(args, parseOptions) {
+         // Built-in internal commands
+@@ -980,7 +980,7 @@ class WebpackCLI {
+                 }
+                 let loadedCommand;
+                 try {
+-                    loadedCommand = await this.tryRequireThenImport(pkg, false);
++                    loadedCommand = await this.tryRequireThenImport(pkg, false, "commonjs");
+                 }
+                 catch (error) {
+                     // Ignore, command is not installed
+@@ -1393,6 +1393,7 @@ class WebpackCLI {
+             let options;
+             let moduleType = "unknown";
+             switch (ext) {
++                case ".ts":
+                 case ".cjs":
+                 case ".cts":
+                     moduleType = "commonjs";
+@@ -1401,6 +1402,7 @@ class WebpackCLI {
+                 case ".mts":
+                     moduleType = "esm";
+                     break;
++                
+             }
+             try {
+                 options = await this.tryRequireThenImport(configPath, false, moduleType);
+@@ -1549,7 +1551,7 @@ class WebpackCLI {
+         const resolveExtends = async (config, configPaths, extendsPaths) => {
+             delete config.extends;
+             const loadedConfigs = await Promise.all(extendsPaths.map((extendsPath) => loadConfigByPath(path.resolve(extendsPath), options.argv)));
+-            const merge = await this.tryRequireThenImport("webpack-merge");
++            const merge = await this.tryRequireThenImport("webpack-merge",true, "commonjs");
+             const loadedOptions = loadedConfigs.flatMap((config) => config.options);
+             if (loadedOptions.length > 0) {
+                 const prevPaths = configPaths.get(config);
+@@ -1600,7 +1602,7 @@ class WebpackCLI {
+                 : config.options.extends);
+         }
+         if (options.merge) {
+-            const merge = await this.tryRequireThenImport("webpack-merge");
++            const merge = await this.tryRequireThenImport("webpack-merge",true, "commonjs");
+             // we can only merge when there are multiple configurations
+             // either by passing multiple configs by flags or passing a
+             // single config exporting an array
+@@ -1636,7 +1638,7 @@ class WebpackCLI {
+             this.logger.error(`'${options.progress}' is an invalid value for the --progress option. Only 'profile' is allowed.`);
+             process.exit(2);
+         }
+-        const CLIPlugin = await this.tryRequireThenImport("./plugins/cli-plugin");
++        const CLIPlugin = await this.tryRequireThenImport("./plugins/cli-plugin", true, "commonjs");
+         const internalBuildConfig = (item) => {
+             const originalWatchValue = item.watch;
+             // Apply options
+@@ -1815,7 +1817,7 @@ class WebpackCLI {
+         let compiler;
+         let createJsonStringifyStream;
+         if (options.json) {
+-            const jsonExt = await this.tryRequireThenImport("@discoveryjs/json-ext");
++            const jsonExt = await this.tryRequireThenImport("@discoveryjs/json-ext", true, "commonjs");
+             createJsonStringifyStream = jsonExt.stringifyStream;
+         }
+         const callback = (error, stats) => {

@@ -7,10 +7,10 @@ import path from 'path';
 import { merge } from 'webpack-merge';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
-import { dependencies } from '../../../package.json';
-import checkNodeEnv from '../scripts/check-node-env';
+import { dependencies } from '../../../packages/js/vrkit-app/package.json';
+// import checkNodeEnv from '../scripts/check-node-env';
 
-checkNodeEnv('development');
+// checkNodeEnv('development');
 
 const dist = webpackPaths.dllPath;
 
@@ -19,7 +19,7 @@ const configuration: webpack.Configuration = {
 
   devtool: 'eval',
 
-  mode: 'development',
+  mode: process.env.NODE_ENV,
 
   target: 'electron-renderer',
 
@@ -59,7 +59,7 @@ const configuration: webpack.Configuration = {
      * development checks
      */
     new webpack.EnvironmentPlugin({
-      NODE_ENV: 'development',
+      NODE_ENV: process.env.NODE_ENV,
     }),
 
     new webpack.LoaderOptionsPlugin({

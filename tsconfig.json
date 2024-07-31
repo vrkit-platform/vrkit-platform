@@ -19,11 +19,23 @@
     },
     {
       "path": "./packages/js/vrkit-app"
-    },
-    {
-      "path": "./etc/webpack"
     }
+//    {
+//      "path": "./etc/webpack"
+//    }
   ],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS",
+      "allowJs": true,
+      "noEmit": false,
+      "declaration": true,
+      "moduleResolution": "node",
+      "target": "ESNext",
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true
+    }
+  },
   "include": [],
   "exclude": ["**/**"]
 }

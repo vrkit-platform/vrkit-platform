@@ -1,21 +1,23 @@
+// noinspection JSUnusedGlobalSymbols
+
 import 'webpack-dev-server';
 import path from 'path';
 import fs from 'fs';
 import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import chalk from 'chalk';
+//import chalk from 'chalk';
 import { merge } from 'webpack-merge';
 import { execSync, spawn } from 'child_process';
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+// import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
 import checkNodeEnv from '../scripts/check-node-env';
 
 // When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
 // at the dev webpack config is not accidentally run in a production environment
-if (process.env.NODE_ENV === 'production') {
-  checkNodeEnv('development');
-}
+// if (process.env.NODE_ENV === 'production') {
+//   checkNodeEnv('development');
+// }
 
 const port = process.env.PORT || 1212;
 const manifest = path.resolve(webpackPaths.dllPath, 'renderer.json');
@@ -31,11 +33,13 @@ if (
   !(fs.existsSync(webpackPaths.dllPath) && fs.existsSync(manifest))
 ) {
   console.log(
-    chalk.black.bgYellow.bold(
+    //chalk.black.bgYellow.bold(
       'The DLL files are missing. Sit back while we build them for you with "npm run build-dll"',
-    ),
+    //),
   );
-  execSync('npm run postinstall');
+  
+  // execSync('npm run postinstall');
+  execSync('npm run build:dll');
 }
 
 const configuration: webpack.Configuration = {
@@ -46,8 +50,8 @@ const configuration: webpack.Configuration = {
   target: ['web', 'electron-renderer'],
 
   entry: [
-    `webpack-dev-server/client?http://localhost:${port}/dist`,
-    'webpack/hot/only-dev-server',
+    // `webpack-dev-server/client?http://localhost:${port}/dist`,
+    // 'webpack/hot/only-dev-server',
     path.join(webpackPaths.srcRendererPath, 'index.tsx'),
   ],
 
@@ -140,14 +144,14 @@ const configuration: webpack.Configuration = {
      * 'staging', for example, by changing the ENV variables in the npm scripts
      */
     new webpack.EnvironmentPlugin({
-      NODE_ENV: 'development',
+      NODE_ENV: process.env.NODE_ENV,
     }),
 
     new webpack.LoaderOptionsPlugin({
       debug: true,
     }),
 
-    new ReactRefreshWebpackPlugin(),
+    // new ReactRefreshWebpackPlugin(),
 
     new HtmlWebpackPlugin({
       filename: path.join('index.html'),
@@ -165,14 +169,15 @@ const configuration: webpack.Configuration = {
   ],
 
   node: {
-    __dirname: false,
-    __filename: false,
+    __dirname: true,
+    __filename: true,
+    global: true
   },
 
   devServer: {
     port,
     compress: true,
-    hot: true,
+    hot: false,
     headers: { 'Access-Control-Allow-Origin': '*' },
     static: {
       publicPath: '/',
@@ -180,6 +185,7 @@ const configuration: webpack.Configuration = {
     historyApiFallback: {
       verbose: true,
     },
+    
     setupMiddlewares(middlewares) {
       console.log('Starting preload.js builder...');
       const preloadProcess = spawn('npm', ['run', 'start:preload'], {

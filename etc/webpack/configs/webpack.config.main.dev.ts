@@ -1,39 +1,44 @@
+/**
+ * Webpack config for production electron main process
+ */
+
 import path from 'path';
 import webpack from 'webpack';
 import { merge } from 'webpack-merge';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import baseConfig from './webpack.config.base';
 import webpackPaths from './webpack.paths';
-import checkNodeEnv from '../scripts/check-node-env';
-
-// When an ESLint server is running, we can't set the NODE_ENV so we'll check if it's
-// at the dev webpack config is not accidentally run in a production environment
-if (process.env.NODE_ENV === 'production') {
-  checkNodeEnv('development');
-}
 
 const configuration: webpack.Configuration = {
   devtool: 'inline-source-map',
 
   mode: 'development',
 
-  target: 'electron-preload',
-
-  entry: path.join(webpackPaths.srcMainPath, 'preload.ts'),
-
-  output: {
-    path: webpackPaths.dllPath,
-    filename: 'preload.js',
-    // library: {
-    //   type: 'umd',
-    // },
+  target: 'electron-main',
+  
+  // externals: function ({ context, request }, callback) {
+  //   if (!/electron-debug/.test(request)) {
+  //     // Externalize to a commonjs module using the request path
+  //     return callback(null, 'commonjs2 ' + request);
+  //   }
+  //
+  //   // Continue without externalizing the import
+  //   callback();
+  // },
+  entry: {
+    main: path.join(webpackPaths.srcMainPath, 'main.ts'),
+    preload: path.join(webpackPaths.srcMainPath, 'preload.ts'),
   },
 
-  plugins: [
-    new BundleAnalyzerPlugin({
-      analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
-    }),
+  output: {
+    path: webpackPaths.distMainPath,
+    filename: '[name].js',
+    library: {
+      type: 'umd',
+    },
+  },
 
+  
+  plugins: [
     /**
      * Create global constants which can be configured at compile time.
      *
@@ -42,16 +47,15 @@ const configuration: webpack.Configuration = {
      *
      * NODE_ENV should be production so that modules do not perform certain
      * development checks
-     *
-     * By default, use 'development' as NODE_ENV. This can be overriden with
-     * 'staging', for example, by changing the ENV variables in the npm scripts
      */
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'development',
+      DEBUG_PROD: false,
+      START_MINIMIZED: false,
     }),
 
-    new webpack.LoaderOptionsPlugin({
-      debug: true,
+    new webpack.DefinePlugin({
+      'process.type': '"browser"',
     }),
   ],
 
@@ -61,11 +65,9 @@ const configuration: webpack.Configuration = {
    * https://github.com/webpack/webpack/issues/2010
    */
   node: {
-    __dirname: false,
-    __filename: false,
+    __dirname: true,
+    __filename: true,
   },
-
-  watch: true,
 };
 
 export default merge(baseConfig, configuration);

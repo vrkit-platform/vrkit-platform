@@ -1,3 +1,4 @@
+import * as React from "react"
 import { MemoryRouter as Router, Routes, Route } from "react-router-dom"
 import icon from "../assets/icons/icon.svg"
 import "./App.css"

@@ -1,14 +1,14 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
+//  "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "composite": true,
     "incremental": true,
-    "module": "commonjs",
-    "jsx": "react-jsx",
+    "module": "ESNext",
+    "jsx": "react",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "allowJs": true,
+    "skipDefaultLibCheck": true,
     "target": "ESNext",
     "lib": [
       "DOM",

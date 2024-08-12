@@ -19,7 +19,7 @@ const configuration: webpack.Configuration = {
 
   devtool: 'eval',
 
-  mode: process.env.NODE_ENV,
+  mode: process.env.NODE_ENV as any,
 
   target: 'electron-renderer',
 

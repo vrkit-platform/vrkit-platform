@@ -46,9 +46,7 @@ message ScreenConfig {
 
   SizeI size = 6;
 
-  oneof layout {
-    DisplayLayoutConfig display = 10;
-    VRLayoutConfig vr = 11;
-  };
+  DisplayLayoutConfig layout_display = 10;
+  VRLayoutConfig layout_vr = 11;
 
 }

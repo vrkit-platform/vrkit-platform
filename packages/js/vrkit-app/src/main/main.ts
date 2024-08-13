@@ -9,14 +9,15 @@
  * to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
-import Path from "path"
+import * as Path from "path"
 import { app, BrowserWindow, shell, ipcMain } from "electron"
 import { autoUpdater } from "electron-updater"
 import log from "electron-log"
 import MenuBuilder from "./menu"
-import { resolveHtmlPath } from "./util"
-import { Option } from "prelude-ts"
-
+import { resolveHtmlPath, resolveMainFile } from "./util"
+import { Option,asOption } from "@3fv/prelude-ts"
+import { isString } from "@3fv/guard"
+import iconPng from "../assets/icons/icon.png"
 const BuildPaths = {
   root: app.isPackaged ?
       __dirname :
@@ -24,7 +25,7 @@ const BuildPaths = {
   dllPath: app.isPackaged ? "." : "vrkit-externals-dll",
   assets: app.isPackaged ?
       Path.join(process.resourcesPath, "assets") :
-      Path.join(__dirname, "../../assets")
+      Path.join(__dirname, "..","assets")
 }
 
 function extendBuildPath(...parts:string[]):string {
@@ -81,15 +82,28 @@ function loadApp() {
       await installExtensions()
     }
     
+    const preloadFile = resolveMainFile("electron-preload.js"),
+        contextIsolation = false
     
     mainWindow = new BrowserWindow({
-      show: false,
-      width: 1024,
-      height: 728,
-      icon: getAssetPath("icons", "icon.png"),
+      show: false, width: 1024, height: 728,
+      
+      icon: iconPng,// getAssetPath("icons", "icon.png"),
       webPreferences: {
-        preload: extendBuildPath(BuildPaths.dllPath, "preload.js"),
-        nodeIntegration: true
+        contextIsolation, ...(
+            contextIsolation ? {
+              preload: preloadFile
+            } : {
+              allowRunningInsecureContent: true,
+              webSecurity: false,
+              nodeIntegration: true,
+              nodeIntegrationInSubFrames: true,
+              nodeIntegrationInWorker: true
+            }
+        ),
+        
+        devTools: isDebug,
+        sandbox: false
       }
     })
     
@@ -102,11 +116,17 @@ function loadApp() {
       if (!mainWindow) {
         throw new Error("\"mainWindow\" is not defined")
       }
-      if (process.env.START_MINIMIZED) {
-        mainWindow.minimize()
-      } else {
-        mainWindow.show()
-      }
+      
+      // Open devtools in `development` automatically
+      if (isDebug)
+        mainWindow.webContents.openDevTools()
+      
+      asOption(process.env.START_MINIMIZED).filter(isString).match({
+        None: () => mainWindow.show(),
+        Some: () => mainWindow.minimize()
+      })
+      
+      
     })
     
     mainWindow.on("closed", () => {
@@ -154,12 +174,13 @@ function loadApp() {
       })
       .catch(console.log)
 }
+
 // if (isDebug) {
 //   import("electron-debug").then(mod => {
 //     mod.default()
 //   }).then(loadApp)
 // } else {
-  loadApp()
+loadApp()
 // }
 
 export {}

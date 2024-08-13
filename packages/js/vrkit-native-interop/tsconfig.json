@@ -1,8 +1,12 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src/web"
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "target": "ES2017",
+    "rootDir": "src/web",
+    "outDir": "lib"
   },
-  "include": ["src/web/**/*.ts"],
+  "include": ["src/web/**/*"],
   "exclude": ["**/*.spec.ts"]
 }

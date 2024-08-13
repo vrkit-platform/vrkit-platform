@@ -6,7 +6,8 @@ set(APP_VERSION ${appVersion})
 
 # GET SOURCES & HEADERS
 file(GLOB_RECURSE libSources
-  src/native/*.[h,cpp]
+  src/native/*.h
+  src/native/*.cpp
 )
 file(GLOB_RECURSE libHeaders include/*.h)
 
@@ -117,6 +118,8 @@ target_include_directories(
 
 # SET EXTENSION FOR TARGET TO `.node`
 set_target_properties(${targetName} PROPERTIES PREFIX "" SUFFIX ".node")
+
+#target_compile_options(${targetName} PUBLIC "/permissive-")
 
 # INCLUDES
 target_link_libraries(${targetName}

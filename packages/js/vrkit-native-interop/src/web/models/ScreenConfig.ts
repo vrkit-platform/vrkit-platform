@@ -103,23 +103,13 @@ export interface ScreenConfig {
      */
     size?: SizeI;
     /**
-     * @generated from protobuf oneof: layout
+     * @generated from protobuf field: IRacingTools.Models.DisplayLayoutConfig layout_display = 10;
      */
-    layout: {
-        oneofKind: "display";
-        /**
-         * @generated from protobuf field: IRacingTools.Models.DisplayLayoutConfig display = 10;
-         */
-        display: DisplayLayoutConfig;
-    } | {
-        oneofKind: "vr";
-        /**
-         * @generated from protobuf field: IRacingTools.Models.VRLayoutConfig vr = 11;
-         */
-        vr: VRLayoutConfig;
-    } | {
-        oneofKind: undefined;
-    };
+    layoutDisplay?: DisplayLayoutConfig;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.VRLayoutConfig layout_vr = 11;
+     */
+    layoutVr?: VRLayoutConfig;
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.ScreenKind
@@ -349,8 +339,8 @@ class ScreenConfig$Type extends MessageType<ScreenConfig> {
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "kind", kind: "enum", T: () => ["IRacingTools.Models.ScreenKind", ScreenKind] },
             { no: 6, name: "size", kind: "message", T: () => SizeI },
-            { no: 10, name: "display", kind: "message", oneof: "layout", T: () => DisplayLayoutConfig },
-            { no: 11, name: "vr", kind: "message", oneof: "layout", T: () => VRLayoutConfig }
+            { no: 10, name: "layout_display", kind: "message", T: () => DisplayLayoutConfig },
+            { no: 11, name: "layout_vr", kind: "message", T: () => VRLayoutConfig }
         ]);
     }
     create(value?: PartialMessage<ScreenConfig>): ScreenConfig {
@@ -358,7 +348,6 @@ class ScreenConfig$Type extends MessageType<ScreenConfig> {
         message.id = "";
         message.name = "";
         message.kind = 0;
-        message.layout = { oneofKind: undefined };
         if (value !== undefined)
             reflectionMergePartial<ScreenConfig>(this, message, value);
         return message;
@@ -380,17 +369,11 @@ class ScreenConfig$Type extends MessageType<ScreenConfig> {
                 case /* IRacingTools.Models.SizeI size */ 6:
                     message.size = SizeI.internalBinaryRead(reader, reader.uint32(), options, message.size);
                     break;
-                case /* IRacingTools.Models.DisplayLayoutConfig display */ 10:
-                    message.layout = {
-                        oneofKind: "display",
-                        display: DisplayLayoutConfig.internalBinaryRead(reader, reader.uint32(), options, (message.layout as any).display)
-                    };
+                case /* IRacingTools.Models.DisplayLayoutConfig layout_display */ 10:
+                    message.layoutDisplay = DisplayLayoutConfig.internalBinaryRead(reader, reader.uint32(), options, message.layoutDisplay);
                     break;
-                case /* IRacingTools.Models.VRLayoutConfig vr */ 11:
-                    message.layout = {
-                        oneofKind: "vr",
-                        vr: VRLayoutConfig.internalBinaryRead(reader, reader.uint32(), options, (message.layout as any).vr)
-                    };
+                case /* IRacingTools.Models.VRLayoutConfig layout_vr */ 11:
+                    message.layoutVr = VRLayoutConfig.internalBinaryRead(reader, reader.uint32(), options, message.layoutVr);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -416,13 +399,12 @@ class ScreenConfig$Type extends MessageType<ScreenConfig> {
         /* IRacingTools.Models.SizeI size = 6; */
         if (message.size)
             SizeI.internalBinaryWrite(message.size, writer.tag(6, WireType.LengthDelimited).fork(), options).join();
-        /* IRacingTools.Models.DisplayLayoutConfig display = 10; */
-        if (message.layout.oneofKind === "display")
-            
-            DisplayLayoutConfig.internalBinaryWrite((message.layout as any).display, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
-        /* IRacingTools.Models.VRLayoutConfig vr = 11; */
-        if (message.layout.oneofKind === "vr")
-            VRLayoutConfig.internalBinaryWrite((message.layout as any).vr, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.DisplayLayoutConfig layout_display = 10; */
+        if (message.layoutDisplay)
+            DisplayLayoutConfig.internalBinaryWrite(message.layoutDisplay, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.VRLayoutConfig layout_vr = 11; */
+        if (message.layoutVr)
+            VRLayoutConfig.internalBinaryWrite(message.layoutVr, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

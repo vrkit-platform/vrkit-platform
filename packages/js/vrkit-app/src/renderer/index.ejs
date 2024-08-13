@@ -4,8 +4,12 @@
     <meta charset="utf-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="script-src 'self' 'unsafe-inline'"
+      content="script-src 'self' 'unsafe-inline' 'unsafe-eval'"
     />
+    <script language="JavaScript">
+			if (typeof window.global === "undefined")
+              window.global = window
+		</script>
     <title>Hello Electron React!</title>
   </head>
   <body>

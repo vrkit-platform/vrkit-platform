@@ -1,6 +1,7 @@
 {
 //  "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
+    "strictNullChecks": false,
     "composite": true,
     "incremental": true,
     "module": "ESNext",
@@ -21,7 +22,7 @@
     "alwaysStrict": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "noImplicitAny": false,
+        "noImplicitAny": false,
     
     "outDir": "lib",
     "inlineSourceMap": true,

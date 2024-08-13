@@ -231,7 +231,7 @@ namespace IRacingTools::Shared::System {
         }
 
         {
-            auto layout = screen->mutable_display();
+            auto layout = screen->mutable_layout_display();
 
             {
                 auto origin = layout->mutable_origin();
@@ -273,11 +273,11 @@ namespace IRacingTools::Shared::System {
             return false;
 
         if (screen.kind() == Models::SK_MONITOR) {
-            if (!screen.has_display() || !other.has_display())
+            if (!screen.has_layout_display() || !other.has_layout_display())
                 return false;
 
-            auto& layout1 = screen.display();
-            auto& layout2 = other.display();
+            auto& layout1 = screen.layout_display();
+            auto& layout2 = other.layout_display();
 
             if (!IsPositionEqual(layout1.origin(), layout2.origin()) || !IsPositionEqual(
                 layout1.origin_offset(),
@@ -377,7 +377,7 @@ namespace IRacingTools::Shared::System {
         }
 
         {
-            auto layout = screen->mutable_vr();
+            auto layout = screen->mutable_layout_vr();
             layout->set_scale(1.0);
             {
                 auto scaledSize = layout->mutable_scaled_size();
@@ -414,11 +414,11 @@ namespace IRacingTools::Shared::System {
             return false;
 
 
-        if (!screen.has_vr() || !other.has_vr())
+        if (!screen.has_layout_vr() || !other.has_layout_vr())
             return false;
 
-        auto& layout1 = screen.vr();
-        auto& layout2 = other.vr();
+        auto& layout1 = screen.layout_vr();
+        auto& layout2 = other.layout_vr();
 
         if (!IsSizeIEqual(layout1.scaled_size(), layout2.scaled_size()) || layout1.scale() != layout2.scale()) {
             return false;

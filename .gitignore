@@ -1,3 +1,7 @@
+dist
+.cache
+/packages/js/*/lib
+/packages/js/vrkit-builder-tool/src/mjs/package.json
 *.tsbuildinfo
 /.jupyter
 /.idea
@@ -22,3 +26,4 @@ node_modules
 /packages/js/vrkit-native-interop/lib
 /packages/js/vrkit-app/lib
 /lib
+/*.lock

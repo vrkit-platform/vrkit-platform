@@ -10,7 +10,6 @@
       [  "./packages/js/vrkit-app"],
       "vrkit-app/*":
       [  "./packages/js/vrkit-app/src/*"]
-      
     }
   },
   "references": [
@@ -20,9 +19,6 @@
     {
       "path": "./packages/js/vrkit-app"
     }
-//    {
-//      "path": "./etc/webpack"
-//    }
   ],
   "ts-node": {
     "compilerOptions": {

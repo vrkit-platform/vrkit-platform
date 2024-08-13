@@ -3,6 +3,14 @@ import "google/protobuf/any.proto";
 
 package IRacingTools.Models.RPC.Messages;
 
+message Ping {
+  uint32 count = 1;
+}
+
+message Pong {
+  uint32 ping_count = 1;
+}
+
 message List {
 
   // TARGET TO BE QUERIED; THIS CAN BE ANYTHING I.E. `dashboards`, `overlays`, ETC
@@ -13,7 +21,7 @@ message List {
   string query = 2;
 
   // ARGUMENTS FOR QUERY
-  map<string, string> parameters = 5;
+  //map<string, string> parameters = 5;
 
   // RESULT OR REQUEST
   bool is_result = 10;

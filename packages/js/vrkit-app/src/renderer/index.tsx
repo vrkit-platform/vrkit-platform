@@ -6,6 +6,7 @@ import type { Models } from "vrkit-native-interop"
 //
 
 let pingCountSeq = 0
+
 window["VRKitNativeTest"] = async function() {
   const { VRKitClient, VRKitPing, Models } = await import("vrkit-native-interop")
   console.log("VRKitPing", VRKitPing())
@@ -21,7 +22,7 @@ window["VRKitNativeTest"] = async function() {
           Models.Pong,
           pingRequest
       )
-      .then((res) => {
+      .then(res => {
         console.log("Received pong message", res)
       })
       .catch(err => console.error("ping failed", err))

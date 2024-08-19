@@ -5,11 +5,7 @@
       "vrkit-native-interop":
       [  "./packages/js/vrkit-native-interop"],
       "vrkit-native-interop/*":
-      [  "./packages/js/vrkit-native-interop/src/*"],
-      "vrkit-app":
-      [  "./packages/js/vrkit-app"],
-      "vrkit-app/*":
-      [  "./packages/js/vrkit-app/src/*"]
+      [  "./packages/js/vrkit-native-interop/src/*"]
     }
   },
   "references": [

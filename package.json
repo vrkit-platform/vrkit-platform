@@ -21,8 +21,13 @@
     "compile:watch": "tsc -b tsconfig.json -w --preserveWatchOutput",
     "compile:tools": "yarn workspace vrkit-builder-tool build",
     "compile:tools:watch": "yarn workspace vrkit-builder-tool build",
-    "compile:all:watch": "concurrently npm:compile:watch npm:compile:tools:watch",
-    "dev": "yarn workspace vrkit-app run dev",
+    
+    "compile:all": "run-s compile:tools compile",
+    "compile:all:watch": "run-p compile:watch compile:tools:watch",
+    
+    "dev:vrkit-app": "yarn workspace vrkit-app run dev",
+    "dev": "run-s compile:all && run-p compile:all:watch dev:vrkit-app",
+    
     "postinstall": "patch-package"
   },
   "repository": {
@@ -74,6 +79,7 @@
     "ejs-loader": "^0.5.0",
     "electron": "^31.3.1",
     "electron-builder": "^24.13.3",
+    "@tomjs/electron-devtools-installer": "^2.3.2",
     "electron-devtools-installer": "^3.2.0",
     "electron-rebuild": "^3.2.9",
     "electronmon": "^2.0.3",

@@ -24,6 +24,7 @@ const assetsDir = Path.join(vrkAppSrcDir, "assets")
 
 const mainDir = Path.join(vrkAppSrcDir, "main")
 const rendererDir = Path.join(vrkAppSrcDir, "renderer")
+const commonDir = Path.join(vrkAppSrcDir, "common")
 
 const pkg = JSON.parse(Fs.readFileSync(Path.join(rootDir, "package.json"),"utf-8"))
 const pkgVersion = pkg.version
@@ -54,6 +55,7 @@ export {
   vrkAppSrcDir,
   rendererDir,
   mainDir,
+  commonDir,
   assetsDir,
   pkg,
   pkgVersion

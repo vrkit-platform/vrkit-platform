@@ -28,10 +28,12 @@ Sh.mkdir("-p", targetDir)
 
 const
   devServer = webpackDevServerConfig(1618, {
-    static: [distDir, targetDir, assetsDir],
+    static: [distDir, targetDir, assetsDir, Path.dirname(assetsDir)],
     proxy: [{
-      context: ['/api'],
-      target: "http://localhost:7001"
+      context: ['/api','/public'],
+      // target: "http://localhost:7001"
+      target: "http://localhost:7272"
+      
     }]
   })
 

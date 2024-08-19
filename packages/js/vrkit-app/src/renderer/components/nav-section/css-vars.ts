@@ -52,11 +52,11 @@ function verticalVars(theme: Theme) {
     '--nav-item-pb': spacing(0.5),
     '--nav-item-pl': spacing(1.5),
     // root
-    '--nav-item-root-height': '44px',
+    '--nav-item-root-height': '2rem',
     // sub
-    '--nav-item-sub-height': '36px',
+    '--nav-item-sub-height': '1.5re,',
     // icon
-    '--nav-icon-size': '24px',
+    '--nav-icon-size': '1.2rem',
     '--nav-icon-margin': spacing(0, 1.5, 0, 0),
     // bullet
     '--nav-bullet-size': '12px',

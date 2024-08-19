@@ -1,5 +1,5 @@
 import type { NavSectionProps, NavItemBaseProps } from 'vrkit-app-renderer/components/nav-section';
-
+import { isNavDataGroupWithItems } from 'vrkit-app-renderer/components/nav-section/types';
 import { flattenArray } from 'vrkit-app-renderer/utils/helper';
 
 // ----------------------------------------------------------------------
@@ -11,7 +11,7 @@ type ItemProps = {
 };
 
 export function getAllItems({ data }: { data: NavSectionProps['data'] }) {
-  const reduceItems = data.map((list) => handleLoop(list.items, list.subheader)).flat();
+  const reduceItems = data.filter(isNavDataGroupWithItems).map((list) => handleLoop(list.items, list.subheader)).flat();
 
   const items = flattenArray(reduceItems).map((option) => {
     const group = splitPath(reduceItems, option.path);

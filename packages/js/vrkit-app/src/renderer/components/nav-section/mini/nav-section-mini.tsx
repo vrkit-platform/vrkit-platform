@@ -6,7 +6,11 @@ import { NavUl, NavLi } from '../styles';
 import { navSectionClasses } from '../classes';
 import { navSectionCssVars } from '../css-vars';
 
-import type { NavGroupProps, NavSectionProps } from '../types';
+import {
+  isNavDataGroupWithItems,
+  type NavGroupProps,
+  type NavSectionProps
+} from "../types"
 
 // ----------------------------------------------------------------------
 
@@ -28,7 +32,7 @@ export function NavSectionMini({
   return (
     <Stack component="nav" className={navSectionClasses.mini.root} sx={{ ...cssVars, ...sx }}>
       <NavUl sx={{ flex: '1 1 auto', gap: 'var(--nav-item-gap)' }}>
-        {data.map((group) => (
+        {data.filter(isNavDataGroupWithItems).map((group) => (
           <Group
             key={group.subheader ?? group.items[0].title}
             render={render}

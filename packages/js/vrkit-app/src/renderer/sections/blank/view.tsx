@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
 import { varAlpha } from 'vrkit-app-renderer/theme/styles';
-import { DashboardContent } from 'vrkit-app-renderer/layouts/dashboard';
+import { AppContent } from '../../layouts/app';
 
 // ----------------------------------------------------------------------
 
@@ -12,7 +12,7 @@ type Props = {
 
 export function BlankView({ title = 'Blank' }: Props) {
   return (
-    <DashboardContent maxWidth="xl">
+    <AppContent maxWidth="xl">
       <Typography variant="h4"> {title} </Typography>
 
       <Box
@@ -25,6 +25,6 @@ export function BlankView({ title = 'Blank' }: Props) {
           border: (theme) => `dashed 1px ${theme.vars.palette.divider}`,
         }}
       />
-    </DashboardContent>
+    </AppContent>
   );
 }

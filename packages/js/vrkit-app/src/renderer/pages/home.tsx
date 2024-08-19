@@ -1,6 +1,5 @@
 import { Helmet } from 'react-helmet-async';
 
-import { HomeView } from 'vrkit-app-renderer/sections/home/view';
 
 // ----------------------------------------------------------------------
 
@@ -18,7 +17,7 @@ export default function Page() {
         <meta name="description" content={metadata.description} />
       </Helmet>
 
-      <HomeView />
+      
     </>
   );
 }

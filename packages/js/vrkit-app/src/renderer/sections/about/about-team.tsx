@@ -13,16 +13,11 @@ import { _socials, _carouselsMembers } from 'vrkit-app-renderer/_mock';
 import { Image } from 'vrkit-app-renderer/components/image';
 import { Iconify, SocialIcon } from 'vrkit-app-renderer/components/iconify';
 import { varFade, MotionViewport } from 'vrkit-app-renderer/components/animate';
-import { Carousel, useCarousel, CarouselArrowFloatButtons } from 'vrkit-app-renderer/components/carousel';
+
 
 // ----------------------------------------------------------------------
 
 export function AboutTeam() {
-  const carousel = useCarousel({
-    align: 'start',
-    slideSpacing: '24px',
-    slidesToShow: { xs: 1, sm: 2, md: 3, lg: 4 },
-  });
 
   return (
     <Container component={MotionViewport} sx={{ textAlign: 'center', py: { xs: 10, md: 15 } }}>
@@ -46,27 +41,7 @@ export function AboutTeam() {
       </m.div>
 
       <Stack sx={{ position: 'relative' }}>
-        <CarouselArrowFloatButtons
-          {...carousel.arrows}
-          options={carousel.options}
-          slotProps={{
-            prevBtn: { sx: { left: { xs: -8, md: -40 } } },
-            nextBtn: { sx: { right: { xs: -8, md: -40 } } },
-          }}
-        />
 
-        <Carousel carousel={carousel} sx={{ px: 0.5 }}>
-          {_carouselsMembers.map((member) => (
-            <Box
-              key={member.id}
-              component={m.div}
-              variants={varFade().in}
-              sx={{ py: { xs: 8, md: 10 } }}
-            >
-              <MemberCard member={member} />
-            </Box>
-          ))}
-        </Carousel>
       </Stack>
 
       <Button

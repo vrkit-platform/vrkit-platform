@@ -12,7 +12,7 @@ import type { NavListProps, NavSubListProps } from '../types';
 
 // ----------------------------------------------------------------------
 
-export function NavList({ data, render, depth, slotProps, enabledRootRedirect }: NavListProps) {
+export function NavList({ data, render, depth, slotProps, enabledRootRedirect, cssVars, ...other }: NavListProps) {
   const pathname = usePathname();
 
   const active = useActiveLink(data.path, !!data.children);
@@ -57,6 +57,7 @@ export function NavList({ data, render, depth, slotProps, enabledRootRedirect }:
       slotProps={depth === 1 ? slotProps?.rootItem : slotProps?.subItem}
       // actions
       onClick={handleToggleMenu}
+      
     />
   );
 

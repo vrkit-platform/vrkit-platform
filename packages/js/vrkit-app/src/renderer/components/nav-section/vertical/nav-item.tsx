@@ -160,6 +160,7 @@ const StyledNavItem = styled(ButtonBase, {
     ...(rootItem && {
       ...baseStyles.item,
       minHeight: 'var(--nav-item-root-height)',
+      
       [`& .${navSectionClasses.item.icon}`]: { ...baseStyles.icon },
       [`& .${navSectionClasses.item.texts}`]: { ...baseStyles.texts },
       [`& .${navSectionClasses.item.title}`]: { ...baseStyles.title },

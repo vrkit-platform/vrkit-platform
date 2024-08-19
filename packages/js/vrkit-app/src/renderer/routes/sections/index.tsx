@@ -5,29 +5,19 @@ import {
   NonIndexRouteObject,
   useRoutes
 } from "react-router-dom"
+import { Outlet } from 'react-router-dom';
 
-import { dashboardRoutes } from "./dashboard"
-import { paths } from "../paths"
+import { AppLayout } from '../../layouts/app';
+import { LoadingScreen } from 'vrkit-app-renderer/components/loading-screen';
 
-// ----------------------------------------------------------------------
-
+import { mainRoutes } from "./main-routes"
+import { WebPaths, WebRootPath } from "../WebPaths"
+import { errorRoutes } from "./error-routes"
 
 function makeDefaultRouteConfigs(
   ...routePaths: string[]
 ): (IndexRouteObject | NonIndexRouteObject)[] {
-  /**
-   * Skip home page
-   * element: <Navigate to={CONFIG.auth.redirectPath} replace />,
-   */
-  // const element = (
-  //   <Suspense fallback={<SplashScreen />}>
-  //     <MainLayout>
-  //       <HomePage />
-  //     </MainLayout>
-  //   </Suspense>
-  // )
-  
-  const element = <Navigate to={paths.dashboard.root} replace />
+  const element = <Navigate to={WebPaths.app.root} replace />
 
   return [
     { index: true, element },
@@ -38,28 +28,28 @@ function makeDefaultRouteConfigs(
   ]
 }
 
+const layoutContent = <AppLayout>
+  <Suspense fallback={<LoadingScreen />}>
+    <Outlet />
+  </Suspense>
+</AppLayout>
+
 export function Router() {
+  
   return useRoutes([
     ...makeDefaultRouteConfigs("", "/", "/index.html"),
 
-    // Dashboard
-    ...dashboardRoutes,
-
     // Main
-    //...mainRoutes,
-
-    // Components
-    // ...componentsRoutes,
-
-    // No match
     {
-      path: "*",
-      element: (
-        <Navigate
-          to="/404"
-          replace
-        />
-      )
-    }
+      path: WebRootPath.app,
+      element: <>{layoutContent}</>,
+      children: [
+        ...mainRoutes,
+      ]
+    },
+    
+    ...errorRoutes,
+
+    
   ])
 }

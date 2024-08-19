@@ -3,7 +3,6 @@ import Divider from '@mui/material/Divider';
 
 import { MenuTags } from './menu-tags';
 import { NavSubList } from './nav-sub-list';
-import { MenuCarousel } from './menu-carousel';
 import { MenuMoreLink } from './menu-more-link';
 import { NavUl, navSectionClasses } from '../../nav-section';
 
@@ -48,17 +47,6 @@ export function NavContent({
               title={data.moreLink.title}
               sx={slotProps?.moreLink}
             />
-          )}
-
-          {!!data.slides && (
-            <>
-              <Divider sx={{ borderStyle: 'dashed', my: 3 }} />
-              <MenuCarousel
-                slides={data.slides}
-                displayCount={slotProps?.carousel?.displayCount}
-                sx={slotProps?.carousel?.sx}
-              />
-            </>
           )}
 
           {!!data.tags && (

@@ -13,7 +13,7 @@ import { useSetState } from 'vrkit-app-renderer/hooks/use-set-state';
 
 import { fIsAfter, fIsBetween } from 'vrkit-app-renderer/utils/format-time';
 
-import { DashboardContent } from 'vrkit-app-renderer/layouts/dashboard';
+import { AppContent } from '../../../layouts/app';
 import { _allFiles, FILE_TYPE_OPTIONS } from 'vrkit-app-renderer/_mock';
 
 import { toast } from 'vrkit-app-renderer/components/snackbar';
@@ -142,7 +142,7 @@ export function FileManagerView() {
 
   return (
     <>
-      <DashboardContent>
+      <AppContent>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Typography variant="h4">File manager</Typography>
           <Button
@@ -182,7 +182,7 @@ export function FileManagerView() {
             )}
           </>
         )}
-      </DashboardContent>
+      </AppContent>
 
       <FileManagerNewFolderDialog open={upload.value} onClose={upload.onFalse} />
 

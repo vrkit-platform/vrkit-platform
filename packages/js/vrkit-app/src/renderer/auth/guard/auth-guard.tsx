@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-import { paths } from 'vrkit-app-renderer/routes/paths';
+import { WebPaths } from '../../routes/WebPaths';
 import { useRouter, usePathname, useSearchParams } from 'vrkit-app-renderer/routes/hooks';
 
 import { CONFIG } from 'vrkit-app-renderer/config-global';
@@ -41,22 +41,22 @@ export function AuthGuard({ children }: Props) {
       return;
     }
 
-    if (!authenticated) {
-      const { method } = CONFIG.auth;
-
-      const signInPath = {
-        jwt: paths.auth.jwt.signIn,
-        auth0: paths.auth.auth0.signIn,
-        amplify: paths.auth.amplify.signIn,
-        firebase: paths.auth.firebase.signIn,
-        supabase: paths.auth.supabase.signIn,
-      }[method];
-
-      const href = `${signInPath}?${createQueryString('returnTo', pathname)}`;
-
-      router.replace(href);
-      return;
-    }
+    // if (!authenticated) {
+    //   const { method } = CONFIG.auth;
+    //
+    //   const signInPath = {
+    //     jwt: WebPaths.auth.jwt.signIn,
+    //     auth0: WebPaths.auth.auth0.signIn,
+    //     amplify: WebPaths.auth.amplify.signIn,
+    //     firebase: WebPaths.auth.firebase.signIn,
+    //     supabase: WebPaths.auth.supabase.signIn,
+    //   }[method];
+    //
+    //   const href = `${signInPath}?${createQueryString('returnTo', pathname)}`;
+    //
+    //   router.replace(href);
+    //   return;
+    // }
 
     setIsChecking(false);
   };

@@ -54,7 +54,7 @@ function mobileVars(theme: Theme) {
     '--nav-item-hover-color': palette.action.hover,
     '--nav-item-caption-color': palette.text.disabled,
     // root
-    '--nav-item-root-height': '44px',
+    '--nav-item-root-height': '2rem',
     '--nav-item-root-active-color': palette.primary.main,
     '--nav-item-root-active-color-on-dark': palette.primary.light,
     '--nav-item-root-active-bg': varAlpha(palette.primary.mainChannel, 0.08),
@@ -62,13 +62,13 @@ function mobileVars(theme: Theme) {
     '--nav-item-root-open-color': palette.text.primary,
     '--nav-item-root-open-bg': palette.action.hover,
     // sub
-    '--nav-item-sub-height': '36px',
+    '--nav-item-sub-height': '1.5rem',
     '--nav-item-sub-active-color': palette.text.primary,
     '--nav-item-sub-active-bg': palette.action.hover,
     '--nav-item-sub-open-color': palette.text.primary,
     '--nav-item-sub-open-bg': palette.action.hover,
     // icon
-    '--nav-icon-size': '24px',
+    '--nav-icon-size': '1.2rem',
     '--nav-icon-margin': spacing(0, 2, 0, 0),
   };
 }

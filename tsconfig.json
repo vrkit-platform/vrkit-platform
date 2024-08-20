@@ -2,6 +2,10 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "vrkit-models":
+      [  "./packages/js/vrkit-models"],
+      "vrkit-models/*":
+      [  "./packages/js/vrkit-models/src/*"],
       "vrkit-native-interop":
       [  "./packages/js/vrkit-native-interop"],
       "vrkit-native-interop/*":
@@ -14,6 +18,9 @@
     },
     {
       "path": "./packages/js/vrkit-app"
+    },
+    {
+      "path": "./packages/js/vrkit-models"
     }
   ],
   "ts-node": {

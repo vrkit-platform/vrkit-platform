@@ -1,4 +1,3 @@
-export * from './mini';
 
 export * from './hooks';
 
@@ -8,8 +7,8 @@ export * from './classes';
 
 export * from './css-vars';
 
-export * from './vertical';
-
 export type * from './types';
 
-export * from './horizontal';
+export * from './nav-section';
+
+export { NavItem as NavSectionVerticalItem } from './nav-item';

@@ -21,7 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "bindings": "^1.5.0",
-    "prelude-ts": "^1.0.6"
+    "vrkit-models": "1.0.0"
   },
   "peerDependencies": {
     "electron": "^31.3.0"

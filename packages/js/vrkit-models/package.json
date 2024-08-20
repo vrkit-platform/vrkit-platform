@@ -1,0 +1,31 @@
+{
+  "name": "vrkit-models",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "binary": {
+    "napi_versions": [
+      9
+    ]
+  },
+  "cmake-js": {
+    "runtime": "electron",
+    "runtimeVersion": "31.3.0",
+    "arch": "x64"
+  },
+  "scripts": {
+    "build:watch": "tsc -p tsconfig.json -w"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@protobuf-ts/runtime": "^2.9.4"
+  },
+  "devDependencies": {
+    "cmake-js": "^7.3.0",
+    "@protobuf-ts/plugin": "^2.9.4",
+    "typescript": "^5.5.4",
+    "vrkit-builder-tool": "1.0.0"
+  }
+}

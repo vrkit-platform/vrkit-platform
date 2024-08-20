@@ -4,7 +4,6 @@
     "outDir": "lib",
     "rootDir": "src",
     "paths": {
-      
       "vrkit-app-main":
       [  "./src/main"],
       "vrkit-app-main/*":

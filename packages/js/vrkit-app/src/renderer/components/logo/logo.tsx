@@ -93,7 +93,6 @@ export const Logo = forwardRef<HTMLDivElement, LogoProps>(
             flexShrink: 0,
             display: 'inline-flex',
             verticalAlign: 'middle',
-            ...(disableLink && { pointerEvents: 'none' }),
             ...sx,
           }}
           {...other}

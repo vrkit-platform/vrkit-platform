@@ -63,16 +63,20 @@ import { ThemeProvider } from "vrkit-app-renderer/theme/theme-provider"
 import { Snackbar } from "vrkit-app-renderer/components/snackbar"
 import { ProgressBar } from "vrkit-app-renderer/components/progress-bar"
 import { MotionLazy } from "vrkit-app-renderer/components/animate/motion-lazy"
+import { Provider as ReduxProvider } from "react-redux"
 import {
   defaultSettings,
   SettingsDrawer,
   SettingsProvider
 } from "vrkit-app-renderer/components/settings"
+import useAppStore from "./hooks/useAppStore"
 
 export default function App() {
   useScrollToTop()
+  const appStore = useAppStore()
 
   return (
+      <ReduxProvider store={appStore}>
     <I18nProvider>
       <LocalizationProvider>
         <SettingsProvider settings={defaultSettings}>
@@ -87,5 +91,6 @@ export default function App() {
         </SettingsProvider>
       </LocalizationProvider>
     </I18nProvider>
+      </ReduxProvider>
   )
 }

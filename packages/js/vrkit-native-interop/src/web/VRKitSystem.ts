@@ -4,8 +4,8 @@
 import Path from "path"
 import { MessageType } from "@protobuf-ts/runtime"
 import Bind from "bindings"
-import { Envelope, Envelope_Kind } from "./models/RPC/Envelope"
-import { Any } from "./models/google/protobuf/any"
+import { Envelope, Envelope_Kind } from "vrkit-models"
+import { Any } from "vrkit-models"
 // const nativeAddonFile = Path.resolve(__dirname, "..","..","bin","Debug","vrkit_native_interop.node")
 // const nativeAddonFileRelative = Path.relative(process.cwd(), nativeAddonFile);
 // console.log(`Loading native addon abs >> ${nativeAddonFile}`);

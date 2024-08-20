@@ -7,6 +7,7 @@ import Box from '@mui/material/Box';
 import { varAlpha } from 'vrkit-app-renderer/theme/styles';
 
 import { Logo } from '../logo';
+import React from "react"
 
 // ----------------------------------------------------------------------
 

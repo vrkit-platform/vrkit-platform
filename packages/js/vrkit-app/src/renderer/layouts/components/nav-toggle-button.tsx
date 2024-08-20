@@ -8,10 +8,10 @@ import { varAlpha } from 'vrkit-app-renderer/theme/styles';
 // ----------------------------------------------------------------------
 
 export type NavToggleButtonProps = IconButtonProps & {
-  isNavMini: boolean;
+
 };
 
-export function NavToggleButton({ isNavMini, sx, ...other }: NavToggleButtonProps) {
+export function NavToggleButton({ sx, ...other }: NavToggleButtonProps) {
   return (
     <IconButton
       size="small"
@@ -23,7 +23,7 @@ export function NavToggleButton({ isNavMini, sx, ...other }: NavToggleButtonProp
         bgcolor: 'background.default',
         transform: 'translateX(-50%)',
         zIndex: 'var(--layout-nav-zIndex)',
-        left: isNavMini ? 'var(--layout-nav-mini-width)' : 'var(--layout-nav-vertical-width)',
+        left: 'var(--layout-nav-vertical-width)',
         border: (theme) => `1px solid ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)}`,
         transition: (theme) =>
           theme.transitions.create(['left'], {
@@ -42,9 +42,6 @@ export function NavToggleButton({ isNavMini, sx, ...other }: NavToggleButtonProp
         sx={{
           width: 16,
           height: 16,
-          ...(isNavMini && {
-            transform: 'scaleX(-1)',
-          }),
         }}
       >
         {/* https://icon-sets.iconify.design/eva/arrow-ios-back-fill/ */}

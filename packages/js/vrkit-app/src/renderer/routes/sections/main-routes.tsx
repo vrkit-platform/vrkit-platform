@@ -15,6 +15,8 @@ export const mainRoutes = [
   { element: <Navigate to={WebPaths.app.root} replace />, index: true },
   { element: <IndexPage />, path: getWebPathPart(WebPaths.app.root) },
   { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.tracks) },
+  { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.laps) },
+  { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.games) },
   // {
   //   path: 'product',
   //   children: [

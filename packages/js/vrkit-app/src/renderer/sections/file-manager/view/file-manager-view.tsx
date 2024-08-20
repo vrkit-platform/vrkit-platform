@@ -14,7 +14,7 @@ import { useSetState } from 'vrkit-app-renderer/hooks/use-set-state';
 import { fIsAfter, fIsBetween } from 'vrkit-app-renderer/utils/format-time';
 
 import { AppContent } from '../../../layouts/app';
-import { _allFiles, FILE_TYPE_OPTIONS } from 'vrkit-app-renderer/_mock';
+import { _files, FILE_TYPE_OPTIONS } from 'vrkit-app-renderer/_mock';
 
 import { toast } from 'vrkit-app-renderer/components/snackbar';
 import { Iconify } from 'vrkit-app-renderer/components/iconify';
@@ -42,7 +42,7 @@ export function FileManagerView() {
 
   const [view, setView] = useState('list');
 
-  const [tableData, setTableData] = useState<IFile[]>(_allFiles);
+  const [tableData, setTableData] = useState<IFile[]>(_files);
 
   const filters = useSetState<IFileFilters>({
     name: '',

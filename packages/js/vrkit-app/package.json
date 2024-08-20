@@ -27,13 +27,15 @@
     "react-router-dom": "^6.26.1",
     "react-router": "^6.26.1",
     
-    
+    "usehooks-ts": "^3.1.0",
     "redux": "^5.0.1",
+    "redux-logger": "^3.0.6",
     "lodash": "^4.17.21",
     "react-redux": "^9.1.2",
     
     "react-logger": "^1.1.0",
     "@reduxjs/toolkit": "^2.2.7",
+    "tinycolor2": "^1.6.0",
     "webpack": "^5.93.0",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4",

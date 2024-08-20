@@ -2,7 +2,7 @@ import type { SettingsState } from 'vrkit-app-renderer/components/settings';
 import type { NavSectionProps } from 'vrkit-app-renderer/components/nav-section';
 import type { Theme, SxProps, CSSObject, Breakpoint } from '@mui/material/styles';
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import Alert from '@mui/material/Alert';
 import { useTheme } from '@mui/material/styles';
@@ -21,7 +21,6 @@ import { Main } from './main';
 
 import { layoutClasses } from '../classes';
 import { NavVertical } from './nav-vertical';
-import { NavHorizontal } from './nav-horizontal';
 import { HeaderBase } from '../core/header-base';
 
 import { LayoutSection } from '../core/layout-section';
@@ -50,11 +49,7 @@ export function AppLayout({ sx, children, data }: AppLayoutProps) {
 
   const navData = data?.nav ?? dashboardNavData;
 
-  const isNavMini = settings.navLayout === 'mini';
-
-  const isNavHorizontal = settings.navLayout === 'horizontal';
-
-  const isNavVertical = isNavMini || settings.navLayout === 'vertical';
+  // const isNavVertical = isNavMini || settings.navLayout === 'vertical';
 
   return (
     <>
@@ -66,7 +61,7 @@ export function AppLayout({ sx, children, data }: AppLayoutProps) {
         headerSection={
           <HeaderBase
             layoutQuery={layoutQuery}
-            disableElevation={isNavVertical}
+            disableElevation={true}
             onOpenNav={mobileNavOpen.onTrue}
             data={{
               nav: navData,
@@ -84,13 +79,13 @@ export function AppLayout({ sx, children, data }: AppLayoutProps) {
                   This is an info Alert.
                 </Alert>
               ),
-              bottomArea: isNavHorizontal ? (
-                <NavHorizontal
-                  data={navData}
-                  layoutQuery={layoutQuery}
-                  cssVars={navColorVars.section}
-                />
-              ) : null,
+              // bottomArea: isNavHorizontal ? (
+              //   <NavHorizontal
+              //     data={navData}
+              //     layoutQuery={layoutQuery}
+              //     cssVars={navColorVars.section}
+              //   />
+              // ) : null,
             }}
             slotProps={{
               toolbar: {
@@ -101,33 +96,12 @@ export function AppLayout({ sx, children, data }: AppLayoutProps) {
                   [`& [data-area="right"]`]: {
                     gap: { xs: 0, sm: 0.75 },
                   },
-                  ...(isNavHorizontal && {
-                    bgcolor: 'var(--layout-nav-bg)',
-                    [`& .${iconButtonClasses.root}`]: {
-                      color: 'var(--layout-nav-text-secondary-color)',
-                    },
-                    [theme.breakpoints.up(layoutQuery)]: {
-                      height: 'var(--layout-nav-horizontal-height)',
-                    },
-                    [`& [data-slot="workspaces"]`]: {
-                      color: 'var(--layout-nav-text-primary-color)',
-                    },
-                    [`& [data-slot="logo"]`]: {
-                      display: 'none',
-                      [theme.breakpoints.up(layoutQuery)]: { display: 'inline-flex' },
-                    },
-                    [`& [data-slot="divider"]`]: {
-                      [theme.breakpoints.up(layoutQuery)]: {
-                        display: 'flex',
-                      },
-                    },
-                  }),
                 },
               },
               container: {
                 maxWidth: false,
                 sx: {
-                  ...(isNavVertical && { px: { [layoutQuery]: 5 } }),
+                  px: { [layoutQuery]: 5 } ,
                 },
               },
             }}
@@ -137,10 +111,9 @@ export function AppLayout({ sx, children, data }: AppLayoutProps) {
          * Sidebar
          *************************************** */
         sidebarSection={
-          isNavHorizontal ? null : (
+          
             <NavVertical
               data={navData}
-              isNavMini={isNavMini}
               layoutQuery={layoutQuery}
               cssVars={navColorVars.section}
               onToggleNav={() =>
@@ -150,7 +123,7 @@ export function AppLayout({ sx, children, data }: AppLayoutProps) {
                 )
               }
             />
-          )
+          
         }
         /** **************************************
          * Footer
@@ -177,13 +150,13 @@ export function AppLayout({ sx, children, data }: AppLayoutProps) {
                 easing: 'var(--layout-transition-easing)',
                 duration: 'var(--layout-transition-duration)',
               }),
-              pl: isNavMini ? 'var(--layout-nav-mini-width)' : 'var(--layout-nav-vertical-width)',
+              pl: 'var(--layout-nav-vertical-width)',
             },
           },
           ...sx,
         }}
       >
-        <Main isNavHorizontal={isNavHorizontal}>{children}</Main>
+        <Main>{children}</Main>
       </LayoutSection>
     </>
   );

@@ -1,4 +1,3 @@
-
 #include <IRacingTools/SDK/DiskClient.h>
 #include <chrono>
 #include <fstream>
@@ -24,11 +23,14 @@
 
 #include "TrackMapGenerator.h"
 
+#include <IRacingTools/Shared/Services/RPCServerService.h>
+
 namespace IRacingTools::Shared::Services {
   using namespace IRacingTools::SDK::Utils;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::Shared::Services::Pipelines;
   using namespace IRacingTools::Shared::Utils;
+
   namespace {
     auto L = GetCategoryWithType<TrackMapService>();
 
@@ -46,14 +48,14 @@ namespace IRacingTools::Shared::Services {
 
   TrackMapService::TrackMapService(
       const std::shared_ptr<ServiceContainer> &serviceContainer)
-      : TrackMapService(serviceContainer, Options{}) {
+    : TrackMapService(serviceContainer, Options{}) {
   }
 
   TrackMapService::TrackMapService(
       const std::shared_ptr<ServiceContainer> &serviceContainer,
       const Options &options)
-      : Service(serviceContainer, PrettyType<TrackMapService>{}.name()),
-        options_(options) {
+    : Service(serviceContainer, PrettyType<TrackMapService>{}.name()),
+      options_(options) {
 
 
     dataFileTaskQueue_ = std::make_unique<TrackMapTaskQueue>(
@@ -106,8 +108,8 @@ namespace IRacingTools::Shared::Services {
     // NOW PREPARE
     if (!skipPrepare) {
       filePaths_ = options_.paths.empty()
-                       ? std::vector<fs::path>{GetTrackMapsPath()}
-                       : options_.paths;
+                     ? std::vector<fs::path>{GetTrackMapsPath()}
+                     : options_.paths;
     }
   }
 
@@ -120,15 +122,16 @@ namespace IRacingTools::Shared::Services {
 
   std::expected<bool, SDK::GeneralError> TrackMapService::init() {
     auto onReadHandler =
-        [&](const std::vector<
-            std::shared_ptr<IRacingTools::Models::TrackMapFile>> &files) {
-          std::scoped_lock lock(stateMutex_);
-          dataFiles_.clear();
-          files_.clear();
-          for (auto &file: files) {
-            files_[file->track_layout_metadata().id()] = file;
-          }
-        };
+        [&](
+        const std::vector<
+          std::shared_ptr<IRacingTools::Models::TrackMapFile>> &files) {
+      std::scoped_lock lock(stateMutex_);
+      dataFiles_.clear();
+      files_.clear();
+      for (auto &file: files) {
+        files_[file->track_layout_metadata().id()] = file;
+      }
+    };
     {
       std::scoped_lock lock(stateMutex_);
 
@@ -141,7 +144,8 @@ namespace IRacingTools::Shared::Services {
       // READ THE UNDERLYING DATA FILE, THE RESULT (IF SUCCESSFUL) IS HANDLED BY
       // THE `onRead` EVENT HANDLER
       L->info(
-          "Reading TrackMapFile jsonl file: {}", fileHandler_->file().string());
+          "Reading TrackMapFile jsonl file: {}",
+          fileHandler_->file().string());
 
       auto loadError = load(true);
 
@@ -152,9 +156,22 @@ namespace IRacingTools::Shared::Services {
 
       // TODO: Add JSONLines data file loading here
       auto tds = getContainer()->getService<TelemetryDataService>();
-      tds->events.onFilesChanged.subscribe([&](auto _, auto &changedDataFiles) {
-        enqueueDataFiles(changedDataFiles);
-      });
+      tds->events.onFilesChanged.subscribe(
+          [&](auto _, auto &changedDataFiles) {
+            enqueueDataFiles(changedDataFiles);
+          });
+
+      auto rpc = getContainer()->getService<RPCServerService>();
+      // auto rpcListPtr = std::mem_fn(&TrackMapService::rpcList);
+      auto rpcListRoute = RPCServerService::TypedRoute<
+        RPC::Messages::List, RPC::Messages::List>::Create(
+          //std::bind(rpcListPtr, this, std::placeholders::_1, std::placeholders::_2),
+          [this](auto &request, auto &response) {
+            return rpcList(request, response);
+          },
+          "/tracks/list");
+      rpc->addRoute(rpcListRoute);
+
     }
     return true;
   }
@@ -185,6 +202,24 @@ namespace IRacingTools::Shared::Services {
     return std::nullopt;
   }
 
+  std::expected<std::shared_ptr<RPC::Messages::List>, GeneralError>
+  TrackMapService::rpcList(
+      const std::shared_ptr<Models::RPC::Messages::List> &request,
+      const std::shared_ptr<RPC::Envelope> &envelope) {
+    auto response = std::make_shared<RPC::Messages::List>();
+    auto tmfs = ValuesOf(files_);
+    for (auto &tmf: tmfs) {
+      auto result = response->add_results();
+      if (!result->PackFrom(*tmf.get())) {
+        L->warn(
+            "Unable to pack track map file protobuf into list, tmf({})",
+            tmf->DebugString());
+        response->mutable_results()->RemoveLast();
+      }
+    }
+    return response;
+  }
+
   /**
    * @brief Remove underlying data file & clear the map
    *
@@ -195,6 +230,7 @@ namespace IRacingTools::Shared::Services {
 
     return std::nullopt;
   }
+
   fs::path TrackMapService::getFilePath() {
     assert((!filePaths_.empty() && "Track map path not set"));
     return filePaths_[0];
@@ -214,6 +250,7 @@ namespace IRacingTools::Shared::Services {
     return dataFiles_.contains(trackLayoutId) ||
            findFile(trackLayoutId).has_value();
   }
+
   std::optional<fs::path>
   TrackMapService::findFile(const std::shared_ptr<LapTrajectory> &lt) {
     return findFile(lt->track_layout_metadata().id());

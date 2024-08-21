@@ -4,6 +4,9 @@
 
 #include <memory>
 
+#include <IRacingTools/Models/rpc/Envelope.pb.h>
+#include <IRacingTools/Models/rpc/Messages/SimpleMessages.pb.h>
+
 #include <IRacingTools/Models/LapTrajectory.pb.h>
 #include <IRacingTools/Models/TelemetryDataFile.pb.h>
 #include <IRacingTools/Models/TrackMap.pb.h>
@@ -123,6 +126,8 @@ namespace IRacingTools::Shared::Services {
      * @brief Must set running == false in overriden implementation
      */
     virtual std::optional<SDK::GeneralError> destroy() override;
+
+   std::expected<std::shared_ptr<RPC::Messages::List>, GeneralError> rpcList(const std::shared_ptr<Models::RPC::Messages::List>& request, const std::shared_ptr<RPC::Envelope> & envelope);
 
     std::vector<fs::path> listTrackMaps();
 

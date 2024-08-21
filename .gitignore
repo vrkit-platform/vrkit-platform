@@ -27,3 +27,4 @@ node_modules
 /packages/js/vrkit-app/lib
 /lib
 /*.lock
+/logs

@@ -9,6 +9,7 @@
 namespace IRacingTools::Shared::Services {
   using namespace IRacingTools::SDK::Utils;
   using namespace IRacingTools::Shared::Logging;
+
   namespace {
     auto L = GetCategoryWithType<RPCServerService>();
   } // namespace

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 619.89 170.08">
+  <defs>
+    <style>
+      .cls-1 {
+        letter-spacing: .03em;
+      }
+
+      .cls-2 {
+        fill: #fff;
+      }
+
+      .cls-2, .cls-3 {
+        font-family: RaceSportRegular, 'Race Sport';
+        font-size: 139.06px;
+      }
+
+      .cls-4 {
+        fill: #333;
+        stroke: #1a1a1a;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-5 {
+        letter-spacing: 0em;
+      }
+
+      .cls-6 {
+        letter-spacing: .07em;
+      }
+
+      .cls-7 {
+        letter-spacing: .03em;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer_1">
+    <path class="cls-4" d="M.5,13.87v124.83c0,6.4,4.5,11.59,10.05,11.59h110.07c2.79,0,5.45-1.33,7.35-3.68l14.93-18.43c3.97-4.91,10.72-4.91,14.7,0l14.93,18.43c1.9,2.35,4.56,3.68,7.35,3.68h110.07c5.55,0,10.05-5.19,10.05-11.59V13.87c0-6.4-4.5-11.59-10.05-11.59H10.55C5,2.29.5,7.47.5,13.87Z"/>
+    <text class="cls-3" transform="translate(308.26 118.2) scale(1.02 1)"><tspan class="cls-1" x="0" y="0">K</tspan><tspan class="cls-6" x="133.36" y="0">I</tspan><tspan class="cls-7" x="196.91" y="0">T</tspan></text>
+    <text class="cls-2" transform="translate(17.41 118.2) scale(1.02 1)"><tspan class="cls-5" x="0" y="0">V</tspan><tspan class="cls-7" x="121.96" y="0">R</tspan></text>
+  </g>
+</svg>

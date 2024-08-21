@@ -35,8 +35,6 @@ export const VRKitPing = vrkSystem.VRKitPing as () => string
 export class VRKitClient {
   readonly nativeClient: VRKitNativeClient
   
-  
-  
   private nextRequestId(): string {
     // TODO: change to uuid
     
@@ -65,7 +63,6 @@ export class VRKitClient {
       request: Request
   ): Promise<Response> {
     
-    const requestData = requestType.toBinary(request)
     let requestEnvelope = Envelope.create({
       id: this.nextRequestId(),
       kind: Envelope_Kind.REQUEST,
@@ -99,4 +96,13 @@ export class VRKitClient {
     console.log("Received & parsed response envelope", res)
     return res;
   }
+}
+
+let defaultVRKitClient:VRKitClient = null
+export function getDefaultVRKitClient():VRKitClient {
+  if (!defaultVRKitClient) {
+    defaultVRKitClient = new VRKitClient()
+  }
+  
+  return defaultVRKitClient;
 }

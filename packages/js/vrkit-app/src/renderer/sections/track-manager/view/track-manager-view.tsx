@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 
 import Stack from "@mui/material/Stack"
 import Button from "@mui/material/Button"
@@ -15,33 +15,52 @@ import { ConfirmDialog } from "vrkit-app-renderer/components/custom-dialog"
 import { useTable } from "vrkit-app-renderer/components/table"
 
 import { TrackManagerTable } from "../track-manager-table"
-import { TrackMapFile } from "vrkit-models"
+import { Any, List as ListModel, TrackMapFile } from "vrkit-models"
 import { BoxProps } from "@mui/material/Box"
 import { useAsync } from "../../../hooks"
+import { asOption } from "@3fv/prelude-ts"
+import { getDefaultVRKitClient } from "vrkit-native-interop"
 
 // ----------------------------------------------------------------------
 
-export interface TrackManagerViewProps extends BoxProps {
+export interface TrackManagerViewProps extends BoxProps {}
 
-}
+export interface TrackMapFileCriteria {}
 
-export interface TrackMapFileCriteria {
-}
+async function getTrackMapFiles(
+  criteria: TrackMapFileCriteria = {}
+): Promise<TrackMapFile[]> {
+  const client = getDefaultVRKitClient()
+  const request = ListModel.create({
+    resultsPage: 0,
+    resultsPerPage: -1
+  })
 
-async function getTrackMapFiles(criteria: TrackMapFileCriteria = {}) {
+  const response = await client.executeRequest<ListModel, ListModel>(
+    "/tracks/list",
+    ListModel,
+    ListModel,
+    request
+  )
 
+  return asOption(response.results)
+    .map(results => results.map(it => Any.unpack(it, TrackMapFile)))
+    .getOrElse([])
 }
 
 export function TrackManagerView(props: TrackManagerViewProps) {
   const table = useTable({ defaultRowsPerPage: 50 })
-  
+
   // TODO: Implement `useAsync` to call VRKNative
   //  - [ ] implement native route handler for listing tracks
   const [criteria, setCriteria] = useState<TrackMapFileCriteria>({})
-  const allFilesAsync = useAsync(getTrackMapFiles,[criteria])
-  const allFiles: TrackMapFile[] = []
-  
-  
+  const allFilesAsync = useAsync(getTrackMapFiles, [criteria])
+
+  const allFiles: TrackMapFile[] = useMemo(
+    () => asOption(allFilesAsync.result).getOrElse([]),
+    [allFilesAsync.result]
+  )
+
   const confirm = useBoolean()
   const processTelem = useBoolean()
 
@@ -54,7 +73,7 @@ export function TrackManagerView(props: TrackManagerViewProps) {
       const deleteRow = tableData.filter(
         row => row.trackLayoutMetadata.id !== id
       )
-      
+
       toast.success("Delete success!")
       setTableData(deleteRow)
 

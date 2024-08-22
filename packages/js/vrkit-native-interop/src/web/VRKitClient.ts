@@ -15,32 +15,32 @@ import { Any } from "vrkit-models"
 // const addon = require('bindings')(nativeAddonFileRelative);
 const vrkNativeClientLib = Bind("vrkit_native_interop");
 
-export enum VRKitNativeClientEventType {
+export enum VRKitClientEvent {
   LiveSessionChanged= "LiveSessionChanged",
   SessionsChanged = "SessionsChanged"
 }
 
 export interface VRKitNativeClientEventData {
-  type: VRKitNativeClientEventType
+  type: VRKitClientEvent
   payload: Uint8Array
 }
 
 //, PayloadType extends MessageType<T> = MessageType<T>
 export interface VRKitClientEventData<T extends {}> {
-  type: VRKitNativeClientEventType
+  type: VRKitClientEvent
   payload: T
 }
 
-export type VRKitNativeClientEventTypeArgMap = {[K in VRKitNativeClientEventType]: any}
-export interface VRKitNativeClientEventTypeArgs extends VRKitNativeClientEventTypeArgMap {
+export type VRKitClientEventArgMap = {[K in VRKitClientEvent]: any}
+export interface VRKitClientEventArgs extends VRKitClientEventArgMap {
   LiveSessionChanged: (data: VRKitClientEventData<any>) => void
 }
 
-export type VRKitNativeClientEventTypeName = VRKitNativeClientEventType | (keyof VRKitNativeClientEventType)
+export type VRKitClientEventName = VRKitClientEvent | (keyof VRKitClientEvent)
 
 
 
-export type VRKitNativeClientEventCallback = (type: VRKitNativeClientEventType, data: VRKitNativeClientEventData) => void
+export type VRKitNativeClientEventCallback = (type: VRKitClientEvent, data: VRKitNativeClientEventData) => void
 
 export interface VRKitNativeClient {
   executeRequest(path: string, requestData: Uint8Array): Promise<Uint8Array>
@@ -53,7 +53,7 @@ export interface VRKitNativeClient {
    * @param type event type being emitted
    * @param args as this is a test, no specific typing is used
    */
-  testNativeEventEmit(type: VRKitNativeClientEventType, ...args:any[]): void;
+  testNativeEventEmit(type: VRKitClientEvent, ...args:any[]): void;
 }
 
 /**
@@ -75,7 +75,7 @@ export const VRKitPing = vrkNativeClientLib.VRKitPing as () => string
 /**
  * JS/Node/Electron side of the client
  */
-export class VRKitClient extends EventEmitter3<VRKitNativeClientEventTypeArgs, VRKitClient> {
+export class VRKitClient extends EventEmitter3<VRKitClientEventArgs, VRKitClient> {
   static gRequestIdSeq: number = 0
   
   readonly nativeClient: VRKitNativeClient
@@ -87,7 +87,7 @@ export class VRKitClient extends EventEmitter3<VRKitNativeClientEventTypeArgs, V
     return id.toString()
   }
   
-  private onEvent(type: VRKitNativeClientEventType, nativeData?: VRKitNativeClientEventData): void {
+  private onEvent(type: VRKitClientEvent, nativeData?: VRKitNativeClientEventData): void {
     console.log(`Received event type`, type, nativeData)
     
     //let msg: any = null
@@ -157,6 +157,10 @@ export class VRKitClient extends EventEmitter3<VRKitNativeClientEventTypeArgs, V
     
     console.log("Received & parsed response envelope", res)
     return res;
+  }
+  
+  testNativeEventEmit():void {
+    this.nativeClient.testNativeEventEmit(VRKitClientEvent.LiveSessionChanged)
   }
 }
 

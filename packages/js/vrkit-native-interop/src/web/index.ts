@@ -1,2 +1,2 @@
 
-export * from "./VRKitSystem"
+export * from "./VRKitClient"

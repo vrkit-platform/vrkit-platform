@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
 import { Deferred } from "@3fv/deferred"
+import { guard } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
 import { spawn } from "node:child_process"
-import { match } from "ts-pattern"
-import {$, cd, path as Path, fs as Fs, echo, within, usePwsh} from "zx"
+import Path from "node:path"
+import {cd, fs as Fs, echo, within, usePwsh} from "zx"
+
+import killAll from "tree-kill"
 import Tracer from "tracer"
 
 if (process.platform === "win32") {
@@ -62,16 +65,34 @@ const cleanupProcs = (sig = "SIGKILL") => () => {
   
   signalled = true
   for (const proc of pendingProcs) {
-    if (!proc.killed) {
+    
+    if (proc.pid > 0 && !proc.killed) {
       console.info(`Killing PID: ${proc.pid}`)
       try {
-        proc.kill()
+        const pid = proc.pid
+        // guard(() => proc.kill("SIGKILL"))
+        // guard(() => proc.unref())
+        guard(() => killAll(pid, "SIGKILL"))
+        // proc.kill(sig)
+        
+        // if (process.platform === "win32")
+        //   execSync(`taskkill /PID ${proc.pid} /T /F`, (error, stdout, stderr)=>{
+        //     // console.log("taskkill stdout: " + stdout)
+        //     // console.log("taskkill stderr: " + stderr)
+        //     if(error){
+        //       console.error("error: " + error.message)
+        //     }
+        //   })
+        //
+        // // if (!proc.killed)
+        
       } catch (err) {
         console.error(`unable to kill ${proc.pid}`,err)
       }
     }
   }
-  process.exit(1)
+  guard(() => killAll(process.pid, "SIGKILL"))
+  // process.exit(0)
 }
 
 
@@ -112,50 +133,56 @@ function getOrCreateLogger(name, logFile = null) {
     })
 }
 
+function getLogFile(flow, ...categories) {
+  const name = categories.join("-")
+  const logDir = flow.logging.dir
+  const logFile = Path.join(logDir, `${name}.log`)
+  
+  if (!Fs.existsSync(logDir))
+    Fs.mkdirs(logDir)
+  
+  return logFile
+}
+
 function createLogger(flow, ...categories) {
   if (categories.length) {
     const name = categories.join("-")
-    const logDir = flow.logging.dir
-    if (!Fs.existsSync(logDir))
-      Fs.mkdirs(logDir)
+    const logFile = getLogFile(flow,...categories)
     
-    const logFile = Path.join(logDir, `${name}.log`)
+    
     return getOrCreateLogger(name, logFile)
   } else {
     return getOrCreateLogger(globalLoggerName)
   }
 }
 
-async function runTask(task, step, flow) {
-  const logger = createLogger(flow, step.name, task.name)
+async function runTask(task, step, flow, logger) {
+  // const logger = createLogger(flow, step.name, task.name)
   const prefix = `STEP(${step.name}) > TASK(${task.name}):`
   const [cmd, args] = task.command
   
   try {
     const deferred = new Deferred()
-    
+    //const taskProcLogFilename = getLogFile(flow, step.name, task.name)
+    // const taskProcLogFile = Fs.openSync(taskProcLogFilename, 'w')
     const taskProc = spawn(cmd, args, {
       env: process.env,
       shell: true,
-      detached: false
+      //windowsHide: true,
+      // stdio: ["inherit", taskProcLogFile, taskProcLogFile]
+      stdio: ["inherit", "inherit", "inherit"]
     });
     
     pendingProcs.push(taskProc)
     
-    taskProc.stdout.on('data', (data) => {
-      logger.info(`${data}`);
-    });
-    
-    taskProc.stderr.on('data', (data) => {
-      logger.info(`${data}`);
-    });
-    
     taskProc.on('close', (code) => {
+      if (signalled) return
+      
       const msg = `child process close all stdio with code ${code}`
       if (code === 0)
         logger.info(msg);
       else
-        logger.error(msg);
+        logger.log(msg);
       
       if (!deferred.isSettled()) {
         if (code === 0)
@@ -166,11 +193,13 @@ async function runTask(task, step, flow) {
     });
     
     taskProc.on('exit', (code) => {
+      if (signalled) return
+      
       const msg = `child process exited all stdio with code ${code}`
       if (code === 0)
         logger.info(msg);
       else
-        logger.error(msg);
+        logger.log(msg);
       
       
       if (!deferred.isSettled()) {
@@ -185,8 +214,10 @@ async function runTask(task, step, flow) {
     await deferred.promise
     logger.info(`${prefix} Success`)
   } catch (err) {
-    logger.error(`STEP(${step.name}): Failed`, err)
-    throw err
+    if (!signalled) {
+      logger.log(`STEP(${step.name}): Failed`, err)
+      throw err
+    }
   }
 }
 
@@ -205,16 +236,18 @@ async function runStep(step, flow) {
   try {
     const isParallel = step.parallel === true
     if (isParallel) {
-      await Promise.all(step.tasks.map(task => runTask(task, step, flow)))
+      await Promise.all(step.tasks.map(task => runTask(task, step, flow, log)))
     } else {
       for await (const task of step.tasks) {
-        await runTask(task, step, flow)
+        await runTask(task, step, flow, log)
       }
     }
     log.info(`STEP(${step.name}): Success`)
   } catch (err) {
-    log.error(`STEP(${step.name}): Failed`, err)
-    throw err
+    if (!signalled) {
+      log.error(`STEP(${step.name}): Failed`, err)
+      throw err
+    }
   }
 }
 
@@ -227,11 +260,15 @@ async function runFlow(flow) {
       await runStep(step, flow)
     }
   } catch (err) {
-    log.error(`Failed`, err)
+    if (!signalled) {
+      log.error(`Failed`, err)
+    }
     // process.exit(1)
   }
   
-  cleanupProcs("SIGKILL")()
+  if (!signalled) {
+    cleanupProcs("SIGKILL")()
+  }
 }
 
 

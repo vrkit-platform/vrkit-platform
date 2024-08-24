@@ -45,6 +45,7 @@ namespace IRacingTools::Shared::Services {
 
     TelemetryDataService() = delete;
 
+    virtual ~TelemetryDataService();
     /**
      * @brief Simple constructor
      */

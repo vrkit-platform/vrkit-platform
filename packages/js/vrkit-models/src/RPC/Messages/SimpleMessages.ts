@@ -12,27 +12,27 @@ import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { Any } from "../../google/protobuf/any";
 /**
- * @generated from protobuf message IRacingTools.Models.RPC.Messages.Ping
+ * @generated from protobuf message IRacingTools.Models.RPC.Messages.PingMessage
  */
-export interface Ping {
+export interface PingMessage {
     /**
      * @generated from protobuf field: uint32 count = 1;
      */
     count: number;
 }
 /**
- * @generated from protobuf message IRacingTools.Models.RPC.Messages.Pong
+ * @generated from protobuf message IRacingTools.Models.RPC.Messages.PongMessage
  */
-export interface Pong {
+export interface PongMessage {
     /**
      * @generated from protobuf field: uint32 ping_count = 1;
      */
     pingCount: number;
 }
 /**
- * @generated from protobuf message IRacingTools.Models.RPC.Messages.List
+ * @generated from protobuf message IRacingTools.Models.RPC.Messages.ListMessage
  */
-export interface List {
+export interface ListMessage {
     /**
      * TARGET TO BE QUERIED; THIS CAN BE ANYTHING I.E. `dashboards`, `overlays`, ETC
      *  AS LONG AS YOUR ROUTE KNOWS WHAT TO LOOK FOR, ANY VALUE WORKS
@@ -46,14 +46,9 @@ export interface List {
      * @generated from protobuf field: string query = 2;
      */
     query: string;
-    /**
-     * ARGUMENTS FOR QUERY
-     *
-     * @generated from protobuf field: map<string, string> parameters = 5;
-     */
-    parameters: {
-        [key: string]: string;
-    };
+    // ARGUMENTS FOR QUERY
+    // map<string, string> parameters = 5;
+
     /**
      * RESULT OR REQUEST
      *
@@ -88,20 +83,20 @@ export interface List {
     errorDetails: string;
 }
 // @generated message type with reflection information, may provide speed optimized methods
-class Ping$Type extends MessageType<Ping> {
+class PingMessage$Type extends MessageType<PingMessage> {
     constructor() {
-        super("IRacingTools.Models.RPC.Messages.Ping", [
+        super("IRacingTools.Models.RPC.Messages.PingMessage", [
             { no: 1, name: "count", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
         ]);
     }
-    create(value?: PartialMessage<Ping>): Ping {
+    create(value?: PartialMessage<PingMessage>): PingMessage {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.count = 0;
         if (value !== undefined)
-            reflectionMergePartial<Ping>(this, message, value);
+            reflectionMergePartial<PingMessage>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Ping): Ping {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PingMessage): PingMessage {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -120,7 +115,7 @@ class Ping$Type extends MessageType<Ping> {
         }
         return message;
     }
-    internalBinaryWrite(message: Ping, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: PingMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* uint32 count = 1; */
         if (message.count !== 0)
             writer.tag(1, WireType.Varint).uint32(message.count);
@@ -131,24 +126,24 @@ class Ping$Type extends MessageType<Ping> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.RPC.Messages.Ping
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.Messages.PingMessage
  */
-export const Ping = new Ping$Type();
+export const PingMessage = new PingMessage$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class Pong$Type extends MessageType<Pong> {
+class PongMessage$Type extends MessageType<PongMessage> {
     constructor() {
-        super("IRacingTools.Models.RPC.Messages.Pong", [
+        super("IRacingTools.Models.RPC.Messages.PongMessage", [
             { no: 1, name: "ping_count", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
         ]);
     }
-    create(value?: PartialMessage<Pong>): Pong {
+    create(value?: PartialMessage<PongMessage>): PongMessage {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.pingCount = 0;
         if (value !== undefined)
-            reflectionMergePartial<Pong>(this, message, value);
+            reflectionMergePartial<PongMessage>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Pong): Pong {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PongMessage): PongMessage {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -167,7 +162,7 @@ class Pong$Type extends MessageType<Pong> {
         }
         return message;
     }
-    internalBinaryWrite(message: Pong, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: PongMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* uint32 ping_count = 1; */
         if (message.pingCount !== 0)
             writer.tag(1, WireType.Varint).uint32(message.pingCount);
@@ -178,16 +173,15 @@ class Pong$Type extends MessageType<Pong> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.RPC.Messages.Pong
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.Messages.PongMessage
  */
-export const Pong = new Pong$Type();
+export const PongMessage = new PongMessage$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class List$Type extends MessageType<List> {
+class ListMessage$Type extends MessageType<ListMessage> {
     constructor() {
-        super("IRacingTools.Models.RPC.Messages.List", [
+        super("IRacingTools.Models.RPC.Messages.ListMessage", [
             { no: 1, name: "subject", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "query", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "parameters", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } },
             { no: 10, name: "is_result", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 11, name: "results_page", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
             { no: 12, name: "results_per_page", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
@@ -196,11 +190,10 @@ class List$Type extends MessageType<List> {
             { no: 60, name: "error_details", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<List>): List {
+    create(value?: PartialMessage<ListMessage>): ListMessage {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.subject = "";
         message.query = "";
-        message.parameters = {};
         message.isResult = false;
         message.resultsPage = 0;
         message.resultsPerPage = 0;
@@ -208,10 +201,10 @@ class List$Type extends MessageType<List> {
         message.results = [];
         message.errorDetails = "";
         if (value !== undefined)
-            reflectionMergePartial<List>(this, message, value);
+            reflectionMergePartial<ListMessage>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: List): List {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ListMessage): ListMessage {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -221,9 +214,6 @@ class List$Type extends MessageType<List> {
                     break;
                 case /* string query */ 2:
                     message.query = reader.string();
-                    break;
-                case /* map<string, string> parameters */ 5:
-                    this.binaryReadMap5(message.parameters, reader, options);
                     break;
                 case /* bool is_result */ 10:
                     message.isResult = reader.bool();
@@ -254,32 +244,13 @@ class List$Type extends MessageType<List> {
         }
         return message;
     }
-    private binaryReadMap5(map: List["parameters"], reader: IBinaryReader, options: BinaryReadOptions): void {
-        let len = reader.uint32(), end = reader.pos + len, key: keyof List["parameters"] | undefined, val: List["parameters"][any] | undefined;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case 1:
-                    key = reader.string();
-                    break;
-                case 2:
-                    val = reader.string();
-                    break;
-                default: throw new globalThis.Error("unknown map entry field for field IRacingTools.Models.RPC.Messages.List.parameters");
-            }
-        }
-        map[key ?? ""] = val ?? "";
-    }
-    internalBinaryWrite(message: List, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: ListMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string subject = 1; */
         if (message.subject !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.subject);
         /* string query = 2; */
         if (message.query !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.query);
-        /* map<string, string> parameters = 5; */
-        for (let k of globalThis.Object.keys(message.parameters))
-            writer.tag(5, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.LengthDelimited).string(message.parameters[k]).join();
         /* bool is_result = 10; */
         if (message.isResult !== false)
             writer.tag(10, WireType.Varint).bool(message.isResult);
@@ -305,6 +276,6 @@ class List$Type extends MessageType<List> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.RPC.Messages.List
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.Messages.ListMessage
  */
-export const List = new List$Type();
+export const ListMessage = new ListMessage$Type();

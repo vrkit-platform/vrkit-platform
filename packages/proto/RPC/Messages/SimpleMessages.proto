@@ -3,15 +3,15 @@ import "google/protobuf/any.proto";
 
 package IRacingTools.Models.RPC.Messages;
 
-message Ping {
+message PingMessage {
   uint32 count = 1;
 }
 
-message Pong {
+message PongMessage {
   uint32 ping_count = 1;
 }
 
-message List {
+message ListMessage {
 
   // TARGET TO BE QUERIED; THIS CAN BE ANYTHING I.E. `dashboards`, `overlays`, ETC
   //  AS LONG AS YOUR ROUTE KNOWS WHAT TO LOOK FOR, ANY VALUE WORKS

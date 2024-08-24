@@ -1,0 +1,41 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+package IRacingTools.Models.Session;
+
+message SessionTiming {
+  bool is_live = 1;
+  bool is_valid = 2;
+  google.protobuf.Timestamp start  = 10;
+  google.protobuf.Timestamp end = 11;
+  int64 duration = 20;
+  int64 position = 21;
+}
+
+enum SessionType {
+  LIVE = 0;
+  DISK = 1;
+}
+
+enum SessionStatus {
+  CREATED = 0;
+  READY = 1;
+  PAUSED = 2;
+  RUNNING = 5;
+  ERROR = 10;
+}
+
+message SessionState {
+
+  string id = 1;
+  SessionType type = 2;
+
+  SessionStatus status = 5;
+
+  SessionTiming timing = 10;
+
+  string file_path = 20;
+
+  string session_info_json = 90;
+  string session_info_yaml = 91;
+}

@@ -4,8 +4,11 @@
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
-#include <IRacingTools/SDK/Utils/Singleton.h>
+#include <IRacingTools/Models/rpc/Messages/SimpleMessages.pb.h>
+#include <IRacingTools/Models/rpc/Events/CommonEventTypes.pb.h>
+#include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
 
+#include <IRacingTools/SDK/Utils/Singleton.h>
 
 
 #include <IRacingTools/Shared/Services/TelemetryDataService.h>
@@ -26,112 +29,130 @@ using namespace IRacingTools::Models;
 
 
 namespace IRacingTools::App::Node {
-using namespace Shared::Services;
+    using namespace Shared::Services;
 
-  using VRKitNativeSystemManager = ServiceManager<RPCServerService,TelemetryDataService,TrackMapService>;
-  using VRKitNativeSystemManagerPtr = std::shared_ptr<VRKitNativeSystemManager>;
+    using VRKitNativeSystemManager = ServiceManager<RPCServerService, TelemetryDataService, TrackMapService>;
+    using VRKitNativeSystemManagerPtr = std::shared_ptr<VRKitNativeSystemManager>;
 
-  /**
-   * @brief Global (cross-thread) system manager/holder
-   */
-  class VRKitNativeGlobal : public Singleton<VRKitNativeGlobal> {
-
-  public:
-
-    VRKitNativeGlobal() = delete;
-    VRKitNativeGlobal(const VRKitNativeGlobal &) = delete;
-    VRKitNativeGlobal(VRKitNativeGlobal &&) = delete;
-
-    void destroy();
-    VRKitNativeSystemManagerPtr serviceManager() const {
-      return manager_;
-    }
-
-  private:
-
-    friend Singleton;
-    explicit VRKitNativeGlobal(token);
-
-    const VRKitNativeSystemManagerPtr manager_;
-  };
-
-
-  class VRKitNativeSystemAddon
-  {
-
-  public:
-    static void Init(Napi::Env env, Napi::Object exports)
-    {
-      env.SetInstanceData(new VRKitNativeSystemAddon());
-    }
-
-    static VRKitNativeSystemAddon *fromEnv(const Napi::Env &env)
-    {
-      return env.GetInstanceData<VRKitNativeSystemAddon>();
-    }
-
-    VRKitNativeSystemAddon();
-
-    Napi::FunctionReference & clientCtor();
-    std::shared_ptr<VRKitNativeGlobal> system() const {
-      return system_;
-    }
-
-  private:
-    Napi::FunctionReference clientCtor_;
-    const std::shared_ptr<VRKitNativeGlobal> system_;
-  };
-
-  /**
-   * @brief NodeSystem client, which can execute RPC calls & exchange information as needed
-   */
-  class VRKitNativeClient : public Napi::ObjectWrap<VRKitNativeClient> {
     /**
-     * @brief Holds JavaScript Event for ThreadSafeFunction callbacks
+     * @brief Global (cross-thread) system manager/holder
      */
-    struct JSDefaultEvent {
-      std::string type;
-      std::optional<google::protobuf::Any> data;
+    class VRKitNativeGlobal : public Singleton<VRKitNativeGlobal> {
+    public:
+        VRKitNativeGlobal() = delete;
+        VRKitNativeGlobal(const VRKitNativeGlobal&) = delete;
+        VRKitNativeGlobal(VRKitNativeGlobal&&) = delete;
 
-      explicit JSDefaultEvent(const std::string &name = "ping", std::optional<google::protobuf::Any> data = std::nullopt);
+        void destroy();
+
+        VRKitNativeSystemManagerPtr serviceManager() const {
+            return manager_;
+        }
+
+    private:
+        friend Singleton;
+        explicit VRKitNativeGlobal(token);
+
+        const VRKitNativeSystemManagerPtr manager_;
     };
 
-    using DefaultEventContextType = Napi::Reference<Napi::Value>;
-    using DefaultEventDataType = JSDefaultEvent;
-    using DefaultEventFinalizerDataType = void;
-
-  public:
-    static Napi::FunctionReference &Constructor(Napi::Env env)
-    {
-      return VRKitNativeSystemAddon::fromEnv(env)->clientCtor();
-    }
+    void VRKitShutdown();
 
     /**
-     * @brief Initialize `node-addon`
-     *
-     * @param env jsEnv context
-     * @param exports to populate with classes & other members
+   * @brief Holds JavaScript Event for ThreadSafeFunction callbacks
+   */
+    struct VRKitNativeJSDefaultEvent {
+        RPC::Events::ClientEvent type;
+        std::optional<google::protobuf::Any> data;
+
+        explicit VRKitNativeJSDefaultEvent(
+            RPC::Events::ClientEvent type,
+            std::optional<google::protobuf::Any> data = std::nullopt
+        );
+    };
+
+    using VRKitNativeDefaultEventContextType = Napi::Reference<Napi::Value>;
+    using VRKitNativeDefaultEventDataType = VRKitNativeJSDefaultEvent;
+    using VRKitNativeDefaultEventFinalizerDataType = void;
+
+
+    void JSDefaultEventCallback(
+        Napi::Env env,
+        Napi::Function callback,
+        // ReSharper disable once CppParameterMayBeConstPtrOrRef
+        VRKitNativeDefaultEventContextType* context,
+        // ReSharper disable once CppParameterMayBeConstPtrOrRef
+        VRKitNativeDefaultEventDataType* data
+    );
+    using VRKitNativeDefaultEventFn = Napi::TypedThreadSafeFunction<
+        VRKitNativeDefaultEventContextType, VRKitNativeDefaultEventDataType, JSDefaultEventCallback>;
+
+    class VRKitNativeSystemAddon {
+    public:
+        static void Init(Napi::Env env, Napi::Object _ /* exports */) {
+            env.SetInstanceData(new VRKitNativeSystemAddon());
+        }
+
+        static VRKitNativeSystemAddon* fromEnv(const Napi::Env& env) {
+            return env.GetInstanceData<VRKitNativeSystemAddon>();
+        }
+
+        VRKitNativeSystemAddon();
+
+        Napi::FunctionReference& clientCtor();
+
+        std::shared_ptr<VRKitNativeGlobal> system() const {
+            return system_;
+        }
+
+    private:
+        Napi::FunctionReference clientCtor_;
+        const std::shared_ptr<VRKitNativeGlobal> system_;
+    };
+
+    /**
+     * @brief NodeSystem client, which can execute RPC calls & exchange information as needed
      */
-    static void Init(Napi::Env env, Napi::Object exports);
+    class VRKitNativeClient : public Napi::ObjectWrap<VRKitNativeClient> {
+    public:
+        static Napi::FunctionReference& Constructor(Napi::Env env) {
+            return VRKitNativeSystemAddon::fromEnv(env)->clientCtor();
+        }
 
-    explicit VRKitNativeClient(const Napi::CallbackInfo &info);
-    ~VRKitNativeClient() override;
+        /**
+         * @brief Initialize `node-addon`
+         *
+         * @param env jsEnv context
+         * @param exports to populate with classes & other members
+         */
+        static void Init(Napi::Env env, Napi::Object exports);
 
-    Napi::Value jsExecuteRequest(const Napi::CallbackInfo &info);
+        explicit VRKitNativeClient(const Napi::CallbackInfo& info);
+        ~VRKitNativeClient() override;
+
+        virtual void Finalize(Napi::Env) override;
+
+        Napi::Value jsExecuteRequest(const Napi::CallbackInfo& info);
+        Napi::Value jsDestroy(const Napi::CallbackInfo& info);
 
 #ifdef DEBUG
-    Napi::Value jsTestNativeEventEmit(const Napi::CallbackInfo &info);
+        Napi::Value jsTestNativeEventEmit(const Napi::CallbackInfo& info);
 #endif
 
-    static void jsDefaultEventCallback(Napi::Env env, Napi::Function callback, DefaultEventContextType *context, DefaultEventDataType *data);
+    private:
+        void destroy();
 
-  private:
-    using DefaultEventFn = Napi::TypedThreadSafeFunction<DefaultEventContextType,DefaultEventDataType, jsDefaultEventCallback>;
+        VRKitNativeDefaultEventFn jsDefaultEventFn_;
 
-    std::shared_ptr<VRKitNativeGlobal> system_;
-    std::atomic_uint32_t pingCount_{0};
+        std::shared_ptr<VRKitNativeGlobal> system_;
+        std::atomic_uint32_t pingCount_{0};
 
-    DefaultEventFn jsDefaultEventFn_;
-  };
+        std::mutex destroyMutex_{};
+        std::atomic_bool destroyed_{false};
 
+#ifdef DEBUG
+        std::mutex jsTestThreadsMutex_{};
+        std::vector<std::shared_ptr<std::thread>> jsTestThreads_{};
+#endif
+    };
 }

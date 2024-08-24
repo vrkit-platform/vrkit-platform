@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package IRacingTools.Models.RPC.Events;
+
+enum ClientEvent {
+  CLIENT_EVENT_UNKNOWN = 0;
+  CLIENT_EVENT_TEST = 1;
+  CLIENT_EVENT_SESSION = 2;
+  CLIENT_EVENT_SESSION_DATA_FRAME = 3;
+}
+
+message ClientEventTestData {
+  ClientEvent type = 1;
+  string message = 2;
+}
+

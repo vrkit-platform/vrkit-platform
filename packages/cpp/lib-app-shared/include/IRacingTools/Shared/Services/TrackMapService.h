@@ -54,6 +54,8 @@ namespace IRacingTools::Shared::Services {
     };
 
     TrackMapService() = delete;
+
+    virtual ~TrackMapService();
     /**
      * @brief Simple constructor
      */
@@ -127,7 +129,7 @@ namespace IRacingTools::Shared::Services {
      */
     virtual std::optional<SDK::GeneralError> destroy() override;
 
-   std::expected<std::shared_ptr<RPC::Messages::List>, GeneralError> rpcList(const std::shared_ptr<Models::RPC::Messages::List>& request, const std::shared_ptr<RPC::Envelope> & envelope);
+   std::expected<std::shared_ptr<RPC::Messages::ListMessage>, GeneralError> rpcList(const std::shared_ptr<Models::RPC::Messages::ListMessage>& request, const std::shared_ptr<RPC::Envelope> & envelope);
 
     std::vector<fs::path> listTrackMaps();
 

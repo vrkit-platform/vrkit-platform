@@ -26,6 +26,10 @@ namespace IRacingTools::Shared::Services {
   } // namespace
 
 
+  TelemetryDataService::~TelemetryDataService() {
+    destroy();
+  }
+
   TelemetryDataService::TelemetryDataService(
       const std::shared_ptr<ServiceContainer> &serviceContainer)
       : TelemetryDataService(serviceContainer, Options{}) {
@@ -158,7 +162,7 @@ namespace IRacingTools::Shared::Services {
 
       setState(State::Starting);
 
-      scanAllFiles();
+      // scanAllFiles();
     }
 
     // auto result = request->future.get();
@@ -181,6 +185,10 @@ namespace IRacingTools::Shared::Services {
 
     setState(State::Destroying);
     reset(true);
+    if (fileTaskQueue_) {
+      fileTaskQueue_->destroy();
+      fileTaskQueue_ = nullptr;
+    }
     setState(State::Destroyed);
     return std::nullopt;
   }

@@ -102,8 +102,9 @@ namespace IRacingTools::Shared::Common {
           return;
 
         enabled_ = false;
-        cv_.notify_all();
       }
+
+      cv_.notify_all();
 
       for (auto &t: threads_) {
         if (t.joinable()) {

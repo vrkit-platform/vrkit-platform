@@ -31,6 +31,15 @@ add_custom_target(
 )
 
 # Shared & Static CPP Targets
+
+set(protoCompiler ${Protobuf_PROTOC_EXECUTABLE})
+message(STATUS "ProtoCompiler: ${protoCompiler}")
+
+find_program(pwshExe NAMES pwsh.exe)
+if (NOT pwshExe)
+  message(FATAL_ERROR "Powershell is missing ${pwshExe}")
+endif()
+
 add_library(${modelsTarget} SHARED ${PROTO_GEN_FILES})
 add_library(${modelsTargetStatic} STATIC ${PROTO_GEN_FILES})
 
@@ -40,6 +49,13 @@ foreach(target ${modelsTarget} ${modelsTargetStatic})
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     ${PROTO_INCLUDE_DEST}
     $<INSTALL_INTERFACE:include>
+  )
+
+  add_custom_command(
+    TARGET ${target}
+    POST_BUILD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${pwshExe} ARGS "${CMAKE_SOURCE_DIR}/scripts/protoc-ts.ps1" "${protoCompiler}"
   )
 #  target_compile_options(${target} PRIVATE "/permissive")
 endforeach()

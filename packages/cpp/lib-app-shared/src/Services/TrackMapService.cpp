@@ -46,6 +46,10 @@ namespace IRacingTools::Shared::Services {
   } // namespace
 
 
+  TrackMapService::~TrackMapService() {
+    destroy();
+  }
+
   TrackMapService::TrackMapService(
       const std::shared_ptr<ServiceContainer> &serviceContainer)
     : TrackMapService(serviceContainer, Options{}) {
@@ -164,7 +168,7 @@ namespace IRacingTools::Shared::Services {
       auto rpc = getContainer()->getService<RPCServerService>();
       // auto rpcListPtr = std::mem_fn(&TrackMapService::rpcList);
       auto rpcListRoute = RPCServerService::TypedRoute<
-        RPC::Messages::List, RPC::Messages::List>::Create(
+        RPC::Messages::ListMessage, RPC::Messages::ListMessage>::Create(
           //std::bind(rpcListPtr, this, std::placeholders::_1, std::placeholders::_2),
           [this](auto &request, auto &response) {
             return rpcList(request, response);
@@ -198,15 +202,19 @@ namespace IRacingTools::Shared::Services {
 
     setState(State::Destroying);
     reset(true);
+    if (dataFileTaskQueue_) {
+      dataFileTaskQueue_->destroy();
+      dataFileTaskQueue_ = nullptr;
+    }
     setState(State::Destroyed);
     return std::nullopt;
   }
 
-  std::expected<std::shared_ptr<RPC::Messages::List>, GeneralError>
+  std::expected<std::shared_ptr<RPC::Messages::ListMessage>, GeneralError>
   TrackMapService::rpcList(
-      const std::shared_ptr<Models::RPC::Messages::List> &request,
+      const std::shared_ptr<Models::RPC::Messages::ListMessage> &request,
       const std::shared_ptr<RPC::Envelope> &envelope) {
-    auto response = std::make_shared<RPC::Messages::List>();
+    auto response = std::make_shared<RPC::Messages::ListMessage>();
     auto tmfs = ValuesOf(files_);
     for (auto &tmf: tmfs) {
       auto result = response->add_results();

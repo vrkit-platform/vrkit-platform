@@ -18,7 +18,7 @@
 
 #ifdef XR_USE_PLATFORM_WIN32
 
-// OLE desktop APIs cannot be overriden with the following desktop parition flag.
+// OLE desktop APIs cannot be overridden with the following desktop parition flag.
 #include <ocidl.h>
 
 #include <winapifamily.h>

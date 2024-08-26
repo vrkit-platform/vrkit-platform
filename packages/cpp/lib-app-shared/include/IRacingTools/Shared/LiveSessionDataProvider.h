@@ -9,7 +9,8 @@
 #include <memory>
 #include <thread>
 
-#include "SessionDataProvider.h"
+#include <IRacingTools/Shared/SessionDataAccess.h>
+#include <IRacingTools/Shared/SessionDataProvider.h>
 
 namespace IRacingTools::Shared {
 
@@ -36,7 +37,13 @@ namespace IRacingTools::Shared {
     virtual bool pause() override;
     virtual bool resume() override;
 
-    virtual const Timing timing() override;
+    virtual std::shared_ptr<Models::Session::SessionData> sessionData() override;
+
+    virtual std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
+
+    virtual bool isLive() const override;
+
+    virtual SessionDataAccess& dataAccess() override;
 
   protected:
     void runnable();
@@ -58,10 +65,8 @@ namespace IRacingTools::Shared {
 
     void checkConnection();
 
-  public:
-    virtual bool isLive() const override;
+    std::shared_ptr<Models::RPC::Events::SessionEventData> createEventData(Models::RPC::Events::SessionEventType type);
 
-  private:
     SessionDataAccess dataAccess_;
     std::unique_ptr<std::thread> thread_{nullptr};
     std::mutex threadMutex_{};
@@ -69,6 +74,8 @@ namespace IRacingTools::Shared {
     std::atomic_bool running_{false};
     std::atomic_bool isConnected_{false};
     DWORD lastUpdatedTime_{0};
+    
+    std::shared_ptr<Models::Session::SessionData> sessionData_{};
   };
 
 

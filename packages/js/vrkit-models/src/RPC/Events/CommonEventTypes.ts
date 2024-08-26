@@ -11,63 +11,46 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 /**
- * @generated from protobuf message IRacingTools.Models.RPC.Events.ClientEventTestData
+ * @generated from protobuf message IRacingTools.Models.RPC.Events.TestEventData
  */
-export interface ClientEventTestData {
-    /**
-     * @generated from protobuf field: IRacingTools.Models.RPC.Events.ClientEvent type = 1;
-     */
-    type: ClientEvent;
+export interface TestEventData {
     /**
      * @generated from protobuf field: string message = 2;
      */
     message: string;
 }
 /**
- * @generated from protobuf enum IRacingTools.Models.RPC.Events.ClientEvent
+ * @generated from protobuf enum IRacingTools.Models.RPC.Events.ClientEventType
  */
-export enum ClientEvent {
+export enum ClientEventType {
     /**
-     * @generated from protobuf enum value: CLIENT_EVENT_UNKNOWN = 0;
+     * @generated from protobuf enum value: CLIENT_EVENT_TYPE_UNKNOWN = 0;
      */
     UNKNOWN = 0,
     /**
-     * @generated from protobuf enum value: CLIENT_EVENT_TEST = 1;
+     * @generated from protobuf enum value: CLIENT_EVENT_TYPE_TEST = 1;
      */
-    TEST = 1,
-    /**
-     * @generated from protobuf enum value: CLIENT_EVENT_SESSION = 2;
-     */
-    SESSION = 2,
-    /**
-     * @generated from protobuf enum value: CLIENT_EVENT_SESSION_DATA_FRAME = 3;
-     */
-    SESSION_DATA_FRAME = 3
+    TEST = 1
 }
 // @generated message type with reflection information, may provide speed optimized methods
-class ClientEventTestData$Type extends MessageType<ClientEventTestData> {
+class TestEventData$Type extends MessageType<TestEventData> {
     constructor() {
-        super("IRacingTools.Models.RPC.Events.ClientEventTestData", [
-            { no: 1, name: "type", kind: "enum", T: () => ["IRacingTools.Models.RPC.Events.ClientEvent", ClientEvent, "CLIENT_EVENT_"] },
+        super("IRacingTools.Models.RPC.Events.TestEventData", [
             { no: 2, name: "message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<ClientEventTestData>): ClientEventTestData {
+    create(value?: PartialMessage<TestEventData>): TestEventData {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.type = 0;
         message.message = "";
         if (value !== undefined)
-            reflectionMergePartial<ClientEventTestData>(this, message, value);
+            reflectionMergePartial<TestEventData>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ClientEventTestData): ClientEventTestData {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: TestEventData): TestEventData {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* IRacingTools.Models.RPC.Events.ClientEvent type */ 1:
-                    message.type = reader.int32();
-                    break;
                 case /* string message */ 2:
                     message.message = reader.string();
                     break;
@@ -82,10 +65,7 @@ class ClientEventTestData$Type extends MessageType<ClientEventTestData> {
         }
         return message;
     }
-    internalBinaryWrite(message: ClientEventTestData, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* IRacingTools.Models.RPC.Events.ClientEvent type = 1; */
-        if (message.type !== 0)
-            writer.tag(1, WireType.Varint).int32(message.type);
+    internalBinaryWrite(message: TestEventData, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string message = 2; */
         if (message.message !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.message);
@@ -96,6 +76,6 @@ class ClientEventTestData$Type extends MessageType<ClientEventTestData> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.RPC.Events.ClientEventTestData
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.Events.TestEventData
  */
-export const ClientEventTestData = new ClientEventTestData$Type();
+export const TestEventData = new TestEventData$Type();

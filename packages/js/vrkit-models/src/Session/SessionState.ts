@@ -10,6 +10,8 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { FileInfo } from "../FileInfo";
+import { TrackLayoutMetadata } from "../TrackLayoutMetadata";
 import { Timestamp } from "../google/protobuf/timestamp";
 /**
  * @generated from protobuf message IRacingTools.Models.Session.SessionTiming
@@ -24,26 +26,34 @@ export interface SessionTiming {
      */
     isValid: boolean;
     /**
-     * @generated from protobuf field: google.protobuf.Timestamp start = 10;
+     * @generated from protobuf field: google.protobuf.Timestamp start_time = 10;
      */
-    start?: Timestamp;
+    startTime?: Timestamp;
     /**
-     * @generated from protobuf field: google.protobuf.Timestamp end = 11;
+     * @generated from protobuf field: google.protobuf.Timestamp end_time = 11;
      */
-    end?: Timestamp;
+    endTime?: Timestamp;
     /**
-     * @generated from protobuf field: int64 duration = 20;
+     * @generated from protobuf field: int64 current_time_millis = 20;
      */
-    duration: bigint;
+    currentTimeMillis: bigint;
     /**
-     * @generated from protobuf field: int64 position = 21;
+     * @generated from protobuf field: int64 total_time_millis = 21;
      */
-    position: bigint;
+    totalTimeMillis: bigint; // int64 position = 21;
+    /**
+     * @generated from protobuf field: int64 sample_index = 50;
+     */
+    sampleIndex: bigint;
+    /**
+     * @generated from protobuf field: int64 sample_count = 51;
+     */
+    sampleCount: bigint;
 }
 /**
- * @generated from protobuf message IRacingTools.Models.Session.SessionState
+ * @generated from protobuf message IRacingTools.Models.Session.SessionData
  */
-export interface SessionState {
+export interface SessionData {
     /**
      * @generated from protobuf field: string id = 1;
      */
@@ -61,9 +71,13 @@ export interface SessionState {
      */
     timing?: SessionTiming;
     /**
-     * @generated from protobuf field: string file_path = 20;
+     * @generated from protobuf field: IRacingTools.Models.TrackLayoutMetadata track_layout_metadata = 20;
      */
-    filePath: string;
+    trackLayoutMetadata?: TrackLayoutMetadata;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.FileInfo file_info = 21;
+     */
+    fileInfo?: FileInfo;
     /**
      * @generated from protobuf field: string session_info_json = 90;
      */
@@ -78,11 +92,11 @@ export interface SessionState {
  */
 export enum SessionType {
     /**
-     * @generated from protobuf enum value: LIVE = 0;
+     * @generated from protobuf enum value: SESSION_TYPE_LIVE = 0;
      */
     LIVE = 0,
     /**
-     * @generated from protobuf enum value: DISK = 1;
+     * @generated from protobuf enum value: SESSION_TYPE_DISK = 1;
      */
     DISK = 1
 }
@@ -91,23 +105,23 @@ export enum SessionType {
  */
 export enum SessionStatus {
     /**
-     * @generated from protobuf enum value: CREATED = 0;
+     * @generated from protobuf enum value: SESSION_STATUS_CREATED = 0;
      */
     CREATED = 0,
     /**
-     * @generated from protobuf enum value: READY = 1;
+     * @generated from protobuf enum value: SESSION_STATUS_READY = 1;
      */
     READY = 1,
     /**
-     * @generated from protobuf enum value: PAUSED = 2;
+     * @generated from protobuf enum value: SESSION_STATUS_PAUSED = 2;
      */
     PAUSED = 2,
     /**
-     * @generated from protobuf enum value: RUNNING = 5;
+     * @generated from protobuf enum value: SESSION_STATUS_RUNNING = 5;
      */
     RUNNING = 5,
     /**
-     * @generated from protobuf enum value: ERROR = 10;
+     * @generated from protobuf enum value: SESSION_STATUS_ERROR = 10;
      */
     ERROR = 10
 }
@@ -117,18 +131,22 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
         super("IRacingTools.Models.Session.SessionTiming", [
             { no: 1, name: "is_live", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 2, name: "is_valid", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 10, name: "start", kind: "message", T: () => Timestamp },
-            { no: 11, name: "end", kind: "message", T: () => Timestamp },
-            { no: 20, name: "duration", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
-            { no: 21, name: "position", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+            { no: 10, name: "start_time", kind: "message", T: () => Timestamp },
+            { no: 11, name: "end_time", kind: "message", T: () => Timestamp },
+            { no: 20, name: "current_time_millis", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 21, name: "total_time_millis", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 50, name: "sample_index", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
+            { no: 51, name: "sample_count", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
         ]);
     }
     create(value?: PartialMessage<SessionTiming>): SessionTiming {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.isLive = false;
         message.isValid = false;
-        message.duration = 0n;
-        message.position = 0n;
+        message.currentTimeMillis = 0n;
+        message.totalTimeMillis = 0n;
+        message.sampleIndex = 0n;
+        message.sampleCount = 0n;
         if (value !== undefined)
             reflectionMergePartial<SessionTiming>(this, message, value);
         return message;
@@ -144,17 +162,23 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
                 case /* bool is_valid */ 2:
                     message.isValid = reader.bool();
                     break;
-                case /* google.protobuf.Timestamp start */ 10:
-                    message.start = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.start);
+                case /* google.protobuf.Timestamp start_time */ 10:
+                    message.startTime = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.startTime);
                     break;
-                case /* google.protobuf.Timestamp end */ 11:
-                    message.end = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.end);
+                case /* google.protobuf.Timestamp end_time */ 11:
+                    message.endTime = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.endTime);
                     break;
-                case /* int64 duration */ 20:
-                    message.duration = reader.int64().toBigInt();
+                case /* int64 current_time_millis */ 20:
+                    message.currentTimeMillis = reader.int64().toBigInt();
                     break;
-                case /* int64 position */ 21:
-                    message.position = reader.int64().toBigInt();
+                case /* int64 total_time_millis */ 21:
+                    message.totalTimeMillis = reader.int64().toBigInt();
+                    break;
+                case /* int64 sample_index */ 50:
+                    message.sampleIndex = reader.int64().toBigInt();
+                    break;
+                case /* int64 sample_count */ 51:
+                    message.sampleCount = reader.int64().toBigInt();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -174,18 +198,24 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
         /* bool is_valid = 2; */
         if (message.isValid !== false)
             writer.tag(2, WireType.Varint).bool(message.isValid);
-        /* google.protobuf.Timestamp start = 10; */
-        if (message.start)
-            Timestamp.internalBinaryWrite(message.start, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
-        /* google.protobuf.Timestamp end = 11; */
-        if (message.end)
-            Timestamp.internalBinaryWrite(message.end, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
-        /* int64 duration = 20; */
-        if (message.duration !== 0n)
-            writer.tag(20, WireType.Varint).int64(message.duration);
-        /* int64 position = 21; */
-        if (message.position !== 0n)
-            writer.tag(21, WireType.Varint).int64(message.position);
+        /* google.protobuf.Timestamp start_time = 10; */
+        if (message.startTime)
+            Timestamp.internalBinaryWrite(message.startTime, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
+        /* google.protobuf.Timestamp end_time = 11; */
+        if (message.endTime)
+            Timestamp.internalBinaryWrite(message.endTime, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
+        /* int64 current_time_millis = 20; */
+        if (message.currentTimeMillis !== 0n)
+            writer.tag(20, WireType.Varint).int64(message.currentTimeMillis);
+        /* int64 total_time_millis = 21; */
+        if (message.totalTimeMillis !== 0n)
+            writer.tag(21, WireType.Varint).int64(message.totalTimeMillis);
+        /* int64 sample_index = 50; */
+        if (message.sampleIndex !== 0n)
+            writer.tag(50, WireType.Varint).int64(message.sampleIndex);
+        /* int64 sample_count = 51; */
+        if (message.sampleCount !== 0n)
+            writer.tag(51, WireType.Varint).int64(message.sampleCount);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -197,31 +227,31 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
  */
 export const SessionTiming = new SessionTiming$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class SessionState$Type extends MessageType<SessionState> {
+class SessionData$Type extends MessageType<SessionData> {
     constructor() {
-        super("IRacingTools.Models.Session.SessionState", [
+        super("IRacingTools.Models.Session.SessionData", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionType", SessionType] },
-            { no: 5, name: "status", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionStatus", SessionStatus] },
+            { no: 2, name: "type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionType", SessionType, "SESSION_TYPE_"] },
+            { no: 5, name: "status", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionStatus", SessionStatus, "SESSION_STATUS_"] },
             { no: 10, name: "timing", kind: "message", T: () => SessionTiming },
-            { no: 20, name: "file_path", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 20, name: "track_layout_metadata", kind: "message", T: () => TrackLayoutMetadata },
+            { no: 21, name: "file_info", kind: "message", T: () => FileInfo },
             { no: 90, name: "session_info_json", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 91, name: "session_info_yaml", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<SessionState>): SessionState {
+    create(value?: PartialMessage<SessionData>): SessionData {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
         message.type = 0;
         message.status = 0;
-        message.filePath = "";
         message.sessionInfoJson = "";
         message.sessionInfoYaml = "";
         if (value !== undefined)
-            reflectionMergePartial<SessionState>(this, message, value);
+            reflectionMergePartial<SessionData>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SessionState): SessionState {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SessionData): SessionData {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -238,8 +268,11 @@ class SessionState$Type extends MessageType<SessionState> {
                 case /* IRacingTools.Models.Session.SessionTiming timing */ 10:
                     message.timing = SessionTiming.internalBinaryRead(reader, reader.uint32(), options, message.timing);
                     break;
-                case /* string file_path */ 20:
-                    message.filePath = reader.string();
+                case /* IRacingTools.Models.TrackLayoutMetadata track_layout_metadata */ 20:
+                    message.trackLayoutMetadata = TrackLayoutMetadata.internalBinaryRead(reader, reader.uint32(), options, message.trackLayoutMetadata);
+                    break;
+                case /* IRacingTools.Models.FileInfo file_info */ 21:
+                    message.fileInfo = FileInfo.internalBinaryRead(reader, reader.uint32(), options, message.fileInfo);
                     break;
                 case /* string session_info_json */ 90:
                     message.sessionInfoJson = reader.string();
@@ -258,7 +291,7 @@ class SessionState$Type extends MessageType<SessionState> {
         }
         return message;
     }
-    internalBinaryWrite(message: SessionState, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: SessionData, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string id = 1; */
         if (message.id !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.id);
@@ -271,9 +304,12 @@ class SessionState$Type extends MessageType<SessionState> {
         /* IRacingTools.Models.Session.SessionTiming timing = 10; */
         if (message.timing)
             SessionTiming.internalBinaryWrite(message.timing, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
-        /* string file_path = 20; */
-        if (message.filePath !== "")
-            writer.tag(20, WireType.LengthDelimited).string(message.filePath);
+        /* IRacingTools.Models.TrackLayoutMetadata track_layout_metadata = 20; */
+        if (message.trackLayoutMetadata)
+            TrackLayoutMetadata.internalBinaryWrite(message.trackLayoutMetadata, writer.tag(20, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.FileInfo file_info = 21; */
+        if (message.fileInfo)
+            FileInfo.internalBinaryWrite(message.fileInfo, writer.tag(21, WireType.LengthDelimited).fork(), options).join();
         /* string session_info_json = 90; */
         if (message.sessionInfoJson !== "")
             writer.tag(90, WireType.LengthDelimited).string(message.sessionInfoJson);
@@ -287,6 +323,6 @@ class SessionState$Type extends MessageType<SessionState> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.Session.SessionState
+ * @generated MessageType for protobuf message IRacingTools.Models.Session.SessionData
  */
-export const SessionState = new SessionState$Type();
+export const SessionData = new SessionData$Type();

@@ -42,13 +42,20 @@ namespace IRacingTools::Shared::UI {
           trackMap_(trackMap),
           unsubscribeFn_(
               dataProvider->subscribe(
-                  [&](std::shared_ptr<SessionDataEvent> event) {
-                      if (event->type() == SessionDataEventType::UpdatedData) {
-                          if (auto dataEvent = std::dynamic_pointer_cast<SessionDataUpdatedDataEvent>(event)) {
-                              std::scoped_lock lock(dataMutex_);
-                              dataChanged_ = true;
-                              dataEvent_ = dataEvent;
-                          }
+              [&](RPC::Events::SessionEventType type, std::shared_ptr<RPC::Events::SessionEventData> ev) {
+                  // [&](std::shared_ptr<SessionDataEvent> event) {
+                      if (type == RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME) {
+                          // TODO: This was hacked for backwards compatability
+                          std::scoped_lock lock(dataMutex_);
+                          auto dataEvent = std::make_shared<SessionDataUpdatedDataEvent>(SessionDataEventType::UpdatedData, &dataProvider_->dataAccess());
+                          dataChanged_ = true;
+                          dataEvent_ = dataEvent;
+
+                          // if (auto dataEvent = std::dynamic_pointer_cast<SessionDataUpdatedDataEvent>(event)) {
+                          //     std::scoped_lock lock(dataMutex_);
+                          //     dataChanged_ = true;
+                          //     dataEvent_ = dataEvent;
+                          // }
                       }
                   }
               )

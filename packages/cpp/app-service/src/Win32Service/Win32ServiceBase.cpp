@@ -540,7 +540,7 @@ void Win32Service::setServiceStatus(DWORD dwCurrentState,
 //   * wCategory - category id. This is similar to event id, but the corresponding string
 //     is shown in a separate column in Windows Event Viewer.
 //
-//   NOTE: It can be overriden to do any other kind of logging in a sublcass
+//   NOTE: It can be overridden to do any other kind of logging in a sublcass
 //
 
 void Win32Service::writeLogEntry(PCWSTR pszMessage, WORD wType, DWORD dwEventId, WORD wCategory)

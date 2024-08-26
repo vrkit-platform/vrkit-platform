@@ -3,7 +3,7 @@
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Common/UUIDHelpers.h>
 
-#include "VRKitNativeClient.h"
+#include "NativeClient.h"
 
 using namespace IRacingTools::App::Node;
 using namespace IRacingTools::Models::RPC;
@@ -12,50 +12,7 @@ using namespace Napi;
 
 namespace IRacingTools::App::Node {
     namespace {
-        auto L = GetCategoryWithType<IRacingTools::App::Node::VRKitNativeGlobal>();
-    }
-
-    void VRKitNativeGlobal::destroy() {
-        manager_->destroy();
-    }
-
-    VRKitNativeGlobal::VRKitNativeGlobal(token) : manager_(std::make_shared<VRKitNativeSystemManager>()) {
-        manager_->init();
-        manager_->start();
-#if 0
-    // Testing only
-    auto pingRouteExecutor = [&](
-        const std::shared_ptr<Messages::Ping> &request,
-        const std::shared_ptr<RPC::Envelope> &envelope) -> std::expected<
-      std::shared_ptr<Messages::Pong>, GeneralError> {
-      L->info("Processing request path for ping: {}", envelope->request_path());
-      auto response = std::make_shared<Messages::Pong>();
-      response->set_ping_count(request->count());
-      return response;
-    };
-
-    auto pingRoute = RPCServerService::TypedRoute<
-      Messages::Ping, Messages::Pong>::Create(pingRouteExecutor, "/ping");
-
-    auto rpcService = serviceManager()->getService<RPCServerService>();
-    rpcService->addRoute(pingRoute);
-#endif
-    }
-
-    void VRKitShutdown() {
-        L->info("Shutting down VRKitNativeGlobal");
-        VRKitNativeGlobal::GetPtr()->destroy();
-        L->info("Shutdown completed VRKitNativeGlobal");
-    }
-
-    /**
-     * @brief per-context reference to global
-     */
-    VRKitNativeSystemAddon::VRKitNativeSystemAddon() : system_(VRKitNativeGlobal::GetPtr()) {
-    }
-
-    Napi::FunctionReference& VRKitNativeSystemAddon::clientCtor() {
-        return clientCtor_;
+        auto L = GetCategoryWithType<IRacingTools::App::Node::NativeClient>();
     }
 
     /**
@@ -63,23 +20,23 @@ namespace IRacingTools::App::Node {
      * @param type of event, must map to `enum VRKitClientEvent` key
      * @param data message to pack into payload
      */
-    VRKitNativeJSDefaultEvent::VRKitNativeJSDefaultEvent(
-        RPC::Events::ClientEvent type,
+    NativeJSDefaultEvent::NativeJSDefaultEvent(
+        RPC::Events::ClientEventType type,
         std::optional<google::protobuf::Any> data
     ) : type(type), data(data) {
     }
 
-    void VRKitNativeClient::Init(Napi::Env env, Napi::Object exports) {
+    void NativeClient::Init(Napi::Env env, Napi::Object exports) {
         Napi::Function func = DefineClass(
             env,
             "NativeClient",
             {
-                InstanceMethod<&VRKitNativeClient::jsExecuteRequest>("executeRequest"),
-                InstanceMethod<&VRKitNativeClient::jsDestroy>("destroy")
+                InstanceMethod<&NativeClient::jsExecuteRequest>("executeRequest"),
+                InstanceMethod<&NativeClient::jsDestroy>("destroy")
 
 #ifdef DEBUG
                 ,
-                InstanceMethod<&VRKitNativeClient::jsTestNativeEventEmit>("testNativeEventEmit")
+                InstanceMethod<&NativeClient::jsTestNativeEventEmit>("testNativeEventEmit")
 #endif
                 // InstanceMethod<&NodeSystemClient::jsShutdown>("shutdown"),
                 // InstanceMethod<&NodeSystemClient::jsOpenBucket>("openBucket"),
@@ -94,9 +51,9 @@ namespace IRacingTools::App::Node {
         exports.Set("NativeClient", func);
     }
 
-    VRKitNativeClient::VRKitNativeClient(const Napi::CallbackInfo& info)
-        : Napi::ObjectWrap<VRKitNativeClient>(info), system_(VRKitNativeGlobal::GetPtr()) {
-        L->info("VRKitNativeClient() new instance: {}", info.Length());
+    NativeClient::NativeClient(const Napi::CallbackInfo& info)
+        : Napi::ObjectWrap<NativeClient>(info), system_(NativeGlobal::GetPtr()) {
+        L->info("NativeClient() new instance: {}", info.Length());
 
         auto env = info.Env();
         if (info.Length() < 1) {
@@ -109,7 +66,7 @@ namespace IRacingTools::App::Node {
 
         auto context = new Reference<Napi::Value>(Persistent(info.This()));
 
-        jsDefaultEventFn_ = VRKitNativeDefaultEventFn::New(
+        jsDefaultEventFn_ = NativeDefaultEventFn::New(
             env,
             info[0].As<Function>(),
             "VRKNativeDefaultEvent",
@@ -121,9 +78,9 @@ namespace IRacingTools::App::Node {
             context,
             [](
             Napi::Env,
-            VRKitNativeDefaultEventFinalizerDataType*,
+            NativeDefaultEventFinalizerDataType*,
             // ReSharper disable once CppParameterMayBeConstPtrOrRef
-            VRKitNativeDefaultEventContextType* ctx
+            NativeDefaultEventContextType* ctx
         ) {
                 L->info("Finalizing jsDefaultEventFn_");
                 delete ctx;
@@ -132,23 +89,23 @@ namespace IRacingTools::App::Node {
     }
 
     /**
-     * @brief VRKitNativeClient destructor
+     * @brief NativeClient destructor
      */
-    VRKitNativeClient::~VRKitNativeClient() {
+    NativeClient::~NativeClient() {
         destroy();
     }
 
     /**
      * @brief Remove all resources associated with the client
      */
-    void VRKitNativeClient::destroy() {
+    void NativeClient::destroy() {
         std::scoped_lock lock(destroyMutex_);
         if (destroyed_.exchange(true)) {
-            L->warn("VRKitNativeClient::destroy(): Already destroyed client");
+            L->warn("NativeClient::destroy(): Already destroyed client");
             return;
         }
 
-        L->info("VRKitNativeClient::destroy()");
+        L->info("NativeClient::destroy()");
 
 #ifdef DEBUG
         {
@@ -164,21 +121,21 @@ namespace IRacingTools::App::Node {
 
     /**
      * @brief Finalize, destroy & cleanup any orphaned resources
-     * @see VRKitNativeClient::destroy()
+     * @see NativeClient::destroy()
      *
      * @param napi_env
      */
-    void VRKitNativeClient::Finalize(Napi::Env napi_env) {
+    void NativeClient::Finalize(Napi::Env napi_env) {
         destroy();
         ObjectWrap::Finalize(napi_env);
     }
 
-    Napi::Value VRKitNativeClient::jsDestroy(const Napi::CallbackInfo& info) {
+    Napi::Value NativeClient::jsDestroy(const Napi::CallbackInfo& info) {
         destroy();
         return {};
     }
 
-    Napi::Value VRKitNativeClient::jsExecuteRequest(const Napi::CallbackInfo& info) {
+    Napi::Value NativeClient::jsExecuteRequest(const Napi::CallbackInfo& info) {
         auto env = info.Env();
 
         // TODO: implement as async to avoid blocking
@@ -210,7 +167,7 @@ namespace IRacingTools::App::Node {
         return deferred.Promise();
     }
 #ifdef DEBUG
-    Napi::Value VRKitNativeClient::jsTestNativeEventEmit(const Napi::CallbackInfo& info) {
+    Napi::Value NativeClient::jsTestNativeEventEmit(const Napi::CallbackInfo& info) {
         L->info("jsTestNativeEventEmit() new instance: {}", info.Length());
 
         auto env = info.Env();
@@ -223,17 +180,17 @@ namespace IRacingTools::App::Node {
         }
 
         auto eventTypeInt = info[0].As<Napi::Number>().Int32Value();
-        auto eventType = magic_enum::enum_cast<RPC::Events::ClientEvent>(eventTypeInt).value_or(
-            Events::CLIENT_EVENT_UNKNOWN
+        auto eventType = magic_enum::enum_cast<RPC::Events::ClientEventType>(eventTypeInt).value_or(
+            Events::CLIENT_EVENT_TYPE_UNKNOWN
         );
         L->info("jsTestNativeEventEmit() eventType: {}", magic_enum::enum_name(eventType).data());
 
-        Events::ClientEventTestData dataMessage{};
+        Events::TestEventData dataMessage{};
         dataMessage.set_message("test emit any payload");
         auto dataAny = google::protobuf::Any{};
         dataAny.PackFrom(dataMessage);
 
-        auto jsEventData = new VRKitNativeJSDefaultEvent(eventType, dataAny);
+        auto jsEventData = new NativeJSDefaultEvent(eventType, dataAny);
 
         {
             std::scoped_lock lock(jsTestThreadsMutex_);
@@ -261,14 +218,14 @@ namespace IRacingTools::App::Node {
     }
 #endif
 
-    // void VRKitNativeClient::jsDefaultEventCallback(
+    // void NativeClient::jsDefaultEventCallback(
     void JSDefaultEventCallback(
         Napi::Env env,
         Napi::Function callback,
         // ReSharper disable once CppParameterMayBeConstPtrOrRef
-        VRKitNativeDefaultEventContextType* context,
+        NativeDefaultEventContextType* context,
         // ReSharper disable once CppParameterMayBeConstPtrOrRef
-        VRKitNativeDefaultEventDataType* data
+        NativeDefaultEventDataType* data
     ) {
         L->info("JSDefaultEventCallback()");
         L->info("JSDefaultEventCallback() eventType: {}", magic_enum::enum_name(data->type).data());
@@ -303,34 +260,3 @@ namespace IRacingTools::App::Node {
         delete data;
     }
 }
-
-namespace {
-    // Napi::String VRKitPingFn(const Napi::CallbackInfo& info) {
-    //     // Napi::Env is the opaque data structure containing the environment in which
-    //     // the request is being run. We will need this env when we want to create any
-    //     // new objects inside the node.js environment
-    //     Napi::Env env = info.Env();
-    //
-    //     // Return a new javascript string that we copy-construct inside the node.js
-    //     // environment
-    //     return Napi::String::New(env, "pong");
-    // }
-
-    Napi::Value VRKitShutdownFn(const Napi::CallbackInfo& info) {
-        VRKitShutdown();
-        return {};
-    }
-}
-
-
-static Napi::Object Init(Napi::Env env, Napi::Object exports) {
-    VRKitNativeSystemAddon::Init(env, exports);
-    VRKitNativeClient::Init(env, exports);
-    // exports.Set("VRKitPing", Napi::Function::New(env, VRKitPingFn));
-    exports.Set("Shutdown", Napi::Function::New(env, VRKitShutdownFn));
-    // Napi::String::New(env, "VRKitPing"),
-    // Napi::Function::New(env, Ping));
-    return exports;
-}
-
-NODE_API_MODULE(VRKitSystem, Init)

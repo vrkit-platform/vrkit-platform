@@ -30,12 +30,12 @@ namespace IRacingTools::Shared::Services {
             virtual std::expected<bool, SDK::GeneralError> init() override;
 
             /**
-             * @brief Must set running == true in overriden implementation
+             * @brief Must set running == true in overridden implementation
              */
             virtual std::expected<bool, SDK::GeneralError>  start()  override;
 
             /**
-             * @brief Must set running == false in overriden implementation
+             * @brief Must set running == false in overridden implementation
              */
             virtual std::optional<SDK::GeneralError> destroy() override;
 

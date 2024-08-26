@@ -4,6 +4,10 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/packages/cpp/*/include",
+                "${workspaceFolder}/packages/js/vrkit-native-interop/src/native",
+                "${workspaceFolder}/node_modules/node-addon-api",
+                "${workspaceFolder}/node_modules/node-api-headers/include",
+                "${workspaceFolder}/build/debug-vscode/packages/proto/IRacingTools/Models",
                 "${workspaceFolder}/build/debug-vscode/packages/cpp/app-service",
                 "${workspaceFolder}/build/debug-vscode/packages/proto",
                 "${workspaceFolder}/build/debug-vscode/vcpkg_installed/x64-windows-static/include",

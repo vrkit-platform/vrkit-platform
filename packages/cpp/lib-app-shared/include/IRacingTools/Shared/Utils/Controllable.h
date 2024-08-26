@@ -20,7 +20,7 @@ namespace IRacingTools::Shared::Utils {
     virtual std::expected<bool, SDK::GeneralError> init() = 0;
 
     /**
-     * @brief Must set running == true in overriden implementation
+     * @brief Must set running == true in overridden implementation
      */
     virtual std::expected<bool, SDK::GeneralError> start() = 0;
 

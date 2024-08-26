@@ -9,7 +9,7 @@
       "vrkit-native-interop":
       [  "./packages/js/vrkit-native-interop"],
       "vrkit-native-interop/*":
-      [  "./packages/js/vrkit-native-interop/src/*"]
+      [  "./packages/js/vrkit-native-interop/src/web/*"]
     }
   },
   "references": [

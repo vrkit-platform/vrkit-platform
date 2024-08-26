@@ -15,11 +15,11 @@ import { ConfirmDialog } from "vrkit-app-renderer/components/custom-dialog"
 import { useTable } from "vrkit-app-renderer/components/table"
 
 import { TrackManagerTable } from "../track-manager-table"
-import { Any, List as ListModel, TrackMapFile } from "vrkit-models"
+import { Any, ListMessage, TrackMapFile } from "vrkit-models"
 import { BoxProps } from "@mui/material/Box"
 import { useAsync } from "../../../hooks"
 import { asOption } from "@3fv/prelude-ts"
-import { getDefaultVRKitClient } from "vrkit-native-interop"
+import { GetDefaultVRKitClient } from "vrkit-native-interop"
 
 // ----------------------------------------------------------------------
 
@@ -30,16 +30,16 @@ export interface TrackMapFileCriteria {}
 async function getTrackMapFiles(
   criteria: TrackMapFileCriteria = {}
 ): Promise<TrackMapFile[]> {
-  const client = getDefaultVRKitClient()
-  const request = ListModel.create({
+  const client = GetDefaultVRKitClient()
+  const request = ListMessage.create({
     resultsPage: 0,
     resultsPerPage: -1
   })
 
-  const response = await client.executeRequest<ListModel, ListModel>(
+  const response = await client.executeRequest<ListMessage, ListMessage>(
     "/tracks/list",
-    ListModel,
-    ListModel,
+    ListMessage,
+    ListMessage,
     request
   )
 

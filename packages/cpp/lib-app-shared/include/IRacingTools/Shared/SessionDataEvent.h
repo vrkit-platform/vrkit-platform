@@ -9,9 +9,6 @@
 #include <memory>
 #include <thread>
 
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/LiveClient.h>
-#include <IRacingTools/SDK/LiveConnection.h>
 #include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/EventEmitter.h>
 #include <IRacingTools/SDK/VarHolder.h>

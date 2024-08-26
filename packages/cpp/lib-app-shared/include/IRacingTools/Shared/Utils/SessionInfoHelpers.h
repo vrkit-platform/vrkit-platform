@@ -16,5 +16,6 @@ namespace IRacingTools::Shared::Utils {
   std::expected<std::shared_ptr<Models::TrackLayoutMetadata>, SDK::GeneralError> GetSessionInfoTrackLayoutMetadata(const SessionInfoMessage& sessionInfoMessage);
   std::expected<std::shared_ptr<Models::TrackLayoutMetadata>, SDK::GeneralError> GetSessionInfoTrackLayoutMetadata(const std::shared_ptr<SessionInfoMessage>& sessionInfoMessage);
   std::expected<std::shared_ptr<Models::TrackLayoutMetadata>, SDK::GeneralError> GetSessionInfoTrackLayoutMetadata(const SessionInfoMessage* sessionInfoMessage);
+  std::expected<Models::TrackLayoutMetadata *, SDK::GeneralError> GetSessionInfoTrackLayoutMetadata(Models::TrackLayoutMetadata * trackLayoutMetadata, const SessionInfoMessage* sessionInfoMessage);
   
 }// namespace IRacingTools::Shared::Services

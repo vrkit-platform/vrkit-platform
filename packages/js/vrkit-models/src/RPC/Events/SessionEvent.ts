@@ -10,6 +10,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { SessionData } from "../../Session/SessionState";
 import { SessionType } from "../../Session/SessionState";
 /**
  * @generated from protobuf message IRacingTools.Models.RPC.Events.SessionEventData
@@ -20,9 +21,9 @@ export interface SessionEventData {
      */
     id: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.RPC.Events.SessionEventData.Type type = 2;
+     * @generated from protobuf field: IRacingTools.Models.RPC.Events.SessionEventType type = 2;
      */
-    type: SessionEventData_Type;
+    type: SessionEventType;
     /**
      * @generated from protobuf field: string session_id = 10;
      */
@@ -31,36 +32,41 @@ export interface SessionEventData {
      * @generated from protobuf field: IRacingTools.Models.Session.SessionType session_type = 11;
      */
     sessionType: SessionType;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionData session_data = 20;
+     */
+    sessionData?: SessionData;
 }
 /**
- * @generated from protobuf enum IRacingTools.Models.RPC.Events.SessionEventData.Type
+ * @generated from protobuf enum IRacingTools.Models.RPC.Events.SessionEventType
  */
-export enum SessionEventData_Type {
+export enum SessionEventType {
     /**
-     * @generated from protobuf enum value: None = 0;
+     * @generated from protobuf enum value: SESSION_EVENT_TYPE_UNKNOWN = 0;
      */
-    None = 0,
+    UNKNOWN = 0,
     /**
-     * @generated from protobuf enum value: Created = 1;
+     * @generated from protobuf enum value: SESSION_EVENT_TYPE_AVAILABLE = 1;
      */
-    Created = 1,
+    AVAILABLE = 1,
     /**
-     * @generated from protobuf enum value: Changed = 2;
+     * @generated from protobuf enum value: SESSION_EVENT_TYPE_INFO_CHANGED = 2;
      */
-    Changed = 2,
+    INFO_CHANGED = 2,
     /**
-     * @generated from protobuf enum value: Removed = 3;
+     * @generated from protobuf enum value: SESSION_EVENT_TYPE_DATA_FRAME = 3;
      */
-    Removed = 3
+    DATA_FRAME = 3
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class SessionEventData$Type extends MessageType<SessionEventData> {
     constructor() {
         super("IRacingTools.Models.RPC.Events.SessionEventData", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "type", kind: "enum", T: () => ["IRacingTools.Models.RPC.Events.SessionEventData.Type", SessionEventData_Type] },
+            { no: 2, name: "type", kind: "enum", T: () => ["IRacingTools.Models.RPC.Events.SessionEventType", SessionEventType, "SESSION_EVENT_TYPE_"] },
             { no: 10, name: "session_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 11, name: "session_type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionType", SessionType] }
+            { no: 11, name: "session_type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionType", SessionType, "SESSION_TYPE_"] },
+            { no: 20, name: "session_data", kind: "message", T: () => SessionData }
         ]);
     }
     create(value?: PartialMessage<SessionEventData>): SessionEventData {
@@ -81,7 +87,7 @@ class SessionEventData$Type extends MessageType<SessionEventData> {
                 case /* string id */ 1:
                     message.id = reader.string();
                     break;
-                case /* IRacingTools.Models.RPC.Events.SessionEventData.Type type */ 2:
+                case /* IRacingTools.Models.RPC.Events.SessionEventType type */ 2:
                     message.type = reader.int32();
                     break;
                 case /* string session_id */ 10:
@@ -89,6 +95,9 @@ class SessionEventData$Type extends MessageType<SessionEventData> {
                     break;
                 case /* IRacingTools.Models.Session.SessionType session_type */ 11:
                     message.sessionType = reader.int32();
+                    break;
+                case /* IRacingTools.Models.Session.SessionData session_data */ 20:
+                    message.sessionData = SessionData.internalBinaryRead(reader, reader.uint32(), options, message.sessionData);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -105,7 +114,7 @@ class SessionEventData$Type extends MessageType<SessionEventData> {
         /* string id = 1; */
         if (message.id !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.id);
-        /* IRacingTools.Models.RPC.Events.SessionEventData.Type type = 2; */
+        /* IRacingTools.Models.RPC.Events.SessionEventType type = 2; */
         if (message.type !== 0)
             writer.tag(2, WireType.Varint).int32(message.type);
         /* string session_id = 10; */
@@ -114,6 +123,9 @@ class SessionEventData$Type extends MessageType<SessionEventData> {
         /* IRacingTools.Models.Session.SessionType session_type = 11; */
         if (message.sessionType !== 0)
             writer.tag(11, WireType.Varint).int32(message.sessionType);
+        /* IRacingTools.Models.Session.SessionData session_data = 20; */
+        if (message.sessionData)
+            SessionData.internalBinaryWrite(message.sessionData, writer.tag(20, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

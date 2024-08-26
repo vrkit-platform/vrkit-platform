@@ -1,15 +1,17 @@
 // noinspection DuplicatedCode
 
-import { VRKitClientEvent,VRKitShutdown, VRKitClient } from "../VRKitClient"
+import { Client } from "../Client"
+import { Shutdown } from "../NativeBinding"
+import { ClientEventType } from "vrkit-models"
 
 async function run() {
   // noinspection DuplicatedCode
   
-  const client = new VRKitClient()
+  const client = new Client()
   try {
     const testPromise = new Promise<any>((resolve, reject) => {
       let triggered = false
-      client.on(VRKitClientEvent.TEST, data => {
+      client.on(ClientEventType.TEST, data => {
         if (triggered) {
           console.error("Already expired/called")
           return;
@@ -37,7 +39,7 @@ async function run() {
   } catch (err) {
     console.error("Failed test", err)
   } finally {
-    await VRKitShutdown()
+    await Shutdown()
     process.exit(0)
   }
 }

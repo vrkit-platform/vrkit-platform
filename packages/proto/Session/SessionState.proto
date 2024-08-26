@@ -1,31 +1,37 @@
 syntax = "proto3";
 import "google/protobuf/timestamp.proto";
+import "FileInfo.proto";
+import "TrackLayoutMetadata.proto";
 
 package IRacingTools.Models.Session;
 
 message SessionTiming {
   bool is_live = 1;
   bool is_valid = 2;
-  google.protobuf.Timestamp start  = 10;
-  google.protobuf.Timestamp end = 11;
-  int64 duration = 20;
-  int64 position = 21;
+  google.protobuf.Timestamp start_time  = 10;
+  google.protobuf.Timestamp end_time = 11;
+  int64 current_time_millis = 20;
+  int64 total_time_millis = 21;
+  //int64 position = 21;
+
+  int64 sample_index = 50;
+  int64 sample_count = 51;
 }
 
 enum SessionType {
-  LIVE = 0;
-  DISK = 1;
+  SESSION_TYPE_LIVE = 0;
+  SESSION_TYPE_DISK = 1;
 }
 
 enum SessionStatus {
-  CREATED = 0;
-  READY = 1;
-  PAUSED = 2;
-  RUNNING = 5;
-  ERROR = 10;
+  SESSION_STATUS_CREATED = 0;
+  SESSION_STATUS_READY = 1;
+  SESSION_STATUS_PAUSED = 2;
+  SESSION_STATUS_RUNNING = 5;
+  SESSION_STATUS_ERROR = 10;
 }
 
-message SessionState {
+message SessionData {
 
   string id = 1;
   SessionType type = 2;
@@ -34,7 +40,8 @@ message SessionState {
 
   SessionTiming timing = 10;
 
-  string file_path = 20;
+  TrackLayoutMetadata track_layout_metadata = 20;
+  FileInfo file_info = 21;
 
   string session_info_json = 90;
   string session_info_yaml = 91;

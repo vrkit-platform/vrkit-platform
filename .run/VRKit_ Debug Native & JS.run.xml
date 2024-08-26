@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="VRKit: Debug Native &amp; JS" type="CompoundRunConfigurationType">
+    <toRun name="VRKit: Main" type="ChromiumRemoteDebugType" />
+    <toRun name="vrkit_native_interop" type="CMakeRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>

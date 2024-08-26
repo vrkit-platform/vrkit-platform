@@ -4,69 +4,31 @@
 
 #pragma once
 
-#include <windows.h>
-
 #include <memory>
-#include <thread>
 
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/LiveClient.h>
-#include <IRacingTools/SDK/LiveConnection.h>
-#include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/Models/Session/SessionState.pb.h>
+#include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
 #include <IRacingTools/SDK/Utils/EventEmitter.h>
-#include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingTools/Shared/SessionDataEvent.h>
 
-#include "Chrono.h"
-#include "SessionDataAccess.h"
-#include "SessionDataEvent.h"
 
 namespace IRacingTools::Shared {
 
   /**
    * @brief IRacing Data Service
    */
-  class SessionDataProvider : public SDK::Utils::EventEmitter<std::shared_ptr<SessionDataEvent>> {
+    //, std::shared_ptr<SessionDataEvent>
+  class SessionDataProvider : public SDK::Utils::EventEmitter<Models::RPC::Events::SessionEventType,std::shared_ptr<Models::RPC::Events::SessionEventData>> {
 
 
   public:
     using SessionDataProviderPtr = std::shared_ptr<SessionDataProvider>;
 
-    /**
-     * Get the current provider
-     *
-     * @return current provider
-     */
-    static SessionDataProviderPtr GetCurrent();
-
-    /**
-     * Set the current provider & return any previously set provider
-     *
-     * @param next provider to set as current
-     * @return If a previous provider had been set, then it is returned (after being stopped)
-     */
-    static SessionDataProviderPtr SetCurrent(const SessionDataProviderPtr& next);
-
-
-    /**
-     * Timing details for the given session
-     */
-    struct Timing {
-
-      using Unit = std::chrono::milliseconds;
-      using Time = std::chrono::time_point<std::chrono::steady_clock, Unit>;
-
-      bool isLive{false};
-      bool isValid{false};
-      Time start{};
-      Time end{};
-      Unit duration{0};
-      Unit position{0};
-    };
-
     using Ptr = std::shared_ptr<SessionDataProvider>;
 
     virtual ~SessionDataProvider() = default;
 
+    virtual SessionDataAccess& dataAccess() = 0;
     virtual bool isAvailable() = 0;
 
     virtual bool start() = 0;
@@ -89,7 +51,9 @@ namespace IRacingTools::Shared {
      *
      * @return current timing ref
      */
-    virtual const Timing timing() = 0;
+    virtual std::shared_ptr<Models::Session::SessionData> sessionData() = 0;
+
+      virtual std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo() = 0;
 
 
   };

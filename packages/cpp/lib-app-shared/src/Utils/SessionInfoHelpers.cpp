@@ -40,6 +40,20 @@ namespace IRacingTools::Shared::Utils {
   std::expected<std::shared_ptr<Models::TrackLayoutMetadata>, SDK::GeneralError>
   GetSessionInfoTrackLayoutMetadata(
       const SessionInfoMessage *sessionInfoMessage) {
+
+    auto tlm = std::make_shared<Models::TrackLayoutMetadata>();
+    if (auto res = GetSessionInfoTrackLayoutMetadata(tlm.get(), sessionInfoMessage); !res.has_value()) {
+      return std::unexpected(res.error());
+    }
+
+    return tlm;
+
+  }
+
+  std::expected<Models::TrackLayoutMetadata*, SDK::GeneralError> GetSessionInfoTrackLayoutMetadata(
+    Models::TrackLayoutMetadata* trackLayoutMetadata,
+    const SessionInfoMessage* sessionInfoMessage
+  ) {
     if (!sessionInfoMessage) {
       return std::unexpected(SDK::GeneralError(
           SDK::ErrorCode::General, "NULL SessionInfoMessage"));
@@ -64,15 +78,15 @@ namespace IRacingTools::Shared::Utils {
         fmt::format("{}::{}::{}", trackId, trackName, trackLayoutName);
     L->info("Computed track layout id from session info >> {}", trackLayoutId);
 
-    auto tlm = std::make_shared<Models::TrackLayoutMetadata>();
-    auto tm = tlm->mutable_track_metadata();
+    // auto tlm = std::make_shared<Models::TrackLayoutMetadata>();
+    auto tm = trackLayoutMetadata->mutable_track_metadata();
 
-    tlm->set_id(trackLayoutId);
-    tlm->set_name(trackLayoutName);
+    trackLayoutMetadata->set_id(trackLayoutId);
+    trackLayoutMetadata->set_name(trackLayoutName);
     tm->set_id(trackId);
     tm->set_name(trackName);
     tm->set_version(trackVersion);
 
-    return tlm;
+    return trackLayoutMetadata;
   }
 } // namespace IRacingTools::Shared::Utils

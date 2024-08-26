@@ -43,6 +43,7 @@
     "webpack-dev-server": "^5.0.4",
     "webpack-hot-middleware": "^2.26.1",
     "webpack-merge": "^6.0.1",
+    "vrkit-models": "1.0.0",
     "vrkit-native-interop": "1.0.0",
     "history": "^4.10.1",
     "cson": "^8.4.0",

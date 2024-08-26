@@ -3,19 +3,18 @@ import "Session/SessionState.proto";
 
 package IRacingTools.Models.RPC.Events;
 
-message SessionEventData {
-  enum Type {
-    None = 0;
-    Created = 1;
-    Changed = 2;
-    Removed = 3;
-  }
+enum SessionEventType {
+  SESSION_EVENT_TYPE_UNKNOWN = 0;
+  SESSION_EVENT_TYPE_AVAILABLE = 1;
+  SESSION_EVENT_TYPE_INFO_CHANGED = 2;
+  SESSION_EVENT_TYPE_DATA_FRAME = 3;
+}
 
+message SessionEventData {
   string id = 1;
-  Type type = 2;
+  SessionEventType type = 2;
 
   string session_id = 10;
   Session.SessionType session_type = 11;
-
-//  string session_name = 12;
+  Session.SessionData session_data = 20;
 }

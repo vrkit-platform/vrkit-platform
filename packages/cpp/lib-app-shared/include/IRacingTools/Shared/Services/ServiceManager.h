@@ -64,7 +64,7 @@ namespace IRacingTools::Shared::Services {
     }
 
     /**
-     * @brief Must set running == true in overriden implementation
+     * @brief Must set running == true in overridden implementation
      */
     std::optional<SDK::GeneralError>  start() {
       // TODO: Implement dependency management and Multithreaded start
@@ -104,7 +104,7 @@ namespace IRacingTools::Shared::Services {
     }
 
     /**
-     * @brief Must set running == false in overriden implementation
+     * @brief Must set running == false in overridden implementation
      */
     std::optional<SDK::GeneralError> destroy() {
       std::scoped_lock lock(stateMutex_);

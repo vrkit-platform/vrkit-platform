@@ -34,8 +34,8 @@ namespace IRacingTools::Shared::Utils {
 
 
   std::expected<Models::FileInfo *, SDK::GeneralError>
-  GetFileInfo(Models::FileInfo *info, std::optional<fs::path> path) {
-    fs::path finalPath = path.value_or(fs::path(info->file()));
+  GetFileInfo(Models::FileInfo *fileInfo, std::optional<fs::path> path) {
+    fs::path finalPath = path.value_or(fs::path(fileInfo->file()));
     if (!finalPath.is_absolute())
       finalPath = fs::absolute(finalPath);
 
@@ -47,18 +47,18 @@ namespace IRacingTools::Shared::Utils {
               finalPath.string())));
     }
 
-    info->set_parent_dir(finalPath.parent_path().string());
-    info->set_file(finalPath.string());
-    info->set_filename(finalPath.filename().string());
-    info->set_is_deleted(false);
+    fileInfo->set_parent_dir(finalPath.parent_path().string());
+    fileInfo->set_file(finalPath.string());
+    fileInfo->set_filename(finalPath.filename().string());
+    fileInfo->set_is_deleted(false);
 
-    if (auto tsRes = UpdateFileInfoTimestamps(info); tsRes.has_value()) {
+    if (auto tsRes = UpdateFileInfoTimestamps(fileInfo); tsRes.has_value()) {
       return std::unexpected(tsRes.value());
     }
 
-    L->debug("FileInfo populated ({})", info->DebugString());
+    L->debug("FileInfo populated ({})", fileInfo->DebugString());
 
-    return info;
+    return fileInfo;
   }
 
   bool FileInfoPathMatch(

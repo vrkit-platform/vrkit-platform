@@ -15,7 +15,7 @@
 
 namespace IRacingTools::Shared::Common {
 
-std::string NewUUID() {
+inline std::string NewUUID() {
   auto uuid = boost::uuids::random_generator()();
 
   return std::string(uuid.begin(), uuid.end());

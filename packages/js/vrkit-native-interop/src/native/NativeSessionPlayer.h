@@ -39,11 +39,11 @@ namespace IRacingTools::App::Node {
    */
     struct NativeSessionPlayerJSEvent {
         RPC::Events::SessionEventType type;
-        std::optional<RPC::Events::SessionEventData> data;
+        std::shared_ptr<RPC::Events::SessionEventData> data;
 
         explicit NativeSessionPlayerJSEvent(
             RPC::Events::SessionEventType type,
-            std::optional<RPC::Events::SessionEventData> data = std::nullopt
+            const std::shared_ptr<RPC::Events::SessionEventData>& data = nullptr
         );
     };
 

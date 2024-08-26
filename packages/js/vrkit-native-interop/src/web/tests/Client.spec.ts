@@ -3,10 +3,11 @@ import {jest} from '@jest/globals';
 
 import { Client} from "../Client"
 import { Shutdown } from "../NativeBinding"
-import { ClientEventType } from "vrkit-models"
+import { ClientEventType, SessionEventType } from "vrkit-models"
 import { SessionPlayer } from "../SessionPlayer"
 import Fixtures from "./DataFixtures"
 import { getLogger } from "@3fv/logger-proxy"
+import { Deferred } from "@3fv/deferred"
 
 const log = getLogger(__filename)
 
@@ -33,8 +34,26 @@ test("SessionPlayer.open", async () => {
   expect(data.fileInfo.file).toEqual(ibtFile)
   expect(data.timing).toBeDefined()
   
-  player.close()
+  const sampleIndexes = Array<bigint>()
+  player.on(SessionEventType.DATA_FRAME, ev => {
+    const evData = ev.payload,
+        {sampleIndex, sampleCount} = evData.sessionData.timing
+    expect(sampleIndexes.includes(sampleIndex)).toBeFalsy()
+    sampleIndexes.push(sampleIndex)
+    
+    log.info("Sample received", sampleIndex,"of", sampleCount)
+    if (sampleIndexes.length >= 10) {
+      log.info("Stopping player after ", sampleIndexes.length, "samples")
+      player.stop()
+    }
+  })
   
+  expect(player.start()).toBeTruthy()
+  
+  await Deferred.delay(2000)
+  expect(player.stop()).toBeTruthy()
+  
+  player.close()
 })
 
 test.skip("VRKit Native Event", async () => {

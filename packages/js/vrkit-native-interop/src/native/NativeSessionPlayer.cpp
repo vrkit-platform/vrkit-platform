@@ -31,7 +31,7 @@ namespace IRacingTools::App::Node {
      */
     NativeSessionPlayerJSEvent::NativeSessionPlayerJSEvent(
         RPC::Events::SessionEventType type,
-        std::optional<RPC::Events::SessionEventData> data
+        const std::shared_ptr<RPC::Events::SessionEventData>& data
     ) : type(type), data(data) {
     }
 
@@ -94,7 +94,7 @@ namespace IRacingTools::App::Node {
                 std::format("FileInfo is unavailable: {}", filePathStr)
             );
 
-            dataProvider_ = std::make_shared<DiskSessionDataProvider>(filePath, filePath.string());
+            dataProvider_ = std::make_shared<DiskSessionDataProvider>(filePath, filePath.filename().string());
             sessionData_ = dataProvider_->sessionData();
         } else {
             // Live player
@@ -124,6 +124,10 @@ namespace IRacingTools::App::Node {
                 delete ctx;
             }
         );
+
+        dataProvider_->subscribe([&] (auto type, auto data) {
+            jsSessionPlayerEventFn_.BlockingCall(new NativeSessionPlayerJSEvent(type, data));
+        });
     }
 
     /**
@@ -256,8 +260,8 @@ namespace IRacingTools::App::Node {
         // ReSharper disable once CppParameterMayBeConstPtrOrRef
         NativeSessionPlayerEventDataType* data
     ) {
-        L->info("JSSessionPlayerEventCallback()");
-        L->info("JSSessionPlayerEventCallback() eventType: {}", magic_enum::enum_name(data->type).data());
+        // L->info("JSSessionPlayerEventCallback()");
+        L->debug("JSSessionPlayerEventCallback() eventType: {}", magic_enum::enum_name(data->type).data());
         // Is the JavaScript environment still available to call into, eg. the TSFN is
         // not aborted
         if (!env || !callback) {
@@ -265,21 +269,25 @@ namespace IRacingTools::App::Node {
         } else {
             // On Node-API 5+, the `callback` parameter is optional; however, this example
             // does ensure a callback is provided.
-            L->info("Creating JS object");
+            L->debug("Creating JS object");
             auto jsObj = Napi::Object::New(env);
             jsObj.Set("type", Napi::Number::New(env, static_cast<int>(data->type)));
-            if (data->data.has_value()) {
-                auto& dataAny = data->data.value();
+            if (data->data) {
 
-                auto dataAnySize = dataAny.ByteSizeLong();
-                auto payloadTypedArray = Napi::Uint8Array::New(env, dataAnySize);
-                dataAny.SerializeToArray(payloadTypedArray.Data(), dataAnySize);
-                jsObj.Set("payload", payloadTypedArray);
+                // auto dataAnySize = data->data->ByteSizeLong();
+                // auto payloadTypedArray = Napi::Uint8Array::New(env, dataAnySize);
+                // data->data->SerializeToArray(payloadTypedArray.Data(), dataAnySize);
+                std::string jsonMsg;
+                if (auto jsonRes = google::protobuf::json::MessageToJsonString(*data->data, &jsonMsg); !jsonRes.ok()) {
+                    L->error("Unable to encode payload, {}", jsonRes.message().data());
+                } else {
+                    jsObj.Set("payload", jsonMsg);
+                }
             } else {
                 jsObj.Set("payload", Napi::Value{});
             }
 
-            L->info("Calling callback");
+            L->trace("Calling callback");
             callback.Call(
                 // context->Value(),
                 {Napi::Number::New(env, static_cast<int>(data->type)), jsObj}

@@ -94,9 +94,8 @@ namespace IRacingTools::Shared {
   void DiskSessionDataProvider::runnable() {
     std::chrono::milliseconds previousSessionDuration{0};
     std::chrono::milliseconds previousTimeMillis = TimeEpoch();
-    std::chrono::milliseconds lastPrintTime{0};
-    auto &diskClient = *diskClient_;
 
+    auto &diskClient = *diskClient_;
 
     while (true) {
       {
@@ -122,59 +121,46 @@ namespace IRacingTools::Shared {
         }
       }
 
-      auto posCountRes = diskClient.getVarCount(KnownVarName::CarIdxPosition);
+      //auto posCountRes = diskClient.getVarCount(KnownVarName::CarIdxPosition);
       auto sessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
+      VRK_LOG_AND_FATAL_IF(!sessionTimeVal,"No session time");
 
       updateTiming();
 
-      if (!sessionTimeVal) {
-        L->error("No session time");
-        abort();
-      }
+      process();
+      //auto sessionTime = sessionTimeVal.value();
+      // long long int sessionMillis = SDK::Utils::SessionTimeToMillis(sessionTime);
 
-      int posCount = 0;
-      if (posCountRes) {
-        for (std::size_t i = 0; i < posCountRes.value(); i++) {
-          auto pos = diskClient.getVarInt("CarIdxPosition", i).value_or(-2);
-          if (pos > 0) {
-            posCount++;
-          }
-        }
-      }
-
-      auto sessionTime = sessionTimeVal.value();
-
-      long long int sessionMillis = SDK::Utils::SessionTimeToMillis(sessionTime);
-      SessionTime sessionDuration{sessionMillis};
-
-      auto intervalDuration = sessionDuration - previousSessionDuration;
-
-      if (previousSessionDuration.count()) {
-        auto currentTimeMillis = TimeEpoch();
-        if (posCount > 0) {
-          auto targetTimeMillis =
-              !previousTimeMillis.count() ? currentTimeMillis : (previousTimeMillis + intervalDuration);
-          if (targetTimeMillis > currentTimeMillis) {
-            auto sleepTimeMillis = targetTimeMillis - currentTimeMillis;
-            std::this_thread::sleep_for(sleepTimeMillis);
-          }
-          previousTimeMillis = targetTimeMillis;
-        } else {
-          previousTimeMillis = currentTimeMillis;
-        }
-      }
-
-      previousSessionDuration = sessionDuration;
-
-//      if (posCount > 0 && TimeEpoch() - lastPrintTime > 999ms) {
-//        L->info << std::format("Session Time: {:%H}:{:%M}:{:%S}.{:03d}\t\tCar Pos Count: {}", sessionDuration,
-//                                 sessionDuration, sessionDuration, millis, posCount)
-//                  << "\n";
-//        std::flush(std::cout);
-//        lastPrintTime = TimeEpoch();
-//      }
-      if (posCount)
-        process();
+//       SessionTime sessionDuration{sessionMillis};
+//
+//       auto intervalDuration = sessionDuration - previousSessionDuration;
+//
+//       if (previousSessionDuration.count()) {
+//         auto currentTimeMillis = TimeEpoch();
+//         if (posCount > 0) {
+//           auto targetTimeMillis =
+//               !previousTimeMillis.count() ? currentTimeMillis : (previousTimeMillis + intervalDuration);
+//           if (targetTimeMillis > currentTimeMillis) {
+//             auto sleepTimeMillis = targetTimeMillis - currentTimeMillis;
+//             std::this_thread::sleep_for(sleepTimeMillis);
+//           }
+//           previousTimeMillis = targetTimeMillis;
+//         } else {
+//           previousTimeMillis = currentTimeMillis;
+//         }
+//       }
+//
+//       previousSessionDuration = sessionDuration;
+//
+// //      if (posCount > 0 && TimeEpoch() - lastPrintTime > 999ms) {
+// //        L->info << std::format("Session Time: {:%H}:{:%M}:{:%S}.{:03d}\t\tCar Pos Count: {}", sessionDuration,
+// //                                 sessionDuration, sessionDuration, millis, posCount)
+// //                  << "\n";
+// //        std::flush(std::cout);
+// //        lastPrintTime = TimeEpoch();
+// //      }
+//       if (posCount)
+//         process();
     }
   }
 

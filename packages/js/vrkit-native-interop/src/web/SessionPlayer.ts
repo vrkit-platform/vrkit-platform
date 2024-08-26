@@ -1,85 +1,104 @@
 // var addon = require('bindings')('SayHello');
 // noinspection ES6UnusedImports
 
-import type {MessageType,IMessageType} from "@protobuf-ts/runtime"
+import type { IMessageType, MessageType } from "@protobuf-ts/runtime"
 import EventEmitter3 from "eventemitter3"
 import {
   Any,
+  SessionData,
   SessionEventData,
+  SessionEventType,
+  SessionTiming
 } from "vrkit-models"
 
 import * as Path from "node:path"
 import { asOption, Option } from "@3fv/prelude-ts"
-import {getLogger} from "@3fv/logger-proxy"
+import { getLogger } from "@3fv/logger-proxy"
 import * as Fs from "node:fs"
 import { Deferred } from "@3fv/deferred"
-import { SessionData, SessionEventType, SessionTiming } from "vrkit-models"
 import { MessageTypeFromCtor, uuidv4 } from "./utils"
-import {
-  GetNativeExports
-} from "./NativeBinding"
+import { GetNativeExports } from "./NativeBinding"
 
 const log = getLogger(__filename)
 const isDev = process.env.NODE_ENV !== "production"
 
-
 export interface NativeSessionPlayerEventData {
   type: SessionEventType
+
   payload: Uint8Array
 }
-
 
 export type SessionPlayerEventName = SessionEventType | keyof SessionEventType
 
 export type NativeSessionPlayerEventCallback = (
-    type: SessionEventType,
-    data: NativeSessionPlayerEventData
+  type: SessionEventType,
+  data: NativeSessionPlayerEventData
 ) => void
 
 export interface NativeSessionPlayer {
-  
-  readonly sessionData:SessionData;
-  readonly sessionTiming:SessionTiming;
+  readonly sessionData: SessionData
+
+  readonly sessionTiming: SessionTiming
+
   readonly sessionInfo: any
-  
-  play(): void;
-  stop(): void;
-  seek(index: number): void;
-  
+
+  start(): boolean
+  stop(): boolean
+  resume(): boolean
+  pause(): boolean
+
+  seek(index: number): boolean
+
   /**
    * Destroy the native client instance
    */
-  destroy():void
+  destroy(): void
 }
 
 /**
  * Class implementation interface definition
  */
 export interface NativeSessionPlayerCtor {
-  new (eventCallback: NativeSessionPlayerEventCallback, file?: string | null): NativeSessionPlayer
+  new (
+    eventCallback: NativeSessionPlayerEventCallback,
+    file?: string | null
+  ): NativeSessionPlayer
 }
-
 
 /**
  * Event data
  */
-export interface SessionPlayerEventData<M extends IMessageType<any>, T extends MessageTypeFromCtor<M> = MessageTypeFromCtor<M>> {
+export interface SessionPlayerEventData<
+  M extends IMessageType<any>,
+  T extends MessageTypeFromCtor<M> = MessageTypeFromCtor<M>
+> {
   type: SessionEventType
 
   payload: T
 }
 
-export type SessionPlayerEventArgMap = { [K in SessionEventType]: (...args:unknown[]) => void }
+export type SessionPlayerEventArgMap = {
+  [K in SessionEventType]: (...args: unknown[]) => void
+}
 
 export interface SessionPlayerEventArgs extends SessionPlayerEventArgMap {
-  [SessionEventType.AVAILABLE]: (data: SessionPlayerEventData<typeof SessionEventData>) => void
-  [SessionEventType.DATA_FRAME]: (data: SessionPlayerEventData<typeof SessionEventData>) => void
+  [SessionEventType.INFO_CHANGED]: (
+    data: SessionPlayerEventData<typeof SessionEventData>
+  ) => void
+
+  [SessionEventType.AVAILABLE]: (
+    data: SessionPlayerEventData<typeof SessionEventData>
+  ) => void
+
+  [SessionEventType.DATA_FRAME]: (
+    data: SessionPlayerEventData<typeof SessionEventData>
+  ) => void
 }
 
 const SessionPlayerEventPayloadTypes = {
+  [SessionEventType.INFO_CHANGED]: SessionEventData,
   [SessionEventType.DATA_FRAME]: SessionEventData,
-  [SessionEventType.AVAILABLE]: SessionEventData,
-  
+  [SessionEventType.AVAILABLE]: SessionEventData
 }
 
 /**
@@ -100,9 +119,8 @@ export class SessionPlayer extends EventEmitter3<
   SessionPlayerEventArgs,
   SessionPlayer
 > {
-  
   private nativePlayer: NativeSessionPlayer
-  
+
   /**
    * Get the next request id
    *
@@ -111,7 +129,7 @@ export class SessionPlayer extends EventEmitter3<
   private nextRequestId(): string {
     return uuidv4()
   }
-  
+
   /**
    * Event handler that is passed to the native client
    * on creation
@@ -125,23 +143,32 @@ export class SessionPlayer extends EventEmitter3<
     nativeData?: NativeSessionPlayerEventData
   ): void {
     log.info(`Received event type`, type, nativeData)
-    
+
     const data: SessionPlayerEventData<any> = {
       type,
       payload: null
     }
     
-    if (nativeData?.payload) {
-      const payloadAny = Any.fromBinary(nativeData.payload)
-      const messageType = SessionPlayerEventPayloadTypes[type]
-      if (messageType) {
-        data.payload = Any.unpack(payloadAny, messageType)
+    try {
+      if (nativeData?.payload) {
+        // data.payload = SessionEventData.fromBinary(nativeData.payload)
+        // data.payload = SessionEventData.fromBinary(nativeData.payload)
+        data.payload = SessionEventData.fromJsonString(nativeData.payload as any)
+        // const payloadAny = Any.fromBinary(nativeData.payload)
+        // const payloadAny:SessionEventData = SessionEventData.fromBinary(nativeData.payload)
+        
+        // const messageType = SessionPlayerEventPayloadTypes[type]
+        // if (messageType) {
+        //   data.payload = Any.unpack(payloadAny, messageType)
+        // }
       }
+    } catch (err) {
+      log.error("Unable to unpack payload",err)
     }
 
     this.emit(type, data)
   }
-  
+
   /**
    * Constructor
    */
@@ -149,14 +176,34 @@ export class SessionPlayer extends EventEmitter3<
     super()
     this.nativePlayer = CreateNativeSessionPlayer(this.onEvent.bind(this), file)
   }
+
+  start() {
+    return this.nativePlayer.start()
+  }
   
+  stop() {
+    return this.nativePlayer.stop()
+  }
+  
+  resume() {
+    return this.nativePlayer.resume()
+  }
+  
+  pause() {
+    return this.nativePlayer.pause()
+  }
+  
+  seek(sampleIndex: number) {
+    return this.nativePlayer.seek(sampleIndex)
+  }
+
   /**
    * Synonym for destroy
    */
   close() {
     this.destroy()
   }
-  
+
   /**
    * Destroy this client & underlying `this.nativeClient`
    */
@@ -164,19 +211,18 @@ export class SessionPlayer extends EventEmitter3<
     this.nativePlayer.destroy()
     delete this.nativePlayer
   }
-  
+
   get sessionTiming() {
     return this.nativePlayer.sessionTiming
   }
-  
+
   get sessionData(): SessionData {
     return SessionData.create(this.nativePlayer.sessionData)
   }
-  
+
   get sessionInfo() {
     return this.nativePlayer.sessionInfo
   }
-  
 }
 
 let liveVRKitSessionPlayer: SessionPlayer = null

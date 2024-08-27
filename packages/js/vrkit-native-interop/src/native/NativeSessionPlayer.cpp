@@ -4,6 +4,7 @@
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Common/UUIDHelpers.h>
 
+#include "Utils/NAPIProtobufHelpers.h"
 #include "NativeSessionPlayer.h"
 
 #include <IRacingTools/Shared/DiskSessionDataProvider.h>
@@ -126,7 +127,7 @@ namespace IRacingTools::App::Node {
         );
 
         dataProvider_->subscribe([&] (auto type, auto data) {
-            jsSessionPlayerEventFn_.BlockingCall(new NativeSessionPlayerJSEvent(type, data));
+            jsSessionPlayerEventFn_.NonBlockingCall(new NativeSessionPlayerJSEvent(type, data));
         });
     }
 
@@ -147,7 +148,11 @@ namespace IRacingTools::App::Node {
             return;
         }
 
-        L->info("SessionPlayer::destroy()");
+        L->info("Cleaning up data provider");
+        this->dataProvider_->stop();
+        this->dataProvider_.reset();
+
+        L->info("Cleaned up data provider");
 
         jsSessionPlayerEventFn_.Release();
     }
@@ -161,6 +166,21 @@ namespace IRacingTools::App::Node {
     void NativeSessionPlayer::Finalize(Napi::Env napi_env) {
         destroy();
         ObjectWrap::Finalize(napi_env);
+    }
+
+    std::shared_ptr<SessionDataProvider> NativeSessionPlayer::dataProvider() {
+        return dataProvider_;
+    }
+
+    Napi::Value NativeSessionPlayer::jsGetSessionDataVariable(const Napi::CallbackInfo& info) {
+        // TODO: Create new `Napi::Object` using defined class `NativeSessionDataVariable`
+        return {};
+    }
+
+    Napi::Value NativeSessionPlayer::jsGetSessionDataVariableHeaders(const Napi::CallbackInfo& info) {
+        auto headers = dataProvider_->getDataVariableHeaders();
+        // TODO: Map headers ^ to `Napi::Object`
+        return {};
     }
 
     Napi::Value NativeSessionPlayer::jsGetSessionInfo(const Napi::CallbackInfo& info) {
@@ -222,7 +242,7 @@ namespace IRacingTools::App::Node {
     Napi::Value
     NativeSessionPlayer::jsStop(const Napi::CallbackInfo& info) {
         dataProvider_->stop();
-        return Napi::Boolean::New(info.Env(), isLive());
+        return Napi::Boolean::New(info.Env(), true);
     }
 
     Napi::Value
@@ -251,7 +271,6 @@ namespace IRacingTools::App::Node {
         return {};
     }
 
-    // void SessionPlayer::jsDefaultEventCallback(
     void JSSessionPlayerEventCallback(
         Napi::Env env,
         Napi::Function callback,
@@ -260,38 +279,24 @@ namespace IRacingTools::App::Node {
         // ReSharper disable once CppParameterMayBeConstPtrOrRef
         NativeSessionPlayerEventDataType* data
     ) {
-        // L->info("JSSessionPlayerEventCallback()");
         L->debug("JSSessionPlayerEventCallback() eventType: {}", magic_enum::enum_name(data->type).data());
-        // Is the JavaScript environment still available to call into, eg. the TSFN is
-        // not aborted
+
         if (!env || !callback) {
             L->error("JS env AND/OR callback is nullptr");
         } else {
-            // On Node-API 5+, the `callback` parameter is optional; however, this example
-            // does ensure a callback is provided.
             L->debug("Creating JS object");
             auto jsObj = Napi::Object::New(env);
-            jsObj.Set("type", Napi::Number::New(env, static_cast<int>(data->type)));
+            jsObj.Set("type", Napi::Number::New(env, data->type));
             if (data->data) {
-
-                // auto dataAnySize = data->data->ByteSizeLong();
-                // auto payloadTypedArray = Napi::Uint8Array::New(env, dataAnySize);
-                // data->data->SerializeToArray(payloadTypedArray.Data(), dataAnySize);
-                std::string jsonMsg;
-                if (auto jsonRes = google::protobuf::json::MessageToJsonString(*data->data, &jsonMsg); !jsonRes.ok()) {
-                    L->error("Unable to encode payload, {}", jsonRes.message().data());
-                } else {
-                    jsObj.Set("payload", jsonMsg);
-                }
+                jsObj.Set("payload", Utils::MessageToUint8Array(env, data->data.get()));
             } else {
                 jsObj.Set("payload", Napi::Value{});
             }
 
             L->trace("Calling callback");
             callback.Call(
-                // context->Value(),
-                {Napi::Number::New(env, static_cast<int>(data->type)), jsObj}
-            ); //,
+                {Napi::Number::New(env, data->type), jsObj}
+            );
         }
 
         delete data;

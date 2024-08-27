@@ -107,6 +107,18 @@ namespace IRacingTools::Shared {
         return dataAccess_;
     }
 
+    SessionDataAccess* LiveSessionDataProvider::dataAccessPtr() {
+        return &dataAccess_;
+    }
+
+    SDK::ClientProvider* LiveSessionDataProvider::clientProvider() {
+        return LiveClient::Get().getProvider().get();
+    }
+
+    const SDK::VarHeaders& LiveSessionDataProvider::getDataVariableHeaders() {
+        return LiveClient::GetInstance().getVarHeaders();
+    }
+
     bool LiveSessionDataProvider::isRunning() {
         return running_.load();
     }

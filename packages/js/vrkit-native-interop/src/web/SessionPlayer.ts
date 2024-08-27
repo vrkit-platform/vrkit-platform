@@ -18,6 +18,11 @@ import * as Fs from "node:fs"
 import { Deferred } from "@3fv/deferred"
 import { MessageTypeFromCtor, uuidv4 } from "./utils"
 import { GetNativeExports } from "./NativeBinding"
+import {
+  SessionDataVariable,
+  SessionDataVariableHeader
+} from "./SessionDataVariableTypes"
+import { flatten } from "lodash"
 
 const log = getLogger(__filename)
 const isDev = process.env.NODE_ENV !== "production"
@@ -36,12 +41,15 @@ export type NativeSessionPlayerEventCallback = (
 ) => void
 
 export interface NativeSessionPlayer {
+  
   readonly sessionData: SessionData
 
   readonly sessionTiming: SessionTiming
 
   readonly sessionInfo: any
-
+  
+  readonly isAvailable: boolean
+  
   start(): boolean
   stop(): boolean
   resume(): boolean
@@ -53,6 +61,11 @@ export interface NativeSessionPlayer {
    * Destroy the native client instance
    */
   destroy(): void
+  
+  getDataVariable(name: string): SessionDataVariable
+  
+  getDataVariableHeaders(): Array<SessionDataVariableHeader>
+
 }
 
 /**
@@ -91,7 +104,8 @@ export interface SessionPlayerEventArgs extends SessionPlayerEventArgMap {
   ) => void
 
   [SessionEventType.DATA_FRAME]: (
-    data: SessionPlayerEventData<typeof SessionEventData>
+    data: SessionPlayerEventData<typeof SessionEventData>,
+      vars: SessionDataVariable[]
   ) => void
 }
 
@@ -120,7 +134,28 @@ export class SessionPlayer extends EventEmitter3<
   SessionPlayer
 > {
   private nativePlayer: NativeSessionPlayer
-
+  private dataVariableHeaderCount = -1
+  private dataVariableHeaderMap: {[name:string]: SessionDataVariableHeader} = {}
+  private dataVariableMap: {[name:string]: SessionDataVariable} = {}
+  private dataFrameEventVariables: SessionDataVariable[] = []
+  
+  /**
+   * Populate the data variable header map
+   *
+   * @private
+   */
+  private populateDataVariableHeaders() {
+    if (this.dataVariableHeaderCount > 0)
+      return
+    
+    const headers = this.nativePlayer.getDataVariableHeaders()
+    headers.forEach(dataVarHeader => {
+      this.dataVariableHeaderMap[dataVarHeader.name] = dataVarHeader
+    })
+    
+    this.dataVariableHeaderCount = headers.length
+  }
+  
   /**
    * Get the next request id
    *
@@ -142,7 +177,7 @@ export class SessionPlayer extends EventEmitter3<
     type: SessionEventType,
     nativeData?: NativeSessionPlayerEventData
   ): void {
-    log.info(`Received event type`, type, nativeData)
+    // log.info(`Received event type`, type, nativeData)
 
     const data: SessionPlayerEventData<any> = {
       type,
@@ -152,8 +187,8 @@ export class SessionPlayer extends EventEmitter3<
     try {
       if (nativeData?.payload) {
         // data.payload = SessionEventData.fromBinary(nativeData.payload)
-        // data.payload = SessionEventData.fromBinary(nativeData.payload)
-        data.payload = SessionEventData.fromJsonString(nativeData.payload as any)
+        data.payload = SessionEventData.fromBinary(nativeData.payload)
+        // data.payload = SessionEventData.fromJsonString(nativeData.payload as any)
         // const payloadAny = Any.fromBinary(nativeData.payload)
         // const payloadAny:SessionEventData = SessionEventData.fromBinary(nativeData.payload)
         
@@ -196,7 +231,56 @@ export class SessionPlayer extends EventEmitter3<
   seek(sampleIndex: number) {
     return this.nativePlayer.seek(sampleIndex)
   }
-
+  
+  
+  
+  getDataVariableHeaders(...argNames: Array<string | string[]>): SessionDataVariableHeader[] {
+    this.populateDataVariableHeaders()
+    
+    const names = flatten(argNames)
+    return names.map(name =>
+        asOption(this.dataVariableHeaderMap[name]).getOrThrow(`Unable to find header for "${name}"`)
+    )
+  }
+  
+  getDataVariableHeader(name: string): SessionDataVariableHeader{
+    return asOption(this.getDataVariableHeaders(name))
+        .map(headers => headers[0])
+        .getOrNull()
+  }
+  
+  getDataVariables(...argNames: Array<string | string[]>): Array<SessionDataVariable> {
+    const names = flatten(argNames)
+    return names.map(name =>
+      asOption(this.dataVariableMap[name]).getOrCall(() =>
+        asOption<SessionDataVariable>(this.nativePlayer.getDataVariable(name))
+          .ifSome(dataVar => {
+            this.dataVariableMap[name] = dataVar
+          })
+          .getOrThrow(`Unable to get data var "${name}"`)
+      )
+    )
+  }
+  
+  getDataVariable(name: string): SessionDataVariable {
+    return asOption(this.getDataVariables(name))
+        .map(vars => vars[0])
+        .getOrNull()
+  }
+  
+  
+  /**
+   * Configure which `SessionDataVariable`(s) are collected and passed
+   * with each `DATA_FRAME` event
+   *
+   * @param argNames
+   */
+  configureDataVariables(...argNames: Array<string | string[]>): boolean {
+    this.dataFrameEventVariables = this.getDataVariables(...argNames)
+    return true
+  }
+  
+  
   /**
    * Synonym for destroy
    */

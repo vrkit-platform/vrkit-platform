@@ -85,6 +85,18 @@ namespace IRacingTools::SDK {
     return available_;
   }
 
+  std::string VarHolder::varName() {
+    return name_;
+  }
+
+  std::string VarHolder::description() {
+    return description_;
+  }
+
+  std::string VarHolder::unit() {
+    return unit_;
+  }
+
   VarDataType /*VarDataType*/ VarHolder::getType() {
     if (isAvailable()) {
       return getClient()->getVarType(idx_).value();

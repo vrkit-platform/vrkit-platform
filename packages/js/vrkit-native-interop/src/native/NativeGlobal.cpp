@@ -61,4 +61,8 @@ namespace IRacingTools::App::Node {
     Napi::FunctionReference& NativeSystemAddon::sessionPlayerCtor() {
         return sessionPlayerCtor_;
     }
+
+    Napi::FunctionReference& NativeSystemAddon::sessionDataVariableCtor() {
+        return sessionDataVariableCtor_;
+    }
 }

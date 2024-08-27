@@ -10,11 +10,22 @@
 #include <thread>
 #include <IRacingTools/SDK/DiskClient.h>
 #include <IRacingTools/Shared/SessionDataProvider.h>
-#include <IRacingTools/Shared/Timer.h>
 
 namespace IRacingTools::Shared {
     class DiskSessionDataProvider : public SessionDataProvider {
     public:
+
+        struct Options {
+            /**
+             * @brief Playback speed adjustment
+             */
+            float playbackSpeed{1.0f};
+
+            /**
+             * @brief Number of data frames to skip inbetween each data emit
+             */
+            std::size_t skipEmitDataFrames{0};
+        };
         DiskSessionDataProvider() = delete;
         DiskSessionDataProvider(const DiskSessionDataProvider& other) = delete;
         DiskSessionDataProvider(DiskSessionDataProvider&& other) noexcept = delete;
@@ -24,7 +35,7 @@ namespace IRacingTools::Shared {
         /**
          * @brief the only acceptable constructor
          */
-        DiskSessionDataProvider(const std::filesystem::path& file, SDK::ClientId clientId);
+        DiskSessionDataProvider(const std::filesystem::path& file, SDK::ClientId clientId, const std::optional<Options>& options = std::nullopt);
 
         /**
          * @brief Destructor required to stop any running threads
@@ -32,6 +43,9 @@ namespace IRacingTools::Shared {
         virtual ~DiskSessionDataProvider() override;
 
         virtual SessionDataAccess& dataAccess() override;
+        virtual SessionDataAccess* dataAccessPtr() override;
+
+        virtual SDK::ClientProvider * clientProvider() override;
 
         virtual bool isLive() const override;
         /**
@@ -64,7 +78,9 @@ namespace IRacingTools::Shared {
 
         virtual std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
         virtual std::shared_ptr<Models::Session::SessionData> sessionData() override;
-
+        virtual const SDK::VarHeaders& getDataVariableHeaders() override;
+        const Options& options();
+        void setOptions(const Options& newOptions);
     protected:
         void runnable();
 
@@ -101,6 +117,9 @@ namespace IRacingTools::Shared {
         std::atomic_bool running_{false};
         std::atomic_bool isAvailable_{false};
         DWORD lastUpdatedTime_{0};
+
+
+        Options options_;
 
         std::shared_ptr<Models::Session::SessionData> sessionData_{};
     };

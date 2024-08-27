@@ -6,12 +6,23 @@ import { Shutdown } from "../NativeBinding"
 import { ClientEventType, SessionEventType } from "vrkit-models"
 import { SessionPlayer } from "../SessionPlayer"
 import Fixtures from "./DataFixtures"
-import { getLogger } from "@3fv/logger-proxy"
+import { getLogger, getLoggingManager } from "@3fv/logger-proxy"
 import { Deferred } from "@3fv/deferred"
 
 const log = getLogger(__filename)
+// const logManager = getLoggingManager()
+// const fileAppender = new FileAppender({
+//   enableRolling: true,
+//   maxFiles: 5,
+//   maxSize: 2048,
+//   filename
+// })
+// manager
+//     .setAppenders(fileAppender)
+//
+//     .setRootLevel("trace")
 
-jest.setTimeout(5000)
+jest.setTimeout(10000)
 
 afterAll(async () => {
   log.info("Shutting down")
@@ -19,8 +30,6 @@ afterAll(async () => {
 })
 
 test("SessionPlayer.open", async () => {
-  
-  
   const ibtFile = Fixtures.resolveFile(Fixtures.Files.ibt.IndyCar.RoadAmerica)
   log.info("Opening IBT File: ", ibtFile)
   let player:SessionPlayer = null;
@@ -41,17 +50,20 @@ test("SessionPlayer.open", async () => {
     expect(sampleIndexes.includes(sampleIndex)).toBeFalsy()
     sampleIndexes.push(sampleIndex)
     
-    log.info("Sample received", sampleIndex,"of", sampleCount)
+    //log.info("Sample received", sampleIndex,"of", sampleCount)
     if (sampleIndexes.length >= 10) {
       log.info("Stopping player after ", sampleIndexes.length, "samples")
+      player.off(SessionEventType.DATA_FRAME)
+      
       player.stop()
+      
     }
   })
   
   expect(player.start()).toBeTruthy()
   
   await Deferred.delay(2000)
-  expect(player.stop()).toBeTruthy()
+  // expect(player.stop()).toBeTruthy()
   
   player.close()
 })

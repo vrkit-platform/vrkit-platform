@@ -70,6 +70,7 @@ namespace IRacingTools::App::Node {
 
         Napi::FunctionReference& clientCtor();
         Napi::FunctionReference& sessionPlayerCtor();
+        Napi::FunctionReference& sessionDataVariableCtor();
 
         std::shared_ptr<NativeGlobal> system() const {
             return system_;
@@ -78,6 +79,8 @@ namespace IRacingTools::App::Node {
     private:
         Napi::FunctionReference clientCtor_;
         Napi::FunctionReference sessionPlayerCtor_;
+        Napi::FunctionReference sessionDataVariableCtor_;
+
         const std::shared_ptr<NativeGlobal> system_;
     };
 

@@ -11,59 +11,62 @@
 #include <IRacingTools/SDK/Utils/LUT.h>
 
 namespace IRacingTools::SDK {
-
-/**
- * @brief helper class to keep track of our variables index
- *
- * Create a global instance of this and it will take care of the details for you.
- */
-class VarHolder {
-
-public:
-    VarHolder() = delete;
-    explicit VarHolder(const std::string_view &name, ClientProvider * clientProvider = nullptr);
-    explicit VarHolder(KnownVarName name, ClientProvider * clientProvider = nullptr);
-
-    void setVarName(const std::string_view &name);
-
     /**
-     * @brief Get type
+     * @brief helper class to keep track of our variables index
      *
-     * @return
+     * Create a global instance of this and it will take care of the details for you.
      */
-    [[maybe_unused]] VarDataType getType();
+    class VarHolder {
+    public:
+        VarHolder() = delete;
+        explicit VarHolder(const std::string_view& name, ClientProvider* clientProvider = nullptr);
+        explicit VarHolder(KnownVarName name, ClientProvider* clientProvider = nullptr);
 
-    /**
-     * @brief Get number of samples
-     *
-     * @return
-     */
-    [[maybe_unused]] uint32_t getCount();
-    bool isValid();
+        void setVarName(const std::string_view& name);
 
-    /**
-     * @brief Get boolean value
-     *
-     * @param entry is the array offset, or 0 if not an array element
-     * @return
-     */
-    bool getBool(int entry = 0);
-    int getInt(int entry = 0);
-    float getFloat(int entry = 0);
-    double getDouble(int entry = 0);
+        /**
+         * @brief Get type
+         *
+         * @return
+         */
+        [[maybe_unused]] VarDataType getType();
 
-protected:
-    bool reset();
-    bool isAvailable();
-    std::shared_ptr<Client> getClient();
+        /**
+         * @brief Get number of samples
+         *
+         * @return
+         */
+        [[maybe_unused]] uint32_t getCount();
 
-    std::atomic_bool available_{false};
-    std::string_view name_{};
-    [[maybe_unused]] std::string_view unit_{};
-    [[maybe_unused]] std::string_view description_{};
-    uint32_t idx_{0};
-    std::optional<ClientId> clientId_{};
+        std::string varName();
+        std::string description();
+        std::string unit();
 
-    ClientProvider * clientProvider_;
-};
+        bool isValid();
+
+        /**
+         * @brief Get boolean value
+         *
+         * @param entry is the array offset, or 0 if not an array element
+         * @return
+         */
+        bool getBool(int entry = 0);
+        int getInt(int entry = 0);
+        float getFloat(int entry = 0);
+        double getDouble(int entry = 0);
+
+    protected:
+        bool reset();
+        bool isAvailable();
+        std::shared_ptr<Client> getClient();
+
+        std::atomic_bool available_{false};
+        std::string name_{};
+        [[maybe_unused]] std::string unit_{};
+        [[maybe_unused]] std::string description_{};
+        uint32_t idx_{0};
+        std::optional<ClientId> clientId_{};
+
+        ClientProvider* clientProvider_;
+    };
 }

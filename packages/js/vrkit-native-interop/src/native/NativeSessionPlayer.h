@@ -63,7 +63,8 @@ namespace IRacingTools::App::Node {
     using SessionPlayerEventFn = Napi::TypedThreadSafeFunction<
         NativeSessionPlayerEventContextType, NativeSessionPlayerEventDataType, JSSessionPlayerEventCallback>;
 
-    
+
+
     /**
      * @brief NodeSystem client, which can execute RPC calls & exchange information as needed
      */
@@ -90,9 +91,11 @@ namespace IRacingTools::App::Node {
 
         virtual void Finalize(Napi::Env) override;
         
-
+        std::shared_ptr<SessionDataProvider> dataProvider();
 
     private:
+        Napi::Value jsGetSessionDataVariable(const Napi::CallbackInfo& info);
+        Napi::Value jsGetSessionDataVariableHeaders(const Napi::CallbackInfo& info);
         Napi::Value jsGetSessionInfo(const Napi::CallbackInfo& info);
         Napi::Value jsGetSessionInfoYAML(const Napi::CallbackInfo& info);
 

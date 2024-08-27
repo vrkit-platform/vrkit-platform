@@ -40,9 +40,9 @@ struct VarDataHeader {
         offset = 0;
         count = 0;
         countAsTime = false;
-        memset(name, 0, sizeof(name));
-        memset(desc, 0, sizeof(name));
-        memset(unit, 0, sizeof(name));
+        std::memset(name, 0, sizeof(name));
+        std::memset(desc, 0, sizeof(desc));
+        std::memset(unit, 0, sizeof(unit));
     }
 };
 

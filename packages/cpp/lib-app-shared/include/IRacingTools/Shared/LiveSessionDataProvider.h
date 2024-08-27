@@ -44,6 +44,10 @@ namespace IRacingTools::Shared {
     virtual bool isLive() const override;
 
     virtual SessionDataAccess& dataAccess() override;
+    virtual SessionDataAccess* dataAccessPtr() override;
+    virtual SDK::ClientProvider * clientProvider() override;
+
+    virtual const SDK::VarHeaders& getDataVariableHeaders() override;
 
   protected:
     void runnable();

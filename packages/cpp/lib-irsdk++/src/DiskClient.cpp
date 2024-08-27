@@ -245,8 +245,7 @@ namespace IRacingTools::SDK {
         if (hasNext()) {
             varBuf_.reset();
             if (FileReadDataFully(varBuf_.data(), 1, header_.bufLen, ibtFile_)) {
-                sampleIndex_++;
-                //return std::fread(varBuf_.data(), 1, header_.bufLen, ibtFile_) == static_cast<size_t>(header_.bufLen);
+                ++sampleIndex_;
                 return true;
             }
         }

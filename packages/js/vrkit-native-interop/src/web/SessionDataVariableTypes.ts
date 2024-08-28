@@ -12,7 +12,9 @@ export enum SessionDataVariableType {
   Double = 5
 }
 
-export const SessionDataVariableTypeSize: { [K in SessionDataVariableType]: number } = {
+export const SessionDataVariableTypeSize: {
+  [K in SessionDataVariableType]: number
+} = {
   [SessionDataVariableType.Char]: 1,
   [SessionDataVariableType.Bool]: 1,
   [SessionDataVariableType.Int32]: 4,
@@ -21,45 +23,54 @@ export const SessionDataVariableTypeSize: { [K in SessionDataVariableType]: numb
   [SessionDataVariableType.Double]: 8
 }
 
-
 export interface SessionDataVariableHeader {
   /**
    * @brief Data Type
    */
-  readonly type: SessionDataVariableType;
-  
+  readonly type: SessionDataVariableType
+
   /**
    * @brief Offset in buffer from start of row
    */
-  readonly offset: SessionDataVariableType;
+  readonly offset: number
+
   /**
    * @brief Number of entries
    */
-  readonly count: number;
-  
-  readonly countAsTime: boolean;
-  readonly pad:number[]
+  readonly count: number
+
+  readonly countAsTime: boolean
+
   
   readonly name: string
+
   readonly description: string
+
   readonly unit: string
-  
 }
 
 export interface SessionDataVariable {
   readonly name: string
+
   readonly type: SessionDataVariableType
+
   readonly count: number
+
   readonly valid: boolean
+
   readonly description: string
+
   readonly unit: string
-  
+
   getBool(entry?: number): boolean
+
   getInt(entry?: number): number
+
   getFloat(entry?: number): number
+
   getDouble(entry?: number): number
 }
 
 export interface SessionDataVariableCtor {
-  new(name: string): SessionDataVariable
+  new (name: string): SessionDataVariable
 }

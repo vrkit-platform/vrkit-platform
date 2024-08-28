@@ -71,8 +71,8 @@ namespace IRacingTools::App::Node {
 
         // GET `NativeSessionPlayer`
         auto playerJsObj = info[0].As<Napi::Object>();
-        if (!playerJsObj.InstanceOf(NativeSessionPlayer::Constructor(info.Env()).Value())) {
-            throw Napi::Error::New(info.Env(),
+        if (!playerJsObj.InstanceOf(NativeSessionPlayer::Constructor(env).Value())) {
+            throw Napi::Error::New(env,
                                    "first parameter must be a Connection object");
         }
 
@@ -182,7 +182,9 @@ namespace IRacingTools::App::Node {
         auto env = info.Env();
         int32_t entry = info.Length() != 1 || !info[0].IsNumber() ? 0 : info[0].As<Napi::Number>().Int32Value();
 
-        if (varHolder_->isValid() && varHolder_->getType() == VarDataType::Double)
+        auto isValid = varHolder_->isValid();
+        auto type = varHolder_->getType();
+        if (isValid && type == VarDataType::Double)
             return Napi::Number::New(env, varHolder_->getDouble(entry));
 
         return {};

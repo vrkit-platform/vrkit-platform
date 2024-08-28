@@ -6,6 +6,7 @@
 
 #include "Utils/NAPIProtobufHelpers.h"
 #include "NativeSessionPlayer.h"
+#include "NativeSessionDataVariable.h"
 
 #include <IRacingTools/Shared/DiskSessionDataProvider.h>
 #include <IRacingTools/Shared/LiveSessionDataProvider.h>
@@ -48,6 +49,8 @@ namespace IRacingTools::App::Node {
                 InstanceMethod<&NativeSessionPlayer::jsPause>("pause"),
                 InstanceMethod<&NativeSessionPlayer::jsIsPaused>("isPaused"),
                 InstanceMethod<&NativeSessionPlayer::jsSeek>("seek"),
+                InstanceMethod<&NativeSessionPlayer::jsGetDataVariable>("getDataVariable"),
+                InstanceMethod<&NativeSessionPlayer::jsGetDataVariableHeaders>("getDataVariableHeaders"),
 
                 InstanceAccessor<&NativeSessionPlayer::jsIsLive>("isLive"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetFileInfo>("fileInfo"),
@@ -127,7 +130,8 @@ namespace IRacingTools::App::Node {
         );
 
         dataProvider_->subscribe([&] (auto type, auto data) {
-            jsSessionPlayerEventFn_.NonBlockingCall(new NativeSessionPlayerJSEvent(type, data));
+            // jsSessionPlayerEventFn_.NonBlockingCall(new NativeSessionPlayerJSEvent(type, data));
+                jsSessionPlayerEventFn_.BlockingCall(new NativeSessionPlayerJSEvent(type, data));
         });
     }
 
@@ -172,15 +176,45 @@ namespace IRacingTools::App::Node {
         return dataProvider_;
     }
 
-    Napi::Value NativeSessionPlayer::jsGetSessionDataVariable(const Napi::CallbackInfo& info) {
+    Napi::Value NativeSessionPlayer::jsGetDataVariable(const Napi::CallbackInfo& info) {
         // TODO: Create new `Napi::Object` using defined class `NativeSessionDataVariable`
-        return {};
+        auto env = info.Env();
+
+        if (info.Length() != 1)
+            throw Napi::TypeError::New(env, "A single string parameter is required to get a sesion data variable");
+
+        auto varName = info[0].As<Napi::String>();
+
+        return NativeSessionDataVariable::Constructor(env).New({info.This(), varName});;
     }
 
-    Napi::Value NativeSessionPlayer::jsGetSessionDataVariableHeaders(const Napi::CallbackInfo& info) {
-        auto headers = dataProvider_->getDataVariableHeaders();
-        // TODO: Map headers ^ to `Napi::Object`
-        return {};
+    Napi::Value NativeSessionPlayer::jsGetDataVariableHeaders(const Napi::CallbackInfo& info) {
+        auto env = info.Env();
+        auto nativeHeaders = dataProvider_->getDataVariableHeaders();
+
+        std::vector<Napi::Value> headers{};
+
+
+        for (auto& nativeHeader : nativeHeaders) {
+            auto obj = Napi::Object::New(env);
+
+            // TODO: Map headers ^ to `Napi::Object`
+            obj.Set("name", nativeHeader.name);
+            obj.Set("desc", nativeHeader.desc);
+            obj.Set("unit", nativeHeader.unit);
+            obj.Set("type", magic_enum::enum_underlying(nativeHeader.type));
+            obj.Set("offset", nativeHeader.offset);
+            obj.Set("count", nativeHeader.count);
+            obj.Set("countAsTime", nativeHeader.countAsTime);
+
+            headers.push_back(obj);
+        }
+
+        auto headersObj = Napi::Array::New(env);
+        auto headersObjPush = headersObj.Get("push").As<Function>();
+        headersObjPush.Call(headersObj, headers);
+
+        return headersObj;
     }
 
     Napi::Value NativeSessionPlayer::jsGetSessionInfo(const Napi::CallbackInfo& info) {

@@ -6,6 +6,7 @@
 #include "NativeClient.h"
 #include "NativeGlobal.h"
 #include "NativeSessionPlayer.h"
+#include "NativeSessionDataVariable.h"
 
 using namespace IRacingTools::App::Node;
 using namespace IRacingTools::Models::RPC;
@@ -39,7 +40,7 @@ static Napi::Object Init(Napi::Env env, Napi::Object exports) {
     NativeSystemAddon::Init(env, exports);
     NativeClient::Init(env, exports);
     NativeSessionPlayer::Init(env, exports);
-    
+    NativeSessionDataVariable::Init(env, exports);
     exports.Set("Shutdown", Napi::Function::New(env, VRKitShutdownFn));
     // exports.Set("VRKitPing", Napi::Function::New(env, VRKitPingFn));
     

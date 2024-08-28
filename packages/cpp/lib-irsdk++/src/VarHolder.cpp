@@ -111,7 +111,7 @@ namespace IRacingTools::SDK {
   }
 
   bool VarHolder::isValid() {
-    return isAvailable() && (idx_ > -1);
+    return isAvailable();
   }
 
 

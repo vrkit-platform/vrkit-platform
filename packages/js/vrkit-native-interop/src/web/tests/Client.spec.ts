@@ -43,14 +43,26 @@ test("SessionPlayer.open", async () => {
   expect(data.fileInfo.file).toEqual(ibtFile)
   expect(data.timing).toBeDefined()
   
-  const sampleIndexes = Array<bigint>()
+  const sessionTimeHeader = player.getDataVariableHeader("SessionTime")
+  expect(sessionTimeHeader).toBeDefined()
+  expect(sessionTimeHeader?.name).toEqual("SessionTime")
+  
+  const sessionTimeVar = player.getDataVariable(sessionTimeHeader.name)
+  
+  
+  const sampleIndexes = Array<[bigint, number]>()
   player.on(SessionEventType.DATA_FRAME, ev => {
     const evData = ev.payload,
         {sampleIndex, sampleCount} = evData.sessionData.timing
-    expect(sampleIndexes.includes(sampleIndex)).toBeFalsy()
-    sampleIndexes.push(sampleIndex)
     
-    //log.info("Sample received", sampleIndex,"of", sampleCount)
+    const sessionTime = sessionTimeVar.getDouble()
+    expect(sampleIndexes.some(([otherSampleIndex]) => otherSampleIndex === sampleIndex)).toBeFalsy()
+    // if (sampleIndexes.length && sampleIndexes.length< 10)
+    //   expect(sampleIndexes[sampleIndexes.length - 1][1]).toBeLessThan(sessionTime)
+    
+    sampleIndexes.push([sampleIndex,sessionTime])
+    
+    log.info("Session time", sessionTime, "Sample received", sampleIndex,"of", sampleCount)
     if (sampleIndexes.length >= 10) {
       log.info("Stopping player after ", sampleIndexes.length, "samples")
       player.off(SessionEventType.DATA_FRAME)

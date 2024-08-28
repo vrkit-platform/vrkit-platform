@@ -64,7 +64,7 @@ namespace IRacingTools::SDK {
         std::string name_{};
         [[maybe_unused]] std::string unit_{};
         [[maybe_unused]] std::string description_{};
-        uint32_t idx_{0};
+        int32_t idx_{0};
         std::optional<ClientId> clientId_{};
 
         ClientProvider* clientProvider_;

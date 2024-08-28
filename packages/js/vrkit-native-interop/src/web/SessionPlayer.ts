@@ -22,7 +22,7 @@ import {
   SessionDataVariable,
   SessionDataVariableHeader
 } from "./SessionDataVariableTypes"
-import { flatten } from "lodash"
+import { flatten, isEmpty } from "lodash"
 
 const log = getLogger(__filename)
 const isDev = process.env.NODE_ENV !== "production"
@@ -238,7 +238,7 @@ export class SessionPlayer extends EventEmitter3<
     this.populateDataVariableHeaders()
     
     const names = flatten(argNames)
-    return names.map(name =>
+    return isEmpty(names) ? Object.values(this.dataVariableHeaderMap) :  names.map(name =>
         asOption(this.dataVariableHeaderMap[name]).getOrThrow(`Unable to find header for "${name}"`)
     )
   }

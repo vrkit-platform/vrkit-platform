@@ -1,6 +1,6 @@
 import { styled } from '@mui/material/styles';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import { varAlpha, stylesMode } from 'vrkit-app-renderer/theme/styles';
 
 import type { PopoverArrow } from './types';
@@ -24,7 +24,7 @@ export const StyledArrow = styled('span', {
   const backgroundStyles = (color: 'cyan' | 'red') => ({
     backgroundRepeat: 'no-repeat',
     backgroundSize: `${size * 3}px ${size * 3}px`,
-    backgroundImage: `url(${CONFIG.site.basePath}/assets/${color}-blur.png)`,
+    backgroundImage: `url(${DefaultConfig.site.basePath}/assets/${color}-blur.png)`,
     ...(color === 'cyan' && {
       backgroundPosition: 'top right',
     }),

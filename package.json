@@ -25,11 +25,12 @@
     "compile:all": "run-s compile:tools compile",
     "compile:all:watch": "run-p compile:watch compile:tools:watch",
     
-    "dev:vrkit-app": "yarn workspace vrkit-app run dev",
     "dev": "./scripts/dev.mjs",
     "//dev": "run-s compile:all && run-p compile:all:watch dev:vrkit-app",
     
-    "start:vrkit-app": "yarn workspace vrkit-app run start:brk",
+    "vrkit-app:dev": "yarn workspace vrkit-app run dev",
+    "vrkit-app:start": "yarn workspace vrkit-app run start",
+    "vrkit-app:start-brk": "yarn workspace vrkit-app run start:brk",
     
     "postinstall": "patch-package"
   },

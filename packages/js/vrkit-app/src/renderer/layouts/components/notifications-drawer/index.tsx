@@ -36,7 +36,7 @@ const TABS = [
 
 // ----------------------------------------------------------------------
 
-export type NotificationsDrawerProps = IconButtonProps & {
+export interface NotificationsDrawerProps extends IconButtonProps {
   data?: NotificationItemProps[];
 };
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { useRouter, useSearchParams } from 'vrkit-app-renderer/routes/hooks';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { SplashScreen } from 'vrkit-app-renderer/components/loading-screen';
 
@@ -23,7 +23,7 @@ export function GuestGuard({ children }: Props) {
 
   const [isChecking, setIsChecking] = useState<boolean>(true);
 
-  const returnTo = searchParams.get('returnTo') || CONFIG.auth.redirectPath;
+  const returnTo = searchParams.get('returnTo') || DefaultConfig.auth.redirectPath;
 
   const checkPermissions = async (): Promise<void> => {
     if (loading) {

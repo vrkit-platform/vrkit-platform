@@ -2,7 +2,7 @@ import type { LightboxExternalProps } from 'yet-another-react-lightbox';
 
 // ----------------------------------------------------------------------
 
-export type LightBoxProps = LightboxExternalProps & {
+export interface LightBoxProps extends LightboxExternalProps {
   disableZoom?: boolean;
   disableVideo?: boolean;
   disableTotal?: boolean;

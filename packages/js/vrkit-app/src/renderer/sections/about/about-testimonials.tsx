@@ -20,7 +20,7 @@ import { useResponsive } from 'vrkit-app-renderer/hooks/use-responsive';
 import { fDate } from 'vrkit-app-renderer/utils/format-time';
 
 import { _testimonials } from 'vrkit-app-renderer/_mock';
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import { bgBlur, varAlpha, bgGradient, hideScrollY } from 'vrkit-app-renderer/theme/styles';
 
 import { Iconify } from 'vrkit-app-renderer/components/iconify';
@@ -98,7 +98,7 @@ export function AboutTestimonials() {
       sx={{
         ...bgGradient({
           color: `0deg, ${varAlpha(theme.vars.palette.grey['900Channel'], 0.9)}, ${varAlpha(theme.vars.palette.grey['900Channel'], 0.9)}`,
-          imgUrl: `${CONFIG.site.basePath}/assets/images/about/testimonials.webp`,
+          imgUrl: `${DefaultConfig.site.basePath}/assets/images/about/testimonials.webp`,
         }),
         overflow: 'hidden',
         height: { md: 840 },

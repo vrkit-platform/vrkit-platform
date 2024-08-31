@@ -3,7 +3,7 @@ import type { Props as SimplebarProps } from 'simplebar-react';
 
 // ----------------------------------------------------------------------
 
-export type ScrollbarProps = SimplebarProps & {
+export interface ScrollbarProps extends SimplebarProps {
   sx?: SxProps<Theme>;
   children?: React.ReactNode;
   fillContent?: boolean;

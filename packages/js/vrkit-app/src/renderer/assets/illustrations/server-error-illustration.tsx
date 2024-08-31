@@ -5,7 +5,7 @@ import { memo } from 'react';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { BackgroundShape } from './background-shape';
 
@@ -41,7 +41,7 @@ function ServerErrorIllustration({ hideBackground, sx, ...other }: Props) {
       {!hideBackground && <BackgroundShape />}
 
       <image
-        href={`${CONFIG.site.basePath}/assets/illustrations/characters/character-8.webp`}
+        href={`${DefaultConfig.site.basePath}/assets/illustrations/characters/character-8.webp`}
         height="300"
         x="340"
         y="30"

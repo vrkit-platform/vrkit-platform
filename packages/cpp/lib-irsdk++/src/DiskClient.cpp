@@ -518,6 +518,24 @@ namespace IRacingTools::SDK {
         return clientId_;
     }
 
+    bool DiskClient::copyDataVariableBuffer(void* target, std::size_t size) {
+        std::scoped_lock lock(ibtFileMutex_);
+        if (!isAvailable()) {
+            L->error("cannot copy data variable buffer from a closed DiskClient");
+            return false;
+        }
+
+        if (size != varBuf_.size()) {
+            L->error("data variable buffer size mismatch (varBufSize={},targetSize={})", varBuf_.size(), size);
+            return false;
+        }
+
+        std::memcpy(target, varBuf_.data(), size);
+        return true;
+
+        return false;
+    }
+
     bool DiskClient::isAvailable() {
         return isFileOpen();
     }

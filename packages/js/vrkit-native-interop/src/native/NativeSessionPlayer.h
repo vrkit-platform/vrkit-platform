@@ -94,6 +94,8 @@ namespace IRacingTools::App::Node {
         std::shared_ptr<SessionDataProvider> dataProvider();
 
     private:
+
+
         Napi::Value jsGetDataVariable(const Napi::CallbackInfo& info);
         Napi::Value jsGetDataVariableHeaders(const Napi::CallbackInfo& info);
         Napi::Value jsGetSessionInfo(const Napi::CallbackInfo& info);
@@ -103,6 +105,7 @@ namespace IRacingTools::App::Node {
 
         Napi::Value jsGetSessionTiming(const Napi::CallbackInfo& info);
 
+        Napi::Value jsIsAvailable(const Napi::CallbackInfo& info);
         Napi::Value jsIsLive(const Napi::CallbackInfo& info);
 
         Napi::Value jsGetFileInfo(const Napi::CallbackInfo& info);

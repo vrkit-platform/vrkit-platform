@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { WebPaths } from '../../routes/WebPaths';
 import { useRouter, usePathname, useSearchParams } from 'vrkit-app-renderer/routes/hooks';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { SplashScreen } from 'vrkit-app-renderer/components/loading-screen';
 

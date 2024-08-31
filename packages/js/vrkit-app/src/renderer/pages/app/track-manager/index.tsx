@@ -1,12 +1,12 @@
 import { Helmet } from 'react-helmet-async';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { TrackManagerView } from 'vrkit-app-renderer/sections/track-manager/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `${CONFIG.site.name} | Track Manager` };
+const metadata = { title: `${DefaultConfig.site.name} | Track Manager` };
 
 export default function Page() {
   return (

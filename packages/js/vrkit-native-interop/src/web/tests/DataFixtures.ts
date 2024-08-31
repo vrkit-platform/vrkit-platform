@@ -41,7 +41,10 @@ export namespace Fixtures {
   }
   
   export function resolveFile(file: string) {
-    return Path.resolve(baseDir, ...splitFileParts(file))
+    return asOption(Path.resolve(baseDir, ...splitFileParts(file)))
+        .filter(Fs.existsSync)
+        .getOrThrow(`Unable to resolve file "${file}"`)
+    
   }
 }
 

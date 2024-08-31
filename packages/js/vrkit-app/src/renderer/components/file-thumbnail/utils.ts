@@ -1,4 +1,4 @@
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import type { ExtendFile } from './types';
 
@@ -17,7 +17,7 @@ const FORMAT_AUDIO = ['wav', 'aif', 'mp3', 'aac'];
 const FORMAT_IMG = ['jpg', 'jpeg', 'gif', 'bmp', 'png', 'svg', 'webp'];
 const FORMAT_VIDEO = ['m4v', 'avi', 'mpg', 'mp4', 'webm'];
 
-const iconUrl = (icon: string) => `${CONFIG.site.basePath}/assets/icons/files/${icon}.svg`;
+const iconUrl = (icon: string) => `${DefaultConfig.site.basePath}/assets/icons/files/${icon}.svg`;
 
 // ----------------------------------------------------------------------
 

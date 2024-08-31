@@ -5,7 +5,7 @@ import { checkboxClasses } from '@mui/material/Checkbox';
 import { menuItemClasses } from '@mui/material/MenuItem';
 import { autocompleteClasses } from '@mui/material/Autocomplete';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { remToPx, varAlpha, mediaQueries } from './utils';
 
@@ -205,7 +205,7 @@ export function paper({ theme, color, dropdown }: PaperProps) {
       color: color ?? varAlpha(theme.vars.palette.background.paperChannel, 0.9),
       blur: 20,
     }),
-    backgroundImage: `url(${CONFIG.site.basePath}/assets/cyan-blur.png), url(${CONFIG.site.basePath}/assets/red-blur.png)`,
+    backgroundImage: `url(${DefaultConfig.site.basePath}/assets/cyan-blur.png), url(${DefaultConfig.site.basePath}/assets/red-blur.png)`,
     backgroundRepeat: 'no-repeat, no-repeat',
     backgroundPosition: 'top right, left bottom',
     backgroundSize: '50%, 50%',

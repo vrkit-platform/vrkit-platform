@@ -86,12 +86,12 @@ namespace IRacingTools::SDK {
     sessionInfoChangedFlag_.clear();
   }
 
-  bool LiveClient::waitForData(int timeoutMS) {
+  bool LiveClient::waitForData(std::int64_t timeoutMillis) {
     std::scoped_lock lock(sessionInfoMutex_);
     auto &conn = LiveConnection::GetInstance();
 
     // wait for start of session or new data
-    if (conn.waitForDataReady(timeoutMS, data_) && conn.getHeader()) {
+    if (conn.waitForDataReady(timeoutMillis, data_) && conn.getHeader()) {
       // if new connection, or data changed lenght then init
       //|| !sessionInfo_.second || sessionInfo_.second->weekendInfo.sessionID != sessionId_
       if (!data_ || nData_ != conn.getHeader()->bufLen) {
@@ -139,8 +139,9 @@ namespace IRacingTools::SDK {
   }
 
   bool LiveClient::isConnected() const {
-    auto &conn = LiveConnection::GetInstance();
+    static auto &conn = LiveConnection::GetInstance();
     return data_ != nullptr && conn.isConnected();
+    //return conn.isConnected();
   }
 
   Opt<uint32_t> LiveClient::getVarIdx(const std::string_view &name) {
@@ -385,6 +386,14 @@ namespace IRacingTools::SDK {
     return sessionInfoChangedFlag_.test();
   }
 
+  std::int32_t LiveClient::getSampleCount() {
+    return sessionSampleCount_;
+  }
+
+  std::int32_t LiveClient::getSampleIndex() {
+    return sessionSampleCount_;
+  }
+
   Opt<double> LiveClient::getVarDouble(const std::string_view &name, uint32_t entry) {
     auto res = getVarIdx(name);
     return res ? getVarDouble(res.value(), entry) : std::nullopt;
@@ -436,8 +445,22 @@ namespace IRacingTools::SDK {
   }
 
   const VarHeaders &LiveClient::getVarHeaders() {
-    static VarHeaders headers{};
-    return headers;
+    auto varCountOpt = getNumVars();
+    if(!varCountOpt || varCountOpt.value() == varHeaders_.size())
+      return varHeaders_;
+
+    auto varCount = varCountOpt.value();
+    //varHeaders_.resize(varCount);
+    for (auto i = 0; i < varCount; i++) {
+      auto varHeaderOpt = getVarHeader(i);
+      if (!varHeaderOpt)
+        continue;
+
+      varHeaders_.push_back(*varHeaderOpt.value());
+    }
+
+
+    return varHeaders_;
   }
 
   std::optional<uint32_t> LiveClient::getNumVars() {

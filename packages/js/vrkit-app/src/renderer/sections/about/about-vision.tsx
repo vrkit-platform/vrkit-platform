@@ -7,7 +7,7 @@ import Container from '@mui/material/Container';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import { varAlpha } from 'vrkit-app-renderer/theme/styles';
 
 import { Image } from 'vrkit-app-renderer/components/image';
@@ -21,7 +21,7 @@ export function AboutVision() {
 
   const renderImg = (
     <Image
-      src={`${CONFIG.site.basePath}/assets/images/about/vision.webp`}
+      src={`${DefaultConfig.site.basePath}/assets/images/about/vision.webp`}
       alt="about-vision"
       ratio={{ xs: '4/3', sm: '16/9' }}
       slotProps={{
@@ -51,7 +51,7 @@ export function AboutVision() {
           key={logo}
           variants={varFade().in}
           alt={logo}
-          src={`${CONFIG.site.basePath}/assets/icons/brands/ic-brand-${logo}.svg`}
+          src={`${DefaultConfig.site.basePath}/assets/icons/brands/ic-brand-${logo}.svg`}
           sx={{ m: { xs: 1.5, md: 2.5 }, height: { xs: 20, md: 32 } }}
         />
       ))}

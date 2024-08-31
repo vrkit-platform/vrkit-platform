@@ -31,7 +31,7 @@ import { groupItems, applyFilter, getAllItems } from './utils';
 
 // ----------------------------------------------------------------------
 
-export type SearchbarProps = BoxProps & {
+export interface SearchbarProps extends BoxProps {
   data?: NavSectionProps['data'];
 };
 

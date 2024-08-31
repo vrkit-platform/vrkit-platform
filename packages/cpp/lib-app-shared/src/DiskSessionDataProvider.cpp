@@ -160,9 +160,11 @@ namespace IRacingTools::Shared {
 
             //auto posCountRes = diskClient.getVarCount(KnownVarName::CarIdxPosition);
             auto currentSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
+
             VRK_LOG_AND_FATAL_IF(!currentSessionTimeVal, "No session time");
             auto currentSessionTime = currentSessionTimeVal.value();
             auto currentSessionTimeMillis = SDK::Utils::SessionTimeToMillis(currentSessionTime);
+            // L->info("Session time {}", currentSessionTime);
             updateTiming();
 
             process();
@@ -252,6 +254,7 @@ namespace IRacingTools::Shared {
 
 
     void DiskSessionDataProvider::process() {
+        checkConnection();
         fireDataUpdatedEvent();
         // processYAMLLiveString();
 
@@ -264,7 +267,7 @@ namespace IRacingTools::Shared {
         //    }
 
         // pump our connection status
-        checkConnection();
+
     }
 
     void DiskSessionDataProvider::fireDataUpdatedEvent() {
@@ -403,11 +406,9 @@ namespace IRacingTools::Shared {
 
         timing->set_sample_index(idx);
 
-
         auto sessionTimeVal = diskClient_->getVarDouble(KnownVarName::SessionTime);
         std::int64_t sessionMillis = SDK::Utils::SessionTimeToMillis(sessionTimeVal.value());
         timing->set_current_time_millis(sessionMillis);
-
 
         return &sessionData_->timing();
     }

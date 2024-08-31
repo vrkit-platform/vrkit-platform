@@ -16,7 +16,7 @@ import { usePopover, CustomPopover } from 'vrkit-app-renderer/components/custom-
 
 // ----------------------------------------------------------------------
 
-export type LanguagePopoverProps = IconButtonProps & {
+export interface LanguagePopoverProps extends IconButtonProps {
   data?: {
     value: string;
     label: string;

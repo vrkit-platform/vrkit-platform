@@ -19,6 +19,7 @@ macro(SETUP_TARGET_COMPILE_DEFS targetName)
   target_compile_definitions(
     ${targetName}
     PRIVATE
+    FMT_USE_STRING_VIEW
     SPDLOG_WCHAR_SUPPORT=1
     SPDLOG_WCHAR_TO_UTF8_SUPPORT=1
   )

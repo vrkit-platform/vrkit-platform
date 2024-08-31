@@ -28,7 +28,7 @@
         "install",
         "-start-type",
         "3"
-      ],      
+      ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [
@@ -45,7 +45,7 @@
       "program": "${command:cmake.launchTargetDirectory}\\vrkit_service.exe",
       "args": [
         "run"
-      ],      
+      ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [
@@ -60,9 +60,7 @@
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${command:cmake.launchTargetDirectory}\\iracing_tools_shared_app_lib_tests.exe",
-      "args": [
-        
-      ],      
+      "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [
@@ -83,9 +81,7 @@
         "data\\ibt\\ligierjsp320_twinring.ibt",
         "-o",
         "data\\telemetry-dump\\telemetry-dump-01",
-        "--json",
-        // "-f",
-        // "YAML"
+        "--json"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -101,11 +97,10 @@
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${command:cmake.launchTargetDirectory}\\iracing_tools_example_irsdk_lapTiming.exe",
-      "args": [        
-      ],
+      "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
-      "console":"externalTerminal",
+      "console": "externalTerminal",
       "environment": [
         {
           "name": "PATH",
@@ -119,7 +114,7 @@
       "request": "launch",
       "program": "${command:cmake.launchTargetDirectory}\\vrkit_tool.exe",
       "args": [
-        "process-all-telemetry",        
+        "process-all-telemetry"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -136,7 +131,7 @@
       "request": "launch",
       "program": "${command:cmake.launchTargetDirectory}\\vrkit_tool.exe",
       "args": [
-        "service-daemon",        
+        "service-daemon"
       ],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

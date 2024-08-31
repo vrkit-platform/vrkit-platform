@@ -53,6 +53,7 @@ namespace IRacingTools::App::Node {
                 InstanceMethod<&NativeSessionPlayer::jsGetDataVariableHeaders>("getDataVariableHeaders"),
 
                 InstanceAccessor<&NativeSessionPlayer::jsIsLive>("isLive"),
+                InstanceAccessor<&NativeSessionPlayer::jsIsAvailable>("isAvailable"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetFileInfo>("fileInfo"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetSessionInfo>("sessionInfo"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetSessionInfoYAML>("sessionInfoYAML"),
@@ -83,12 +84,12 @@ namespace IRacingTools::App::Node {
         argError(!argCount || argCount > 2, kCtorArgError);
 
         argError(!info[0].IsFunction(), kCtorArgError);
-        argError(argCount == 2 && !info[1].IsString(), kCtorArgError);
+        argError(argCount == 2 && !info[1].IsString() && !info[1].IsNull(), kCtorArgError);
 
         // CREATE SESSION STATE
         sessionData_ = std::make_shared<Models::Session::SessionData>();
 
-        if (argCount == 2) {
+        if (argCount == 2 && info[1].IsString()) {
             // Disk based player
             auto filePathStr = info[1].As<Napi::String>().Utf8Value();
 
@@ -130,8 +131,8 @@ namespace IRacingTools::App::Node {
         );
 
         dataProvider_->subscribe([&] (auto type, auto data) {
-            // jsSessionPlayerEventFn_.NonBlockingCall(new NativeSessionPlayerJSEvent(type, data));
-                jsSessionPlayerEventFn_.BlockingCall(new NativeSessionPlayerJSEvent(type, data));
+            jsSessionPlayerEventFn_.NonBlockingCall(new NativeSessionPlayerJSEvent(type, data));
+                //jsSessionPlayerEventFn_.BlockingCall(new NativeSessionPlayerJSEvent(type, data));
         });
     }
 
@@ -181,7 +182,7 @@ namespace IRacingTools::App::Node {
         auto env = info.Env();
 
         if (info.Length() != 1)
-            throw Napi::TypeError::New(env, "A single string parameter is required to get a sesion data variable");
+            throw Napi::TypeError::New(env, "A single string parameter is required to get a session data variable");
 
         auto varName = info[0].As<Napi::String>();
 
@@ -192,8 +193,9 @@ namespace IRacingTools::App::Node {
         auto env = info.Env();
         auto nativeHeaders = dataProvider_->getDataVariableHeaders();
 
-        std::vector<Napi::Value> headers{};
-
+        // std::vector<Napi::Value> headers{};
+        auto headersObj = Napi::Array::New(env);
+        auto headersObjPush = headersObj.Get("push").As<Function>();
 
         for (auto& nativeHeader : nativeHeaders) {
             auto obj = Napi::Object::New(env);
@@ -207,12 +209,12 @@ namespace IRacingTools::App::Node {
             obj.Set("count", nativeHeader.count);
             obj.Set("countAsTime", nativeHeader.countAsTime);
 
-            headers.push_back(obj);
+            headersObjPush.Call(headersObj, {obj});
+            // headers.push_back(obj);
         }
 
-        auto headersObj = Napi::Array::New(env);
-        auto headersObjPush = headersObj.Get("push").As<Function>();
-        headersObjPush.Call(headersObj, headers);
+
+
 
         return headersObj;
     }
@@ -254,6 +256,10 @@ namespace IRacingTools::App::Node {
     Napi::Value NativeSessionPlayer::jsGetSessionTiming(const Napi::CallbackInfo& info) {
         if (auto data = jsGetSessionData(info); data.IsObject()) return data.As<Napi::Object>().Get("timing");
         return {};
+    }
+
+    Napi::Value NativeSessionPlayer::jsIsAvailable(const Napi::CallbackInfo& info) {
+        return Napi::Boolean::New(info.Env(), dataProvider_->isAvailable());
     }
 
     Napi::Value
@@ -313,12 +319,14 @@ namespace IRacingTools::App::Node {
         // ReSharper disable once CppParameterMayBeConstPtrOrRef
         NativeSessionPlayerEventDataType* data
     ) {
-        L->debug("JSSessionPlayerEventCallback() eventType: {}", magic_enum::enum_name(data->type).data());
+        if (L->should_log(spdlog::level::trace))
+            L->trace("JSSessionPlayerEventCallback() eventType: {}", std::string(magic_enum::enum_name(data->type)));
+
 
         if (!env || !callback) {
-            L->error("JS env AND/OR callback is nullptr");
+            L->warn("JS env AND/OR callback is nullptr");
         } else {
-            L->debug("Creating JS object");
+            L->trace("Creating JS object");
             auto jsObj = Napi::Object::New(env);
             jsObj.Set("type", Napi::Number::New(env, data->type));
             if (data->data) {

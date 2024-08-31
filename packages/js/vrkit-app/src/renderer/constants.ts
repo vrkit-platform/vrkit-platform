@@ -1,4 +1,5 @@
 export const isDev = process.env.NODE_ENV !== "production"
+export const isElectron = typeof process !== "undefined" && process?.versions?.electron?.length > 0
 
 export const APP_SYNC_MANAGER_ID = "SYNC_MANAGER_ID"
 export const APP_DB_ID = "APP_DB"

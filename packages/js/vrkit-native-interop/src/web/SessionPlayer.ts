@@ -2,6 +2,7 @@
 // noinspection ES6UnusedImports
 
 import type { IMessageType, MessageType } from "@protobuf-ts/runtime"
+import {guard} from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
 import {
   Any,
@@ -54,7 +55,7 @@ export interface NativeSessionPlayer {
   stop(): boolean
   resume(): boolean
   pause(): boolean
-
+  
   seek(index: number): boolean
 
   /**
@@ -94,17 +95,19 @@ export type SessionPlayerEventArgMap = {
   [K in SessionEventType]: (...args: unknown[]) => void
 }
 
+export type SessionPlayerEventDataDefault = SessionPlayerEventData<typeof SessionEventData>
+
 export interface SessionPlayerEventArgs extends SessionPlayerEventArgMap {
   [SessionEventType.INFO_CHANGED]: (
-    data: SessionPlayerEventData<typeof SessionEventData>
+    data: SessionPlayerEventDataDefault
   ) => void
 
   [SessionEventType.AVAILABLE]: (
-    data: SessionPlayerEventData<typeof SessionEventData>
+    data: SessionPlayerEventDataDefault
   ) => void
 
   [SessionEventType.DATA_FRAME]: (
-    data: SessionPlayerEventData<typeof SessionEventData>,
+    data: SessionPlayerEventDataDefault,
       vars: SessionDataVariable[]
   ) => void
 }
@@ -177,7 +180,7 @@ export class SessionPlayer extends EventEmitter3<
     type: SessionEventType,
     nativeData?: NativeSessionPlayerEventData
   ): void {
-    // log.info(`Received event type`, type, nativeData)
+    // log.debug(`Received event type`, type, nativeData)
 
     const data: SessionPlayerEventData<any> = {
       type,
@@ -186,22 +189,13 @@ export class SessionPlayer extends EventEmitter3<
     
     try {
       if (nativeData?.payload) {
-        // data.payload = SessionEventData.fromBinary(nativeData.payload)
         data.payload = SessionEventData.fromBinary(nativeData.payload)
-        // data.payload = SessionEventData.fromJsonString(nativeData.payload as any)
-        // const payloadAny = Any.fromBinary(nativeData.payload)
-        // const payloadAny:SessionEventData = SessionEventData.fromBinary(nativeData.payload)
-        
-        // const messageType = SessionPlayerEventPayloadTypes[type]
-        // if (messageType) {
-        //   data.payload = Any.unpack(payloadAny, messageType)
-        // }
       }
     } catch (err) {
       log.error("Unable to unpack payload",err)
     }
 
-    this.emit(type, data)
+    guard(() => this.emit(type, data), err => log.error("Unable to emit event", err))
   }
 
   /**
@@ -211,30 +205,56 @@ export class SessionPlayer extends EventEmitter3<
     super()
     this.nativePlayer = CreateNativeSessionPlayer(this.onEvent.bind(this), file)
   }
-
+  
+  /**
+   * Is the session currently valid & available
+   */
+  get isAvailable() {
+    return this.nativePlayer?.isAvailable
+  }
+  
+  /**
+   * Start the player, `Start != Play`
+   */
   start() {
-    return this.nativePlayer.start()
+    return this.nativePlayer?.start()
   }
   
+  /**
+   * Stop the player, `Stop != Pause`
+   */
   stop() {
-    return this.nativePlayer.stop()
+    return this.nativePlayer?.stop()
   }
   
+  /**
+   * `Resume == Play`
+   */
   resume() {
-    return this.nativePlayer.resume()
+    return this.nativePlayer?.resume()
   }
   
+  /**
+   * `Pause == Stop`
+   */
   pause() {
-    return this.nativePlayer.pause()
+    return this.nativePlayer?.pause()
   }
   
+  /**
+   * Go to a specific data sample
+   * @param sampleIndex
+   */
   seek(sampleIndex: number) {
-    return this.nativePlayer.seek(sampleIndex)
+    return this.nativePlayer?.seek(sampleIndex)
   }
   
   
   
   getDataVariableHeaders(...argNames: Array<string | string[]>): SessionDataVariableHeader[] {
+    if (!this.isAvailable)
+      return []
+    
     this.populateDataVariableHeaders()
     
     const names = flatten(argNames)
@@ -292,7 +312,7 @@ export class SessionPlayer extends EventEmitter3<
    * Destroy this client & underlying `this.nativeClient`
    */
   destroy() {
-    this.nativePlayer.destroy()
+    this.nativePlayer?.destroy()
     delete this.nativePlayer
   }
 

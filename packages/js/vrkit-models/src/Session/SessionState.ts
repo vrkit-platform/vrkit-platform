@@ -34,21 +34,21 @@ export interface SessionTiming {
      */
     endTime?: Timestamp;
     /**
-     * @generated from protobuf field: int64 current_time_millis = 20;
+     * @generated from protobuf field: int32 current_time_millis = 20;
      */
-    currentTimeMillis: bigint;
+    currentTimeMillis: number;
     /**
-     * @generated from protobuf field: int64 total_time_millis = 21;
+     * @generated from protobuf field: int32 total_time_millis = 21;
      */
-    totalTimeMillis: bigint; // int64 position = 21;
+    totalTimeMillis: number; // int64 position = 21;
     /**
-     * @generated from protobuf field: int64 sample_index = 50;
+     * @generated from protobuf field: int32 sample_index = 50;
      */
-    sampleIndex: bigint;
+    sampleIndex: number;
     /**
-     * @generated from protobuf field: int64 sample_count = 51;
+     * @generated from protobuf field: int32 sample_count = 51;
      */
-    sampleCount: bigint;
+    sampleCount: number;
 }
 /**
  * @generated from protobuf message IRacingTools.Models.Session.SessionData
@@ -133,20 +133,20 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
             { no: 2, name: "is_valid", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 10, name: "start_time", kind: "message", T: () => Timestamp },
             { no: 11, name: "end_time", kind: "message", T: () => Timestamp },
-            { no: 20, name: "current_time_millis", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
-            { no: 21, name: "total_time_millis", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
-            { no: 50, name: "sample_index", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
-            { no: 51, name: "sample_count", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+            { no: 20, name: "current_time_millis", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 21, name: "total_time_millis", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 50, name: "sample_index", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 51, name: "sample_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
         ]);
     }
     create(value?: PartialMessage<SessionTiming>): SessionTiming {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.isLive = false;
         message.isValid = false;
-        message.currentTimeMillis = 0n;
-        message.totalTimeMillis = 0n;
-        message.sampleIndex = 0n;
-        message.sampleCount = 0n;
+        message.currentTimeMillis = 0;
+        message.totalTimeMillis = 0;
+        message.sampleIndex = 0;
+        message.sampleCount = 0;
         if (value !== undefined)
             reflectionMergePartial<SessionTiming>(this, message, value);
         return message;
@@ -168,17 +168,17 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
                 case /* google.protobuf.Timestamp end_time */ 11:
                     message.endTime = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.endTime);
                     break;
-                case /* int64 current_time_millis */ 20:
-                    message.currentTimeMillis = reader.int64().toBigInt();
+                case /* int32 current_time_millis */ 20:
+                    message.currentTimeMillis = reader.int32();
                     break;
-                case /* int64 total_time_millis */ 21:
-                    message.totalTimeMillis = reader.int64().toBigInt();
+                case /* int32 total_time_millis */ 21:
+                    message.totalTimeMillis = reader.int32();
                     break;
-                case /* int64 sample_index */ 50:
-                    message.sampleIndex = reader.int64().toBigInt();
+                case /* int32 sample_index */ 50:
+                    message.sampleIndex = reader.int32();
                     break;
-                case /* int64 sample_count */ 51:
-                    message.sampleCount = reader.int64().toBigInt();
+                case /* int32 sample_count */ 51:
+                    message.sampleCount = reader.int32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -204,18 +204,18 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
         /* google.protobuf.Timestamp end_time = 11; */
         if (message.endTime)
             Timestamp.internalBinaryWrite(message.endTime, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
-        /* int64 current_time_millis = 20; */
-        if (message.currentTimeMillis !== 0n)
-            writer.tag(20, WireType.Varint).int64(message.currentTimeMillis);
-        /* int64 total_time_millis = 21; */
-        if (message.totalTimeMillis !== 0n)
-            writer.tag(21, WireType.Varint).int64(message.totalTimeMillis);
-        /* int64 sample_index = 50; */
-        if (message.sampleIndex !== 0n)
-            writer.tag(50, WireType.Varint).int64(message.sampleIndex);
-        /* int64 sample_count = 51; */
-        if (message.sampleCount !== 0n)
-            writer.tag(51, WireType.Varint).int64(message.sampleCount);
+        /* int32 current_time_millis = 20; */
+        if (message.currentTimeMillis !== 0)
+            writer.tag(20, WireType.Varint).int32(message.currentTimeMillis);
+        /* int32 total_time_millis = 21; */
+        if (message.totalTimeMillis !== 0)
+            writer.tag(21, WireType.Varint).int32(message.totalTimeMillis);
+        /* int32 sample_index = 50; */
+        if (message.sampleIndex !== 0)
+            writer.tag(50, WireType.Varint).int32(message.sampleIndex);
+        /* int32 sample_count = 51; */
+        if (message.sampleCount !== 0)
+            writer.tag(51, WireType.Varint).int32(message.sampleCount);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

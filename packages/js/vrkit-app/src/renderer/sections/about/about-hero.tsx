@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { varFade, AnimateText, MotionContainer, animateTextClasses } from 'vrkit-app-renderer/components/animate';
 
@@ -20,7 +20,7 @@ export function AboutHero() {
         position: 'relative',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundImage: `url(${CONFIG.site.basePath}/assets/background/overlay.svg), url(${CONFIG.site.basePath}/assets/images/about/hero.webp)`,
+        backgroundImage: `url(${DefaultConfig.site.basePath}/assets/background/overlay.svg), url(${DefaultConfig.site.basePath}/assets/images/about/hero.webp)`,
       }}
     >
       <Container component={MotionContainer}>

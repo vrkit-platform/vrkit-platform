@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="VRKit App (Node external console)" type="NodeJSConfigurationType" path-to-node="$PROJECT_DIR$/node_modules/electron/dist/electron" node-parameters="--inspect-brk=9222 --enable-logging" path-to-js-file="dist/main/electron-main.js" working-dir="$PROJECT_DIR$/packages/js/vrkit-app">
+    <method v="2" />
+  </configuration>
+</component>

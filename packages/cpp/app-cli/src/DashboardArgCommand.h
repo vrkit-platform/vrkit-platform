@@ -8,16 +8,14 @@
 
 #include "ArgCommand.h"
 
-
 #include <CLI/CLI.hpp>
-
 
 namespace IRacingTools::App::Commands {
   using namespace std::literals;
 
   class DashboardArgCommand : public ArgCommand {
   public:
-    int execute() override;
+    virtual int execute() override;
 
   protected:
     CLI::App *createCommand(CLI::App *app) override;

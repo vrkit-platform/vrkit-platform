@@ -16,7 +16,7 @@ import { FlexAuto, FlexScaleZero } from "../../styles/ThemedStyles"
 
 // ----------------------------------------------------------------------
 
-export type NavVerticalProps = NavSectionProps & {
+export interface NavVerticalProps extends NavSectionProps {
   layoutQuery: Breakpoint
   onToggleNav: () => void
   slots?: {

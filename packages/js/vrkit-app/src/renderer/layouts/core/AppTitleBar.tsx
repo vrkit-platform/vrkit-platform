@@ -3,7 +3,7 @@ import type { AppBarProps } from '@mui/material/AppBar';
 import type { ToolbarProps } from '@mui/material/Toolbar';
 import type { ContainerProps } from '@mui/material/Container';
 
-import Box from '@mui/material/Box';
+import Box, { BoxProps } from "@mui/material/Box"
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
@@ -12,8 +12,12 @@ import { styled, useTheme } from '@mui/material/styles';
 import { useScrollOffSetTop } from 'vrkit-app-renderer/hooks/use-scroll-offset-top';
 
 import { bgBlur, varAlpha } from 'vrkit-app-renderer/theme/styles';
+import React from "react"
+import { useAppSelector } from "../../services/store"
+import {
+  sessionManagerSelectors
+} from "../../services/store/slices/session-manager"
 
-import { layoutClasses } from '../classes';
 
 // ----------------------------------------------------------------------
 
@@ -33,10 +37,7 @@ const StyledElevation = styled('span')(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export type HeaderSectionProps = AppBarProps & {
-  layoutQuery: Breakpoint;
-  disableOffset?: boolean;
-  disableElevation?: boolean;
+export interface AppTitleBarProps extends AppBarProps {
   slots?: {
     leftArea?: React.ReactNode;
     leftAreaEnd?: React.ReactNode;
@@ -50,37 +51,31 @@ export type HeaderSectionProps = AppBarProps & {
   };
   slotProps?: {
     toolbar?: ToolbarProps;
-    container?: ContainerProps;
+    container?: BoxProps;
   };
 };
 
-export function HeaderSection({
+export function AppTitleBar({
   sx,
   slots,
   slotProps,
-  disableOffset,
-  disableElevation,
-  layoutQuery = 'md',
   ...other
-}: HeaderSectionProps) {
+}: AppTitleBarProps) {
   const theme = useTheme();
 
   const { offsetTop } = useScrollOffSetTop();
+  
+  const isLiveConnected = useAppSelector(sessionManagerSelectors.selectIsLiveSessionConnected)
+  const activeSession = useAppSelector(sessionManagerSelectors.selectActiveSession)
 
   const toolbarStyles = {
     default: {
-      minHeight: 'auto',
-      height: 'var(--layout-header-mobile-height)',
+      minHeight: '4rem',
+      height: '4rem',
       transition: theme.transitions.create(['height', 'background-color'], {
         easing: theme.transitions.easing.easeInOut,
         duration: theme.transitions.duration.shorter,
       }),
-      [theme.breakpoints.up('sm')]: {
-        minHeight: 'auto',
-      },
-      [theme.breakpoints.up(layoutQuery)]: {
-        height: 'var(--layout-header-desktop-height)',
-      },
     },
     offset: {
       ...bgBlur({ color: varAlpha(theme.vars.palette.background.defaultChannel, 0.8) }),
@@ -90,9 +85,9 @@ export function HeaderSection({
   return (
     <AppBar
       position="sticky"
-      className={layoutClasses.header}
+      elevation={5}
       sx={{
-        zIndex: 'var(--layout-header-zIndex)',
+        zIndex: 5,
         ...sx,
       }}
       {...other}
@@ -103,12 +98,10 @@ export function HeaderSection({
         disableGutters
         {...slotProps?.toolbar}
         sx={{
-          ...toolbarStyles.default,
-          ...(!disableOffset && offsetTop && toolbarStyles.offset),
-          ...slotProps?.toolbar?.sx,
+        
         }}
       >
-        <Container
+        <Box
           {...slotProps?.container}
           sx={{
             height: 1,
@@ -124,12 +117,12 @@ export function HeaderSection({
           </Box>
 
           {slots?.rightArea}
-        </Container>
+        </Box>
       </Toolbar>
 
       {slots?.bottomArea}
 
-      {!disableElevation && offsetTop && <StyledElevation />}
+      <StyledElevation />
     </AppBar>
   );
 }

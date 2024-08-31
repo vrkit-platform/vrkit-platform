@@ -5,7 +5,7 @@ import { forwardRef } from 'react';
 import Box from '@mui/material/Box';
 import NoSsr from '@mui/material/NoSsr';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 // ----------------------------------------------------------------------
 
@@ -38,7 +38,7 @@ export const FlagIcon = forwardRef<HTMLSpanElement, FlagIconProps>(
           <Box
             component="img"
             alt={code}
-            src={`${CONFIG.site.basePath}/assets/icons/flagpack/${code?.toLowerCase()}.webp`}
+            src={`${DefaultConfig.site.basePath}/assets/icons/flagpack/${code?.toLowerCase()}.webp`}
             sx={{ width: 1, height: 1, objectFit: 'cover' }}
           />
         </Box>

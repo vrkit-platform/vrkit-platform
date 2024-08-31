@@ -166,6 +166,8 @@ namespace IRacingTools::SDK {
     virtual std::optional<WeakSessionInfoWithUpdateCount> getSessionInfoWithUpdateCount() override;
     virtual ClientId getClientId() override;
 
+    virtual bool copyDataVariableBuffer(void* target, std::size_t size);
+
   protected:
     std::expected<bool, GeneralError> updateSessionInfo(std::FILE * ibtFile = nullptr);
     

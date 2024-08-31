@@ -69,9 +69,9 @@ namespace IRacingTools::Shared::Services {
       //   fileTaskQueue_->destroy();
       // }
 
-      for (auto &watcher: fileWatchers_) {
-        watcher->stop();
-      }
+      // for (auto &watcher: fileWatchers_) {
+      //   watcher->stop();
+      // }
 
       filePaths_.clear();
 

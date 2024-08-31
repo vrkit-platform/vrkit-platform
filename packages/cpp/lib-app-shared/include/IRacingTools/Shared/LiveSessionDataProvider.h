@@ -14,7 +14,6 @@
 
 namespace IRacingTools::Shared {
 
-
   class LiveSessionDataProvider final : public SessionDataProvider {
 
   public:
@@ -63,11 +62,14 @@ namespace IRacingTools::Shared {
      */
     void process();
 
+    void updateTiming();
     void processData();
 
-    void processDataUpdate();
+    // void processDataUpdate();
 
     void checkConnection();
+
+    std::int64_t waitForDataDuration();
 
     std::shared_ptr<Models::RPC::Events::SessionEventData> createEventData(Models::RPC::Events::SessionEventType type);
 

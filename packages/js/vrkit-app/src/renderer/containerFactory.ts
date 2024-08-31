@@ -2,14 +2,18 @@ import { Deferred } from "@3fv/deferred"
 import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 import { ActionRegistry } from "vrkit-app-common/services"
-import { APP_DB_ID, APP_STORE_ID, isSharedWorkerEnabled } from "./constants"
-
 import WebActionManager from "./services/web-action-manager"
+import SessionManager from "./services/session-manager"
+
+import { APP_STORE_ID, isSharedWorkerEnabled } from "./constants"
+
+
 
 import {
   setContainerResolver
 } from "./utils"
 import { isDev } from "./constants"
+
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log
@@ -37,6 +41,7 @@ async function createContainer(): Promise<Container> {
       .bindConstant(APP_STORE_ID, appStore)
       .bindClass(ActionRegistry)
       .bindClass(WebActionManager)
+      .bindClass(SessionManager)
       .resolveAll()
 
     // container = await container.resolveAll()
@@ -79,6 +84,8 @@ export function resolveContainer(): Deferred<Container> {
       return err
     })
     createContainer()
+        .then(() => log.info("Resolved container"))
+        .catch(err => log.error("Failed to resolve container", err))
   }
   return containerDeferred
 }

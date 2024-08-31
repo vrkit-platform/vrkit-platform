@@ -26,7 +26,7 @@ export type SettingsState = {
   primaryColor: 'default' | 'cyan' | 'purple' | 'blue' | 'orange' | 'red';
 };
 
-export type SettingsContextValue = SettingsState & {
+export interface SettingsContextValue extends SettingsState {
   canReset: boolean;
   onReset: () => void;
   onUpdate: (updateValue: Partial<SettingsState>) => void;

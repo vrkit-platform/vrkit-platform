@@ -47,9 +47,9 @@ struct VarDataHeader {
 };
 
 struct VarDataBufDescriptor {
-    int tickCount; // used to detect changes in data
-    int bufOffset; // offset from header
-    int pad[2];    // (16 byte align)
+    int tickCount{}; // used to detect changes in data
+    int bufOffset{}; // offset from header
+    int pad[2]{};    // (16 byte align)
 };
 
 using VarHeaders = std::vector<VarDataHeader>;

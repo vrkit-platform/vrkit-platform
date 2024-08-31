@@ -36,7 +36,7 @@ export type ConfigValue = {
 
 // ----------------------------------------------------------------------
 
-export const CONFIG: ConfigValue = {
+export const DefaultConfig: ConfigValue = {
   site: {
     name: 'Minimals',
     serverUrl: '',

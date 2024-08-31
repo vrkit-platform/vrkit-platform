@@ -19,6 +19,10 @@
 #define UNICODE
 #endif
 
+#ifndef FMT_USE_STRING_VIEW
+#define FMT_USE_STRING_VIEW
+#endif
+
 #define WIN32_LEAN_AND_MEAN     // Exclude rarely-used stuff from Windows headers
 // Windows Header Files:
 #include <windows.h>

@@ -38,7 +38,7 @@ namespace IRacingTools::SDK {
         int numBuf{}; // <= Resources::MaxBufferCount (3 for now)
         int bufLen{}; // length in bytes for one line
 
-        int ignoreMemberUnused[2]; // (16 byte align)
+        int ignoreMemberUnused[2]{}; // (16 byte align)
 
         VarDataBufDescriptor varBuf[Resources::MaxBufferCount]{}; // buffers of data being written to
     };

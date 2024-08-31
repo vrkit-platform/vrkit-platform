@@ -4,8 +4,8 @@ import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
-import { CONFIG } from '../../../config-global';
-import { varAlpha, bgGradient } from '../../../theme/styles';
+import { DefaultConfig } from '../../config-global';
+import { varAlpha, bgGradient } from '../../theme/styles';
 
 // ----------------------------------------------------------------------
 
@@ -22,10 +22,10 @@ export function AppWelcome({ title, description, action, img, sx, ...other }: Pr
   return (
     <Box
       sx={{
-        ...bgGradient({
-          color: `to right, ${varAlpha(theme.vars.palette.grey['900Channel'], 0.88)} 0%, ${theme.vars.palette.grey[900]} 75%`,
-          imgUrl: `${CONFIG.site.basePath}/assets/background/background-5.webp`,
-        }),
+        // ...bgGradient({
+        //   color: `to right, ${varAlpha(theme.vars.palette.grey['900Channel'], 0.88)} 0%, ${theme.vars.palette.grey[900]} 75%`,
+        //   imgUrl: `${DefaultConfig.site.basePath}/assets/background/background-5.webp`,
+        // }),
         pt: 5,
         pb: 5,
         pr: 3,
@@ -39,7 +39,7 @@ export function AppWelcome({ title, description, action, img, sx, ...other }: Pr
         color: 'common.white',
         textAlign: { xs: 'center', md: 'left' },
         flexDirection: { xs: 'column', md: 'row' },
-        border: `solid 1px ${theme.vars.palette.grey[800]}`,
+        // border: `solid 1px ${theme.vars.palette.grey[800]}`,
         ...sx,
       }}
       {...other}

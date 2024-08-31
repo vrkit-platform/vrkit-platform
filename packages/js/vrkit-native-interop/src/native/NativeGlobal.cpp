@@ -5,6 +5,8 @@
 
 #include "NativeGlobal.h"
 
+#include <IRacingTools/Shared/Utils/Win32ProcessTool.h>
+
 using namespace IRacingTools::App::Node;
 using namespace IRacingTools::Models::RPC;
 using namespace Napi;
@@ -20,6 +22,8 @@ namespace IRacingTools::App::Node {
     }
 
     NativeGlobal::NativeGlobal(token) : manager_(std::make_shared<NativeSystemManager>()) {
+        WindowsSetHighPriorityProcess();
+
         manager_->init();
         manager_->start();
 #if 0

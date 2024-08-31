@@ -10,6 +10,7 @@
 
 #include <boost/di.hpp>
 
+#include "LiveDataReplayArgCommand.h"
 #include "DashboardArgCommand.h"
 #include "GenerateTrackmapArgCommand.h"
 #include "SHMViewerArgCommand.h"
@@ -46,7 +47,7 @@ int main(int argc, char **argv) {
   app.set_version_flag("--version", appVerion);
 
   auto cmds =
-      ArgCommand::build<TelemetryDumpArgCommand, ProcessAllTelemetryArgCommand,DashboardArgCommand, GenerateTrackmapArgCommand, SessionPlayArgCommand,
+      ArgCommand::build<LiveDataReplayArgCommand, TelemetryDumpArgCommand, ProcessAllTelemetryArgCommand,DashboardArgCommand, GenerateTrackmapArgCommand, SessionPlayArgCommand,
                         SessionRecordArgCommand, SHMViewerArgCommand, ServiceDaemonArgCommand>(&app);
 
   CLI11_PARSE(app, argc, argv);

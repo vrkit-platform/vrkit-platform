@@ -12,7 +12,7 @@ export type AutocompleteBaseProps = Omit<
   'renderInput'
 >;
 
-export type RHFAutocompleteProps = AutocompleteBaseProps & {
+export interface RHFAutocompleteProps extends AutocompleteBaseProps {
   name: string;
   label?: string;
   placeholder?: string;

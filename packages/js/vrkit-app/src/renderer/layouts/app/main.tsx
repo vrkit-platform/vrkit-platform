@@ -1,85 +1,70 @@
-import type { BoxProps } from '@mui/material/Box';
-import type { Breakpoint } from '@mui/material/styles';
-import type { ContainerProps } from '@mui/material/Container';
+import type { BoxProps } from "@mui/material/Box"
+import Box from "@mui/material/Box"
+import { useTheme } from "@mui/material/styles"
 
-import Box from '@mui/material/Box';
-import { useTheme } from '@mui/material/styles';
-import Container from '@mui/material/Container';
-
-import { layoutClasses } from 'vrkit-app-renderer/layouts/classes';
-
-import { useSettingsContext } from 'vrkit-app-renderer/components/settings';
+import { useSettingsContext } from "vrkit-app-renderer/components/settings"
+import {
+  dimensionConstraints,
+  Fill,
+  FlexColumn,
+  OverflowHidden
+} from "../../styles"
 
 // ----------------------------------------------------------------------
 
-type MainProps = BoxProps & {
-
-};
+type MainProps = BoxProps & {}
 
 export function Main({ children, sx, ...other }: MainProps) {
+  const theme = useTheme()
   return (
     <Box
       component="main"
-      className={layoutClasses.main}
+      
       sx={{
-        display: 'flex',
-        flex: '1 1 auto',
-        flexDirection: 'column',
-        ...sx,
+        position: "absolute",
+        display: "flex",
+        // ...dimensionConstraints("100%", "100%"),
+        top: theme.dimen.appBarHeight,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        ...OverflowHidden,
+        // paddingTop: theme.dimen.appBarHeight,
+        // flex: "1 1 0",
+        //flexDirection: "column",
+        ...sx
+      }}
+      {...other}
+    >
+      <Box sx={{...FlexColumn}}>
+      {children}
+      </Box>
+    </Box>
+  )
+}
+
+// ----------------------------------------------------------------------
+
+interface AppContentProps extends BoxProps {}
+
+export function AppContent({ sx, children, ...other }: AppContentProps) {
+  const theme = useTheme()
+
+  const settings = useSettingsContext()
+
+  return (
+    <Box
+      
+      sx={{
+        display: "flex",
+        flex: "1 1 0",
+        flexDirection: "column",
+        
+        ...sx
       }}
       {...other}
     >
       {children}
     </Box>
-  );
-}
-
-// ----------------------------------------------------------------------
-
-type AppContentProps = ContainerProps & {
-  disablePadding?: boolean;
-};
-
-export function AppContent({
-  sx,
-  children,
-  disablePadding,
-  maxWidth = 'lg',
-  ...other
-}: AppContentProps) {
-  const theme = useTheme();
-
-  const settings = useSettingsContext();
-
-  const layoutQuery: Breakpoint = 'lg';
-
-  return (
-    <Container
-      className={layoutClasses.content}
-      maxWidth={settings.compactLayout ? maxWidth : false}
-      sx={{
-        display: 'flex',
-        flex: '1 1 auto',
-        flexDirection: 'column',
-        pt: 'var(--layout-dashboard-content-pt)',
-        pb: 'var(--layout-dashboard-content-pb)',
-        [theme.breakpoints.up(layoutQuery)]: {
-          px: 'var(--layout-dashboard-content-px)',
-        },
-        ...(disablePadding && {
-          p: {
-            xs: 0,
-            sm: 0,
-            md: 0,
-            lg: 0,
-            xl: 0,
-          },
-        }),
-        ...sx,
-      }}
-      {...other}
-    >
-      {children}
-    </Container>
-  );
+  )
 }

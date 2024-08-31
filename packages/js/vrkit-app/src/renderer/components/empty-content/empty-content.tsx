@@ -5,12 +5,12 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import { varAlpha } from 'vrkit-app-renderer/theme/styles';
 
 // ----------------------------------------------------------------------
 
-export type EmptyContentProps = StackProps & {
+export interface EmptyContentProps extends StackProps {
   title?: string;
   imgUrl?: string;
   filled?: boolean;
@@ -53,7 +53,7 @@ export function EmptyContent({
       <Box
         component="img"
         alt="empty content"
-        src={imgUrl ?? `${CONFIG.site.basePath}/assets/icons/empty/ic-content.svg`}
+        src={imgUrl ?? `${DefaultConfig.site.basePath}/assets/icons/empty/ic-content.svg`}
         sx={{ width: 1, maxWidth: 160, ...slotProps?.img }}
       />
 

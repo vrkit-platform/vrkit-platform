@@ -11,7 +11,7 @@ import React from "react"
 
 // ----------------------------------------------------------------------
 
-export type AnimateLogoProps = BoxProps & {
+export interface AnimateLogoProps extends BoxProps {
   logo?: React.ReactNode;
 };
 

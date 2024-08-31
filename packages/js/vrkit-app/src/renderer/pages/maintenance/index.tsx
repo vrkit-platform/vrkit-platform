@@ -1,12 +1,12 @@
 import { Helmet } from 'react-helmet-async';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { MaintenanceView } from 'vrkit-app-renderer/sections/maintenance/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Maintenance - ${CONFIG.site.name}` };
+const metadata = { title: `Maintenance - ${DefaultConfig.site.name}` };
 
 export default function Page() {
   return (

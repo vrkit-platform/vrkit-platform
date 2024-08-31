@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="vrkit_native_interop (jest)" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="..\..\..\node_modules\jest\bin\jest.js --no-cache --detectOpenHandles --force-node-api-uncaught-exceptions-policy=true" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$PROJECT_DIR$/packages/js/vrkit-native-interop" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_native_interop" CONFIG_NAME="DebugClionNinja" RUN_PATH="C:/tools/nodejs/node.exe">
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -41,6 +41,7 @@ static Napi::Object Init(Napi::Env env, Napi::Object exports) {
     NativeClient::Init(env, exports);
     NativeSessionPlayer::Init(env, exports);
     NativeSessionDataVariable::Init(env, exports);
+
     exports.Set("Shutdown", Napi::Function::New(env, VRKitShutdownFn));
     // exports.Set("VRKitPing", Napi::Function::New(env, VRKitPingFn));
     

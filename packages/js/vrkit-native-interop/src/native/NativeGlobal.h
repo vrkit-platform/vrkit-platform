@@ -31,7 +31,8 @@ using namespace IRacingTools::Models;
 namespace IRacingTools::App::Node {
     using namespace Shared::Services;
 
-    using NativeSystemManager = ServiceManager<RPCServerService, TelemetryDataService, TrackMapService>;
+    // using NativeSystemManager = ServiceManager<RPCServerService, TelemetryDataService, TrackMapService>;
+    using NativeSystemManager = ServiceManager<RPCServerService>;
     using NativeSystemManagerPtr = std::shared_ptr<NativeSystemManager>;
 
     /**

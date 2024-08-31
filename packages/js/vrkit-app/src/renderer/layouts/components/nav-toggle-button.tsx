@@ -7,7 +7,7 @@ import { varAlpha } from 'vrkit-app-renderer/theme/styles';
 
 // ----------------------------------------------------------------------
 
-export type NavToggleButtonProps = IconButtonProps & {
+export interface NavToggleButtonProps extends IconButtonProps {
 
 };
 

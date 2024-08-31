@@ -69,7 +69,7 @@ export type WorkflowEventHandler<
 /**
  * The control interface for workflows
  */
-export type WorkflowControl = WorkflowState & {
+export interface WorkflowControl extends WorkflowState {
   run: () => Promise<Workflow>
   reset: () => Promise<Workflow>
   cancel: () => Promise<Workflow>

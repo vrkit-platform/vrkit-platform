@@ -25,7 +25,7 @@ export type MultiFilePreviewProps = {
   };
 };
 
-export type UploadProps = DropzoneOptions & {
+export interface UploadProps extends DropzoneOptions {
   error?: boolean;
   sx?: SxProps<Theme>;
   thumbnail?: boolean;

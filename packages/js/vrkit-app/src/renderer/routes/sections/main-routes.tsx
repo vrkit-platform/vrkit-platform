@@ -5,7 +5,7 @@ import { Navigate } from "react-router-dom"
 // ----------------------------------------------------------------------
 
 // Overview
-const IndexPage = lazy(() => import('vrkit-app-renderer/pages/app'));
+const IndexPage = lazy(() => import('../../pages/app'));
 
 // File manager
 const FileManagerPage = lazy(() => import('vrkit-app-renderer/pages/app/file-manager'));

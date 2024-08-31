@@ -3,11 +3,11 @@ import { Helmet } from 'react-helmet-async';
 import { Typography } from '@mui/material';
 import Container from '@mui/material/Container';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Blank - ${CONFIG.site.name}` };
+const metadata = { title: `Blank - ${DefaultConfig.site.name}` };
 
 export default function Page() {
   return (

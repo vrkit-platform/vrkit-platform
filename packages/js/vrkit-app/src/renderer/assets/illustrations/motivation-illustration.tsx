@@ -5,7 +5,7 @@ import { memo } from 'react';
 import Box from '@mui/material/Box';
 import { useTheme } from '@mui/material/styles';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { BackgroundShape } from './background-shape';
 
@@ -37,7 +37,7 @@ function MotivationIllustration({ hideBackground, sx, ...other }: Props) {
       {!hideBackground && <BackgroundShape />}
 
       <image
-        href={`${CONFIG.site.basePath}/assets/illustrations/characters/character-2.webp`}
+        href={`${DefaultConfig.site.basePath}/assets/illustrations/characters/character-2.webp`}
         height="300"
         x="322"
         y="30"

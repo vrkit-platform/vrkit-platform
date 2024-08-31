@@ -9,7 +9,7 @@ export interface ExtendFile extends File {
   lastModifiedDate?: Date;
 }
 
-export type FileThumbnailProps = StackProps & {
+export interface FileThumbnailProps extends StackProps {
   tooltip?: boolean;
   file: File | string;
   imageView?: boolean;

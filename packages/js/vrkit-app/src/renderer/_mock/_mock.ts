@@ -1,6 +1,6 @@
 import { fSub } from 'vrkit-app-renderer/utils/format-time';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import {
   _id,
@@ -35,7 +35,7 @@ import {
 
 // ----------------------------------------------------------------------
 
-const { assetURL } = CONFIG.site;
+const { assetURL } = DefaultConfig.site;
 
 export const _mock = {
   id: (index: number) => _id[index],

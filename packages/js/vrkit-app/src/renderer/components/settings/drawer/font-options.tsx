@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import { setFont, varAlpha, stylesMode } from 'vrkit-app-renderer/theme/styles';
 
 import { Block } from './styles';
@@ -54,7 +54,7 @@ export function FontOptions({ value, options, onClickOption }: Props) {
                 }}
               >
                 <SvgColor
-                  src={`${CONFIG.site.basePath}/assets/icons/setting/ic-font.svg`}
+                  src={`${DefaultConfig.site.basePath}/assets/icons/setting/ic-font.svg`}
                   sx={{
                     width: 28,
                     height: 28,

@@ -5,7 +5,8 @@ import type {} from '@mui/x-date-pickers/themeAugmentation';
 import type {} from '@mui/material/themeCssVarsAugmentation';
 
 import CssBaseline from '@mui/material/CssBaseline';
-import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
+//import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 
 import { useTranslate } from 'vrkit-app-renderer/locales';
 
@@ -29,13 +30,13 @@ export function ThemeProvider({ children }: Props) {
   const theme = createTheme(currentLang?.systemValue, settings);
 
   return (
-    <CssVarsProvider
+    <MuiThemeProvider
       theme={theme}
-      defaultMode={schemeConfig.defaultMode}
-      modeStorageKey={schemeConfig.modeStorageKey}
+//      defaultMode={schemeConfig.defaultMode}
+  //    modeStorageKey={schemeConfig.modeStorageKey}
     >
       <CssBaseline />
       <RTL direction={settings.direction}>{children}</RTL>
-    </CssVarsProvider>
+    </MuiThemeProvider>
   );
 }

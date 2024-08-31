@@ -3,7 +3,8 @@ import type { Theme, SxProps, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import GlobalStyles from '@mui/material/GlobalStyles';
 
-import { layoutClasses } from '../classes';
+
+import React from "react"
 
 // ----------------------------------------------------------------------
 
@@ -28,12 +29,6 @@ export function LayoutSection({
     <GlobalStyles
       styles={{
         body: {
-          '--layout-nav-zIndex': 1101,
-          '--layout-nav-mobile-width': '320px',
-          '--layout-header-blur': '8px',
-          '--layout-header-zIndex': 1100,
-          '--layout-header-mobile-height': '64px',
-          '--layout-header-desktop-height': '72px',
           ...cssVars,
         },
       }}
@@ -43,8 +38,7 @@ export function LayoutSection({
   return (
     <>
       {inputGlobalStyles}
-
-      <Box id="root__layout" className={layoutClasses.root} sx={sx}>
+      <Box id="root__layout"  sx={sx}>
         {sidebarSection ? (
           <>
             {sidebarSection}
@@ -52,8 +46,7 @@ export function LayoutSection({
               display="flex"
               flex="1 1 auto"
               flexDirection="column"
-              className={layoutClasses.hasSidebar}
-            >
+                          >
               {headerSection}
               {children}
               {footerSection}

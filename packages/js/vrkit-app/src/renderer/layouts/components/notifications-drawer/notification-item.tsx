@@ -9,7 +9,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 
 import { fToNow } from 'vrkit-app-renderer/utils/format-time';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { Label } from 'vrkit-app-renderer/components/label';
 import { FileThumbnail } from 'vrkit-app-renderer/components/file-thumbnail';
@@ -39,7 +39,7 @@ export function NotificationItem({ notification }: { notification: NotificationI
         >
           <Box
             component="img"
-            src={`${CONFIG.site.basePath}/assets/icons/notification/${(notification.type === 'order' && 'ic-order') || (notification.type === 'chat' && 'ic-chat') || (notification.type === 'mail' && 'ic-mail') || (notification.type === 'delivery' && 'ic-delivery')}.svg`}
+            src={`${DefaultConfig.site.basePath}/assets/icons/notification/${(notification.type === 'order' && 'ic-order') || (notification.type === 'chat' && 'ic-chat') || (notification.type === 'mail' && 'ic-mail') || (notification.type === 'delivery' && 'ic-delivery')}.svg`}
             sx={{ width: 24, height: 24 }}
           />
         </Stack>

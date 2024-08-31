@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
 import { alpha as hexAlpha } from '@mui/material/styles';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { Block } from './styles';
 import { SvgColor } from '../../svg-color';
@@ -41,7 +41,7 @@ export function PresetsOptions({ value, options, onClickOption }: Props) {
                 }}
               >
                 <SvgColor
-                  src={`${CONFIG.site.basePath}/assets/icons/setting/ic-siderbar-duotone.svg`}
+                  src={`${DefaultConfig.site.basePath}/assets/icons/setting/ic-siderbar-duotone.svg`}
                   sx={{ width: 28, height: 28, color: 'currentColor' }}
                 />
               </ButtonBase>

@@ -25,7 +25,7 @@ export type AutocompleteBaseProps = Omit<
   'options' | 'renderOption' | 'renderInput' | 'renderTags' | 'getOptionLabel'
 >;
 
-export type CountrySelectProps = AutocompleteBaseProps & {
+export interface CountrySelectProps extends AutocompleteBaseProps {
   label?: string;
   error?: boolean;
   placeholder?: string;

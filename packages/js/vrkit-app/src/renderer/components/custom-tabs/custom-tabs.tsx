@@ -10,7 +10,7 @@ import { stylesMode } from 'vrkit-app-renderer/theme/styles';
 
 // ----------------------------------------------------------------------
 
-export type CustomTabsProps = TabsProps & {
+export interface CustomTabsProps extends TabsProps {
   slotProps?: TabsProps['slotProps'] & {
     scroller?: SxProps<Theme>;
     indicator?: SxProps<Theme>;

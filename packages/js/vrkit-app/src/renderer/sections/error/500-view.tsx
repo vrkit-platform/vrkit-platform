@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 
 import { RouterLink } from 'vrkit-app-renderer/routes/components';
 
-import { SimpleLayout } from 'vrkit-app-renderer/layouts/simple';
+import { AppLayout } from 'vrkit-app-renderer/layouts/app';
 import { ServerErrorIllustration } from 'vrkit-app-renderer/assets/illustrations';
 
 import { varBounce, MotionContainer } from 'vrkit-app-renderer/components/animate';
@@ -15,7 +15,7 @@ import { varBounce, MotionContainer } from 'vrkit-app-renderer/components/animat
 
 export function View500() {
   return (
-    <SimpleLayout content={{ compact: true }}>
+    <AppLayout>
       <Container component={MotionContainer}>
         <m.div variants={varBounce().in}>
           <Typography variant="h3" sx={{ mb: 2 }}>
@@ -37,6 +37,6 @@ export function View500() {
           Go to home
         </Button>
       </Container>
-    </SimpleLayout>
+    </AppLayout>
   );
 }

@@ -15,7 +15,7 @@ import { borderGradient } from 'vrkit-app-renderer/theme/styles';
  * https://gradientborder.framer.website/
  */
 
-export type AnimateBorderProps = BoxProps & {
+export interface AnimateBorderProps extends BoxProps {
   animate?: {
     outline?: string;
     color?: string | string[];

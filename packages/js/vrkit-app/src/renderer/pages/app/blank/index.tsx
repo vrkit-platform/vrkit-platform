@@ -1,12 +1,12 @@
 import { Helmet } from 'react-helmet-async';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { BlankView } from 'vrkit-app-renderer/sections/blank/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Blank | Dashboard - ${CONFIG.site.name}` };
+const metadata = { title: `Blank | Dashboard - ${DefaultConfig.site.name}` };
 
 export default function Page() {
   return (

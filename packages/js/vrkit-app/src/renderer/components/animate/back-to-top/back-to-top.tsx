@@ -9,7 +9,7 @@ import { Iconify } from 'vrkit-app-renderer/components/iconify';
 
 // ----------------------------------------------------------------------
 
-export type BackToTopProps = FabProps & {
+export interface BackToTopProps extends FabProps {
   value?: number;
 };
 

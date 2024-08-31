@@ -9,7 +9,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 
 import { useBoolean } from 'vrkit-app-renderer/hooks/use-boolean';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import { maxLine } from 'vrkit-app-renderer/theme/styles';
 
 import { Iconify } from 'vrkit-app-renderer/components/iconify';
@@ -19,28 +19,28 @@ import { Iconify } from 'vrkit-app-renderer/components/iconify';
 const CATEGORIES = [
   {
     label: 'Managing your account',
-    icon: `${CONFIG.site.basePath}/assets/icons/faqs/ic-account.svg`,
+    icon: `${DefaultConfig.site.basePath}/assets/icons/faqs/ic-account.svg`,
     href: '#',
   },
-  { label: 'Payment', icon: `${CONFIG.site.basePath}/assets/icons/faqs/ic-payment.svg`, href: '#' },
+  { label: 'Payment', icon: `${DefaultConfig.site.basePath}/assets/icons/faqs/ic-payment.svg`, href: '#' },
   {
     label: 'Delivery',
-    icon: `${CONFIG.site.basePath}/assets/icons/faqs/ic-delivery.svg`,
+    icon: `${DefaultConfig.site.basePath}/assets/icons/faqs/ic-delivery.svg`,
     href: '#',
   },
   {
     label: 'Problem with the product',
-    icon: `${CONFIG.site.basePath}/assets/icons/faqs/ic-package.svg`,
+    icon: `${DefaultConfig.site.basePath}/assets/icons/faqs/ic-package.svg`,
     href: '#',
   },
   {
     label: 'Return & refund',
-    icon: `${CONFIG.site.basePath}/assets/icons/faqs/ic-refund.svg`,
+    icon: `${DefaultConfig.site.basePath}/assets/icons/faqs/ic-refund.svg`,
     href: '#',
   },
   {
     label: 'Guarantees and assurances',
-    icon: `${CONFIG.site.basePath}/assets/icons/faqs/ic-assurances.svg`,
+    icon: `${DefaultConfig.site.basePath}/assets/icons/faqs/ic-assurances.svg`,
     href: '#',
   },
 ];

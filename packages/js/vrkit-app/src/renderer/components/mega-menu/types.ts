@@ -38,7 +38,7 @@ export type SlideProps = {
   coverUrl: string;
 };
 
-export type MenuLink = LinkProps & {
+export interface MenuLink extends LinkProps {
   path: string;
   title: string;
 };
@@ -49,7 +49,7 @@ export type MenuCarouselProps = {
   sx?: SxProps<Theme>;
 };
 
-export type MenuTagsProps = BoxProps & {
+export interface MenuTagsProps extends BoxProps {
   tags: MenuLink[];
 };
 
@@ -100,7 +100,7 @@ export type NavListProps = {
   };
 };
 
-export type NavSubListProps = StackProps & {
+export interface NavSubListProps extends StackProps {
   title?: string;
   slotProps?: SlotProps;
   onCloseMenu?: () => void;

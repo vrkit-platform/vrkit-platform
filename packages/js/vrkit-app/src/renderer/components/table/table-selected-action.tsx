@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 
 // ----------------------------------------------------------------------
 
-export type TableSelectedActionProps = StackProps & {
+export interface TableSelectedActionProps extends StackProps {
   dense?: boolean;
   rowCount: number;
   numSelected: number;

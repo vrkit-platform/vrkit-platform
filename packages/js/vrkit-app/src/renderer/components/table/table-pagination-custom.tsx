@@ -8,7 +8,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 
 // ----------------------------------------------------------------------
 
-export type TablePaginationCustomProps = TablePaginationProps & {
+export type TablePaginationCustomProps = TablePaginationProps &{
   dense?: boolean;
   sx?: SxProps<Theme>;
   onChangeDense?: (event: React.ChangeEvent<HTMLInputElement>) => void;

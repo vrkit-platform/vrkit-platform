@@ -3,18 +3,21 @@ import { HashRouter } from "react-router-dom"
 import { HelmetProvider } from "react-helmet-async"
 
 import App from "./App"
-import { CONFIG } from "./config-global"
+import { DefaultConfig } from "./config-global"
+import { PageMetadataProvider } from "./components/page-metadata"
 
 export default function AppContainer() {
   return (
     <StrictMode>
-      <HelmetProvider>
-        <HashRouter basename={CONFIG.site.basePath}>
-          <Suspense>
-            <App />
-          </Suspense>
-        </HashRouter>
-      </HelmetProvider>
+      <PageMetadataProvider>
+        <HelmetProvider>
+          <HashRouter basename={DefaultConfig.site.basePath}>
+            <Suspense>
+              <App />
+            </Suspense>
+          </HashRouter>
+        </HelmetProvider>
+      </PageMetadataProvider>
     </StrictMode>
   )
 }

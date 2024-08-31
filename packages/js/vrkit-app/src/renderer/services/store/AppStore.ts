@@ -20,6 +20,7 @@ import { globalReducer } from "./slices/global/GlobalSlice"
 import { asOption } from "@3fv/prelude-ts"
 import { dataReducer } from "./slices/data"
 import { getLogger } from "@3fv/logger-proxy"
+import { sessionManagerReducer } from "./slices/session-manager"
 
 
 const log = getLogger(__filename)
@@ -51,12 +52,13 @@ const getDevMiddleware = () => {
 }
 
 export const appStore = configureStore<AppRootState>({
-  preloadedState: asOption(
-    import.meta.webpackHot?.data?.state
-  ).getOrUndefined(),
+  // preloadedState: asOption(
+  //   import.meta.webpackHot?.data?.state
+  // ).getOrUndefined(),
   reducer: {
     data: dataReducer,
     global: globalReducer,
+    sessionManager: sessionManagerReducer
     // router: connectRouter(history) as Reducer<RouterState<any>>
   },
 
@@ -67,18 +69,17 @@ export const appStore = configureStore<AppRootState>({
       // .concat(routerMiddleware)
       .prepend(...getDevMiddleware()) as any, //routerMiddleware
   // preloadedState: storageService.get<AppRootState>(StorageKey.settings_state) ?? {},
-  devTools: isDev
-    ? {
-        name: "VRKit"
-      }
-    : false
+  devTools: true
+      // {
+      //   name: "VRKit"
+      // }
 })
 
-if (import.meta.webpackHot) {
-  import.meta.webpackHot.addDisposeHandler(data =>
-    assign(data, { state: appStore.getState() })
-  )
-}
+// if (import.meta.webpackHot) {
+//   import.meta.webpackHot.addDisposeHandler(data =>
+//     assign(data, { state: appStore.getState() })
+//   )
+// }
 
 export type AppStore = typeof appStore
 export type AppDispatch = typeof appStore.dispatch
@@ -86,8 +87,8 @@ export type AppSelector<T = unknown> = Selector<AppRootState, T>
 
 export default appStore
 
-if (process.env.NODE_ENV !== "production") {
-  assign(global, {
-    appStore: appStore
-  })
-}
+// if (process.env.NODE_ENV !== "production") {
+//   assign(global, {
+//     appStore: appStore
+//   })
+// }

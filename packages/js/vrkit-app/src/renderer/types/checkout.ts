@@ -41,7 +41,7 @@ export type ICheckoutState = {
   billing: IAddressItem | null;
 };
 
-export type CheckoutContextValue = ICheckoutState & {
+export interface CheckoutContextValue extends ICheckoutState {
   canReset: boolean;
   onReset: () => void;
   onUpdate: (updateValue: Partial<ICheckoutState>) => void;

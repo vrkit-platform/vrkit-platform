@@ -4,7 +4,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { imageClasses } from './classes';
 
@@ -80,8 +80,8 @@ export const Image = forwardRef<HTMLSpanElement, ImageProps>(
         wrapperClassName={wrapperClassName || imageClasses.wrapper}
         placeholderSrc={
           visibleByDefault || disabledEffect
-            ? `${CONFIG.site.basePath}/assets/transparent.png`
-            : `${CONFIG.site.basePath}/assets/placeholder.svg`
+            ? `${DefaultConfig.site.basePath}/assets/transparent.png`
+            : `${DefaultConfig.site.basePath}/assets/placeholder.svg`
         }
         sx={{
           width: 1,

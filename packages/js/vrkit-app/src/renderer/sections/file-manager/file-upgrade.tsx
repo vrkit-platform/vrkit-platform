@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { SvgColor } from 'vrkit-app-renderer/components/svg-color';
 
@@ -31,7 +31,7 @@ export function FileUpgrade({ sx, ...other }: CardProps) {
       <Box
         component="img"
         alt="Upgrade Illustration"
-        src={`${CONFIG.site.basePath}/assets/illustrations/illustration-upgrade.webp`}
+        src={`${DefaultConfig.site.basePath}/assets/illustrations/illustration-upgrade.webp`}
         sx={{
           right: 16,
           zIndex: 9,
@@ -42,7 +42,7 @@ export function FileUpgrade({ sx, ...other }: CardProps) {
       />
 
       <SvgColor
-        src={`${CONFIG.site.basePath}/assets/background/shape-circle-1.svg`}
+        src={`${DefaultConfig.site.basePath}/assets/background/shape-circle-1.svg`}
         sx={{
           zIndex: 8,
           width: 200,

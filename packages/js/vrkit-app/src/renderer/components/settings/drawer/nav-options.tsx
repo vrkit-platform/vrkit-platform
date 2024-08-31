@@ -5,7 +5,7 @@ import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
 import ButtonBase from '@mui/material/ButtonBase';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import { varAlpha, stylesMode } from 'vrkit-app-renderer/theme/styles';
 
 import { Block } from './styles';
@@ -251,7 +251,7 @@ export function ColorOption({ option, selected, sx, ...other }: OptionProps) {
       {...other}
     >
       <SvgColor
-        src={`${CONFIG.site.basePath}/assets/icons/setting/ic-sidebar-${option === 'integrate' ? 'outline' : 'filled'}.svg`}
+        src={`${DefaultConfig.site.basePath}/assets/icons/setting/ic-sidebar-${option === 'integrate' ? 'outline' : 'filled'}.svg`}
       />
 
       <Box

@@ -31,7 +31,7 @@ export type UsePopoverReturn = {
   setAnchorEl: React.Dispatch<React.SetStateAction<PopoverProps['anchorEl']>>;
 };
 
-export type CustomPopoverProps = PopoverProps & {
+export interface CustomPopoverProps extends PopoverProps {
   slotProps?: PopoverProps['slotProps'] & {
     arrow?: PopoverArrow;
   };

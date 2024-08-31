@@ -21,7 +21,7 @@ import { useCopyToClipboard } from 'vrkit-app-renderer/hooks/use-copy-to-clipboa
 
 import { fData } from 'vrkit-app-renderer/utils/format-number';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { toast } from 'vrkit-app-renderer/components/snackbar';
 import { Iconify } from 'vrkit-app-renderer/components/iconify';
@@ -119,7 +119,7 @@ export function FileManagerFolderItem({
       ) : (
         <Box
           component="img"
-          src={`${CONFIG.site.basePath}/assets/icons/files/ic-folder.svg`}
+          src={`${DefaultConfig.site.basePath}/assets/icons/files/ic-folder.svg`}
           sx={{ width: 1, height: 1 }}
         />
       )}

@@ -1,12 +1,12 @@
 import { Helmet } from 'react-helmet-async';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { FileManagerView } from 'vrkit-app-renderer/sections/file-manager/view';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `File manager | Dashboard - ${CONFIG.site.name}` };
+const metadata = { title: `File manager | Dashboard - ${DefaultConfig.site.name}` };
 
 export default function Page() {
   return (

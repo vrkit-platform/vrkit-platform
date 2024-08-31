@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 
 // ----------------------------------------------------------------------
 
-export type AnimateCountUpProps = TypographyProps & {
+export interface AnimateCountUpProps extends TypographyProps {
   to: number;
   from?: number;
   toFixed?: number;

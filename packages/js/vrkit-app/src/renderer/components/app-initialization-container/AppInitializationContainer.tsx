@@ -1,4 +1,4 @@
-import React from "react"
+import React, {Children} from "react"
 import { Future } from "@3fv/prelude-ts"
 import { Container } from "@3fv/ditsy"
 import { resolveContainer } from "../../containerFactory"
@@ -10,7 +10,7 @@ const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 export interface AppInitializationContainerProps {
-  children: React.ReactChildren | React.ReactNode | React.ReactNode[]
+  children: (typeof Children) | React.ReactNode | React.ReactNode[]
 }
 export interface AppInitializationContainerState {
   containerPromise: Promise<Container>
@@ -21,11 +21,8 @@ export class AppInitializationContainer extends React.Component<
   AppInitializationContainerProps,
   AppInitializationContainerState
 > {
-  // static contextType = AppBridgeContext
-
-  // context: React.ContextType<typeof AppBridgeContext>
-
-  constructor(props) {
+  
+  constructor(props: AppInitializationContainerProps) {
     super(props)
 
     this.state = {

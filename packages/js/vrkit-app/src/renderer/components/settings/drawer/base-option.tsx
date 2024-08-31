@@ -5,7 +5,7 @@ import Switch from '@mui/material/Switch';
 import Tooltip from '@mui/material/Tooltip';
 import ButtonBase from '@mui/material/ButtonBase';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import { varAlpha } from 'vrkit-app-renderer/theme/styles';
 
 import { Iconify } from 'vrkit-app-renderer/components/iconify';
@@ -46,7 +46,7 @@ export function BaseOption({ icon, label, tooltip, selected, ...other }: Props) 
         justifyContent="space-between"
         sx={{ width: 1, mb: 3 }}
       >
-        <SvgColor src={`${CONFIG.site.basePath}/assets/icons/setting/ic-${icon}.svg`} />
+        <SvgColor src={`${DefaultConfig.site.basePath}/assets/icons/setting/ic-${icon}.svg`} />
         <Switch name={label} size="small" color="default" checked={selected} sx={{ mr: -0.75 }} />
       </Box>
 

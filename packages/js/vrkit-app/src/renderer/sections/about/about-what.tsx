@@ -11,7 +11,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 
 import { fPercent } from 'vrkit-app-renderer/utils/format-number';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import { varAlpha, stylesMode } from 'vrkit-app-renderer/theme/styles';
 
 import { Image } from 'vrkit-app-renderer/components/image';
@@ -51,7 +51,7 @@ export function AboutWhat() {
             <m.div variants={varFade().inUp}>
               <Image
                 alt="Our office small"
-                src={`${CONFIG.site.basePath}/assets/images/about/what-small.webp`}
+                src={`${DefaultConfig.site.basePath}/assets/images/about/what-small.webp`}
                 ratio="1/1"
                 sx={{
                   borderRadius: 3,
@@ -68,7 +68,7 @@ export function AboutWhat() {
             <m.div variants={varFade().inUp}>
               <Image
                 alt="Our office large"
-                src={`${CONFIG.site.basePath}/assets/images/about/what-large.webp`}
+                src={`${DefaultConfig.site.basePath}/assets/images/about/what-large.webp`}
                 ratio="3/4"
                 sx={{
                   borderRadius: 3,

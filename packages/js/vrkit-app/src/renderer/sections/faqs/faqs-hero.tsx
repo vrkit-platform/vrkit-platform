@@ -7,7 +7,7 @@ import { useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import { outlinedInputClasses } from '@mui/material/OutlinedInput';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import { varAlpha, bgGradient } from 'vrkit-app-renderer/theme/styles';
 
 import { Iconify } from 'vrkit-app-renderer/components/iconify';
@@ -23,7 +23,7 @@ export function FaqsHero() {
       sx={{
         ...bgGradient({
           color: `0deg, ${varAlpha(theme.vars.palette.grey['900Channel'], 0.8)}, ${varAlpha(theme.vars.palette.grey['900Channel'], 0.8)}`,
-          imgUrl: `${CONFIG.site.basePath}/assets/images/faqs/hero.webp`,
+          imgUrl: `${DefaultConfig.site.basePath}/assets/images/faqs/hero.webp`,
         }),
         height: { md: 560 },
         py: { xs: 10, md: 0 },

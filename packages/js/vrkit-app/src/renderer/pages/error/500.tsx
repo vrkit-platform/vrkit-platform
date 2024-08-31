@@ -1,12 +1,12 @@
 import { Helmet } from 'react-helmet-async';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 import { View500 } from 'vrkit-app-renderer/sections/error';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `500 Internal server error! | Error - ${CONFIG.site.name}` };
+const metadata = { title: `500 Internal server error! | Error - ${DefaultConfig.site.name}` };
 
 export default function Page() {
   return (

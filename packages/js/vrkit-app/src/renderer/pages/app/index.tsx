@@ -1,22 +1,22 @@
 import React from "react"
 import { Helmet } from 'react-helmet-async';
 
-import { CONFIG } from 'vrkit-app-renderer/config-global';
-import { OverviewView } from "vrkit-app-renderer/sections/app/overview"
+import { DefaultConfig } from 'vrkit-app-renderer/config-global';
+import { AppView } from "vrkit-app-renderer/sections/app"
 
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `${CONFIG.site.name} - Overview` };
+const metadata = { title: `${DefaultConfig.site.name} - Overview` };
 
-export default function OverviewAppPage() {
+export default function AppPage() {
   return (
     <>
       <Helmet>
         <title> {metadata.title}</title>
       </Helmet>
 
-      <OverviewView />
+      <AppView />
     </>
   );
 }

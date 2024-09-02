@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
 
 package IRacingTools.Models;
 
@@ -8,7 +9,7 @@ message FileInfo {
   string parent_dir = 3;
   bool is_deleted = 5;
 
-  int64 created_at = 10;
-  int64 modified_at = 11;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp modified_at = 11;
 
 }

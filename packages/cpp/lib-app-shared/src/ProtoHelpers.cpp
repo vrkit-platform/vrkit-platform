@@ -92,8 +92,10 @@ namespace IRacingTools::Shared::Utils {
     int64_t createdAtSeconds = ToSeconds(ts.createdAt);
     int64_t modifiedAtSeconds = ToSeconds(ts.modifiedAt);
 
-    fileInfo->set_created_at(createdAtSeconds);
-    fileInfo->set_modified_at(modifiedAtSeconds);
+    fileInfo->mutable_created_at()->set_seconds(createdAtSeconds);
+    fileInfo->mutable_created_at()->set_nanos(0);
+    fileInfo->mutable_modified_at()->set_seconds(modifiedAtSeconds);
+    fileInfo->mutable_modified_at()->set_nanos(0);
 
     return std::nullopt;
   }

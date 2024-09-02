@@ -1,5 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="VRKit: Electron Main" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--trace-deprecation --force-node-api-uncaught-exceptions-policy=true --inspect=9222 dist\main\electron-main.js" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$PROJECT_DIR$/packages/js/vrkit-app" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_native_interop" CONFIG_NAME="DebugClionNinja" RUN_PATH="$PROJECT_DIR$/node_modules/electron/dist/electron.exe">
+  <configuration default="false" name="VRKit: Electron Main" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--enable-logging dist\main\electron-main.js" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$PROJECT_DIR$/packages/js/vrkit-app" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_native_interop" CONFIG_NAME="DebugClionNinja" RUN_PATH="$PROJECT_DIR$/node_modules/electron/dist/electron.exe">
+    <envs>
+      <env name="ELECTRON_ENABLE_LOGGING" value="1" />
+    </envs>
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>

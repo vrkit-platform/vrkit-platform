@@ -1,8 +1,8 @@
 // var addon = require('bindings')('SayHello');
 // noinspection ES6UnusedImports
-
+import YAML from "yaml"
 import type { IMessageType, MessageType } from "@protobuf-ts/runtime"
-import {guard} from "@3fv/guard"
+import { getValue, guard, isObject, isString } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
 import {
   Any,
@@ -12,18 +12,21 @@ import {
   SessionTiming
 } from "vrkit-models"
 
-import * as Path from "node:path"
 import { asOption, Option } from "@3fv/prelude-ts"
 import { getLogger } from "@3fv/logger-proxy"
-import * as Fs from "node:fs"
 import { Deferred } from "@3fv/deferred"
-import { MessageTypeFromCtor, uuidv4 } from "./utils"
+import {
+  MessageTypeFromCtor,
+  objectKeysLowerFirstReviver,
+  uuidv4
+} from "./utils"
 import { GetNativeExports } from "./NativeBinding"
 import {
   SessionDataVariable,
   SessionDataVariableHeader
 } from "./SessionDataVariableTypes"
-import { flatten, isEmpty } from "lodash"
+import { flatten, isEmpty, lowerFirst } from "lodash"
+import type { SessionInfoMessage } from "./SessionInfoTypes"
 
 const log = getLogger(__filename)
 const isDev = process.env.NODE_ENV !== "production"
@@ -47,7 +50,7 @@ export interface NativeSessionPlayer {
 
   readonly sessionTiming: SessionTiming
 
-  readonly sessionInfo: any
+  readonly sessionInfoYAMLStr: string
   
   readonly isAvailable: boolean
   
@@ -324,8 +327,19 @@ export class SessionPlayer extends EventEmitter3<
     return SessionData.create(this.nativePlayer.sessionData)
   }
 
-  get sessionInfo() {
-    return this.nativePlayer.sessionInfo
+  get sessionInfo(): SessionInfoMessage {
+    try {
+      const yamlStr = this.nativePlayer.sessionInfoYAMLStr
+      // log.info("SessionInfoMessage (YAML)", yamlStr)
+      return (isEmpty(yamlStr) ? {} : YAML.parse(yamlStr, objectKeysLowerFirstReviver)) as SessionInfoMessage
+      
+    } catch (err) {
+      log.error(`Failed to get session info message`, err)
+      return {} as SessionInfoMessage
+    }
+    //return {} as SessionInfoMessage
+    
+    
   }
 }
 

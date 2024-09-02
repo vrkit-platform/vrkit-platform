@@ -53,6 +53,7 @@ namespace IRacingTools::Shared {
          */
         virtual std::shared_ptr<Models::Session::SessionData> sessionData() = 0;
 
+        virtual std::string sessionInfoStr() = 0;
         virtual std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo() = 0;
         virtual const SDK::VarHeaders& getDataVariableHeaders() = 0;
         //virtual std::vector<SDK::VarData*> getDataVariableHeaders() = 0;

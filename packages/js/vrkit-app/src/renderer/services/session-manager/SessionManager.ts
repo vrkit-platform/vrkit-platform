@@ -202,14 +202,14 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
         id: null
       }
     
-    const {isAvailable, sessionData: data, sessionTiming: timing, sessionInfo } = player
+    const {isAvailable, sessionData: data, sessionTiming: timing } = player
     return {
       id: data.id,
       type: data.type,
       isAvailable,
       data,
       timing,
-      info: sessionInfo
+      info: player.sessionInfo
     } as ActiveSession
   }
   

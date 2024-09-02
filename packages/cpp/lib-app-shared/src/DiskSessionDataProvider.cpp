@@ -349,6 +349,16 @@ namespace IRacingTools::Shared {
         return diskClient_->getSessionInfo().lock();
     }
 
+    std::string DiskSessionDataProvider::sessionInfoStr() {
+        auto res = diskClient_->getSessionInfoStr();
+        if (!res) {
+            L->error("Failed to get session info string: {}", res.error().what());
+            return "";
+        }
+
+        return std::string{res.value()};
+    }
+
     bool DiskSessionDataProvider::pause() {
         std::scoped_lock lock(threadMutex_);
         paused_.exchange(true);

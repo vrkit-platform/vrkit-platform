@@ -10,10 +10,17 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
-import { Pipeline } from "./Pipeline";
 import { FileInfo } from "./FileInfo";
 import { TrackLayoutMetadata } from "./TrackLayoutMetadata";
 /**
+ *  enum Status {
+ *    STATUS_CREATED = 0;
+ *    STATUS_PROCESSING = 1;
+ *    STATUS_AVAILABLE = 5;
+ *    STATUS_INVALID = 10;
+ *    STATUS_ERROR = 20;
+ *  }
+ *
  * @generated from protobuf message IRacingTools.Models.TrackMapFile
  */
 export interface TrackMapFile {
@@ -28,62 +35,17 @@ export interface TrackMapFile {
      * @generated from protobuf field: IRacingTools.Models.FileInfo file_info = 2;
      */
     fileInfo?: FileInfo;
-    /**
-     * @generated from protobuf field: IRacingTools.Models.TrackMapFile.Status status = 5;
-     */
-    status: TrackMapFile_Status;
-    /**
-     * Pipeline (i.e. TRACK_MAP)
-     *
-     * @generated from protobuf field: repeated IRacingTools.Models.Pipeline pipelines = 10;
-     */
-    pipelines: Pipeline[];
-    /**
-     * @generated from protobuf field: string error_details = 20;
-     */
-    errorDetails: string;
-}
-/**
- * @generated from protobuf enum IRacingTools.Models.TrackMapFile.Status
- */
-export enum TrackMapFile_Status {
-    /**
-     * @generated from protobuf enum value: STATUS_CREATED = 0;
-     */
-    CREATED = 0,
-    /**
-     * @generated from protobuf enum value: STATUS_PROCESSING = 1;
-     */
-    PROCESSING = 1,
-    /**
-     * @generated from protobuf enum value: STATUS_AVAILABLE = 5;
-     */
-    AVAILABLE = 5,
-    /**
-     * @generated from protobuf enum value: STATUS_INVALID = 10;
-     */
-    INVALID = 10,
-    /**
-     * @generated from protobuf enum value: STATUS_ERROR = 20;
-     */
-    ERROR = 20
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class TrackMapFile$Type extends MessageType<TrackMapFile> {
     constructor() {
         super("IRacingTools.Models.TrackMapFile", [
             { no: 1, name: "track_layout_metadata", kind: "message", T: () => TrackLayoutMetadata },
-            { no: 2, name: "file_info", kind: "message", T: () => FileInfo },
-            { no: 5, name: "status", kind: "enum", T: () => ["IRacingTools.Models.TrackMapFile.Status", TrackMapFile_Status, "STATUS_"] },
-            { no: 10, name: "pipelines", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => Pipeline },
-            { no: 20, name: "error_details", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "file_info", kind: "message", T: () => FileInfo }
         ]);
     }
     create(value?: PartialMessage<TrackMapFile>): TrackMapFile {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.status = 0;
-        message.pipelines = [];
-        message.errorDetails = "";
         if (value !== undefined)
             reflectionMergePartial<TrackMapFile>(this, message, value);
         return message;
@@ -98,15 +60,6 @@ class TrackMapFile$Type extends MessageType<TrackMapFile> {
                     break;
                 case /* IRacingTools.Models.FileInfo file_info */ 2:
                     message.fileInfo = FileInfo.internalBinaryRead(reader, reader.uint32(), options, message.fileInfo);
-                    break;
-                case /* IRacingTools.Models.TrackMapFile.Status status */ 5:
-                    message.status = reader.int32();
-                    break;
-                case /* repeated IRacingTools.Models.Pipeline pipelines */ 10:
-                    message.pipelines.push(Pipeline.internalBinaryRead(reader, reader.uint32(), options));
-                    break;
-                case /* string error_details */ 20:
-                    message.errorDetails = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -126,15 +79,6 @@ class TrackMapFile$Type extends MessageType<TrackMapFile> {
         /* IRacingTools.Models.FileInfo file_info = 2; */
         if (message.fileInfo)
             FileInfo.internalBinaryWrite(message.fileInfo, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
-        /* IRacingTools.Models.TrackMapFile.Status status = 5; */
-        if (message.status !== 0)
-            writer.tag(5, WireType.Varint).int32(message.status);
-        /* repeated IRacingTools.Models.Pipeline pipelines = 10; */
-        for (let i = 0; i < message.pipelines.length; i++)
-            Pipeline.internalBinaryWrite(message.pipelines[i], writer.tag(10, WireType.LengthDelimited).fork(), options).join();
-        /* string error_details = 20; */
-        if (message.errorDetails !== "")
-            writer.tag(20, WireType.LengthDelimited).string(message.errorDetails);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

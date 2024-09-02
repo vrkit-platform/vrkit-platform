@@ -53,8 +53,8 @@ namespace IRacingTools::Shared::Services {
       std::string message = fmt::format(fmt, std::forward<Args>(args)...);
       L->error(message);
       if (tmFile) {
-        tmFile->set_status(
-            TrackMapFile::STATUS_ERROR);
+        // tmFile->set_status(
+        //     TrackMapFile::STATUS_ERROR);
         return tmFile;
       }
       return std::unexpected(GeneralError(ErrorCode::General, message));

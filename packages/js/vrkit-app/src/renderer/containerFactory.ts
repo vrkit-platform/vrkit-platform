@@ -13,6 +13,8 @@ import {
   setContainerResolver
 } from "./utils"
 import { isDev } from "./constants"
+import FileSystemManager from "./services/file-system-manager"
+import TrackManager from "./services/track-manager"
 
 
 const log = getLogger(__filename)
@@ -41,6 +43,8 @@ async function createContainer(): Promise<Container> {
       .bindConstant(APP_STORE_ID, appStore)
       .bindClass(ActionRegistry)
       .bindClass(WebActionManager)
+      .bindClass(FileSystemManager)
+        .bindClass(TrackManager)
       .bindClass(SessionManager)
       .resolveAll()
 

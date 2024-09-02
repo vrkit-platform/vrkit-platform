@@ -2,8 +2,12 @@
   "name": "vrkit-models",
   "version": "1.0.0",
   "description": "",
+  "license": "ISC",
+  "author": "",
   "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "scripts": {
+    "build:watch": "tsc -p tsconfig.json -w"
+  },
   "binary": {
     "napi_versions": [
       9
@@ -14,11 +18,7 @@
     "runtimeVersion": "31.3.0",
     "arch": "x64"
   },
-  "scripts": {
-    "build:watch": "tsc -p tsconfig.json -w"
-  },
-  "author": "",
-  "license": "ISC",
+  "types": "lib/index.d.ts",
   "dependencies": {
     "@protobuf-ts/runtime": "^2.9.4"
   },

@@ -106,7 +106,7 @@ namespace IRacingTools::Shared::Services {
       auto dataFileModifiedAt = dataFile->file_info().modified_at();
 
       // IF NO CHANGE, MARK AS PROCESSED
-      if (dataFileModifiedAtNow <= dataFileModifiedAt) {
+      if (dataFileModifiedAtNow <= dataFileModifiedAt.seconds()) {
         L->debug("Ignoring telemetry file ({}) as it has already been "
                  "ingested");
         return nullptr;
@@ -117,8 +117,8 @@ namespace IRacingTools::Shared::Services {
           "File ({}) has been updated (currentModifiedAt={},modifiedAt={})",
           file.string(),
           dataFileModifiedAtNow,
-          dataFileModifiedAt);
-      dataFile->mutable_file_info()->set_modified_at(dataFileModifiedAtNow);
+          dataFileModifiedAt.seconds());
+      dataFile->mutable_file_info()->mutable_modified_at()->set_seconds(dataFileModifiedAtNow);
     }
 
     // IF NO FILE EXISTS IN THE SERVICE

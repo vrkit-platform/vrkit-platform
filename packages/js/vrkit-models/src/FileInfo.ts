@@ -10,6 +10,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { Timestamp } from "./google/protobuf/timestamp";
 /**
  * @generated from protobuf message IRacingTools.Models.FileInfo
  */
@@ -31,13 +32,13 @@ export interface FileInfo {
      */
     isDeleted: boolean;
     /**
-     * @generated from protobuf field: int64 created_at = 10;
+     * @generated from protobuf field: google.protobuf.Timestamp created_at = 10;
      */
-    createdAt: bigint;
+    createdAt?: Timestamp;
     /**
-     * @generated from protobuf field: int64 modified_at = 11;
+     * @generated from protobuf field: google.protobuf.Timestamp modified_at = 11;
      */
-    modifiedAt: bigint;
+    modifiedAt?: Timestamp;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class FileInfo$Type extends MessageType<FileInfo> {
@@ -47,8 +48,8 @@ class FileInfo$Type extends MessageType<FileInfo> {
             { no: 2, name: "filename", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "parent_dir", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "is_deleted", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 10, name: "created_at", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ },
-            { no: 11, name: "modified_at", kind: "scalar", T: 3 /*ScalarType.INT64*/, L: 0 /*LongType.BIGINT*/ }
+            { no: 10, name: "created_at", kind: "message", T: () => Timestamp },
+            { no: 11, name: "modified_at", kind: "message", T: () => Timestamp }
         ]);
     }
     create(value?: PartialMessage<FileInfo>): FileInfo {
@@ -57,8 +58,6 @@ class FileInfo$Type extends MessageType<FileInfo> {
         message.filename = "";
         message.parentDir = "";
         message.isDeleted = false;
-        message.createdAt = 0n;
-        message.modifiedAt = 0n;
         if (value !== undefined)
             reflectionMergePartial<FileInfo>(this, message, value);
         return message;
@@ -80,11 +79,11 @@ class FileInfo$Type extends MessageType<FileInfo> {
                 case /* bool is_deleted */ 5:
                     message.isDeleted = reader.bool();
                     break;
-                case /* int64 created_at */ 10:
-                    message.createdAt = reader.int64().toBigInt();
+                case /* google.protobuf.Timestamp created_at */ 10:
+                    message.createdAt = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.createdAt);
                     break;
-                case /* int64 modified_at */ 11:
-                    message.modifiedAt = reader.int64().toBigInt();
+                case /* google.protobuf.Timestamp modified_at */ 11:
+                    message.modifiedAt = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.modifiedAt);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -110,12 +109,12 @@ class FileInfo$Type extends MessageType<FileInfo> {
         /* bool is_deleted = 5; */
         if (message.isDeleted !== false)
             writer.tag(5, WireType.Varint).bool(message.isDeleted);
-        /* int64 created_at = 10; */
-        if (message.createdAt !== 0n)
-            writer.tag(10, WireType.Varint).int64(message.createdAt);
-        /* int64 modified_at = 11; */
-        if (message.modifiedAt !== 0n)
-            writer.tag(11, WireType.Varint).int64(message.modifiedAt);
+        /* google.protobuf.Timestamp created_at = 10; */
+        if (message.createdAt)
+            Timestamp.internalBinaryWrite(message.createdAt, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
+        /* google.protobuf.Timestamp modified_at = 11; */
+        if (message.modifiedAt)
+            Timestamp.internalBinaryWrite(message.modifiedAt, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

@@ -55,8 +55,7 @@ namespace IRacingTools::App::Node {
                 InstanceAccessor<&NativeSessionPlayer::jsIsLive>("isLive"),
                 InstanceAccessor<&NativeSessionPlayer::jsIsAvailable>("isAvailable"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetFileInfo>("fileInfo"),
-                InstanceAccessor<&NativeSessionPlayer::jsGetSessionInfo>("sessionInfo"),
-                InstanceAccessor<&NativeSessionPlayer::jsGetSessionInfoYAML>("sessionInfoYAML"),
+                InstanceAccessor<&NativeSessionPlayer::jsGetSessionInfoYAMLStr>("sessionInfoYAMLStr"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetSessionData>("sessionData"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetSessionTiming>("sessionTiming")
             }
@@ -193,7 +192,6 @@ namespace IRacingTools::App::Node {
         auto env = info.Env();
         auto nativeHeaders = dataProvider_->getDataVariableHeaders();
 
-        // std::vector<Napi::Value> headers{};
         auto headersObj = Napi::Array::New(env);
         auto headersObjPush = headersObj.Get("push").As<Function>();
 
@@ -210,23 +208,18 @@ namespace IRacingTools::App::Node {
             obj.Set("countAsTime", nativeHeader.countAsTime);
 
             headersObjPush.Call(headersObj, {obj});
-            // headers.push_back(obj);
         }
-
-
-
 
         return headersObj;
     }
 
-    Napi::Value NativeSessionPlayer::jsGetSessionInfo(const Napi::CallbackInfo& info) {
-        return {};
-    }
 
-    Napi::Value NativeSessionPlayer::jsGetSessionInfoYAML(const Napi::CallbackInfo& info) {
-        auto sessionInfo = dataProvider_->sessionInfo();
-        auto sessionInfoYamlNode = YAML::convert<SessionInfo::SessionInfoMessage>::encode(*sessionInfo);
-        auto sessionInfoYaml = YAML::Dump(sessionInfoYamlNode);
+    Napi::Value NativeSessionPlayer::jsGetSessionInfoYAMLStr(const Napi::CallbackInfo& info) {
+        // TODO: Change implementation to use raw string from shared memory via `Client` implementations
+        auto sessionInfoYaml = dataProvider_->sessionInfoStr();
+        // auto sessionInfo = dataProvider_->sessionInfo();
+        // auto sessionInfoYamlNode = YAML::convert<SessionInfo::SessionInfoMessage>::encode(*sessionInfo);
+        // auto sessionInfoYaml = YAML::Dump(sessionInfoYamlNode);
         return Napi::String::New(info.Env(), sessionInfoYaml);
     }
 

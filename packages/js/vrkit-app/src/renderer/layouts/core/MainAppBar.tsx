@@ -165,16 +165,16 @@ function MainAppBar(props: MainAppBarProps) {
         <Box
           className={clsx(
             mainAppBarClasses.left,
-            GlobalCSSClassNames.electronWindowDraggable,
-            {
-              // [mainAppBarClasses.isFullscreen]: isFullScreen
-            }
+            // GlobalCSSClassNames.electronWindowDraggable,
+            // {
+            //   // [mainAppBarClasses.isFullscreen]: isFullScreen
+            // }
           )}
         ></Box>
         <Box
           className={clsx(
             mainAppBarClasses.center,
-            GlobalCSSClassNames.electronWindowDraggable
+            // GlobalCSSClassNames.electronWindowDraggable
           )}
         >
           {/*Platform: {process.env.TARGET_PLATFORM}*/}
@@ -183,7 +183,7 @@ function MainAppBar(props: MainAppBarProps) {
         <Box
           className={clsx(
             mainAppBarClasses.right,
-            GlobalCSSClassNames.electronWindowDraggable
+            // GlobalCSSClassNames.electronWindowDraggable
           )}
         >
           {appBar?.content?.right}

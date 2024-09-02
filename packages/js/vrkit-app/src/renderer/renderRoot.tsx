@@ -16,6 +16,7 @@ async function renderRoot(root: ReactDOM.Root) {
     )
   }
   root.render(<Root />)
+  console.log("Initialized All, should render root")
 }
 
 export default renderRoot

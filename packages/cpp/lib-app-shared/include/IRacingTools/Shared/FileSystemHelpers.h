@@ -140,7 +140,7 @@ namespace IRacingTools::Shared {
     // CHECK THE TIMESTAMPS
     auto ts = res.value();
     auto fileModifiedAtNow = ToSeconds(ts.modifiedAt);
-    auto fileModifiedAt = fi.modified_at();
+    auto fileModifiedAt = fi.modified_at().seconds();
 
     // IF NO CHANGE, MARK AS PROCESSED
     return std::pair<bool, FileTimestamps<DefaultFileClock>>(fileModifiedAtNow > fileModifiedAt, ts);

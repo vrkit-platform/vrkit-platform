@@ -16,10 +16,11 @@ import {
 } from "vrkit-app-renderer/components/settings"
 import useAppStore from "./hooks/useAppStore"
 
+
 export default function App() {
   useScrollToTop()
   const appStore = useAppStore()
-
+  
   return (
     <ReduxProvider store={appStore}>
       <I18nProvider>

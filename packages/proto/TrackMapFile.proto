@@ -3,17 +3,17 @@ syntax = "proto3";
 package IRacingTools.Models;
 
 import "FileInfo.proto";
-import "Pipeline.proto";
+//import "Pipeline.proto";
 import "TrackLayoutMetadata.proto";
 
 message TrackMapFile {
-  enum Status {
-    STATUS_CREATED = 0;
-    STATUS_PROCESSING = 1;
-    STATUS_AVAILABLE = 5;
-    STATUS_INVALID = 10;
-    STATUS_ERROR = 20;
-  }
+//  enum Status {
+//    STATUS_CREATED = 0;
+//    STATUS_PROCESSING = 1;
+//    STATUS_AVAILABLE = 5;
+//    STATUS_INVALID = 10;
+//    STATUS_ERROR = 20;
+//  }
 
   /**
    * Track Layout ID
@@ -21,11 +21,11 @@ message TrackMapFile {
   TrackLayoutMetadata track_layout_metadata = 1;
   FileInfo file_info = 2;
 
-  Status status = 5;
-
-  // Pipeline (i.e. TRACK_MAP)
-  repeated Pipeline pipelines = 10;
-  string error_details = 20;
+//  Status status = 5;
+//
+//  // Pipeline (i.e. TRACK_MAP)
+////  repeated Pipeline pipelines = 10;
+//  string error_details = 20;
   
 
 

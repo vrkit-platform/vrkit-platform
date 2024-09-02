@@ -225,6 +225,19 @@ namespace IRacingTools::Shared {
     return sessionData_;
   }
 
+  std::string LiveSessionDataProvider::sessionInfoStr() {
+    if (!isAvailable())
+      return "";
+
+    auto res = LiveClient::GetInstance().getSessionInfoStr();
+    if (!res) {
+      L->error("Failed to get session info string: {}", res.error().what());
+      return "";
+    }
+
+    return std::string{res.value()};
+  }
+
   std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> LiveSessionDataProvider::sessionInfo() {
     auto weakInfo = LiveClient::GetInstance().getSessionInfo();
 

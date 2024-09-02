@@ -38,6 +38,7 @@ namespace IRacingTools::Shared {
 
     virtual std::shared_ptr<Models::Session::SessionData> sessionData() override;
 
+    virtual std::string sessionInfoStr() override;
     virtual std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
 
     virtual bool isLive() const override;

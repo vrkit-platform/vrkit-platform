@@ -365,6 +365,9 @@ namespace IRacingTools::SDK {
    */
   Expected<std::string_view> LiveClient::getSessionInfoStr() {
     std::scoped_lock lock(sessionInfoMutex_);
+    if (!isConnected())
+      return std::unexpected(GeneralError("LiveClient is not connected"));
+
     auto res = updateSessionInfo();
     if (!res.has_value()) 
       return std::unexpected(res.error());

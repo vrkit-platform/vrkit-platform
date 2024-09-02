@@ -77,6 +77,7 @@ namespace IRacingTools::Shared {
         virtual bool resume() override;
 
         virtual std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
+      virtual std::string sessionInfoStr() override;
         virtual std::shared_ptr<Models::Session::SessionData> sessionData() override;
         virtual const SDK::VarHeaders& getDataVariableHeaders() override;
         const Options& options();

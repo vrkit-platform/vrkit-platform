@@ -42,7 +42,7 @@ export function NavVertical({
         left: 0,
         height: 1,
         display: "none",
-        position: "fixed",
+        // position: "fixed",
         flexDirection: "column",
         bgcolor: "var(--layout-nav-bg)",
         zIndex: "var(--layout-nav-zIndex)",

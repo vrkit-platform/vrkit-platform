@@ -209,7 +209,7 @@ auto file = resolveFile(filename);
                 return std::unexpected(res.error());
             }
 
-            auto screen = config.add_screens();
+            auto screen = config.mutable_screen();
             res.value().toModel(screen);
         }
 
@@ -219,7 +219,7 @@ auto file = resolveFile(filename);
                 return std::unexpected(res.error());
             }
 
-            auto screen = config.add_screens();
+            auto screen = config.mutable_screen();
             res.value().toModel(screen);
         }
 

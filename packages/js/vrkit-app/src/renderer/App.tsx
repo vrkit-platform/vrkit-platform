@@ -1,4 +1,4 @@
-import "vrkit-app-renderer/global.css"
+// import "vrkit-app-renderer/global.css"
 
 // ----------------------------------------------------------------------
 import { Router } from "vrkit-app-renderer/routes/sections"
@@ -15,6 +15,9 @@ import {
   SettingsProvider
 } from "vrkit-app-renderer/components/settings"
 import useAppStore from "./hooks/useAppStore"
+
+import "!!style-loader!css-loader!sass-loader!assets/css/fonts/fonts.global.scss"
+
 
 
 export default function App() {

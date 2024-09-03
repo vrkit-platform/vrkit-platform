@@ -103,17 +103,12 @@ export function createTheme(
    * 2.Create theme + add locale + update component with settings.
    */
   const theme = muiCreateTheme(themeOptions)
-  //     extendTheme(
-  //   updateTheme,
-  //   localeComponents,
-  //   updateComponentsWithSettings(settings),
-  //   overridesTheme
-  // );
+  ;
 
   return assign(theme, {
     dimen: {
       electronTrafficLightsWidth: 70,
-      appBarHeight: "4rem",
+      appBarHeight: "3rem",
       listActionFooterHeight: rem(2),
       layoutPadding: [4, 2], // spacing unit
       projectIconSizes: [

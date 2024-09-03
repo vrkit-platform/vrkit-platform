@@ -260,7 +260,7 @@ export class FileSystemManager extends EventEmitter3<FileSystemManagerEventArgs>
    *
    * @param filePath
    */
-  getFileData(filePath: string): FileAccess {
+  getFileAccess(filePath: string): FileAccess {
     return new FileAccess(filePath)
   }
   
@@ -270,7 +270,7 @@ export class FileSystemManager extends EventEmitter3<FileSystemManagerEventArgs>
    * @param filePath
    */
   readFile(filePath: string): Promise<Uint8Array> {
-    return this.getFileData(filePath).readBytes();
+    return this.getFileAccess(filePath).readBytes();
     
   }
   
@@ -284,7 +284,7 @@ export class FileSystemManager extends EventEmitter3<FileSystemManagerEventArgs>
       M extends object,
       MT extends MessageType<M> = MessageType<M>,
   >(filePath: string, messageType: MT): Promise<M> {
-    const data = await this.getFileData(filePath).readBytes();
+    const data = await this.getFileAccess(filePath).readBytes();
     return messageType.fromBinary(data)
   }
   

@@ -1,14 +1,10 @@
 syntax = "proto3";
+import "TrackTypes.proto";
 
 package IRacingTools.Models;
 
 
-
 message Track {
-  enum Type {
-    TRACK_TYPE_ROAD = 0;
-    TRACK_TYPE_OVAL = 1;
-  }
 
   message Layout {
     // `id` is a compound key that we generate when processing IBT files
@@ -35,7 +31,7 @@ message Track {
   string name = 2;
 
   // WeekendInfo::trackType
-  Type type = 3;
+  TrackType type = 3;
 
   string display_name = 5;
   string display_short_name = 6;

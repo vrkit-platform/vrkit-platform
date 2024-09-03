@@ -11,10 +11,11 @@ import {
 } from "vrkit-app-renderer/constants"
 import type { AppStore } from "../store"
 import EventEmitter3 from "eventemitter3"
-import { FileSystemManager } from "../file-system-manager"
+import { FileAccess, FileSystemManager } from "../file-system-manager"
 import { FileInfo, LapTrajectory, TrackMapFile } from "vrkit-models"
 import Path from "path"
 import { Deferred } from "@3fv/deferred"
+import { endsWith } from "lodash/fp"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -22,12 +23,12 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-export enum TrackType {
-  Road = "Road",
-  Oval = "Oval",
-  DirtRoad = "DirtRoad",
-  DirtOval = "DirtOval"
-}
+// export enum TrackType {
+//   Road = "Road",
+//   Oval = "Oval",
+//   DirtRoad = "DirtRoad",
+//   DirtOval = "DirtOval"
+// }
 
 export enum TrackEventType {
   TrackChange = "TrackChange"
@@ -68,7 +69,7 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     }
     
     this.readyDeferred = new Deferred()
-    await this.reload(true)
+    await this.reloadDatabase(true)
     if (typeof window !== "undefined") {
       window.addEventListener("beforeunload", this.unload)
     }
@@ -87,16 +88,23 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     super()
   }
   
-  private getDataFile() {
-    return this.fsManager.getFileData(AppFiles.trackMapListFile)
+  /**
+   * Get the underlying database file
+   * @private
+   */
+  private getDatabaseFileAccess() {
+    return this.fsManager.getFileAccess(AppFiles.trackMapListFile)
   }
   
-  async rebuildDataFile(): Promise<TrackMapFile[]> {
+  /**
+   * Rebuild the database from disk (EXPENSIVE)
+   */
+  async rebuildDatabase(): Promise<TrackMapFile[]> {
     
-    const dataFile = this.getDataFile()
+    const dataFile = this.getDatabaseFileAccess()
     const tmDir = AppPaths.trackMapsDir
     const tmFiles = await Fs.promises.readdir(tmDir)
-        .then(files => files.filter(f => f.endsWith(".trackmap"))
+        .then(files => files.filter(endsWith(".trackmap"))
             .map(f => Path.join(tmDir, f)))
     
     const tmfs = await Promise.all(tmFiles.map(async tmFile => {
@@ -125,14 +133,23 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     
   }
   
+  /**
+   * List all track map files
+   */
   async list(): Promise<TrackMapFile[]> {
     await this.readyDeferred.promise
-    await this.reload()
+    await this.reloadDatabase()
     
     return this.trackFiles ?? []
     
   }
   
+  /**
+   * Internally hydrates a map of `id => TrackMapFile`
+   *
+   * @param tmfs
+   * @private
+   */
   private setTrackMapFiles(tmfs:TrackMapFile[]):void {
     this.trackFiles = tmfs
     this.trackFileMap = tmfs.reduce((map, tmf) => ({
@@ -141,12 +158,16 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     }), {} as any)
   }
   
-  async reload(ignoreCache: boolean = false): Promise<TrackManager> {
+  /**
+   * Reload the database file (json lines) from disk
+   * @param ignoreCache
+   */
+  async reloadDatabase(ignoreCache: boolean = false): Promise<TrackManager> {
     if (!ignoreCache && this.readyDeferred.isFulfilled()) {
       return this
     }
     
-    const dataFile = this.getDataFile()
+    const dataFile = this.getDatabaseFileAccess()
     if (!await dataFile.exists) {
       return this
     }
@@ -161,8 +182,40 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     log.info(`Loaded track map files`, files)
     this.setTrackMapFiles(files)
     return this
-    
   }
+  
+  /**
+   * Get `TrackMapFile` by layout id
+   *
+   * @param id
+   */
+  getTrackMapFile(id: string): TrackMapFile {
+    return this.trackFileMap ? this.trackFileMap[id] : null
+  }
+  
+  /**
+   * Load the `LapTrajectory` that `TrackMapFile` for `id` points to
+   *
+   * @param id
+   */
+  async getLapTrajectory(id: string): Promise<LapTrajectory> {
+    const tmf = this.getTrackMapFile(id)
+    if (!tmf)
+      return null
+    
+    const fileAccess = new FileAccess(tmf.fileInfo.file)
+    if (!await fileAccess.exists) {
+      log.error(`Lap trajectory file does not exist (${tmf.fileInfo.file}) for id: ${id}`)
+      return null
+    }
+    
+    const lt = LapTrajectory.fromBinary(await fileAccess.readBytes())
+    log.info(`Loaded trajectory (${id})`)
+    
+    return lt
+  }
+  
+  
 }
 
 export default TrackManager

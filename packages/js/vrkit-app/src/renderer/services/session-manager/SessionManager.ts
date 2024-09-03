@@ -196,7 +196,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    * @param player
    * @private
    */
-  private playerToActiveSession(player: SessionPlayer): ActiveSession {
+  private toActiveSessionFromPlayer(player: SessionPlayer): ActiveSession {
     if (!player)
       return {
         id: null
@@ -253,7 +253,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       return
     }
     
-    const activeSession = this.playerToActiveSession(container.player)
+    const activeSession = this.toActiveSessionFromPlayer(container.player)
     this.appStore.dispatch(sessionManagerActions.setActiveSession(activeSession))
   }
   

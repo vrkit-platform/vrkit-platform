@@ -10,6 +10,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { TrackType } from "./TrackTypes";
 /**
  * @generated from protobuf message IRacingTools.Models.Track
  */
@@ -29,9 +30,9 @@ export interface Track {
     /**
      * WeekendInfo::trackType
      *
-     * @generated from protobuf field: IRacingTools.Models.Track.Type type = 3;
+     * @generated from protobuf field: IRacingTools.Models.TrackType type = 3;
      */
-    type: Track_Type;
+    type: TrackType;
     /**
      * @generated from protobuf field: string display_name = 5;
      */
@@ -112,26 +113,13 @@ export interface Track_Layout {
      */
     direction: string;
 }
-/**
- * @generated from protobuf enum IRacingTools.Models.Track.Type
- */
-export enum Track_Type {
-    /**
-     * @generated from protobuf enum value: TRACK_TYPE_ROAD = 0;
-     */
-    TRACK_TYPE_ROAD = 0,
-    /**
-     * @generated from protobuf enum value: TRACK_TYPE_OVAL = 1;
-     */
-    TRACK_TYPE_OVAL = 1
-}
 // @generated message type with reflection information, may provide speed optimized methods
 class Track$Type extends MessageType<Track> {
     constructor() {
         super("IRacingTools.Models.Track", [
             { no: 1, name: "id", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "type", kind: "enum", T: () => ["IRacingTools.Models.Track.Type", Track_Type] },
+            { no: 3, name: "type", kind: "enum", T: () => ["IRacingTools.Models.TrackType", TrackType, "TRACK_TYPE_"] },
             { no: 5, name: "display_name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "display_short_name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 10, name: "altitude", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ },
@@ -174,7 +162,7 @@ class Track$Type extends MessageType<Track> {
                 case /* string name */ 2:
                     message.name = reader.string();
                     break;
-                case /* IRacingTools.Models.Track.Type type */ 3:
+                case /* IRacingTools.Models.TrackType type */ 3:
                     message.type = reader.int32();
                     break;
                 case /* string display_name */ 5:
@@ -225,7 +213,7 @@ class Track$Type extends MessageType<Track> {
         /* string name = 2; */
         if (message.name !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.name);
-        /* IRacingTools.Models.Track.Type type = 3; */
+        /* IRacingTools.Models.TrackType type = 3; */
         if (message.type !== 0)
             writer.tag(3, WireType.Varint).int32(message.type);
         /* string display_name = 5; */

@@ -1,0 +1,9 @@
+
+
+* {
+	user-select: none;
+}
+
+p, input, textarea, .userSelectable {
+	user-select: auto;
+}

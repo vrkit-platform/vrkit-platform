@@ -13,14 +13,6 @@ import { MessageType } from "@protobuf-ts/runtime";
 import { FileInfo } from "./FileInfo";
 import { TrackLayoutMetadata } from "./TrackLayoutMetadata";
 /**
- *  enum Status {
- *    STATUS_CREATED = 0;
- *    STATUS_PROCESSING = 1;
- *    STATUS_AVAILABLE = 5;
- *    STATUS_INVALID = 10;
- *    STATUS_ERROR = 20;
- *  }
- *
  * @generated from protobuf message IRacingTools.Models.TrackMapFile
  */
 export interface TrackMapFile {

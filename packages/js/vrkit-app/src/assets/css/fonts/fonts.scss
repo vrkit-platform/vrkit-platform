@@ -1,0 +1,83 @@
+@import "font-awesome/font-awesome.css";
+@import url('https://fonts.googleapis.com/css?family=Fira+Sans:200,300,400,500,600,700,900');
+
+
+/*************************************
+    SF Pro Display Family
+ *************************************/
+
+@font-face {
+  src: url('SFProDisplay/SFProDisplay-Regular.woff2') format('woff2'), url('SFProDisplay/SFProDisplay-Regular.woff') format('woff');
+  font-family: 'SanFranciscoDisplay';
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  src: url('SFProDisplay/SFProDisplay-Medium.woff2') format('woff2'), url('SFProDisplay/SFProDisplay-Medium.woff') format('woff');
+  font-family: 'SanFranciscoDisplay';
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  src: url('SFProDisplay/SF-Pro-Display-Semibold.woff2') format('woff2'), url('SFProDisplay/SF-Pro-Display-Semibold.woff') format('woff');
+  font-family: 'SanFranciscoDisplay';
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  src: url('SFProDisplay/SFProDisplay-Bold.woff2') format('woff2'), url('SFProDisplay/SFProDisplay-Bold.woff') format('woff');
+  font-family: 'SanFranciscoDisplay';
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  src: url('SFProDisplay/SF-Pro-Display-Black.woff2') format('woff2'), url('SFProDisplay/SF-Pro-Display-Black.woff') format('woff');
+  font-family: 'SanFranciscoDisplay';
+  font-weight: 900;
+  font-style: normal;
+}
+
+
+
+
+$font-weight-map: (
+    'UltraLight': 100,
+    'Thin': 100,
+    'Light': 300,
+    'Regular': 400,
+    'Medium': 500,
+    'Semibold':600,
+    'Demibold':600,
+    'Bold':700,
+    'Black':900,
+    'Heavy':900,
+);
+
+
+
+@mixin makeFontFace($font-name,$weights...) {
+  @each $weight in $weights {
+    
+    @font-face {
+      font-family: $font-name;
+      src: url('#{$font-name}/#{$font-name}-#{$weight}.eot');
+      src: url('#{$font-name}/#{$font-name}-#{$weight}.eot?iefix') format('eot'),
+      url('#{$font-name}/#{$font-name}-#{$weight}.woff') format('woff'),
+      url('#{$font-name}/#{$font-name}-#{$weight}.ttf') format('truetype'),
+      url('#{$font-name}/#{$font-name}-#{$weight}.svg##{$font-name}') format('svg');
+      font-style: normal;
+      font-weight: #{map_get($font-weight-map,$weight)};
+    }
+  }
+}
+
+@include makeFontFace('AvenirNext','Heavy','Bold','DemiBold','UltraLight','Medium','Regular')
+
+
+*, input, textarea, select {
+  font-family: 'AvenirNext';
+}

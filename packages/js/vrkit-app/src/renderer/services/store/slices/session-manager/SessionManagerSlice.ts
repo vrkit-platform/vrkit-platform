@@ -10,6 +10,7 @@ import type {
   SessionManagerState,
   SessionPlayerId
 } from "./SessionManagerState"
+import { isNotEmpty } from "vrkit-app-common/utils"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -78,7 +79,8 @@ const slice = createSlice({
   extraReducers: builder =>
     builder,
   selectors: {
-    selectIsLiveSessionConnected: (state: SessionManagerState) => state.liveSessionConnected,
+    hasActiveSession: (state: SessionManagerState) => isNotEmpty(state.activeSession?.id),
+    isLiveSessionConnected: (state: SessionManagerState) => state.liveSessionConnected,
     selectSessionIds:(state: SessionManagerState) => state.sessionIds,
     selectActiveSession: (state: SessionManagerState) => state.activeSession,
     selectActiveSessionData: (state: SessionManagerState) => state.activeSession?.data,

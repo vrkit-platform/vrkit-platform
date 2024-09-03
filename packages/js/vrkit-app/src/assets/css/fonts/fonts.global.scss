@@ -1,0 +1,95 @@
+//
+//@import url(material-icons/material-icons.global.css);
+//@import url(fira-code/webfont.css);
+//@import url(firacode/stylesheet.css);
+//@import url(octicons/octicons.css);
+//@import url(~noto-color-emoji/noto-color-emoji.css);
+
+/*************************************
+    SF Pro Display Family
+ *************************************/
+
+@font-face {
+  src: url('SFProDisplay/SFProDisplay-Regular.woff2') format('woff2'), url('SFProDisplay/SFProDisplay-Regular.woff') format('woff');
+  font-family: 'SanFranciscoDisplay';
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  src: url('SFProDisplay/SFProDisplay-Medium.woff2') format('woff2'), url('SFProDisplay/SFProDisplay-Medium.woff') format('woff');
+  font-family: 'SanFranciscoDisplay';
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  src: url('SFProDisplay/SF-Pro-Display-Semibold.woff2') format('woff2'), url('SFProDisplay/SF-Pro-Display-Semibold.woff') format('woff');
+  font-family: 'SanFranciscoDisplay';
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  src: url('SFProDisplay/SFProDisplay-Bold.woff2') format('woff2'), url('SFProDisplay/SFProDisplay-Bold.woff') format('woff');
+  font-family: 'SanFranciscoDisplay';
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  src: url('SFProDisplay/SF-Pro-Display-Black.woff2') format('woff2'), url('SFProDisplay/SF-Pro-Display-Black.woff') format('woff');
+  font-family: 'SanFranciscoDisplay';
+  font-weight: 900;
+  font-style: normal;
+}
+
+
+$font-weight-map: (
+  'UltraLight': 100,
+	'ExtraLight': 100,
+  'Light': 200,
+	'Thin': 300,
+  'Regular': 400,
+  'Medium': 500,
+  'Semibold':600,
+  'SemiBold':600,
+  'Demibold':600,
+  'Bold':700,
+  'ExtraBold':800,
+  'Black':900,
+  'Heavy':900,
+);
+
+
+@mixin makeFontFace($font-name,$weights...) {
+  @each $weight in $weights {
+    @font-face {
+      font-family: $font-name;
+      //url('#{$font-name}/#{$font-name}-#{$weight}.woff') format('woff'),
+      src: url('#{$font-name}/#{$font-name}-#{$weight}.ttf') format('truetype');
+      font-style: normal;
+      font-weight: #{map_get($font-weight-map,$weight)};
+    }
+  }
+}
+
+@include makeFontFace('AvenirNext', 'Heavy', 'Bold', 'DemiBold', 'UltraLight', 'Medium', 'Regular');
+//@include makeFontFace('FiraCode', 'Bold', 'Light', 'Medium', 'Regular');
+//@include makeFontFace('Nunito', 'Black', 'Bold', 'Light', 'SemiBold', 'ExtraLight','Regular');
+@include makeFontFace('Roboto', 'Black', 'Bold', 'Light', 'Medium', 'Thin','Regular');
+@include makeFontFace('RobotoSlab', 'Black', 'Bold', 'Light', 'Medium', 'Thin','Regular');
+@include makeFontFace('RobotoMono', 'Bold', 'Light', 'Medium', 'Thin','Regular');
+// OTHER FONT CHOICE
+// @include makeFontFace('Jura','Bold','Light','Medium','Regular','Semibold');
+
+// EMOJI FONT
+@font-face {
+  font-family: 'NotoColorEmoji';
+  src: url('noto-color-emoji/ttf/NotoColorEmoji.ttf') format('truetype');
+}
+
+
+//*, input, textarea, select {
+//  font-family: 'AvenirNext', NotoColorEmoji, sans-serif;
+//}

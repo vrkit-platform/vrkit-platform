@@ -10,51 +10,13 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { OverlayPlacement } from "./OverlayTypes";
 import { ScreenConfig } from "./ScreenConfig";
 import { ScreenKind } from "./ScreenConfig";
-import { RectI } from "./Geometry";
 /**
- * @generated from protobuf message IRacingTools.Models.Dashboard.OverlayConfig
+ * @generated from protobuf message IRacingTools.Models.Dashboard.DashboardConfig
  */
-export interface OverlayConfig {
-    /**
-     * @generated from protobuf field: string id = 1;
-     */
-    id: string;
-    /**
-     * @generated from protobuf field: IRacingTools.Models.Dashboard.OverlayKind kind = 2;
-     */
-    kind: OverlayKind;
-    /**
-     * @generated from protobuf field: string name = 3;
-     */
-    name: string;
-    /**
-     * @generated from protobuf field: string description = 4;
-     */
-    description: string;
-}
-/**
- * @generated from protobuf message IRacingTools.Models.Dashboard.OverlayPlacementConfig
- */
-export interface OverlayPlacementConfig {
-    /**
-     * @generated from protobuf field: string id = 1;
-     */
-    id: string;
-    /**
-     * @generated from protobuf field: string overlay_id = 2;
-     */
-    overlayId: string;
-    /**
-     * @generated from protobuf field: IRacingTools.Models.RectI rect = 10;
-     */
-    rect?: RectI;
-}
-/**
- * @generated from protobuf message IRacingTools.Models.Dashboard.OverlayLayoutConfig
- */
-export interface OverlayLayoutConfig {
+export interface DashboardConfig {
     /**
      * @generated from protobuf field: string id = 1;
      */
@@ -64,204 +26,52 @@ export interface OverlayLayoutConfig {
      */
     name: string;
     /**
-     * @generated from protobuf field: string screen_id = 5;
-     */
-    screenId: string;
-    /**
-     * @generated from protobuf field: IRacingTools.Models.ScreenKind kind = 6;
-     */
-    kind: ScreenKind;
-    /**
-     * @generated from protobuf field: repeated IRacingTools.Models.Dashboard.OverlayPlacementConfig placements = 10;
-     */
-    placements: OverlayPlacementConfig[];
-}
-/**
- * @generated from protobuf message IRacingTools.Models.Dashboard.DashboardConfig
- */
-export interface DashboardConfig {
-    /**
-     * @generated from protobuf field: string description = 2;
+     * @generated from protobuf field: string description = 3;
      */
     description: string;
     /**
-     * @generated from protobuf field: repeated IRacingTools.Models.ScreenConfig screens = 10;
+     * @generated from protobuf field: string screen_id = 10;
      */
-    screens: ScreenConfig[];
+    screenId: string;
     /**
-     * @generated from protobuf field: repeated IRacingTools.Models.Dashboard.OverlayConfig overlays = 20;
+     * @generated from protobuf field: IRacingTools.Models.ScreenKind kind = 11;
      */
-    overlays: OverlayConfig[];
+    kind: ScreenKind;
     /**
-     * @generated from protobuf field: repeated IRacingTools.Models.Dashboard.OverlayLayoutConfig layouts = 30;
+     * @generated from protobuf field: IRacingTools.Models.ScreenConfig screen = 12;
      */
-    layouts: OverlayLayoutConfig[];
-}
-/**
- * @generated from protobuf enum IRacingTools.Models.Dashboard.OverlayKind
- */
-export enum OverlayKind {
+    screen?: ScreenConfig;
     /**
-     * @generated from protobuf enum value: OK_TRACK_MAP = 0;
+     * @generated from protobuf field: repeated IRacingTools.Models.Dashboard.OverlayPlacement placements = 20;
      */
-    OK_TRACK_MAP = 0
+    placements: OverlayPlacement[];
 }
 // @generated message type with reflection information, may provide speed optimized methods
-class OverlayConfig$Type extends MessageType<OverlayConfig> {
+class DashboardConfig$Type extends MessageType<DashboardConfig> {
     constructor() {
-        super("IRacingTools.Models.Dashboard.OverlayConfig", [
-            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "kind", kind: "enum", T: () => ["IRacingTools.Models.Dashboard.OverlayKind", OverlayKind] },
-            { no: 3, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value?: PartialMessage<OverlayConfig>): OverlayConfig {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.id = "";
-        message.kind = 0;
-        message.name = "";
-        message.description = "";
-        if (value !== undefined)
-            reflectionMergePartial<OverlayConfig>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: OverlayConfig): OverlayConfig {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string id */ 1:
-                    message.id = reader.string();
-                    break;
-                case /* IRacingTools.Models.Dashboard.OverlayKind kind */ 2:
-                    message.kind = reader.int32();
-                    break;
-                case /* string name */ 3:
-                    message.name = reader.string();
-                    break;
-                case /* string description */ 4:
-                    message.description = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: OverlayConfig, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string id = 1; */
-        if (message.id !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.id);
-        /* IRacingTools.Models.Dashboard.OverlayKind kind = 2; */
-        if (message.kind !== 0)
-            writer.tag(2, WireType.Varint).int32(message.kind);
-        /* string name = 3; */
-        if (message.name !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.name);
-        /* string description = 4; */
-        if (message.description !== "")
-            writer.tag(4, WireType.LengthDelimited).string(message.description);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message IRacingTools.Models.Dashboard.OverlayConfig
- */
-export const OverlayConfig = new OverlayConfig$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class OverlayPlacementConfig$Type extends MessageType<OverlayPlacementConfig> {
-    constructor() {
-        super("IRacingTools.Models.Dashboard.OverlayPlacementConfig", [
-            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "overlay_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 10, name: "rect", kind: "message", T: () => RectI }
-        ]);
-    }
-    create(value?: PartialMessage<OverlayPlacementConfig>): OverlayPlacementConfig {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.id = "";
-        message.overlayId = "";
-        if (value !== undefined)
-            reflectionMergePartial<OverlayPlacementConfig>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: OverlayPlacementConfig): OverlayPlacementConfig {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string id */ 1:
-                    message.id = reader.string();
-                    break;
-                case /* string overlay_id */ 2:
-                    message.overlayId = reader.string();
-                    break;
-                case /* IRacingTools.Models.RectI rect */ 10:
-                    message.rect = RectI.internalBinaryRead(reader, reader.uint32(), options, message.rect);
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: OverlayPlacementConfig, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string id = 1; */
-        if (message.id !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.id);
-        /* string overlay_id = 2; */
-        if (message.overlayId !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.overlayId);
-        /* IRacingTools.Models.RectI rect = 10; */
-        if (message.rect)
-            RectI.internalBinaryWrite(message.rect, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message IRacingTools.Models.Dashboard.OverlayPlacementConfig
- */
-export const OverlayPlacementConfig = new OverlayPlacementConfig$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class OverlayLayoutConfig$Type extends MessageType<OverlayLayoutConfig> {
-    constructor() {
-        super("IRacingTools.Models.Dashboard.OverlayLayoutConfig", [
+        super("IRacingTools.Models.Dashboard.DashboardConfig", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "screen_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "kind", kind: "enum", T: () => ["IRacingTools.Models.ScreenKind", ScreenKind] },
-            { no: 10, name: "placements", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => OverlayPlacementConfig }
+            { no: 3, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 10, name: "screen_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 11, name: "kind", kind: "enum", T: () => ["IRacingTools.Models.ScreenKind", ScreenKind] },
+            { no: 12, name: "screen", kind: "message", T: () => ScreenConfig },
+            { no: 20, name: "placements", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => OverlayPlacement }
         ]);
     }
-    create(value?: PartialMessage<OverlayLayoutConfig>): OverlayLayoutConfig {
+    create(value?: PartialMessage<DashboardConfig>): DashboardConfig {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
         message.name = "";
+        message.description = "";
         message.screenId = "";
         message.kind = 0;
         message.placements = [];
         if (value !== undefined)
-            reflectionMergePartial<OverlayLayoutConfig>(this, message, value);
+            reflectionMergePartial<DashboardConfig>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: OverlayLayoutConfig): OverlayLayoutConfig {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DashboardConfig): DashboardConfig {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -272,88 +82,20 @@ class OverlayLayoutConfig$Type extends MessageType<OverlayLayoutConfig> {
                 case /* string name */ 2:
                     message.name = reader.string();
                     break;
-                case /* string screen_id */ 5:
-                    message.screenId = reader.string();
-                    break;
-                case /* IRacingTools.Models.ScreenKind kind */ 6:
-                    message.kind = reader.int32();
-                    break;
-                case /* repeated IRacingTools.Models.Dashboard.OverlayPlacementConfig placements */ 10:
-                    message.placements.push(OverlayPlacementConfig.internalBinaryRead(reader, reader.uint32(), options));
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: OverlayLayoutConfig, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string id = 1; */
-        if (message.id !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.id);
-        /* string name = 2; */
-        if (message.name !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.name);
-        /* string screen_id = 5; */
-        if (message.screenId !== "")
-            writer.tag(5, WireType.LengthDelimited).string(message.screenId);
-        /* IRacingTools.Models.ScreenKind kind = 6; */
-        if (message.kind !== 0)
-            writer.tag(6, WireType.Varint).int32(message.kind);
-        /* repeated IRacingTools.Models.Dashboard.OverlayPlacementConfig placements = 10; */
-        for (let i = 0; i < message.placements.length; i++)
-            OverlayPlacementConfig.internalBinaryWrite(message.placements[i], writer.tag(10, WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message IRacingTools.Models.Dashboard.OverlayLayoutConfig
- */
-export const OverlayLayoutConfig = new OverlayLayoutConfig$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class DashboardConfig$Type extends MessageType<DashboardConfig> {
-    constructor() {
-        super("IRacingTools.Models.Dashboard.DashboardConfig", [
-            { no: 2, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 10, name: "screens", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => ScreenConfig },
-            { no: 20, name: "overlays", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => OverlayConfig },
-            { no: 30, name: "layouts", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => OverlayLayoutConfig }
-        ]);
-    }
-    create(value?: PartialMessage<DashboardConfig>): DashboardConfig {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.description = "";
-        message.screens = [];
-        message.overlays = [];
-        message.layouts = [];
-        if (value !== undefined)
-            reflectionMergePartial<DashboardConfig>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DashboardConfig): DashboardConfig {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string description */ 2:
+                case /* string description */ 3:
                     message.description = reader.string();
                     break;
-                case /* repeated IRacingTools.Models.ScreenConfig screens */ 10:
-                    message.screens.push(ScreenConfig.internalBinaryRead(reader, reader.uint32(), options));
+                case /* string screen_id */ 10:
+                    message.screenId = reader.string();
                     break;
-                case /* repeated IRacingTools.Models.Dashboard.OverlayConfig overlays */ 20:
-                    message.overlays.push(OverlayConfig.internalBinaryRead(reader, reader.uint32(), options));
+                case /* IRacingTools.Models.ScreenKind kind */ 11:
+                    message.kind = reader.int32();
                     break;
-                case /* repeated IRacingTools.Models.Dashboard.OverlayLayoutConfig layouts */ 30:
-                    message.layouts.push(OverlayLayoutConfig.internalBinaryRead(reader, reader.uint32(), options));
+                case /* IRacingTools.Models.ScreenConfig screen */ 12:
+                    message.screen = ScreenConfig.internalBinaryRead(reader, reader.uint32(), options, message.screen);
+                    break;
+                case /* repeated IRacingTools.Models.Dashboard.OverlayPlacement placements */ 20:
+                    message.placements.push(OverlayPlacement.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -367,18 +109,27 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
         return message;
     }
     internalBinaryWrite(message: DashboardConfig, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string description = 2; */
+        /* string id = 1; */
+        if (message.id !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.id);
+        /* string name = 2; */
+        if (message.name !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.name);
+        /* string description = 3; */
         if (message.description !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.description);
-        /* repeated IRacingTools.Models.ScreenConfig screens = 10; */
-        for (let i = 0; i < message.screens.length; i++)
-            ScreenConfig.internalBinaryWrite(message.screens[i], writer.tag(10, WireType.LengthDelimited).fork(), options).join();
-        /* repeated IRacingTools.Models.Dashboard.OverlayConfig overlays = 20; */
-        for (let i = 0; i < message.overlays.length; i++)
-            OverlayConfig.internalBinaryWrite(message.overlays[i], writer.tag(20, WireType.LengthDelimited).fork(), options).join();
-        /* repeated IRacingTools.Models.Dashboard.OverlayLayoutConfig layouts = 30; */
-        for (let i = 0; i < message.layouts.length; i++)
-            OverlayLayoutConfig.internalBinaryWrite(message.layouts[i], writer.tag(30, WireType.LengthDelimited).fork(), options).join();
+            writer.tag(3, WireType.LengthDelimited).string(message.description);
+        /* string screen_id = 10; */
+        if (message.screenId !== "")
+            writer.tag(10, WireType.LengthDelimited).string(message.screenId);
+        /* IRacingTools.Models.ScreenKind kind = 11; */
+        if (message.kind !== 0)
+            writer.tag(11, WireType.Varint).int32(message.kind);
+        /* IRacingTools.Models.ScreenConfig screen = 12; */
+        if (message.screen)
+            ScreenConfig.internalBinaryWrite(message.screen, writer.tag(12, WireType.LengthDelimited).fork(), options).join();
+        /* repeated IRacingTools.Models.Dashboard.OverlayPlacement placements = 20; */
+        for (let i = 0; i < message.placements.length; i++)
+            OverlayPlacement.internalBinaryWrite(message.placements[i], writer.tag(20, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

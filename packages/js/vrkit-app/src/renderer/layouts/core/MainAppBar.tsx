@@ -44,17 +44,18 @@ import {
   getContrastText,
   hasCls,
   heightConstraint,
-  OverflowHidden,
+  OverflowHidden, PositionAbsolute,
   PositionRelative
 } from "../../styles"
-import { GlobalCSSClassNames, isElectron } from "vrkit-app-renderer/constants"
+import { GlobalCSSClassNames } from "vrkit-app-renderer/constants"
 import { usePageMetadata } from "../../components/page-metadata"
 import {
   sessionManagerSelectors
 } from "../../services/store/slices/session-manager"
 import { useAppSelector } from "vrkit-app-renderer/services/store"
+import { Logo } from "../../components/logo"
 // import { useIsFullScreen } from "../../../hooks"
-// import { GlobalCSSClassNames } from "@taskx/lib-shared-web/constants"
+
 
 export interface AppBarContentOverrides {
   left?: React.ReactNode
@@ -65,21 +66,21 @@ export interface AppBarContentOverrides {
 }
 
 export interface MainAppBarProps {}
-
-/**
- * Title component for adding text/title to appBar
- */
-const AppBarTitle = styled<typeof Box>(Box)(({ theme }) => ({
-  ...FlexScaleZero,
-  ...Ellipsis,
-  alignSelf: "center",
-  justifySelf: "center",
-  paddingLeft: 0, // lineHeight: 1,
-  // fontSize: rem(0.8),
-  ...theme.typography.h4, // typography: "h3",
-  fontWeight: 100,
-  opacity: 0.7
-}))
+//
+// /**
+//  * Title component for adding text/title to appBar
+//  */
+// const AppBarTitle = styled<typeof Box>(Box)(({ theme }) => ({
+//   ...FlexScaleZero,
+//   ...Ellipsis,
+//   alignSelf: "center",
+//   justifySelf: "center",
+//   paddingLeft: 0, // lineHeight: 1,
+//   // fontSize: rem(0.8),
+//   ...theme.typography.h4, // typography: "h3",
+//   fontWeight: 100,
+//   opacity: 0.7
+// }))
 
 const MainToolbarRoot = styled(Toolbar)(({ theme }) => ({
   [`&.${toolbarClasses.root}`]: {
@@ -114,6 +115,11 @@ const MainAppBarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
   ...FlexRow,
   ...FlexDefaults.stretch,
   ...FillWidth, // ...PositionRelative,
+  ...OverflowHidden,
+  ...PositionAbsolute,
+  borderTopLeftRadius: "1rem",
+  borderTopRightRadius: "1rem",
+  // borderRadius: "3rem",
   [child([mainAppBarClasses.left, mainAppBarClasses.right])]: {
     ...FillHeight,
     ...FlexAuto,
@@ -123,17 +129,12 @@ const MainAppBarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
     flex: "0 0 auto",
     minWidth: "15%",
     alignItems: "stretch",
+    
     [hasCls(mainAppBarClasses.right)]: {
       ...flexAlign("center", "flex-end")
     },
     [hasCls(mainAppBarClasses.left)]: {
       ...flexAlign("center", "flex-start"),
-      ...(isElectron && {
-        paddingLeft: theme.dimen.electronTrafficLightsWidth,
-        [hasCls(mainAppBarClasses.isFullscreen)]: {
-          paddingLeft: 0
-        }
-      })
     }
   },
   [child([mainAppBarClasses.center])]: {
@@ -152,25 +153,29 @@ function MainAppBar(props: MainAppBarProps) {
     { SectionProps = {}, section, appBar } = pageMetadata,
     theme = useTheme(),
     appBarHeight = appBar?.height ?? theme.dimen.appBarHeight,
-    isLiveAvailable = useAppSelector(sessionManagerSelectors.selectIsLiveSessionConnected)
+    isLiveAvailable = useAppSelector(sessionManagerSelectors.isLiveSessionConnected)
     
   return (
     <MainAppBarRoot
       style={{
         ...heightConstraint(appBarHeight)
       }}
+      className={clsx(
+        GlobalCSSClassNames.electronWindowDraggable)}
       elevation={4}
     >
       <MainToolbarRoot>
         <Box
           className={clsx(
             mainAppBarClasses.left,
-            // GlobalCSSClassNames.electronWindowDraggable,
+            GlobalCSSClassNames.electronWindowDraggable,
             // {
             //   // [mainAppBarClasses.isFullscreen]: isFullScreen
             // }
           )}
-        ></Box>
+        >
+          <Logo />
+        </Box>
         <Box
           className={clsx(
             mainAppBarClasses.center,

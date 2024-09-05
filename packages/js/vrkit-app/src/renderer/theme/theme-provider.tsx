@@ -1,42 +1,30 @@
-import type {} from '@mui/lab/themeAugmentation';
-import type {} from '@mui/x-tree-view/themeAugmentation';
-import type {} from '@mui/x-data-grid/themeAugmentation';
-import type {} from '@mui/x-date-pickers/themeAugmentation';
-import type {} from '@mui/material/themeCssVarsAugmentation';
+
 
 import CssBaseline from '@mui/material/CssBaseline';
-//import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import { useSettingsContext } from "vrkit-app-renderer/components/settings"
+import { createTheme } from "./create-theme"
+import React from "react"
+import { useTranslate } from "vrkit-app-renderer/locales/use-locales"
 
-import { useTranslate } from 'vrkit-app-renderer/locales';
 
-import { useSettingsContext } from 'vrkit-app-renderer/components/settings';
+export interface ThemeProviderProps {
+  children: React.ReactNode
+}
 
-import { createTheme } from './create-theme';
-import { RTL } from './with-settings/right-to-left';
-import { schemeConfig } from './color-scheme-script';
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const { currentLang } = useTranslate()
 
-// ----------------------------------------------------------------------
+  const settings = useSettingsContext()
 
-type Props = {
-  children: React.ReactNode;
-};
-
-export function ThemeProvider({ children }: Props) {
-  const { currentLang } = useTranslate();
-
-  const settings = useSettingsContext();
-
-  const theme = createTheme(currentLang?.systemValue, settings);
+  const theme = createTheme(currentLang?.systemValue, settings)
 
   return (
     <MuiThemeProvider
       theme={theme}
-//      defaultMode={schemeConfig.defaultMode}
-  //    modeStorageKey={schemeConfig.modeStorageKey}
     >
       <CssBaseline />
-      <RTL direction={settings.direction}>{children}</RTL>
+      {children}
     </MuiThemeProvider>
-  );
+  )
 }

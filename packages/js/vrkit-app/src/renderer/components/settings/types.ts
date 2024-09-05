@@ -1,5 +1,5 @@
 import type { Theme, SxProps } from '@mui/material/styles';
-import type { ThemeDirection, ThemeColorScheme } from 'vrkit-app-renderer/theme/types';
+import type { ThemeDirection, ThemeColorScheme } from '../../theme/ThemeTypes';
 
 // ----------------------------------------------------------------------
 

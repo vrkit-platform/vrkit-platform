@@ -1,4 +1,4 @@
-import type { ThemeUpdateOptions } from './types';
+import type { ThemeUpdateOptions } from './ThemeTypes';
 
 // ----------------------------------------------------------------------
 

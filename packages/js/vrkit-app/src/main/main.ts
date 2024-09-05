@@ -22,6 +22,8 @@ const { debug, trace, info, error, warn } = log
 
 
 async function start() {
+  require('@electron/remote/main').initialize()
+  
   await importDefault(import("./bootstrap"))
   await importDefault(import("./launch"))
 }

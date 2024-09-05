@@ -7,7 +7,7 @@ import { AppView } from "vrkit-app-renderer/sections/app"
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `${DefaultConfig.site.name} - Overview` };
+const metadata = { title: `${DefaultConfig.site.name}` };
 
 export default function AppPage() {
   return (

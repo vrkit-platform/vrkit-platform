@@ -7,17 +7,15 @@ import { Navigate } from "react-router-dom"
 // Overview
 const IndexPage = lazy(() => import('../../pages/app'));
 
-// File manager
-const FileManagerPage = lazy(() => import('vrkit-app-renderer/pages/app/file-manager'));
 
 
 export const mainRoutes = [
   { element: <Navigate to={WebPaths.app.root} replace />, index: true },
   { element: <IndexPage />, path: getWebPathPart(WebPaths.app.root) },
-  { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.tracks) },
-  { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.laps) },
-  { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.games) },
-  // {
+  // { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.tracks) },
+  // { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.laps) },
+  // { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.games) },
+  // // {
   //   path: 'product',
   //   children: [
   //     { element: <ProductListPage />, index: true },

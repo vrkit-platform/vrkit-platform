@@ -1,7 +1,7 @@
 import { varAlpha } from '../styles';
 import { grey, info, error, common, primary, success, warning, secondary } from './palette';
 
-import type { ThemeColorScheme } from '../types';
+import type { ThemeColorScheme } from '../ThemeTypes';
 
 // ----------------------------------------------------------------------
 

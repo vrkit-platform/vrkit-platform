@@ -3,7 +3,7 @@ import createCache from '@emotion/cache';
 import rtlPlugin from 'stylis-plugin-rtl';
 import { CacheProvider } from '@emotion/react';
 
-import type { ThemeDirection } from '../types';
+import type { ThemeDirection } from '../ThemeTypes';
 
 // ----------------------------------------------------------------------
 

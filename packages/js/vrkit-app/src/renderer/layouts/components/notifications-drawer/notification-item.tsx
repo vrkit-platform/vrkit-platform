@@ -203,7 +203,7 @@ export function NotificationItem({ notification }: { notification: NotificationI
       sx={{
         p: 2.5,
         alignItems: 'flex-start',
-        borderBottom: (theme) => `dashed 1px ${theme.vars.palette.divider}`,
+        borderBottom: (theme) => `dashed 1px ${theme.palette.divider}`,
       }}
     >
       {renderUnReadBadge}

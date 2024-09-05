@@ -24,7 +24,7 @@ export function NavToggleButton({ sx, ...other }: NavToggleButtonProps) {
         transform: 'translateX(-50%)',
         zIndex: 'var(--layout-nav-zIndex)',
         left: 'var(--layout-nav-vertical-width)',
-        border: (theme) => `1px solid ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)}`,
+        border: (theme) => `1px solid ${varAlpha(theme.palette.grey['500Channel'], 0.12)}`,
         transition: (theme) =>
           theme.transitions.create(['left'], {
             easing: 'var(--layout-transition-easing)',

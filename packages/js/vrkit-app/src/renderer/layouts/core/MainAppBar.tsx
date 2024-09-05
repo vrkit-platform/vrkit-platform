@@ -24,7 +24,7 @@ import {
 //   heightConstraint,
 //   OverflowHidden,
 //   PositionRelative
-// } from "@taskx/lib-styles"
+// } from "vrkit-app-renderer/styles"
 // import { usePageMetadata } from "../../page/metadata"
 // import { AppMainMenu } from "../../app-menu"
 // import { ReactChildren } from "../../../types"
@@ -35,7 +35,7 @@ import {
   Ellipsis,
   Fill,
   FillHeight,
-  FillWidth,
+  FillWidth, flex,
   flexAlign,
   FlexAuto,
   FlexDefaults,
@@ -44,7 +44,8 @@ import {
   getContrastText,
   hasCls,
   heightConstraint,
-  OverflowHidden, PositionAbsolute,
+  OverflowHidden,
+  PositionAbsolute,
   PositionRelative
 } from "../../styles"
 import { GlobalCSSClassNames } from "vrkit-app-renderer/constants"
@@ -93,8 +94,8 @@ const MainToolbarRoot = styled(Toolbar)(({ theme }) => ({
     paddingBottom: theme.spacing(2),
     paddingRight: theme.spacing(1),
     paddingLeft: theme.spacing(1),
-    backgroundColor: theme.palette.background.appBar,
-    backgroundImage: theme.palette.background.appBarGradient,
+    // backgroundColor: theme.palette.background.appBar,
+    // backgroundImage: theme.palette.background.appBarGradient,
     color: getContrastText(theme.palette.background.appBar)
   }
 }))
@@ -109,17 +110,16 @@ const mainAppBarClasses = createClassNames(
 )
 
 const MainAppBarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
-  backgroundColor: "transparent",
+  backgroundColor: "transparent !important",
+  backgroundImage: "none",
+  boxShadow: "none",
   color: "inherit",
-  flex: "1 1 0",
+  ...flex(1, 1, 0),
   ...FlexRow,
   ...FlexDefaults.stretch,
   ...FillWidth, // ...PositionRelative,
   ...OverflowHidden,
   ...PositionAbsolute,
-  borderTopLeftRadius: "1rem",
-  borderTopRightRadius: "1rem",
-  // borderRadius: "3rem",
   [child([mainAppBarClasses.left, mainAppBarClasses.right])]: {
     ...FillHeight,
     ...FlexAuto,
@@ -142,8 +142,7 @@ const MainAppBarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
     ...FlexRow,
     ...OverflowHidden,
     ...PositionRelative,
-    ...flexAlign("stretch", "stretch"), // maxWidth: "50%",
-    // ...makeWidthConstraint("50%"),
+    ...flexAlign("stretch", "stretch"),
     height: "auto"
   }
 }))
@@ -153,25 +152,22 @@ function MainAppBar(props: MainAppBarProps) {
     { SectionProps = {}, section, appBar } = pageMetadata,
     theme = useTheme(),
     appBarHeight = appBar?.height ?? theme.dimen.appBarHeight,
-    isLiveAvailable = useAppSelector(sessionManagerSelectors.isLiveSessionConnected)
+    isLiveAvailable = useAppSelector(sessionManagerSelectors.isLiveSessionAvailable)
     
   return (
     <MainAppBarRoot
-      style={{
+      sx={{
         ...heightConstraint(appBarHeight)
       }}
       className={clsx(
         GlobalCSSClassNames.electronWindowDraggable)}
-      elevation={4}
+      elevation={0}
     >
       <MainToolbarRoot>
         <Box
           className={clsx(
             mainAppBarClasses.left,
             GlobalCSSClassNames.electronWindowDraggable,
-            // {
-            //   // [mainAppBarClasses.isFullscreen]: isFullScreen
-            // }
           )}
         >
           <Logo />
@@ -182,18 +178,15 @@ function MainAppBar(props: MainAppBarProps) {
             // GlobalCSSClassNames.electronWindowDraggable
           )}
         >
-          {/*Platform: {process.env.TARGET_PLATFORM}*/}
           {appBar?.content?.center}
         </Box>
         <Box
           className={clsx(
             mainAppBarClasses.right,
-            // GlobalCSSClassNames.electronWindowDraggable
           )}
         >
           {appBar?.content?.right}
-          {isLiveAvailable ? "LIVE" : "NOT LIVE"}
-          {/*{isElectron && <AppMainMenu />}*/}
+         
         </Box>
       </MainToolbarRoot>
     </MainAppBarRoot>

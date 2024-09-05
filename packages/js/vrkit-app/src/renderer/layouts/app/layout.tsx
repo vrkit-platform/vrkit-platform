@@ -8,9 +8,6 @@ import React from "react"
 import Alert from "@mui/material/Alert"
 
 import { useBoolean } from "vrkit-app-renderer/hooks/use-boolean"
-
-import { Main } from "./main"
-import { navData as dashboardNavData } from "../nav-data"
 import { Logo } from "../../components/logo"
 import { AppTitleBar } from "../core/AppTitleBar"
 import MainAppBar from "../core/MainAppBar"
@@ -42,22 +39,26 @@ const StyledDivider = styled("span")(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
+import type { BoxProps } from "@mui/material/Box"
+import Box from "@mui/material/Box"
+import {
+  dimensionConstraints,
+  Fill,
+  FillWidth,
+  FlexColumn,
+  OverflowHidden,
+  widthConstraint
+} from "../../styles"
+
+// ----------------------------------------------------------------------
+
 export type AppLayoutProps = {
-  sx?: SxProps<Theme>
+  sx?: SxProps
   children: React.ReactNode
-  data?: {
-    nav?: NavSectionProps["data"]
-  }
 }
 
-export function AppLayout({ sx, children, data }: AppLayoutProps) {
+export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
   const theme = useTheme()
-
-  const mobileNavOpen = useBoolean()
-
-  const settings = useSettingsContext()
-
-  const navData = data?.nav ?? dashboardNavData
 
   // const isNavVertical = isNavMini || settings.navLayout === 'vertical';
 
@@ -69,8 +70,29 @@ export function AppLayout({ sx, children, data }: AppLayoutProps) {
         }}
       />
       <MainAppBar />
-
-      <Main>{children}</Main>
+      
+      <Box
+          component="main"
+          sx={{
+            position: "absolute",
+            display: "flex",
+            // ...dimensionConstraints("100%", "100%"),
+            top: theme.dimen.appBarHeight,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "transparent",
+            ...widthConstraint("100vw"),
+            ...OverflowHidden,
+            ...sx
+          }}
+      >
+        <Box sx={{
+          ...FillWidth,
+          ...FlexColumn}}>
+          {children}
+        </Box>
+      </Box>
 
     </>
   )

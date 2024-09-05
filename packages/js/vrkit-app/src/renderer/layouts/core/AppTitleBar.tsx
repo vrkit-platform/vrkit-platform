@@ -65,7 +65,7 @@ export function AppTitleBar({
 
   const { offsetTop } = useScrollOffSetTop();
   
-  const isLiveConnected = useAppSelector(sessionManagerSelectors.isLiveSessionConnected)
+  const isLiveConnected = useAppSelector(sessionManagerSelectors.isLiveSessionAvailable)
   const activeSession = useAppSelector(sessionManagerSelectors.selectActiveSession)
 
   const toolbarStyles = {

@@ -8,7 +8,7 @@ import { hexToRgbChannel, createPaletteChannel } from '../styles';
 import { grey as coreGreyPalette, primary as corePrimaryPalette } from '../core/palette';
 import { createShadowColor, customShadows as coreCustomShadows } from '../core/custom-shadows';
 
-import type { ThemeComponents, ThemeUpdateOptions } from '../types';
+import type { ThemeComponents, ThemeUpdateOptions } from '../ThemeTypes';
 
 // ----------------------------------------------------------------------
 

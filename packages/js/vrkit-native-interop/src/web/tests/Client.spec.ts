@@ -1,15 +1,13 @@
 // import "jest"
-import {jest} from '@jest/globals';
+import { jest } from "@jest/globals"
 
-import { Client} from "../Client"
+import { Client } from "../Client"
 import { Shutdown } from "../NativeBinding"
 import { ClientEventType, SessionEventType } from "vrkit-models"
 import { GetLiveVRKitSessionPlayer, SessionPlayer } from "../SessionPlayer"
 import Fixtures from "./DataFixtures"
-import { getLogger, getLoggingManager} from "@3fv/logger-proxy"
+import { getLogger } from "@3fv/logger-proxy"
 import { Deferred } from "@3fv/deferred"
-import * as fs from "node:fs"
-import path from "node:path"
 
 const log = getLogger(__filename)
 
@@ -52,7 +50,7 @@ test.skip("SessionPlayer.open", async () => {
   
   const sessionTimeVar = player.getDataVariable(sessionTimeHeader.name)
   const sampleIndexes = Array<[number, number]>()
-  player.on(SessionEventType.DATA_FRAME, ev => {
+  player.on(SessionEventType.DATA_FRAME, (player, ev) => {
     const
         evData = ev.payload,
         {sampleIndex, sampleCount} = evData.sessionData.timing
@@ -108,7 +106,7 @@ test("SessionPlayer.live", async () => {
     
     const sessionTimeVar = player.getDataVariable(sessionTimeHeader.name)
     const sampleIndexes = Array<[number, number]>()
-    player.on(SessionEventType.DATA_FRAME, ev => {
+    player.on(SessionEventType.DATA_FRAME, (player, ev) => {
       try {
         const evData = ev.payload, {
           sampleIndex, sampleCount

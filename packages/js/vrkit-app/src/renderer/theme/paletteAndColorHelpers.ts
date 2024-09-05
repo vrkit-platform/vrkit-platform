@@ -1,7 +1,7 @@
 import { padStart, range } from "lodash"
 import { add } from "lodash/fp"
 import { darken, lighten } from "@mui/material/styles"
-import type { Theme } from "./types"
+import type { Theme } from "./ThemeTypes"
 import { linearGradient } from "../styles"
 import { createPaletteChannel } from "./styles/utils"
 

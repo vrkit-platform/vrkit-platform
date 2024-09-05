@@ -11,8 +11,12 @@ import { getLogger } from "@3fv/logger-proxy"
 import { getService } from "./ServiceContainer"
 import { WindowManager } from "./services/window-manager"
 
+
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
+
+
+
 
 const BuildPaths = {
   root: app.isPackaged
@@ -58,6 +62,8 @@ async function launch() {
         devTools: isDev
       }
     })
+    
+    require('@electron/remote/main').enable(mainWindow.webContents)
     
     
     windowManager.enable(mainWindow)

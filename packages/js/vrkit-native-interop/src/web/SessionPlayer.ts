@@ -1,31 +1,23 @@
 // var addon = require('bindings')('SayHello');
 // noinspection ES6UnusedImports
 import YAML from "yaml"
-import type { IMessageType, MessageType } from "@protobuf-ts/runtime"
-import { getValue, guard, isObject, isString } from "@3fv/guard"
+import type { IMessageType } from "@protobuf-ts/runtime"
+import { guard } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
 import {
-  Any,
-  SessionData,
-  SessionEventData,
-  SessionEventType,
-  SessionTiming
+  SessionData, SessionEventData, SessionEventType, SessionTiming
 } from "vrkit-models"
 
-import { asOption, Option } from "@3fv/prelude-ts"
+import { asOption } from "@3fv/prelude-ts"
 import { getLogger } from "@3fv/logger-proxy"
-import { Deferred } from "@3fv/deferred"
 import {
-  MessageTypeFromCtor,
-  objectKeysLowerFirstReviver,
-  uuidv4
+  MessageTypeFromCtor, objectKeysLowerFirstReviver, uuidv4
 } from "./utils"
 import { GetNativeExports } from "./NativeBinding"
 import {
-  SessionDataVariable,
-  SessionDataVariableHeader
+  SessionDataVariable, SessionDataVariableHeader
 } from "./SessionDataVariableTypes"
-import { flatten, isEmpty, lowerFirst } from "lodash"
+import { flatten, isEmpty } from "lodash"
 import type { SessionInfoMessage } from "./SessionInfoTypes"
 
 const log = getLogger(__filename)
@@ -102,15 +94,19 @@ export type SessionPlayerEventDataDefault = SessionPlayerEventData<typeof Sessio
 
 export interface SessionPlayerEventArgs extends SessionPlayerEventArgMap {
   [SessionEventType.INFO_CHANGED]: (
-    data: SessionPlayerEventDataDefault
+      player: SessionPlayer,
+      data: SessionPlayerEventDataDefault
+    
   ) => void
 
   [SessionEventType.AVAILABLE]: (
-    data: SessionPlayerEventDataDefault
+      player: SessionPlayer,
+      data: SessionPlayerEventDataDefault
   ) => void
 
   [SessionEventType.DATA_FRAME]: (
-    data: SessionPlayerEventDataDefault,
+      player: SessionPlayer,
+      data: SessionPlayerEventDataDefault,
       vars: SessionDataVariable[]
   ) => void
 }
@@ -162,14 +158,6 @@ export class SessionPlayer extends EventEmitter3<
     this.dataVariableHeaderCount = headers.length
   }
   
-  /**
-   * Get the next request id
-   *
-   * @private
-   */
-  private nextRequestId(): string {
-    return uuidv4()
-  }
 
   /**
    * Event handler that is passed to the native client
@@ -198,7 +186,7 @@ export class SessionPlayer extends EventEmitter3<
       log.error("Unable to unpack payload",err)
     }
 
-    guard(() => this.emit(type, data), err => log.error("Unable to emit event", err))
+    guard(() => this.emit(type, this, data), err => log.error("Unable to emit event", err))
   }
 
   /**
@@ -324,7 +312,8 @@ export class SessionPlayer extends EventEmitter3<
   }
 
   get sessionData(): SessionData {
-    return SessionData.create(this.nativePlayer.sessionData)
+    const json = this.nativePlayer.sessionData
+    return SessionData.create(json || {})
   }
 
   get sessionInfo(): SessionInfoMessage {

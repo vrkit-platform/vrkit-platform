@@ -235,9 +235,11 @@ namespace IRacingTools::App::Node {
         // TODO: THIS WILL NOT PERFORM, REIMPLEMENT WITH `ObjectWrap<SessionInfo>` IF NEEDED
         auto sessionData = dataProvider_->sessionData();
         std::string sessionDataJson{};
-        if (auto encodeRes = google::protobuf::json::MessageToJsonString(*sessionData, &sessionDataJson); !encodeRes.
-            ok()) {
-            throw TypeError::New(env, "Unable to encode `SessionData` to JSON");
+        auto encodeRes = google::protobuf::json::MessageToJsonString(*sessionData, &sessionDataJson);
+        if (!encodeRes.ok()) {
+            L->error("Unable to encode SessionData ({}): {}", magic_enum::enum_name(encodeRes.code()).data(), std::string{encodeRes.message()});
+            // throw TypeError::New(env, "Unable to encode `SessionData` to JSON");
+            return Napi::Object::New(env);
         }
 
         auto sessionDataJsonStr = Napi::String::New(env, sessionDataJson);;

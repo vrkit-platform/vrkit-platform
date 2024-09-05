@@ -10,6 +10,7 @@ import tinycolor from "tinycolor2"
 import { asOption, Option, Predicate } from "@3fv/prelude-ts"
 import { endsWith, get, replace } from "lodash/fp"
 import { P, match } from "ts-pattern"
+import type { SxProps } from "@mui/material/styles"
 
 const log = getLogger(__filename)
 
@@ -20,10 +21,10 @@ const log = getLogger(__filename)
  */
 export function getDocumentFontSize(): number {
   return typeof getComputedStyle === "function"
-    ? parseFloat(
-        getComputedStyle(document.documentElement).fontSize
+      ? parseFloat(
+          getComputedStyle(document.documentElement).fontSize
       )
-    : 10
+      : 10
 }
 
 export type CSSSize = CSS.Globals | number | string
@@ -36,7 +37,7 @@ export enum ViewportMode {
 }
 
 export function mergeClasses(
-  ...classes: Array<string | null | false>
+    ...classes: Array<string | null | false>
 ): string {
   return classes.filter(clazz => isString(clazz)).join(" ")
 }
@@ -50,22 +51,22 @@ export type AnyCSSProperties = CSSProperties & any
  */
 function updateSize(): void {
   const width = window.innerWidth,
-    newSize =
-      width >= 1280
-        ? ViewportMode.DesktopBig
-        : width >= 1024
-        ? ViewportMode.Desktop
-        : width >= 667
-        ? ViewportMode.Landscape
-        : ViewportMode.Portrait
-
+      newSize =
+          width >= 1280
+              ? ViewportMode.DesktopBig
+              : width >= 1024
+                  ? ViewportMode.Desktop
+                  : width >= 667
+                      ? ViewportMode.Landscape
+                      : ViewportMode.Portrait
+  
   log.debug(`Window resized: ${width}/${newSize}`)
   // viewportSize = newSize
 }
 
 if (
-  typeof window !== "undefined" &&
-  isFunction(window.addEventListener)
+    typeof window !== "undefined" &&
+    isFunction(window.addEventListener)
 ) {
   updateSize()
   window.addEventListener("resize", updateSize)
@@ -73,19 +74,19 @@ if (
 
 
 export type CSSPropFn<P = any> = (
-  props: P
+    props: P
 ) => number | string
 
 export function allowYOverflow(style: CSSProperties) {
   return omit(style, "overflow")
 }
 
-export function dimensionConstraint<P = any>(
-  dim: "width" | "height",
-  val: string | number | CSSPropFn<P>
-): CSSProperties {
+export function dimensionConstraint(
+    dim: "width" | "height",
+    val: string | number
+) {
   const dimUpper =
-    dim.charAt(0).toUpperCase() + dim.substring(1)
+      dim.charAt(0).toUpperCase() + dim.substring(1)
   return {
     [dim]: val,
     [`min${dimUpper}`]: val,
@@ -95,29 +96,29 @@ export function dimensionConstraint<P = any>(
 }
 
 export function normalizeCSSProps(
-  ...props: Array<string | string[]>
+    ...props: Array<string | string[]>
 ): Array<keyof CSS.StandardLonghandProperties> {
   return Option.of(
-    props.reduce(
-      (allProps: Array<string>, prop) =>
-        Array<string>(
-          ...allProps,
-          ...(Array.isArray(prop) ? prop : [prop])
-        ),
-      Array<string>()
-    )
-  )
-    .map((props: Array<string>) =>
-      uniq([...props, ...props.map(toDashCase)])
-    )
-    .get() as Array<keyof CSS.StandardLonghandProperties>
+          props.reduce(
+              (allProps: Array<string>, prop) =>
+                  Array<string>(
+                      ...allProps,
+                      ...(Array.isArray(prop) ? prop : [prop])
+                  ),
+              Array<string>()
+          )
+      )
+      .map((props: Array<string>) =>
+          uniq([...props, ...props.map(toDashCase)])
+      )
+      .get() as Array<keyof CSS.StandardLonghandProperties>
 }
 
 export const WebkitBoxDisplay = "-webkit-box"
 export const WebkitFillAvailable = "-webkit-fill-available"
 
 export const PlaceholderSelector =
-  "&::-webkit-input-placeholder"
+    "&::-webkit-input-placeholder"
 
 export const FlexProperties = normalizeCSSProps([
   "flex-basis",
@@ -146,10 +147,10 @@ export const PaddingProperties = normalizeCSSProps([
 ])
 
 export const SizeProperties = uniq(
-  Array<keyof CSS.StandardLonghandProperties>(
-    ...HeightProperties,
-    ...WidthProperties
-  )
+    Array<keyof CSS.StandardLonghandProperties>(
+        ...HeightProperties,
+        ...WidthProperties
+    )
 )
 
 export const WebkitBox = {
@@ -157,30 +158,30 @@ export const WebkitBox = {
 } as CSSProperties
 
 export const webkitBoxClamp = (
-  lines: number = 1
+    lines: number = 1
 ): CSSProperties => ({
   WebkitLineClamp: lines,
   flexDirection: "row",
   display: WebkitBoxDisplay
 })
 
-export function heightConstraint<P>(
-  val: CSSSize | CSSPropFn<P>
-): CSSProperties {
-  return dimensionConstraint<P>("height", val)
+export function heightConstraint(
+    val: CSSSize
+) {
+  return dimensionConstraint("height", val)
 }
 
-export function widthConstraint<P>(
-  val: string | number | CSSPropFn<P>
-): CSSProperties {
-  return dimensionConstraint<P>("width", val)
+export function widthConstraint(
+    val: string | number
+) {
+  return dimensionConstraint("width", val)
 }
 
 // noinspection JSSuspiciousNameCombination
-export function dimensionConstraints<P>(
-  width: string | number | CSSPropFn<P>,
-  height: string | number | CSSPropFn<P> = width
-): CSSProperties {
+export function dimensionConstraints(
+    width: string | number,
+    height: string | number = width
+) {
   return {
     ...heightConstraint(height),
     ...widthConstraint(width)
@@ -188,15 +189,15 @@ export function dimensionConstraints<P>(
 }
 
 export const FillHeightAvailable = heightConstraint(
-  WebkitFillAvailable
+    WebkitFillAvailable
 ) as CSSProperties
 
 export const FillHeight = heightConstraint(
-  "100%"
+    "100%"
 ) as CSSProperties
 
 export const FillWidth = widthConstraint(
-  "100%"
+    "100%"
 ) as CSSProperties
 
 export const Fill = {
@@ -214,8 +215,8 @@ export const FillBounds = {
 
 
 export const FillWindow = Object.assign(
-  widthConstraint("100vw"),
-  heightConstraint("100vh")
+    widthConstraint("100vw"),
+    heightConstraint("100vh")
 ) as CSSProperties
 
 export const Transparent = "transparent"
@@ -230,7 +231,7 @@ export const OverflowVisible = {
 
 export const OverflowHidden = {
   overflow: "hidden"
-} as CSSProperties
+} //as CSSProperties
 
 export const OverflowAuto = {
   overflow: "auto"
@@ -290,8 +291,8 @@ export const TransitionDuration = {
 }
 
 export function alpha(
-  color: CSS.DataType.Color,
-  alpha: number
+    color: CSS.DataType.Color,
+    alpha: number
 ): CSS.DataType.Color {
   return tinycolor(color).setAlpha(alpha).toRgbString()
 }
@@ -308,51 +309,51 @@ export function alpha(
  * @param delay
  */
 export function transition(
-  props: string[] | string | null = null,
-  duration = TransitionDuration.Short,
-  easing = "ease-out",
-  delay: number = 0
+    props: string[] | string | null = null,
+    duration = TransitionDuration.Short,
+    easing = "ease-out",
+    delay: number = 0
 ): CSSProperties {
   if (isString(props)) props = [props]
-
+  
   props = uniq(
-    (props ?? ["all"]).map(toDashCase)
+      (props ?? ["all"]).map(toDashCase)
   ) as string[]
-
+  
   return {
     transition: props
-      .map(
-        prop => `${prop} ${duration}ms ${easing} ${delay}ms`
-      )
-      .join(", ")
+        .map(
+            prop => `${prop} ${duration}ms ${easing} ${delay}ms`
+        )
+        .join(", ")
   }
 }
 
 export function flexAlign(
-  alignItems: CSS.Property.AlignItems,
-  justifyContent: CSS.Property.JustifyContent = alignItems as any
+    alignItems: CSS.Property.AlignItems,
+    justifyContent: CSS.Property.JustifyContent = alignItems as any
 ): CSSProperties {
   return { justifyContent, alignItems }
 }
 
 // noinspection JSSuspiciousNameCombination
 export function padding(
-  top:
-    | string
-    | number
-    | ((props: any) => string | number) = 0,
-  right:
-    | string
-    | number
-    | ((props: any) => string | number) = top,
-  bottom:
-    | string
-    | number
-    | ((props: any) => string | number) = top,
-  left:
-    | string
-    | number
-    | ((props: any) => string | number) = right
+    top:
+        | string
+        | number
+        | ((props: any) => string | number) = 0,
+    right:
+        | string
+        | number
+        | ((props: any) => string | number) = top,
+    bottom:
+        | string
+        | number
+        | ((props: any) => string | number) = top,
+    left:
+        | string
+        | number
+        | ((props: any) => string | number) = right
 ): CSSProperties {
   return {
     paddingTop: top,
@@ -364,30 +365,30 @@ export function padding(
 
 // noinspection JSSuspiciousNameCombination
 export function paddingRem(
-  top = 0,
-  right = top,
-  bottom = top,
-  left = right
+    top = 0,
+    right = top,
+    bottom = top,
+    left = right
 ): CSSProperties {
   return padding(
-    remToPx(top),
-    remToPx(right),
-    remToPx(bottom),
-    remToPx(left)
+      remToPx(top),
+      remToPx(right),
+      remToPx(bottom),
+      remToPx(left)
   ) as any
 }
 
 export function borderRadius(
-  borderTopLeftRadius: number | string,
-  borderTopRightRadius:
-    | number
-    | string = borderTopLeftRadius,
-  borderBottomLeftRadius:
-    | number
-    | string = borderTopLeftRadius,
-  borderBottomRightRadius:
-    | number
-    | string = borderTopRightRadius
+    borderTopLeftRadius: number | string,
+    borderTopRightRadius:
+        | number
+        | string = borderTopLeftRadius,
+    borderBottomLeftRadius:
+        | number
+        | string = borderTopLeftRadius,
+    borderBottomRightRadius:
+        | number
+        | string = borderTopRightRadius
 ): CSSProperties {
   return {
     borderTopLeftRadius,
@@ -398,10 +399,10 @@ export function borderRadius(
 }
 
 export function border(
-  top = 0,
-  right = top,
-  bottom = top,
-  left = right
+    top = 0,
+    right = top,
+    bottom = top,
+    left = right
 ): CSSProperties {
   return {
     borderTop: top,
@@ -412,24 +413,24 @@ export function border(
 }
 
 export function borderRem(
-  top = 0,
-  right = top,
-  bottom = top,
-  left = right
+    top = 0,
+    right = top,
+    bottom = top,
+    left = right
 ): CSSProperties {
   return border(
-    remToPx(top),
-    remToPx(right),
-    remToPx(bottom),
-    remToPx(left)
+      remToPx(top),
+      remToPx(right),
+      remToPx(bottom),
+      remToPx(left)
   ) as any
 }
 
 export function margin(
-  top: string | number = 0,
-  right = top,
-  bottom = top,
-  left = right
+    top: string | number = 0,
+    right = top,
+    bottom = top,
+    left = right
 ): CSSProperties {
   return {
     marginTop: top,
@@ -440,16 +441,16 @@ export function margin(
 }
 
 export function marginRem(
-  top = 0,
-  right = top,
-  bottom = top,
-  left = right
+    top = 0,
+    right = top,
+    bottom = top,
+    left = right
 ): CSSProperties {
   return margin(
-    rem(top),
-    rem(right),
-    rem(bottom),
-    rem(left)
+      rem(top),
+      rem(right),
+      rem(bottom),
+      rem(left)
   )
 }
 
@@ -459,9 +460,9 @@ export function marginRem(
  * @type {string[]}
  */
 export const PaddingProps = Object.keys(
-  paddingRem(0)
+    paddingRem(0)
 ).map(key =>
-  key.replace(/([A-Z])/g, g => `-${g[0].toLowerCase()}`)
+    key.replace(/([A-Z])/g, g => `-${g[0].toLowerCase()}`)
 )
 
 /**
@@ -470,9 +471,9 @@ export const PaddingProps = Object.keys(
  * @type {string[]}
  */
 export const MarginProps = Object.keys(
-  marginRem(0)
+    marginRem(0)
 ).map(key =>
-  key.replace(/([A-Z])/g, g => `-${g[0].toLowerCase()}`)
+    key.replace(/([A-Z])/g, g => `-${g[0].toLowerCase()}`)
 )
 
 /**
@@ -481,9 +482,9 @@ export const MarginProps = Object.keys(
  * @type {string[]}
  */
 export const BorderProps = Object.keys(
-  borderRem(0)
+    borderRem(0)
 ).map(key =>
-  key.replace(/([A-Z])/g, g => `-${g[0].toLowerCase()}`)
+    key.replace(/([A-Z])/g, g => `-${g[0].toLowerCase()}`)
 )
 
 export type RemResult<AsRem extends boolean | undefined> = AsRem extends true ? string : number
@@ -540,9 +541,9 @@ export const FlexAuto = flex(0, 0, "auto")
  * @param flexBasis
  */
 export function flex(
-  flexGrow: CSS.Property.Flex<any> = 1,
-  flexShrink: CSS.Property.Flex<any> = 1,
-  flexBasis: CSS.Property.FlexBasis<any> = "auto"
+    flexGrow: CSS.Property.Flex<any> = 1,
+    flexShrink: CSS.Property.Flex<any> = 1,
+    flexBasis: CSS.Property.FlexBasis<any> = "auto"
 ): CSSProperties {
   return {
     flexGrow,
@@ -550,6 +551,19 @@ export function flex(
     flexBasis
   }
 }
+
+export function newFlex(
+    flexGrow: CSS.Property.Flex<any> = 1,
+    flexShrink: CSS.Property.Flex<any> = 1,
+    flexBasis: CSS.Property.FlexBasis<any> = "auto"
+) {
+  return {
+    flexGrow,
+    flexShrink,
+    flexBasis
+  }
+}
+
 
 /**
  * Flex Align Center
@@ -568,7 +582,7 @@ export const FlexAlignStart: CSSProperties = flexAlign("flex-start")
 export const FlexAlignEnd = flexAlign("flex-end")
 
 export const FlexAlignSpaceBetween =
-  flexAlign("space-between")
+    flexAlign("space-between")
 
 export const FlexScale = flex()
 
@@ -598,16 +612,16 @@ export const FlexRowReverse = makeStyle(Flex, {
 }) as CSSProperties
 
 export const FlexRowCenter = makeStyle(
-  FlexRow,
-  FlexAlignCenter
+    FlexRow,
+    FlexAlignCenter
 )
 
 export const FlexInlineRowCenter = makeStyle(
-  FlexRow,
-  FlexAlignCenter,
-  {
-    display: "inline-flex"
-  }
+    FlexRow,
+    FlexAlignCenter,
+    {
+      display: "inline-flex"
+    }
 )
 
 export const FlexColumn = makeStyle(Flex, {
@@ -619,21 +633,21 @@ export const FlexColumnReverse = makeStyle(Flex, {
 })
 
 export const FlexColumnCenter = makeStyle(
-  FlexColumn,
-  FlexAlignCenter
+    FlexColumn,
+    FlexAlignCenter
 )
 
 export function makeStyle(...styles): CSSProperties {
   return Object.assign(
-    {},
-    ...styles.reduce((allStyles, style) => {
-      if (Array.isArray(style)) {
-        allStyles.push(...style)
-      } else {
-        allStyles.push(style)
-      }
-      return allStyles
-    }, [])
+      {},
+      ...styles.reduce((allStyles, style) => {
+        if (Array.isArray(style)) {
+          allStyles.push(...style)
+        } else {
+          allStyles.push(style)
+        }
+        return allStyles
+      }, [])
   )
 }
 
@@ -677,60 +691,71 @@ export const FlexDefaults = {
 }
 
 export const remOrDigitsTest = Predicate.of(
-  endsWith("rem")
+    endsWith("rem")
 ).or(digitsOnly)
 
 const mapRemToNumber = flow(replace(/rem/g, ""), parseFloat)
 
 export function remToNumber(rem: string | number) {
   return mapRemToNumber(
-    isString(rem) ? rem : rem.toString()
+      isString(rem) ? rem : rem.toString()
   )
 }
 
 export function remToPx(rem: number | string): number {
   return asOption(
-    match(rem)
-      .with(P.string, rem =>
-        asOption(rem)
-          .filter(remOrDigitsTest)
-          .map(mapRemToNumber)
-          .getOrThrow(
-            `Value (${rem}), if a string, must end with rem`
+      match(rem)
+          .with(P.string, rem =>
+              asOption(rem)
+                  .filter(remOrDigitsTest)
+                  .map(mapRemToNumber)
+                  .getOrThrow(
+                      `Value (${rem}), if a string, must end with rem`
+                  )
           )
-      )
-      .with(P.number, rem => rem)
-      .otherwise(() => {
-        throwError(`Unable to determine type: ${rem}`)
-      })
+          .with(P.number, rem => rem)
+          .otherwise(() => {
+            throwError(`Unable to determine type: ${rem}`)
+          })
   )
-    .map(value => Math.round(value * getDocumentFontSize()))
-    .get()
+      .map(value => Math.round(value * getDocumentFontSize()))
+      .get()
 }
 
 export function directChild(
-  className: string,
-  state: string = ""
+    className: string,
+    state: string = ""
 ): string {
   return child(className, state, true)
 }
 
 export function child(
-  className: string | string[],
-  state: string = "",
-  direct: boolean = false
+    className: string | string[],
+    state: string = "",
+    direct: boolean = false
 ): string {
   const classNames = arrayOf(className)
   return classNames.map(className => `&${isEmpty(state) ? "" : `:${state}`} ${
-    direct ? ">" : ""
+      direct ? ">" : ""
   } .${className}`).join(",")
 }
 
 export function hasCls(
-  className: string | string[]
+    className: string | string[],
+    negate: boolean = false
 ): string {
   const classNames = arrayOf(className)
-  return `&${classNames.map(className => `.${className}`).join("")}`
+  let criteria = classNames.map(className => `.${className}`).join("")
+  if (negate) {
+    criteria = `:not(${criteria})`
+  }
+  return `&${criteria}`
+}
+
+export function notHasCls(
+    className: string | string[]
+): string {
+  return hasCls(className, true)
 }
 
 export function important(value: string | number): string {
@@ -738,45 +763,45 @@ export function important(value: string | number): string {
 }
 
 export function radialGradient(
-  ...colorStops: string[]
+    ...colorStops: string[]
 ): string {
   //return `-webkit-linear-gradient(${colorStops.join(',')})`
   return `radial-gradient(${colorStops.join(",")})`
 }
 
 export function linearGradient(
-  ...colorStops: string[]
+    ...colorStops: string[]
 ): string {
   //return `-webkit-linear-gradient(${colorStops.join(',')})`
   return `linear-gradient(${colorStops.join(",")})`
 }
 
 export function linearGradientRule(
-  ...colorStopsAndCSS: Array<string | CSSProperties>
+    ...colorStopsAndCSS: Array<string | CSSProperties>
 ): CSSProperties {
   //return `-webkit-linear-gradient(${colorStops.join(',')})`
   const [colorStops, otherCss] = partition(
-    colorStopsAndCSS,
-    isString
+      colorStopsAndCSS,
+      isString
   )
   return assign(
-    {
-      background:
-        `linear-gradient(${[...colorStops].join(",")})` +
-        asOption(
-          otherCss.map(get("background")).filter(Boolean)
-        ).map(backgrounds =>
-          isEmpty(backgrounds)
-            ? ""
-            : `,` + backgrounds.join(", ")
-        )
-    },
-    ...otherCss.map(css => omit(css, ["background"]))
+      {
+        background:
+            `linear-gradient(${[...colorStops].join(",")})` +
+            asOption(
+                otherCss.map(get("background")).filter(Boolean)
+            ).map(backgrounds =>
+                isEmpty(backgrounds)
+                    ? ""
+                    : `,` + backgrounds.join(", ")
+            )
+      },
+      ...otherCss.map(css => omit(css, ["background"]))
   )
 }
 
 export function linearGradientContentBox(
-  ...colorStops: Array<string>
+    ...colorStops: Array<string>
 ): string {
   //return `-webkit-linear-gradient(${colorStops.join(',')})`
   return `content-box ${linearGradient(...colorStops)}`

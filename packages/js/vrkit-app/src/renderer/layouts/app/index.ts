@@ -1,3 +1,3 @@
-export * from './main';
+export * from './AppContent';
 
 export * from './layout';

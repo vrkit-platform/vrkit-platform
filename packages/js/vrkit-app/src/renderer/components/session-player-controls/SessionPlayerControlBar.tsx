@@ -1,5 +1,5 @@
 // import {dialog} from "@electron/remote"
-import Box from "@mui/material/Box"
+import Box, { BoxProps } from "@mui/material/Box"
 import Button, { ButtonProps } from "@mui/material/Button"
 import { styled, useTheme } from "@mui/material/styles"
 import { Grid2Props } from "@mui/material/Unstable_Grid2"
@@ -8,29 +8,39 @@ import {
   createClassNames,
   FillWidth,
   flex,
+  flexAlign,
   FlexColumnCenter,
   FlexRow,
   FlexRowCenter,
   hasCls,
   heightConstraint,
+  padding,
   paddingRem,
   rem
 } from "../../styles"
 import clsx from "clsx"
 import { useAppSelector } from "../../services/store"
 import {
-  LiveSessionId,
+  ActiveSessionType,
   SessionDetail,
   sessionManagerSelectors
 } from "vrkit-app-renderer/services/store/slices/session-manager"
-import React from "react"
-import { FlexRowBox, FlexRowCenterBox, FlexScaleZeroBox } from "../box"
+import React, { useCallback } from "react"
+import {
+  FlexAutoBox,
+  FlexRowBox,
+  FlexRowCenterBox,
+  FlexScaleZeroBox
+} from "../box"
 import { match, P } from "ts-pattern"
 import { getLogger } from "@3fv/logger-proxy"
 import { useShowOpenDialog } from "vrkit-app-renderer/hooks/useShowOpenDialog"
 import { isEmpty } from "vrkit-app-common/utils"
 import SessionManager from "vrkit-app-renderer/services/session-manager"
 import { useService } from "../service-container"
+import { SessionTiming } from "vrkit-models"
+
+import { DurationView, MILLIS_IN_HR } from "../time"
 
 const log = getLogger(__filename)
 
@@ -100,20 +110,30 @@ const LiveSessionBox = styled(FlexRowCenterBox, { name: "LiveSessionBox" })(
   })
 )
 
-export interface LiveSessionButtonProps extends ButtonProps {}
+export interface LiveSessionButtonProps extends ButtonProps {
+  activeSessionType: ActiveSessionType
+}
 
-export function LiveSessionButton({ sx, ...other }: LiveSessionButtonProps) {
-  const
-    activeSession = useAppSelector(sessionManagerSelectors.selectActiveSession),
-    isAvailable = useAppSelector(
+export function LiveSessionButton({
+  sx,
+  activeSessionType,
+  ...other
+}: LiveSessionButtonProps) {
+  const isAvailable = useAppSelector(
       sessionManagerSelectors.isLiveSessionAvailable
     ),
-    isActive = activeSession?.id === LiveSessionId,
+    isActive = activeSessionType === "LIVE",
+    sessionManager = useService(SessionManager),
     text = match([isAvailable, isActive])
       .with([false, P.any], () => "Not Running")
       .with([true, false], () => "Connect")
       .with([true, true], () => "Disconnect")
-      .otherwise(() => "unknown")
+      .otherwise(() => "unknown"),
+    onClick = useCallback(() => {
+      sessionManager.setActiveSessionType(
+        isActive || !isAvailable ? "NONE" : "LIVE"
+      )
+    }, [isActive, isAvailable])
 
   return (
     <Button
@@ -122,6 +142,7 @@ export function LiveSessionButton({ sx, ...other }: LiveSessionButtonProps) {
         ...FlexRowCenter,
         ...sx
       }}
+      onClick={onClick}
       variant={isAvailable ? "contained" : "text"}
       {...other}
     >
@@ -137,52 +158,104 @@ export function LiveSessionButton({ sx, ...other }: LiveSessionButtonProps) {
 }
 
 const DiskSessionBox = styled(FlexRowCenterBox, { name: "DiskSessionBox" })(
-    ({ theme }) => ({
-      backgroundColor: alpha(theme.palette.secondary.main, 0.2), // ...widthConstraint(rem(6)),
-      ...flex(0, 0, "auto"),
-      ...paddingRem(0, 1),
-      gap: rem(1)
-    })
+  ({ theme }) => ({
+    backgroundColor: alpha(theme.palette.secondary.main, 0.2), // ...widthConstraint(rem(6)),
+    ...flex(0, 0, "auto"),
+    ...paddingRem(0, 1),
+    gap: rem(1)
+  })
 )
 
-export interface DiskSessionButtonProps extends ButtonProps {}
+export interface DiskSessionButtonProps extends ButtonProps {
+  activeSessionType: ActiveSessionType
+}
 
-export function DiskSessionButton({ sx, ...other }: DiskSessionButtonProps) {
-  const
-      diskSession = useAppSelector(sessionManagerSelectors.selectDiskSession),
-      isAvailable = diskSession?.isAvailable === true,
-      sessionManager = useService(SessionManager),
-      onClick = useShowOpenDialog(res => {
-        const {filePaths} = res
-        if (res.canceled || isEmpty(filePaths)) {
-          log.info(`Open file was cancelled or no file paths`, filePaths, res.canceled)
-          return
-        }
-        
-        const [filePath] = filePaths
-        sessionManager.createDiskPlayer(filePath)
-        
-      })
-  
+export function DiskSessionButton({
+  sx,
+  activeSessionType,
+  ...other
+}: DiskSessionButtonProps) {
+  const diskSession = useAppSelector(sessionManagerSelectors.selectDiskSession),
+    isActive = activeSessionType === "DISK",
+    isAvailable = diskSession?.isAvailable === true,
+    sessionManager = useService(SessionManager),
+    onCloseClick = () => {
+      sessionManager.closeDiskSession()
+    },
+    onOpenClick = useShowOpenDialog(res => {
+      const { filePaths } = res
+      if (res.canceled || isEmpty(filePaths)) {
+        log.info(
+          `Open file was cancelled or no file paths`,
+          filePaths,
+          res.canceled
+        )
+        return
+      }
+
+      const [filePath] = filePaths
+      sessionManager
+        .createDiskPlayer(filePath)
+        .catch(err => log.error("Failed to create disk player", err))
+    })
+
   return (
-      <Button
-          sx={{
-            ...FlexRowCenter,
-            ...sx
-          }}
-          variant={"outlined"}
-          color={"secondary"}
-          onClick={onClick}
-          {...other}
+    <Button
+      sx={{
+        ...FlexRowCenter,
+        ...sx
+      }}
+      variant={"text"}
+      color={"secondary"}
+      onClick={isAvailable ? onCloseClick : onOpenClick}
+      {...other}
+    >
+      <Box
+        sx={{
+          ...FlexColumnCenter
+        }}
       >
-        <Box
-            sx={{
-              ...FlexColumnCenter
-            }}
-        >
-          Open Session File
-        </Box>
-      </Button>
+        {!isAvailable ? `Open Session File` : `Close Session File`}
+      </Box>
+    </Button>
+  )
+}
+
+interface SessionTimingViewProps extends BoxProps {
+  timing: SessionTiming
+
+  type: ActiveSessionType
+
+  session: SessionDetail
+
+  showHours?: boolean
+}
+
+function SessionTimingView({
+  type,
+  session,
+  timing,
+  showHours = timing.currentTimeMillis >= MILLIS_IN_HR
+}: SessionTimingViewProps) {
+  const { sampleIndex, sampleCount, isLive } = timing
+
+  return (
+    <FlexScaleZeroBox>
+      {/*<Moment date={sessionTime} format="HH:mm:ss.SSS"/>*/}
+      <DurationView
+        millis={timing.currentTimeMillis}
+        showHours={showHours}
+      />
+      {!isLive && timing.totalTimeMillis > 0 && (
+        <>
+          &nbsp;of&nbsp;
+          <DurationView
+            millis={timing.totalTimeMillis}
+            showHours={showHours}
+          />
+        </>
+      )}
+    </FlexScaleZeroBox>
   )
 }
 
@@ -196,7 +269,13 @@ export function SessionPlayerControlBar(props: SessionPlayerControlBarProps) {
     ),
     liveSession = useAppSelector(sessionManagerSelectors.selectLiveSession),
     diskSession = useAppSelector(sessionManagerSelectors.selectDiskSession),
-      activeSession = useAppSelector(sessionManagerSelectors.selectActiveSession)
+    activeSession = useAppSelector(sessionManagerSelectors.selectActiveSession),
+    activeSessionType = useAppSelector(
+      sessionManagerSelectors.selectActiveSessionType
+    ),
+    activeSessionTiming = useAppSelector(
+      sessionManagerSelectors.selectActiveSessionTiming
+    )
 
   return (
     <SPCRoot
@@ -213,13 +292,35 @@ export function SessionPlayerControlBar(props: SessionPlayerControlBarProps) {
           ...FillWidth
         }}
       >
-        <FlexScaleZeroBox></FlexScaleZeroBox>
+        <FlexScaleZeroBox
+          sx={{
+            ...padding(rem(0.5)),
+            ...FlexRowCenter,
+            ...flexAlign("center", "start"),
+            gap: rem(1)
+          }}
+        >
+          {activeSession ? (
+            <>
+              <FlexAutoBox>{activeSessionType}</FlexAutoBox>
+              <SessionTimingView
+                type={activeSessionType}
+                session={activeSession}
+                timing={activeSessionTiming}
+              />
+            </>
+          ) : (
+            <>No Active Session</>
+          )}
+        </FlexScaleZeroBox>
         <DiskSessionBox>
-          <DiskSessionButton />
-          {diskSession?.isAvailable && <SessionDetailBox detail={diskSession} />}
+          <DiskSessionButton activeSessionType={activeSessionType} />
+          {diskSession?.isAvailable && (
+            <SessionDetailBox detail={diskSession} />
+          )}
         </DiskSessionBox>
         <LiveSessionBox>
-          <LiveSessionButton />
+          <LiveSessionButton activeSessionType={activeSessionType} />
           {isLiveSessionAvailable && <SessionDetailBox detail={liveSession} />}
         </LiveSessionBox>
       </FlexRowBox>

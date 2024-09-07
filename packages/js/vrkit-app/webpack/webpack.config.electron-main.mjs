@@ -27,13 +27,8 @@ Sh.mkdir("-p", targetDir)
 export default () => {
   return defaultWebpackConfig("electron-main", "electron-main", moduleDir, {
     distDir: targetDir,
-    entryFile: "./src/main/main.ts",
-    extraEntries: {
-      "electron-preload": {
-        entryFile: "./src/main/preload.ts",
-        isPreload: true
-      }
-    },
+    entryFile: "./src/main/entry-main.ts",
+    
     devtool: "source-map",
     config: {
       externals: [

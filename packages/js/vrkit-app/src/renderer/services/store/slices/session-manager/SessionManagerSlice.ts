@@ -1,15 +1,15 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import {
-  type SessionDetail,
+  ActiveSessionType, type SessionDetail,
   sessionDetailDefaults,
   type SessionManagerState,
   type SessionPlayerId
 } from "./SessionManagerState"
-import { isNotEmpty } from "vrkit-app-common/utils"
+import { Identity, isNotEmpty } from "vrkit-app-common/utils"
 import { isDefined, isString } from "@3fv/guard"
 import { get } from "lodash/fp"
-import { SessionType } from "vrkit-models"
+import { SessionTiming, SessionType } from "vrkit-models"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -20,10 +20,16 @@ const { info, debug, warn, error } = log
  * @returns {SessionManagerState}
  */
 const newSessionState = (): SessionManagerState => ({
-  activeSession: sessionDetailDefaults(),
+  activeSessionType: "NONE",
   liveSession: sessionDetailDefaults(),
+  diskSession: sessionDetailDefaults(),
   sessionIds: new Set<string>()
 })
+
+function createActiveSessionSelector<T>(selector: (session:SessionDetail) => T) {
+  return (state: SessionManagerState) =>
+      selector(state.activeSessionType === "LIVE" ? state.liveSession : state.activeSessionType === "DISK" ? state.diskSession : null)
+}
 
 const slice = createSlice({
   name: "sessionManager",
@@ -55,26 +61,42 @@ const slice = createSlice({
       return state
     },
 
-    setActiveSession(
+    setActiveSessionType(
       state,
-      { payload: activeSession = {} }: PayloadAction<SessionDetail>
+      { payload: activeSessionType = "NONE" }: PayloadAction<ActiveSessionType>
     ) {
-      state.activeSession = activeSession
+      state.activeSessionType = activeSessionType
       return state
     },
-
-    updateActiveSession(
-      state,
-      { payload: activeSession = {} }: PayloadAction<SessionDetail>
+    
+    setDiskSession(
+        state,
+        { payload: diskSession =  sessionDetailDefaults() }: PayloadAction<SessionDetail>
     ) {
-      state.activeSession = { ...state.activeSession, ...activeSession }
+      state.diskSession = diskSession
       return state
     },
-
+    
+    updateDiskSession(
+        state,
+        { payload: diskSession =  sessionDetailDefaults() }: PayloadAction<SessionDetail>
+    ) {
+      state.diskSession = { ...state.diskSession, ...diskSession }
+      return state
+    },
+    
+    updateDiskSessionTiming(
+        state,
+        { payload: timing }: PayloadAction<SessionTiming>
+    ) {
+      state.diskSession.timing = timing
+      return state
+    },
+    
     setLiveSession(
       state,
       {
-        payload: liveSession = { ...sessionDetailDefaults() }
+        payload: liveSession = sessionDetailDefaults()
       }: PayloadAction<SessionDetail>
     ) {
       state.liveSession = liveSession
@@ -83,20 +105,32 @@ const slice = createSlice({
 
     updateLiveSession(
       state,
-      { payload: liveSession = {} }: PayloadAction<SessionDetail>
+      { payload: liveSession =  sessionDetailDefaults() }: PayloadAction<SessionDetail>
     ) {
       state.liveSession = { ...state.liveSession, ...liveSession }
       return state
+    },
+    
+    updateLiveSessionTiming(
+        state,
+        { payload: timing }: PayloadAction<SessionTiming>
+    ) {
+      state.liveSession.timing = timing
+      return state
     }
+    
+    
+    
+    
   },
   extraReducers: builder => builder,
   selectors: {
     hasAvailableSession: (state: SessionManagerState) =>
-      [state.activeSession?.isAvailable, state.liveSession?.isAvailable]
+      [state.diskSession?.isAvailable, state.liveSession?.isAvailable]
         .some(it => it === true),
 
     hasActiveSession: (state: SessionManagerState) =>
-      isNotEmpty(state.activeSession?.id),
+      isNotEmpty(state.activeSessionType),
 
     isLiveSessionAvailable: (state: SessionManagerState) =>
       state.liveSession?.isAvailable === true,
@@ -104,26 +138,22 @@ const slice = createSlice({
     selectSessionIds: (state: SessionManagerState) => state.sessionIds,
 
     // Active Session Selectors
-    selectActiveSession: (state: SessionManagerState) =>
-      isNotEmpty(state.activeSession?.id) ? state.activeSession : null,
-    selectActiveSessionData: (state: SessionManagerState) =>
-      state.activeSession?.data,
-    selectActiveSessionId: (state: SessionManagerState) =>
-      state.activeSession?.id,
-    selectActiveSessionTiming: (state: SessionManagerState) =>
-      state.activeSession?.timing,
-    selectActiveSessionInfo: (state: SessionManagerState) =>
-      state.activeSession?.info,
-    selectActiveSessionWeekendInfo: (state: SessionManagerState) =>
-      state.activeSession?.info?.weekendInfo,
+    selectActiveSessionType: (state: SessionManagerState) => state.activeSessionType,
+    selectActiveSession: createActiveSessionSelector(Identity),
+    selectActiveSessionData: createActiveSessionSelector(session =>
+            session?.data),
+    selectActiveSessionId: createActiveSessionSelector(session =>
+        session?.id),
+    selectActiveSessionTiming: createActiveSessionSelector(session =>
+        session?.timing),
+    selectActiveSessionInfo: createActiveSessionSelector(session =>
+        session?.info),
+    selectActiveSessionWeekendInfo: createActiveSessionSelector(session =>
+        session?.info?.weekendInfo),
 
     // Disk Session Selectors
     selectDiskSession: (state: SessionManagerState) =>
-      isNotEmpty(state.activeSession?.id) &&
-      isNotEmpty(state.activeSession?.filePath) &&
-      state.activeSession?.type === SessionType.DISK
-        ? state.activeSession
-        : null,
+       state.diskSession,
 
     // Live Session Selectors
     selectLiveSession: (state: SessionManagerState) =>

@@ -8,23 +8,26 @@ import { APP_STORE_ID, isDev } from "../../constants"
 import type { AppStore } from "../store"
 import {
   GetLiveVRKitSessionPlayer,
+  isLivePlayer,
   SessionDataVariable,
   SessionPlayer,
   SessionPlayerEventDataDefault
 } from "vrkit-native-interop"
 import { isDefined, isString } from "@3fv/guard"
-import { SessionEventType } from "vrkit-models"
+import { SessionEventData, SessionEventType, SessionTiming } from "vrkit-models"
 import {
-  LiveSessionId,
+  ActiveSessionType, LiveSessionId,
   SessionDetail,
+  sessionDetailDefaults,
   sessionManagerActions,
   sessionManagerSelectors,
   SessionPlayerId
 } from "../store/slices/session-manager"
-import { isEmpty } from "lodash"
+import { first, isEmpty } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
 import EventEmitter3 from "eventemitter3"
 import { Deferred } from "@3fv/deferred"
+import { isNotEmpty } from "vrkit-app-common/utils"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -34,7 +37,10 @@ const { debug, trace, info, error, warn } = log
 
 class SessionPlayerContainer {
   readonly disposers = Array<() => void>()
-
+  
+  timing: SessionTiming = null
+  dataVars: SessionDataVariable[] = []
+  
   constructor(
     readonly id: SessionPlayerId,
     readonly player: SessionPlayer
@@ -42,6 +48,11 @@ class SessionPlayerContainer {
 
   dispose() {
     this.disposers.forEach(disposer => disposer())
+  }
+  
+  setDataFrame(timing:SessionTiming, dataVars:SessionDataVariable[]):void {
+    this.timing = timing
+    this.dataVars = dataVars
   }
 }
 
@@ -52,12 +63,21 @@ export interface SessionManagerEventArgs {
 @Singleton()
 export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   private playerContainers = new Map<SessionPlayerId, SessionPlayerContainer>()
-
+  
+  private getContainerByPlayer(player : SessionPlayer) {
+    return this.playerContainers.get(player.id)
+  }
+  
   @Bind
-  private onEventAvailable(
+  private onEventSessionStateChange(
     player: SessionPlayer,
     ev: SessionPlayerEventDataDefault
   ) {
+    if (!this.checkPlayerIsManager(player)) {
+      log.warn("Player is not currently managed & has been removed", player.id)
+      return
+    }
+        
     if (!ev?.payload) {
       warn(`No event payload`, ev)
       return
@@ -69,38 +89,9 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       data
     )
     
-    const { activeSession } = this
-    
-    if (data.sessionId === LiveSessionId) {
-      this.updateLiveSession()
-    }
-    
-    if (data.sessionId === activeSession?.id) {
-      this.updateActiveSession(player)
-    }
+    this.updateSession(player, data)
   }
 
-  @Bind
-  private onEventInfoChanged(
-    player: SessionPlayer,
-    ev: SessionPlayerEventDataDefault
-  ) {
-    const { payload: data } = ev
-    const { activeSession } = this
-
-    if (activeSession && activeSession?.id !== data.sessionId) {
-      debug(`session info changed for non-active session ${data.sessionId}`)
-      return
-    }
-    
-    if (data.sessionId === LiveSessionId) {
-      this.updateLiveSession()
-    }
-    
-    if (data.sessionId === activeSession?.id) {
-      this.updateActiveSession(player)
-    }
-  }
 
   @Bind
   private onEventDataFrame(
@@ -108,7 +99,18 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     data: SessionPlayerEventDataDefault,
     vars: SessionDataVariable[]
   ) {
-    // TODO: implement data frame emit
+    const container = this.getContainerByPlayer(player)
+    if (!this.checkPlayerIsManager(player)) {
+      log.warn("Player is not currently managed & has been removed", player.id)
+      return
+    }
+    asOption(data.payload?.sessionData?.timing).ifSome(timing => {
+      container.setDataFrame(timing, vars)
+      this.appStore.dispatch(
+          isLivePlayer(player) ?
+              sessionManagerActions.updateLiveSessionTiming(timing) :
+          sessionManagerActions.updateDiskSessionTiming(timing))
+    })
   }
 
   /**
@@ -144,12 +146,12 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       return null
     }
     const container = new SessionPlayerContainer(sessionId, player)
-    player.on(SessionEventType.AVAILABLE, this.onEventAvailable)
-    player.on(SessionEventType.INFO_CHANGED, this.onEventInfoChanged)
+    player.on(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
+    player.on(SessionEventType.INFO_CHANGED, this.onEventSessionStateChange)
     player.on(SessionEventType.DATA_FRAME, this.onEventDataFrame)
     container.disposers.push(() => {
-      player.off(SessionEventType.AVAILABLE, this.onEventAvailable)
-      player.off(SessionEventType.INFO_CHANGED, this.onEventInfoChanged)
+      player.off(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
+      player.off(SessionEventType.INFO_CHANGED, this.onEventSessionStateChange)
       player.off(SessionEventType.DATA_FRAME, this.onEventDataFrame)
     })
 
@@ -213,17 +215,23 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    */
   updateState() {
     this.updateSessionIds()
-
-    asOption(this.activeSession).match({
-      Some: ({ id }) => {
-        this.setActiveSession(id)
-      },
-      None: () => {
-        this.updateActiveSession()
-      }
+    this.playerContainers.forEach(({player}) => {
+      this.updateSession(player, null)
     })
-
-    this.updateLiveSession()
+    // asOption(this.activeSession)
+    //     // .filter(isDefined)
+    //     // .filter(({id}) => isNotEmpty(id))
+    //     .match({
+    //   Some: ({ id }) => {
+    //     this.setActiveSession(id)
+    //   },
+    //   None: () => {
+    //     this.updateActiveSession()
+    //   }
+    // })
+    //
+    // this.updateDiskSession()
+    // this.updateLiveSession()
   }
 
   /**
@@ -239,28 +247,33 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    * Convert a `SessionPlayer` to `ActiveSession`
    *
    * @param player
+   * @param evData
    * @private
    */
-  private toSessionDetailFromPlayer(player: SessionPlayer): SessionDetail {
+  private toSessionDetailFromPlayer(player: SessionPlayer, evData: SessionEventData): SessionDetail {
     if (!player)
       return {
-        id: null
+        id: "",
+        isAvailable: false
       }
 
-    const {
-      isAvailable,
-      sessionInfo,
-      sessionData: data,
-      sessionTiming: timing
-    } = player
-    return {
-      id: data.id,
-      type: data.type,
-      isAvailable,
-      data,
-      timing,
-      info: sessionInfo
-    } as SessionDetail
+    return asOption(evData)
+        .match({
+          Some: ({sessionData: data}):SessionDetail => ({
+            id: data.id,
+            isAvailable: true,
+            info: player.sessionInfo,
+            data,
+            timing: data.timing
+          }),
+          None: ():SessionDetail => ({
+            id: player.id,
+            isAvailable: player.isAvailable,
+            info: player.sessionInfo,
+            data: player.sessionData,
+            timing: player.sessionTiming
+          })
+        })
   }
 
   /**
@@ -270,14 +283,8 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return sessionManagerSelectors.selectActiveSession(this.appStore.getState())
   }
 
-  @Bind setActiveSession(sessionId: SessionPlayerId) {
-    const container = this.playerContainers.get(sessionId)
-    if (!container) {
-      error(`Player with id ${sessionId} not found, can not set active session`)
-      return
-    }
-
-    this.updateActiveSession(container)
+  @Bind setActiveSessionType(type: ActiveSessionType) {
+    this.appStore.dispatch(sessionManagerActions.setActiveSessionType(type))
   }
 
   @Bind hasActiveSession() {
@@ -285,30 +292,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return isString(activeSession?.id) && !isEmpty(activeSession.id)
   }
 
-  @Bind updateActiveSession(
-    playerOrContainer: SessionPlayer | SessionPlayerContainer = null
-  ) {
-    let container: SessionPlayerContainer =
-      playerOrContainer instanceof SessionPlayerContainer
-        ? playerOrContainer
-        : null
-    if (playerOrContainer instanceof SessionPlayer) {
-      container = this.playerContainers.get(playerOrContainer.sessionData.id)
-    }
-
-    if (!container)
-      container = this.playerContainers.get(this.activeSession?.id)
-
-    if (!container) {
-      warn(`No current active session & no container provided`)
-      return
-    }
-
-    const activeSession = this.toSessionDetailFromPlayer(container.player)
-    this.appStore.dispatch(
-      sessionManagerActions.setActiveSession(activeSession)
-    )
-  }
+  
 
   get liveSessionPlayerContainer() {
     const container = this.playerContainers.get(LiveSessionId)
@@ -324,31 +308,70 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   get liveSessionPlayer() {
     return this.liveSessionPlayerContainer?.player
   }
-
+  
   /**
    * Update the live session connection flag
    *
    * @private
    */
   @Bind
-  private updateLiveSession() {
-    const container = this.playerContainers.get(LiveSessionId)
-    if (!container) {
-      throw Error(`LIVE Player ${LiveSessionId} not found`)
+  private updateSession(playerOrContainer: SessionPlayer | SessionPlayerContainer, data: SessionEventData) {
+    const player = playerOrContainer instanceof SessionPlayerContainer ? playerOrContainer.player : playerOrContainer
+    if (!player) {
+      throw Error(`Invalid playerOrContainer`)
     }
-
+    
+    const sessionDetail = this.toSessionDetailFromPlayer(player, data)
     this.appStore.dispatch(
-      sessionManagerActions.setLiveSession({
-        ...this.toSessionDetailFromPlayer(container.player)
-      })
+        sessionDetail?.id === LiveSessionId ?
+        sessionManagerActions.setLiveSession(sessionDetail) :
+            sessionManagerActions.setDiskSession(sessionDetail)
     )
   }
-
+  
+  get diskSessionPlayerContainer() {
+    const id = this.diskSessionId
+    if (!isNotEmpty(id)) {
+      return null
+    }
+    
+    const container = this.playerContainers.get(id)
+    if (!container) {
+      throw Error(`Disk Player ${id} not found`)
+    }
+    return container
+  }
+  
+  /**
+   * Get the live session player
+   */
+  get diskSessionPlayer() {
+    return this.diskSessionPlayerContainer?.player
+  }
+  
+  
+  private get hasDiskSession() {
+    return isNotEmpty(this.diskSessionIds)
+  }
+  
+  private get diskSessionIds(): string[] {
+    return this.sessionIds.filter(id => id !== LiveSessionId)
+  }
+  
+  private get diskSessionId(): string {
+    return first(this.diskSessionIds)
+  }
+  
   /**
    * Get sessionIds from state
    */
-  get sessionIds() {
+  get stateSessionIds() {
+    
     return sessionManagerSelectors.selectSessionIds(this.appStore.getState())
+  }
+  
+  get sessionIds() {    
+    return [...this.playerContainers.keys()]
   }
 
   /**
@@ -356,7 +379,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    */
   @Bind updateSessionIds() {
     const currentSessionIds = new Set([...this.playerContainers.keys()])
-    const sessionIds = this.sessionIds
+    const sessionIds = this.stateSessionIds
 
     asOption(currentSessionIds.difference(sessionIds).size)
       .tap(diffCount => debug(`sessionIds diff count is`, diffCount))
@@ -376,9 +399,48 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     
     this.addPlayer(filePath, player)
     
-    await Deferred.delay(1500)
+    // await Deferred.delay(1500)
     
-    this.setActiveSession(filePath)
+    this.updateSession(player, null)
+    this.setActiveSessionType("DISK")
+  }
+  
+  get activeSessionType() {
+    return sessionManagerSelectors.selectActiveSessionType(this.appStore.getState())
+  }
+  
+  closeDiskSession() {
+    const { activeSessionType,diskSessionId } = this
+    const container = this.playerContainers.get(diskSessionId)
+    if (container) {
+      container.dispose()
+      this.playerContainers.delete(diskSessionId)
+    }
+    
+    
+    if (activeSessionType === "DISK") {
+      this.appStore.dispatch(
+          sessionManagerActions.setActiveSessionType("NONE")
+      )
+    }
+    
+    this.appStore.dispatch(
+        sessionManagerActions.setDiskSession(sessionDetailDefaults())
+    )
+  }
+  
+  private checkPlayerIsManager(player:SessionPlayer):boolean {
+    if (!player) {
+      log.error(`Player is null`)
+      return false
+    }
+    const container = this.getContainerByPlayer(player)
+    if (!container) {
+      player.destroy()
+      return false
+    }
+      
+    return true
   }
 }
 

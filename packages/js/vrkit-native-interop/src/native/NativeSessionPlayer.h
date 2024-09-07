@@ -95,7 +95,7 @@ namespace IRacingTools::App::Node {
 
     private:
 
-
+        Napi::Value jsGetId(const Napi::CallbackInfo& info);
         Napi::Value jsGetDataVariable(const Napi::CallbackInfo& info);
         Napi::Value jsGetDataVariableHeaders(const Napi::CallbackInfo& info);
         Napi::Value jsGetSessionInfoYAMLStr(const Napi::CallbackInfo& info);
@@ -133,6 +133,7 @@ namespace IRacingTools::App::Node {
 
         std::shared_ptr<NativeGlobal> system_;
         SessionPlayerEventFn jsSessionPlayerEventFn_;
+        std::string id_;
 
         
         

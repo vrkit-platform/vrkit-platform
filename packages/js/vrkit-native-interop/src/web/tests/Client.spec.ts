@@ -30,7 +30,7 @@ afterAll(async () => {
   await Shutdown();
 })
 
-test.skip("SessionPlayer.open", async () => {
+test("SessionPlayer.open", async () => {
   const ibtFile = Fixtures.resolveFile(Fixtures.Files.ibt.IndyCar.RoadAmerica)
   //log.info("Opening IBT File: ", ibtFile)
   let player:SessionPlayer = null;
@@ -81,7 +81,7 @@ test.skip("SessionPlayer.open", async () => {
   player.close()
 })
 
-test("SessionPlayer.live", async () => {
+test.skip("SessionPlayer.live", async () => {
   let player:SessionPlayer = GetLiveVRKitSessionPlayer()
   
   try {

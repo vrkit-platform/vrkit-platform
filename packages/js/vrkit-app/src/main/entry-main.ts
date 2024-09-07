@@ -15,14 +15,14 @@ import { app, BrowserWindow, ipcMain, session, shell } from "electron"
 import { defaults, importDefault } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import { getLogger } from "@3fv/logger-proxy"
-
+import * as ElectronRemote from '@electron/remote/main'
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
 
 async function start() {
-  require('@electron/remote/main').initialize()
+  ElectronRemote.initialize()
   
   await importDefault(import("./bootstrap"))
   await importDefault(import("./launch"))

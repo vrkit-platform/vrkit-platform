@@ -39,8 +39,12 @@ const
 
 const webConfig = defaultWebpackConfig("electron-renderer", "electron-renderer", moduleDir, {
   distDir: targetDir,
-  entryFile: "./src/renderer/index.tsx",
-  
+  entryFile: "./src/renderer/entry-renderer.tsx",
+  extraEntries: {
+    "electron-renderer-overlay": {
+      entryFile: "./src/renderer/entry-renderer-overlay.tsx"
+    }
+  },
   config: {
     externals: [electronExternals],
     devServer,
@@ -48,7 +52,19 @@ const webConfig = defaultWebpackConfig("electron-renderer", "electron-renderer",
       new HtmlWebpackPlugin({
         title: "vrkit-electron-renderer",
         filename: `index.html`,
-        template: Path.join(rendererDir, "index.ejs"),
+        excludeChunks: ["electron-renderer-overlay"],
+        template: Path.join(rendererDir, "entry-renderer.ejs"),
+        templateParameters: {
+          isElectron: true,
+          appVersion: pkgVersion,
+          appPathPrefix: ""
+        }
+      }),
+      new HtmlWebpackPlugin({
+        title: "vrkit-electron-renderer-overlay",
+        filename: `index-overlay.html`,
+        excludeChunks: ["electron-renderer"],
+        template: Path.join(rendererDir, "entry-renderer-overlay.ejs"),
         templateParameters: {
           isElectron: true,
           appVersion: pkgVersion,

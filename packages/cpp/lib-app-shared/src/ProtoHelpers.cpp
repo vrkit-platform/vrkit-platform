@@ -89,6 +89,8 @@ namespace IRacingTools::Shared::Utils {
       return tsRes.error();
 
     auto& ts = tsRes.value();
+    // int64_t createdAtSeconds = std::chrono::duration_cast<std::chrono::seconds>(ts.createdAt.time_since_epoch()).count();
+    // int64_t modifiedAtSeconds = std::chrono::duration_cast<std::chrono::seconds>(ts.modifiedAt.time_since_epoch()).count();
     int64_t createdAtSeconds = ToSeconds(ts.createdAt);
     int64_t modifiedAtSeconds = ToSeconds(ts.modifiedAt);
 

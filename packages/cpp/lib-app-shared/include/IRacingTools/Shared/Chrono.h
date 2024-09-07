@@ -25,7 +25,8 @@ namespace IRacingTools::Shared {
 
   template<typename TP>
   int64_t ToSeconds(const TP& tp) {
-    return tp.time_since_epoch().count();
+    return std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch()).count();
+    //tp.time_since_epoch().count() ;
   }
 
 

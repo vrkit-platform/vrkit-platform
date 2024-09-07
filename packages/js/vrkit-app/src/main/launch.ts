@@ -1,22 +1,24 @@
 import { isDev, isMac, WindowSizeDefault } from "./constants"
 
 import Path from "path"
+import type { NativeImage, Rectangle } from "electron"
 import { app, BrowserWindow, shell } from "electron"
 import { resolveHtmlPath } from "./utils"
 import { Option } from "@3fv/prelude-ts"
 import iconPng from "../assets/icons/icon.png"
-import { defaults } from "vrkit-app-common/utils"
+import { defaults, signalFlag } from "vrkit-app-common/utils"
 
 import { getLogger } from "@3fv/logger-proxy"
 import { getService } from "./ServiceContainer"
 import { WindowManager } from "./services/window-manager"
-
+import { HandlerDetails, WindowOpenHandlerResponse } from "electron/main"
+import * as ElectronRemote from "@electron/remote/main"
+import { getValue } from "@3fv/guard"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
-
-
+// let electronRemote: typeof ElectronRemote = null
 
 const BuildPaths = {
   root: app.isPackaged
@@ -38,34 +40,117 @@ const getAssetPath = (...paths: string[]): string => {
 
 let mainWindow: BrowserWindow | null = null
 
+function windowOptionDefaults(): Electron.BrowserWindowConstructorOptions {
+  return {
+    titleBarStyle: "hidden",
+    titleBarOverlay: false,
+    fullscreenable: false,
+    icon: iconPng,
+    resizable: true,
+    webPreferences: {
+      allowRunningInsecureContent: true,
+      webSecurity: false,
+      nodeIntegration: true,
+      nodeIntegrationInSubFrames: true,
+      nodeIntegrationInWorker: true,
+      contextIsolation: false,
+      sandbox: false,
+      devTools: isDev
+    }
+  }
+}
+
+/**
+ * Handles window open requests in a renderer window
+ *
+ * @param ev
+ */
+const windowOpenHandler = (ev: HandlerDetails): WindowOpenHandlerResponse => {
+  log.info(`windowOpenHandler`, ev)
+  return {
+    action: "allow",
+    overrideBrowserWindowOptions: {
+      frame: false,
+      transparent: true,
+      backgroundColor: "#00000000",
+      ...windowOptionDefaults()
+    }
+  }
+}
+
+const windowMap = new Map<number, BrowserWindow>()
+
+/**
+ * Prepare window & attach event handlers, etc
+ *
+ * @param win
+ */
+function prepareWindow(win: BrowserWindow) {
+  if (windowMap.has(win.id)) {
+    info(`Window ${win.id} is already configured`)
+    return
+  }
+
+  const id = win.id
+  windowMap.set(id, win)
+
+  
+  const onFrameCallback = (image: NativeImage, _dirtyRect: Rectangle) => {
+    getValue(
+      () => {
+        info(
+          `onFrameCallback window buffer received ${id} (${image.getBitmap().length} bytes)`
+        )
+      },
+      null,
+      err => {
+        error(`Unable to get handle?`, err)
+      }
+    )
+  }
+
+  win.on("close", () => {
+    windowMap.delete(id)
+  })
+
+  if (win !== mainWindow) {
+    win.on("show", () => {
+      win.webContents.beginFrameSubscription(false, onFrameCallback)
+    })
+  }
+
+  ElectronRemote.enable(win.webContents)
+  win.on("show", () => {
+    win.webContents.setWindowOpenHandler(windowOpenHandler)
+    if (isDev) {
+        win.webContents.openDevTools()
+    }
+  })
+  win.webContents.setWindowOpenHandler(windowOpenHandler)
+  win.webContents.on("did-create-window", (newWin, details) => {
+    info(`Preparing new webContents window`)
+    prepareWindow(newWin)
+  })
+}
+
 async function launch() {
   const windowManager = getService<WindowManager>(WindowManager)
 
   const createWindow = async () => {
     mainWindow = new BrowserWindow({
       ...defaults(windowManager.createWindowOptions, WindowSizeDefault),
+      backgroundColor: "black",
       show: false,
-      titleBarStyle: "hidden",
-      titleBarOverlay: false,
-      icon: iconPng,
-      backgroundColor: "#00000000",
-      resizable: true,
-      
-      webPreferences: {
-        allowRunningInsecureContent: true,
-        webSecurity: false,
-        nodeIntegration: true,
-        nodeIntegrationInSubFrames: true,
-        nodeIntegrationInWorker: true,
-        contextIsolation: false,
-        sandbox: false,
-        devTools: isDev
-      }
+      ...windowOptionDefaults()
     })
-    
-    require('@electron/remote/main').enable(mainWindow.webContents)
-    
-    
+
+    //electronRemote = await importDefault(import('@electron/remote/main'))
+    prepareWindow(mainWindow)
+
+    app.on("browser-window-created", (_, newWin) => {
+      prepareWindow(newWin)
+    })
+
     windowManager.enable(mainWindow)
 
     Option.of(resolveHtmlPath("index.html"))
@@ -76,22 +161,16 @@ async function launch() {
           .catch(err => console.error("Failed to load url", url, err))
       )
 
-    let firstLoad = true
+    const firstLoadSignal = signalFlag()
     mainWindow.on("ready-to-show", async () => {
-      if (firstLoad) {
-        // mainWindow.webContents.devToolsWebContents.reload()
-        firstLoad = false
-      }
+      firstLoadSignal.toggle()
+
       if (!mainWindow) {
         throw new Error('"mainWindow" is not defined')
       }
 
       // Open devtools in `development` automatically
       mainWindow.show()
-
-      if (isDev) {
-        mainWindow.webContents.openDevTools()
-      }
     })
 
     mainWindow.on("closed", () => {
@@ -102,10 +181,10 @@ async function launch() {
     // menuBuilder.buildMenu()
     //
     // Open urls in the user's browser
-    mainWindow.webContents.setWindowOpenHandler(edata => {
-      shell.openExternal(edata.url)
-      return { action: "allow" }
-    })
+    // mainWindow.webContents.setWindowOpenHandler(edata => {
+    //   shell.openExternal(edata.url)
+    //   return { action: "allow" }
+    // })
   }
 
   /**

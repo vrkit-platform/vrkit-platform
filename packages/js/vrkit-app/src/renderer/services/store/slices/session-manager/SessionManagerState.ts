@@ -2,11 +2,8 @@
 // import { get } from "lodash/fp"
 import { SessionData, SessionTiming, SessionType } from "vrkit-models"
 import { SessionInfoMessage } from "vrkit-native-interop"
-
-export type SessionPlayerId = string | "SESSION_TYPE_LIVE"
-
-export const LiveSessionId:SessionPlayerId = "SESSION_TYPE_LIVE"
-
+import { SessionPlayerId, LiveSessionId } from "vrkit-native-interop"
+export { SessionPlayerId, LiveSessionId } // from "vrkit-native-interop"
 
 
 export interface SessionDetail {
@@ -24,9 +21,12 @@ export const sessionDetailDefaults = (): SessionDetail => ({
   id: ""
 })
 
+export type ActiveSessionType = "LIVE" | "DISK" | "NONE"
+
 export interface SessionManagerState {
   liveSession?: SessionDetail
-  activeSession?: SessionDetail
+  diskSession?: SessionDetail
+  activeSessionType: ActiveSessionType
   sessionIds: Set<SessionPlayerId>
 }
 

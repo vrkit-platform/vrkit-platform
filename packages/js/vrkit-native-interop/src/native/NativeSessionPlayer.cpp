@@ -52,6 +52,7 @@ namespace IRacingTools::App::Node {
                 InstanceMethod<&NativeSessionPlayer::jsGetDataVariable>("getDataVariable"),
                 InstanceMethod<&NativeSessionPlayer::jsGetDataVariableHeaders>("getDataVariableHeaders"),
 
+                InstanceAccessor<&NativeSessionPlayer::jsGetId>("id"),
                 InstanceAccessor<&NativeSessionPlayer::jsIsLive>("isLive"),
                 InstanceAccessor<&NativeSessionPlayer::jsIsAvailable>("isAvailable"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetFileInfo>("fileInfo"),
@@ -72,6 +73,10 @@ namespace IRacingTools::App::Node {
      */
     NativeSessionPlayer::NativeSessionPlayer(const Napi::CallbackInfo& info)
         : Napi::ObjectWrap<NativeSessionPlayer>(info), system_(NativeGlobal::GetPtr()) {
+        constexpr auto kArgIdxId = 1;
+        constexpr auto kArgIdxFile = 2;
+        constexpr auto kArgCount = 3;
+
         L->info("SessionPlayer() new instance: {}", info.Length());
 
         auto env = info.Env();
@@ -80,17 +85,19 @@ namespace IRacingTools::App::Node {
             if (errorIf) throw TypeError::New(env, msg);
         };
 
-        argError(!argCount || argCount > 2, kCtorArgError);
+        argError(!argCount || argCount > kArgCount, kCtorArgError);
 
         argError(!info[0].IsFunction(), kCtorArgError);
-        argError(argCount == 2 && !info[1].IsString() && !info[1].IsNull(), kCtorArgError);
+        argError(!info[kArgIdxId].IsString(), kCtorArgError);
+        argError(argCount == kArgCount && !info[kArgIdxFile].IsString() && !info[kArgIdxFile].IsNull(), kCtorArgError);
 
         // CREATE SESSION STATE
         sessionData_ = std::make_shared<Models::Session::SessionData>();
 
-        if (argCount == 2 && info[1].IsString()) {
+        id_ = info[kArgIdxId].As<Napi::String>().Utf8Value();
+        if (argCount == kArgCount && info[kArgIdxFile].IsString()) {
             // Disk based player
-            auto filePathStr = info[1].As<Napi::String>().Utf8Value();
+            auto filePathStr = info[kArgIdxFile].As<Napi::String>().Utf8Value();
 
             fs::path filePath{filePathStr};
             argError(
@@ -176,6 +183,9 @@ namespace IRacingTools::App::Node {
         return dataProvider_;
     }
 
+    Napi::Value NativeSessionPlayer::jsGetId(const Napi::CallbackInfo& info) {
+        return Napi::String::New(info.Env(), id_);
+    }
     Napi::Value NativeSessionPlayer::jsGetDataVariable(const Napi::CallbackInfo& info) {
         // TODO: Create new `Napi::Object` using defined class `NativeSessionDataVariable`
         auto env = info.Env();
@@ -237,9 +247,16 @@ namespace IRacingTools::App::Node {
         std::string sessionDataJson{};
         auto encodeRes = google::protobuf::json::MessageToJsonString(*sessionData, &sessionDataJson);
         if (!encodeRes.ok()) {
-            L->error("Unable to encode SessionData ({}): {}", magic_enum::enum_name(encodeRes.code()).data(), std::string{encodeRes.message()});
-            // throw TypeError::New(env, "Unable to encode `SessionData` to JSON");
-            return Napi::Object::New(env);
+            auto errCodeName = std::string{magic_enum::enum_name(encodeRes.code()).data()};
+            auto errMessage = std::string{encodeRes.message()};
+            L->error("Unable to encode SessionData ({}): {}", errCodeName, errMessage);
+            auto terrObj = TypeError::New(env, "Unable to encode `SessionData` to JSON");
+
+            auto errObj = Napi::Object::New(env);
+            errObj.Set("code", errCodeName);
+            errObj.Set("message", errMessage);
+            terrObj.Set("pb", errObj);
+            throw terrObj;
         }
 
         auto sessionDataJsonStr = Napi::String::New(env, sessionDataJson);;

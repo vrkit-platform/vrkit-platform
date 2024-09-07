@@ -15,10 +15,11 @@ const { debug, trace, info, error, warn } = log
 
 const getDevMiddleware = () => {
   if (isDev) {
-    const logger = asOption(require("redux-logger"))
-      .map(mod => (mod.default ?? mod) as Middleware)
-      .get()
-    return [logger]
+    // const logger = asOption(require("redux-logger"))
+    //   .map(mod => (mod.default ?? mod) as Middleware)
+    //   .get()
+    // return [logger]
+    return []
   } else {
     return []
   }

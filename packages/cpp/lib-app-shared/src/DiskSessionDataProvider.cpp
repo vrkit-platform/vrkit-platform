@@ -188,9 +188,9 @@ namespace IRacingTools::Shared {
 
             auto nowTime = std::chrono::steady_clock::now();
             auto intervalDuration = nextTime - nowTime;
-            if (DEBUG && L->should_log(spdlog::level::debug)) {
-                L->debug("next data frame in {}ms", duration_cast<std::chrono::milliseconds>(intervalDuration).count());
-            }
+            // if (DEBUG && L->should_log(spdlog::level::debug)) {
+            //     L->debug("next data frame in {}ms", duration_cast<std::chrono::milliseconds>(intervalDuration).count());
+            // }
 
             {
                 std::unique_lock threadLock(threadMutex_);
@@ -198,41 +198,6 @@ namespace IRacingTools::Shared {
                     return !running_;
                 });
             }
-
-            // long long int sessionMillis = SDK::Utils::SessionTimeToMillis(sessionTime);
-
-            //       SessionTime sessionDuration{sessionMillis};
-            //
-            //       auto intervalDuration = sessionDuration - previousSessionDuration;
-            //
-            //       if (previousSessionDuration.count()) {
-            //         auto currentTimeMillis = TimeEpoch();
-            //         if (posCount > 0) {
-            //           auto targetTimeMillis =
-            //               !previousTimeMillis.count() ? currentTimeMillis : (previousTimeMillis + intervalDuration);
-            //           if (targetTimeMillis > currentTimeMillis) {
-            //             auto sleepTimeMillis = targetTimeMillis - currentTimeMillis;
-            //             std::this_thread::sleep_for(sleepTimeMillis);
-            //           }
-            //           previousTimeMillis = targetTimeMillis;
-            //         } else {
-            //           previousTimeMillis = currentTimeMillis;
-            //         }
-            //       }
-            //
-            //       previousSessionDuration = sessionDuration;
-            //
-            // //      if (posCount > 0 && TimeEpoch() - lastPrintTime > 999ms) {
-            // //        L->info << std::format("Session Time: {:%H}:{:%M}:{:%S}.{:03d}\t\tCar Pos Count: {}", sessionDuration,
-            // //                                 sessionDuration, sessionDuration, millis, posCount)
-            // //                  << "\n";
-            // //        std::flush(std::cout);
-            // //        lastPrintTime = TimeEpoch();
-            // //      }
-            //       if (posCount)
-            //         process();
-
-
         }
     }
 

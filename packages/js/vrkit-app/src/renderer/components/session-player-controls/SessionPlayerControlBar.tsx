@@ -21,8 +21,6 @@ import {
 import clsx from "clsx"
 import { useAppSelector } from "../../services/store"
 import {
-  ActiveSessionType,
-  SessionDetail,
   sessionManagerSelectors
 } from "vrkit-app-renderer/services/store/slices/session-manager"
 import React, { useCallback } from "react"
@@ -36,11 +34,15 @@ import { match, P } from "ts-pattern"
 import { getLogger } from "@3fv/logger-proxy"
 import { useShowOpenDialog } from "vrkit-app-renderer/hooks/useShowOpenDialog"
 import { isEmpty } from "vrkit-app-common/utils"
-import SessionManager from "vrkit-app-renderer/services/session-manager"
+import SessionManagerClient from "vrkit-app-renderer/services/session-manager-client"
 import { useService } from "../service-container"
 import { SessionTiming } from "vrkit-models"
 
 import { DurationView, MILLIS_IN_HR } from "../time"
+import {
+  ActiveSessionType,
+  SessionDetail
+} from "vrkit-app-common/models/session-manager"
 
 const log = getLogger(__filename)
 
@@ -123,14 +125,14 @@ export function LiveSessionButton({
       sessionManagerSelectors.isLiveSessionAvailable
     ),
     isActive = activeSessionType === "LIVE",
-    sessionManager = useService(SessionManager),
+    sessionManagerClient = useService(SessionManagerClient),
     text = match([isAvailable, isActive])
       .with([false, P.any], () => "Not Running")
       .with([true, false], () => "Connect")
       .with([true, true], () => "Disconnect")
       .otherwise(() => "unknown"),
     onClick = useCallback(() => {
-      sessionManager.setActiveSessionType(
+      sessionManagerClient.setActiveSessionType(
         isActive || !isAvailable ? "NONE" : "LIVE"
       )
     }, [isActive, isAvailable])
@@ -178,24 +180,14 @@ export function DiskSessionButton({
   const diskSession = useAppSelector(sessionManagerSelectors.selectDiskSession),
     isActive = activeSessionType === "DISK",
     isAvailable = diskSession?.isAvailable === true,
-    sessionManager = useService(SessionManager),
+      sessionManagerClient = useService(SessionManagerClient),
     onCloseClick = () => {
-      sessionManager.closeDiskSession()
+      sessionManagerClient.closeDiskSession()
     },
-    onOpenClick = useShowOpenDialog(res => {
-      const { filePaths } = res
-      if (res.canceled || isEmpty(filePaths)) {
-        log.info(
-          `Open file was cancelled or no file paths`,
-          filePaths,
-          res.canceled
-        )
-        return
-      }
-
-      const [filePath] = filePaths
-      sessionManager
-        .createDiskPlayer(filePath)
+    onOpenClick = useCallback(() => {
+      
+      sessionManagerClient
+        .showOpenDiskPlayer()
         .catch(err => log.error("Failed to create disk player", err))
     })
 

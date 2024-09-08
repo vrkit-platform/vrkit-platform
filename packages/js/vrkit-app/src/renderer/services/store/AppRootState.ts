@@ -3,7 +3,7 @@
 //import type { RouterState } from "connected-react-router"
 import type { GlobalState } from "./slices/global"
 import type { DataState } from "./slices/data"
-import type { SessionManagerState } from "./slices/session-manager"
+import type { SessionManagerState } from "vrkit-app-common/models/session-manager"
 
 export interface AppRootState {
   global: GlobalState

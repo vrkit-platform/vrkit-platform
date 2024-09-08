@@ -5,7 +5,7 @@ import {
   sessionDetailDefaults,
   type SessionManagerState,
   type SessionPlayerId
-} from "./SessionManagerState"
+} from "vrkit-app-common/models/session-manager"
 import { Identity, isNotEmpty } from "vrkit-app-common/utils"
 import { isDefined, isString } from "@3fv/guard"
 import { get } from "lodash/fp"
@@ -23,7 +23,6 @@ const newSessionState = (): SessionManagerState => ({
   activeSessionType: "NONE",
   liveSession: sessionDetailDefaults(),
   diskSession: sessionDetailDefaults(),
-  sessionIds: new Set<string>()
 })
 
 function createActiveSessionSelector<T>(selector: (session:SessionDetail) => T) {
@@ -50,14 +49,6 @@ const slice = createSlice({
         ...state.liveSession,
         isAvailable: liveSessionConnected
       }
-      return state
-    },
-
-    setSessionIds(
-      state,
-      { payload: sessionIds }: PayloadAction<Set<SessionPlayerId>>
-    ) {
-      state.sessionIds = sessionIds
       return state
     },
 
@@ -134,8 +125,6 @@ const slice = createSlice({
 
     isLiveSessionAvailable: (state: SessionManagerState) =>
       state.liveSession?.isAvailable === true,
-
-    selectSessionIds: (state: SessionManagerState) => state.sessionIds,
 
     // Active Session Selectors
     selectActiveSessionType: (state: SessionManagerState) => state.activeSessionType,

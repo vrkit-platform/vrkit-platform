@@ -29,7 +29,7 @@ export interface NativeSessionPlayerEventData {
 
 export type SessionPlayerId = string | "SESSION_TYPE_LIVE"
 
-export const LiveSessionId: SessionPlayerId = "SESSION_TYPE_LIVE"
+const LiveSessionId: SessionPlayerId = "SESSION_TYPE_LIVE"
 
 export type SessionPlayerEventName = SessionEventType | keyof SessionEventType
 

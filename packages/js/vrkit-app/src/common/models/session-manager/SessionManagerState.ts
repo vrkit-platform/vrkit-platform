@@ -1,10 +1,8 @@
-// import { createEntityAdapter, EntityState,createSelector } from "@reduxjs/toolkit"
-// import { get } from "lodash/fp"
 import { SessionData, SessionTiming, SessionType } from "vrkit-models"
-import { SessionInfoMessage } from "vrkit-native-interop"
-import { SessionPlayerId, LiveSessionId } from "vrkit-native-interop"
-export { SessionPlayerId, LiveSessionId } // from "vrkit-native-interop"
+import type { SessionPlayerId, SessionInfoMessage } from "vrkit-native-interop"
+export { SessionPlayerId }
 
+export const LiveSessionId: SessionPlayerId = "SESSION_TYPE_LIVE"
 
 export interface SessionDetail {
   id?: string
@@ -27,6 +25,16 @@ export interface SessionManagerState {
   liveSession?: SessionDetail
   diskSession?: SessionDetail
   activeSessionType: ActiveSessionType
-  sessionIds: Set<SessionPlayerId>
 }
 
+export const newSessionState = (): SessionManagerState => ({
+  activeSessionType: "NONE",
+  liveSession: sessionDetailDefaults(),
+  diskSession: sessionDetailDefaults(),
+})
+
+export enum SessionManagerEventType {
+  UNKNOWN = "UNKNOWN",
+  STATE_CHANGED = "STATE_CHANGED",
+  DATA_FRAME = "DATA_FRAME"
+}

@@ -3,7 +3,7 @@ import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 import { ActionRegistry } from "vrkit-app-common/services"
 import WebActionManager from "./services/web-action-manager"
-import SessionManager from "./services/session-manager"
+import SessionManagerClient from "./services/session-manager-client"
 
 import { APP_STORE_ID, isSharedWorkerEnabled } from "./constants"
 
@@ -45,7 +45,7 @@ async function createContainer(): Promise<Container> {
       .bindClass(WebActionManager)
       .bindClass(FileSystemManager)
         .bindClass(TrackManager)
-      .bindClass(SessionManager)
+      .bindClass(SessionManagerClient)
       .resolveAll()
 
     // container = await container.resolveAll()

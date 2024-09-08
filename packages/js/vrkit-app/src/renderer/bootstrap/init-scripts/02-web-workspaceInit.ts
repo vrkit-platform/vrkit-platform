@@ -3,7 +3,7 @@ import { getLogger } from "@3fv/logger-proxy"
 
 // import { EntityStateAdapter } from "@reduxjs/toolkit"
 // import { isDev } from "../../constants"
-import { SessionManager } from "../../services/session-manager"
+import { SessionManager } from "../../services/session-manager-client"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

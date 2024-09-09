@@ -1,7 +1,9 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import {
-  ActiveSessionType, type SessionDetail,
+  ActiveSessionType,
+  newSessionState,
+  type SessionDetail,
   sessionDetailDefaults,
   type SessionManagerState,
   type SessionPlayerId
@@ -13,17 +15,6 @@ import { SessionTiming, SessionType } from "vrkit-models"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
-
-/**
- * New initial state instance
- *
- * @returns {SessionManagerState}
- */
-const newSessionState = (): SessionManagerState => ({
-  activeSessionType: "NONE",
-  liveSession: sessionDetailDefaults(),
-  diskSession: sessionDetailDefaults(),
-})
 
 function createActiveSessionSelector<T>(selector: (session:SessionDetail) => T) {
   return (state: SessionManagerState) =>

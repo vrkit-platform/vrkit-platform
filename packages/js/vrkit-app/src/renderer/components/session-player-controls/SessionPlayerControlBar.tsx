@@ -181,15 +181,14 @@ export function DiskSessionButton({
     isActive = activeSessionType === "DISK",
     isAvailable = diskSession?.isAvailable === true,
       sessionManagerClient = useService(SessionManagerClient),
-    onCloseClick = () => {
+    onCloseClick = useCallback(() => {
       sessionManagerClient.closeDiskSession()
-    },
+    },[sessionManagerClient]),
     onOpenClick = useCallback(() => {
-      
       sessionManagerClient
-        .showOpenDiskPlayer()
+          .showOpenDiskSession()
         .catch(err => log.error("Failed to create disk player", err))
-    })
+    },[sessionManagerClient])
 
   return (
     <Button

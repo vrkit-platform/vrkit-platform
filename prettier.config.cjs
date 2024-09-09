@@ -6,7 +6,7 @@ module.exports = {
   singleQuote: false,
   parser: "typescript",
   arrowParens: "avoid",
-  printWidth: 80,
+  printWidth: 120,
   quoteProps: "as-needed",
   jsxSingleQuote: false,
   jsxBracketSameLine: false,

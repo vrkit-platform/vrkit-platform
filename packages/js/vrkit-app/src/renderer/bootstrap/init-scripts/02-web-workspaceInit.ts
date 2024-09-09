@@ -1,17 +1,15 @@
 import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-
-// import { EntityStateAdapter } from "@reduxjs/toolkit"
-// import { isDev } from "../../constants"
-import { SessionManager } from "../../services/session-manager-client"
+import { SessionManagerClient } from "../../services/session-manager-client"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 export async function init(container: Container) {
-  debug(`init sessionManager state`)
-  const sessionManager = container.get(SessionManager)
-  sessionManager.updateState()
+  debug(`init sessionManagerClient state`)
+  const sessionManagerClient = container.get(SessionManagerClient)
+  const initState = await sessionManagerClient.getMainSessionManagerState()
+  sessionManagerClient.updateState(initState)
   
   // let unsubscribe: Function = null
   //

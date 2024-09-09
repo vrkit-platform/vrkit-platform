@@ -19,7 +19,11 @@ import {
   SessionDetail,
   sessionDetailDefaults,
   SessionManagerEventType,
+  SessionManagerEventTypeToIPCName,
+  SessionManagerFnType,
+  SessionManagerFnTypeToIPCName,
   SessionManagerState,
+  SessionManagerStateSessionKey,
   SessionPlayerId
 } from "vrkit-app-common/models/session-manager"
 
@@ -27,9 +31,10 @@ import { first, isEmpty } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
 import EventEmitter3 from "eventemitter3"
 import { assign, isDev, isNotEmpty, propEqualTo } from "vrkit-app-common/utils"
-import { app, dialog, ipcMain } from "electron"
+import { app, dialog, ipcMain, IpcMainInvokeEvent, webContents } from "electron"
 import { get } from "lodash/fp"
 import { Deferred } from "@3fv/deferred"
+import { match } from "ts-pattern"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -73,6 +78,7 @@ export interface SessionManagerEventArgs {
   ) => void
 
   [SessionManagerEventType.DATA_FRAME]: (
+    sessionId: string,
     dataVars: SessionDataVariable[]
   ) => void
 }
@@ -81,7 +87,7 @@ export interface SessionManagerEventArgs {
 export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   private state_ = newSessionState()
 
-  private pendingOpenDiskPlayerDeferred_: Deferred<boolean> = null
+  private pendingOpenDiskPlayerDeferred_: Deferred<string> = null
 
   private livePlayerContainer_: SessionPlayerContainer = null
 
@@ -133,22 +139,33 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       return
     }
 
-    const { activeSessionType } = this.state
-    if (activeSessionType === "NONE")
-      asOption(data.payload?.sessionData?.timing).ifSome(timing => {
-        container.setDataFrame(timing, vars)
-        // TODO: Implement emitState
-
-        // this.appStore.dispatch(
-        //   isLivePlayer(player)
-        //     ? sessionManagerActions.updateLiveSessionTiming(timing)
-        //     : sessionManagerActions.updateDiskSessionTiming(timing)
-        // )
+    // const { activeSessionType } = this.state
+    // if (activeSessionType !== "NONE")
+    asOption(data.payload?.sessionData?.timing).ifSome(timing => {
+      container.setDataFrame(timing, vars)
+      const stateKey: SessionManagerStateSessionKey = isLivePlayer(player)
+        ? "liveSession"
+        : "diskSession"
+      this.patchState({
+        [stateKey]: {
+          ...this.state[stateKey],
+          timing
+        }
       })
+
+      // TODO: Implement value based SessionDataVariable interface & emit
+      this.broadcast(SessionManagerEventType.DATA_FRAME, player.id, [])
+    })
   }
 
   get state() {
     return this.state_
+  }
+
+  async getStateHandler(
+    event: IpcMainInvokeEvent
+  ): Promise<SessionManagerState> {
+    return this.state
   }
 
   /**
@@ -232,25 +249,51 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    */
   @PostConstruct() // @ts-ignore
   private async init(): Promise<void> {
-    // tslint:disable-next-line
+    const ipcFnHandlers = Array<
+      [SessionManagerFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any]
+    >(
+      [
+        SessionManagerFnType.SET_ACTIVE_SESSION_TYPE,
+        this.setActiveSessionTypeHandler.bind(this)
+      ],
+      [
+        SessionManagerFnType.SHOW_OPEN_DISK_SESSION,
+        this.showOpenDiskPlayerDialogHandler.bind(this)
+      ],
+      [
+        SessionManagerFnType.CLOSE_DISK_SESSION,
+        this.closeDiskSessionHandler.bind(this)
+      ],
+      [SessionManagerFnType.GET_STATE, this.getStateHandler.bind(this)]
+    )
+
     app.on("before-quit", this.unload)
 
+    ipcFnHandlers.forEach(([type, handler]) =>
+      ipcMain.handle(SessionManagerFnTypeToIPCName(type), handler)
+    )
+
+    this.createLivePlayer()
+
+    // In dev mode, make everything accessible
     if (isDev) {
       Object.assign(global, {
         sessionManager: this
       })
 
-      if (import.meta.webpackHot) {
-        import.meta.webpackHot.addDisposeHandler(() => {
+      if (module.hot) {
+        module.hot.addDisposeHandler(() => {
           app.off("before-quit", this.unload)
+          ipcFnHandlers.forEach(([type]) =>
+            ipcMain.removeHandler(SessionManagerFnTypeToIPCName(type))
+          )
+
           Object.assign(global, {
-            sessionManager: null
+            sessionManager: undefined
           })
         })
       }
     }
-
-    this.createLivePlayer()
   }
 
   /**
@@ -265,20 +308,6 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    */
   updateState() {
     this.patchState()
-    // asOption(this.activeSession)
-    //     // .filter(isDefined)
-    //     // .filter(({id}) => isNotEmpty(id))
-    //     .match({
-    //   Some: ({ id }) => {
-    //     this.setActiveSession(id)
-    //   },
-    //   None: () => {
-    //     this.updateActiveSession()
-    //   }
-    // })
-    //
-    // this.updateDiskSession()
-    // this.updateLiveSession()
   }
 
   /**
@@ -310,7 +339,10 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return asOption(evData).match({
       Some: ({ sessionData: data }): SessionDetail => ({
         id: data.id,
-        isAvailable: true,
+        isAvailable: asOption(data.timing).match({
+          Some: ({ isValid }) => isValid === true,
+          None: () => player.isAvailable
+        }),
         info: player.sessionInfo,
         data,
         timing: data.timing
@@ -349,6 +381,16 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     this.patchState({ activeSessionType: type })
   }
 
+  @Bind
+  async setActiveSessionTypeHandler(
+    event: IpcMainInvokeEvent,
+    type: ActiveSessionType
+  ): Promise<ActiveSessionType> {
+    log.info(`Received handler callback setActiveSessionTypeHandler`, event)
+    this.setActiveSessionType(type)
+    return type
+  }
+
   @Bind hasActiveSession() {
     const { activeSession } = this
     return isString(activeSession?.id) && !isEmpty(activeSession.id)
@@ -373,26 +415,45 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   @Bind
   private updateSession(
     playerOrContainer: SessionPlayer | SessionPlayerContainer,
-    data: SessionEventData
+    data: SessionEventData,
+    activeSessionType: ActiveSessionType = this.state.activeSessionType
   ) {
     const player =
       playerOrContainer instanceof SessionPlayerContainer
         ? playerOrContainer.player
         : playerOrContainer
+
     if (!player) {
       throw Error(`Invalid playerOrContainer`)
     }
 
     const sessionDetail = this.toSessionDetailFromPlayer(player, data)
-    const isLive = sessionDetail?.id === LiveSessionId
+    const { isAvailable } = sessionDetail
+    
+    const isLive = isLivePlayer(player)
+    const stateKey: SessionManagerStateSessionKey = isLive
+      ? "liveSession"
+      : "diskSession"
+    
+    match([isLive, activeSessionType, isAvailable])
+        .with([true, "LIVE", false], () => {
+          activeSessionType = "NONE"
+        })
+        .with([false, "DISK", false], () => {
+          activeSessionType = "NONE"
+        })
+        .otherwise(() => {})
+    
+    // if (isLive && activeSessionType === "LIVE" && !isAvailable) {
+    //   activeSessionType = "NONE"
+    // }
+    
     this.patchState({
-      ...(isLive
-        ? {
-            liveSession: sessionDetail
-          }
-        : {
-            diskSession: sessionDetail
-          })
+      activeSessionType,
+      [stateKey]: {
+        ...this.state[stateKey],
+        ...sessionDetail
+      }
     })
   }
 
@@ -427,8 +488,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     // await Deferred.delay(1500)
 
-    this.updateSession(player, null)
-    this.setActiveSessionType("DISK")
+    this.updateSession(player, null, "DISK")
   }
 
   get activeSessionType() {
@@ -443,6 +503,8 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       delete this.diskPlayerContainer_
     }
 
+    this.diskPlayerContainer_ = null
+
     if (activeSessionType === "DISK") {
       activeSessionType = "NONE"
     }
@@ -451,6 +513,13 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       diskSession: sessionDetailDefaults(),
       activeSessionType
     })
+  }
+
+  @Bind
+  async closeDiskSessionHandler(event: IpcMainInvokeEvent): Promise<boolean> {
+    info(`Received closeDiskSessionHandler`, event)
+    this.closeDiskSession()
+    return true
   }
 
   private checkPlayerIsManaged(player: SessionPlayer): boolean {
@@ -485,16 +554,44 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     this.broadcastState()
   }
 
+  /**
+   * Broadcast a state change
+   *
+   * @private
+   */
   private broadcastState() {
     this.broadcast(SessionManagerEventType.STATE_CHANGED, this.state_)
   }
 
+  /**
+   * Generate broadcast/emit function.  This emits via it's super
+   * class `EventEmitter3` & sends it to all browser windows
+   *
+   * @param type
+   * @param args
+   * @private
+   */
   private broadcast(type: SessionManagerEventType, ...args: any[]): void {
+    const ipcEventName = SessionManagerEventTypeToIPCName(type)
     ;(this.emit as any)(type, ...args)
-    ipcMain.emit("SESSION_MANAGER_EVENT", type, ...args)
+
+    webContents.getAllWebContents().forEach(wc => {
+      wc.send(ipcEventName, ...args)
+    })
   }
 
-  async showOpenDiskPlayerDialog(): Promise<boolean> {
+  /**
+   * Handles the event to show the disk player open dialog.
+   *
+   * @param {IpcMainInvokeEvent} event - The event object from IPC invoke.
+   * @return {Promise<string>} A promise that resolves with the selected file
+   *     path or rejects with an error.
+   */
+  @Bind
+  async showOpenDiskPlayerDialogHandler(
+    event: IpcMainInvokeEvent
+  ): Promise<string> {
+    info(`Received showOpenDiskPlayerDialog event`)
     if (
       this.pendingOpenDiskPlayerDeferred_ &&
       !this.pendingOpenDiskPlayerDeferred_.isSettled()
@@ -513,11 +610,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       log.info("Selected file to open as session", res)
       if (res.canceled || isEmpty(res.filePaths))
         throw Error("showOpenDiskPlayerDialog cancelled or no file")
-      
+
       const filePath = first(res.filePaths)
       await this.createDiskPlayer(filePath)
-      
-      deferred.resolve(true)
+
+      deferred.resolve(filePath)
     } catch (err) {
       log.error("Unable to open disk session", err)
       deferred.reject(err)

@@ -2,6 +2,8 @@ import { isString } from "@3fv/guard"
 
 const electronExternalsExclude = [
   "vrkit-native-interop",
+  "electron",
+  "electron/main",
   "@electron/remote",
   "@electron/remote/main",
   "node-fetch",

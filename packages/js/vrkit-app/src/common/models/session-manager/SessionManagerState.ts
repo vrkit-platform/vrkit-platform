@@ -77,3 +77,5 @@ export function SessionManagerFnTypeToIPCName(
 ): SessionManagerFnIPCName {
   return `SESSION_MANAGER_FN_${type.toUpperCase()}` as SessionManagerFnIPCName
 }
+
+export type SessionManagerStatePatchFn = (state: SessionManagerState) => Partial<SessionManagerState>

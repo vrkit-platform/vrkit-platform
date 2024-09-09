@@ -42,12 +42,10 @@ namespace IRacingTools::Shared::SHM {
 
     static_assert(std::is_standard_layout_v<LayerConfig>);
 
-
-
     struct LayerSprite {
         PixelRect sourceRect;
         PixelRect destRect;
-        float opacity;
+        float opacity{0.0f};
     };
 
     struct IPCHandles;
@@ -125,7 +123,7 @@ namespace IRacingTools::Shared::SHM {
         // Use the magic string to make sure we don't have
         // uninitialized memory that happens to have the
         // feeder-attached bit set
-        static constexpr std::string_view Magic{"IRTMagic"};
+        static constexpr std::string_view Magic{"VRKMagic"};
         static_assert(Magic.size() == sizeof(uint64_t));
         uint64_t magic = *reinterpret_cast<const uint64_t*>(Magic.data());
 
@@ -158,8 +156,8 @@ namespace IRacingTools::Shared::SHM {
         winrt::handle textureHandle;
         winrt::handle fenceHandle;
 
-        const HANDLE foreignTextureHandle {};
-        const HANDLE foreignFenceHandle {};
+        const HANDLE foreignTextureHandle;
+        const HANDLE foreignFenceHandle;
 
         IPCHandles(HANDLE feederProcess, const FrameMetadata& frame)
           : foreignTextureHandle(frame.texture), foreignFenceHandle(frame.fence) {

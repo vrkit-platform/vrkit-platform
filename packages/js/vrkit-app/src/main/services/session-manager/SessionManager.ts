@@ -10,7 +10,7 @@ import {
   SessionPlayer,
   SessionPlayerEventDataDefault
 } from "vrkit-native-interop"
-import { isDefined, isString } from "@3fv/guard"
+import { isDefined, isFunction, isString } from "@3fv/guard"
 import { SessionEventData, SessionEventType, SessionTiming } from "vrkit-models"
 import {
   ActiveSessionType,
@@ -23,6 +23,7 @@ import {
   SessionManagerFnType,
   SessionManagerFnTypeToIPCName,
   SessionManagerState,
+  SessionManagerStatePatchFn,
   SessionManagerStateSessionKey,
   SessionPlayerId
 } from "vrkit-app-common/models/session-manager"
@@ -303,12 +304,6 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     this.addPlayer(LiveSessionId, GetLiveVRKitSessionPlayer()).player.start()
   }
 
-  /**
-   * Update the whole SessionManagerState slice
-   */
-  updateState() {
-    this.patchState()
-  }
 
   /**
    * Service constructor
@@ -542,14 +537,21 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       .filter(isDefined)
       .some(propEqualTo("id", sessionId))
   }
-
+  
   getPlayerContainer(sessionId: SessionPlayerId): SessionPlayerContainer {
     return this.playerContainers_
       .filter(isDefined)
       .find(propEqualTo("id", sessionId))
   }
-
-  private patchState(newState: Partial<SessionManagerState> = {}): void {
+  
+  /**
+   * Merge & patch SessionManagerState slice
+   */
+  
+  private patchState(newStateOrFn: Partial<SessionManagerState> | SessionManagerStatePatchFn  = {}): void {
+    const currentState = this.state
+    const newState = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn
+    
     assign(this.state_, newState)
     this.broadcastState()
   }

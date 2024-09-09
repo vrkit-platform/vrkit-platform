@@ -5,7 +5,7 @@ import type { NativeImage, Rectangle } from "electron"
 import { app, BrowserWindow, shell } from "electron"
 import { resolveHtmlPath } from "./utils"
 import { Option } from "@3fv/prelude-ts"
-import iconPng from "../assets/icons/icon.png"
+
 import { defaults, signalFlag } from "vrkit-app-common/utils"
 
 import { getLogger } from "@3fv/logger-proxy"
@@ -14,6 +14,7 @@ import { WindowManager } from "./services/window-manager"
 import { HandlerDetails, WindowOpenHandlerResponse } from "electron/main"
 import * as ElectronRemote from "@electron/remote/main"
 import { getValue } from "@3fv/guard"
+import { windowOptionDefaults } from "./utils"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -40,25 +41,6 @@ const getAssetPath = (...paths: string[]): string => {
 
 let mainWindow: BrowserWindow | null = null
 
-function windowOptionDefaults(): Electron.BrowserWindowConstructorOptions {
-  return {
-    titleBarStyle: "hidden",
-    titleBarOverlay: false,
-    fullscreenable: false,
-    icon: iconPng,
-    resizable: true,
-    webPreferences: {
-      allowRunningInsecureContent: true,
-      webSecurity: false,
-      nodeIntegration: true,
-      nodeIntegrationInSubFrames: true,
-      nodeIntegrationInWorker: true,
-      contextIsolation: false,
-      sandbox: false,
-      devTools: isDev
-    }
-  }
-}
 
 /**
  * Handles window open requests in a renderer window

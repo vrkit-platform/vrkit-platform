@@ -16,6 +16,11 @@
 namespace IRacingTools::Shared::SHM {
     using namespace VR;
 
+    namespace {
+        auto L = Logging::GetCategoryWithName("SHM");
+    }
+
+
     enum class LockState {
         Unlocked,
         TryLock,
@@ -49,25 +54,25 @@ namespace IRacingTools::Shared::SHM {
             );
 
             if (!fileHandle) {
-                spdlog::error("CreateFileMappingW failed: {}", static_cast<int>(GetLastError()));
+                L->error("CreateFileMappingW failed: {}", static_cast<int>(GetLastError()));
                 return;
             }
 
             auto eventHandle = Win32::CreateEventW(nullptr, false, false, SHMEventPath().c_str());
             if (!eventHandle) {
-                spdlog::error("CreateEventW failed: {}", static_cast<int>(GetLastError()));
+                L->error("CreateEventW failed: {}", static_cast<int>(GetLastError()));
                 return;
             }
 
             auto mutexHandle = Win32::CreateMutexW(nullptr, FALSE, SHMMutexPath().c_str());
             if (!mutexHandle) {
-                spdlog::error("CreateMutexW failed: {}", static_cast<int>(GetLastError()));
+                L->error("CreateMutexW failed: {}", static_cast<int>(GetLastError()));
                 return;
             }
 
             mapping_ = static_cast<std::byte*>(MapViewOfFile(fileHandle.get(), FILE_MAP_WRITE, 0, 0, SHMSize));
             if (!mapping_) {
-                spdlog::error("MapViewOfFile failed: {}", static_cast<int>(GetLastError())); //std::bit_cast<uint32_t>(
+                L->error("MapViewOfFile failed: {}", static_cast<int>(GetLastError())); //std::bit_cast<uint32_t>(
                 return;
             }
 
@@ -94,7 +99,7 @@ namespace IRacingTools::Shared::SHM {
 
 
         void lock() override {
-            spdlog::trace("SHM::Impl::lock()");
+            L->trace("SHM::Impl::lock()");
             const auto result = WaitForSingleObject(mutexHandle_.get(), INFINITE);
             switch (result) {
             case WAIT_OBJECT_0:
@@ -104,7 +109,7 @@ namespace IRacingTools::Shared::SHM {
                 *metadata_ = {};
                 break;
             default:
-                spdlog::error(
+                L->error(
                     "Unexpected result from SHM WaitForSingleObject in lock(): " "{:#016x}",
                     static_cast<uint64_t>(result)
                 );
@@ -116,7 +121,7 @@ namespace IRacingTools::Shared::SHM {
         }
 
         bool try_lock() override {
-            spdlog::trace("SHM::Impl::try_lock()");
+            L->trace("SHM::Impl::try_lock()");
             const auto result = WaitForSingleObject(mutexHandle_.get(), 0);
             switch (result) {
             case WAIT_OBJECT_0:
@@ -130,7 +135,7 @@ namespace IRacingTools::Shared::SHM {
                 lockState_ = LockState::Unlocked;
                 return false;
             default:
-                spdlog::error("Unexpected result from SHM WaitForSingleObject in try_lock()");
+                L->error("Unexpected result from SHM WaitForSingleObject in try_lock()");
                 VRK_BREAK;
                 return false;
             }
@@ -141,7 +146,7 @@ namespace IRacingTools::Shared::SHM {
 
 
         void unlock() override {
-            spdlog::trace("SHM::Impl::unlock()");
+            L->trace("SHM::Impl::unlock()");
             const auto ret = ReleaseMutex(mutexHandle_.get());
         }
     };
@@ -159,7 +164,7 @@ namespace IRacingTools::Shared::SHM {
         if (!sCache.empty()) [[likely]] {
             return sCache;
         }
-        sCache = fmt::format(L"{}/IRT-s{:x}", ProjectReverseDomainW, static_cast<std::size_t>(SHMSize));
+        sCache = fmt::format(L"{}/VRK-s{:x}", ProjectReverseDomainW, static_cast<std::size_t>(SHMSize));
         return sCache;
     }
 
@@ -208,7 +213,7 @@ namespace IRacingTools::Shared::SHM {
 
     Writer::Writer(uint64_t gpuLUID) {
         const auto path = SHMPath();
-        // spdlog::info(L"Initializing SHM writer with path {}", path);
+        // L->info(L"Initializing SHM writer with path {}", path);
 
         impl_ = std::make_shared<Impl>();
         if (!impl_->isValid()) {
@@ -220,7 +225,7 @@ namespace IRacingTools::Shared::SHM {
         impl_->gpuLUID_ = gpuLUID;
         *impl_->metadata_ = FrameMetadata{};
 
-        spdlog::info("Writer initialized.");
+        L->info("Writer initialized.");
     }
 
     void Writer::detach() {
@@ -231,7 +236,7 @@ namespace IRacingTools::Shared::SHM {
         FlushViewOfFile(impl_->mapping_, NULL);
 
 
-        // spdlog::debug(
+        // L->debug(
         //   "Writer::Detach(): Session ID {:#018x} replaced with {:#018x}",
         //   oldID,
         //   impl_->metadata_->sessionId);
@@ -435,14 +440,14 @@ namespace IRacingTools::Shared::SHM {
     SHMReader::SHMReader() {
         // VRK_TraceLoggingScope("SHM::Reader::Reader()");
         const auto path = SHMPath();
-        //spdlog::info(L"Initializing SHM reader with path {}", path);
+        //L->info(L"Initializing SHM reader with path {}", path);
 
         this->p = std::make_shared<Impl>();
         if (!p->isValid()) {
             p.reset();
             return;
         }
-        spdlog::info("Reader initialized.");
+        L->info("Reader initialized.");
     }
 
     SHMReader::~SHMReader() {
@@ -531,7 +536,7 @@ namespace IRacingTools::Shared::SHM {
         ||
           (handles->foreignTextureHandle != p->metadata_->texture) )) {
             // Impl::UpdateSession() should have nuked the whole lot
-            spdlog::info("Replacing handles without new session ID");
+            L->info("Replacing handles without new session ID");
             VRK_BREAK;
             handles = {};
           }

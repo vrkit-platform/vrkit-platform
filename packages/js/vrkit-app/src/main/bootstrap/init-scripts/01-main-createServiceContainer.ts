@@ -13,6 +13,7 @@ import ElectronActions from "../../services/electron-actions"
 import { once } from "vrkit-app-common/utils"
 import { WindowManager } from "../../services/window-manager"
 import SessionManager from "../../services/session-manager"
+import { OverlayManager } from "../../services/overlay-manager"
 
 const createServiceContainer = once(async function createServiceContainer() {
   const container = await new Container()
@@ -24,6 +25,7 @@ const createServiceContainer = once(async function createServiceContainer() {
     .bindClass(ElectronMainMenuManager)
     .bindClass(WindowManager)
     .bindClass(SessionManager)
+      .bindClass(OverlayManager)
     .bindAsyncFactory(MainAppState, createMainStateStore)
     .resolveAll()
 

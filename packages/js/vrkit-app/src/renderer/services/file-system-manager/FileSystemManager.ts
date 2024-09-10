@@ -81,10 +81,16 @@ export class FileAccess {
       return onError(`File does not exist: ${this.filePath}`)
 
     try {
-      const encoding = FileEncodingTypeMap[type] as BufferEncoding
-      deferred.resolve(
-        (await Fs.promises.readFile(this.filePath, encoding)) as DataType
-      )
+      if (type === FileEncodingType.Bytes) {
+        deferred.resolve(
+            await Fs.promises.readFile(this.filePath) as any
+        )
+      } else {
+        const encoding = FileEncodingTypeMap[type] as BufferEncoding
+        deferred.resolve((
+            await Fs.promises.readFile(this.filePath, encoding)
+        ) as DataType)
+      }
       return deferred.promise
     } catch (err) {
       return onError(

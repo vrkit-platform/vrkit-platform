@@ -7,8 +7,8 @@ import { Bind } from "vrkit-app-common/decorators"
 import { APP_STORE_ID, isDev } from "../../constants"
 
 import type { AppStore } from "../store"
-import { SessionDataVariable, SessionPlayer } from "vrkit-native-interop"
-import { SessionTiming } from "vrkit-models"
+import { SessionPlayer } from "vrkit-native-interop"
+import { SessionDataVariable, SessionTiming } from "vrkit-models"
 import {
   ActiveSessionType,
   SessionManagerEventType,

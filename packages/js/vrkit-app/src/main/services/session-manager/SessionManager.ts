@@ -6,12 +6,11 @@ import { Bind } from "vrkit-app-common/decorators"
 import {
   GetLiveVRKitSessionPlayer,
   isLivePlayer,
-  SessionDataVariable,
   SessionPlayer,
   SessionPlayerEventDataDefault
 } from "vrkit-native-interop"
 import { isDefined, isFunction, isString } from "@3fv/guard"
-import { SessionEventData, SessionEventType, SessionTiming } from "vrkit-models"
+import { SessionDataVariableValueMap, SessionEventData, SessionEventType, SessionTiming } from "vrkit-models"
 import {
   ActiveSessionType,
   LiveSessionId,
@@ -27,7 +26,6 @@ import {
   SessionManagerStateSessionKey,
   SessionPlayerId
 } from "vrkit-app-common/models/session-manager"
-
 import { first, isEmpty } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
 import EventEmitter3 from "eventemitter3"
@@ -49,14 +47,14 @@ class SessionPlayerContainer {
 
   private timing_: SessionTiming = null
 
-  private dataVars_: SessionDataVariable[] = []
+  private dataVarValues_: SessionDataVariableValueMap = {}
 
   get timing() {
     return this.timing_
   }
 
-  get dataVars() {
-    return this.dataVars_
+  get dataVarValues() {
+    return this.dataVarValues_
   }
 
   constructor(
@@ -68,9 +66,9 @@ class SessionPlayerContainer {
     this.disposers.forEach(disposer => disposer())
   }
 
-  setDataFrame(timing: SessionTiming, dataVars: SessionDataVariable[]): void {
+  setDataFrame(timing: SessionTiming, dataVars: SessionDataVariableValueMap = {}): void {
     this.timing_ = timing
-    this.dataVars_ = dataVars
+    this.dataVarValues_ = dataVars
   }
 }
 
@@ -83,7 +81,7 @@ export interface SessionManagerEventArgs {
 
   [SessionManagerEventType.STATE_CHANGED]: (newState: SessionManagerState) => void
 
-  [SessionManagerEventType.DATA_FRAME]: (sessionId: string, dataVars: SessionDataVariable[]) => void
+  [SessionManagerEventType.DATA_FRAME]: (sessionId: string, dataVarValues: SessionDataVariableValueMap) => void
 }
 
 function getWeekendInfo(session: SessionDetail) {
@@ -130,7 +128,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   }
 
   @Bind
-  private onEventDataFrame(player: SessionPlayer, data: SessionPlayerEventDataDefault, vars: SessionDataVariable[]) {
+  private onEventDataFrame(
+    player: SessionPlayer,
+    data: SessionPlayerEventDataDefault,
+    dataVarValues: SessionDataVariableValueMap
+  ) {
     const container = this.getContainerByPlayer(player)
     if (!this.checkPlayerIsManaged(player)) {
       log.warn("Player is not currently managed & has been removed", player.id)
@@ -140,7 +142,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     // const { activeSessionType } = this.state
     // if (activeSessionType !== "NONE")
     asOption(data.payload?.sessionData?.timing).ifSome(timing => {
-      container.setDataFrame(timing, vars)
+      container.setDataFrame(timing, dataVarValues)
       const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession"
       this.patchState({
         [stateKey]: {
@@ -150,7 +152,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       })
 
       // TODO: Implement value based SessionDataVariable interface & emit
-      this.emit(SessionManagerEventType.DATA_FRAME, player.id, [])
+      this.emit(SessionManagerEventType.DATA_FRAME, player.id, dataVarValues)
     })
   }
 
@@ -306,10 +308,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return asOption(evData).match({
       Some: ({ sessionData: data }): SessionDetail => ({
         id: data.id,
-        isAvailable: asOption(data.timing).match({
-          Some: ({ isValid }) => isValid === true,
-          None: () => player.isAvailable
-        }),
+        isAvailable: player.isAvailable,
         info: player.sessionInfo,
         data,
         timing: data.timing
@@ -444,7 +443,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     player.start()
 
     this.addPlayer(filePath, player)
-
+    
     // await Deferred.delay(1500)
 
     this.updateSession(player, null, "DISK")
@@ -502,6 +501,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
   getPlayerContainer(sessionId: SessionPlayerId): SessionPlayerContainer {
     return this.playerContainers_.filter(isDefined).find(propEqualTo("id", sessionId))
+  }
+  
+  getActivePlayer(): SessionPlayer {
+    const id = this.activeSession?.id
+    return !id ? null : this.getPlayerContainer(id)?.player
   }
 
   /**

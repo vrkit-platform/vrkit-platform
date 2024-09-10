@@ -1,6 +1,5 @@
-import { OverlayInfo, OverlayPlacement, SessionTiming } from "vrkit-models"
-import type { SessionDataVariable, SessionInfoMessage } from "vrkit-native-interop" // ------ OverlayManager events & types
-import { SessionDataVariableValue } from "../session-manager"
+import { OverlayInfo, OverlayPlacement, SessionDataVariableValueMap, SessionTiming } from "vrkit-models"
+import type { SessionInfoMessage, PluginClientEventArgs, PluginClientEventType } from "vrkit-plugin-sdk" // ------ OverlayManager events & types
 
 // ------ OverlayManager events & types
 
@@ -17,22 +16,13 @@ export function OverlayManagerEventTypeToIPCName(type: OverlayManagerEventType):
 // ------ OverlayClient events & types
 
 export enum OverlayClientEventType {
-  SESSION_INFO = "SESSION_INFO",
-  DATA_FRAME = "DATA_FRAME",
   OVERLAY_CONFIG = "OVERLAY_CONFIG"
 }
 
-export interface OverlayManagerClientEventArgs {
+export interface OverlayClientEventArgs extends PluginClientEventArgs {
   [OverlayClientEventType.OVERLAY_CONFIG]: (config: OverlayConfig) => void
-
-  [OverlayClientEventType.DATA_FRAME]: (
-    sessionId: string,
-    timing: SessionTiming,
-    dataVarValues: SessionDataVariableValue<any>[]
-  ) => void
-
-  [OverlayClientEventType.SESSION_INFO]: (sessionId: string, info: SessionInfoMessage) => void
 }
+export type OverlayClientEventHandler<Type extends keyof OverlayClientEventArgs> = OverlayClientEventArgs[Type]
 
 export enum OverlayClientFnType {
   FETCH_CONFIG = "FETCH_CONFIG",
@@ -48,7 +38,7 @@ export function OverlayClientFnTypeToIPCName(type: OverlayClientFnType): Overlay
 
 export type OverlayClientEventIPCName = `OVERLAY_CLIENT_EVENT_${OverlayClientEventType}`
 
-export function OverlayClientEventTypeToIPCName(type: OverlayClientEventType): OverlayClientEventIPCName {
+export function OverlayClientEventTypeToIPCName(type: OverlayClientEventType | PluginClientEventType): OverlayClientEventIPCName {
   return `OVERLAY_CLIENT_EVENT_${type.toUpperCase()}` as OverlayClientEventIPCName
 }
 

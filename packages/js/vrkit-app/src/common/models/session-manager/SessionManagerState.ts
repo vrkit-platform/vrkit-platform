@@ -1,5 +1,7 @@
 import { SessionData, SessionTiming, SessionType } from "vrkit-models"
-import type { SessionInfoMessage, SessionPlayerId } from "vrkit-native-interop"
+import type { SessionPlayerId } from "vrkit-native-interop"
+import type {SessionInfoMessage} from "vrkit-plugin-sdk"
+
 export { SessionPlayerId }
 
 export const LiveSessionId: SessionPlayerId = "SESSION_TYPE_LIVE"

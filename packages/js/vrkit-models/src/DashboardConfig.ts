@@ -11,6 +11,7 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { OverlayPlacement } from "./OverlayTypes";
+import { OverlayInfo } from "./OverlayTypes";
 import { ScreenConfig } from "./ScreenConfig";
 /**
  * @generated from protobuf message IRacingTools.Models.Dashboard.DashboardConfig
@@ -37,7 +38,11 @@ export interface DashboardConfig {
      */
     screen?: ScreenConfig;
     /**
-     * @generated from protobuf field: repeated IRacingTools.Models.Dashboard.OverlayPlacement placements = 20;
+     * @generated from protobuf field: repeated IRacingTools.Models.Dashboard.OverlayInfo overlays = 20;
+     */
+    overlays: OverlayInfo[];
+    /**
+     * @generated from protobuf field: repeated IRacingTools.Models.Dashboard.OverlayPlacement placements = 25;
      */
     placements: OverlayPlacement[];
 }
@@ -50,7 +55,8 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
             { no: 3, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 10, name: "screen_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 12, name: "screen", kind: "message", T: () => ScreenConfig },
-            { no: 20, name: "placements", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => OverlayPlacement }
+            { no: 20, name: "overlays", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => OverlayInfo },
+            { no: 25, name: "placements", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => OverlayPlacement }
         ]);
     }
     create(value?: PartialMessage<DashboardConfig>): DashboardConfig {
@@ -59,6 +65,7 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
         message.name = "";
         message.description = "";
         message.screenId = "";
+        message.overlays = [];
         message.placements = [];
         if (value !== undefined)
             reflectionMergePartial<DashboardConfig>(this, message, value);
@@ -84,7 +91,10 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
                 case /* IRacingTools.Models.ScreenConfig screen */ 12:
                     message.screen = ScreenConfig.internalBinaryRead(reader, reader.uint32(), options, message.screen);
                     break;
-                case /* repeated IRacingTools.Models.Dashboard.OverlayPlacement placements */ 20:
+                case /* repeated IRacingTools.Models.Dashboard.OverlayInfo overlays */ 20:
+                    message.overlays.push(OverlayInfo.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                case /* repeated IRacingTools.Models.Dashboard.OverlayPlacement placements */ 25:
                     message.placements.push(OverlayPlacement.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
@@ -114,9 +124,12 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
         /* IRacingTools.Models.ScreenConfig screen = 12; */
         if (message.screen)
             ScreenConfig.internalBinaryWrite(message.screen, writer.tag(12, WireType.LengthDelimited).fork(), options).join();
-        /* repeated IRacingTools.Models.Dashboard.OverlayPlacement placements = 20; */
+        /* repeated IRacingTools.Models.Dashboard.OverlayInfo overlays = 20; */
+        for (let i = 0; i < message.overlays.length; i++)
+            OverlayInfo.internalBinaryWrite(message.overlays[i], writer.tag(20, WireType.LengthDelimited).fork(), options).join();
+        /* repeated IRacingTools.Models.Dashboard.OverlayPlacement placements = 25; */
         for (let i = 0; i < message.placements.length; i++)
-            OverlayPlacement.internalBinaryWrite(message.placements[i], writer.tag(20, WireType.LengthDelimited).fork(), options).join();
+            OverlayPlacement.internalBinaryWrite(message.placements[i], writer.tag(25, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

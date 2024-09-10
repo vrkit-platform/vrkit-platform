@@ -1,7 +1,7 @@
 import { ipcRenderer, IpcRendererEvent } from "electron"
 import { getLogger } from "@3fv/logger-proxy"
 
-import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
+import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
 
 import { isDev } from "../../constants"
@@ -9,18 +9,17 @@ import { isDev } from "../../constants"
 import EventEmitter3 from "eventemitter3"
 import { assign, Pair } from "vrkit-app-common/utils"
 import {
-  OverlayConfig,
-  OverlayManagerClientEventArgs,
   OverlayClientEventType,
   OverlayClientEventTypeToIPCName,
+  OverlayClientFnType,
   OverlayClientFnTypeToIPCName,
-  OverlaySessionData,
-  OverlayClientFnType
+  OverlayConfig,
+  OverlayClientEventArgs,
+  OverlaySessionData
 } from "vrkit-app-common/models/overlay-manager"
-import type { SessionDataVariable, SessionInfoMessage } from "vrkit-native-interop"
-import { SessionTiming } from "vrkit-models"
+import { PluginClientEventType, type SessionInfoMessage } from "vrkit-plugin-sdk"
+import { OverlayKind, SessionDataVariableValueMap, SessionTiming } from "vrkit-models"
 import { isFunction } from "@3fv/guard"
-import { SessionDataVariableValue } from "vrkit-app-common/models/session-manager"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -28,16 +27,16 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-
 interface OverlayClientState {
   config: OverlayConfig
+
   session: OverlaySessionData
 }
 
 export type OverlayClientStatePatchFn = (state: OverlayClientState) => Partial<OverlayClientState>
 
 @Singleton()
-export class OverlayClient extends EventEmitter3<OverlayManagerClientEventArgs> {
+export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
   private state_: OverlayClientState = {
     config: null,
     session: null
@@ -61,15 +60,15 @@ export class OverlayClient extends EventEmitter3<OverlayManagerClientEventArgs> 
   get config() {
     return this.state_.config
   }
-  
+
   private onOverlayConfigEvent(_event: IpcRendererEvent, config: OverlayConfig) {
     this.patchState({
       config
     })
-    
+
     this.emit(OverlayClientEventType.OVERLAY_CONFIG, config)
   }
-  
+
   private onSessionInfoEvent(_event: IpcRendererEvent, sessionId: string, info: SessionInfoMessage) {
     this.patchState({
       session: {
@@ -79,17 +78,16 @@ export class OverlayClient extends EventEmitter3<OverlayManagerClientEventArgs> 
       }
     })
 
-    this.emit(OverlayClientEventType.SESSION_INFO, sessionId, info)
+    this.emit(PluginClientEventType.SESSION_INFO, sessionId, info)
   }
 
-  
   private onDataFrameEvent(
     _event: IpcRendererEvent,
     sessionId: string,
     timing: SessionTiming,
-    dataVars: SessionDataVariableValue<any>[]
+    dataVarValues: SessionDataVariableValueMap
   ) {
-    this.emit(OverlayClientEventType.DATA_FRAME, sessionId, timing, dataVars)
+    this.emit(PluginClientEventType.DATA_FRAME, sessionId, timing, dataVarValues)
   }
 
   /**
@@ -109,14 +107,16 @@ export class OverlayClient extends EventEmitter3<OverlayManagerClientEventArgs> 
    * Add all app-wide actions
    * @private
    */
-  @PostConstruct() // @ts-ignore
+  @PostConstruct()
+  // @ts-ignore
+  // tslint:disable-next-line
   private async init(): Promise<void> {
     // tslint:disable-next-line
     window.addEventListener("beforeunload", this.unload)
-    const ipcEventHandlers = Array<Pair<OverlayClientEventType, (event: IpcRendererEvent, ...args: any[]) => any>>(
-        [OverlayClientEventType.SESSION_INFO, this.onSessionInfoEvent.bind(this)],
-        [OverlayClientEventType.OVERLAY_CONFIG, this.onOverlayConfigEvent.bind(this)],
-      [OverlayClientEventType.DATA_FRAME, this.onDataFrameEvent.bind(this)]
+    const ipcEventHandlers = Array<Pair<OverlayClientEventType | PluginClientEventType, (event: IpcRendererEvent, ...args: any[]) => any>>(
+      [OverlayClientEventType.OVERLAY_CONFIG, this.onOverlayConfigEvent.bind(this)],
+        [PluginClientEventType.SESSION_INFO, this.onSessionInfoEvent.bind(this)],
+        [PluginClientEventType.DATA_FRAME, this.onDataFrameEvent.bind(this)]
     )
 
     ipcEventHandlers.forEach(([type, handler]) => {
@@ -125,14 +125,14 @@ export class OverlayClient extends EventEmitter3<OverlayManagerClientEventArgs> 
 
     if (isDev) {
       Object.assign(global, {
-        sessionManagerClient: this
+        overlayClient: this
       })
 
       if (import.meta.webpackHot) {
         import.meta.webpackHot.addDisposeHandler(() => {
           window.removeEventListener("beforeunload", this.unload)
           Object.assign(global, {
-            sessionManagerClient: null
+            overlayClient: null
           })
 
           ipcEventHandlers.forEach(([type, handler]) => {
@@ -141,17 +141,25 @@ export class OverlayClient extends EventEmitter3<OverlayManagerClientEventArgs> 
         })
       }
     }
-    
-    const [config, session] = await Promise.all([
-        this.fetchOverlayConfig(),
-        this.fetchSession()
-    ])
-    
+
+    const [config, session] = await Promise.all([this.fetchOverlayConfig(), this.fetchSession()])
+
     this.patchState({
       config,
       session
     })
+
+    // await this.loadOverlay()
+    //     .catch(err => error(`Failed to load overlay`, err))
   }
+
+  // private async loadOverlay() {
+  //   const { config } = this
+  //   if (config.overlay.kind === OverlayKind.CUSTOM) {
+  //     throw Error(`NotImplemented yet, will be part of plugin system`)
+  //   }
+  //
+  // }
 
   /**
    * Service constructor
@@ -163,20 +171,25 @@ export class OverlayClient extends EventEmitter3<OverlayManagerClientEventArgs> 
 
   @Bind
   async fetchOverlayConfig(): Promise<OverlayConfig> {
-    return ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_CONFIG))
-  }
-  
-  @Bind 
-  fetchSession(): Promise<OverlaySessionData> {
-    return ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_SESSION))
-  }
-  
-  @Bind 
-  close(): Promise<void> {
-    return ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.CLOSE))
+    const newConfig = await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_CONFIG))
+    this.patchState({
+      config: newConfig
+    })
+    return newConfig
   }
 
-  
+  @Bind
+  async fetchSession(): Promise<OverlaySessionData> {
+    const newSession = await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_SESSION))
+    this.patchState({
+      session: newSession
+    })
+    return newSession
+  }
+
+  @Bind close(): Promise<void> {
+    return ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.CLOSE))
+  }
 }
 
 export default OverlayClient

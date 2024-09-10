@@ -3,19 +3,26 @@
 import { asOption, Either, Option } from "@3fv/prelude-ts"
 import YAML from "yaml"
 import type { IMessageType } from "@protobuf-ts/runtime"
-import { guard } from "@3fv/guard"
+import { guard, isDefined } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
 import {
-  SessionData, SessionEventData, SessionEventType, SessionTiming
+  SessionData,
+  SessionDataVariable,
+  SessionDataVariableHeader,
+  SessionDataVariableMap,
+  SessionDataVariableType,
+  SessionDataVariableValue,
+  SessionDataVariableValueMap,
+  SessionEventData,
+  SessionEventType,
+  SessionTiming
 } from "vrkit-models"
 import { getLogger } from "@3fv/logger-proxy"
 import { MessageTypeFromCtor, objectKeysLowerFirstReviver } from "./utils"
 import { GetNativeExports } from "./NativeBinding"
-import {
-  SessionDataVariable, SessionDataVariableHeader
-} from "./SessionDataVariableTypes"
-import { flatten, identity, isEmpty, negate } from "lodash"
-import type { SessionInfoMessage } from "./SessionInfoTypes"
+import { flatten, identity, isEmpty, negate, pick, range } from "lodash"
+
+import type { SessionInfoMessage } from "vrkit-plugin-sdk"
 
 const log = getLogger(__filename)
 const isDev = process.env.NODE_ENV !== "production"
@@ -114,7 +121,7 @@ export interface SessionPlayerEventArgs extends SessionPlayerEventArgMap {
   [SessionEventType.DATA_FRAME]: (
     player: SessionPlayer,
     data: SessionPlayerEventDataDefault,
-    vars: SessionDataVariable[]
+    dataVarValues: SessionDataVariableValueMap
   ) => void
 }
 
@@ -152,9 +159,9 @@ export class SessionPlayer extends EventEmitter3<
   private dataVariableHeaderMap: { [name: string]: SessionDataVariableHeader } =
     {}
 
-  private dataVariableMap: { [name: string]: SessionDataVariable } = {}
+  private dataVariableMap: SessionDataVariableMap = {}
 
-  private dataFrameEventVariables: SessionDataVariable[] = []
+  // private dataFrameEventVariables: SessionDataVariable[] = []
 
   /**
    * Populate the data variable header map
@@ -171,6 +178,32 @@ export class SessionPlayer extends EventEmitter3<
 
     this.dataVariableHeaderCount = headers.length
   }
+  
+  getDataVariableValueMap(): SessionDataVariableValueMap {
+    return Object.fromEntries(Object.entries(this.dataVariableMap).map(([name, dataVar]) => {
+      const { type } = dataVar
+      const value = {
+        ...pick(dataVar, "count", "valid", "name", "unit"),
+        type,
+        values: range(dataVar.count).map(idx =>
+            type === SessionDataVariableType.Bool
+                ? dataVar.getBool(idx)
+                : type === SessionDataVariableType.Char
+                    ? dataVar.getChar(idx)
+                    : type === SessionDataVariableType.Bitmask
+                        ? dataVar.getBitmask(idx)
+                        : type === SessionDataVariableType.Float
+                            ? dataVar.getFloat(idx)
+                            : type === SessionDataVariableType.Double
+                                ? dataVar.getDouble(idx)
+                                : type === SessionDataVariableType.Int32
+                                    ? dataVar.getInt(idx)
+                                    : null
+        )
+      } as SessionDataVariableValue
+      return [name, value]
+    }))
+  }
 
   /**
    * Event handler that is passed to the native client
@@ -185,7 +218,8 @@ export class SessionPlayer extends EventEmitter3<
     nativeData?: NativeSessionPlayerEventData
   ): void {
     // log.debug(`Received event type`, type, nativeData)
-
+    
+    
     const data: SessionPlayerEventData<any> = {
       type,
       payload: null
@@ -198,9 +232,14 @@ export class SessionPlayer extends EventEmitter3<
     } catch (err) {
       log.error("Unable to unpack payload", err)
     }
+    
+    const extraArgs:any[] = []
+    if (type === SessionEventType.DATA_FRAME) {
+      extraArgs.push(this.getDataVariableValueMap())
+    }
 
     guard(
-      () => this.emit(type, this, data),
+      () => this.emit(type, this, data, ...extraArgs),
       err => log.error("Unable to emit event", err)
     )
   }
@@ -294,9 +333,12 @@ export class SessionPlayer extends EventEmitter3<
           .ifSome(dataVar => {
             this.dataVariableMap[name] = dataVar
           })
-          .getOrThrow(`Unable to get data var "${name}"`)
+          .getOrCall(() => {
+            log.error(`Unable to get data var "${name}"`)
+            return null
+          })
       )
-    )
+    ).filter(isDefined)
   }
 
   getDataVariable(name: string): SessionDataVariable {
@@ -312,7 +354,7 @@ export class SessionPlayer extends EventEmitter3<
    * @param argNames
    */
   configureDataVariables(...argNames: Array<string | string[]>): boolean {
-    this.dataFrameEventVariables = this.getDataVariables(...argNames)
+    this.getDataVariables(...argNames)
     return true
   }
 

@@ -13,7 +13,8 @@ message DashboardConfig {
   string screen_id = 10;
   ScreenConfig screen = 12;
 
-  repeated OverlayPlacement placements = 20;
+  repeated OverlayInfo overlays = 20;
+  repeated OverlayPlacement placements = 25;
 }
 
 

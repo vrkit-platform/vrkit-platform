@@ -8,7 +8,7 @@ import { setContainerResolver } from "../../utils"
 import { isDev } from "../../constants"
 import FileSystemManager from "../../services/file-system-manager"
 import TrackManager from "../../services/track-manager"
-import OverlayClient from "../../services/overlay-client"
+import OverlayClient, { PluginClientManager } from "../../services/overlay-client"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log
@@ -35,6 +35,7 @@ async function createContainer(): Promise<Container> {
       .bindClass(FileSystemManager)
       .bindClass(TrackManager)
       .bindClass(OverlayClient)
+      .bindClass(PluginClientManager)
       .resolveAll()
 
     // container = await container.resolveAll()

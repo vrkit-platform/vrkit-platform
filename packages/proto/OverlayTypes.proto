@@ -16,11 +16,15 @@ message OverlayInfo {
 
   string name = 3;
   string description = 4;
+
+  repeated string data_var_names = 20;
+
+
 }
 
 message OverlayPlacement {
   string id = 1;
-  OverlayInfo overlay = 2;
+  string overlay_id = 5;
 
   RectI rect = 10;
 }

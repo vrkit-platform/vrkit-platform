@@ -9,7 +9,11 @@
       "vrkit-native-interop":
       [  "./packages/js/vrkit-native-interop"],
       "vrkit-native-interop/*":
-      [  "./packages/js/vrkit-native-interop/src/web/*"]
+      [  "./packages/js/vrkit-native-interop/src/web/*"],
+      "vrkit-plugin-sdk":
+      [  "./packages/js/vrkit-plugin-sdk"],
+      "vrkit-plugin-sdk/*":
+      [  "./packages/js/vrkit-plugin-sdk/src/*"]
     }
   },
   "references": [
@@ -21,7 +25,11 @@
     },
     {
       "path": "./packages/js/vrkit-models"
-    }
+    },
+    {
+      "path": "./packages/js/vrkit-plugin-sdk"
+    },
+    
   ],
   "ts-node": {
     "compilerOptions": {

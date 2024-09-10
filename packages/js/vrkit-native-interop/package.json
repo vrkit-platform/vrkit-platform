@@ -28,7 +28,8 @@
     "bindings": "^1.5.0",
     "eventemitter3": "^5.0.1",
     "yaml": "^2.5.0",
-    "vrkit-models": "1.0.0"
+    "vrkit-models": "1.0.0",
+    "vrkit-plugin-sdk": "1.0.0"
   },
   "peerDependencies": {
     "electron": "^31.3.0"

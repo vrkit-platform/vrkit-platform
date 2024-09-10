@@ -29,12 +29,12 @@ Sh.mkdir("-p", targetDir)
 const
   devServer = webpackDevServerConfig(1618, {
     static: [distDir, targetDir, assetsDir, Path.dirname(assetsDir)],
-    proxy: [{
-      context: ['/api','/public'],
-      // target: "http://localhost:7001"
-      target: "http://localhost:7272"
-      
-    }]
+    // proxy: [{
+    //   context: ['/api','/public'],
+    //   // target: "http://localhost:7001"
+    //   target: "http://localhost:7272"
+    //
+    // }]
   })
 
 const webConfig = defaultWebpackConfig("electron-renderer", "electron-renderer", moduleDir, {
@@ -44,6 +44,9 @@ const webConfig = defaultWebpackConfig("electron-renderer", "electron-renderer",
     "electron-renderer-overlay": {
       entryFile: "./src/renderer/entry/overlay/entry-renderer-overlay.tsx"
     }
+  },
+  output: {
+    devtoolModuleFilenameTemplate: "[absolute-resource-path]",
   },
   config: {
     externals: [electronExternals],

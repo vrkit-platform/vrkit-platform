@@ -1,5 +1,5 @@
 {
-  "name": "vrkit-models",
+  "name": "vrkit-plugin-sdk",
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
@@ -10,11 +10,9 @@
   },
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@protobuf-ts/runtime": "^2.9.4"
+    "vrkit-models": "1.0.0"
   },
   "devDependencies": {
-    "cmake-js": "^7.3.0",
-    "@protobuf-ts/plugin": "^2.9.4",
     "typescript": "^5.5.4",
     "vrkit-builder-tool": "1.0.0"
   }

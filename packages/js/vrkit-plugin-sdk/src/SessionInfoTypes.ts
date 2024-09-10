@@ -20,6 +20,7 @@ export interface Group {
   isScenic?: boolean;
 }
 
+
 export interface Camera {
   cameraName: string;
   cameraNum:  number;

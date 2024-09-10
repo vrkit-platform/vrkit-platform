@@ -2,10 +2,10 @@ import { getLogger } from "@3fv/logger-proxy"
 
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
-import { DashboardConfig, OverlayKind, OverlayPlacement } from "vrkit-models"
-import { isFunction } from "@3fv/guard"
+import { DashboardConfig, OverlayInfo, OverlayKind, OverlayPlacement, SessionDataVariableValueMap } from "vrkit-models"
+import { isDefined, isFunction } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
-import { assign, isDev, isNotEmpty, Pair } from "vrkit-app-common/utils"
+import { assign, isDev, Pair } from "vrkit-app-common/utils"
 import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from "electron"
 import { Deferred } from "@3fv/deferred"
 import {
@@ -22,13 +22,11 @@ import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
 import {
   ActiveSessionType,
-  SessionDataVariableValue,
   SessionDetail,
   SessionManagerEventType,
   SessionManagerState
 } from "vrkit-app-common/models/session-manager"
-import { SessionDataVariable, SessionDataVariableType } from "vrkit-native-interop"
-import { pick, range } from "lodash"
+import { PluginClientEventType } from "vrkit-plugin-sdk"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -105,20 +103,18 @@ export class OverlayWindow {
     this.window?.webContents?.send(OverlayClientEventTypeToIPCName(OverlayClientEventType.OVERLAY_CONFIG), this.config)
   }
 
-  private constructor(placement: OverlayPlacement) {
-    const { overlay } = placement
-
+  private constructor(overlay: OverlayInfo, placement: OverlayPlacement) {
     this.config_ = { overlay, placement }
     this.window_ = new BrowserWindow({
       ...windowOptionDefaults({
         devTools: isDev
       }),
-      transparent: true, // backgroundColor:
-      // "#00000000"
+      transparent: true,
       show: false,
       backgroundColor: "transparent"
     })
 
+    // The returned promise is tracked via `readyDeferred`
     this.initialize().catch(err => {
       log.error(`failed to initialize overlay window`, err)
     })
@@ -130,23 +126,17 @@ export class OverlayWindow {
       const win = this.window_
       const url = resolveHtmlPath("index-overlay.html")
       info(`Resolved overlay url: ${url}`)
-
-      win.on("ready-to-show", () => {
-        win.show()
-      })
-
-      win.on("show", () => {
-        deferred.resolve(this)
-      })
-
+      
       await win.loadURL(url)
-
+      win.show()
       if (isDev) {
         win.webContents.openDevTools({
           mode: "detach"
         })
       }
-
+      
+      deferred.resolve(this)
+      
       await deferred.promise
     } catch (err) {
       log.error(`Failed to initialize overlay window`, err)
@@ -155,8 +145,8 @@ export class OverlayWindow {
     return deferred.promise
   }
 
-  static create(placement: OverlayPlacement): OverlayWindow {
-    return new OverlayWindow(placement)
+  static create(overlay: OverlayInfo, placement: OverlayPlacement): OverlayWindow {
+    return new OverlayWindow(overlay, placement)
   }
 }
 
@@ -188,15 +178,27 @@ const DashboardTrackMapMockConfig: DashboardConfig = {
   // screen: {
   //
   // },
+  overlays: [
+    {
+      id: "track-map-0",
+      kind: OverlayKind.TRACK_MAP,
+      name: "track-map-0",
+      description: "Default",
+      dataVarNames: [
+        "PlayerCarIdx",
+        "CarIdxLap",
+        "CarIdxLapCompleted",
+        "CarIdxPosition",
+        "CarIdxClassPosition",
+        "CarIdxEstTime",
+        "CarIdxLapDistPct"
+      ]
+    }
+  ],
   placements: [
     {
       id: "track-map-placement-0",
-      overlay: {
-        id: "track-map-0",
-        kind: OverlayKind.TRACK_MAP,
-        name: "track-map-0",
-        description: "Default"
-      },
+      overlayId: "track-map-0",
       rect: {
         size: {
           width: 400,
@@ -267,9 +269,28 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     const overlays = Array<OverlayWindow>()
     if (!notActive) {
       const { config } = this.state
-      asOption(config.placements.map(placement => OverlayWindow.create(placement)))
-        .filter(isNotEmpty)
-        .ifSome(newOverlays => overlays.push(...newOverlays))
+      const activePlayer = this.sessionManager.getActivePlayer()
+      const overlayMap = config.overlays.filter(isDefined).reduce((map, overlay) => {
+        activePlayer.getDataVariables(...(overlay.dataVarNames ?? []))
+        return {
+          ...map,
+          [overlay.id]: overlay
+        }
+      }, {})
+
+      overlays.push(
+        ...config.placements
+          .map(placement => {
+            const overlay = overlayMap[placement.overlayId]
+            if (!overlay) {
+              log.error("Unable to locate overlay with id", placement.overlayId)
+              return null
+            }
+
+            return OverlayWindow.create(overlay, placement)
+          })
+          .filter(isDefined)
+      )
     }
 
     this.patchState({
@@ -279,7 +300,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
     if (overlays.length) await Promise.all(overlays.map(overlay => overlay.whenReady()))
 
-    this.broadcastRendererOverlays(OverlayClientEventType.SESSION_INFO, activeSession?.id, activeSession?.info)
+    this.broadcastRendererOverlays(PluginClientEventType.SESSION_INFO, activeSession?.id, activeSession?.info)
   }
 
   private async onActiveSessionChangedEvent(
@@ -291,34 +312,16 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   }
 
   private onSessionStateChangedEvent(_newState: SessionManagerState) {
-    this.broadcastRendererOverlays(OverlayClientEventType.SESSION_INFO, this.sessionManager.activeSession?.info)
+    this.broadcastRendererOverlays(PluginClientEventType.SESSION_INFO, this.sessionManager.activeSession?.info)
   }
 
-  private onSessionDataFrameEvent(sessionId: string, dataVars: SessionDataVariable[]) {
-    const values = dataVars.map(dataVar => {
-      const { type } = dataVar
-      return {
-        ...pick(dataVar, "count", "valid", "name", "unit"),
-        type,
-        values: range(dataVar.count).map(idx =>
-          type === SessionDataVariableType.Bool
-            ? dataVar.getBool(idx)
-            : type === SessionDataVariableType.Char
-              ? dataVar.getChar(idx)
-              : type === SessionDataVariableType.Bitmask
-                ? dataVar.getBitmask(idx)
-                : type === SessionDataVariableType.Float
-                  ? dataVar.getFloat(idx)
-                  : type === SessionDataVariableType.Double
-                    ? dataVar.getDouble(idx)
-                    : type === SessionDataVariableType.Int32
-                      ? dataVar.getInt(idx)
-                      : null
-        )
-      } as SessionDataVariableValue<any>
-    })
-
-    this.broadcastRendererOverlays(OverlayClientEventType.DATA_FRAME, sessionId, this.sessionManager.activeSession?.info, values)
+  private onSessionDataFrameEvent(sessionId: string, dataVarValues: SessionDataVariableValueMap) {
+    this.broadcastRendererOverlays(
+        PluginClientEventType.DATA_FRAME,
+      sessionId,
+      this.sessionManager.activeSession?.info,
+      dataVarValues
+    )
   }
 
   /**
@@ -339,12 +342,26 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
     return overlayWindow?.config
   }
-
+  
+  /**
+   * Handles renderer invocations for session info
+   *
+   * @param event
+   */
   async fetchSessionHandler(event: IpcMainInvokeEvent): Promise<OverlaySessionData> {
     const window = BrowserWindow.fromWebContents(event.sender),
-      windowId = window.id,
-      overlayWindow = this.state.overlays.find(it => it.window?.id === windowId),
-      session = this.sessionManager.activeSession
+      windowId = window.id
+
+    if (!this.isValidOverlayWindowId(windowId)) {
+      error(`Unknown overlay window ${windowId}`)
+      return {
+        id: null,
+        info: null,
+        timing: null
+      }
+    }
+
+    const session = this.sessionManager.activeSession
 
     return {
       id: session.id,
@@ -460,14 +477,15 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     ;(this.emit as any)(type, ...args)
   }
 
-  private broadcastRendererOverlays(type: OverlayClientEventType, ...args: any[]): void {
+  private broadcastRendererOverlays(type: OverlayClientEventType | PluginClientEventType, ...args: any[]): void {
     const ipcEventName = OverlayClientEventTypeToIPCName(type)
     this.overlays.forEach(overlay => {
-      overlay.window?.webContents?.send(ipcEventName, ...args)
+      if (overlay.ready) overlay.window?.webContents?.send(ipcEventName, ...args)
     })
-    // webContents.getAllWebContents().forEach(wc => {
-    //   wc.send(ipcEventName, ...args)
-    // })
+  }
+
+  private isValidOverlayWindowId(windowId: number): boolean {
+    return this.state.overlays.some(it => it.window?.id === windowId)
   }
 }
 

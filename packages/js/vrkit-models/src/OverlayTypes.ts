@@ -12,9 +12,9 @@ import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { RectI } from "./Geometry";
 /**
- * @generated from protobuf message IRacingTools.Models.Dashboard.Overlay
+ * @generated from protobuf message IRacingTools.Models.Dashboard.OverlayInfo
  */
-export interface Overlay {
+export interface OverlayInfo {
     /**
      * @generated from protobuf field: string id = 1;
      */
@@ -41,9 +41,9 @@ export interface OverlayPlacement {
      */
     id: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.Dashboard.Overlay overlay = 2;
+     * @generated from protobuf field: IRacingTools.Models.Dashboard.OverlayInfo overlay = 2;
      */
-    overlay?: Overlay;
+    overlay?: OverlayInfo;
     /**
      * @generated from protobuf field: IRacingTools.Models.RectI rect = 10;
      */
@@ -60,29 +60,33 @@ export enum OverlayKind {
     /**
      * @generated from protobuf enum value: OVERLAY_KIND_CLOCK = 1;
      */
-    CLOCK = 1
+    CLOCK = 1,
+    /**
+     * @generated from protobuf enum value: OVERLAY_KIND_CUSTOM = 10;
+     */
+    CUSTOM = 10
 }
 // @generated message type with reflection information, may provide speed optimized methods
-class Overlay$Type extends MessageType<Overlay> {
+class OverlayInfo$Type extends MessageType<OverlayInfo> {
     constructor() {
-        super("IRacingTools.Models.Dashboard.Overlay", [
+        super("IRacingTools.Models.Dashboard.OverlayInfo", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "kind", kind: "enum", T: () => ["IRacingTools.Models.Dashboard.OverlayKind", OverlayKind, "OVERLAY_KIND_"] },
             { no: 3, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 4, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<Overlay>): Overlay {
+    create(value?: PartialMessage<OverlayInfo>): OverlayInfo {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
         message.kind = 0;
         message.name = "";
         message.description = "";
         if (value !== undefined)
-            reflectionMergePartial<Overlay>(this, message, value);
+            reflectionMergePartial<OverlayInfo>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Overlay): Overlay {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: OverlayInfo): OverlayInfo {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -110,7 +114,7 @@ class Overlay$Type extends MessageType<Overlay> {
         }
         return message;
     }
-    internalBinaryWrite(message: Overlay, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: OverlayInfo, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string id = 1; */
         if (message.id !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.id);
@@ -130,15 +134,15 @@ class Overlay$Type extends MessageType<Overlay> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.Dashboard.Overlay
+ * @generated MessageType for protobuf message IRacingTools.Models.Dashboard.OverlayInfo
  */
-export const Overlay = new Overlay$Type();
+export const OverlayInfo = new OverlayInfo$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
     constructor() {
         super("IRacingTools.Models.Dashboard.OverlayPlacement", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "overlay", kind: "message", T: () => Overlay },
+            { no: 2, name: "overlay", kind: "message", T: () => OverlayInfo },
             { no: 10, name: "rect", kind: "message", T: () => RectI }
         ]);
     }
@@ -157,8 +161,8 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
                 case /* string id */ 1:
                     message.id = reader.string();
                     break;
-                case /* IRacingTools.Models.Dashboard.Overlay overlay */ 2:
-                    message.overlay = Overlay.internalBinaryRead(reader, reader.uint32(), options, message.overlay);
+                case /* IRacingTools.Models.Dashboard.OverlayInfo overlay */ 2:
+                    message.overlay = OverlayInfo.internalBinaryRead(reader, reader.uint32(), options, message.overlay);
                     break;
                 case /* IRacingTools.Models.RectI rect */ 10:
                     message.rect = RectI.internalBinaryRead(reader, reader.uint32(), options, message.rect);
@@ -178,9 +182,9 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
         /* string id = 1; */
         if (message.id !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.id);
-        /* IRacingTools.Models.Dashboard.Overlay overlay = 2; */
+        /* IRacingTools.Models.Dashboard.OverlayInfo overlay = 2; */
         if (message.overlay)
-            Overlay.internalBinaryWrite(message.overlay, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            OverlayInfo.internalBinaryWrite(message.overlay, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         /* IRacingTools.Models.RectI rect = 10; */
         if (message.rect)
             RectI.internalBinaryWrite(message.rect, writer.tag(10, WireType.LengthDelimited).fork(), options).join();

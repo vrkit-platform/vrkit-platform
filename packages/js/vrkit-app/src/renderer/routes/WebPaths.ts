@@ -12,11 +12,6 @@ function leaf(rootPath: WebRootPathKey | WebRootPath, ...parts: string[]) {
 }
 
 export const WebPaths = {
-  comingSoon: '/coming-soon',
-  maintenance: '/maintenance',
-  about: '/about-us',
-  contact: '/contact-us',
-  faqs: '/faqs',
   page403: '/error/403',
   page404: '/error/404',
   page500: '/error/500',

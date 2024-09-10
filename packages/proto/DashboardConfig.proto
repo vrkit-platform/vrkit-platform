@@ -11,7 +11,6 @@ message DashboardConfig {
   string description = 3;
 
   string screen_id = 10;
-  ScreenKind kind = 11;
   ScreenConfig screen = 12;
 
   repeated OverlayPlacement placements = 20;

@@ -2,15 +2,12 @@ import { getLogger } from "@3fv/logger-proxy"
 import type {MessageType,IMessageType} from "@protobuf-ts/runtime"
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
-import { APP_STORE_ID, isDev } from "vrkit-app-renderer/constants"
-import type { AppStore } from "../store"
+import { isDev } from "vrkit-app-renderer/constants"
 import { getValue } from "@3fv/guard"
 import Fs, { constants as FsConstants } from "node:fs"
 import EventEmitter3 from "eventemitter3"
 import { Deferred } from "@3fv/deferred"
-import { isNotEmpty } from "vrkit-app-common/utils"
-import { asOption } from "@3fv/prelude-ts"
-import assert from "node:assert"
+
 import Path from "path"
 import { FileInfo, millisToTimestamp } from "vrkit-models"
 
@@ -236,9 +233,8 @@ export class FileSystemManager extends EventEmitter3<FileSystemManagerEventArgs>
   /**
    * Service constructor
    *
-   * @param appStore
    */
-  constructor(@Inject(APP_STORE_ID) readonly appStore: AppStore) {
+  constructor() {
     super()
   }
   

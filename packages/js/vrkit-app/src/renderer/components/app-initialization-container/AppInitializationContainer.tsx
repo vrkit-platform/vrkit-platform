@@ -1,7 +1,7 @@
 import React, {Children} from "react"
 import { Future } from "@3fv/prelude-ts"
 import { Container } from "@3fv/ditsy"
-import { resolveContainer } from "../../containerFactory"
+import { resolveContainer } from "../../entry/default/containerFactory"
 import { getLogger } from "@3fv/logger-proxy"
 import CircularProgress from "@mui/material/CircularProgress"
 import { ServiceContainerContext } from "../service-container"

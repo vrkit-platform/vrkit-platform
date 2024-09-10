@@ -27,10 +27,6 @@ message VRLayoutConfig {
   SizeI scaled_size = 11;
 }
 
-enum ScreenKind {
-  SK_MONITOR = 0;
-  SK_VR = 1;
-}
 
 /**
  * Represents a complete screen
@@ -42,7 +38,6 @@ message ScreenConfig {
    */
   string id = 1;
   string name = 2;
-  ScreenKind kind = 3;
 
   SizeI size = 6;
 

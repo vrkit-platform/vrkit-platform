@@ -7,7 +7,7 @@ import { Bind } from "vrkit-app-common/decorators"
 import { WindowSizeDefault } from "../../constants"
 import { defaults } from "vrkit-app-common/utils"
 import { getLogger } from "@3fv/logger-proxy"
-import { Singleton } from "@3fv/ditsy"
+import { PostConstruct, Singleton } from "@3fv/ditsy"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -206,6 +206,14 @@ export class WindowManager {
   }
 
   enable(win: Electron.BrowserWindow) {
+    if (this.winRef && this.winRef === win) {
+      warn(`Window manager already enabled on window id`, win?.id)
+      return
+    }
+    
+    if (this.winRef)
+      this.disable()
+    
     const { config, state } = this
     if (config.maximize && state.isMaximized) {
       win.maximize()
@@ -294,6 +302,29 @@ export class WindowManager {
       width: this.width,
       height: this.height
     }
+  }
+}
+
+@Singleton()
+export class MainWindowManager {
+  private mainWindow_: Electron.BrowserWindow = null
+  
+  get mainWindow() {
+    return this.mainWindow_
+  }
+  
+  constructor(readonly windowManager: WindowManager) {
+  
+  }
+  
+  @PostConstruct() // @ts-ignore
+  private async init(): Promise<void> {
+  
+  }
+  
+  setMainWindow(newMainWindow: Electron.BrowserWindow = null) {
+    this.mainWindow_ = newMainWindow
+    this.windowManager.enable(newMainWindow)
   }
 }
 

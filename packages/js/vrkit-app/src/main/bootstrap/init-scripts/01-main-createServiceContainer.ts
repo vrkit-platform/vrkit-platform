@@ -3,15 +3,12 @@ import { Container } from "@3fv/ditsy"
 import { setServiceContainer } from "../../ServiceContainer"
 import { NativeThemeManager } from "../../services/native-theme"
 import { createMainStateStore, MainAppState } from "../../services/store"
-import {
-  ElectronMainMenuManager,
-  ElectronMenuRenderer
-} from "../../services/electron-menu"
+import { ElectronMainMenuManager, ElectronMenuRenderer } from "../../services/electron-menu"
 import { ActionRegistry } from "vrkit-app-common/services/actions"
 import { AppSettingsService } from "../../services/app-settings"
 import ElectronActions from "../../services/electron-actions"
 import { once } from "vrkit-app-common/utils"
-import { WindowManager } from "../../services/window-manager"
+import { MainWindowManager, WindowManager } from "../../services/window-manager"
 import SessionManager from "../../services/session-manager"
 import { OverlayManager } from "../../services/overlay-manager"
 
@@ -24,8 +21,9 @@ const createServiceContainer = once(async function createServiceContainer() {
     .bindClass(AppSettingsService)
     .bindClass(ElectronMainMenuManager)
     .bindClass(WindowManager)
+    .bindClass(MainWindowManager)
     .bindClass(SessionManager)
-      .bindClass(OverlayManager)
+    .bindClass(OverlayManager)
     .bindAsyncFactory(MainAppState, createMainStateStore)
     .resolveAll()
 

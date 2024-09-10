@@ -61,7 +61,11 @@ export interface SessionDataVariable {
   readonly description: string
 
   readonly unit: string
-
+  
+  getBitmask(entry?: number): number
+  
+  getChar(entry?: number): number
+  
   getBool(entry?: number): boolean
 
   getInt(entry?: number): number

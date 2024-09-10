@@ -31,6 +31,8 @@ namespace IRacingTools::App::Node {
         InstanceAccessor<&NativeSessionDataVariable::jsIsValid>("valid"),
         InstanceAccessor<&NativeSessionDataVariable::jsGetDescription>("description"),
         InstanceAccessor<&NativeSessionDataVariable::jsGetUnit>("unit"),
+        InstanceMethod<&NativeSessionDataVariable::jsGetChar>("getChar"),
+        InstanceMethod<&NativeSessionDataVariable::jsGetBitmask>("getBitmask"),
         InstanceMethod<&NativeSessionDataVariable::jsGetBool>("getBool"),
         InstanceMethod<&NativeSessionDataVariable::jsGetInt>("getInt"),
         InstanceMethod<&NativeSessionDataVariable::jsGetFloat>("getFloat"),
@@ -127,6 +129,32 @@ namespace IRacingTools::App::Node {
     if (varHolder_->isValid() && varHolder_->getType() == VarDataType::Bool) return Napi::Boolean::New(
       env,
       varHolder_->getBool(entry)
+    );
+
+    return {};
+  }
+
+  Napi::Value
+  NativeSessionDataVariable::jsGetChar(const Napi::CallbackInfo& info) {
+    auto env = info.Env();
+    int32_t entry = info.Length() != 1 || !info[0].IsNumber() ? 0 : info[0].As<Napi::Number>().Int32Value();
+
+    if (varHolder_->isValid() && varHolder_->getType() == VarDataType::Char) return Napi::Boolean::New(
+      env,
+      varHolder_->getInt(entry)
+    );
+
+    return {};
+  }
+
+  Napi::Value
+  NativeSessionDataVariable::jsGetBitmask(const Napi::CallbackInfo& info) {
+    auto env = info.Env();
+    int32_t entry = info.Length() != 1 || !info[0].IsNumber() ? 0 : info[0].As<Napi::Number>().Int32Value();
+
+    if (varHolder_->isValid() && varHolder_->getType() == VarDataType::Bitmask) return Napi::Boolean::New(
+      env,
+      varHolder_->getInt(entry)
     );
 
     return {};

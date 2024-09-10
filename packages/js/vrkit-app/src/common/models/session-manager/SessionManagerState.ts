@@ -47,7 +47,7 @@ export type SessionManagerStateSessionKey = keyof Pick<
 >
 
 export enum SessionManagerEventType {
-  UNKNOWN = "UNKNOWN",
+  ACTIVE_SESSION_CHANGED = "ACTIVE_SESSION_CHANGED",
   STATE_CHANGED = "STATE_CHANGED",
   DATA_FRAME = "DATA_FRAME"
 }

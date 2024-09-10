@@ -1,4 +1,5 @@
 import type { Theme as BaseTheme, Direction, ThemeOptions } from "@mui/material/styles"
+// import "./core/palette"
 
 import type { CssVarsTheme, CssVarsThemeOptions } from '@mui/material/styles';
 import type { TypographyOptions } from '@mui/material/styles/createTypography';
@@ -59,6 +60,8 @@ declare module "@mui/material/styles/createPalette" {
     actionFooter: string
     filledInput: string
     filledInputDisabled: string
+    neutral: string;
+    neutralChannel: string;
     pane00: string
     pane01: string
     pane02: string

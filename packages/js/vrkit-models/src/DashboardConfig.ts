@@ -12,7 +12,6 @@ import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { OverlayPlacement } from "./OverlayTypes";
 import { ScreenConfig } from "./ScreenConfig";
-import { ScreenKind } from "./ScreenConfig";
 /**
  * @generated from protobuf message IRacingTools.Models.Dashboard.DashboardConfig
  */
@@ -34,10 +33,6 @@ export interface DashboardConfig {
      */
     screenId: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.ScreenKind kind = 11;
-     */
-    kind: ScreenKind;
-    /**
      * @generated from protobuf field: IRacingTools.Models.ScreenConfig screen = 12;
      */
     screen?: ScreenConfig;
@@ -54,7 +49,6 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 10, name: "screen_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 11, name: "kind", kind: "enum", T: () => ["IRacingTools.Models.ScreenKind", ScreenKind] },
             { no: 12, name: "screen", kind: "message", T: () => ScreenConfig },
             { no: 20, name: "placements", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => OverlayPlacement }
         ]);
@@ -65,7 +59,6 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
         message.name = "";
         message.description = "";
         message.screenId = "";
-        message.kind = 0;
         message.placements = [];
         if (value !== undefined)
             reflectionMergePartial<DashboardConfig>(this, message, value);
@@ -87,9 +80,6 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
                     break;
                 case /* string screen_id */ 10:
                     message.screenId = reader.string();
-                    break;
-                case /* IRacingTools.Models.ScreenKind kind */ 11:
-                    message.kind = reader.int32();
                     break;
                 case /* IRacingTools.Models.ScreenConfig screen */ 12:
                     message.screen = ScreenConfig.internalBinaryRead(reader, reader.uint32(), options, message.screen);
@@ -121,9 +111,6 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
         /* string screen_id = 10; */
         if (message.screenId !== "")
             writer.tag(10, WireType.LengthDelimited).string(message.screenId);
-        /* IRacingTools.Models.ScreenKind kind = 11; */
-        if (message.kind !== 0)
-            writer.tag(11, WireType.Varint).int32(message.kind);
         /* IRacingTools.Models.ScreenConfig screen = 12; */
         if (message.screen)
             ScreenConfig.internalBinaryWrite(message.screen, writer.tag(12, WireType.LengthDelimited).fork(), options).join();

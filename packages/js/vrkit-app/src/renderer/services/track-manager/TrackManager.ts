@@ -5,11 +5,10 @@ import Fs from "fs-extra"
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
 import {
-  APP_STORE_ID, AppFiles,
+  AppFiles,
   AppPaths,
   isDev
 } from "vrkit-app-renderer/constants"
-import type { AppStore } from "../store"
 import EventEmitter3 from "eventemitter3"
 import { FileAccess, FileSystemManager } from "../file-system-manager"
 import { FileInfo, LapTrajectory, TrackMapFile } from "vrkit-models"
@@ -23,19 +22,12 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-// export enum TrackType {
-//   Road = "Road",
-//   Oval = "Oval",
-//   DirtRoad = "DirtRoad",
-//   DirtOval = "DirtOval"
-// }
-
 export enum TrackEventType {
-  TrackChange = "TrackChange"
+  TRACK_CHANGE = "TRACK_CHANGE"
 }
 
 export interface TrackManagerEventArgs {
-  [TrackEventType.TrackChange]: (trackManager: TrackManager) => void
+  [TrackEventType.TRACK_CHANGE]: (trackManager: TrackManager) => void
 }
 
 @Singleton()
@@ -78,11 +70,9 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
   /**
    * Service constructor
    *
-   * @param appStore
    * @param fsManager
    */
   constructor(
-    @Inject(APP_STORE_ID) readonly appStore: AppStore,
     @Inject(FileSystemManager) readonly fsManager: FileSystemManager
   ) {
     super()

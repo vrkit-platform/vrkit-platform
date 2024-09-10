@@ -67,6 +67,8 @@ namespace IRacingTools::App::Node {
         Napi::Value jsGetUnit(const Napi::CallbackInfo& info);
 
         Napi::Value jsGetBool(const Napi::CallbackInfo& info);
+        Napi::Value jsGetChar(const Napi::CallbackInfo& info);
+        Napi::Value jsGetBitmask(const Napi::CallbackInfo& info);
         Napi::Value jsGetInt(const Napi::CallbackInfo& info);
         Napi::Value jsGetFloat(const Napi::CallbackInfo& info);
         Napi::Value jsGetDouble(const Napi::CallbackInfo& info);

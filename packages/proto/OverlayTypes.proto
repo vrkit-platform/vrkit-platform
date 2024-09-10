@@ -7,9 +7,10 @@ package IRacingTools.Models.Dashboard;
 enum OverlayKind {
   OVERLAY_KIND_TRACK_MAP = 0;
   OVERLAY_KIND_CLOCK = 1;
+  OVERLAY_KIND_CUSTOM = 10;
 }
 
-message Overlay {
+message OverlayInfo {
   string id = 1;
   OverlayKind kind = 2;
 
@@ -19,7 +20,7 @@ message Overlay {
 
 message OverlayPlacement {
   string id = 1;
-  Overlay overlay = 2;
+  OverlayInfo overlay = 2;
 
   RectI rect = 10;
 }

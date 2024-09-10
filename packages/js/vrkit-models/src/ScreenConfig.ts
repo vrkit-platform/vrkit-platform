@@ -95,10 +95,6 @@ export interface ScreenConfig {
      */
     name: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.ScreenKind kind = 3;
-     */
-    kind: ScreenKind;
-    /**
      * @generated from protobuf field: IRacingTools.Models.SizeI size = 6;
      */
     size?: SizeI;
@@ -110,19 +106,6 @@ export interface ScreenConfig {
      * @generated from protobuf field: IRacingTools.Models.VRLayoutConfig layout_vr = 11;
      */
     layoutVr?: VRLayoutConfig;
-}
-/**
- * @generated from protobuf enum IRacingTools.Models.ScreenKind
- */
-export enum ScreenKind {
-    /**
-     * @generated from protobuf enum value: SK_MONITOR = 0;
-     */
-    SK_MONITOR = 0,
-    /**
-     * @generated from protobuf enum value: SK_VR = 1;
-     */
-    SK_VR = 1
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class DisplayConfig$Type extends MessageType<DisplayConfig> {
@@ -337,7 +320,6 @@ class ScreenConfig$Type extends MessageType<ScreenConfig> {
         super("IRacingTools.Models.ScreenConfig", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "kind", kind: "enum", T: () => ["IRacingTools.Models.ScreenKind", ScreenKind] },
             { no: 6, name: "size", kind: "message", T: () => SizeI },
             { no: 10, name: "layout_display", kind: "message", T: () => DisplayLayoutConfig },
             { no: 11, name: "layout_vr", kind: "message", T: () => VRLayoutConfig }
@@ -347,7 +329,6 @@ class ScreenConfig$Type extends MessageType<ScreenConfig> {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
         message.name = "";
-        message.kind = 0;
         if (value !== undefined)
             reflectionMergePartial<ScreenConfig>(this, message, value);
         return message;
@@ -362,9 +343,6 @@ class ScreenConfig$Type extends MessageType<ScreenConfig> {
                     break;
                 case /* string name */ 2:
                     message.name = reader.string();
-                    break;
-                case /* IRacingTools.Models.ScreenKind kind */ 3:
-                    message.kind = reader.int32();
                     break;
                 case /* IRacingTools.Models.SizeI size */ 6:
                     message.size = SizeI.internalBinaryRead(reader, reader.uint32(), options, message.size);
@@ -393,9 +371,6 @@ class ScreenConfig$Type extends MessageType<ScreenConfig> {
         /* string name = 2; */
         if (message.name !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.name);
-        /* IRacingTools.Models.ScreenKind kind = 3; */
-        if (message.kind !== 0)
-            writer.tag(3, WireType.Varint).int32(message.kind);
         /* IRacingTools.Models.SizeI size = 6; */
         if (message.size)
             SizeI.internalBinaryWrite(message.size, writer.tag(6, WireType.LengthDelimited).fork(), options).join();

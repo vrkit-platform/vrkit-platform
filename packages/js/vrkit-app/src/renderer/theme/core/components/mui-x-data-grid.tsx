@@ -73,7 +73,7 @@ const MuiDataGrid: Components<Theme>['MuiDataGrid'] = {
       baseSelect: { native: true, variant: 'outlined' },
     },
   },
-
+  
   /** **************************************
    * STYLE
    *************************************** */

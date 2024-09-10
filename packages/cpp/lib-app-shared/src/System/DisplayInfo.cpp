@@ -223,7 +223,7 @@ namespace IRacingTools::Shared::System {
     Models::ScreenConfig* DisplayScreenInfo::toModel(Models::ScreenConfig* screen) const {
         screen->set_id("IMPLEMENT ID SCHEME");
         screen->set_name(screen->id());
-        screen->set_kind(Models::SK_MONITOR);
+
         {
             auto size = screen->mutable_size();
             size->set_width(width);
@@ -266,13 +266,13 @@ namespace IRacingTools::Shared::System {
 
     bool DisplayScreenInfo::equalTo(const Models::ScreenConfig& other) const {
         auto screen = toModel();
-        if (screen.kind() != Models::SK_MONITOR || screen.kind() != other.kind() || !IsSizeIEqual(
+        if (!IsSizeIEqual(
             screen.size(),
             other.size()
         ))
             return false;
 
-        if (screen.kind() == Models::SK_MONITOR) {
+
             if (!screen.has_layout_display() || !other.has_layout_display())
                 return false;
 
@@ -310,7 +310,7 @@ namespace IRacingTools::Shared::System {
                     return false;
                 }
             }
-        }
+
 
         return true;
     }
@@ -369,7 +369,6 @@ namespace IRacingTools::Shared::System {
     Models::ScreenConfig* VRScreenInfo::toModel(Models::ScreenConfig* screen) const {
         screen->set_id("VR");
         screen->set_name(screen->id());
-        screen->set_kind(Models::SK_VR);
         {
             auto size = screen->mutable_size();
             size->set_width(width);
@@ -407,7 +406,7 @@ namespace IRacingTools::Shared::System {
 
     bool VRScreenInfo::equalTo(const Models::ScreenConfig& other) const {
         auto screen = toModel();
-        if (screen.kind() != Models::SK_VR || screen.kind() != other.kind() || !IsSizeIEqual(
+        if (!IsSizeIEqual(
             screen.size(),
             other.size()
         ))

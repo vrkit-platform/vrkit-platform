@@ -6,7 +6,14 @@ import { DashboardConfig, OverlayInfo, OverlayKind, OverlayPlacement, SessionDat
 import { isDefined, isFunction } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
 import { assign, isDev, Pair } from "vrkit-app-common/utils"
-import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from "electron"
+import {
+  app,
+  BrowserWindow,
+  BrowserWindowConstructorOptions,
+  ipcMain,
+  IpcMainEvent,
+  IpcMainInvokeEvent
+} from "electron"
 import { Deferred } from "@3fv/deferred"
 import {
   OverlayClientEventType,
@@ -15,7 +22,7 @@ import {
   OverlayClientFnTypeToIPCName,
   OverlayConfig,
   OverlayManagerEventType,
-  OverlaySessionData
+  OverlaySessionData, OverlayWindowMainEvents, OverlayWindowRendererEvents
 } from "vrkit-app-common/models/overlay-manager"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
 import { SessionManager } from "../session-manager"
@@ -34,6 +41,9 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
+const WinRendererEvents = OverlayWindowRendererEvents
+const WinMainEvents = OverlayWindowMainEvents
+
 export type OverlayManagerStatePatchFn = (state: OverlayManagerState) => Partial<OverlayManagerState>
 
 export class OverlayWindow {
@@ -42,9 +52,31 @@ export class OverlayWindow {
   private readonly config_: OverlayConfig
 
   private readonly readyDeferred_ = new Deferred<OverlayWindow>()
-
+  
   private closeDeferred: Deferred<void> = null
-
+  
+  readonly windowOptions: BrowserWindowConstructorOptions
+  
+  @Bind
+  private onIPCMouseEnter(ev: IpcMainEvent) {
+    const fromWin = BrowserWindow.fromWebContents(ev?.sender)
+    if (fromWin?.id !== this.window_?.id) {
+      return
+    }
+    
+    this.setIgnoreMouseEvents(false)
+  }
+  
+  @Bind
+  private onIPCMouseLeave(ev: IpcMainEvent) {
+    const fromWin = BrowserWindow.fromWebContents(ev?.sender)
+    if (fromWin?.id !== this.window_?.id) {
+      return
+    }
+    
+    this.setIgnoreMouseEvents(true)
+  }
+  
   /**
    * Get the browser window
    */
@@ -73,6 +105,16 @@ export class OverlayWindow {
     }
 
     const deferred = (this.closeDeferred = new Deferred())
+    
+    ipcMain.off(
+        WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_ENTER),
+        this.onIPCMouseEnter
+    )
+    
+    ipcMain.off(
+        WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_LEAVE),
+        this.onIPCMouseLeave
+    )
 
     try {
       this.window?.close()
@@ -105,15 +147,31 @@ export class OverlayWindow {
 
   private constructor(overlay: OverlayInfo, placement: OverlayPlacement) {
     this.config_ = { overlay, placement }
-    this.window_ = new BrowserWindow({
+    this.windowOptions = {
       ...windowOptionDefaults({
-        devTools: isDev
+        devTools: isDev,
+        transparent: true
       }),
       transparent: true,
       show: false,
-      backgroundColor: "transparent"
-    })
-
+      frame: false,
+      backgroundColor: "#00000000",
+      alwaysOnTop: true
+    }
+    
+    this.window_ = new BrowserWindow(this.windowOptions)
+    this.setIgnoreMouseEvents(true)
+    
+    ipcMain.on(
+        WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_ENTER),
+        this.onIPCMouseEnter
+    )
+    
+    ipcMain.on(
+        WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_LEAVE),
+        this.onIPCMouseLeave
+    )
+    
     // The returned promise is tracked via `readyDeferred`
     this.initialize().catch(err => {
       log.error(`failed to initialize overlay window`, err)
@@ -147,6 +205,16 @@ export class OverlayWindow {
 
   static create(overlay: OverlayInfo, placement: OverlayPlacement): OverlayWindow {
     return new OverlayWindow(overlay, placement)
+  }
+  
+  private setIgnoreMouseEvents(ignore:boolean):void {
+    if (ignore) {
+      this.window_?.setIgnoreMouseEvents(true, {
+        forward: true
+      })
+    } else {
+      this.window_?.setIgnoreMouseEvents(false)
+    }
   }
 }
 
@@ -270,13 +338,13 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     if (!notActive) {
       const { config } = this.state
       const activePlayer = this.sessionManager.getActivePlayer()
-      const overlayMap = config.overlays.filter(isDefined).reduce((map, overlay) => {
-        activePlayer.getDataVariables(...(overlay.dataVarNames ?? []))
+      const overlayMap = config.overlays.filter(isDefined).reduce((map, overlayInfo) => {
+        activePlayer.getDataVariables(...(overlayInfo.dataVarNames ?? []))
         return {
           ...map,
-          [overlay.id]: overlay
+          [overlayInfo.id]: overlayInfo
         }
-      }, {})
+      }, {}) as {[id:string]: OverlayInfo}
 
       overlays.push(
         ...config.placements
@@ -287,7 +355,14 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
               return null
             }
 
-            return OverlayWindow.create(overlay, placement)
+            const newWin = OverlayWindow.create(overlay, placement)
+            newWin.window.on("closed", (event: Electron.Event) => {
+              this.patchState(state => ({
+                overlays: state.overlays.filter(overlay => overlay.windowId !== newWin.windowId),
+              }))
+              // event.returnValue = true
+            } )
+            return newWin
           })
           .filter(isDefined)
       )

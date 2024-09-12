@@ -1,0 +1,90 @@
+
+$titlebarHeight: 2rem;
+$defaultTransition: all 1s ease-out;
+
+#root {
+	z-index: 1;
+	padding: $titlebarHeight 0 0;
+	width: 100vw;
+	height: calc(100vh - $titlebarHeight);
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	overflow: hidden;
+	transition: $defaultTransition;
+}
+
+#titlebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 2rem;
+	z-index: 1000;
+	overflow: hidden;
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	justify-content: stretch;
+	
+	transition: $defaultTransition;
+	& > #titlebarLabel {
+		&, & * {
+			user-select: none !important;
+			-webkit-user-select: none !important;
+			-webkit-app-region: drag !important;
+		};
+		
+		& {
+			flex: 1 1 40%;
+		}
+	}
+	
+	& > #titlebarControls {
+		//position: absolute;
+		
+		//right: 0;
+		//top: 0;
+		flex: 0 0 auto;
+	}
+}
+
+
+body {
+	overflow: hidden;
+	
+	&:not(.hover) {
+		& > #root {
+			background-color: transparent;
+		}
+		& > #titlebar {
+			background-color: transparent;
+		}
+	}
+	
+	&.hover {
+		& > #root {
+			background-color: black;
+		}
+		& > #titlebar {
+			background-color: gray;
+		}
+	}
+}
+
+
+.electronWindowDraggable {
+	&, & * {
+		user-select: none !important;
+		-webkit-user-select: none !important;
+		-webkit-app-region: drag !important;
+	}
+}
+
+.electronAllowInteraction {
+	user-select: auto;
+	-webkit-user-select: auto;
+	-webkit-app-region: no-drag;
+}

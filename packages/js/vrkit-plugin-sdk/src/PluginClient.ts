@@ -1,4 +1,9 @@
-import type { LapTrajectory, OverlayInfo, SessionDataVariableValueMap, SessionTiming } from "vrkit-models"
+import type {
+  LapTrajectory,
+  OverlayInfo,
+  SessionDataVariableValueMap,
+  SessionTiming, TrackMap
+} from "vrkit-models"
 import type { SessionInfoMessage } from "./SessionInfoTypes"
 
 export enum PluginClientEventType {
@@ -29,6 +34,8 @@ export interface PluginClient {
   getSessionTiming(): SessionTiming
   
   getLapTrajectory(trackLayoutId: string): Promise<LapTrajectory>
+  
+  getTrackMap(trackLayoutId: string): Promise<TrackMap>
   
   on<T extends keyof PluginClientEventArgs, Fn extends PluginClientEventArgs[T] = PluginClientEventArgs[T]>(type: T, handler: Fn): void
 

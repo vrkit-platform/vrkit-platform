@@ -15,6 +15,8 @@ import { FileInfo, LapTrajectory, TrackMapFile } from "vrkit-models"
 import Path from "path"
 import { Deferred } from "@3fv/deferred"
 import { endsWith } from "lodash/fp"
+import { isString } from "@3fv/guard"
+import { LapTrajectoryConverter } from "vrkit-shared"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -204,6 +206,23 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     
     return lt
   }
+  
+  async getTrackMapFromLapTrajectory(idOrTrajectory: string | LapTrajectory) {
+    let trajectory: LapTrajectory
+    if (isString(idOrTrajectory)) {
+      trajectory = await this.getLapTrajectory(idOrTrajectory)
+    } else {
+      trajectory = idOrTrajectory
+    }
+    
+    const converter = new LapTrajectoryConverter(20)
+    return converter.toTrackMap(trajectory)
+    
+    
+    return
+  }
+  
+  
   
   
 }

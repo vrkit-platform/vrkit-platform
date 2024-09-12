@@ -19,7 +19,7 @@ namespace IRacingTools::Shared::Geometry {
   using namespace Models;
 
   template<typename PixelType = float>
-  class LapTracjectoryConverter {
+  class LapTrajectoryConverter {
   public:
     using Pixel = PixelBase<PixelType>;
 
@@ -35,7 +35,7 @@ namespace IRacingTools::Shared::Geometry {
 
     static constexpr bool kConvertToInteger = isPixelTypeInteger<PixelType>();
 
-    explicit LapTracjectoryConverter(ZoomLevel zoomLevel = kZoomLevelDefault)
+    explicit LapTrajectoryConverter(ZoomLevel zoomLevel = kZoomLevelDefault)
         : pixelConverter_(zoomLevel) {
     }
 

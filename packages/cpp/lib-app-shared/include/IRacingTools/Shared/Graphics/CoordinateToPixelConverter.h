@@ -119,17 +119,17 @@ using PixelI = PixelBase<int>;
 template<typename T>
 constexpr bool isPixelTypeInteger() {
     if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>) {
-        return true;
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 template<typename PixelType = float>
 class CoordinateToPixelConverter {
 public:
     using Pixel = PixelBase<PixelType>;
-    static constexpr bool kConvertToInteger = isPixelTypeInteger<PixelType>();
+    static constexpr bool kConvertToInteger = !isPixelTypeInteger<PixelType>();
 
     PixelType clampPixelValue(double value) {
         PixelType outValue;

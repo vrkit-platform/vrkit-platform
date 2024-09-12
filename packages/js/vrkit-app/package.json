@@ -150,7 +150,9 @@
     "mobx": "^6.13.1",
     "mobx-utils": "^6.0.8",
     "zod": "^3.23.8",
-    "vrkit-plugin-sdk": "1.0.0"
+    "vrkit-plugin-sdk": "1.0.0",
+    "vrkit-shared": "1.0.0",
+    "two.js": "latest"
   },
   "devDependencies": {
     "@electron/notarize": "^2.3.2",

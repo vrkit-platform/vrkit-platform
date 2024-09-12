@@ -1,0 +1,22 @@
+{
+  "name": "vrkit-shared",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json -w",
+    "test": "jest --no-cache",
+    "test:watch": "jest --no-cache --watchAll"
+  },
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "vrkit-models": "1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vrkit-builder-tool": "1.0.0"
+  }
+}

@@ -86,6 +86,8 @@ async function launch() {
       ...defaults(windowManager.createWindowOptions, WindowSizeDefault),
       backgroundColor: "black",
       show: false,
+      titleBarStyle: "hidden",
+      titleBarOverlay: false,
       ...windowOptionDefaults()
     })
 

@@ -10,11 +10,9 @@ import { isFunction } from "@3fv/guard"
 
 export function windowOptionDefaults(webPreferences: Partial<WebPreferences> = {}): BrowserWindowConstructorOptions {
   return {
-    titleBarStyle: "hidden",
-    titleBarOverlay: false,
     fullscreenable: false,
     icon: iconPng,
-    resizable: true,
+    //resizable: true,
     webPreferences: {
       allowRunningInsecureContent: true,
       webSecurity: false,

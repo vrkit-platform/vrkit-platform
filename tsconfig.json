@@ -13,7 +13,11 @@
       "vrkit-plugin-sdk":
       [  "./packages/js/vrkit-plugin-sdk"],
       "vrkit-plugin-sdk/*":
-      [  "./packages/js/vrkit-plugin-sdk/src/*"]
+      [  "./packages/js/vrkit-plugin-sdk/src/*"],
+      "vrkit-shared":
+      [  "./packages/js/vrkit-shared"],
+      "vrkit-shared/*":
+      [  "./packages/js/vrkit-shared/src/*"]
     }
   },
   "references": [
@@ -29,7 +33,9 @@
     {
       "path": "./packages/js/vrkit-plugin-sdk"
     },
-    
+    {
+      "path": "./packages/js/vrkit-shared"
+    },
   ],
   "ts-node": {
     "compilerOptions": {

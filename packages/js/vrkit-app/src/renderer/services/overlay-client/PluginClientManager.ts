@@ -42,6 +42,9 @@ const { debug, trace, info, error, warn } = log
           getLapTrajectory: (trackLayoutId: string) => {
             return this.trackManager.getLapTrajectory(trackLayoutId)
           },
+          getTrackMap: (trackLayoutId: string) => {
+            return this.trackManager.getTrackMapFromLapTrajectory(trackLayoutId)
+          },
           on: <T extends keyof PluginClientEventArgs, Fn extends PluginClientEventArgs[T] = PluginClientEventArgs[T]>(
               type: T,
               handler: Fn

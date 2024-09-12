@@ -9,6 +9,7 @@ import { isDev } from "../../constants"
 import FileSystemManager from "../../services/file-system-manager"
 import TrackManager from "../../services/track-manager"
 import OverlayClient, { PluginClientManager } from "../../services/overlay-client"
+import OverlayWindowControls from "vrkit-app-renderer/services/overlay-window-controls"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log
@@ -32,6 +33,7 @@ async function createContainer(): Promise<Container> {
     }
 
     container = await container
+      .bindClass(OverlayWindowControls)
       .bindClass(FileSystemManager)
       .bindClass(TrackManager)
       .bindClass(OverlayClient)

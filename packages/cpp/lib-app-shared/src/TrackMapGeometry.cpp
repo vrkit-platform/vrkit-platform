@@ -6,7 +6,7 @@
 namespace IRacingTools::Shared::Geometry {
 
 TrackMap ToTrackMap(const LapTrajectory &lapTrajectory, ZoomLevel zoomLevel) {
-    return LapTracjectoryConverter(zoomLevel).toTrackMap(lapTrajectory);
+    return LapTrajectoryConverter(zoomLevel).toTrackMap(lapTrajectory);
 }
 
 TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Size<UINT> &size) {

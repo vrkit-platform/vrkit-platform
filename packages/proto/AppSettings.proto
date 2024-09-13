@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package IRacingTools.Models;
+
+message AppSettings {
+
+  string activeDashboardId = 1;
+
+  bool autoconnect = 5;
+}
+
+
+

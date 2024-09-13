@@ -17,7 +17,7 @@ import { flatten } from "lodash"
 import {
   isDev, ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin
 } from "../../constants"
-import { getMainStateStore } from "../store"
+
 import { assert, isPromise } from "@3fv/guard"
 import { get } from "lodash/fp"
 
@@ -111,34 +111,34 @@ export const electronGlobalActions: Array<ActionOptions> = [
   {
     ...ElectronMainAppActions.quit,
     execute: () => {
-      const store = getMainStateStore()
-      store.setShutdownInProgress()
+      // const store = getMainStateStore()
+      // store.setShutdownInProgress()
       app.quit()
     }
   },
   {
     ...ElectronMainAppActions.zoomDefault,
     execute: () => {
-      const store = getMainStateStore()
-      store.setZoomFactor(1)
+      // const store = getMainStateStore()
+      // store.setZoomFactor(1)
     }
   },
   {
     ...ElectronMainAppActions.zoomIn,
     execute: () => {
-      const store = getMainStateStore(),
-        newZoomFactor = store.zoomFactor + ZoomFactorIncrement
-
-      store.setZoomFactor(Math.min(newZoomFactor, ZoomFactorMax))
+      // const store = getMainStateStore(),
+      //   newZoomFactor = store.zoomFactor + ZoomFactorIncrement
+      //
+      // store.setZoomFactor(Math.min(newZoomFactor, ZoomFactorMax))
     }
   },
   {
     ...ElectronMainAppActions.zoomOut,
     execute: () => {
-      const store = getMainStateStore(),
-        newZoomFactor = store.zoomFactor - ZoomFactorIncrement
-
-      store.setZoomFactor(Math.max(newZoomFactor, ZoomFactorMin))
+      // const store = getMainStateStore(),
+      //   newZoomFactor = store.zoomFactor - ZoomFactorIncrement
+      //
+      // store.setZoomFactor(Math.max(newZoomFactor, ZoomFactorMin))
     }
   }
 ]

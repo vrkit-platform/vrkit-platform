@@ -21,7 +21,7 @@ import { capitalize, first } from "lodash"
 import { assert } from "@3fv/guard"
 import { invokeWith } from "vrkit-app-common/utils"
 import { ThemeId, THEMES } from "vrkit-app-common/models"
-import MainAppState from "../store"
+// import MainAppState from "../store"
 import { Bind } from "vrkit-app-common/decorators"
 import { inspectSharedWorker } from "../../utils/sharedWorkerHelpers"
 
@@ -110,7 +110,7 @@ export class ElectronMainMenuManager {
     return {
       label: capitalize(themeId),
       click: () => {
-        this.mainAppState.setTheme(themeId)
+        // this.mainAppState.setTheme(themeId)
       }
     } as MenuItemConstructorOptions
   }
@@ -228,6 +228,6 @@ export class ElectronMainMenuManager {
   constructor(
     readonly actionRegistry: ActionRegistry,
     readonly electronActions: ElectronMainActionManager,
-    readonly mainAppState: MainAppState
+    // readonly mainAppState: MainAppState
   ) {}
 }

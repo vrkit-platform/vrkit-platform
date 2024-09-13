@@ -3,7 +3,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import { Bind } from "vrkit-app-common/decorators"
 import { ipcMain, IpcMainEvent, nativeTheme, webContents } from "electron"
 import { getAppThemeFromSystem } from "../../utils/getAppThemeFromSystem"
-import MainStateStore from "../store"
+// import MainStateStore from "../store"
 import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
 
 const log = getLogger(__filename)
@@ -21,7 +21,7 @@ export class NativeThemeManager {
   @PostConstruct()
   private onUpdated() {
     const newTheme = getAppThemeFromSystem()
-    this.store.setSystemTheme(newTheme)
+    // this.store.setSystemTheme(newTheme)
     webContents.getAllWebContents()
       .forEach(content =>
         content.send(ElectronIPCChannel.nativeThemeChanged, newTheme))
@@ -30,7 +30,7 @@ export class NativeThemeManager {
   
   
   constructor(
-    readonly store: MainStateStore
+    // readonly store: MainStateStore
   ) {
     nativeTheme.on("updated", this.onUpdated)
     ipcMain.on(ElectronIPCChannel.getNativeThemeSync,this.getNativeThemeSync)

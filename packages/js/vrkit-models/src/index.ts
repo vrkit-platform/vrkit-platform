@@ -3,6 +3,7 @@ export * from "./google"
 export * from "./RPC"
 export * from "./Session"
 
+export * from "./AppSettings"
 export * from "./Track"
 export * from "./FileInfo"
 export * from "./Geometry"

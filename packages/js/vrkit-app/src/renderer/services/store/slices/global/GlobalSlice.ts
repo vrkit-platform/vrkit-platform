@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { GlobalState } from "./GlobalState"
+import type { GlobalState } from "./GlobalState"
 import type { AppDialogStateValue } from "./AppDialogStateValue"
 import { loadWebAppSettings } from "./loadWebAppSettings"
 import type {ThemeId} from "vrkit-app-common/models"
 
 const newGlobalState = (): GlobalState => ({
-  settings: loadWebAppSettings(),
+  // settings: loadWebAppSettings(),
   ready: true,
   dialog: null
 })
@@ -16,12 +16,12 @@ const slice = createSlice({
   name: "global",
   initialState: newGlobalState(),
   reducers: {
-    setTheme(
-      state: GlobalState,
-      {payload: theme}: PayloadAction<ThemeId>
-    ): void {
-      state.settings.theme = theme ?? "DARK"
-    },
+    // setTheme(
+    //   state: GlobalState,
+    //   {payload: theme}: PayloadAction<ThemeId>
+    // ): void {
+    //   state.settings.theme = theme ?? "DARK"
+    // },
     patch(
       state: GlobalState,
       action: PayloadAction<Partial<GlobalState>>

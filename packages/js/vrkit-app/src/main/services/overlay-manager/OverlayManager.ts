@@ -304,7 +304,32 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   
   private state_: OverlayManagerState = null
   
-  private async newOverlayManagerState(): Promise<OverlayManagerState> {
+  private validateState(state:OverlayManagerState) {
+    // CREATE A DEFAULT CONFIG IF NONE EXIST
+    if (isEmpty(state.configs)) {
+      const defaultConfig = DashboardConfig.create({ ...DashboardTrackMapMockConfig, id: generateUUID() })
+      this.saveDashboardConfig(defaultConfig)
+          .catch(err => {
+            error("Failed to save default config", err)
+          })
+      
+      state.configs.push(defaultConfig)
+    }
+    
+    const activeDashboardId = this.activeDashboardId
+    if (!activeDashboardId || !state.configs.some(it => it.id === activeDashboardId)) {
+      this.appSettingsService.changeSettings({
+        activeDashboardId: state.configs[0].id
+      })
+    }
+  }
+  
+  /**
+   * Create the initial state for the overlay manager
+   *
+   * @private
+   */
+  private async createInitialState(): Promise<OverlayManagerState> {
     const dashFiles = await Fsx.promises
         .readdir(dashDir)
         .then(files => files.filter(endsWith(FileExtensions.Dashboard)).map(f => Path.join(dashDir, f)))
@@ -324,15 +349,14 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
         .filter(isDefined)
         .getOrThrow()
     
-    if (isEmpty(configs)) {
-      configs.push(DashboardConfig.create({ ...DashboardTrackMapMockConfig, id: generateUUID() }))
-    }
-    
-    return {
+    const state:OverlayManagerState =  {
       configs,
       activeSessionId: null,
       overlays: []
     }
+    
+    this.validateState(state)
+    return state
   }
   
   
@@ -349,33 +373,13 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   }
   
   get activeDashboardConfig() {
+    this.validateState(this.state)
+    
     const {configs} = this.state
     const {activeDashboardId} = this
     
-    if (isEmpty(configs)) {
-      const config = DashboardConfig.create({ ...DashboardTrackMapMockConfig, id: generateUUID() })
-      const newState = this.patchState({
-        configs: [config],
+    return configs.find(it => it.id === activeDashboardId)
     
-      })
-      
-      this.appSettingsService.changeSettings({
-        activeDashboardId
-      })
-      
-      return config
-    }
-    
-    let config = configs.find(it => it.id === activeDashboardId)
-    
-    if (!config || isEmpty(activeDashboardId)) {
-      config = first(configs)
-      this.appSettingsService.changeSettings({
-        activeDashboardId: config.id
-      })
-    }
-    
-    return config
     
   }
 
@@ -460,7 +464,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     this.broadcastRendererOverlays(
       PluginClientEventType.DATA_FRAME,
       sessionId,
-      this.sessionManager.activeSession?.info,
+      this.sessionManager.activeSession?.timing,
       dataVarValues
     )
   }
@@ -537,7 +541,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    */
   @PostConstruct() // @ts-ignore
   private async init(): Promise<void> {
-    this.state_ = await this.newOverlayManagerState()
+    this.state_ = await this.createInitialState()
 
     const ipcFnHandlers = Array<Pair<OverlayClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
       [OverlayClientFnType.FETCH_CONFIG, this.fetchOverlayConfigHandler.bind(this)],
@@ -588,6 +592,16 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     super()
   }
 
+  @Bind
+  private saveDashboardConfig(config: DashboardConfig) {
+    return this.persistQueue_.add(this.createSaveDashboardConfigTask(config))
+  }
+  
+  @Bind
+  private deleteDashboardConfig(config: DashboardConfig) {
+    return this.persistQueue_.add(this.createDeleteDashboardConfigTask(config.id))
+  }
+  
   /**
    * Merge & patch OverlayManagerState slice
    */
@@ -603,15 +617,11 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     
     // HANDLE REMOVALS
     const missingConfigs = currentConfigs.filter(({id}) => !newConfigs.some(({id: newId}) => newId === id))
-    missingConfigs.forEach(config => {
-      this.persistQueue_.add(this.createDeleteTask(config.id))
-    })
+    missingConfigs.forEach(this.deleteDashboardConfig)
     
     // HANDLE ADDITIONS
     const diffConfigs = newConfigs.filter((newConfig, i) => !isEqual(currentConfigs[i], newConfig))
-    diffConfigs.forEach(config => {
-      this.persistQueue_.add(this.createSaveTask(config))
-    })
+    diffConfigs.forEach(this.saveDashboardConfig)
     
     this.broadcastMainStateChanged(newState)
     return newState
@@ -664,7 +674,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     }
   }
   
-  private createDeleteTask(id: string) {
+  private createDeleteDashboardConfigTask(id: string) {
     return async () => {
       const dashFile = Path.join(AppPaths.dashboardsDir, id + FileExtensions.Dashboard)
       info(`Deleting dashboard ${dashFile}`)
@@ -674,7 +684,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     
   }
   
-  private createSaveTask(config: DashboardConfig) {
+  private createSaveDashboardConfigTask(config: DashboardConfig) {
     return async () => {
       const dashFile = Path.join(AppPaths.dashboardsDir, config.id + FileExtensions.Dashboard)
       info(`Saving dashboard ${dashFile}`)
@@ -683,6 +693,8 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     }
     
   }
+  
+  
 }
 
 export default OverlayManager

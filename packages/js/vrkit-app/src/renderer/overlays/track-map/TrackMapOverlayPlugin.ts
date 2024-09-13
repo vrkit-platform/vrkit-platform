@@ -1,19 +1,18 @@
 import { pick } from "lodash"
 import Two from "two.js"
-import type TTwo from "two.js"
 import type { LapTrajectory, TrackMap } from "vrkit-models"
 import "vrkit-plugin-sdk"
+import { PluginClient, PluginClientEventType } from "vrkit-plugin-sdk"
 import { ScaleTrackMapToFit } from "vrkit-shared"
 
 const rootEl = document.getElementById("root") as HTMLElement,
     canvasEl = document.createElement('canvas')
 
-
 rootEl.appendChild(canvasEl)
 
-let trackMap: TrackMap = null
+let client: PluginClient = null
 
-let two = null as any
+let trackMap: TrackMap = null
 
 let trackPath: any = null
 
@@ -40,12 +39,7 @@ function renderTrack() {
     background: 'transparent'
   })
   
-  if (two) {
-    two.clear()
-    two = null
-  }
-  
-  two = new Two({
+  const two = new Two({
     fitted: true,
     width,
     height,
@@ -83,8 +77,9 @@ function renderSetup() {
 }
 
 async function launch() {
+  client = getVRKitPluginClient()
+  
   const
-      client = getVRKitPluginClient(),
       overlayInfo = client.getOverlayInfo(),
       sessionInfo = await client.fetchSessionInfo(),
       weekendInfo = sessionInfo.weekendInfo,
@@ -93,6 +88,12 @@ async function launch() {
   
   trackMap = await client.getTrackMap(trackLayoutId)
   
+  client.on(PluginClientEventType.SESSION_INFO, (sessionId, info) => {
+    console.log("SESSION_INFO EVENT", sessionId, info)
+  })
+  client.on(PluginClientEventType.DATA_FRAME, (sessionId, timing, dataVarValues) => {
+    console.log("DATA_FRAME EVENT", sessionId, timing.currentTimeMillis, "DATA VAR VALUE COUNT = ", dataVarValues.length)
+  })
   // console.log(`Trajectory for ${trackLayoutId}`, trackMap)
   //rootEl.innerHTML = `Track map goes here: trackId=${trackId},trackName=${trackName},trackConfigName=${trackConfigName} --- trackLayoutId=${trackLayoutId}`
   renderSetup()

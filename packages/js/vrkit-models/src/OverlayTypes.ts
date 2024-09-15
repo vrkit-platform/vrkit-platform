@@ -12,6 +12,15 @@ import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { RectI } from "./Geometry";
 /**
+ * @generated from protobuf message IRacingTools.Models.Dashboard.OverlayBaseSettings
+ */
+export interface OverlayBaseSettings {
+    /**
+     * @generated from protobuf field: int32 fps = 1;
+     */
+    fps: number;
+}
+/**
  * @generated from protobuf message IRacingTools.Models.Dashboard.OverlayInfo
  */
 export interface OverlayInfo {
@@ -35,6 +44,10 @@ export interface OverlayInfo {
      * @generated from protobuf field: repeated string data_var_names = 20;
      */
     dataVarNames: string[];
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Dashboard.OverlayBaseSettings settings = 30;
+     */
+    settings?: OverlayBaseSettings;
 }
 /**
  * @generated from protobuf message IRacingTools.Models.Dashboard.OverlayPlacement
@@ -71,6 +84,53 @@ export enum OverlayKind {
     CUSTOM = 10
 }
 // @generated message type with reflection information, may provide speed optimized methods
+class OverlayBaseSettings$Type extends MessageType<OverlayBaseSettings> {
+    constructor() {
+        super("IRacingTools.Models.Dashboard.OverlayBaseSettings", [
+            { no: 1, name: "fps", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
+        ]);
+    }
+    create(value?: PartialMessage<OverlayBaseSettings>): OverlayBaseSettings {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.fps = 0;
+        if (value !== undefined)
+            reflectionMergePartial<OverlayBaseSettings>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: OverlayBaseSettings): OverlayBaseSettings {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int32 fps */ 1:
+                    message.fps = reader.int32();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: OverlayBaseSettings, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int32 fps = 1; */
+        if (message.fps !== 0)
+            writer.tag(1, WireType.Varint).int32(message.fps);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.Dashboard.OverlayBaseSettings
+ */
+export const OverlayBaseSettings = new OverlayBaseSettings$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class OverlayInfo$Type extends MessageType<OverlayInfo> {
     constructor() {
         super("IRacingTools.Models.Dashboard.OverlayInfo", [
@@ -78,7 +138,8 @@ class OverlayInfo$Type extends MessageType<OverlayInfo> {
             { no: 2, name: "kind", kind: "enum", T: () => ["IRacingTools.Models.Dashboard.OverlayKind", OverlayKind, "OVERLAY_KIND_"] },
             { no: 3, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 4, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 20, name: "data_var_names", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
+            { no: 20, name: "data_var_names", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
+            { no: 30, name: "settings", kind: "message", T: () => OverlayBaseSettings }
         ]);
     }
     create(value?: PartialMessage<OverlayInfo>): OverlayInfo {
@@ -112,6 +173,9 @@ class OverlayInfo$Type extends MessageType<OverlayInfo> {
                 case /* repeated string data_var_names */ 20:
                     message.dataVarNames.push(reader.string());
                     break;
+                case /* IRacingTools.Models.Dashboard.OverlayBaseSettings settings */ 30:
+                    message.settings = OverlayBaseSettings.internalBinaryRead(reader, reader.uint32(), options, message.settings);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -139,6 +203,9 @@ class OverlayInfo$Type extends MessageType<OverlayInfo> {
         /* repeated string data_var_names = 20; */
         for (let i = 0; i < message.dataVarNames.length; i++)
             writer.tag(20, WireType.LengthDelimited).string(message.dataVarNames[i]);
+        /* IRacingTools.Models.Dashboard.OverlayBaseSettings settings = 30; */
+        if (message.settings)
+            OverlayBaseSettings.internalBinaryWrite(message.settings, writer.tag(30, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

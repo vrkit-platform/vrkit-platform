@@ -31,7 +31,8 @@ export function OverlayManagerEventTypeToIPCName(type: OverlayManagerEventType):
  * Overlay client event types `manager -> client`
  */
 export enum OverlayClientEventType {
-  OVERLAY_CONFIG = "OVERLAY_CONFIG"
+  OVERLAY_CONFIG = "OVERLAY_CONFIG",
+  EDIT_MODE = "EDIT_MODE"
 }
 
 /**
@@ -39,6 +40,7 @@ export enum OverlayClientEventType {
  */
 export interface OverlayClientEventArgs extends PluginClientEventArgs {
   [OverlayClientEventType.OVERLAY_CONFIG]: (config: OverlayConfig) => void
+  [OverlayClientEventType.EDIT_MODE]: (enabled: boolean) => void
 }
 
 /**
@@ -52,6 +54,7 @@ export type OverlayClientEventHandler<Type extends keyof OverlayClientEventArgs>
 export enum OverlayClientFnType {
   FETCH_CONFIG = "FETCH_CONFIG",
   FETCH_SESSION = "FETCH_SESSION",
+  
   CLOSE = "CLOSE"
 }
 
@@ -150,6 +153,8 @@ export namespace OverlayWindowMainEvents {
    */
   export enum EventType {
     BOUNDS_CHANGED = "BOUNDS_CHANGED",
+    CONTROLS_ENABLED = "CONTROLS_ENABLED"
+    
   }
   
   export type EventIPCName = `OVERLAY_WINDOW_MAIN_EVENT_${EventType}`

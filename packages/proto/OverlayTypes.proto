@@ -1,6 +1,5 @@
 syntax = "proto3";
 import "Geometry.proto";
-import "ScreenConfig.proto";
 
 package IRacingTools.Models.Dashboard;
 
@@ -8,6 +7,10 @@ enum OverlayKind {
   OVERLAY_KIND_TRACK_MAP = 0;
   OVERLAY_KIND_CLOCK = 1;
   OVERLAY_KIND_CUSTOM = 10;
+}
+
+message OverlayBaseSettings {
+  int32 fps = 1;
 }
 
 message OverlayInfo {
@@ -18,6 +21,8 @@ message OverlayInfo {
   string description = 4;
 
   repeated string data_var_names = 20;
+
+  OverlayBaseSettings settings = 30;
 
 
 }

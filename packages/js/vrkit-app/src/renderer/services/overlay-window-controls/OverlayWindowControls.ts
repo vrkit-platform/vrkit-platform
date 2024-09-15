@@ -4,7 +4,7 @@ import { Bind } from "vrkit-app-common/decorators"
 import { isDev } from "../../constants"
 import "./OverlayWindowControls.scss"
 import { OverlayWindowMainEvents, OverlayWindowRendererEvents } from "vrkit-app-common/models/overlay-manager"
-import { ipcRenderer } from "electron"
+import { ipcRenderer, IpcRendererEvent } from "electron"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -33,13 +33,24 @@ export class OverlayWindowControls {
 
   @Bind
   private onMouseEnter(event: Event) {
-    body.classList.add("hover")
-    ipcRenderer.send(WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_ENTER))
+    // log.info(`onMouseEnter`)
+    // body.classList.add("hover")
+    // ipcRenderer.send(WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_ENTER))
   }
 
   @Bind
   private onMouseLeave(event: Event) {
-    body.classList.remove("hover")
+    // log.info(`onMouseLeave`)
+    // body.classList.remove("hover")
+    // ipcRenderer.send(WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_LEAVE))
+  }
+  
+  @Bind
+  private onMainControlsEnabled(ev: IpcRendererEvent, enabled: boolean) {
+    if (enabled)
+      body.classList.add("hover")
+    else
+      body.classList.remove("hover")
   }
 
   /**
@@ -66,12 +77,14 @@ export class OverlayWindowControls {
   private async init(): Promise<void> {
     // tslint:disable-next-line
     window.addEventListener("beforeunload", this.unload)
-
+    this.labelEl.innerHTML = "Overlay"
+    this.titlebarEl.appendChild(this.labelEl)
     this.titlebarEl.appendChild(this.controlsEl)
     body.appendChild(this.titlebarEl)
-
-    body.addEventListener("mouseenter", this.onMouseEnter)
-    body.addEventListener("mouseleave", this.onMouseLeave)
+    
+    ipcRenderer.on(WinMainEvents.EventTypeToIPCName(WinMainEvents.EventType.CONTROLS_ENABLED), this.onMainControlsEnabled)
+    // body.addEventListener("mouseenter", this.onMouseEnter)
+    // body.addEventListener("mouseleave", this.onMouseLeave)
 
     if (import.meta.webpackHot) {
       import.meta.webpackHot.addDisposeHandler(() => {

@@ -32,8 +32,8 @@ $defaultTransition: all 1s ease-out;
 	transition: $defaultTransition;
 	& > #titlebarLabel {
 		&, & * {
-			user-select: none !important;
-			-webkit-user-select: none !important;
+			//user-select: none !important;
+			//-webkit-user-select: none !important;
 			-webkit-app-region: drag !important;
 		};
 		
@@ -54,7 +54,8 @@ $defaultTransition: all 1s ease-out;
 
 body {
 	overflow: hidden;
-	
+	width: 100vw;
+	height: 100vh;
 	&:not(.hover) {
 		& > #root {
 			background-color: transparent;

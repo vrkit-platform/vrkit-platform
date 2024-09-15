@@ -1,6 +1,7 @@
 import { isString } from "@3fv/guard"
 
 const electronExternalsExclude = [
+  "iohook-raub",
   "vrkit-native-interop",
   "electron",
   "electron/main",

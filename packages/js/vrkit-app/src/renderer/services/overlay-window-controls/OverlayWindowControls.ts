@@ -3,8 +3,14 @@ import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
 import { isDev } from "../../constants"
 import "./OverlayWindowControls.scss"
-import { OverlayWindowMainEvents, OverlayWindowRendererEvents } from "vrkit-app-common/models/overlay-manager"
+import {
+  OverlayClientEventType,
+  OverlayMode,
+  OverlayWindowMainEvents,
+  OverlayWindowRendererEvents
+} from "vrkit-app-common/models/overlay-manager"
 import { ipcRenderer, IpcRendererEvent } from "electron"
+import OverlayClient from "../overlay-client"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -16,41 +22,42 @@ const { debug, trace, info, error, warn } = log
 const WinRendererEvents = OverlayWindowRendererEvents
 const WinMainEvents = OverlayWindowMainEvents
 
-
-function createDivWithId(elementId: string): HTMLElement {
-  const el = document.createElement("div")
+function createElementWithId<ET extends HTMLElement = HTMLElement>(tag: string, elementId: string): ET {
+  const el = document.createElement(tag) as ET
   el.id = elementId
   return el
 }
 
-const { body } = document
+function createDivWithId(elementId: string): HTMLDivElement {
+  return createElementWithId<HTMLDivElement>("div", elementId)
+}
+
+const { body } = document,
+    rootEl = document.getElementById("root")
 
 @Singleton()
 export class OverlayWindowControls {
-  readonly titlebarEl: HTMLElement = createDivWithId("titlebar")
-  readonly labelEl: HTMLElement = createDivWithId("titlebarLabel")
-  readonly controlsEl: HTMLElement = createDivWithId("titlebarControls")
+  readonly editModeBtnEl: HTMLButtonElement = createElementWithId<HTMLButtonElement>("button", "editModeBtn")
+  readonly editModeBtnLayerEl: HTMLElement = createDivWithId("editModeBtnLayer")
+  readonly editBarEl: HTMLElement = createDivWithId("editBar")
+  readonly editBarLabelEl: HTMLElement = createDivWithId("editBarLabel")
+  readonly editBarControlsEl: HTMLElement = createDivWithId("editBarControls")
+  readonly contentEl: HTMLElement = createDivWithId("content")
 
   @Bind
-  private onMouseEnter(event: Event) {
+  private async onEditBtnClick(event: Event) {
     // log.info(`onMouseEnter`)
     // body.classList.add("hover")
     // ipcRenderer.send(WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_ENTER))
+    await this.client.setMode(OverlayMode.EDIT)
   }
 
   @Bind
-  private onMouseLeave(event: Event) {
-    // log.info(`onMouseLeave`)
-    // body.classList.remove("hover")
-    // ipcRenderer.send(WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_LEAVE))
-  }
-  
-  @Bind
-  private onMainControlsEnabled(ev: IpcRendererEvent, enabled: boolean) {
+  private onMainFocused(ev: IpcRendererEvent, enabled: boolean) {
     if (enabled)
-      body.classList.add("hover")
+      rootEl.classList.add("focus")
     else
-      body.classList.remove("hover")
+      rootEl.classList.remove("focus")
   }
 
   /**
@@ -63,8 +70,8 @@ export class OverlayWindowControls {
   private unload(event?: Event) {
     debug(`Unloading overlay window controls`)
 
-    body.removeEventListener("mouseenter", this.onMouseEnter)
-    body.removeEventListener("mouseleave", this.onMouseLeave)
+    // body.removeEventListener("mouseenter", this.onMouseEnter)
+    // body.removeEventListener("mouseleave", this.onMouseLeave)
   }
 
   /**
@@ -77,12 +84,23 @@ export class OverlayWindowControls {
   private async init(): Promise<void> {
     // tslint:disable-next-line
     window.addEventListener("beforeunload", this.unload)
-    this.labelEl.innerHTML = "Overlay"
-    this.titlebarEl.appendChild(this.labelEl)
-    this.titlebarEl.appendChild(this.controlsEl)
-    body.appendChild(this.titlebarEl)
     
-    ipcRenderer.on(WinMainEvents.EventTypeToIPCName(WinMainEvents.EventType.CONTROLS_ENABLED), this.onMainControlsEnabled)
+    this.editModeBtnEl.textContent = "Edit Overlay & Layout"
+    this.editModeBtnEl.addEventListener("click", this.onEditBtnClick.bind(this))
+    this.editBarLabelEl.innerHTML = "Overlay"
+    this.editBarEl.appendChild(this.editBarLabelEl)
+    this.editBarEl.appendChild(this.editBarControlsEl)
+    rootEl.appendChild(this.contentEl)
+    rootEl.appendChild(this.editBarEl)
+    rootEl.appendChild(this.editModeBtnLayerEl)
+    this.editModeBtnLayerEl.appendChild(this.editModeBtnEl)
+    
+    ipcRenderer.on(WinMainEvents.EventTypeToIPCName(WinMainEvents.EventType.FOCUSED), this.onMainFocused)
+    this.client.on(OverlayClientEventType.OVERLAY_MODE,(newMode: OverlayMode) => {
+    // TODO: Swap all this junk out for REACT
+      // document.body.style.setProperty('overlay-edit-mode', 'true')
+      
+    })
     // body.addEventListener("mouseenter", this.onMouseEnter)
     // body.addEventListener("mouseleave", this.onMouseLeave)
 
@@ -116,7 +134,7 @@ export class OverlayWindowControls {
    * Service constructor
    *
    */
-  constructor() {}
+  constructor(readonly client: OverlayClient) {}
 }
 
 export default OverlayWindowControls

@@ -1,22 +1,67 @@
 
+@use "sass:map";
+
+
+$overlay-edit-mode: false !default;
 $titlebarHeight: 2rem;
-$defaultTransition: all 1s ease-out;
+$transition: none 0.25s ease-out;
+$transition-props: background-color, opacity, color;
+
+$color-action: #8080da !default;
+$color-action-contrast: #FFF !default;
+
+
+$bg: #00000000 !default;
+$bg-focus: #000000DD !default;
+
+$edit-bar-bg: transparent !default;
+$edit-bar-text: transparent !default;
+
+$edit-btn-bg: $color-action !default;
+$edit-btn-text: $color-action-contrast !default;
+
+@if $overlay-edit-mode {
+	$bg: #000000FF;
+	$bg-focus: #000000FF;
+	$edit-btn-bg: #00000000;
+	$edit-btn-text: #00000000;
+	$edit-bar-bg: $color-action;
+	$edit-bar-text: $color-action-contrast;
+}
+
+html, body, #root {
+	margin: 0 !important;
+	padding: 0 !important;
+}
 
 #root {
 	z-index: 1;
-	padding: $titlebarHeight 0 0;
+	padding: 0;
 	width: 100vw;
 	height: calc(100vh - $titlebarHeight);
 	position: fixed;
-	top: 0;
+	border-radius: 1rem;
+	top: $titlebarHeight;
 	left: 0;
 	right: 0;
 	bottom: 0;
 	overflow: hidden;
-	transition: $defaultTransition;
+	transition: $transition;
+	transition-property: $transition-props;
 }
 
-#titlebar {
+#content {
+	overflow: hidden;
+	position: relative;
+	max-width: 100%;
+	min-width: 100%;
+	width: 100%;
+	max-height: 100%;
+	min-height: 100%;
+	height: 100%;
+}
+
+#editBar {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -29,11 +74,13 @@ $defaultTransition: all 1s ease-out;
 	align-items: stretch;
 	justify-content: stretch;
 	
-	transition: $defaultTransition;
-	& > #titlebarLabel {
+	transition: $transition;
+	transition-property: $transition-props;
+	
+	& > #editBarLabel {
 		&, & * {
-			//user-select: none !important;
-			//-webkit-user-select: none !important;
+			user-select: none !important;
+			-webkit-user-select: none !important;
 			-webkit-app-region: drag !important;
 		};
 		
@@ -42,36 +89,88 @@ $defaultTransition: all 1s ease-out;
 		}
 	}
 	
-	& > #titlebarControls {
+	& > #editBarControls {
 		//position: absolute;
 		
 		//right: 0;
 		//top: 0;
+		min-width: 20%;
 		flex: 0 0 auto;
 	}
 }
 
-
-body {
+#editModeBtnLayer {
+	overflow: hidden;
+	position: fixed;
+	width: 100vw;
+	height: 100vh;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	z-index: 999;
+	
+	border-radius: 1rem;
+	
+	transition: $transition;
+	transition-property: $transition-props;
+	
+}
+	
+	body {
 	overflow: hidden;
 	width: 100vw;
 	height: 100vh;
-	&:not(.hover) {
-		& > #root {
-			background-color: transparent;
+	& > div#root {
+		
+		& > #content {
+			
+			background-color: $bg;
 		}
-		& > #titlebar {
-			background-color: transparent;
+		
+		& > #editBar {
+			background-color: $edit-bar-bg;
+			color: $edit-bar-text;
 		}
-	}
+		
+		& > #editModeBtnLayer {
+			opacity: 0;
+			
+			& > #editModeBtn {
+				background-color: $edit-btn-bg;
+				color: $edit-btn-text;
+			}
+		}
+
+
+		&.focus {
+			& > #content {
+			
+			}
+			
+			& > #editBar {
+				background-color: $edit-bar-bg;
+				color: $edit-bar-text;
+			}
+			
+			& > #editModeBtnLayer {
+				opacity: 1;
+				background-color: $bg-focus;
+				
+				& > #editModeBtn {
+				
+				}
+			}
+		}
 	
-	&.hover {
-		& > #root {
-			background-color: black;
-		}
-		& > #titlebar {
-			background-color: gray;
-		}
+		
+		
+		
 	}
 }
 

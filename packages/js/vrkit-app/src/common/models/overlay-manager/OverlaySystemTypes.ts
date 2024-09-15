@@ -27,12 +27,22 @@ export function OverlayManagerEventTypeToIPCName(type: OverlayManagerEventType):
 
 // ------ OverlayClient events & types
 
+export interface OverlayClientState {
+  config: OverlayConfig
+  
+  session: OverlaySessionData
+  
+  mode: OverlayMode
+}
+
+
 /**
  * Overlay client event types `manager -> client`
  */
 export enum OverlayClientEventType {
   OVERLAY_CONFIG = "OVERLAY_CONFIG",
-  EDIT_MODE = "EDIT_MODE"
+  OVERLAY_MODE = "OVERLAY_MODE",
+  STATE_CHANGED = "STATE_CHANGED"
 }
 
 /**
@@ -40,7 +50,9 @@ export enum OverlayClientEventType {
  */
 export interface OverlayClientEventArgs extends PluginClientEventArgs {
   [OverlayClientEventType.OVERLAY_CONFIG]: (config: OverlayConfig) => void
-  [OverlayClientEventType.EDIT_MODE]: (enabled: boolean) => void
+  [OverlayClientEventType.OVERLAY_MODE]: (mode: OverlayMode) => void
+  [OverlayClientEventType.STATE_CHANGED]: (state: OverlayClientState) => void
+  
 }
 
 /**
@@ -54,7 +66,8 @@ export type OverlayClientEventHandler<Type extends keyof OverlayClientEventArgs>
 export enum OverlayClientFnType {
   FETCH_CONFIG = "FETCH_CONFIG",
   FETCH_SESSION = "FETCH_SESSION",
-  
+  SET_OVERLAY_MODE = "SET_OVERLAY_MODE",
+  FETCH_OVERLAY_MODE = "FETCH_OVERLAY_MODE",
   CLOSE = "CLOSE"
 }
 
@@ -118,6 +131,10 @@ export interface DefaultOverlayClient {
   close(): Promise<void>
 }
 
+export enum OverlayMode {
+  NORMAL = "NORMAL",
+  EDIT = "EDIT"
+}
 
 export namespace OverlayWindowRendererEvents {
   
@@ -153,7 +170,7 @@ export namespace OverlayWindowMainEvents {
    */
   export enum EventType {
     BOUNDS_CHANGED = "BOUNDS_CHANGED",
-    CONTROLS_ENABLED = "CONTROLS_ENABLED"
+    FOCUSED = "FOCUSED"
     
   }
   

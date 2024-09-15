@@ -16,10 +16,10 @@ import { isDefined } from "@3fv/guard"
 const TrackMapThrottlingPeriod = 100,
   CarMarkerRadiusPx = 6,
   log = getLogger(__filename),
-  rootEl = document.getElementById("root") as HTMLElement,
+  contentEl = document.getElementById("content") as HTMLElement,
   canvasEl = document.createElement("canvas")
 
-rootEl.appendChild(canvasEl)
+contentEl.appendChild(canvasEl)
 
 let client: PluginClient = null
 let overlayInfo: OverlayInfo = null
@@ -71,8 +71,8 @@ interface SceneState {
 
 const sceneState: SceneState = {
   carMarkers: [],
-  width: rootEl.clientWidth,
-  height: rootEl.clientHeight
+  width: contentEl.clientWidth,
+  height: contentEl.clientHeight
 }
 
 type RenderCarsFn = (cars: CarData[]) => void
@@ -138,7 +138,7 @@ let renderCars: RenderCarsFn = Noop()
  * Render the track map
  */
 const createScene = throttle(() => {
-  const { clientWidth: width, clientHeight: height } = rootEl
+  const { clientWidth: width, clientHeight: height } = contentEl
   if (!width || !height) {
     log.warn("Unable to render canvas, width & height must be positive values", { width, height })
     return
@@ -207,7 +207,7 @@ const sizeObserver = new ResizeObserver(
   throttle(
     (entries: ResizeObserverEntry[]) => {
       for (let entry of entries) {
-        if (entry?.target !== rootEl) {
+        if (entry?.target !== contentEl) {
           log.warn("Received unknown element resize entry", entry)
           continue
         }
@@ -234,7 +234,7 @@ function renderSetup(newInfo: OverlayInfo = overlayInfo) {
   renderCars = makeRenderCars(newInfo?.settings)
 
   if (!setupComplete)
-    sizeObserver.observe(rootEl, {
+    sizeObserver.observe(contentEl, {
       box: "border-box"
     })
   setupComplete = true

@@ -67,7 +67,7 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
     const currentState = this.state_
     const patch = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn
 
-    const newState = assign(this.state_, patch)
+    const newState = this.state_ = {...this.state_, ...patch}
 
     if (!isEqual(currentState, newState)) {
       this.emit(OverlayClientEventType.STATE_CHANGED, newState)
@@ -83,7 +83,7 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
    * @param mode
    */
   private onOverlayModeEvent(_event: IpcRendererEvent, mode: OverlayMode) {
-    if (mode === this.mode) return
+    // if (mode === this.mode) return
 
     this.patchState({
       mode
@@ -199,11 +199,12 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
       }
     }
 
-    const [config, session] = await Promise.all([this.fetchOverlayConfig(), this.fetchSession()])
+    const [config, session, mode] = await Promise.all([this.fetchOverlayConfig(), this.fetchSession(), this.fetchMode()])
 
     this.patchState({
       config,
-      session
+      session,
+      mode
     })
 
     // await this.loadOverlay()
@@ -247,7 +248,7 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
   @Bind
   async fetchMode(): Promise<OverlayMode> {
     const mode = await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_OVERLAY_MODE))
-    if (mode === this.state_?.mode) return mode
+    // if (mode === this.state_?.mode) return mode
 
     this.patchState({
       mode

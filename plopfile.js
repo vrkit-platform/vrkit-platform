@@ -1,8 +1,4 @@
 require("source-map-support/register")
-// require("core-js")
-/**
- *  //@type {import("sugar").default} Sugar
- */
 
 const registerSharedActions = require("./tools/plop/actions/SharedActions")
 const Fs = require("fs")

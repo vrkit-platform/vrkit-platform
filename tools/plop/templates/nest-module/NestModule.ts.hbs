@@ -1,0 +1,11 @@
+import { Module, Global } from "@nestjs/common"
+import { {{name}}Manager } from "./{{name}}Manager"
+
+@Global()
+@Module({
+  imports: [], providers: [{{name}}Manager], exports: [{{name}}Manager]
+})
+export class {{name}}Module {
+}
+
+export default {{name}}Module

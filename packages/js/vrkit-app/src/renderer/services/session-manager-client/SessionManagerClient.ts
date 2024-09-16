@@ -18,13 +18,16 @@ import {
   SessionManagerState,
   SessionPlayerId
 } from "vrkit-app-common/models/session-manager"
-// import {
-//   sessionManagerActions,
-//   sessionManagerSelectors
-// } from "../store/slices/session-manager"
 import EventEmitter3 from "eventemitter3"
 import { sessionManagerActions } from "../store/slices/session-manager"
-import { Pair } from "vrkit-app-common/utils"
+import { Disposables, Pair } from "vrkit-app-common/utils"
+import {
+  OverlayClientEventType,
+  OverlayClientEventTypeToIPCName,
+  OverlayClientFnType,
+  OverlayClientFnTypeToIPCName,
+  OverlayMode
+} from "vrkit-app-common/models/overlay-manager"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -80,8 +83,21 @@ export interface SessionManagerClientEventArgs {
   ) => void
 }
 
+type SessionEventHandlerPair = Pair<
+    SessionManagerEventType,
+    (event: IpcRendererEvent, ...args: any[]) => any
+>
+
+type OverlayEventHandlerPair = Pair<
+    OverlayClientEventType,
+    (event: IpcRendererEvent, ...args: any[]) => any
+>
+
 @Singleton()
 export class SessionManagerClient extends EventEmitter3<SessionManagerClientEventArgs> {
+  
+  private disposers = new Disposables()
+  
   @Bind
   private onSessionManagerStateChangedEvent(
     _event: IpcRendererEvent,
@@ -90,12 +106,21 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
     this.updateState(newState)
   }
 
-  @Bind
+  
   private onSessionManagerDataFrameEvent(
     _event: IpcRendererEvent,
     sessionId: string,
     dataVars: SessionDataVariable[]
   ) {}
+  
+  
+  private onOverlayModeEvent(
+      _event: IpcRendererEvent,
+      mode: OverlayMode
+  ) {
+    log.info("OVERLAY MODE RECEIVED", mode)
+    this.appStore.dispatch(sessionManagerActions.patch({overlayMode: mode}))
+  }
 
   /**
    * Cleanup resources on unload
@@ -104,10 +129,10 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
    * @private
    */
   @Bind
-  private unload(event: Event) {
+  private unload(event: Event = null) {
     debug(`Unloading session manager client`)
-
-    // TODO: Unsubscribe from ipcRenderer
+    
+    this.disposers.dispose()
   }
 
   /**
@@ -118,12 +143,9 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
   private async init(): Promise<void> {
     // tslint:disable-next-line
     window.addEventListener("beforeunload", this.unload)
-    const ipcEventHandlers = Array<
-      Pair<
-        SessionManagerEventType,
-        (event: IpcRendererEvent, ...args: any[]) => any
-      >
-    >(
+    
+    
+    const ipcSessionEventHandlers = Array<SessionEventHandlerPair>(
       [
         SessionManagerEventType.STATE_CHANGED,
         this.onSessionManagerStateChangedEvent.bind(this)
@@ -133,11 +155,41 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
         this.onSessionManagerDataFrameEvent.bind(this)
       ]
     )
+    
+    const ipcOverlayEventHandlers = Array<
+        OverlayEventHandlerPair
+    >(
+        [
+          OverlayClientEventType.OVERLAY_MODE,
+          this.onOverlayModeEvent.bind(this)
+        ]
+    )
 
-    ipcEventHandlers.forEach(([type, handler]) => {
+    ipcSessionEventHandlers.forEach(([type, handler]) => {
       ipcRenderer.on(SessionManagerEventTypeToIPCName(type), handler)
     })
-
+    
+    ipcOverlayEventHandlers.forEach(([type, handler]) => {
+      ipcRenderer.on(OverlayClientEventTypeToIPCName(type), handler)
+    })
+    
+    this.disposers.push(() => {
+      ipcSessionEventHandlers.forEach(([type, handler]) => {
+        ipcRenderer.off(SessionManagerEventTypeToIPCName(type), handler)
+      })
+      
+      ipcOverlayEventHandlers.forEach(([type, handler]) => {
+        ipcRenderer.off(OverlayClientEventTypeToIPCName(type), handler)
+      })
+      
+      Object.assign(global, {
+        sessionManagerClient: null
+      })
+      
+      window.removeEventListener("beforeunload", this.unload)
+      
+    })
+    
     if (isDev) {
       Object.assign(global, {
         sessionManagerClient: this
@@ -145,14 +197,7 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
 
       if (import.meta.webpackHot) {
         import.meta.webpackHot.addDisposeHandler(() => {
-          window.removeEventListener("beforeunload", this.unload)
-          Object.assign(global, {
-            sessionManagerClient: null
-          })
-
-          ipcEventHandlers.forEach(([type, handler]) => {
-            ipcRenderer.off(SessionManagerEventTypeToIPCName(type), handler)
-          })
+          this.unload()
         })
       }
     }
@@ -161,7 +206,7 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
   /**
    * Update the whole SessionManagerState slice
    */
-  updateState(newState: SessionManagerState) {
+  updateState(newState: Partial<SessionManagerState>) {
     this.appStore.dispatch(sessionManagerActions.patch(newState))
   }
 
@@ -202,6 +247,13 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
     return ipcRenderer.invoke(
       SessionManagerFnTypeToIPCName(SessionManagerFnType.SHOW_OPEN_DISK_SESSION)
     )
+  }
+  
+  @Bind
+  async setOverlayMode(mode: OverlayMode): Promise<void> {
+    const newMode = await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.SET_OVERLAY_MODE), mode)
+    
+    this.appStore.dispatch(sessionManagerActions.setOverlayMode(newMode))
   }
 }
 

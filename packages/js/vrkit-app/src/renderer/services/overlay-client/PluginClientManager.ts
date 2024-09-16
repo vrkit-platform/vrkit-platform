@@ -168,7 +168,6 @@ const { debug, trace, info, error, warn } = log
       this.client.off(type, handler as any)
     }
     
-    @Bind
     getReactComponent() {
       return this.reactComponent_
     }

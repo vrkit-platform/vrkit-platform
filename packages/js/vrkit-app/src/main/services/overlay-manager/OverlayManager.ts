@@ -38,6 +38,7 @@ import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
 import ioHook from "iohook-raub"
 import { THookEventMouse } from "vrkit-shared"
 import { OverlayWindow } from "./OverlayWindow"
+import { MainWindowManager } from "../window-manager"
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 
@@ -193,7 +194,11 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     if (idChanged || notActive) {
       await this.closeAll(true)
     }
-
+    
+    this.patchState({
+      mode: OverlayMode.NORMAL
+    })
+    
     if (!idChanged) return
 
     const overlays = Array<OverlayWindow>()
@@ -345,7 +350,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       ow.setMode(mode)
     }
     // this.broadcastRendererOverlays(OverlayClientEventType.OVERLAY_MODE, mode)
-
+    
     return mode
   }
 
@@ -398,13 +403,20 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   private async init(): Promise<void> {
     this.state_ = await this.createInitialState()
 
+    const { sessionManager } = this
+
     const ipcFnHandlers = Array<Pair<OverlayClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
-      [OverlayClientFnType.FETCH_CONFIG, this.fetchOverlayConfigHandler.bind(this)],
-      [OverlayClientFnType.FETCH_SESSION, this.fetchSessionHandler.bind(this)],
-      [OverlayClientFnType.SET_OVERLAY_MODE, this.setOverlayModeHandler.bind(this)],
-      [OverlayClientFnType.FETCH_OVERLAY_MODE, this.fetchOverlayModeHandler.bind(this)],
-      [OverlayClientFnType.CLOSE, this.closeHandler.bind(this)]
-    )
+        [OverlayClientFnType.FETCH_CONFIG, this.fetchOverlayConfigHandler.bind(this)],
+        [OverlayClientFnType.FETCH_SESSION, this.fetchSessionHandler.bind(this)],
+        [OverlayClientFnType.SET_OVERLAY_MODE, this.setOverlayModeHandler.bind(this)],
+        [OverlayClientFnType.FETCH_OVERLAY_MODE, this.fetchOverlayModeHandler.bind(this)],
+        [OverlayClientFnType.CLOSE, this.closeHandler.bind(this)]
+      ),
+      sessionManagerEventHandlers = Array<Pair<SessionManagerEventType, (...args: any[]) => void>>(
+        [SessionManagerEventType.ACTIVE_SESSION_CHANGED, this.onActiveSessionChangedEvent.bind(this)],
+        [SessionManagerEventType.STATE_CHANGED, this.onSessionStateChangedEvent.bind(this)],
+        [SessionManagerEventType.DATA_FRAME, this.onSessionDataFrameEvent.bind(this)]
+      )
 
     app.on("before-quit", this.unload)
 
@@ -412,6 +424,9 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
     this.disposers.push(() => {
       ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayClientFnTypeToIPCName(type)))
+
+      sessionManagerEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
+
       app.off("before-quit", this.unload)
 
       Object.assign(global, {
@@ -425,16 +440,14 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
         overlayManager: this
       })
     }
+
     if (module.hot) {
       module.hot.addDisposeHandler(() => {
         this.unload()
       })
     }
 
-    const { sessionManager } = this
-    sessionManager.on(SessionManagerEventType.ACTIVE_SESSION_CHANGED, this.onActiveSessionChangedEvent.bind(this))
-    sessionManager.on(SessionManagerEventType.STATE_CHANGED, this.onSessionStateChangedEvent.bind(this))
-    sessionManager.on(SessionManagerEventType.DATA_FRAME, this.onSessionDataFrameEvent.bind(this))
+    sessionManagerEventHandlers.forEach(([type, handler]) => sessionManager.on(type, handler))
   }
 
   /**
@@ -443,11 +456,13 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @param container
    * @param sessionManager
    * @param appSettingsService
+   * @param mainWindowManager
    */
   constructor(
     @InjectContainer() readonly container: Container,
     readonly sessionManager: SessionManager,
-    readonly appSettingsService: AppSettingsService
+    readonly appSettingsService: AppSettingsService,
+    readonly mainWindowManager: MainWindowManager
   ) {
     super()
   }
@@ -467,16 +482,17 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    */
 
   private patchState(
-    newStateOrFn: Partial<OverlayManagerState> | OverlayManagerStatePatchFn = {}
+    newStateOrFn: Partial<OverlayManagerState> | OverlayManagerStatePatchFn = {},
+    skipBroadcast: boolean = false
   ): OverlayManagerState {
     const currentState = this.state_
     const currentConfigs = currentState.configs ?? []
 
     const newStatePatch = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn
 
-    const newState = assign(this.state_, newStatePatch)
+    const newState = this.state_ = {...this.state_, ...newStatePatch}
     const newConfigs = newState.configs ?? []
-
+    
     // HANDLE REMOVALS
     const missingConfigs = currentConfigs.filter(({ id }) => !newConfigs.some(({ id: newId }) => newId === id))
     missingConfigs.forEach(this.deleteDashboardConfig)
@@ -485,7 +501,14 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     const diffConfigs = newConfigs.filter((newConfig, i) => !isEqual(currentConfigs[i], newConfig))
     diffConfigs.forEach(this.saveDashboardConfig)
 
-    this.broadcastMainStateChanged(newState)
+    if (!skipBroadcast) this.broadcastMainStateChanged(newState)
+    
+    // MODE CHANGE DETECTION
+    // - YES >> BROADCAST THE MODE CHANGE TO THE MAIN WINDOW
+    if (!skipBroadcast && currentState.mode !== newState.mode) {
+      this.broadcastRendererMainWindow(OverlayClientEventType.OVERLAY_MODE, newState.mode)
+    }
+    
     return newState
   }
 
@@ -515,6 +538,11 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     this.overlays.forEach(overlay => {
       if (overlay.ready) overlay.window?.webContents?.send(ipcEventName, ...args)
     })
+  }
+
+  private broadcastRendererMainWindow(type: OverlayClientEventType | PluginClientEventType, ...args: any[]): void {
+    const ipcEventName = OverlayClientEventTypeToIPCName(type)
+    this.mainWindowManager.mainWindow?.webContents?.send(ipcEventName, ...args)
   }
 
   private isValidOverlayWindowId(windowId: number): boolean {

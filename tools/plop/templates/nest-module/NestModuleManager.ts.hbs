@@ -1,0 +1,18 @@
+import { Inject, Injectable } from "@nestjs/common"
+import { getLogger } from "@3fv/logger-proxy"
+
+// noinspection TypeScriptUnresolvedVariable
+const log = getLogger(__filename)
+// noinspection JSUnusedLocalSymbols
+const { debug, trace, info, error, warn } = log
+
+
+@Injectable()
+export class {{name}}Manager {
+
+  constructor(
+
+  ) {
+  }
+}
+

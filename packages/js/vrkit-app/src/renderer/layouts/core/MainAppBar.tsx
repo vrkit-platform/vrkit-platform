@@ -7,27 +7,6 @@ import {
   toolbarClasses,
   useTheme
 } from "@mui/material"
-// import {
-//   child,
-//   createClassNames,
-//   Ellipsis, Fill,
-//   FillHeight,
-//   FillWidth,
-//   FlexAuto,
-//   FlexDefaults,
-//   FlexRow,
-//   FlexRowCenter,
-//   FlexScaleZero,
-//   getContrastText,
-//   hasCls,
-//   flexAlign,
-//   heightConstraint,
-//   OverflowHidden,
-//   PositionRelative
-// } from "vrkit-app-renderer/styles"
-// import { usePageMetadata } from "../../page/metadata"
-// import { AppMainMenu } from "../../app-menu"
-// import { ReactChildren } from "../../../types"
 import clsx from "clsx"
 import {
   child,
@@ -67,21 +46,6 @@ export interface AppBarContentOverrides {
 }
 
 export interface MainAppBarProps {}
-//
-// /**
-//  * Title component for adding text/title to appBar
-//  */
-// const AppBarTitle = styled<typeof Box>(Box)(({ theme }) => ({
-//   ...FlexScaleZero,
-//   ...Ellipsis,
-//   alignSelf: "center",
-//   justifySelf: "center",
-//   paddingLeft: 0, // lineHeight: 1,
-//   // fontSize: rem(0.8),
-//   ...theme.typography.h4, // typography: "h3",
-//   fontWeight: 100,
-//   opacity: 0.7
-// }))
 
 const MainToolbarRoot = styled(Toolbar)(({ theme }) => ({
   [`&.${toolbarClasses.root}`]: {

@@ -1,0 +1,28 @@
+{
+  "name": "@taskx/{{pkgType}}-{{name}}",
+  "version": "{{version}}",
+  "main": "./index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "dependencies": {
+    "@taskx/lib-decorators": "{{version}}",
+    "@taskx/lib-util": "{{version}}",
+    "@taskx/lib-models": "{{version}}"
+  },
+  "devDependencies": {
+    "@taskx/tool-builder": "{{version}}",
+    "@taskx/tool-testing": "{{version}}"
+  },
+  "publishConfig": {
+    "access": "restricted",
+    "directory": "lib"
+  },
+  "scripts": {
+    "postbootstrap": "yarn run init",
+    "clean": "rm -Rf lib && yarn run init",
+    "clean:output": "test -e lib/node_modules && rm -Rf lib/node_modules; true",
+    "compile": "yarn run init && tsc -p tsconfig.json",
+    "prepack": "run-s clean:output init compile",
+    "init": "zx ../../../scripts/package-init.mjs"
+  }
+}

@@ -1,6 +1,7 @@
 import { SessionData, SessionTiming, SessionType } from "vrkit-models"
 import type { SessionPlayerId } from "vrkit-native-interop"
-import type {SessionInfoMessage} from "vrkit-plugin-sdk"
+import type { SessionInfoMessage } from "vrkit-plugin-sdk"
+import { OverlayMode } from "../overlay-manager"
 
 export { SessionPlayerId }
 
@@ -35,9 +36,12 @@ export interface SessionManagerState {
   diskSession?: SessionDetail
 
   activeSessionType: ActiveSessionType
+  
+  overlayMode?: OverlayMode
 }
 
 export const newSessionState = (): SessionManagerState => ({
+  // overlayMode: OverlayMode.NORMAL,
   activeSessionType: "NONE",
   liveSession: sessionDetailDefaults(),
   diskSession: sessionDetailDefaults()

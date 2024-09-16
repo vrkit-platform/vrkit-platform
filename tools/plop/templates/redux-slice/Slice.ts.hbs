@@ -1,0 +1,44 @@
+import { getLogger } from "@3fv/logger-proxy"
+import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { example{{name}}Action } from "./{{name}}Actions"
+import type { {{name}}State } from "./{{name}}State"
+
+
+const log = getLogger(__filename)
+const { info, debug, warn, error } = log
+
+
+
+
+/**
+ * New initial state instance
+ */
+const new{{name}}State = (): {{name}}State =>
+  ({})
+
+const slice = createSlice({
+  name: "{{lowerCase name}}",
+  initialState: new{{name}}State(),
+  reducers: {
+    patch: (
+      state: {{name}}State,
+      action: PayloadAction<Partial<{{name}}State>>
+    ) => {
+      Object.assign(state, action.payload ?? {})
+    }
+  },
+  extraReducers: builder =>
+    builder
+      .addCase(example{{name}}Action.fulfilled, (state, { payload: {{name}} }) => {
+        // Mutate state with payload
+      })
+
+})
+
+/**
+ * Reducer and generated actions
+ */
+export const { reducer: {{camelCase name}}Reducer, actions: {{camelCase name}}Actions } = slice
+
+
+export default slice

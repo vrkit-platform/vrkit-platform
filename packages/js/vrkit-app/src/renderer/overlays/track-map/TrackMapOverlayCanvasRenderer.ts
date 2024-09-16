@@ -6,24 +6,19 @@ import type { Shape as TwoShape } from "two.js/src/shape"
 import Two from "two.js"
 import type { OverlayBaseSettings, OverlayInfo, SessionDataVariableValueMap, TrackMap } from "vrkit-models"
 import "vrkit-plugin-sdk"
-import { PluginClient, PluginClientComponentProps, PluginClientEventType, SessionInfoMessage } from "vrkit-plugin-sdk"
+import { PluginClient, PluginClientEventType, SessionInfoMessage } from "vrkit-plugin-sdk"
 import { ScaleTrackMapToFit } from "vrkit-shared"
 import { assign, Noop } from "vrkit-app-common/utils"
 import { asOption } from "@3fv/prelude-ts"
 import { get } from "lodash/fp"
 import { isDefined } from "@3fv/guard"
-import React, { useEffect } from "react"
 import { Deferred } from "@3fv/deferred"
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind, Throttle } from "vrkit-app-common/decorators"
+import { Fill } from "vrkit-app-renderer/styles/ThemedStyles"
 
 const TrackMapThrottlingPeriod = 100,
   CarMarkerRadiusPx = 6,
   log = getLogger(__filename)
-//  contentEl = document.getElementById("content") as HTMLElement
-
-//   canvasEl = document.createElement("canvas")
-//
-// contentEl.appendChild(canvasEl)
 
 interface CarData {
   idx: number // from info
@@ -60,9 +55,9 @@ interface SceneState {
   width?: number
 
   height?: number
-  
+
   // canvasEl?: HTMLCanvasElement
-  
+
   trackMap?: TrackMap
 
   client: PluginClient
@@ -75,12 +70,12 @@ interface SceneState {
   setupComplete: boolean
 }
 
-const newSceneState = (): SceneState => ({
+const newSceneState = (width: number, height: number): SceneState => ({
   carMarkers: [],
   carDataMap: new Map<number, CarData>(),
   client: getVRKitPluginClient(),
-  width: 0,
-  height: 0,
+  width,
+  height,
 
   // FLAG MARKING WHETHER SETUP HAS ALREADY RUN
   setupComplete: false
@@ -88,39 +83,58 @@ const newSceneState = (): SceneState => ({
 
 type RenderCarsFn = (cars: CarData[]) => void
 
-class TrackMapOverlayPlugin extends React.Component<PluginClientComponentProps, SceneState> {
+class TrackMapOverlayCanvasRenderer {
+  /**
+   * Initialization deferred promise
+   *
+   * @private
+   */
   private readonly initializeDeferred = new Deferred<void>()
 
-  private mounted: boolean = false
+  /**
+   * Renderer internal state
+   *
+   * @private
+   */
+  private readonly state: SceneState = null
 
-  // private get canvasEl(): HTMLCanvasElement {
-  //   return this.state?.canvasEl
-  // }
-  //
-  // private get canvasEl() {
-  //   return this.canvasRef?.current
-  // }
-  
-  private canvasEl: HTMLCanvasElement = null
-  
+  /**
+   * Patch the state
+   *
+   * @param patch
+   * @returns {SceneState}
+   */
+  private patchSceneState(patch: Partial<SceneState>): SceneState {
+    return assign(this.state, patch)
+  }
+
   /**
    * FPS driven car update
    */
-  private renderCars: RenderCarsFn = Noop()
+  private renderCars_: RenderCarsFn = Noop()
 
+  /**
+   * Retrieve the render cars function
+   */
+  get renderCars() {
+    if (!this.renderCars_) {
+      this.renderCars_ = this.makeRenderCars(this.state.overlayInfo?.settings)
+    }
+
+    return this.renderCars_
+  }
+
+  /**
+   * Check if the renderer has been initialized
+   * @private
+   */
   private get isInitialized() {
     return this.initializeDeferred.isFulfilled()
   }
 
-  private patchSceneState(patch: Partial<SceneState>): SceneState {
-    this.setState(prevState => ({ ...prevState, ...patch }))
-    return this.state
-  }
-
-  private makeRenderCars(settings: OverlayBaseSettings): RenderCarsFn {
-    const fps = settings?.fps ?? 10
-    return (
-      //throttle(
+  private makeRenderCars(settings: OverlayBaseSettings = null): RenderCarsFn {
+    const fps = settings?.fps ?? 60
+    return throttle(
       (carsData: CarData[]) => {
         const sceneState = this.state
         log.debug(`Rendering cars (count=${carsData.length})`)
@@ -166,20 +180,24 @@ class TrackMapOverlayPlugin extends React.Component<PluginClientComponentProps, 
           }
         }
 
-        two.render()
-      }
+        two.update()
+      },
+      Math.ceil(1000 / fps)
     )
-    //   ,
-    //   Math.ceil(1000 / fps)
-    // )
   }
 
   /**
    * Render the track map
    */
-  createScene = throttle(() => {
-    const { width, height } = this.props,
-        {trackMap} = this.state
+  // @Throttle(TrackMapThrottlingPeriod, {
+  //   trailing: true
+  //   // leading: true
+  // })
+  private createScene() {
+    
+    
+    const { width, height } = this.state,
+      { trackMap } = this.state
 
     if (!this.canvasEl || !width || !height) {
       log.warn("Unable to render canvas, canvas element, width & height must be positive values", { width, height })
@@ -187,20 +205,27 @@ class TrackMapOverlayPlugin extends React.Component<PluginClientComponentProps, 
     }
 
     log.info("renderTrack()", width, height)
-
+    
     this.canvasEl.width = width
     this.canvasEl.height = height
     Object.assign(this.canvasEl.style, {
       width: `${width}px`,
       height: `${height}px`,
-      background: "transparent"
+      background: "transparent",
+      objectFit: "contain",
+      ...Fill
     })
-
+    
+    if (this.state.two) {
+      return
+    }
+    
     if (this.state.two) {
       this.state.two.clear()
+      this.state.two = null
     }
-
-    const statePatch:Partial<SceneState> = {
+    
+    const statePatch: Partial<SceneState> = {
       width,
       height,
       carMarkers: [],
@@ -209,7 +234,9 @@ class TrackMapOverlayPlugin extends React.Component<PluginClientComponentProps, 
         width,
         height,
         domElement: this.canvasEl,
-        autostart: false
+        autostart: false,
+        smoothing: false,
+        overdraw: false
       })
     }
 
@@ -227,11 +254,17 @@ class TrackMapOverlayPlugin extends React.Component<PluginClientComponentProps, 
     // trackPath.stroke = "red"
     // trackPath.fill = "transparent"
     two.add(trackPath)
-    
-    this.setState(prevState => ({...prevState, ...statePatch}))
-  }, TrackMapThrottlingPeriod)
 
-  updateSessionInfo(info: SessionInfoMessage) {
+    this.patchSceneState(statePatch)
+  }
+
+  /**
+   * Updates the driver info data & session info (Practice, Quali, Race)
+   *
+   * @param info
+   * @private
+   */
+  private updateSessionInfo(info: SessionInfoMessage) {
     const drivers = info?.driverInfo?.drivers
     // log.info("Drivers info", drivers)
     if (!drivers) {
@@ -265,10 +298,13 @@ class TrackMapOverlayPlugin extends React.Component<PluginClientComponentProps, 
     return this.state.carDataMap
   }
 
-  updateCars(dataVarValues: SessionDataVariableValueMap) {
-    if (!this.mounted)
-      return
-    
+  /**
+   * Update the state (position, lap, lap times, etc) triggered via a data frame
+   *
+   * @param dataVarValues
+   * @private
+   */
+  private updateCars(dataVarValues: SessionDataVariableValueMap) {
     if (!this.isInitialized) {
       log.warn("Not initialized yet")
       return
@@ -281,11 +317,6 @@ class TrackMapOverlayPlugin extends React.Component<PluginClientComponentProps, 
 
     const pendingCarData = Array<CarData>()
     this.carDataMap.forEach((data, idx) => {
-      // lap: number // CarIdxLap
-      // lapCompleted: number // CarIdxLapCompleted
-      // lapPercentComplete: number // CarIdxLapDistPct
-      // position: number // CarIdxPosition
-      // classPosition: number // CarIdxClassPosition
       Object.assign(data, {
         lap: dataVarValues["CarIdxLap"].values[idx] ?? -1,
         lapCompleted: dataVarValues["CarIdxLapCompleted"].values[idx] ?? -1,
@@ -299,92 +330,102 @@ class TrackMapOverlayPlugin extends React.Component<PluginClientComponentProps, 
       }
     })
 
-    if (!this.renderCars) {
-      this.renderCars = this.makeRenderCars(this.state.overlayInfo?.settings)
-    }
-
     this.renderCars(pendingCarData)
   }
-  
-  onDataFrame = (sessionId, timing, dataVarValues) => {
-    if (!this.isInitialized)
-      return
-    
-    log.debug("DATA_FRAME EVENT",
-        sessionId,
-        timing.currentTimeMillis,
-        "DATA VAR VALUE COUNT = ",
-        dataVarValues.length
-    )
+
+  /**
+   * Handler for DATA_FRAME events
+   *
+   * @param sessionId
+   * @param timing
+   * @param dataVarValues
+   * @private
+   */
+  @Bind
+  private onDataFrame(sessionId, timing, dataVarValues) {
+    if (!this.isInitialized) return
+
+    // log.debug("DATA_FRAME EVENT", sessionId, timing.currentTimeMillis, "DATA VAR VALUE COUNT = ", dataVarValues.length)
     this.updateCars(dataVarValues)
   }
-  
-  onSessionInfo = (sessionId, info) => {
+
+  /**
+   * Handler for session info events
+   *
+   * @param sessionId
+   * @param info
+   * @private
+   */
+  @Bind
+  private onSessionInfo(sessionId, info) {
     this.updateSessionInfo(info)
   }
-  
+
   private async initializeState() {
     try {
-      const state = newSceneState(), { client } = state
-      
+      const { state } = this,
+        { client } = state
+
       // newSceneState()
       const { sessionInfo } = assign(state, {
-        overlayInfo: client.getOverlayInfo(),
-        sessionInfo: await client.fetchSessionInfo()
-      }),
-          weekendInfo = sessionInfo.weekendInfo, {
-            trackID: trackId,
-            trackName,
-            trackConfigName
-          } = pick(weekendInfo, "trackID", "trackName", "trackConfigName"),
-          trackLayoutId = `${trackId}::${trackName}::${trackConfigName ===
-          "null" ? "NO_CONFIG_NAME" : trackConfigName}`
-      
+          overlayInfo: client.getOverlayInfo(),
+          sessionInfo: await client.fetchSessionInfo()
+        }),
+        weekendInfo = sessionInfo.weekendInfo,
+        { trackID: trackId, trackName, trackConfigName } = pick(weekendInfo, "trackID", "trackName", "trackConfigName"),
+        trackLayoutId = `${trackId}::${trackName}::${trackConfigName === "null" ? "NO_CONFIG_NAME" : trackConfigName}`
+
       state.trackMap = await client.getTrackMap(trackLayoutId)
-      
+
+      this.patchSceneState(state)
+
+      this.initializeDeferred.resolve()
+      this.createScene()
+
+      // REMOVE LISTENERS ON RELOAD
       if (import.meta.webpackHot) {
         import.meta.webpackHot.addDisposeHandler(() => {
-          client.off(PluginClientEventType.SESSION_INFO, this.onSessionInfo)
-          client.off(PluginClientEventType.DATA_FRAME, this.onDataFrame)
+          this.destroy()
         })
       }
-      
-      this.setState(state, () => {
-        this.initializeDeferred.resolve()
-        this.createScene()
-        
-        client.on(PluginClientEventType.SESSION_INFO, this.onSessionInfo)
-        client.on(PluginClientEventType.DATA_FRAME, this.onDataFrame)
-      })
+
+      // ATTACH LISTENERS
+      client.on(PluginClientEventType.SESSION_INFO, this.onSessionInfo)
+      client.on(PluginClientEventType.DATA_FRAME, this.onDataFrame)
     } catch (err) {
       this.initializeDeferred.reject(err)
     }
     // this.renderSetup()
   }
 
+  constructor(
+    readonly canvasEl: HTMLCanvasElement,
+    width: number,
+    height: number
+  ) {
+    this.state = newSceneState(width, height)
 
-  
-  render() {
-    if (this.isInitialized) {
-      this.createScene()
-      this.forceUpdate()
-    }
-  }
-  
-
-  constructor(readonly canvasEl: HTMLCanvasElement) {
-    this.state = newSceneState()
-    
     this.initializeState()
       .then(() => {
         log.info(`Initialize state completed, rendering`)
-        this.updateState()
       })
       .catch(err => {
         log.error(`failed to initialize state`, err)
       })
   }
 
+  setSize(width: number, height: number) {
+    if (this.state.width !== width || this.state.height !== height) {
+      this.patchSceneState({ width, height })
+      this.createScene()
+    }
+  }
+
+  @Bind
+  destroy() {
+    this.state.client.off(PluginClientEventType.SESSION_INFO, this.onSessionInfo)
+    this.state.client.off(PluginClientEventType.DATA_FRAME, this.onDataFrame)
+  }
 }
 
-export default TrackMapOverlayPlugin
+export default TrackMapOverlayCanvasRenderer

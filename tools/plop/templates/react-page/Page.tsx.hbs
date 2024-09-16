@@ -1,0 +1,31 @@
+import React from "react"
+import { getLogger } from "@3fv/logger-proxy"
+import clsx from "clsx"
+import { StyledComponentProps, usePropsAndStyles, makeUseStyles, Theme } from "@taskx/lib-styles"
+
+const log = getLogger(__filename)
+
+export type {{name}}PageClassKey = "root"
+
+export const use{{name}}PageStyles = makeUseStyles<{{name}}PageProps>(module, (theme:Theme) => {
+
+  return {
+    root: {}
+  }
+})
+
+
+export interface {{name}}PageProps extends StyledComponentProps<{{name}}PageClassKey> {
+
+}
+
+
+
+export function {{name}}Page(props:{{name}}PageProps) {
+  const { classes, className, ...other } = usePropsAndStyles(props, use{{name}}PageStyles)
+
+
+  return <div className={clsx(classes.root, className, {})}/>
+}
+
+export default {{name}}Page

@@ -1,0 +1,64 @@
+// REACT
+import React from "react"
+
+// CLSX
+import clsx from "clsx"
+
+// 3FV
+import { getLogger } from "@3fv/logger-proxy"
+
+// MUI
+import Box from "@mui/material/Box"
+import type {BoxProps} from "@mui/material/Box"
+import { styled } from "@mui/material/styles"
+import type { Theme } from "@mui/material"
+import type { SxProps } from "@mui/system"
+
+// APP
+import { ClassNamesKey, createClassNames, dimensionConstraints, hasCls } from "vrkit-app-renderer/styles"
+
+const log = getLogger(__filename)
+const { info, debug, warn, error } = log
+
+const classPrefix = "{{camelCase name}}"
+export const {{camelCase name}}Classes = createClassNames(classPrefix, "child1")
+export type {{name}}ClassKey = ClassNamesKey<typeof {{camelCase name}}Classes>
+
+
+const {{name}}Root = styled(Box, {
+  name: "{{name}}Root",
+  label: "{{name}}Root"
+})(({theme}) => ({
+  // root styles here
+  [child({{camelCase name}}Classes.child1)]: {
+    // child styled here
+  }
+}))
+
+
+/**
+ * {{name}} Component Properties
+ */
+export interface {{name}}Props extends BoxProps {
+
+}
+
+
+/**
+ * {{name}} Component
+ *
+ * @param { {{name}}Props } props
+ * @returns {JSX.Element}
+ */
+export function {{name}}(props:{{name}}Props) {
+  const { ...other } = props
+
+  return <{{name}}Root
+
+    {...other}
+  >
+    {/* Body */}
+  </{{name}}Root>
+}
+
+export default {{name}}

@@ -8,7 +8,7 @@ export * from "./LazyGetter"
 export * from "./Serializable"
 export * from "./MemoizeGetter"
 export * from "./applyDecorators"
-
+export * from "./ThrottleDebounceDecorators"
 export * from "./helpers"
 export * from "./ReflectConstants"
 export * from "./context/GenericDecoratorContext"

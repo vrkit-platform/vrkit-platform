@@ -1,0 +1,25 @@
+import { getLogger } from "@3fv/logger-proxy"
+import { Container, InjectContainer, PostConstruct, Inject, Singleton } from "@3fv/ditsy"
+
+// noinspection TypeScriptUnresolvedVariable
+const log = getLogger(__filename)
+// noinspection JSUnusedLocalSymbols
+const { debug, trace, info, error, warn } = log
+
+
+@Singleton()
+export class {{name}}{{getSuffix skipSuffix suffix}} {
+
+  @PostConstruct()
+  async init() {
+    // init class here
+  }
+
+  constructor(
+    @InjectContainer()
+    private readonly container: Container
+  ) {
+  }
+}
+
+export default {{name}}{{getSuffix skipSuffix suffix}}

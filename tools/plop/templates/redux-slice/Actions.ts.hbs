@@ -1,0 +1,40 @@
+import { getLogger } from "@3fv/logger-proxy"
+import { createAppAsyncThunk } from "../../AppStoreHelpers"
+import { isDev } from "../../../../constants"
+
+const log = getLogger(__filename)
+const { debug, trace, info, error, warn } = log
+
+/**
+* Save Data action
+*
+* @type {AppThunk<string, string>}
+*/
+export const example{{name}}Action = createAppAsyncThunk<string, string>("{{lowerCase name}}/exampleAction",
+  async (Data, api) => {
+   try {
+     // const db = getAppDatabase()
+
+     // DB Transaction
+     // const result = await db.transaction(
+     //   "rw",
+     //   db.table,
+     //   async _trans => {
+     //     return Data
+     //   }
+     // )
+
+     // Debugging
+     // if (isDev) {
+     //   debug(`result`, result)
+     // }
+
+     // return result
+     return "example"
+   } catch (err) {
+     error(`Failure`, err)
+     throw api.rejectWithValue(err)
+   }
+  }
+)
+export {}

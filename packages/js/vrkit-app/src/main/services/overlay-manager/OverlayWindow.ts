@@ -1,6 +1,5 @@
 import { getLogger } from "@3fv/logger-proxy"
-import { BrowserWindow, BrowserWindowConstructorOptions, ipcMain, IpcMainEvent } from "electron"
-import { Bind } from "vrkit-app-common/decorators"
+import { BrowserWindow, BrowserWindowConstructorOptions } from "electron"
 import { OverlayInfo, OverlayPlacement } from "vrkit-models"
 import { isDev } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
@@ -8,6 +7,7 @@ import {
   OverlayClientEventType,
   OverlayClientEventTypeToIPCName,
   OverlayConfig,
+  OverlayMode,
   OverlayWindowMainEvents,
   OverlayWindowRendererEvents
 } from "vrkit-app-common/models/overlay-manager"
@@ -25,6 +25,8 @@ const WinRendererEvents = OverlayWindowRendererEvents
 const WinMainEvents = OverlayWindowMainEvents
 
 export class OverlayWindow {
+  private mode_: OverlayMode = OverlayMode.NORMAL
+
   private focused_: boolean = false
 
   private readonly window_: BrowserWindow
@@ -36,22 +38,6 @@ export class OverlayWindow {
   private closeDeferred: Deferred<void> = null
 
   readonly windowOptions: BrowserWindowConstructorOptions
-
-  @Bind
-  private onIPCMouseEnter(ev: IpcMainEvent) {
-    const fromWin = BrowserWindow.fromWebContents(ev?.sender)
-    if (fromWin?.id !== this.window_?.id) {
-      return
-    }
-  }
-
-  @Bind
-  private onIPCMouseLeave(ev: IpcMainEvent) {
-    const fromWin = BrowserWindow.fromWebContents(ev?.sender)
-    if (fromWin?.id !== this.window_?.id) {
-      return
-    }
-  }
 
   /**
    * Get the browser window
@@ -72,6 +58,10 @@ export class OverlayWindow {
     return this.isClosing && this.closeDeferred.isSettled()
   }
 
+  get mode() {
+    return this.mode_
+  }
+
   /**
    * Close the window
    */
@@ -81,10 +71,6 @@ export class OverlayWindow {
     }
 
     const deferred = (this.closeDeferred = new Deferred())
-
-    ipcMain.off(WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_ENTER), this.onIPCMouseEnter)
-
-    ipcMain.off(WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_LEAVE), this.onIPCMouseLeave)
 
     try {
       this.window?.close()
@@ -130,11 +116,6 @@ export class OverlayWindow {
     }
 
     this.window_ = new BrowserWindow(this.windowOptions)
-    this.setFocused(false)
-
-    ipcMain.on(WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_ENTER), this.onIPCMouseEnter)
-
-    ipcMain.on(WinRendererEvents.EventTypeToIPCName(WinRendererEvents.EventType.MOUSE_LEAVE), this.onIPCMouseLeave)
 
     // The returned promise is tracked via `readyDeferred`
     this.initialize().catch(err => {
@@ -181,14 +162,15 @@ export class OverlayWindow {
     }
   }
 
-  setFocused(focused: boolean): void {
-    if ((focused && this.focused_) || (!focused && !this.focused_)) return
-
+  setFocused(focused: boolean) {
     this.focused_ = focused
-    this.setIgnoreMouseEvents(!focused)
-    this.window.webContents.send(
-      OverlayWindowMainEvents.EventTypeToIPCName(OverlayWindowMainEvents.EventType.FOCUSED),
-      focused
-    )
+  }
+
+  setMode(mode: OverlayMode): void {
+    if (mode === this.mode) return
+
+    this.mode_ = mode
+    this.setIgnoreMouseEvents(mode !== OverlayMode.EDIT)
+    this.window.webContents.send(OverlayClientEventTypeToIPCName(OverlayClientEventType.OVERLAY_MODE), mode)
   }
 }

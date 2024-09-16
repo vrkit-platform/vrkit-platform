@@ -6,7 +6,7 @@ import { Bind } from "vrkit-app-common/decorators"
 import { isDev } from "../../constants"
 
 import { OverlayClientEventHandler, OverlayConfig, OverlaySessionData } from "vrkit-app-common/models/overlay-manager"
-import type { PluginClient, PluginClientEventArgs } from "vrkit-plugin-sdk"
+import type { PluginClient, PluginClientComponentProps, PluginClientEventArgs } from "vrkit-plugin-sdk"
 import { OverlayKind } from "vrkit-models"
 import OverlayClient from "./OverlayClient"
 import { asOption } from "@3fv/prelude-ts"
@@ -25,6 +25,7 @@ const { debug, trace, info, error, warn } = log
   
     private builtinPluginCtx: any = null
   private pluginClient: PluginClient
+    private reactComponent_: React.ComponentType<PluginClientComponentProps>
     
     private getPluginClient(): PluginClient {
       return asOption(this.pluginClient).getOrCall(() => {
@@ -61,29 +62,7 @@ const { debug, trace, info, error, warn } = log
       })
     }
     
-    @Bind
-    getConfig(): OverlayConfig {
-      return this.client.config
-    }
-  
-    @Bind
-    getSessionData(): OverlaySessionData {
-      return this.client.sessionData
-    }
     
-    async fetchSessionInfo() {
-      const session = await this.client.fetchSession()
-      return session?.info
-    }
-    
-    on<Type extends keyof PluginClientEventArgs>(type: Type, handler: OverlayClientEventHandler<Type>) {
-      this.client.on(type, handler as any)
-    }
-  
-    off<Type extends keyof PluginClientEventArgs>(type: Type, handler?: OverlayClientEventHandler<Type>) {
-      this.client.off(type, handler as any)
-    }
-  
     /**
      * Cleanup resources on unload
      *
@@ -131,7 +110,7 @@ const { debug, trace, info, error, warn } = log
         throw Error(`${config.overlay.kind} is not implemented yet`)
       }
       
-      await importDefault(builtinPluginImportPromise)
+      this.reactComponent_ = await importDefault(builtinPluginImportPromise)
       
     }
   
@@ -164,6 +143,35 @@ const { debug, trace, info, error, warn } = log
      *
      */
     constructor(readonly client: OverlayClient, readonly trackManager: TrackManager) {}
+    
+    @Bind
+    getConfig(): OverlayConfig {
+      return this.client.config
+    }
+    
+    @Bind
+    getSessionData(): OverlaySessionData {
+      return this.client.sessionData
+    }
+    
+    @Bind
+    async fetchSessionInfo() {
+      const session = await this.client.fetchSession()
+      return session?.info
+    }
+    
+    on<Type extends keyof PluginClientEventArgs>(type: Type, handler: OverlayClientEventHandler<Type>) {
+      this.client.on(type, handler as any)
+    }
+    
+    off<Type extends keyof PluginClientEventArgs>(type: Type, handler?: OverlayClientEventHandler<Type>) {
+      this.client.off(type, handler as any)
+    }
+    
+    @Bind
+    getReactComponent() {
+      return this.reactComponent_
+    }
   }
 
 export default OverlayClient

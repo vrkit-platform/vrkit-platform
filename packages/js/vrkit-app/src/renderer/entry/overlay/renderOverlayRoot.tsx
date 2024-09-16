@@ -1,10 +1,10 @@
 import ReactDOM from "react-dom/client"
 import React from "react"
 import { importDefault } from "vrkit-app-common/utils"
-import { resolveContainer } from "./containerFactory"
+import { resolveContainer } from "./overlayContainerFactory"
 
-async function renderRoot(root: ReactDOM.Root) {
-  const AppContainer = await importDefault(import("./AppContainer"))
+async function renderOverlayRoot(root: ReactDOM.Root) {
+  const AppContainer = await importDefault(import("./OverlayWindowAppContainer"))
   const AppInitializationContainer = await importDefault(import("../../components/app-initialization-container"))
 
   function Root() {
@@ -18,4 +18,4 @@ async function renderRoot(root: ReactDOM.Root) {
   root.render(<Root />)
 }
 
-export default renderRoot
+export default renderOverlayRoot

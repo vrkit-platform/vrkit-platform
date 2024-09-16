@@ -42,7 +42,12 @@ export interface PluginClient {
   off<T extends keyof PluginClientEventArgs, Fn extends PluginClientEventArgs[T] = PluginClientEventArgs[T]>(type: T, handler: Fn): void
 }
 
+export interface PluginClientComponentProps {
+  client: PluginClient
+  width: number
+  height: number
+}
+
 declare global {
   function getVRKitPluginClient(): PluginClient
-  
 }

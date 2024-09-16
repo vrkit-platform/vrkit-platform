@@ -5,7 +5,7 @@ import { Bind } from "vrkit-app-common/decorators"
 import { DashboardConfig, OverlayInfo, SessionDataVariableValueMap } from "vrkit-models"
 import { isDefined, isFunction } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
-import { assign, isDev, isEmpty, isEqual, Pair } from "vrkit-app-common/utils"
+import { assign, Disposables, isDev, isEmpty, isEqual, isPointInRect, Pair } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
   OverlayClientEventType,
@@ -88,6 +88,8 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   })
 
   private state_: OverlayManagerState = null
+
+  private readonly disposers = new Disposables()
 
   get state() {
     return this.state_
@@ -259,19 +261,6 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     )
   }
 
-  /**
-   * Cleanup resources on unload
-   *
-   * @param event
-   * @private
-   */
-  @Bind
-  private unload(event: Electron.Event) {
-    debug(`Unloading OverlayManager`, event)
-
-    ioHook.stop()
-  }
-
   async fetchOverlayConfigHandler(event: IpcMainInvokeEvent): Promise<OverlayConfig> {
     const window = BrowserWindow.fromWebContents(event.sender),
       windowId = window.id,
@@ -326,7 +315,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       }
     })
   }
-  
+
   /**
    * Get the current overlay mode for the app
    *
@@ -335,7 +324,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   async fetchOverlayModeHandler(event: IpcMainInvokeEvent) {
     return this.mode
   }
-  
+
   /**
    * Set the overlay mode
    *
@@ -352,7 +341,10 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       mode
     }).mode
 
-    this.broadcastRendererOverlays(OverlayClientEventType.OVERLAY_MODE, mode)
+    for (const ow of this.overlays) {
+      ow.setMode(mode)
+    }
+    // this.broadcastRendererOverlays(OverlayClientEventType.OVERLAY_MODE, mode)
 
     return mode
   }
@@ -367,13 +359,35 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     for (let ow of this.overlays) {
       const bounds = ow.window.getBounds()
       const { x, y, width, height } = bounds
-      if (p.x >= x && p.x <= x + width && p.y >= y && p.y <= y + height) {
-        // log.info(`Enable event`, ev, "point", p, "window bounds", bounds)
+      if (isPointInRect(p, bounds)) {
         ow.setFocused(true)
       } else {
         ow.setFocused(false)
       }
     }
+  }
+
+  private setupIOHook() {
+    ioHook.on("mousemove", this.onIOHookMouseMove)
+    ioHook.start()
+
+    this.disposers.push(() => {
+      ioHook.off("mousemove", this.onIOHookMouseMove)
+      ioHook.stop()
+    })
+  }
+
+  /**
+   * Cleanup resources on unload
+   *
+   * @param event
+   * @private
+   */
+  @Bind
+  private unload(event: Electron.Event = null) {
+    debug(`Unloading OverlayManager`, event)
+
+    this.disposers.dispose()
   }
 
   /**
@@ -393,29 +407,28 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     )
 
     app.on("before-quit", this.unload)
-    ioHook.on("mousemove", this.onIOHookMouseMove)
-    ioHook.start()
+
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(OverlayClientFnTypeToIPCName(type), handler))
+
+    this.disposers.push(() => {
+      ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayClientFnTypeToIPCName(type)))
+      app.off("before-quit", this.unload)
+
+      Object.assign(global, {
+        overlayManager: undefined
+      })
+    })
 
     // In dev mode, make everything accessible
     if (isDev) {
       Object.assign(global, {
         overlayManager: this
       })
-
-      if (module.hot) {
-        module.hot.addDisposeHandler(() => {
-          app.off("before-quit", this.unload)
-          ioHook.off("mousemove", this.onIOHookMouseMove)
-          ioHook.stop()
-
-          ipcFnHandlers.forEach(([type]) => ipcMain.removeHandler(OverlayClientFnTypeToIPCName(type)))
-
-          Object.assign(global, {
-            overlayManager: undefined
-          })
-        })
-      }
+    }
+    if (module.hot) {
+      module.hot.addDisposeHandler(() => {
+        this.unload()
+      })
     }
 
     const { sessionManager } = this

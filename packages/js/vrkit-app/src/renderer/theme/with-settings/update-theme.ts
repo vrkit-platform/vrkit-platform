@@ -18,8 +18,7 @@ import type { ThemeComponents, ThemeUpdateOptions } from '../ThemeTypes';
  */
 
 export function updateCoreWithSettings(
-  theme: ThemeUpdateOptions,
-  settings: SettingsState
+  theme: ThemeUpdateOptions
 ): ThemeUpdateOptions {
   const { colorSchemes, customShadows } = theme;
 
@@ -31,12 +30,12 @@ export function updateCoreWithSettings(
         palette: {
           ...colorSchemes?.light?.palette,
           /** [1] */
-          primary: getPalettePrimary(settings.primaryColor),
+          primary: getPalettePrimary('default'),
           /** [2] */
           background: {
             ...colorSchemes?.light?.palette?.background,
-            default: getBackgroundDefault(settings.contrast),
-            defaultChannel: hexToRgbChannel(getBackgroundDefault(settings.contrast)),
+            default: getBackgroundDefault('default'),
+            defaultChannel: hexToRgbChannel(getBackgroundDefault('default')),
           },
         },
       },
@@ -44,7 +43,7 @@ export function updateCoreWithSettings(
         palette: {
           ...colorSchemes?.dark?.palette,
           /** [1] */
-          primary: getPalettePrimary(settings.primaryColor),
+          primary: getPalettePrimary('default'),
         },
       },
     },
@@ -52,9 +51,7 @@ export function updateCoreWithSettings(
       ...customShadows,
       /** [1] */
       primary:
-        settings.primaryColor === 'default'
-          ? coreCustomShadows('light').primary
-          : createShadowColor(getPalettePrimary(settings.primaryColor).mainChannel),
+        coreCustomShadows('dark').primary,
     },
   };
 }

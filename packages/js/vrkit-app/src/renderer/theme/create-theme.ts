@@ -10,7 +10,7 @@ import type {} from "@mui/x-date-pickers/themeAugmentation"
 // noinspection ES6UnusedImports
 import type {} from "@mui/material/themeCssVarsAugmentation"
 
-import type { Theme, ThemeOptions } from "@mui/material/styles"
+import type { Direction, Theme, ThemeOptions } from "@mui/material/styles"
 import { createTheme as muiCreateTheme } from "@mui/material/styles"
 import type { SettingsState } from "vrkit-app-renderer/components/settings"
 
@@ -104,19 +104,19 @@ const themeOptions: ThemeOptions = {
 }
 
 export function createTheme(
-  localeComponents: ThemeLocaleComponents,
-  settings: SettingsState
+  localeComponents: ThemeLocaleComponents
 ): Theme {
+  const colorScheme = "dark"
   const initialTheme = {
     colorSchemes,
-    shadows: shadows(settings.colorScheme),
-    customShadows: customShadows(settings.colorScheme),
-    direction: settings.direction,
+    shadows: shadows(colorScheme),
+    customShadows: customShadows(colorScheme),
+    direction: "ltr" as Direction,
     shape: { borderRadius: 8 },
     components,
     typography: {
       ...typography,
-      fontFamily: setFont(settings.fontFamily)
+      // fontFamily: setFont(settings.fontFamily)
     },
     cssVarPrefix: "",
     shouldSkipGeneratingVar
@@ -125,7 +125,7 @@ export function createTheme(
   /**
    * 1.Update values from settings before creating theme.
    */
-  const updateTheme = updateCoreWithSettings(initialTheme, settings)
+  const updateTheme = updateCoreWithSettings(initialTheme)
 
   /**
    * 2.Create theme + add locale + update component with settings.

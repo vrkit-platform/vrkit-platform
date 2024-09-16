@@ -15,9 +15,8 @@ export interface ThemeProviderProps {
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const { currentLang } = useTranslate()
 
-  const settings = useSettingsContext()
-
-  const theme = createTheme(currentLang?.systemValue, settings)
+  
+  const theme = createTheme(currentLang?.systemValue)
 
   return (
     <MuiThemeProvider

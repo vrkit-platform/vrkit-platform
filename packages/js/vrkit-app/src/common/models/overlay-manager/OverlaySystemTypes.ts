@@ -148,8 +148,8 @@ export namespace OverlayWindowRendererEvents {
    * of an overlay window.
    */
   export enum EventType {
-    MOUSE_ENTER = "MOUSE_ENTER",
-    MOUSE_LEAVE = "MOUSE_LEAVE",
+    // MOUSE_ENTER = "MOUSE_ENTER",
+    // MOUSE_LEAVE = "MOUSE_LEAVE",
     BOUNDS_CHANGED = "BOUNDS_CHANGED",
     CLOSE = "CLOSE"
   }
@@ -169,9 +169,7 @@ export namespace OverlayWindowMainEvents {
    * from the renderer process of an overlay window.
    */
   export enum EventType {
-    BOUNDS_CHANGED = "BOUNDS_CHANGED",
-    FOCUSED = "FOCUSED"
-    
+    BOUNDS_CHANGED = "BOUNDS_CHANGED"
   }
   
   export type EventIPCName = `OVERLAY_WINDOW_MAIN_EVENT_${EventType}`

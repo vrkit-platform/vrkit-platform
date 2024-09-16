@@ -22,27 +22,8 @@ const { debug, trace, info, error, warn } = log
 const WinRendererEvents = OverlayWindowRendererEvents
 const WinMainEvents = OverlayWindowMainEvents
 
-function createElementWithId<ET extends HTMLElement = HTMLElement>(tag: string, elementId: string): ET {
-  const el = document.createElement(tag) as ET
-  el.id = elementId
-  return el
-}
-
-function createDivWithId(elementId: string): HTMLDivElement {
-  return createElementWithId<HTMLDivElement>("div", elementId)
-}
-
-const { body } = document,
-    rootEl = document.getElementById("root")
-
 @Singleton()
 export class OverlayWindowControls {
-  readonly editModeBtnEl: HTMLButtonElement = createElementWithId<HTMLButtonElement>("button", "editModeBtn")
-  readonly editModeBtnLayerEl: HTMLElement = createDivWithId("editModeBtnLayer")
-  readonly editBarEl: HTMLElement = createDivWithId("editBar")
-  readonly editBarLabelEl: HTMLElement = createDivWithId("editBarLabel")
-  readonly editBarControlsEl: HTMLElement = createDivWithId("editBarControls")
-  readonly contentEl: HTMLElement = createDivWithId("content")
 
   @Bind
   private async onEditBtnClick(event: Event) {
@@ -54,10 +35,11 @@ export class OverlayWindowControls {
 
   @Bind
   private onMainFocused(ev: IpcRendererEvent, enabled: boolean) {
-    if (enabled)
-      rootEl.classList.add("focus")
-    else
-      rootEl.classList.remove("focus")
+    // Replace with event or redux
+    // if (enabled)
+    //   rootEl.classList.add("focus")
+    // else
+    //   rootEl.classList.remove("focus")
   }
 
   /**
@@ -85,25 +67,11 @@ export class OverlayWindowControls {
     // tslint:disable-next-line
     window.addEventListener("beforeunload", this.unload)
     
-    this.editModeBtnEl.textContent = "Edit Overlay & Layout"
-    this.editModeBtnEl.addEventListener("click", this.onEditBtnClick.bind(this))
-    this.editBarLabelEl.innerHTML = "Overlay"
-    this.editBarEl.appendChild(this.editBarLabelEl)
-    this.editBarEl.appendChild(this.editBarControlsEl)
-    rootEl.appendChild(this.contentEl)
-    rootEl.appendChild(this.editBarEl)
-    rootEl.appendChild(this.editModeBtnLayerEl)
-    this.editModeBtnLayerEl.appendChild(this.editModeBtnEl)
-    
-    ipcRenderer.on(WinMainEvents.EventTypeToIPCName(WinMainEvents.EventType.FOCUSED), this.onMainFocused)
     this.client.on(OverlayClientEventType.OVERLAY_MODE,(newMode: OverlayMode) => {
-    // TODO: Swap all this junk out for REACT
+      // TODO: Swap all this junk out for REACT
       // document.body.style.setProperty('overlay-edit-mode', 'true')
-      
     })
-    // body.addEventListener("mouseenter", this.onMouseEnter)
-    // body.addEventListener("mouseleave", this.onMouseLeave)
-
+    
     if (import.meta.webpackHot) {
       import.meta.webpackHot.addDisposeHandler(() => {
         this.unload()
@@ -121,10 +89,6 @@ export class OverlayWindowControls {
           Object.assign(window, {
             overlayWindowControls: undefined
           })
-
-          // ipcEventHandlers.forEach(([type, handler]) => {
-          //   ipcRenderer.off(OverlayClientEventTypeToIPCName(type), handler)
-          // })
         })
       }
     }

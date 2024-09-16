@@ -30,8 +30,15 @@ $edit-btn-text: $color-action-contrast !default;
 }
 
 html, body, #root {
-	margin: 0 !important;
-	padding: 0 !important;
+	margin: 0;
+}
+
+html, body {
+	padding: 0;
+}
+
+#root {
+	padding: 1rem;
 }
 
 #root {

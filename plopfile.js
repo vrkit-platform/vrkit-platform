@@ -7,19 +7,19 @@ const Path = require("path")
 const { echo } = require("shelljs")
 const { isFunction } = require("@3fv/guard")
 const registerReactHelpers = require("./tools/plop/helpers/plop-react-helpers")
-const registerReduxHelpers = require("./tools/plop/helpers/plop-redux-helpers")
-const registerNestHelpers =  require("./tools/plop/helpers/plop-nest-helpers")
-const registerPkgHelpers =  require("./tools/plop/helpers/plop-pkg-helpers")
-const registerNamingHelpers =  require("./tools/plop/helpers/plop-naming-helpers")
+// const registerReduxHelpers = require("./tools/plop/helpers/plop-redux-helpers")
+// const registerNestHelpers =  require("./tools/plop/helpers/plop-nest-helpers")
+// const registerPkgHelpers =  require("./tools/plop/helpers/plop-pkg-helpers")
+// const registerNamingHelpers =  require("./tools/plop/helpers/plop-naming-helpers")
 
 module.exports = function plopfile(plop) {
   
-  registerReduxHelpers(plop)
-  registerSharedActions(plop)
+  // registerReduxHelpers(plop)
+  // registerSharedActions(plop)
   registerReactHelpers(plop)
-  registerNestHelpers(plop)
-  registerPkgHelpers(plop)
-  registerNamingHelpers(plop)
+  // registerNestHelpers(plop)
+  // registerPkgHelpers(plop)
+  // registerNamingHelpers(plop)
 
   const addGenerator = (name, configFilename = name) =>
     asOption(configFilename)
@@ -53,12 +53,12 @@ module.exports = function plopfile(plop) {
         }
       })
 
-  addGenerator("new-package")
+  // addGenerator("new-package")
   // addGenerator("new-api-client-package")
-	addGenerator("nest-module")
-  addGenerator("service")
+	// addGenerator("nest-module")
+  // addGenerator("service")
   // addGenerator("job-runner-module")
-  addGenerator("redux-slice")
+  // addGenerator("redux-slice")
   addGenerator("react-component")
-	addGenerator("react-page")
+	// addGenerator("react-page")
 }

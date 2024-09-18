@@ -2,9 +2,18 @@ syntax = "proto3";
 
 package IRacingTools.Models;
 
+enum ThemeType {
+  AUTO = 0;
+  LIGHT = 1;
+  DARK = 2;
+}
+
 message AppSettings {
 
-  string activeDashboardId = 1;
+  string active_dashboard_id = 1;
+  ThemeType theme_type = 2;
+
+  float zoom_factor = 3;
 
   bool autoconnect = 5;
 }

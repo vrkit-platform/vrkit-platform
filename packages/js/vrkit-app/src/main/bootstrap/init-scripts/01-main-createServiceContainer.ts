@@ -10,6 +10,7 @@ import { once } from "vrkit-app-common/utils"
 import { MainWindowManager, WindowManager } from "../../services/window-manager"
 import SessionManager from "../../services/session-manager"
 import { OverlayManager } from "../../services/overlay-manager"
+import SharedAppState, { createSharedAppStateStore } from "../../services/store"
 
 const createServiceContainer = once(async function createServiceContainer() {
   const container = await new Container()
@@ -23,6 +24,7 @@ const createServiceContainer = once(async function createServiceContainer() {
     .bindClass(MainWindowManager)
     .bindClass(SessionManager)
     .bindClass(OverlayManager)
+    .bindAsyncFactory(SharedAppState, createSharedAppStateStore)
     .resolveAll()
 
   setServiceContainer(container)

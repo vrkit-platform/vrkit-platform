@@ -1,0 +1,45 @@
+
+@use "sass:map";
+
+$titlebarHeight: 2rem;
+$transition: none 0.25s ease-out;
+$transition-props: background-color, opacity, color;
+
+
+html, body, #root {
+	margin: 0;
+}
+
+html, body {
+	padding: 0;
+}
+
+#root {
+	padding: 1rem;
+	z-index: 1;
+	width: 100vw;
+	height: calc(100vh - $titlebarHeight);
+	position: fixed;
+	border-radius: 1rem;
+	top: $titlebarHeight;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	overflow: hidden;
+	transition: $transition;
+	transition-property: $transition-props;
+}
+
+.electronWindowDraggable {
+	&, & * {
+		user-select: none !important;
+		-webkit-user-select: none !important;
+		-webkit-app-region: drag !important;
+	}
+}
+
+.electronAllowInteraction {
+	user-select: auto;
+	-webkit-user-select: auto;
+	-webkit-app-region: no-drag;
+}

@@ -1,5 +1,4 @@
 export * from "./FsExtra"
-export * from "./Paths"
 export * from "./getAppThemeFromSystem"
-//export * from "./FileStorage"
 export * from "./WindowHelpers"
+export * from "./NativeImageSequenceCapture"

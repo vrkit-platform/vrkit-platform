@@ -37,11 +37,11 @@ export interface SessionManagerState {
 
   activeSessionType: ActiveSessionType
   
-  overlayMode?: OverlayMode
+  
 }
 
 export const newSessionState = (): SessionManagerState => ({
-  // overlayMode: OverlayMode.NORMAL,
+  
   activeSessionType: "NONE",
   liveSession: sessionDetailDefaults(),
   diskSession: sessionDetailDefaults()

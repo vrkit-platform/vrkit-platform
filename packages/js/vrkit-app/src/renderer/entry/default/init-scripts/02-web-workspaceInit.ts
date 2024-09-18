@@ -6,11 +6,12 @@ const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 export async function init(container: Container) {
-  debug(`init sessionManagerClient state`)
+  info(`init sessionManagerClient state`)
   const sessionManagerClient = container.get(SessionManagerClient)
   const initState = await sessionManagerClient.getMainSessionManagerState()
   sessionManagerClient.updateState(initState)
   
+  info(`init sessionManagerClient state completed`)
   // let unsubscribe: Function = null
   //
   // if (import.meta.webpackHot) {

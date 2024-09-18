@@ -62,8 +62,11 @@ function prepareWindow(win: BrowserWindow) {
   })
   
   ElectronRemote.enable(win.webContents)
-  
-  win.on("show", () => {
+  win.webContents.on('render-process-gone', (event, details) => {
+    error(`Renderer process crashed`, details, event)
+  })
+    
+    win.on("show", () => {
     win.webContents.setWindowOpenHandler(windowOpenHandler)
     if (isDev) {
       win.webContents.openDevTools()

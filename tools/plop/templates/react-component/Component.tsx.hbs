@@ -30,7 +30,7 @@ const {{name}}Root = styled(Box, {
   label: "{{name}}Root"
 })(({theme}) => ({
   // root styles here
-  [child({{camelCase name}}Classes.child1)]: {
+  [hasCls({{camelCase name}}Classes.child1)]: {
     // child styled here
   }
 }))

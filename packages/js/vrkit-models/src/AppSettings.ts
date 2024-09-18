@@ -15,25 +15,54 @@ import { MessageType } from "@protobuf-ts/runtime";
  */
 export interface AppSettings {
     /**
-     * @generated from protobuf field: string activeDashboardId = 1;
+     * @generated from protobuf field: string active_dashboard_id = 1;
      */
     activeDashboardId: string;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.ThemeType theme_type = 2;
+     */
+    themeType: ThemeType;
+    /**
+     * @generated from protobuf field: float zoom_factor = 3;
+     */
+    zoomFactor: number;
     /**
      * @generated from protobuf field: bool autoconnect = 5;
      */
     autoconnect: boolean;
 }
+/**
+ * @generated from protobuf enum IRacingTools.Models.ThemeType
+ */
+export enum ThemeType {
+    /**
+     * @generated from protobuf enum value: AUTO = 0;
+     */
+    AUTO = 0,
+    /**
+     * @generated from protobuf enum value: LIGHT = 1;
+     */
+    LIGHT = 1,
+    /**
+     * @generated from protobuf enum value: DARK = 2;
+     */
+    DARK = 2
+}
 // @generated message type with reflection information, may provide speed optimized methods
 class AppSettings$Type extends MessageType<AppSettings> {
     constructor() {
         super("IRacingTools.Models.AppSettings", [
-            { no: 1, name: "activeDashboardId", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 1, name: "active_dashboard_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "theme_type", kind: "enum", T: () => ["IRacingTools.Models.ThemeType", ThemeType] },
+            { no: 3, name: "zoom_factor", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
             { no: 5, name: "autoconnect", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
     create(value?: PartialMessage<AppSettings>): AppSettings {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.activeDashboardId = "";
+        message.themeType = 0;
+        message.zoomFactor = 0;
         message.autoconnect = false;
         if (value !== undefined)
             reflectionMergePartial<AppSettings>(this, message, value);
@@ -44,8 +73,14 @@ class AppSettings$Type extends MessageType<AppSettings> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string activeDashboardId */ 1:
+                case /* string active_dashboard_id */ 1:
                     message.activeDashboardId = reader.string();
+                    break;
+                case /* IRacingTools.Models.ThemeType theme_type */ 2:
+                    message.themeType = reader.int32();
+                    break;
+                case /* float zoom_factor */ 3:
+                    message.zoomFactor = reader.float();
                     break;
                 case /* bool autoconnect */ 5:
                     message.autoconnect = reader.bool();
@@ -62,9 +97,15 @@ class AppSettings$Type extends MessageType<AppSettings> {
         return message;
     }
     internalBinaryWrite(message: AppSettings, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string activeDashboardId = 1; */
+        /* string active_dashboard_id = 1; */
         if (message.activeDashboardId !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.activeDashboardId);
+        /* IRacingTools.Models.ThemeType theme_type = 2; */
+        if (message.themeType !== 0)
+            writer.tag(2, WireType.Varint).int32(message.themeType);
+        /* float zoom_factor = 3; */
+        if (message.zoomFactor !== 0)
+            writer.tag(3, WireType.Bit32).float(message.zoomFactor);
         /* bool autoconnect = 5; */
         if (message.autoconnect !== false)
             writer.tag(5, WireType.Varint).bool(message.autoconnect);

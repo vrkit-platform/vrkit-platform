@@ -13,10 +13,9 @@ import { asOption } from "@3fv/prelude-ts"
 import { get } from "lodash/fp"
 import { isDefined } from "@3fv/guard"
 import { Deferred } from "@3fv/deferred"
-import { Bind, Throttle } from "vrkit-app-common/decorators"
-import { Fill } from "vrkit-app-renderer/styles/ThemedStyles"
+import { Bind } from "vrkit-app-common/decorators"
 
-const TrackMapThrottlingPeriod = 100,
+const TrackMapThrottlingPeriod = 500,
   CarMarkerRadiusPx = 6,
   log = getLogger(__filename)
 
@@ -89,14 +88,14 @@ class TrackMapOverlayCanvasRenderer {
    *
    * @private
    */
-  private readonly initializeDeferred = new Deferred<void>()
+  private initializeDeferred = new Deferred<void>()
 
   /**
    * Renderer internal state
    *
    * @private
    */
-  private readonly state: SceneState = null
+  private state: SceneState = null
 
   /**
    * Patch the state
@@ -105,7 +104,8 @@ class TrackMapOverlayCanvasRenderer {
    * @returns {SceneState}
    */
   private patchSceneState(patch: Partial<SceneState>): SceneState {
-    return assign(this.state, patch)
+    this.state = { ...this.state, ...patch }
+    return this.state
   }
 
   /**
@@ -136,6 +136,11 @@ class TrackMapOverlayCanvasRenderer {
     const fps = settings?.fps ?? 60
     return throttle(
       (carsData: CarData[]) => {
+        if (!this.isInitialized) {
+          log.warn("Not initialized")
+          return
+        }
+
         const sceneState = this.state
         log.debug(`Rendering cars (count=${carsData.length})`)
 
@@ -190,70 +195,90 @@ class TrackMapOverlayCanvasRenderer {
    * Render the track map
    */
   // @Throttle(TrackMapThrottlingPeriod, {
-  //   trailing: true
-  //   // leading: true
+  //   trailing: true,
+  //   leading: true
   // })
   private createScene() {
-    
-    
+    if (!this.isInitialized) {
+      log.warn("Not initialized, can not createScene")
+      return
+    }
+
     const { width, height } = this.state,
       { trackMap } = this.state
 
-    if (!this.canvasEl || !width || !height) {
-      log.warn("Unable to render canvas, canvas element, width & height must be positive values", { width, height })
+    if (!this.canvasEl || !width || !height || !trackMap) {
+      log.warn(
+        "Unable to render canvas, canvas element, width & height must be positive values",
+        { width, height },
+        "track map",
+        trackMap
+      )
       return
     }
 
     log.info("renderTrack()", width, height)
-    
-    this.canvasEl.width = width
-    this.canvasEl.height = height
+
+    // this.canvasEl.width = width
+    // this.canvasEl.height = height
     Object.assign(this.canvasEl.style, {
       width: `${width}px`,
       height: `${height}px`,
       background: "transparent",
-      objectFit: "contain",
-      ...Fill
+      objectFit: "contain"
     })
-    
-    if (this.state.two) {
-      return
+
+    if (!this.state.two) {
+      // this.state.two.clear()
+      // this.state.two = null
+      //
+      // this.canvasEl.innerHTML = "";
     }
-    
-    if (this.state.two) {
-      this.state.two.clear()
-      this.state.two = null
-    }
-    
+
     const statePatch: Partial<SceneState> = {
-      width,
-      height,
-      carMarkers: [],
-      two: new Two({
-        fitted: true,
         width,
         height,
-        domElement: this.canvasEl,
-        autostart: false,
-        smoothing: false,
-        overdraw: false
-      })
-    }
+        two: asOption(this.state.two)
+          .ifSome(t => {
+            t.width = width
+            t.height = height
+          })
+          .getOrCall(
+            () =>
+              new Two({
+                width,
+                height,
+                domElement: this.canvasEl,
+                autostart: false,
+                smoothing: false,
+                overdraw: false
+              })
+          )
+      },
+      two = statePatch.two,
+      scaledTrackMap = ScaleTrackMapToFit(
+        trackMap,
+        { width, height },
+        {
+          padding: 10
+        }
+      ),
+      trackPathAnchors = scaledTrackMap.path.map(coord => new Two.Anchor(coord.x, coord.y))
 
-    const two = statePatch.two
+    asOption(this.state.trackPath).match({
+      Some: tp => {
+        tp.vertices = trackPathAnchors
+      },
+      None: () => {
+        const tp = (statePatch.trackPath = new Two.Path(trackPathAnchors, true))
+        Object.assign(tp, {
+          stroke: "red",
+          fill: "transparent"
+        })
 
-    const scaledTrackMap = ScaleTrackMapToFit(trackMap, { width, height })
-    const trackPathAnchors = scaledTrackMap.path.map(coord => new Two.Anchor(coord.x, coord.y))
-    const trackPath = (statePatch.trackPath = new Two.Path(trackPathAnchors, true))
-
-    Object.assign(trackPath, {
-      stroke: "red",
-      fill: "transparent"
+        two.add(tp)
+      }
     })
-
-    // trackPath.stroke = "red"
-    // trackPath.fill = "transparent"
-    two.add(trackPath)
 
     this.patchSceneState(statePatch)
   }
@@ -265,6 +290,10 @@ class TrackMapOverlayCanvasRenderer {
    * @private
    */
   private updateSessionInfo(info: SessionInfoMessage) {
+    if (!this.isInitialized) {
+      log.warn("Not initialized")
+      return
+    }
     const drivers = info?.driverInfo?.drivers
     // log.info("Drivers info", drivers)
     if (!drivers) {
@@ -345,7 +374,8 @@ class TrackMapOverlayCanvasRenderer {
   private onDataFrame(sessionId, timing, dataVarValues) {
     if (!this.isInitialized) return
 
-    // log.debug("DATA_FRAME EVENT", sessionId, timing.currentTimeMillis, "DATA VAR VALUE COUNT = ", dataVarValues.length)
+    // log.debug("DATA_FRAME EVENT", sessionId, timing.currentTimeMillis, "DATA
+    // VAR VALUE COUNT = ", dataVarValues.length)
     this.updateCars(dataVarValues)
   }
 
@@ -362,12 +392,21 @@ class TrackMapOverlayCanvasRenderer {
   }
 
   private async initializeState() {
+    const deferred = this.initializeDeferred
+    if (!deferred) {
+      log.warn("Deferred is null, this has likely been destroyed")
+      return
+    }
+
+    if (deferred.isSettled()) {
+      log.warn("Deferred is already settled, skipping and returning same result")
+      return deferred.promise
+    }
+
     try {
       const { state } = this,
-        { client } = state
-
-      // newSceneState()
-      const { sessionInfo } = assign(state, {
+        { client } = state,
+        { sessionInfo } = assign(state, {
           overlayInfo: client.getOverlayInfo(),
           sessionInfo: await client.fetchSessionInfo()
         }),
@@ -379,7 +418,7 @@ class TrackMapOverlayCanvasRenderer {
 
       this.patchSceneState(state)
 
-      this.initializeDeferred.resolve()
+      deferred.resolve()
       this.createScene()
 
       // REMOVE LISTENERS ON RELOAD
@@ -393,8 +432,10 @@ class TrackMapOverlayCanvasRenderer {
       client.on(PluginClientEventType.SESSION_INFO, this.onSessionInfo)
       client.on(PluginClientEventType.DATA_FRAME, this.onDataFrame)
     } catch (err) {
-      this.initializeDeferred.reject(err)
+      deferred.reject(err)
     }
+
+    return deferred.promise
     // this.renderSetup()
   }
 
@@ -403,6 +444,32 @@ class TrackMapOverlayCanvasRenderer {
     width: number,
     height: number
   ) {
+    this.reset(width, height)
+  }
+
+  setSize(width: number, height: number) {
+    if (this.state.width !== width || this.state.height !== height) {
+      this.reset(width, height)
+    }
+  }
+
+  clear() {
+    Two.Instances.forEach((t: Two) => {
+      t.clear()
+    })
+
+    this.canvasEl?.replaceChildren()
+  }
+
+  reset(width: number, height: number) {
+    this.clear()
+
+    const client = getVRKitPluginClient()
+    client.off(PluginClientEventType.SESSION_INFO)
+    client.off(PluginClientEventType.DATA_FRAME)
+
+    this.initializeDeferred = new Deferred()
+
     this.state = newSceneState(width, height)
 
     this.initializeState()
@@ -414,17 +481,14 @@ class TrackMapOverlayCanvasRenderer {
       })
   }
 
-  setSize(width: number, height: number) {
-    if (this.state.width !== width || this.state.height !== height) {
-      this.patchSceneState({ width, height })
-      this.createScene()
-    }
-  }
-
-  @Bind
   destroy() {
-    this.state.client.off(PluginClientEventType.SESSION_INFO, this.onSessionInfo)
-    this.state.client.off(PluginClientEventType.DATA_FRAME, this.onDataFrame)
+    const client = getVRKitPluginClient()
+    client.off(PluginClientEventType.SESSION_INFO)
+    client.off(PluginClientEventType.DATA_FRAME)
+
+    this.clear()
+    this.initializeDeferred = null
+    this.state = null
   }
 }
 

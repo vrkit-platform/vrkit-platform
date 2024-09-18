@@ -1,9 +1,8 @@
 import { nativeTheme } from "electron"
-import { THEMES, ThemeId } from "vrkit-app-common/models"
+import type { ThemeId } from "vrkit-app-common/models"
+import { ThemeType } from "vrkit-models"
 
 export function getAppThemeFromSystem(): ThemeId {
-  const useDark = nativeTheme.shouldUseDarkColors,
-    theme: ThemeId = useDark ? THEMES.DARK : THEMES.LIGHT
-
-  return theme
+  const useDark = nativeTheme.shouldUseDarkColors
+  return ThemeType[useDark ? ThemeType.DARK : ThemeType.LIGHT] as ThemeId
 }

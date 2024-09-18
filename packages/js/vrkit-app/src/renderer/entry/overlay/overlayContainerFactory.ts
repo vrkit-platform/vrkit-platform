@@ -5,11 +5,11 @@ import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 
 import { setContainerResolver } from "../../utils"
-import { isDev } from "../../constants"
+import { APP_STORE_ID, isDev } from "../../constants"
 import FileSystemManager from "../../services/file-system-manager"
 import TrackManager from "../../services/track-manager"
 import OverlayClient, { PluginClientManager } from "../../services/overlay-client"
-import OverlayWindowControls from "vrkit-app-renderer/services/overlay-window-controls"
+import SharedAppStateClient from "vrkit-app-renderer/services/shared-app-state-client"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log
@@ -25,6 +25,8 @@ async function createContainer(): Promise<Container> {
   try {
     debug(`Creating service container for overlay window`)
 
+    const { default: appStore } = await import("../../services/store/AppStore")
+
     let container = new Container()
     if (isDev) {
       Object.assign(window, {
@@ -33,7 +35,8 @@ async function createContainer(): Promise<Container> {
     }
 
     container = await container
-      .bindClass(OverlayWindowControls)
+      .bindConstant(APP_STORE_ID, appStore)
+      .bindClass(SharedAppStateClient)
       .bindClass(FileSystemManager)
       .bindClass(TrackManager)
       .bindClass(OverlayClient)

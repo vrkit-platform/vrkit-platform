@@ -3,13 +3,15 @@ import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { ipcMain, webContents } from "electron"
 
 import { Future } from "@3fv/prelude-ts"
-import { ErrorKind, throwError } from "vrkit-app-common/utils"
+import { cloneDeep, ErrorKind, isEqual, throwError } from "vrkit-app-common/utils"
 import { Bind } from "vrkit-app-common/decorators"
 import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
 import { AppSettings } from "vrkit-models"
 import { AppFiles } from "vrkit-app-common/constants"
 import Fs from "fs"
 import PQueue from "p-queue"
+import { IObjectDidChange, observe } from "mobx"
+import SharedAppState from "../store"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -95,14 +97,17 @@ export class AppSettingsService {
   private async init() {
     this.state = {
       ...this.state,
-      appSettings: await this.loadAppSettings()
+      appSettings:await this.loadAppSettings()
     }
+    
+    this.sharedAppState.setAppSettings(this.state.appSettings)
 
     ipcMain.handle(ElectronIPCChannel.getAppSettings, this.onGetAppSettings)
     ipcMain.handle(ElectronIPCChannel.saveAppSettings, this.onSaveAppSettings)
     ipcMain.on(ElectronIPCChannel.getAppSettingsSync, this.onGetAppSettingsSync)
     ipcMain.on(ElectronIPCChannel.saveAppSettingsSync, this.onSaveAppSettingsSync)
-
+    
+    const unsubscribe = observe(this.sharedAppState, this.onStateChange, false)
     if (module.hot) {
       module.hot.addDisposeHandler(() => {
         ipcMain.removeHandler(ElectronIPCChannel.getAppSettings)
@@ -150,7 +155,29 @@ export class AppSettingsService {
     })
   }
   
-  constructor() {}
+  
+  /**
+   * On state change, emit to renderers
+   *
+   * @param change
+   */
+  @Bind
+  private onStateChange(change: IObjectDidChange<SharedAppState>) {
+    const newSettings = change.object.appSettings
+    if (!isEqual(newSettings, this.state.appSettings)) {
+      this.state.appSettings = cloneDeep(newSettings)
+      
+      webContents.getAllWebContents().forEach(webContent => {
+        webContent.send(ElectronIPCChannel.settingsChanged, newSettings)
+      })
+    }
+  }
+  
+  constructor(readonly sharedAppState: SharedAppState) {
+    this.state = {
+      appSettings: sharedAppState.appSettings
+    }
+  }
   
   get appSettings() {
     return this.state.appSettings

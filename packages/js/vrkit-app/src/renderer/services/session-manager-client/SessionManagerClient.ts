@@ -249,12 +249,7 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
     )
   }
   
-  @Bind
-  async setOverlayMode(mode: OverlayMode): Promise<void> {
-    const newMode = await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.SET_OVERLAY_MODE), mode)
-    
-    this.appStore.dispatch(sessionManagerActions.setOverlayMode(newMode))
-  }
+  
 }
 
 export default SessionManagerClient

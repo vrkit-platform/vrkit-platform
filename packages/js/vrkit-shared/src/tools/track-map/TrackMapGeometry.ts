@@ -27,12 +27,33 @@ TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Size<UINT> &size) {
 import { LapCoordinate, SizeF, TrackMap } from "vrkit-models"
 import { Size } from "../CoordinateMathConstants"
 
-export function ScaleTrackMapToFit(trackMap: TrackMap, size: SizeF): TrackMap {
-  const scaled: TrackMap = TrackMap.create({
+export interface ScaleTrackMapToFitConfig {
+  padding: number
+}
+
+export type ScaleTrackMapToFitOptions = Partial<ScaleTrackMapToFitConfig>
+
+const applyDefaultScaleTrackMapToFitConfig = (options: ScaleTrackMapToFitOptions):ScaleTrackMapToFitConfig => ({
+  padding: 0,
+  ...options
+})
+
+export function ScaleTrackMapToFit(trackMap: TrackMap, size: SizeF, options: ScaleTrackMapToFitOptions = {}): TrackMap {
+  const config = applyDefaultScaleTrackMapToFitConfig(options),
+      {padding} = config
+  
+  const
+      dimPadding = 2 * padding,
+      dimOffset = padding,
+      paddedSize: SizeF = {
+        width: size.width - dimPadding,
+        height: size.height -dimPadding
+      },
+      scaled: TrackMap = TrackMap.create({
     ...trackMap,
     path: trackMap.path.map(point => LapCoordinate.create({...point})),
     scaledSize: {
-      ...size
+      ...paddedSize
     }
   })
   
@@ -41,14 +62,13 @@ export function ScaleTrackMapToFit(trackMap: TrackMap, size: SizeF): TrackMap {
   const scaleX: number = scaledSize.width / trackMap.size.width
   const scaleY: number = scaledSize.height / trackMap.size.height
   const scaleRatio: number = scaled.scaledRatio = Math.min(scaleX, scaleY)
- 
   
   const pointCount = scaled.path.length
   for (let idx = 0; idx < pointCount; idx++) {
     const point = LapCoordinate.create(scaled.path[idx])
     Object.assign(point, {
-      x: point.x * scaleRatio,
-      y: point.y * scaleRatio
+      x: dimOffset + (point.x * scaleRatio),
+      y: dimOffset + (point.y * scaleRatio)
     })
     
     scaled.path[idx] = point

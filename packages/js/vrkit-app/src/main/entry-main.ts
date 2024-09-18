@@ -11,18 +11,25 @@
  */
 import "./prepareElectronMain"
 
-import { app, BrowserWindow, ipcMain, session, shell } from "electron"
-import { defaults, importDefault } from "vrkit-app-common/utils"
-import { Deferred } from "@3fv/deferred"
+import { app } from "electron"
+import { importDefault } from "vrkit-app-common/utils"
 import { getLogger } from "@3fv/logger-proxy"
-import * as ElectronRemote from '@electron/remote/main'
+import * as ElectronRemote from "@electron/remote/main"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
+process.on("uncaughtException",(...args:any[]) => {
+  error("uncaughtException", args)
+})
+
+process.on("unhandledRejection",(...args:any[]) => {
+  error("unhandledRejection", args)
+})
 
 async function start() {
-  ElectronRemote.initialize()
+  if (!ElectronRemote.isInitialized())
+    ElectronRemote.initialize()
   
   await importDefault(import("./bootstrap"))
   await importDefault(import("./launch"))

@@ -20,10 +20,11 @@ import { ElectronMainActionManager } from "../electron-actions"
 import { capitalize, first } from "lodash"
 import { assert } from "@3fv/guard"
 import { invokeWith } from "vrkit-app-common/utils"
-import { ThemeId, THEMES } from "vrkit-app-common/models"
+import { ThemeId } from "vrkit-app-common/models"
 // import MainAppState from "../store"
 import { Bind } from "vrkit-app-common/decorators"
 import { inspectSharedWorker } from "../../utils/sharedWorkerHelpers"
+import { ThemeType } from "vrkit-models"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -165,7 +166,7 @@ export class ElectronMainMenuManager {
           {
             label: "Theme",
             submenu: [
-              ...Object.values(THEMES).map(this.changeThemeMenuItem)
+              ...Object.keys(ThemeType).map(this.changeThemeMenuItem)
             ]
           },
 

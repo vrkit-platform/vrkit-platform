@@ -2,10 +2,8 @@
 import Box, { BoxProps } from "@mui/material/Box"
 import Button, { ButtonProps } from "@mui/material/Button"
 import { styled, useTheme } from "@mui/material/styles"
-import { Grid2Props } from "@mui/material/Unstable_Grid2"
 import {
   alpha,
-  createClassNames,
   FillWidth,
   flex,
   flexAlign,
@@ -17,21 +15,23 @@ import {
   padding,
   paddingRem,
   rem
-} from "../../styles"
+} from "../../styles/ThemedStyles"
 import clsx from "clsx"
-import { useAppSelector } from "../../services/store"
-import { sessionManagerSelectors } from "vrkit-app-renderer/services/store/slices/session-manager"
+import { useAppSelector } from "../../services/store/AppStoreHooks"
+import { sessionManagerSelectors } from "../../services/store/slices/session-manager"
 import React, { useCallback } from "react"
 import { FlexAutoBox, FlexRowBox, FlexRowCenterBox, FlexScaleZeroBox } from "../box"
 import { match, P } from "ts-pattern"
 import { getLogger } from "@3fv/logger-proxy"
-import SessionManagerClient from "vrkit-app-renderer/services/session-manager-client"
+import { SessionManagerClient } from "../../services/session-manager-client"
 import { useService } from "../service-container"
-import { SessionTiming } from "vrkit-models"
+import type { SessionTiming } from "vrkit-models"
 
 import { DurationView, MILLIS_IN_HR } from "../time"
-import { ActiveSessionType, SessionDetail } from "vrkit-app-common/models/session-manager"
-import { OverlayMode } from "vrkit-app-common/models/overlay-manager"
+import type { ActiveSessionType, SessionDetail } from "vrkit-app-common/models/session-manager"
+
+import { OverlayModeSessionWidget } from "./OverlayModeSessionWidget"
+import { createClassNames } from "vrkit-app-renderer/styles/createClasses"
 
 const log = getLogger(__filename)
 
@@ -44,7 +44,7 @@ const classNames = createClassNames(
   "active"
 )
 
-export interface SessionPlayerControlBarProps extends Grid2Props {}
+export interface SessionPlayerControlBarProps {}
 
 const SPCRoot = styled("div", { name: "SessionPlayerControlBar" })(
   ({ theme }) => ({
@@ -221,7 +221,6 @@ function SessionTimingView({
 
   return (
     <FlexScaleZeroBox>
-      {/*<Moment date={sessionTime} format="HH:mm:ss.SSS"/>*/}
       <DurationView
         millis={timing.currentTimeMillis}
         showHours={showHours}
@@ -236,56 +235,6 @@ function SessionTimingView({
         </>
       )}
     </FlexScaleZeroBox>
-  )
-}
-
-const OverlayModeSessionBox = styled(FlexRowCenterBox, { name: "DashboardSessionBox" })(
-    ({ theme }) => ({
-      backgroundColor: alpha(theme.palette.success.main, 0.2), // ...widthConstraint(rem(6)),
-      ...flex(0, 0, "auto"),
-      ...paddingRem(0, 1),
-      gap: rem(1)
-    })
-)
-
-export interface OverlayModeButtonProps extends ButtonProps {
-
-}
-
-export function OverlayModeButton({
-  sx,
-  ...other
-}: OverlayModeButtonProps) {
-  const 
-      hasActiveSession = useAppSelector(sessionManagerSelectors.hasActiveSession), 
-      overlayMode = useAppSelector(sessionManagerSelectors.selectOverlayMode),
-      
-      sessionManagerClient = useService(SessionManagerClient),
-      
-      onClick = useCallback(() => {
-        sessionManagerClient.setOverlayMode(overlayMode === OverlayMode.NORMAL ? OverlayMode.EDIT : OverlayMode.NORMAL)
-      },[sessionManagerClient, overlayMode])      
-  
-  return (
-      <Button
-          sx={{
-            ...FlexRowCenter,
-            ...sx
-          }}
-          variant={"text"}
-          color={"success"}
-          onClick={onClick}
-          disabled={!hasActiveSession}
-          {...other}
-      >
-        <Box
-            sx={{
-              ...FlexColumnCenter
-            }}
-        >
-          {!hasActiveSession ? `Overlay Mode Disabled` : `Overlay ${overlayMode === OverlayMode.EDIT ? "Normal" : "Edit"}  Mode`}
-        </Box>
-      </Button>
   )
 }
 
@@ -344,9 +293,8 @@ export function SessionPlayerControlBar(props: SessionPlayerControlBarProps) {
           )}
         </FlexScaleZeroBox>
         
-        <OverlayModeSessionBox>
-          <OverlayModeButton />
-        </OverlayModeSessionBox>
+        <OverlayModeSessionWidget/>
+        
         <DiskSessionBox>
           <DiskSessionButton activeSessionType={activeSessionType} />
           {diskSession?.isAvailable && (

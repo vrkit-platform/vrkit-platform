@@ -3,31 +3,46 @@ import { PluginClientComponentProps } from "vrkit-plugin-sdk"
 import React, { useEffect, useRef, useState } from "react"
 import TrackMapOverlayCanvasRenderer from "./TrackMapOverlayCanvasRenderer"
 
+let renderer: TrackMapOverlayCanvasRenderer = null
+
 function TrackMapOverlayPlugin(props: PluginClientComponentProps) {
   const { client, width, height } = props,
-    canvasRef = useRef<HTMLCanvasElement>(),
-    [renderer, setRenderer] = useState<TrackMapOverlayCanvasRenderer>(null)
+    [canvasRef, setCanvasRef] = useState<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    const cleanup = () => {
-      if (renderer) renderer.destroy()
-    }
-    if (canvasRef.current) {
+    
+    if (canvasRef) {
       if (!renderer) {
-        setRenderer(new TrackMapOverlayCanvasRenderer(canvasRef.current, width, height))
+        renderer = new TrackMapOverlayCanvasRenderer(canvasRef, width, height)
+        
       } else {
-        renderer.setSize(width, height)
+        renderer.reset(width, height)
       }
     }
 
-    return cleanup
-  }, [canvasRef.current, width, height])
-
+    return () => {
+      if (renderer) {
+        renderer.destroy()
+        renderer = null
+      }
+    }
+  }, [canvasRef, renderer, width, height])
+  
+  useEffect(() => {
+    return () => {
+      if (renderer) {
+        renderer.destroy()
+        renderer = null
+      }
+      setCanvasRef(null)
+    }
+  }, [])
+  
   return (
     <canvas
       // width={width}
       // height={height}
-      ref={canvasRef}
+      ref={ref => setCanvasRef(ref)}
     />
   )
 }

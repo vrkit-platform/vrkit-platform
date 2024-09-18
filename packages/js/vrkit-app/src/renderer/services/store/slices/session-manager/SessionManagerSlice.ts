@@ -34,13 +34,6 @@ const slice = createSlice({
       return assign(state, action.payload ?? {})
     },
 
-    setOverlayMode: (state: SessionManagerState, { payload: overlayMode }: PayloadAction<OverlayMode>) => {
-      return {
-        ...state,
-        overlayMode
-      }
-    },
-
     setLiveSessionConnected(state, { payload: liveSessionConnected }: PayloadAction<boolean>) {
       state.liveSession = {
         ...state.liveSession,
@@ -86,8 +79,7 @@ const slice = createSlice({
   },
   extraReducers: builder => builder,
   selectors: {
-    selectOverlayMode: (state: SessionManagerState) => state.overlayMode ?? OverlayMode.NORMAL,
-
+    
     hasAvailableSession: (state: SessionManagerState) =>
       [state.diskSession?.isAvailable, state.liveSession?.isAvailable].some(it => it === true),
 

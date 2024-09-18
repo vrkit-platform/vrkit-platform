@@ -8,29 +8,25 @@ build-backend = "hatchling.build"
 
 [project]
 name = "irsdk_tool"
-
 dynamic = ["version"]
-description = ''
+description = 'test'
 readme = "README.md"
 requires-python = ">=3.8"
-license = "MIT"
+#license = "PRIVATE"
 keywords = []
 authors = [
-  {
-    name = "Jonathan Glanz",
-    email = "jonathan.glanz@gmail.com"
-  },
+  {name = "Jonathan Glanz", email = "jonathan.glanz@gmail.com"},
 ]
-classifiers = [
-  "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
-]
+#classifiers = [
+#  "Development Status :: 4 - Beta",
+#  "Programming Language :: Python",
+#  "Programming Language :: Python :: 3.8",
+#  "Programming Language :: Python :: 3.9",
+#  "Programming Language :: Python :: 3.10",
+#  "Programming Language :: Python :: 3.11",
+#  "Programming Language :: Python :: Implementation :: CPython",
+#  "Programming Language :: Python :: Implementation :: PyPy",
+#]
 dependencies = [
   'PyYAML >= 5.3',
   'folium >= 0.15',
@@ -45,7 +41,8 @@ dependencies = [
   "betterproto",
   "CppHeaderParser",
   "clang-format",
-  "mypy-protobuf"
+  "mypy-protobuf",
+  "opencv-python"
 ]
 
 [project.urls]

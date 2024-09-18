@@ -5,17 +5,12 @@ import { ActionRegistry } from "vrkit-app-common/services"
 import WebActionManager from "../../services/web-action-manager"
 import SessionManagerClient from "../../services/session-manager-client"
 
-import { APP_STORE_ID, isSharedWorkerEnabled } from "../../constants"
+import { APP_STORE_ID, isDev } from "../../constants"
 
-
-
-import {
-  setContainerResolver
-} from "../../utils"
-import { isDev } from "../../constants"
+import { setContainerResolver } from "../../utils"
 import FileSystemManager from "../../services/file-system-manager"
 import TrackManager from "../../services/track-manager"
-
+import SharedAppStateClient from "vrkit-app-renderer/services/shared-app-state-client"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log
@@ -41,10 +36,11 @@ async function createContainer(): Promise<Container> {
 
     container = await container
       .bindConstant(APP_STORE_ID, appStore)
+      .bindClass(SharedAppStateClient)
       .bindClass(ActionRegistry)
       .bindClass(WebActionManager)
       .bindClass(FileSystemManager)
-        .bindClass(TrackManager)
+      .bindClass(TrackManager)
       .bindClass(SessionManagerClient)
       .resolveAll()
 
@@ -52,19 +48,12 @@ async function createContainer(): Promise<Container> {
     containerDeferred.resolve(container)
 
     info(`Container fully resolved & ready to rock`)
-    const bootstrapCtx = require.context(
-        "./init-scripts",
-        false,
-        /\.tsx?$/,
-        "lazy"
-      ),
+    const bootstrapCtx = require.context("./init-scripts", false, /\.tsx?$/, "lazy"),
       bootstrapKeys = bootstrapCtx.keys().sort()
 
     info(`Executing init: ${bootstrapKeys.join(",")}`)
     for (const key of bootstrapKeys) {
-      await bootstrapCtx(key).then(
-        ({ default: initFn }) => initFn(container) as Promise<void>
-      )
+      await bootstrapCtx(key).then(({ default: initFn }) => initFn(container) as Promise<void>)
     }
   } catch (err) {
     error(`failed to create the services container`, err)
@@ -88,8 +77,8 @@ export function resolveContainer(): Deferred<Container> {
       return err
     })
     createContainer()
-        .then(() => log.info("Resolved container"))
-        .catch(err => log.error("Failed to resolve container", err))
+      .then(() => log.info("Resolved container"))
+      .catch(err => log.error("Failed to resolve container", err))
   }
   return containerDeferred
 }

@@ -39,7 +39,7 @@ export interface PluginClient {
   
   on<T extends keyof PluginClientEventArgs, Fn extends PluginClientEventArgs[T] = PluginClientEventArgs[T]>(type: T, handler: Fn): void
 
-  off<T extends keyof PluginClientEventArgs, Fn extends PluginClientEventArgs[T] = PluginClientEventArgs[T]>(type: T, handler: Fn): void
+  off<T extends keyof PluginClientEventArgs, Fn extends PluginClientEventArgs[T] = PluginClientEventArgs[T]>(type: T, handler?: Fn): void
 }
 
 export interface PluginClientComponentProps {

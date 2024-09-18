@@ -1,7 +1,10 @@
-import type { ValuesOf } from 'vrkit-app-common/utils';
-export const THEMES = {
-  LIGHT: "LIGHT",
-  DARK: "DARK"
-}
+import type { KeysOf, ValuesOf } from "vrkit-app-common/utils"
+import { ThemeType } from "vrkit-models"
+// export const THEMES = {
+//   LIGHT: "LIGHT",
+//   DARK: "DARK"
+// }
 
-export type ThemeId = ValuesOf<typeof THEMES> | "AUTO"
+export type ThemeId = KeysOf<typeof ThemeType>
+
+

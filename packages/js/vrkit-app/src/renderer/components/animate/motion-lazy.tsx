@@ -1,4 +1,5 @@
 import { domMax, LazyMotion } from 'framer-motion';
+import React from "react"
 
 // ----------------------------------------------------------------------
 

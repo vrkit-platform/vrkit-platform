@@ -1,6 +1,14 @@
 import ReactDOM from "react-dom/client"
 import { get } from "lodash/fp"
 
+process.on("uncaughtException",(...args:any[]) => {
+  console.error("uncaughtException", args)
+})
+
+process.on("unhandledRejection",(...args:any[]) => {
+  console.error("unhandledRejection", args)
+})
+
 async function start() {
   const renderRoot = await import("./renderRoot").then(get("default"))
   

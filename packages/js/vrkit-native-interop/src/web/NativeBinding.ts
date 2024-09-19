@@ -8,12 +8,12 @@ import { asOption, Option } from "@3fv/prelude-ts"
 import {getLogger} from "@3fv/logger-proxy"
 import * as Fs from "node:fs"
 import { Deferred } from "@3fv/deferred"
-import type {NativeSessionPlayerCtor} from "./SessionPlayer"
-import type { NativeClientCtor } from "./Client"
+import type {NativeSessionPlayerCtor} from "./NativeSessionPlayer"
+import type { NativeClientCtor } from "./NativeClient"
+import type { NativeOverlayManagerCtor } from "./NativeOverlayManager"
 
 
 const log = getLogger(__filename)
-const isDev = process.env.NODE_ENV !== "production"
 
 /**
  * Container for holding native exports
@@ -94,6 +94,9 @@ export interface NativeExports {
   NativeClient: NativeClientCtor
   
   NativeSessionPlayer: NativeSessionPlayerCtor
+  
+  NativeOverlayManager: NativeOverlayManagerCtor
+  
   /**
    * Shutdown the underlying client
    *

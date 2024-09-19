@@ -7,25 +7,23 @@ import { once } from "vrkit-app-common/utils"
 import { action, makeObservable, observable, toJS } from "mobx"
 import { deepObserve, IDisposer } from "mobx-utils"
 
-
-import { broadcastToAllWindows, fileExists, getAppThemeFromSystem, readObjectFile } from "../../utils"
+import { broadcastToAllWindows, getAppThemeFromSystem, newNativeImageSequenceCaptureSettings } from "../../utils"
 import { OverlayMode } from "vrkit-app-common/models/overlay-manager"
 import { AppSettings, ThemeType } from "vrkit-models"
 import { isString } from "@3fv/guard"
 import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
 import { pick } from "lodash"
+import { DevSettings } from "../../models"
 
 const log = getLogger(__filename)
 
 const { debug, trace, info, error, warn } = log
 const BindAction = () => applyDecorators(Bind, action)
 
-// const [sharedAppStateSchema, sharedAppStateFile] = FileStorage.files.state
-
 @Singleton()
-export class SharedAppState implements AppSettings, ISharedAppState {
-  private initDeferred: Deferred<SharedAppState>
+export class MainSharedAppState implements AppSettings, ISharedAppState {
+  private initDeferred: Deferred<MainSharedAppState>
 
   private stopObserving: IDisposer
 
@@ -44,11 +42,11 @@ export class SharedAppState implements AppSettings, ISharedAppState {
   @observable activeDashboardId: string = null
 
   @observable autoconnect: boolean = false
-  
-  toJSON() {
-    return pick(this, "zoomFactor", "themeType", "systemTheme", "overlayMode", "activeDashboardId", "autoconnect")
+
+  @observable devSettings: DevSettings = {
+    imageSequenceCapture: newNativeImageSequenceCaptureSettings()
   }
-  
+
   get theme(): ThemeId {
     return (isString(this.themeType) ? this.themeType : ThemeType[this.themeType]) as ThemeId
   }
@@ -81,10 +79,10 @@ export class SharedAppState implements AppSettings, ISharedAppState {
       warn("Shutdown in progress, ignoring change")
       return
     }
-    
+
     this.broadcast()
   }
-  
+
   private broadcast() {
     const sharedAppStateObj = toJS(this.toJSON())
     info("Broadcasting shared app state", sharedAppStateObj)
@@ -96,7 +94,7 @@ export class SharedAppState implements AppSettings, ISharedAppState {
     if (this.initDeferred) {
       return this.initDeferred.promise
     }
-    this.initDeferred = new Deferred<SharedAppState>()
+    this.initDeferred = new Deferred<MainSharedAppState>()
     try {
       makeObservable(this)
       const unsubscribe = (this.stopObserving = deepObserve(this, this.onChange))
@@ -130,7 +128,7 @@ export class SharedAppState implements AppSettings, ISharedAppState {
   @BindAction() setZoomFactor(zoomFactor: number) {
     this.zoomFactor = zoomFactor
   }
-  
+
   @BindAction() setOverlayMode(overlayMode: OverlayMode) {
     this.overlayMode = overlayMode
   }
@@ -148,14 +146,19 @@ export class SharedAppState implements AppSettings, ISharedAppState {
   }
 
   @Bind
-  private async fetchSharedAppStateHandler(_ev: IpcMainInvokeEvent):Promise<ISharedAppState> {
+  private async fetchSharedAppStateHandler(_ev: IpcMainInvokeEvent): Promise<ISharedAppState> {
     const stateJs = toJS(this.toJSON())
     info("Sending state js", stateJs)
     return stateJs
   }
+  
+  toJSON() {
+    return pick(this, "zoomFactor", "themeType", "systemTheme", "overlayMode", "activeDashboardId", "autoconnect")
+  }
+  
 }
 
-const instanceDeferred = new Deferred<SharedAppState>()
+const instanceDeferred = new Deferred<MainSharedAppState>()
 
 /**
  * Get main state store if it's been resolved
@@ -176,7 +179,7 @@ export function getSharedAppStateStore() {
  * Async factory for main state store
  */
 export const createSharedAppStateStore = once(async () => {
-  const store = new SharedAppState()
+  const store = new MainSharedAppState()
   await store.whenReady().then(
     () => instanceDeferred.resolve(store),
     err => {

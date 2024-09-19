@@ -1,29 +1,21 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { BrowserWindow, BrowserWindowConstructorOptions } from "electron"
-import { OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
+import { OverlayInfo, OverlayPlacement } from "vrkit-models"
 import { isDev } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
   OverlayClientEventType,
   OverlayClientEventTypeToIPCName,
   OverlayConfig,
-  OverlayMode,
-  OverlayWindowMainEvents,
-  OverlayWindowRendererEvents
+  OverlayMode
 } from "vrkit-app-common/models/overlay-manager"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
-import { AppPaths } from "vrkit-app-common/constants"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
-
-const dashDir = AppPaths.dashboardsDir
-
-const WinRendererEvents = OverlayWindowRendererEvents
-const WinMainEvents = OverlayWindowMainEvents
 
 export class OverlayWindow {
   private mode_: OverlayMode = OverlayMode.NORMAL
@@ -39,6 +31,10 @@ export class OverlayWindow {
   private closeDeferred: Deferred<void> = null
 
   readonly windowOptions: BrowserWindowConstructorOptions
+
+  get id() {
+    return this.config_?.overlay.id
+  }
 
   /**
    * Get the browser window
@@ -107,7 +103,7 @@ export class OverlayWindow {
     this.windowOptions = {
       ...windowOptionDefaults({
         devTools: isDev,
-        transparent: true,
+        transparent: true
         // offscreen: true
       }),
       transparent: true,
@@ -115,7 +111,7 @@ export class OverlayWindow {
       frame: false,
       backgroundColor: "#00000000",
       alwaysOnTop: true,
-      
+
       ...placement.rect.position,
       ...placement.rect.size
     }
@@ -127,17 +123,17 @@ export class OverlayWindow {
       log.error(`failed to initialize overlay window`, err)
     })
   }
-  
+
   private async initialize(): Promise<OverlayWindow> {
     const deferred = this.readyDeferred_
     try {
       const win = this.window_
       const url = resolveHtmlPath("index-overlay.html")
       info(`Resolved overlay url: ${url}`)
-      
+
       await win.loadURL(url)
       win.show()
-      
+
       if (isDev) {
         win.webContents.openDevTools({
           mode: "detach"

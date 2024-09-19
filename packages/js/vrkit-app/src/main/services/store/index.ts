@@ -1,4 +1,4 @@
-export * from './SharedAppState';
+export * from './MainSharedAppState';
 
 
-export {SharedAppState as default} from "./SharedAppState"
+export {MainSharedAppState as default} from "./MainSharedAppState"

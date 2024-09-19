@@ -15,37 +15,45 @@ import { ConfirmDialog } from "vrkit-app-renderer/components/custom-dialog"
 import { useTable } from "vrkit-app-renderer/components/table"
 
 import { TrackManagerTable } from "../track-manager-table"
-import { Any, ListMessage, TrackMapFile } from "vrkit-models"
+import { TrackMapFile } from "vrkit-models"
 import { BoxProps } from "@mui/material/Box"
 import { useAsync } from "../../../hooks"
 import { asOption } from "@3fv/prelude-ts"
-import { GetDefaultVRKitClient } from "vrkit-native-interop"
+import { TrackManager } from "../../../services/track-manager"
+import { useService } from "../../../components/service-container"
+import { getLogger } from "@3fv/logger-proxy"
 
-// ----------------------------------------------------------------------
+const log = getLogger(__filename)
 
 export interface TrackManagerViewProps extends BoxProps {}
 
 export interface TrackMapFileCriteria {}
 
 async function getTrackMapFiles(
+  trackManager: TrackManager,
   criteria: TrackMapFileCriteria = {}
 ): Promise<TrackMapFile[]> {
-  const client = GetDefaultVRKitClient()
-  const request = ListMessage.create({
-    resultsPage: 0,
-    resultsPerPage: -1
-  })
+  // const client = GetDefaultVRKitClient()
+  // const request = ListMessage.create({
+  //   resultsPage: 0,
+  //   resultsPerPage: -1
+  // })
+  //
+  // const response = await client.executeRequest<ListMessage, ListMessage>(
+  //   "/tracks/list",
+  //   ListMessage,
+  //   ListMessage,
+  //   request
+  // )
+  //
+  // return asOption(response.results)
+  //   .map(results => results.map(it => Any.unpack(it, TrackMapFile)))
+  //   .getOrElse([])
 
-  const response = await client.executeRequest<ListMessage, ListMessage>(
-    "/tracks/list",
-    ListMessage,
-    ListMessage,
-    request
-  )
-
-  return asOption(response.results)
-    .map(results => results.map(it => Any.unpack(it, TrackMapFile)))
-    .getOrElse([])
+  // const service = getService(TrackManager)
+  const tmfs = trackManager.list()
+  log.info("TrackMap files", tmfs)
+  return tmfs
 }
 
 export function TrackManagerView(props: TrackManagerViewProps) {
@@ -54,12 +62,10 @@ export function TrackManagerView(props: TrackManagerViewProps) {
   // TODO: Implement `useAsync` to call VRKNative
   //  - [ ] implement native route handler for listing tracks
   const [criteria, setCriteria] = useState<TrackMapFileCriteria>({})
-  const allFilesAsync = useAsync(getTrackMapFiles, [criteria])
+  const trackManager = useService(TrackManager)
+  const allFilesAsync = useAsync(getTrackMapFiles, [trackManager, criteria])
 
-  const allFiles: TrackMapFile[] = useMemo(
-    () => asOption(allFilesAsync.result).getOrElse([]),
-    [allFilesAsync.result]
-  )
+  const allFiles: TrackMapFile[] = useMemo(() => asOption(allFilesAsync.result).getOrElse([]), [allFilesAsync.result])
 
   const confirm = useBoolean()
   const processTelem = useBoolean()
@@ -70,9 +76,7 @@ export function TrackManagerView(props: TrackManagerViewProps) {
 
   const handleDeleteItem = useCallback(
     (id: string) => {
-      const deleteRow = tableData.filter(
-        row => row.trackLayoutMetadata.id !== id
-      )
+      const deleteRow = tableData.filter(row => row.trackLayoutMetadata.id !== id)
 
       toast.success("Delete success!")
       setTableData(deleteRow)
@@ -83,9 +87,7 @@ export function TrackManagerView(props: TrackManagerViewProps) {
   )
 
   const handleDeleteItems = useCallback(() => {
-    const deleteRows = tableData.filter(
-      row => !table.selected.includes(row.trackLayoutMetadata.id)
-    )
+    const deleteRows = tableData.filter(row => !table.selected.includes(row.trackLayoutMetadata.id))
 
     toast.success("Delete success!")
 
@@ -137,8 +139,7 @@ export function TrackManagerView(props: TrackManagerViewProps) {
         title="Delete"
         content={
           <>
-            Are you sure want to delete{" "}
-            <strong> {table.selected.length} </strong> items?
+            Are you sure want to delete <strong> {table.selected.length} </strong> items?
           </>
         }
         action={

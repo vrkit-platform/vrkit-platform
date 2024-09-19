@@ -11,7 +11,6 @@ import { Deferred } from "@3fv/deferred"
 
 const log = getLogger(__filename)
 
-
 jest.setTimeout(10000)
 
 beforeAll(() => {

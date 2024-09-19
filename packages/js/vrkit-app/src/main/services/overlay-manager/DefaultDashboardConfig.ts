@@ -4,7 +4,7 @@ import { generateUUID } from "vrkit-app-common/utils"
 export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardConfig"): DashboardConfig {
   const trackMapOverlay = newTrackMapOverlay(`${name}-overlay-trackmap`)
 
-  return {
+  return DashboardConfig.create({
     id: generateUUID(),
     name,
     description: "Default",
@@ -30,11 +30,11 @@ export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardC
         }
       }
     ]
-  }
+  })
 }
 
 export function newTrackMapOverlay(name = "track-map"): OverlayInfo {
-  return {
+  return OverlayInfo.create({
     id: generateUUID(),
     kind: OverlayKind.TRACK_MAP,
     name,
@@ -51,5 +51,5 @@ export function newTrackMapOverlay(name = "track-map"): OverlayInfo {
     settings: {
       fps: 10
     }
-  }
+  })
 }

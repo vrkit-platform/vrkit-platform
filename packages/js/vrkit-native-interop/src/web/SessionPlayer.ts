@@ -14,8 +14,7 @@ import {
   SessionDataVariableValue,
   SessionDataVariableValueMap,
   SessionEventData,
-  SessionEventType,
-  SessionTiming
+  SessionEventType
 } from "vrkit-models"
 import { getLogger } from "@3fv/logger-proxy"
 import { MessageTypeFromCtor, objectKeysLowerFirstReviver } from "./utils"
@@ -23,69 +22,18 @@ import { GetNativeExports } from "./NativeBinding"
 import { flatten, identity, isEmpty, negate, pick, range } from "lodash"
 
 import type { SessionInfoMessage } from "vrkit-plugin-sdk"
+import {
+  NativeSessionPlayerEventCallback,
+  NativeSessionPlayer,
+  NativeSessionPlayerEventData,
+  SessionPlayerId
+} from "./NativeSessionPlayer"
+
 
 const log = getLogger(__filename)
-const isDev = process.env.NODE_ENV !== "production"
 const isNotEmpty = negate(isEmpty)
 
-export interface NativeSessionPlayerEventData {
-  type: SessionEventType
-
-  payload: Uint8Array
-}
-
-export type SessionPlayerId = string | "SESSION_TYPE_LIVE"
-
 const LiveSessionId: SessionPlayerId = "SESSION_TYPE_LIVE"
-
-export type SessionPlayerEventName = SessionEventType | keyof SessionEventType
-
-export type NativeSessionPlayerEventCallback = (
-  type: SessionEventType,
-  data: NativeSessionPlayerEventData
-) => void
-
-export interface NativeSessionPlayer {
-  readonly sessionData: SessionData
-
-  readonly sessionTiming: SessionTiming
-
-  readonly sessionInfoYAMLStr: string
-
-  readonly isAvailable: boolean
-
-  readonly id: string
-  
-  start(): boolean
-
-  stop(): boolean
-
-  resume(): boolean
-
-  pause(): boolean
-
-  seek(index: number): boolean
-
-  /**
-   * Destroy the native client instance
-   */
-  destroy(): void
-
-  getDataVariable(name: string): SessionDataVariable
-
-  getDataVariableHeaders(): Array<SessionDataVariableHeader>
-}
-
-/**
- * Class implementation interface definition
- */
-export interface NativeSessionPlayerCtor {
-  new (
-    eventCallback: NativeSessionPlayerEventCallback,
-    id: string,
-    file?: string | null
-  ): NativeSessionPlayer
-}
 
 /**
  * Event data

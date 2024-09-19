@@ -7,6 +7,6 @@
     "rootDir": "src/web",
     "outDir": "lib"
   },
-  "include": ["src/web/**/*"],
+  "include": ["src/web/**/*.ts"],
 //  "exclude": ["**/*.spec.ts"]
 }

@@ -5,6 +5,7 @@
 
 #include "NativeClient.h"
 #include "NativeGlobal.h"
+#include "NativeOverlayManager.h"
 #include "NativeSessionPlayer.h"
 #include "NativeSessionDataVariable.h"
 
@@ -18,17 +19,6 @@ namespace {
 
 
 namespace {
-    // Napi::String VRKitPingFn(const Napi::CallbackInfo& info) {
-    //     // Napi::Env is the opaque data structure containing the environment in which
-    //     // the request is being run. We will need this env when we want to create any
-    //     // new objects inside the node.js environment
-    //     Napi::Env env = info.Env();
-    //
-    //     // Return a new javascript string that we copy-construct inside the node.js
-    //     // environment
-    //     return Napi::String::New(env, "pong");
-    // }
-
     Napi::Value VRKitShutdownFn(const Napi::CallbackInfo& info) {
         VRKitShutdown();
         return {};
@@ -41,6 +31,7 @@ static Napi::Object Init(Napi::Env env, Napi::Object exports) {
     NativeClient::Init(env, exports);
     NativeSessionPlayer::Init(env, exports);
     NativeSessionDataVariable::Init(env, exports);
+    NativeOverlayManager::Init(env, exports);
 
     exports.Set("Shutdown", Napi::Function::New(env, VRKitShutdownFn));
     // exports.Set("VRKitPing", Napi::Function::New(env, VRKitPingFn));

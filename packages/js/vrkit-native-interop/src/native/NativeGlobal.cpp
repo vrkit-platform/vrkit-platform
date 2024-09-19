@@ -1,11 +1,11 @@
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 
 #include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Common/UUIDHelpers.h>
 
 #include "NativeGlobal.h"
 
 #include <IRacingTools/Shared/Utils/Win32ProcessTool.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 using namespace IRacingTools::App::Node;
 using namespace IRacingTools::Models::RPC;
@@ -64,6 +64,10 @@ namespace IRacingTools::App::Node {
 
     Napi::FunctionReference& NativeSystemAddon::sessionPlayerCtor() {
         return sessionPlayerCtor_;
+    }
+
+    Napi::FunctionReference& NativeSystemAddon::overlayManagerCtor() {
+        return overlayManagerCtor_;
     }
 
     Napi::FunctionReference& NativeSystemAddon::sessionDataVariableCtor() {

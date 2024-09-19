@@ -1,17 +1,11 @@
 import { getLogger } from "@3fv/logger-proxy"
-import {
-  app,
-  BrowserWindow,
-  ipcMain,
-  IpcMainInvokeEvent, NativeImage,
-  screen
-} from "electron"
+import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent, NativeImage } from "electron"
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
 import { DashboardConfig, OverlayInfo, OverlayPlacement, RectI, SessionDataVariableValueMap } from "vrkit-models"
 import { isDefined, isFunction } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
-import { Disposables, isDev, isEmpty, isEqual, isPointInRect, Pair } from "vrkit-app-common/utils"
+import { Disposables, isDev, isEmpty, isEqual, Pair, SignalFlag } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
   OverlayClientEventType,
@@ -41,13 +35,12 @@ import { endsWith } from "lodash/fp"
 import Path from "path"
 import PQueue from "p-queue"
 import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
-import ioHook from "iohook-raub"
-import { THookEventMouse } from "vrkit-shared"
 import { OverlayWindow } from "./OverlayWindow"
 import { MainWindowManager } from "../window-manager"
-import { SharedAppState } from "../store"
+import { MainSharedAppState } from "../store"
 import { pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
+import { CreateNativeOverlayManager } from "vrkit-native-interop"
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 
@@ -63,7 +56,6 @@ export type OverlayManagerStatePatchFn = (state: OverlayManagerState) => Partial
 
 export interface OverlayManagerEventArgs {
   [OverlayManagerEventType.STATE_CHANGED]: (manager: OverlayManager, newState: OverlayManagerState) => void
-
 }
 
 export interface OverlayManagerState {
@@ -84,12 +76,20 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
   private state_: OverlayManagerState = null
 
-  private readonly disposers = new Disposables()
-  
-  private readonly windowFrameSequences = Array<NativeImageSequenceCapture>()
-  
+  private readonly disposers_ = new Disposables()
+
+  private readonly shutdownFlag_ = SignalFlag.new()
+
+  private readonly frameSequenceCaptures_ = Array<NativeImageSequenceCapture>()
+
+  private readonly nativeManager_ = CreateNativeOverlayManager()
+
   get state() {
     return this.state_
+  }
+
+  get isShutdown() {
+    return this.shutdownFlag_.isSet
   }
 
   get mode() {
@@ -218,13 +218,18 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
             }
 
             const newWin = OverlayWindow.create(overlay, placement)
-            newWin.window.on("closed", this.createOnCloseHandler(newWin.windowId))
 
             const onBoundsChanged = this.createOnBoundsChangedHandler(config, placement, newWin)
-            newWin.window.on("moved", onBoundsChanged)
-            newWin.window.on("resized", onBoundsChanged)
-            newWin.window.webContents.setFrameRate(10)
-            newWin.window.webContents.beginFrameSubscription(false, this.createOnFrameHandler(config, placement, newWin))
+            newWin.window
+              .on("closed", this.createOnCloseHandler(newWin.windowId))
+              .on("moved", onBoundsChanged)
+              .on("resized", onBoundsChanged)
+
+            newWin.window.webContents.setFrameRate(overlay.settings?.fps ?? 10)
+            newWin.window.webContents.beginFrameSubscription(
+              false,
+              this.createOnFrameHandler(config, placement, newWin)
+            )
             //on("paint",this.createOnPaintHandler(config, placement, newWin))
             return newWin
           })
@@ -322,12 +327,12 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   /**
    * Get the current overlay mode for the app
    *
-   * @param event
+   * @param _event
    */
-  async fetchOverlayModeHandler(event: IpcMainInvokeEvent) {
+  async fetchOverlayModeHandler(_event: IpcMainInvokeEvent) {
     return this.mode
   }
-  
+
   /**
    * Set overlay mode
    *
@@ -344,7 +349,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     }
 
     this.sharedAppState.setOverlayMode(mode)
-    
+
     return mode
   }
 
@@ -365,17 +370,23 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @private
    */
   @Bind
-  private unload(event: Electron.Event = null) {
+  private async unload(event: Electron.Event = null) {
     debug(`Unloading OverlayManager`, event)
 
-    this.disposers.dispose()
-    //
-    // const overlays = this.overlays ?? []
-    //
-    // await Promise.all(overlays.map(o => o.close()))
-    //     .then(() => info(`All windows closed`))
-    //     .catch(err => warn(`error closing windows`, err))
-    //
+    this.disposers_.dispose()
+
+    const overlays = this.overlays ?? []
+
+    await Promise.all(
+      overlays.map(o => {
+        o.window?.webContents?.endFrameSubscription()
+        return o.close()
+      })
+    )
+      .then(() => info(`All windows closed`))
+      .catch(err => warn(`error closing windows`, err))
+
+    this.state.overlays = []
     // this.patchState({
     //   overlays: []
     // })
@@ -388,11 +399,11 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   @PostConstruct() // @ts-ignore
   private async init(): Promise<void> {
     this.state_ = await this.createInitialState()
-    
+
     app.on("before-quit", this.unload)
-    
+
     const { sessionManager } = this,
-        ipcFnHandlers = Array<Pair<OverlayClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
+      ipcFnHandlers = Array<Pair<OverlayClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
         [OverlayClientFnType.FETCH_CONFIG, this.fetchOverlayConfigHandler.bind(this)],
         [OverlayClientFnType.FETCH_SESSION, this.fetchSessionHandler.bind(this)],
         [OverlayClientFnType.SET_OVERLAY_MODE, this.setOverlayModeHandler.bind(this)],
@@ -406,15 +417,15 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       )
 
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(OverlayClientFnTypeToIPCName(type), handler))
-    
+
     // In dev mode, make everything accessible
     if (isDev) {
       Object.assign(global, {
         overlayManager: this
       })
     }
-    
-    this.disposers.push(() => {
+
+    this.disposers_.push(() => {
       ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayClientFnTypeToIPCName(type)))
       sessionManagerEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
       app.off("before-quit", this.unload)
@@ -447,7 +458,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
     readonly mainWindowManager: MainWindowManager,
-    readonly sharedAppState: SharedAppState
+    readonly sharedAppState: MainSharedAppState
   ) {
     super()
   }
@@ -459,10 +470,10 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @returns {Promise<void>} pending task promise scheduled in `p-queue`
    */
   @Bind
-  private saveDashboardConfig(config: DashboardConfig) {
+  private saveDashboardConfig(config: DashboardConfig): Promise<void> {
     return this.persistQueue_.add(this.createSaveDashboardConfigTask(config))
   }
-  
+
   /**
    * Delete a dashboard config
    *
@@ -470,7 +481,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @returns {Promise<void>} pending task promise scheduled in `p-queue`
    */
   @Bind
-  private deleteDashboardConfig(config: DashboardConfig) {
+  private deleteDashboardConfig(config: DashboardConfig): Promise<void> {
     return this.persistQueue_.add(this.createDeleteDashboardConfigTask(config.id))
   }
 
@@ -572,35 +583,44 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       }))
     }
   }
-  
-  private createOnPaintHandler(
-      config: DashboardConfig,
-      targetPlacement: OverlayPlacement,
-      win: OverlayWindow
-  )  {
-    const cap = new NativeImageSequenceCapture(win.config.overlay.id, "png")
-    // this.windowFrameSequences.push(cap)
+
+  /**
+   * On paint handler (not used at the moment, but if render model is changed,
+   * it may)
+   * @param config
+   * @param targetPlacement
+   * @param win
+   * @private
+   */
+  private createOnPaintHandler(config: DashboardConfig, targetPlacement: OverlayPlacement, win: OverlayWindow) {
+    let cap: NativeImageSequenceCapture = asOption(this.sharedAppState.devSettings?.imageSequenceCapture)
+      .filter(it => it !== false)
+      .map(
+        ({ format, outputPath }) => new NativeImageSequenceCapture(win.config.overlay.id + "-paint", format, outputPath)
+      )
+      .getOrNull()
+
     return (_ev: Electron.Event, dirty: Electron.Rectangle, image: NativeImage) => {
-    
-      // info(`Received paint frame`, {dirty, bufferLen: image.getBitmap().length})
-      cap.push(image)
+      if (cap) cap.push(image)
     }
   }
-  
-  private createOnFrameHandler(
-      config: DashboardConfig,
-      targetPlacement: OverlayPlacement,
-      win: OverlayWindow
-  )  {
-    const cap = new NativeImageSequenceCapture(win.config.overlay.id + "-frame", "raw")
-    // this.windowFrameSequences.push(cap)
-    // return (_ev: Electron.Event, dirty: Electron.Rectangle, image: NativeImage) => {
+
+  private createOnFrameHandler(config: DashboardConfig, targetPlacement: OverlayPlacement, win: OverlayWindow) {
+    let cap: NativeImageSequenceCapture = asOption(this.sharedAppState.devSettings?.imageSequenceCapture)
+      .filter(it => it !== false)
+      .map(
+        ({ format, outputPath }) => new NativeImageSequenceCapture(win.config.overlay.id + "-frame", format, outputPath)
+      )
+      .getOrNull()
+
     return (image: NativeImage, dirty: Electron.Rectangle) => {
-      // info(`Received paint frame`, {dirty, bufferLen: image.getBitmap().length})
-      cap.push(image)
+      const buf = image.getBitmap()
+      this.nativeManager_.createOrUpdateResources(win.id, win.windowId, dirty.width, dirty.height)
+      this.nativeManager_.processFrame(win.id, buf)
+      if (cap) cap.push(image)
     }
   }
-  
+
   /**
    * Create a bounds changed (`moved`, `resized`) event handler
    *

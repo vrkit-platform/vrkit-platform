@@ -168,7 +168,7 @@ namespace IRacingTools::Shared::Graphics {
         auto srcTexture = target_->d3d().texture();
 
         // TraceLoggingWriteTagged(activity, "AcquireSHMLock/start");
-        const std::unique_lock shmLock(*writer_.get());
+        const std::unique_lock shmLock(*writer_);
         //TraceLoggingWriteTagged(activity, "AcquireSHMLock/stop");
 
         auto ipcTextureInfo = writer_->beginFrame();

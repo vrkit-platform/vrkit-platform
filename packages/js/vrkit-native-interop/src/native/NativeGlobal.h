@@ -4,19 +4,12 @@
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
-#include <IRacingTools/Models/rpc/Messages/SimpleMessages.pb.h>
-#include <IRacingTools/Models/rpc/Events/CommonEventTypes.pb.h>
-#include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
-
 #include <IRacingTools/SDK/Utils/Singleton.h>
 
-
 #include <IRacingTools/Shared/Services/TelemetryDataService.h>
-#include <IRacingTools/Shared/Services/TrackMapService.h>
+// #include <IRacingTools/Shared/Services/TrackMapService.h>
 
 #include <IRacingTools/Shared/Services/ServiceManager.h>
-
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/Services/RPCServerService.h>
 
 #include <napi.h>
@@ -72,6 +65,7 @@ namespace IRacingTools::App::Node {
         Napi::FunctionReference& clientCtor();
         Napi::FunctionReference& sessionPlayerCtor();
         Napi::FunctionReference& sessionDataVariableCtor();
+        Napi::FunctionReference& overlayManagerCtor();
 
         std::shared_ptr<NativeGlobal> system() const {
             return system_;
@@ -81,6 +75,7 @@ namespace IRacingTools::App::Node {
         Napi::FunctionReference clientCtor_;
         Napi::FunctionReference sessionPlayerCtor_;
         Napi::FunctionReference sessionDataVariableCtor_;
+        Napi::FunctionReference overlayManagerCtor_;
 
         const std::shared_ptr<NativeGlobal> system_;
     };

@@ -114,13 +114,6 @@
     "fs-extra": "^11.2.0",
     "plop": "^4.0.1"
   },
-  "electronmon": {
-    "logLevel": "quiet",
-    "patterns": [
-      "!**/**",
-      "build/js/vrkit-dist/main/**/**"
-    ]
-  },
   "resolutions": {
     "react": "18.3.1",
     "react-dom": "18.3.1",

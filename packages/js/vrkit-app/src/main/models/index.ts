@@ -1,1 +1,1 @@
-export * from './SharedAppStateSchema';
+export * from './MainSharedAppStateSchema';

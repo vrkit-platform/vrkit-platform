@@ -1,5 +1,4 @@
 syntax = "proto3";
-import "Geometry.proto";
 import "OverlayTypes.proto";
 import "ScreenConfig.proto";
 

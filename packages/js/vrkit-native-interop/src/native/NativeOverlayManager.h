@@ -4,7 +4,7 @@
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
-#include <IRacingTools/Shared/Graphics/IPCRenderer.h>
+#include <IRacingTools/Shared/Graphics/IPCDXRenderer.h>
 #include <napi.h>
 
 #include "NativeGlobal.h"
@@ -67,7 +67,7 @@ namespace IRacingTools::App::Node {
 
     virtual void Finalize(Napi::Env) override;
 
-    std::shared_ptr<Graphics::IPCRenderer> ipcRenderer();
+    std::shared_ptr<Graphics::IPCDXRenderer> ipcDxRenderer();
 
     std::shared_ptr<NativeOverlayWindowResources> getResourceByOverlayId(const std::string& overlayId);
    std::shared_ptr<NativeOverlayWindowResources> getResourceByWindowId(const std::int32_t& windowId);
@@ -154,6 +154,6 @@ namespace IRacingTools::App::Node {
     std::vector<std::shared_ptr<NativeOverlayWindowResources>> resources_{};
 
     std::shared_ptr<Graphics::DXResources> dxr_;
-    std::shared_ptr<Graphics::IPCRenderer> ipcRenderer_;
+    std::shared_ptr<Graphics::IPCDXRenderer> ipcDxRenderer_;
   };
 } // namespace IRacingTools::App::Node

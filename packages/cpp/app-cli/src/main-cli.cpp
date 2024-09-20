@@ -10,15 +10,14 @@
 
 #include <boost/di.hpp>
 
-#include "LiveDataReplayArgCommand.h"
 #include "DashboardArgCommand.h"
 #include "GenerateTrackmapArgCommand.h"
+#include "LiveDataReplayArgCommand.h"
+#include "ProcessAllTelemetryArgCommand.h"
 #include "SHMViewerArgCommand.h"
 #include "ServiceDaemonArgCommand.h"
-#include "SessionPlayArgCommand.h"
 #include "SessionRecordArgCommand.h"
 #include "TelemetryDumpArgCommand.h"
-#include "ProcessAllTelemetryArgCommand.h"
 
 
 using namespace std::literals;
@@ -34,21 +33,17 @@ int main(int argc, char **argv) {
   System::DisplayInfoSetup();
   System::GetAllDisplayInfo();
 
-  // QCoreApplication::setApplicationName(APP_NAME);
-  // QCoreApplication::setApplicationVersion(APP_VERSION);
-
   CLI::App app{APP_NAME};
-  std::string appVerion{APP_VERSION};
+  std::string appVersion{APP_VERSION};
 
   fmt::println("{} v{}", APP_NAME, APP_VERSION);
 
   // app.require_subcommand(0);
   app.set_help_all_flag("--help-all", "Show all help details");
-  app.set_version_flag("--version", appVerion);
+  app.set_version_flag("--version", appVersion);
 
   auto cmds =
-      ArgCommand::build<LiveDataReplayArgCommand, TelemetryDumpArgCommand, ProcessAllTelemetryArgCommand,DashboardArgCommand, GenerateTrackmapArgCommand, SessionPlayArgCommand,
-                        SessionRecordArgCommand, SHMViewerArgCommand, ServiceDaemonArgCommand>(&app);
+    ArgCommand::build<LiveDataReplayArgCommand, TelemetryDumpArgCommand, ProcessAllTelemetryArgCommand, DashboardArgCommand, GenerateTrackmapArgCommand, SessionRecordArgCommand, SHMViewerArgCommand, ServiceDaemonArgCommand>(&app);
 
   CLI11_PARSE(app, argc, argv);
 

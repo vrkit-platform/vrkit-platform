@@ -9,7 +9,6 @@
 #include <IRacingTools/SDK/Utils/Literals.h>
 #include <IRacingTools/Shared/UI/BaseWindow.h>
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
-#include <IRacingTools/Shared/Graphics/TrackMapWidget.h>
 #include <IRacingTools/Shared/Graphics/DXResources.h>
 #include <IRacingTools/Shared/Graphics/DXWindowResources.h>
 
@@ -29,11 +28,6 @@ namespace IRacingTools::Shared::UI {
 
         std::shared_ptr<Graphics::DXResources> dxr_{nullptr};
         std::shared_ptr<Graphics::DXWindowResources> dxwr_{nullptr};
-        // std::shared_ptr<Graphics::RenderTarget> renderTarget_{nullptr};
-        //
-        // winrt::com_ptr<ID3D11Texture2D> backBuffer_{nullptr};
-        // winrt::com_ptr<IDXGISwapChain1> swapChain_{nullptr};
-        // Size<UINT> swapChainDim_{0, 0};
 
         std::optional<typename  SDK::Utils::EventEmitter<WindowClazz*,PixelSize, PixelSize>::UnsubscribeFn> onResizeUnsubscribe_{};
 
@@ -48,7 +42,7 @@ namespace IRacingTools::Shared::UI {
 
         virtual WNDCLASSEX getWindowClassOptions() override {
             auto wc = Base::getWindowClassOptions();
-            // fill in the struct with the needed information
+
             wc.cbSize = sizeof(WNDCLASSEX);
             wc.style = CS_HREDRAW | CS_VREDRAW;
             wc.hCursor = LoadCursor(nullptr, IDC_ARROW);

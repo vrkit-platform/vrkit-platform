@@ -116,7 +116,7 @@ namespace IRacingTools::Shared::SHM {
      * @brief Create unique session id
      * @return
      */
-    static uint64_t CreateSessionID();
+    static uint64_t CreateSessionId();
 
     // DUPLICATED FROM OKB
     struct FrameMetadata {
@@ -130,14 +130,14 @@ namespace IRacingTools::Shared::SHM {
         uint64_t gpuLUID{};
 
         uint64_t frameNumber = 0;
-        uint64_t sessionId = CreateSessionID();
+        uint64_t sessionId = CreateSessionId();
         SHMHeaderFlags flags{};
         SHMConfig config;
 
         uint8_t layerCount = 0;
         LayerConfig layers[MaxViewCount];
 
-        DWORD feederProcessID{};
+        DWORD feederProcessId{};
         // If you're looking for texture size, it's in Config
         HANDLE texture{};
         HANDLE fence{};
@@ -316,7 +316,7 @@ namespace IRacingTools::Shared::SHM {
          */
         size_t getRenderCacheKey(ConsumerKind kind) const;
 
-        uint64_t getSessionID() const;
+        uint64_t getSessionId() const;
 
     protected:
         Snapshot maybeGetUncached(ConsumerKind);

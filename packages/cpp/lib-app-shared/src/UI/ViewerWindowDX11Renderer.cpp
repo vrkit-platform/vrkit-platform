@@ -58,7 +58,7 @@ uint64_t D3D11Renderer::render(
   if (destDimensions_ != destTextureDimensions) {
     destHandle_ = {};
   }
-  if (sessionId_ != cachedReader_.getSessionID()) {
+  if (sessionId_ != cachedReader_.getSessionId()) {
     destHandle_ = {};
   }
   if (destHandle_ != destTextureHandle) {

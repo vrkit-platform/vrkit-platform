@@ -7,9 +7,8 @@
 #include <IRacingTools/Models/TrackMap.pb.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/SHM/SHM.h>
-#include <IRacingTools/Shared/TrackMapGeometry.h>
 #include <IRacingTools/SDK/Utils/LockHelpers.h>
-// #include <IRacingTools/SDK/Utils/tracing.h>
+
 #include <spdlog/spdlog.h>
 
 
@@ -181,7 +180,7 @@ namespace IRacingTools::Shared::SHM {
     return sCache;
   }
 
-  uint64_t CreateSessionID() {
+  uint64_t CreateSessionId() {
     std::random_device randDevice;
     std::uniform_int_distribution<uint32_t> randDist;
     uint64_t sessionId = static_cast<uint64_t>(GetCurrentProcessId()) << 32;
@@ -204,8 +203,6 @@ namespace IRacingTools::Shared::SHM {
     friend class Writer;
     DWORD processId_ = GetCurrentProcessId();
     uint64_t gpuLUID_{};
-
-  public:
   };
 
   Writer::Writer(uint64_t gpuLUID) {
@@ -222,7 +219,7 @@ namespace IRacingTools::Shared::SHM {
     impl_->gpuLUID_ = gpuLUID;
     *impl_->metadata_ = FrameMetadata{};
 
-    L->info("Writer initialized.");
+    // L->info("Writer initialized.");
   }
 
   void Writer::detach() {
@@ -273,18 +270,17 @@ namespace IRacingTools::Shared::SHM {
       throw std::logic_error("Attempted to update invalid SHM");
     }
 
-
-    // if (layers.size() > MaxViewCount) [[unlikely]] {
-    //   VRK_LOG_AND_FATAL(
-    //     "Asked to publish {} layers, but max is {}", layers.size(), MaxViewCount);
-    // }
+    if (layers.size() > MaxViewCount) [[unlikely]] {
+      VRK_LOG_AND_FATAL(
+        "Asked to publish {} layers, but max is {}", layers.size(), MaxViewCount);
+    }
 
     impl_->metadata_->gpuLUID = impl_->gpuLUID_;
     impl_->metadata_->config = config;
     impl_->metadata_->frameNumber++;
     impl_->metadata_->flags = static_cast<SHMHeaderFlags>(impl_->metadata_->flags | FEEDER_ATTACHED);
     impl_->metadata_->layerCount = static_cast<uint8_t>(layers.size());
-    impl_->metadata_->feederProcessID = impl_->processId_;
+    impl_->metadata_->feederProcessId = impl_->processId_;
     impl_->metadata_->texture = texture;
     impl_->metadata_->fence = fence;
     memcpy(impl_->metadata_->layers, layers.data(), sizeof(LayerConfig) * layers.size());
@@ -408,7 +404,7 @@ namespace IRacingTools::Shared::SHM {
   class SHMReader::Impl : public SHM::Impl {
   public:
     winrt::handle feederProcessHandle_;
-    uint64_t sessionID_{~(0ui64)};
+    uint64_t sessionId_{~(0ui64)};
 
     std::array<std::unique_ptr<IPCHandles>, SHMSwapchainLength> handles_;
 
@@ -416,17 +412,17 @@ namespace IRacingTools::Shared::SHM {
       // VRK_TraceLoggingScope("SHM::Reader::Impl::UpdateSession()");
       const auto& metadata = *this->metadata_;
 
-      if (sessionID_ != metadata.sessionId) {
+      if (sessionId_ != metadata.sessionId) {
         feederProcessHandle_ = {};
         handles_ = {};
-        sessionID_ = metadata.sessionId;
+        sessionId_ = metadata.sessionId;
       }
 
       if (feederProcessHandle_) {
         return;
       }
 
-      feederProcessHandle_ = winrt::handle{OpenProcess(PROCESS_DUP_HANDLE, FALSE, metadata.feederProcessID)};
+      feederProcessHandle_ = winrt::handle{OpenProcess(PROCESS_DUP_HANDLE, FALSE, metadata.feederProcessId)};
     }
 
   private:
@@ -450,7 +446,7 @@ namespace IRacingTools::Shared::SHM {
     L->info("Reader initialized.");
   }
 
-  SHMReader::~SHMReader() {
+  SHMReader::~SHMReader() { // NOLINT(*-use-equals-default)
     //VRK_TraceLoggingScope("SHM::Reader::~Reader()");
   }
 
@@ -463,7 +459,7 @@ namespace IRacingTools::Shared::SHM {
   }
 
 
-  uint64_t SHMReader::getSessionID() const {
+  uint64_t SHMReader::getSessionId() const {
     if (!p) {
       return {};
     }
@@ -692,7 +688,7 @@ namespace IRacingTools::Shared::SHM {
   }
 
   void SHMCachedReader::updateSession() {
-    const auto sessionID = this->getSessionID();
+    const auto sessionID = this->getSessionId();
     if (sessionID == sessionId_) {
       return;
     }

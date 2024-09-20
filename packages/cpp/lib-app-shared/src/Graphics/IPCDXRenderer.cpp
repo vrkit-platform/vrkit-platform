@@ -1,20 +1,20 @@
 #include <gsl/util>
-#include <IRacingTools/Shared/Graphics/IPCRenderer.h>
+#include <IRacingTools/Shared/Graphics/IPCDXRenderer.h>
 #include <IRacingTools/Shared/Graphics/Spriting.h>
 
 namespace IRacingTools::Shared::Graphics {
-    IPCRenderer::IPCRenderer(const std::shared_ptr<DXResources>& dxr) : dxr_(dxr),
+    IPCDXRenderer::IPCDXRenderer(const std::shared_ptr<DXResources>& dxr) : dxr_(dxr),
                                                                         writer_(
                                                                             std::make_shared<SHM::Writer>(
                                                                                 dxr->getDXGIAdapterLUID()
                                                                             )
                                                                         ) {}
 
-    std::shared_ptr<IPCRenderer> IPCRenderer::Create(const std::shared_ptr<DXResources>& dxr) {
-        return std::shared_ptr<IPCRenderer>(new IPCRenderer(dxr));
+    std::shared_ptr<IPCDXRenderer> IPCDXRenderer::Create(const std::shared_ptr<DXResources>& dxr) {
+        return std::shared_ptr<IPCDXRenderer>(new IPCDXRenderer(dxr));
     }
 
-    IPCTextureResources* IPCRenderer::getIPCTextureResources(uint8_t textureIndex, const PixelSize& size) {
+    IPCDXRenderer::TextureResources* IPCDXRenderer::getTextureResources(uint8_t textureIndex, const PixelSize& size) {
         auto& ret = ipcSwapchain_.at(textureIndex);
         if (ret.textureSize == size) [[likely]] {
             return &ret;
@@ -56,16 +56,14 @@ namespace IRacingTools::Shared::Graphics {
         return &ret;
     }
 
-    void IPCRenderer::initializeCanvas(const PixelSize& size) {
+    void IPCDXRenderer::initializeCanvas(const PixelSize& size) {
         if (canvasSize_ == size) {
             return;
         }
 
-        // VRK_TraceLoggingScope("InterprocessRenderer::InitializeCanvas()");
-
         D3D11_TEXTURE2D_DESC desc{
-            .Width = static_cast<UINT>(size.width()),
-            .Height = static_cast<UINT>(size.height()),
+            .Width = size.width(),
+            .Height = size.height(),
             .MipLevels = 1,
             .ArraySize = 1,
             .Format = SHM::SHARED_TEXTURE_PIXEL_FORMAT,
@@ -87,7 +85,7 @@ namespace IRacingTools::Shared::Graphics {
         writer_->detach();
     }
 
-    void IPCRenderer::renderNow(const std::shared_ptr<RenderTarget>& sourceTarget) noexcept {
+    void IPCDXRenderer::renderNow(const std::shared_ptr<RenderTarget>& sourceTarget) noexcept {
         if (isRendering_.test_and_set()) {
             spdlog::debug("Two renders in the same instance");
             VRK_BREAK;
@@ -147,7 +145,7 @@ namespace IRacingTools::Shared::Graphics {
         this->submitFrame(shmLayers, inputLayerID);
     }
 
-    void IPCRenderer::submitFrame(const std::vector<SHM::LayerConfig>& shmLayers, std::uint64_t inputLayerID) noexcept {
+    void IPCDXRenderer::submitFrame(const std::vector<SHM::LayerConfig>& shmLayers, std::uint64_t inputLayerID) noexcept {
         if (!writer_) {
             return;
         }
@@ -172,7 +170,7 @@ namespace IRacingTools::Shared::Graphics {
         //TraceLoggingWriteTagged(activity, "AcquireSHMLock/stop");
 
         auto ipcTextureInfo = writer_->beginFrame();
-        auto destResources = this->getIPCTextureResources(ipcTextureInfo.textureIndex, canvasSize_);
+        auto destResources = this->getTextureResources(ipcTextureInfo.textureIndex, canvasSize_);
 
         auto fence = destResources->fence.get();
         {

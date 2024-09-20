@@ -104,7 +104,7 @@ namespace IRacingTools::App::Node {
     L->info("NativeOverlayManager() new instance: {}", info.Length());
 
     dxr_ = std::make_shared<Graphics::DXResources>();
-    ipcRenderer_ = Graphics::IPCRenderer::Create(dxr_);
+    ipcDxRenderer_ = Graphics::IPCDXRenderer::Create(dxr_);
   }
 
   /**
@@ -140,8 +140,8 @@ namespace IRacingTools::App::Node {
     ObjectWrap::Finalize(napi_env);
   }
 
-  std::shared_ptr<Graphics::IPCRenderer> NativeOverlayManager::ipcRenderer() {
-    return ipcRenderer_;
+  std::shared_ptr<Graphics::IPCDXRenderer> NativeOverlayManager::ipcDxRenderer() {
+    return ipcDxRenderer_;
   }
 
   std::shared_ptr<NativeOverlayWindowResources> NativeOverlayManager::getResourceByOverlayId(
@@ -323,7 +323,7 @@ namespace IRacingTools::App::Node {
 
     auto buf = info[1].As<Napi::Uint8Array>();
     resource->render(buf.Data(), buf.ByteLength());
-    ipcRenderer_->renderNow(resource->renderTarget);
+    ipcDxRenderer_->renderNow(resource->renderTarget);
 
     return env.Undefined();
   }

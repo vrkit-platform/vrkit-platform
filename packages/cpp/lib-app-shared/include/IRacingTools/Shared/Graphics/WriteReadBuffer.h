@@ -35,11 +35,11 @@ namespace IRacingTools::Shared::Graphics {
       std::uint32_t height{0};
       std::uint32_t bpp{BytesPerPixelRGBA};
 
-      constexpr bool isValid() {
+      bool isValid() const {
         return width > 0 && height > 0 && bpp > 0;
       }
 
-      constexpr std::uint32_t bufferSize() {
+      std::uint32_t bufferSize() const {
         return width * height * bpp;
       }
 
@@ -56,16 +56,13 @@ namespace IRacingTools::Shared::Graphics {
     using ReadFn = std::function<bool(const Byte* buf, std::uint32_t size, const Config& config)>;
 
     explicit WriteReadBuffer(const std::optional<Config>& options = std::nullopt);
+    WriteReadBuffer(WriteReadBuffer&&) = delete;
+    WriteReadBuffer(const WriteReadBuffer&) = delete;
 
     ~WriteReadBuffer();
 
     void reconfigure(const Config& newConfig);
 
-    WriteReadBuffer() = delete;
-
-    WriteReadBuffer(WriteReadBuffer&&) = delete;
-
-    WriteReadBuffer(const WriteReadBuffer&) = delete;
 
     std::uint32_t bufferSize();
 

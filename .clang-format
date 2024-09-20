@@ -39,6 +39,7 @@ BreakConstructorInitializersBeforeComma: false
 ColumnLimit: 0
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ContinuationIndentWidth: 2
+EmptyLineAfterAccessModifier: Always
 IncludeCategories: 
   - Regex: '^<.*'
     Priority: 1

@@ -103,7 +103,7 @@ XrSwapchain OpenXRDX11Layer::createSwapchain(
   XrSession session,
   const PixelSize& size) {
   spdlog::debug("{}", __FUNCTION__);
-  VRK_TraceLoggingScope("OpenXRDX11Layer::CreateSwapchain()");
+  VRK_TraceLoggingScope("OpenXRDX11Layer::CreateSwapchain()"); // NOLINT(*-pro-type-member-init)
 
   auto oxr = this->getOpenXR();
 

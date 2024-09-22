@@ -1,7 +1,7 @@
 $RegistryPath = "HKLM:\Software\Khronos\OpenXR\1\ApiLayers\Implicit"
 
 $RootPath = Resolve-Path (Join-Path "$PSScriptRoot" ".." "..")
-$OpenXRLayerPath = Join-Path "$RootPath" "packages" "cpp" "openxr-lib"
+$OpenXRLayerPath = Join-Path "$RootPath" "packages" "cpp" "lib-openxr-layer"
 
 Write-Output "$RootPath"
 Write-Output "$OpenXRLayerPath"

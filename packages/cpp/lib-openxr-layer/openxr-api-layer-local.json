@@ -2,7 +2,7 @@
   "file_format_version" : "1.0.0",
   "api_layer": {
     "name": "VRKitOpenXRLayer",
-    "library_path": ".\\iracing_tools_openxr_lib.dll",
+    "library_path": "Y:\\code\\sim-racing\\irsdk-interop\\build\\debug-clion-ninja2\\packages\\cpp\\lib-openxr-layer\\Debug\\vrkit_openxr_lib.dll",
     "api_version": "1.0",
     "implementation_version": "1",
     "description": "VRKit OpenXR Layer",

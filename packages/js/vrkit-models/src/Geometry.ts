@@ -62,6 +62,19 @@ export interface RectI {
      */
     position?: Position;
 }
+/**
+ * @generated from protobuf message IRacingTools.Models.RectF
+ */
+export interface RectF {
+    /**
+     * @generated from protobuf field: IRacingTools.Models.SizeF size = 1;
+     */
+    size?: SizeF;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Position position = 2;
+     */
+    position?: Position;
+}
 // @generated message type with reflection information, may provide speed optimized methods
 class Position$Type extends MessageType<Position> {
     constructor() {
@@ -280,3 +293,56 @@ class RectI$Type extends MessageType<RectI> {
  * @generated MessageType for protobuf message IRacingTools.Models.RectI
  */
 export const RectI = new RectI$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class RectF$Type extends MessageType<RectF> {
+    constructor() {
+        super("IRacingTools.Models.RectF", [
+            { no: 1, name: "size", kind: "message", T: () => SizeF },
+            { no: 2, name: "position", kind: "message", T: () => Position }
+        ]);
+    }
+    create(value?: PartialMessage<RectF>): RectF {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<RectF>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RectF): RectF {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* IRacingTools.Models.SizeF size */ 1:
+                    message.size = SizeF.internalBinaryRead(reader, reader.uint32(), options, message.size);
+                    break;
+                case /* IRacingTools.Models.Position position */ 2:
+                    message.position = Position.internalBinaryRead(reader, reader.uint32(), options, message.position);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: RectF, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* IRacingTools.Models.SizeF size = 1; */
+        if (message.size)
+            SizeF.internalBinaryWrite(message.size, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.Position position = 2; */
+        if (message.position)
+            Position.internalBinaryWrite(message.position, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.RectF
+ */
+export const RectF = new RectF$Type();

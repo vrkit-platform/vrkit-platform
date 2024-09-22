@@ -10,6 +10,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { RectF } from "./Geometry";
 import { RectI } from "./Geometry";
 /**
  * @generated from protobuf message IRacingTools.Models.Dashboard.OverlayBaseSettings
@@ -65,6 +66,10 @@ export interface OverlayPlacement {
      * @generated from protobuf field: IRacingTools.Models.RectI rect = 10;
      */
     rect?: RectI;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.RectF vr_rect = 20;
+     */
+    vrRect?: RectF;
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.Dashboard.OverlayKind
@@ -222,7 +227,8 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
         super("IRacingTools.Models.Dashboard.OverlayPlacement", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "overlay_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 10, name: "rect", kind: "message", T: () => RectI }
+            { no: 10, name: "rect", kind: "message", T: () => RectI },
+            { no: 20, name: "vr_rect", kind: "message", T: () => RectF }
         ]);
     }
     create(value?: PartialMessage<OverlayPlacement>): OverlayPlacement {
@@ -247,6 +253,9 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
                 case /* IRacingTools.Models.RectI rect */ 10:
                     message.rect = RectI.internalBinaryRead(reader, reader.uint32(), options, message.rect);
                     break;
+                case /* IRacingTools.Models.RectF vr_rect */ 20:
+                    message.vrRect = RectF.internalBinaryRead(reader, reader.uint32(), options, message.vrRect);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -268,6 +277,9 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
         /* IRacingTools.Models.RectI rect = 10; */
         if (message.rect)
             RectI.internalBinaryWrite(message.rect, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.RectF vr_rect = 20; */
+        if (message.vrRect)
+            RectF.internalBinaryWrite(message.vrRect, writer.tag(20, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

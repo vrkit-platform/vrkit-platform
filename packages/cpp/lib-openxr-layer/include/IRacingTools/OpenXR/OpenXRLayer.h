@@ -64,14 +64,14 @@ namespace IRacingTools::OpenXR {
         };
 
         struct Layer {
-            const SHM::LayerConfig* layerConfig{nullptr};
+            const SHM::SHMOverlayFrameConfig* layerConfig{nullptr};
             RenderParameters renderParameters;
         };
 
 
         struct Sizes {
             Vector2 normalSize;
-            Vector2 zoomedSize;
+            // Vector2 zoomedSize;
         };
 
         OpenXRLayer() = delete;
@@ -82,21 +82,21 @@ namespace IRacingTools::OpenXR {
 
         std::vector<OpenXRLayer::Layer> getLayers(const SHM::Snapshot& snapshot, const Pose& hmdPose);
 
-        RenderParameters getRenderParameters(const SHM::Snapshot&, const SHM::LayerConfig&, const Pose& hmdPose);
+        RenderParameters getRenderParameters(const SHM::Snapshot&, const SHM::SHMOverlayFrameConfig&, const Pose& hmdPose);
 
 
-        Pose getKneeboardPose(const VR::VRRenderConfig& vr, const SHM::LayerConfig&, const Pose& hmdPose);
+        Pose getKneeboardPose(const VR::VRRenderConfig& vr, const SHM::SHMOverlayFrameConfig&, const Pose& hmdPose);
 
-        Vector2 getKneeboardSize(const SHM::SHMConfig& config, const SHM::LayerConfig&, bool isLookingAtKneeboard);
+        Vector2 getKneeboardSize(const SHM::SHMConfig& config, const SHM::SHMOverlayFrameConfig&);
 
         bool isLookingAtKneeboard(
             const SHM::SHMConfig&,
-            const SHM::LayerConfig&,
+            const SHM::SHMOverlayFrameConfig&,
             const Pose& hmdPose,
             const Pose& kneeboardPose
         );
 
-        Sizes getSizes(const VR::VRRenderConfig&, const SHM::LayerConfig&) const;
+        Sizes getSizes(const VR::VRRenderConfig&, const SHM::SHMOverlayFrameConfig&) const;
 
 
         void maybeRecenter(const VR::VRRenderConfig& vr, const Pose& hmdPose);

@@ -14,51 +14,16 @@ namespace IRacingTools::App::Node {
     /**
      * @brief The error message used for incorrect constructor calls
      */
-    constexpr auto kCtorArgError = "NativeOverlayManager constructor supports "
-                                   "the following signature `()`";
+    constexpr auto kCtorArgError = "NativeOverlayManager constructor supports " "the following signature `()`";
     auto L = GetCategoryWithType<IRacingTools::App::Node::NativeOverlayManager>();
   } // namespace
-
-
-  void NativeOverlayWindowResources::resize(const PixelSize &size, bool force) {
-    if (!force && size == this->size) {
-      return;
-    }
-
-    D3D11_TEXTURE2D_DESC desc{
-      .Width = static_cast<UINT>(size.width()),
-      .Height = static_cast<UINT>(size.height()),
-      .MipLevels = 1,
-      .ArraySize = 1,
-      .Format = SHM::SHARED_TEXTURE_PIXEL_FORMAT,
-      .SampleDesc = {1, 0},
-      .BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-    };
-
-    auto device = dxr->getDXDevice().get();
-
-    check_hresult(device->CreateTexture2D(&desc, nullptr, texture.put()));
-    renderTarget = Graphics::RenderTarget::Create(dxr, texture);
-  }
-  void NativeOverlayWindowResources::render(unsigned char *data, std::size_t dataSize) {
-    // TODO: Render RGBA data to `renderTarget`
-    D3D11_BOX destRegion;
-    destRegion.left = 0;
-    destRegion.right = size.width();
-    destRegion.top = 0;
-    destRegion.bottom = size.height();
-    destRegion.front = 0;
-    destRegion.back = 1;
-
-    UINT32 rowPitch = 4 * size.width();
-    dxr->getDXImmediateContext()->UpdateSubresource(renderTarget->d3dTexture().get(), 0, &destRegion, data, rowPitch, 0);
-  }
 
   Napi::Value NativeOverlayWindowResources::toNapiObject(Napi::Env env) {
     auto o = Napi::Object::New(env);
     o.Set("windowId", Napi::Number::New(env, windowId));
     o.Set("overlayId", Napi::String::New(env, overlayId));
 
+    auto size = imageData.getImageSize();
     auto s = Napi::Object::New(env);
     s.Set("width", Napi::Number::New(env, size.width()));
     s.Set("height", Napi::Number::New(env, size.height()));
@@ -69,25 +34,47 @@ namespace IRacingTools::App::Node {
   }
 
   NativeOverlayWindowResources::NativeOverlayWindowResources(
-  std::shared_ptr<Graphics::DXResources> dxr,
-  const std::int32_t &windowId,
-    const std::string &overlayId,
-    const PixelSize &size) :
-      dxr(dxr),windowId(windowId), overlayId(overlayId), size(size) {
-    resize(size, true);
+    const std::int32_t& windowId,
+    const std::string& overlayId,
+    const PixelSize& size
+  ) : IPCOverlayFrameData{.screenRect = {}, .vrRect = {}, .imageData = {size.width(), size.height()}},
+      windowId(windowId),
+      overlayId(overlayId) {
+
+  }
+
+  std::size_t NativeOverlayManager::getOverlayCount() {
+    return resources_.size();
+  }
+
+  std::shared_ptr<Graphics::IPCOverlayFrameData<Graphics::ImageFormatChannels::RGBA>> NativeOverlayManager::
+  getOverlayData(std::size_t idx) {
+    return idx >= resources_.size() ? nullptr : resources_.at(idx);
+  }
+
+  void NativeOverlayManager::onOverlayFrameData(OnFrameData fn) {
+    {
+      std::unique_lock lock(onFrameMutex_);
+      onFrameCondition_.wait(lock);
+    }
+
+    fn();
   }
 
   void NativeOverlayManager::Init(Napi::Env env, Napi::Object exports) {
     Napi::Function func = DefineClass(
       env,
       "NativeOverlayManager",
-      {InstanceMethod<&NativeOverlayManager::jsDestroy>("destroy"),
-       InstanceMethod<&NativeOverlayManager::jsGetResourceInfo>("getResourceInfo"),
-       InstanceMethod<&NativeOverlayManager::jsGetResourceInfoById>("getResourceInfoById"),
-       InstanceMethod<&NativeOverlayManager::jsGetResourceCount>("getResourceCount"),
-       InstanceMethod<&NativeOverlayManager::jsCreateOrUpdateResources>("createOrUpdateResources"),
-       InstanceMethod<&NativeOverlayManager::jsReleaseResources>("releaseResources"),
-       InstanceMethod<&NativeOverlayManager::jsProcessFrame>("processFrame")});
+      {
+        InstanceMethod<&NativeOverlayManager::jsDestroy>("destroy"),
+        InstanceMethod<&NativeOverlayManager::jsGetResourceInfo>("getResourceInfo"),
+        InstanceMethod<&NativeOverlayManager::jsGetResourceInfoById>("getResourceInfoById"),
+        InstanceMethod<&NativeOverlayManager::jsGetResourceCount>("getResourceCount"),
+        InstanceMethod<&NativeOverlayManager::jsCreateOrUpdateResources>("createOrUpdateResources"),
+        InstanceMethod<&NativeOverlayManager::jsReleaseResources>("releaseResources"),
+        InstanceMethod<&NativeOverlayManager::jsProcessFrame>("processFrame")
+      }
+    );
 
     Constructor(env) = Napi::Persistent(func);
     exports.Set("NativeOverlayManager", func);
@@ -99,12 +86,13 @@ namespace IRacingTools::App::Node {
    * @param info callback info provided by `node-addon-api`.  Arguments must
    * either be `[string]` or `[]`
    */
-  NativeOverlayManager::NativeOverlayManager(const Napi::CallbackInfo &info) :
-      Napi::ObjectWrap<NativeOverlayManager>(info), system_(NativeGlobal::GetPtr()) {
+  NativeOverlayManager::NativeOverlayManager(const Napi::CallbackInfo& info) :
+    Napi::ObjectWrap<NativeOverlayManager>(info),
+    system_(NativeGlobal::GetPtr()) {
     L->info("NativeOverlayManager() new instance: {}", info.Length());
 
     dxr_ = std::make_shared<Graphics::DXResources>();
-    ipcDxRenderer_ = Graphics::IPCDXRenderer::Create(dxr_);
+    ipcDxRenderer_ = Graphics::RGBAIPCOverlayCanvasRenderer::Create(this);
   }
 
   /**
@@ -140,19 +128,21 @@ namespace IRacingTools::App::Node {
     ObjectWrap::Finalize(napi_env);
   }
 
-  std::shared_ptr<Graphics::IPCDXRenderer> NativeOverlayManager::ipcDxRenderer() {
+  std::shared_ptr<Graphics::RGBAIPCOverlayCanvasRenderer> NativeOverlayManager::ipcDxRenderer() {
     return ipcDxRenderer_;
   }
 
   std::shared_ptr<NativeOverlayWindowResources> NativeOverlayManager::getResourceByOverlayId(
-    const std::string &overlayId) {
+    const std::string& overlayId
+  ) {
     std::scoped_lock lock(resourcesMutex_);
     auto result = std::ranges::find_if(
       resources_.begin(),
       resources_.end(),
-      [&](auto &it) {
+      [&](auto& it) {
         return it->overlayId == overlayId;
-      });
+      }
+    );
     if (result != resources_.end()) {
       return *result;
     }
@@ -161,14 +151,16 @@ namespace IRacingTools::App::Node {
   }
 
   std::shared_ptr<NativeOverlayWindowResources> NativeOverlayManager::getResourceByWindowId(
-    const std::int32_t &windowId) {
+    const std::int32_t& windowId
+  ) {
     std::scoped_lock lock(resourcesMutex_);
     auto result = std::ranges::find_if(
       resources_.begin(),
       resources_.end(),
-      [&](auto &it) {
+      [&](auto& it) {
         return it->windowId == windowId;
-      });
+      }
+    );
     if (result != resources_.end()) {
       return *result;
     }
@@ -177,16 +169,18 @@ namespace IRacingTools::App::Node {
   }
 
 
-  Napi::Value NativeOverlayManager::jsCreateOrUpdateResources(const Napi::CallbackInfo &info) {
+  Napi::Value NativeOverlayManager::jsCreateOrUpdateResources(const Napi::CallbackInfo& info) {
     std::scoped_lock lock(resourcesMutex_);
     auto env = info.Env();
     auto throwInvalidArgs = [&] {
       throw TypeError::New(
         env,
-        "invalid arguments `createOrUpdateResources(overlayId: string, windowId: number, width: number, height: number): NativeOverlayWindowResourceInfo`");
+        "invalid arguments `createOrUpdateResources(overlayId: string, windowId: number, width: number, height: number): NativeOverlayWindowResourceInfo`"
+      );
     };
 
-    if (info.Length() != 4 || !info[0].IsString() || !info[1].IsNumber() || !info[2].IsNumber() || !info[3].IsNumber()) {
+    if (info.Length() != 4 || !info[0].IsString() || !info[1].IsNumber() || !info[2].IsNumber() || !info[3].
+      IsNumber()) {
       throwInvalidArgs();
     }
 
@@ -194,24 +188,23 @@ namespace IRacingTools::App::Node {
     auto windowId = info[1].As<Napi::Number>().Int32Value();
     auto width = info[2].As<Napi::Number>().Int32Value();
     auto height = info[3].As<Napi::Number>().Int32Value();
-    PixelSize size{static_cast<const unsigned &>(width), static_cast<const unsigned &>(height)};
+    PixelSize size{static_cast<const unsigned&>(width), static_cast<const unsigned&>(height)};
 
     auto resource = getResourceByOverlayId(overlayId);
-    if (!resource)
-      resource = getResourceByWindowId(windowId);
+    if (!resource) resource = getResourceByWindowId(windowId);
 
     if (!resource) {
-      resource = std::make_shared<NativeOverlayWindowResources>(dxr_, windowId, overlayId, size);
+      resource = std::make_shared<NativeOverlayWindowResources>(windowId, overlayId, size);
       resources_.push_back(resource);
     } else {
-      resource->resize(size);
+      //resource->resize(size);
     }
 
     return resource->toNapiObject(env);
   }
 
   Napi::Value
-  NativeOverlayManager::jsGetResourceInfo(const Napi::CallbackInfo &info) {
+  NativeOverlayManager::jsGetResourceInfo(const Napi::CallbackInfo& info) {
     std::scoped_lock lock(resourcesMutex_);
     auto env = info.Env();
 
@@ -221,8 +214,8 @@ namespace IRacingTools::App::Node {
       resource = resources_[idx];
     } else {
       std::string msg{
-        "NativeOverlayManager::jsGetResourceInfo(): invalid "
-        "argument, 1 arguments of type number is required"};
+        "NativeOverlayManager::jsGetResourceInfo(): invalid " "argument, 1 arguments of type number is required"
+      };
       L->warn(msg);
       throw TypeError::New(env, msg);
     }
@@ -234,7 +227,7 @@ namespace IRacingTools::App::Node {
   }
 
   Napi::Value
-  NativeOverlayManager::jsGetResourceInfoById(const Napi::CallbackInfo &info) {
+  NativeOverlayManager::jsGetResourceInfoById(const Napi::CallbackInfo& info) {
     std::scoped_lock lock(resourcesMutex_);
     auto env = info.Env();
     auto hasArg = info.Length() == 1;
@@ -246,7 +239,8 @@ namespace IRacingTools::App::Node {
     } else {
       std::string msg{
         "NativeOverlayManager::jsGetResourceInfoById(): invalid argument, 1 "
-        "arguments of type string | number is required"};
+        "arguments of type string | number is required"
+      };
       L->warn(msg);
       throw TypeError::New(env, msg);
     }
@@ -258,13 +252,13 @@ namespace IRacingTools::App::Node {
   }
 
   Napi::Value
-  NativeOverlayManager::jsGetResourceCount(const Napi::CallbackInfo &info) {
+  NativeOverlayManager::jsGetResourceCount(const Napi::CallbackInfo& info) {
     std::scoped_lock lock(resourcesMutex_);
     return Napi::Number::New(info.Env(), resources_.size());
   }
 
   Napi::Value
-  NativeOverlayManager::jsReleaseResources(const Napi::CallbackInfo &info) {
+  NativeOverlayManager::jsReleaseResources(const Napi::CallbackInfo& info) {
     std::scoped_lock lock(resourcesMutex_);
     auto env = info.Env();
     if (info.Length() == 0) {
@@ -273,7 +267,7 @@ namespace IRacingTools::App::Node {
       std::set<std::int32_t> windowIds{};
       std::set<std::string> overlayIds{};
       for (auto i = 0; i < info.Length(); i++) {
-        auto &arg = info[i];
+        auto& arg = info[i];
         if (arg.IsNumber()) {
           windowIds.insert(arg.As<Napi::Number>().Int32Value());
         } else if (arg.IsString()) {
@@ -281,7 +275,8 @@ namespace IRacingTools::App::Node {
         } else {
           std::string msg{
             "NativeOverlayManager::jsReleaseResources(): invalid argument, "
-            "0..n arguments of type string | number are allowed"};
+            "0..n arguments of type string | number are allowed"
+          };
           L->warn(msg);
           throw TypeError::New(env, msg);
         }
@@ -289,20 +284,19 @@ namespace IRacingTools::App::Node {
 
       std::erase_if(
         resources_,
-        [&](auto &resource) {
+        [&](auto& resource) {
           return windowIds.contains(resource->windowId) || overlayIds.contains(resource->overlayId);
-        });
+        }
+      );
     }
     return {};
   }
 
   Napi::Value
-  NativeOverlayManager::jsProcessFrame(const Napi::CallbackInfo &info) {
+  NativeOverlayManager::jsProcessFrame(const Napi::CallbackInfo& info) {
     auto env = info.Env();
     auto throwInvalidArgs = [&] {
-      throw TypeError::New(
-        env,
-        "invalid arguments `processFrame(overlayId: string, buf: Uint8Array): void`");
+      throw TypeError::New(env, "invalid arguments `processFrame(overlayId: string, buf: Uint8Array): void`");
     };
 
     if (info.Length() != 2 || !info[0].IsString() || !info[1].IsTypedArray()) {
@@ -315,20 +309,24 @@ namespace IRacingTools::App::Node {
       std::scoped_lock lock(resourcesMutex_);
       resource = getResourceByOverlayId(overlayId);
       if (!resource) {
-        throw TypeError::New(
-          env,
-          std::format("resources not found for overlayId: {}", overlayId));
+        throw TypeError::New(env, std::format("resources not found for overlayId: {}", overlayId));
       }
     }
 
     auto buf = info[1].As<Napi::Uint8Array>();
-    resource->render(buf.Data(), buf.ByteLength());
-    ipcDxRenderer_->renderNow(resource->renderTarget);
+    auto res = resource->imageData.produce(buf.Data(), buf.ByteLength());
+    if (res && res.value() > 0) {
+      LOCK(onFrameMutex_, lock);
+      onFrameCondition_.notify_all();
+    }
+    // TODO: Reimplement in the way of a notification to the
+    //  the renderer (`onNewData`)
+    // ipcDxRenderer_->renderNow(resource->renderTarget);
 
     return env.Undefined();
   }
 
-  Napi::Value NativeOverlayManager::jsDestroy(const Napi::CallbackInfo &info) {
+  Napi::Value NativeOverlayManager::jsDestroy(const Napi::CallbackInfo& info) {
     destroy();
     return info.Env().Undefined();
   }

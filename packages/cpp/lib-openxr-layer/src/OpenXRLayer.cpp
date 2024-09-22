@@ -41,7 +41,7 @@ namespace IRacingTools::OpenXR {
     };
 
     // constexpr std::string_view OpenXRLayerName{"IRTOpenXRLayer"};
-    constexpr std::string_view OpenXRLayerName{"IRacingToolsOpenXRLayer"};
+    constexpr std::string_view OpenXRLayerName{"VRKitOpenXRLayer"};
 
     static_assert(OpenXRLayerName.size() <= XR_MAX_API_LAYER_NAME_SIZE);
 
@@ -120,7 +120,7 @@ namespace IRacingTools::OpenXR {
 
     OpenXRLayer::Pose OpenXRLayer::getKneeboardPose(
         const VR::VRRenderConfig& vr,
-        const SHM::LayerConfig& layer,
+        const SHM::SHMOverlayFrameConfig& layer,
         const Pose& hmdPose
     ) {
         if (!eyeHeight_) {
@@ -137,19 +137,16 @@ namespace IRacingTools::OpenXR {
 
     OpenXRLayer::Vector2 OpenXRLayer::getKneeboardSize(
         const SHM::SHMConfig& config,
-        const SHM::LayerConfig& layer,
-        bool isLookingAtKneeboard
+        const SHM::SHMOverlayFrameConfig& layer
     ) {
         const auto sizes = this->getSizes(config.vr, layer);
 
-        return config.vr.forceZoom || (isLookingAtKneeboard && layer.vr.enableGazeZoom) ?
-                   sizes.zoomedSize :
-                   sizes.normalSize;
+        return sizes.normalSize;
     }
 
     bool OpenXRLayer::isLookingAtKneeboard(
         const SHM::SHMConfig& config,
-        const SHM::LayerConfig& layer,
+        const SHM::SHMOverlayFrameConfig& layer,
         const Pose& hmdPose,
         const Pose& kneeboardPose
     ) {
@@ -160,7 +157,7 @@ namespace IRacingTools::OpenXR {
         }
 
         const auto sizes = this->getSizes(config.vr, layer);
-        auto currentSize = lookingAtBoard ? sizes.zoomedSize : sizes.normalSize;
+        auto currentSize = sizes.normalSize;
 
         currentSize.x *= layer.vr.gazeTargetScale.horizontal;
         currentSize.y *= layer.vr.gazeTargetScale.vertical;
@@ -176,14 +173,14 @@ namespace IRacingTools::OpenXR {
         return lookingAtBoard;
     }
 
-    OpenXRLayer::Sizes OpenXRLayer::getSizes(const VR::VRRenderConfig& vrc, const SHM::LayerConfig& layer) const {
+    OpenXRLayer::Sizes OpenXRLayer::getSizes(const VR::VRRenderConfig& vrc, const SHM::SHMOverlayFrameConfig& layer) const {
         const auto& physicalSize = layer.vr.physicalSize;
         const auto virtualWidth = physicalSize.width();
         const auto virtualHeight = physicalSize.height();
 
         return {
             .normalSize = {virtualWidth, virtualHeight},
-            .zoomedSize = {virtualWidth * layer.vr.zoomScale, virtualHeight * layer.vr.zoomScale},
+            // .zoomedSize = {virtualWidth * layer.vr.zoomScale, virtualHeight * layer.vr.zoomScale},
         };
     }
 
@@ -394,8 +391,13 @@ namespace IRacingTools::OpenXR {
             );
 
             XrPosef pose = XR_POSEF_IDENTITY;
+            // auto vrPose = layer->vr.pose;
+            // if (vrPose.isValid()) {
+            //     pose.position = {vrPose.x, vrPose.eyeY, vrPose.z};
+            // } else {
+            //     pose.position = {-0.25f, 0.0f, -1.0f};
+            // }
             pose.position = {-0.25f, 0.0f, -1.0f};
-
             //auto pose = GetXrPosef(params.kneeboardPose);
             auto imageRect = destRect.staticCast<int, XrRect2Di>();
             addedXRLayers.push_back(
@@ -488,7 +490,7 @@ namespace IRacingTools::OpenXR {
             return {};
         }
 
-        const auto desiredFlags = XR_SPACE_LOCATION_ORIENTATION_VALID_BIT | XR_SPACE_LOCATION_POSITION_VALID_BIT;
+        constexpr auto desiredFlags = XR_SPACE_LOCATION_ORIENTATION_VALID_BIT | XR_SPACE_LOCATION_POSITION_VALID_BIT;
         if ((location.locationFlags & desiredFlags) != desiredFlags) {
             return {};
         }
@@ -502,7 +504,7 @@ namespace IRacingTools::OpenXR {
 
     OpenXRLayer::RenderParameters OpenXRLayer::getRenderParameters(
         const SHM::Snapshot& snapshot,
-        const SHM::LayerConfig& layer,
+        const SHM::SHMOverlayFrameConfig& layer,
         const Pose& hmdPose
     ) {
         auto config = snapshot.getConfig();
@@ -519,7 +521,7 @@ namespace IRacingTools::OpenXR {
 
         return {
             .kneeboardPose = kneeboardPose,
-            .kneeboardSize = this->getKneeboardSize(config, layer, isLookingAtKneeboard),
+            .kneeboardSize = this->getKneeboardSize(config, layer),
             .kneeboardOpacity = isLookingAtKneeboard ? layer.vr.opacity.gaze : layer.vr.opacity.normal,
             .cacheKey = cacheKey,
             .isLookingAtKneeboard = isLookingAtKneeboard,

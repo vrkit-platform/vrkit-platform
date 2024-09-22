@@ -28,12 +28,19 @@ namespace IRacingTools::Shared::Graphics {
     RGB = 3, RGBA = 4
   };
 
+
+  constexpr std::uint32_t ToBPP(ImageFormatChannels format) {
+    return magic_enum::enum_underlying(format);
+  }
+
   /**
    * @brief Manages writing to and reading from a buffer
    */
-  template <std::uint32_t BPP>
-  class ImageDataBuffer : public std::enable_shared_from_this<ImageDataBuffer<BPP>>, public SDK::Utils::Lockable {
+  template <ImageFormatChannels FormatChannels>
+  class ImageDataBuffer : public std::enable_shared_from_this<ImageDataBuffer<FormatChannels>>, public SDK::Utils::Lockable {
   public:
+
+    static constexpr auto BPP = magic_enum::enum_underlying(FormatChannels);
 
     enum class Status {
       Empty, Filled, Destroyed
@@ -49,7 +56,7 @@ namespace IRacingTools::Shared::Graphics {
     const std::uint32_t bpp = BPP;
 
     bool isValid() const {
-      return width > 0 && height > 0 && bpp > 0;
+      return width > 0 && height > 0 && bpp > 0 && !isDestroyed();
     }
 
     /**
@@ -175,10 +182,16 @@ namespace IRacingTools::Shared::Graphics {
 
       return createImageDataBufferError("Status never reached Empty (status={})", std::string{magic_enum::enum_name<Status>(status())});;
     }
+
     std::expected<std::uint32_t, SDK::GeneralError> produce(const Byte* src, std::uint32_t size) {
-      return produce([&] (Byte* dst, std::uint32_t dstSize, ImageDataBuffer* _imageDataBuffer) -> std::uint32_t {
-        return (memcpy(dst, src, size)) ? size : 0;
-      });
+      return produce(
+        [&](Byte* dst, std::uint32_t dstSize, ImageDataBuffer* _imageDataBuffer) -> std::uint32_t {
+          if (dstSize != size) {
+            return 0;
+          }
+          return std::memcpy(dst, src, dstSize) ? dstSize : 0;
+        }
+      );
     }
 
     std::expected<std::uint32_t, SDK::GeneralError> produce(const Buffer& buf) {
@@ -190,6 +203,10 @@ namespace IRacingTools::Shared::Graphics {
     }
 
     std::expected<bool, SDK::GeneralError> swap(ImageDataBuffer& other, bool skipWaitIfUnavailable = false) {
+      if (!isValid()) {
+        return createImageDataBufferError("Cannot swap to buffer, it is not valid");
+      }
+
       if (skipWaitIfUnavailable) {
         if (std::try_lock(*this, other) > -1) {
           return false;
@@ -218,7 +235,7 @@ namespace IRacingTools::Shared::Graphics {
       return true;
     }
 
-    std::expected<bool, SDK::GeneralError> swap(const std::shared_ptr<ImageDataBuffer> & other, bool skipWaitIfUnavailable = false) {
+    std::expected<bool, SDK::GeneralError> swap(const std::shared_ptr<ImageDataBuffer>& other, bool skipWaitIfUnavailable = false) {
       return swap(*other, skipWaitIfUnavailable);
     }
 
@@ -239,7 +256,20 @@ namespace IRacingTools::Shared::Graphics {
       return false;
     };
 
+    std::expected<std::uint32_t, SDK::GeneralError> consume(Byte* dst, std::uint32_t size) {
+      return consume(
+        [&](const Byte* src, std::uint32_t srcSize, ImageDataBuffer* _imageDataBuffer) -> std::uint32_t {
+          if (srcSize != size) {
+            return 0;
+          }
+          return std::memcpy(dst, src, srcSize) ? srcSize : 0;
+        }
+      );
+    };
+
     std::expected<std::uint32_t, SDK::GeneralError> consume(ConsumeFn fn) {
+
+
       std::uint32_t res;
       if (waitFor(
         Status::Filled,
@@ -253,7 +283,7 @@ namespace IRacingTools::Shared::Graphics {
       }
 
       return createImageDataBufferError("Status never reached Filled (status={})", std::string{magic_enum::enum_name<Status>(status())});
-    };
+    }
 
   private:
 
@@ -269,7 +299,83 @@ namespace IRacingTools::Shared::Graphics {
   };
 
 
-  using RGBAImageDataBuffer = ImageDataBuffer<magic_enum::enum_underlying(ImageFormatChannels::RGBA)>;
+  using RGBAImageDataBuffer = ImageDataBuffer<ImageFormatChannels::RGBA>;
 
+  /**
+   * @brief contains both a read & write buffer, that are auto-swapped on fill
+   *
+   * @tparam FormatChannels # of channels in the image buffer that will be produced/consumed
+   */
+  template <ImageFormatChannels FormatChannels>
+  class ImageDataBufferContainer {
+  public:
 
+    static constexpr auto BPP = magic_enum::enum_underlying(FormatChannels);
+    using Buffer = ImageDataBuffer<FormatChannels>;
+    using ConsumeFn = typename Buffer::ConsumeFn;
+
+  private:
+
+    Buffer writeBuffer_;
+    Buffer readBuffer_;
+
+  public:
+
+    using Byte = typename ImageDataBuffer<FormatChannels>::Byte;
+
+    const std::uint32_t width;
+    const std::uint32_t height;
+    const std::uint32_t bpp = ToBPP(FormatChannels);
+
+    ImageDataBufferContainer(const std::uint32_t& width, const std::uint32_t& height) : writeBuffer_(width, height), readBuffer_(width, height), width(width), height(height) {
+
+    }
+
+    ImageDataBufferContainer() = delete;
+
+    std::expected<std::uint32_t, SDK::GeneralError> produce(const Byte* data, std::uint32_t len) {
+      static auto L = Logging::GetCategoryWithName("ImageDataBufferContainer");
+
+      VRK_LOG_AND_FATAL_IF(len != writeBuffer_.size(), "Data len does == buffer len")
+      std::unique_lock writeLock(writeBuffer_);
+      auto res = writeBuffer_.produce(data, len);
+      if (!res) {
+        return std::unexpected(res.error());
+      }
+
+      if (readBuffer_.swap(writeBuffer_)) {
+        return createImageDataBufferError("Unable to swap read/write buffers");
+      }
+
+      return res.value();
+    }
+
+    std::expected<std::uint32_t, SDK::GeneralError> consume(ConsumeFn fn) {
+      return readBuffer_.consume(fn);
+    }
+
+    std::expected<std::uint32_t, SDK::GeneralError> consume(Byte* data, std::uint32_t len) {
+      return readBuffer_.consume(data, len);
+    }
+
+    void destroy() {
+      for (auto& b : {writeBuffer_, readBuffer_}) {
+        b.destroy();
+      }
+    }
+
+    PixelSize getImageSize() const {
+      return {width, height};
+    }
+
+    std::uint32_t getImageDataSize() const {
+      return width * height * bpp;
+    }
+
+    std::uint32_t getImageDataStride() const {
+      return width * bpp;
+    }
+  };
+
+  using RGBAImageDataBufferContainer = ImageDataBufferContainer<ImageFormatChannels::RGBA>;
 } // namespace IRacingTools::Shared::Graphics

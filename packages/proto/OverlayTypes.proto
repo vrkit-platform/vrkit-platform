@@ -32,5 +32,7 @@ message OverlayPlacement {
   string overlay_id = 5;
 
   RectI rect = 10;
+
+  RectF vr_rect = 20;
 }
 

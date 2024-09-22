@@ -24,7 +24,6 @@ namespace IRacingTools::Shared::SHM {
     struct SHMConfig final {
         uint64_t globalInputLayerId{};
         VR::VRRenderConfig vr{};
-        //  ConsumerPattern target {};
         PixelSize textureSize{};
         std::array<float, 4> tint{1, 1, 1, 1};
     };
@@ -33,14 +32,14 @@ namespace IRacingTools::Shared::SHM {
         FEEDER_ATTACHED = 1 << 0,
     };
 
-    struct LayerConfig final {
+    struct SHMOverlayFrameConfig final {
         uint64_t layerID{};
 
-        bool vrEnabled{false};
+        bool vrEnabled{true};
         VR::VRLayer vr{};
     };
 
-    static_assert(std::is_standard_layout_v<LayerConfig>);
+    static_assert(std::is_standard_layout_v<SHMOverlayFrameConfig>);
 
     struct LayerSprite {
         PixelRect sourceRect;
@@ -127,25 +126,25 @@ namespace IRacingTools::Shared::SHM {
         static_assert(Magic.size() == sizeof(uint64_t));
         uint64_t magic = *reinterpret_cast<const uint64_t*>(Magic.data());
 
-        uint64_t gpuLUID{};
+        uint64_t gpuAdapterId{};
 
         uint64_t frameNumber = 0;
         uint64_t sessionId = CreateSessionId();
         SHMHeaderFlags flags{};
         SHMConfig config;
 
-        uint8_t layerCount = 0;
-        LayerConfig layers[MaxViewCount];
+        uint8_t overlayFrameCount = 0;
+        SHMOverlayFrameConfig overlayFrameConfigs[MaxViewCount];
 
-        DWORD feederProcessId{};
-        // If you're looking for texture size, it's in Config
+        DWORD overlayProducerProcessId{};
+
         HANDLE texture{};
         HANDLE fence{};
 
         alignas(2 * sizeof(LONG64)) std::array<LONG64, SHMSwapchainLength> frameReadyFenceValues{0};
 
         std::size_t getRenderCacheKey() const;
-        bool haveFeeder() const;
+        bool haveOverlayProducer() const;
     };
 
     static_assert(std::is_standard_layout_v<FrameMetadata>);
@@ -203,7 +202,7 @@ namespace IRacingTools::Shared::SHM {
         };
 
         Writer() = delete;
-        explicit Writer(uint64_t gpuLUID);
+        explicit Writer(uint64_t gpuAdapterId);
         virtual ~Writer();
 
         void detach();
@@ -213,7 +212,7 @@ namespace IRacingTools::Shared::SHM {
         void submitEmptyFrame();
 
         NextFrameInfo beginFrame() noexcept;
-        void submitFrame(const SHMConfig& config, const std::vector<LayerConfig>& layers, HANDLE texture, HANDLE fence);
+        void submitFrame(const SHMConfig& config, const std::vector<SHMOverlayFrameConfig>& layers, HANDLE texture, HANDLE fence);
 
         // "Lockable" C++ named concept: supports std::unique_lock
         void lock();
@@ -259,7 +258,7 @@ namespace IRacingTools::Shared::SHM {
         size_t getRenderCacheKey() const;
         SHMConfig getConfig() const;
         uint8_t getLayerCount() const;
-        const LayerConfig* getLayerConfig(uint8_t layerIndex) const;
+        const SHMOverlayFrameConfig* getLayerConfig(uint8_t layerIndex) const;
 
         template <std::derived_from<IPCClientTexture> T>
         T* getTexture() const {
@@ -321,7 +320,7 @@ namespace IRacingTools::Shared::SHM {
     protected:
         Snapshot maybeGetUncached(ConsumerKind);
         Snapshot maybeGetUncached(
-          uint64_t gpuLUID,
+          uint64_t gpuAdapterId,
           IPCTextureCopier* copier,
           const std::shared_ptr<IPCClientTexture>& dest,
           ConsumerKind) const;
@@ -341,7 +340,7 @@ namespace IRacingTools::Shared::SHM {
           );//const std::source_location& loc = std::source_location::current()
 
     protected:
-        void initializeCache(uint64_t gpuLUID, uint8_t swapchainLength);
+        void initializeCache(uint64_t gpuAdapterId, uint8_t swapchainLength);
 
         virtual std::shared_ptr<IPCClientTexture>
         createIPCClientTexture(const PixelSize&, uint8_t swapchainIndex) noexcept = 0;
@@ -352,7 +351,7 @@ namespace IRacingTools::Shared::SHM {
         IPCTextureCopier* textureCopier_ {nullptr};
         ConsumerKind consumerKind_ {};
 
-        uint64_t gpuluid_ {};
+        uint64_t gpuAdapterId_ {};
         uint64_t cacheKey_ {~0ui64};
         uint64_t sessionId_ {};
         std::deque<Snapshot> cache_;

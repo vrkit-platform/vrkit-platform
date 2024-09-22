@@ -153,3 +153,4 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE) & __ImageBase)
 #endif
 
+#define LOCK(Mutex, Var) std::scoped_lock Var(Mutex)

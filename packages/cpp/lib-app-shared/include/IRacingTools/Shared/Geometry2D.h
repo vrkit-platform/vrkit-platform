@@ -470,7 +470,6 @@ namespace IRacingTools::Shared {
   using PixelPoint [[maybe_unused]] = Point<uint32_t>;
   using PixelRect = Rect<uint32_t>;
 
-
   template<class T>
   void from_json(const nlohmann::json &j, Size<T> &v) {
     v.width_ = j.at("width");

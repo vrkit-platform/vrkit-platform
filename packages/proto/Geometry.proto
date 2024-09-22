@@ -21,3 +21,8 @@ message RectI {
   SizeI size = 1;
   Position position = 2;
 }
+
+message RectF {
+  SizeF size = 1;
+  Position position = 2;
+}

@@ -94,16 +94,16 @@ namespace IRacingTools::Shared::Graphics {
       D3DKMT_WDDM_2_9_CAPS caps{};
       D3DKMT_QUERYADAPTERINFO capsQuery{.hAdapter = kmtAdapter.hAdapter, .Type = KMTQAITYPE_WDDM_2_9_CAPS, .pPrivateDriverData = &caps, .PrivateDriverDataSize = sizeof(caps),};
       if (D3DKMTQueryAdapterInfo(&capsQuery) != 0 /* STATUS_SUCCESS */) {
-        D3DKMT_WDDM_2_7_CAPS caps{};
+        D3DKMT_WDDM_2_7_CAPS caps27{};
         capsQuery.Type = KMTQAITYPE_WDDM_2_7_CAPS;
-        capsQuery.pPrivateDriverData = &caps;
-        capsQuery.PrivateDriverDataSize = sizeof(caps);
+        capsQuery.pPrivateDriverData = &caps27;
+        capsQuery.PrivateDriverDataSize = sizeof(caps27);
         if (D3DKMTQueryAdapterInfo(&capsQuery) == 0) {
-          if (caps.HwSchEnabled) {
+          if (caps27.HwSchEnabled) {
             spdlog::debug("    HAGS: enabled");
-          } else if (caps.HwSchEnabledByDefault) {
+          } else if (caps27.HwSchEnabledByDefault) {
             spdlog::debug("    HAGS: anually_ disabled");
-          } else if (caps.HwSchSupported) {
+          } else if (caps27.HwSchSupported) {
             spdlog::debug("    HAGS: disabled (supported but off-by-default)");
           } else {
             spdlog::debug("   HAGS: unsupported");

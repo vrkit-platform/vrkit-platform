@@ -149,7 +149,7 @@ namespace IRacingTools::Shared::SHM {
   };
 
 
-  bool FrameMetadata::haveFeeder() const {
+  bool FrameMetadata::haveOverlayProducer() const {
     static constexpr auto FeederAttachedValue = magic_enum::enum_integer(SHMHeaderFlags::FEEDER_ATTACHED);
     return magic == *reinterpret_cast<const uint64_t*>(Magic.data()) && (magic_enum::enum_integer(flags) &
       FeederAttachedValue) == FeederAttachedValue;
@@ -202,10 +202,10 @@ namespace IRacingTools::Shared::SHM {
   class Writer::Impl : public SHM::Impl {
     friend class Writer;
     DWORD processId_ = GetCurrentProcessId();
-    uint64_t gpuLUID_{};
+    uint64_t gpuAdapterId_{};
   };
 
-  Writer::Writer(uint64_t gpuLUID) {
+  Writer::Writer(uint64_t gpuAdapterId) {
     const auto path = SHMPath();
     // L->info(L"Initializing SHM writer with path {}", path);
 
@@ -216,7 +216,7 @@ namespace IRacingTools::Shared::SHM {
       return;
     }
 
-    impl_->gpuLUID_ = gpuLUID;
+    impl_->gpuAdapterId_ = gpuAdapterId;
     *impl_->metadata_ = FrameMetadata{};
 
     // L->info("Writer initialized.");
@@ -225,14 +225,14 @@ namespace IRacingTools::Shared::SHM {
   void Writer::detach() {
     // impl_->template Transition<State::Locked, State::Detaching>();
 
-    const auto oldID = impl_->metadata_->sessionId;
+    // const auto oldId = impl_->metadata_->sessionId;
     *impl_->metadata_ = {};
     FlushViewOfFile(impl_->mapping_, NULL);
 
 
     // L->debug(
     //   "Writer::Detach(): Session ID {:#018x} replaced with {:#018x}",
-    //   oldID,
+    //   oldId,
     //   impl_->metadata_->sessionId);
   }
 
@@ -247,7 +247,7 @@ namespace IRacingTools::Shared::SHM {
     //   State::SubmittingEmptyFrame,
     //   State::Locked>(p);
     impl_->metadata_->frameNumber++;
-    impl_->metadata_->layerCount = 0;
+    impl_->metadata_->overlayFrameCount = 0;
   }
 
   Writer::NextFrameInfo Writer::beginFrame() noexcept {
@@ -262,7 +262,7 @@ namespace IRacingTools::Shared::SHM {
 
   void Writer::submitFrame(
     const SHMConfig& config,
-    const std::vector<LayerConfig>& layers,
+    const std::vector<SHMOverlayFrameConfig>& layers,
     HANDLE texture,
     HANDLE fence
   ) {
@@ -275,15 +275,15 @@ namespace IRacingTools::Shared::SHM {
         "Asked to publish {} layers, but max is {}", layers.size(), MaxViewCount);
     }
 
-    impl_->metadata_->gpuLUID = impl_->gpuLUID_;
+    impl_->metadata_->gpuAdapterId = impl_->gpuAdapterId_;
     impl_->metadata_->config = config;
     impl_->metadata_->frameNumber++;
     impl_->metadata_->flags = static_cast<SHMHeaderFlags>(impl_->metadata_->flags | FEEDER_ATTACHED);
-    impl_->metadata_->layerCount = static_cast<uint8_t>(layers.size());
-    impl_->metadata_->feederProcessId = impl_->processId_;
+    impl_->metadata_->overlayFrameCount = static_cast<uint8_t>(layers.size());
+    impl_->metadata_->overlayProducerProcessId = impl_->processId_;
     impl_->metadata_->texture = texture;
     impl_->metadata_->fence = fence;
-    memcpy(impl_->metadata_->layers, layers.data(), sizeof(LayerConfig) * layers.size());
+    memcpy(impl_->metadata_->overlayFrameConfigs, layers.data(), sizeof(SHMOverlayFrameConfig) * layers.size());
   }
 
   void Writer::lock() {
@@ -312,7 +312,7 @@ namespace IRacingTools::Shared::SHM {
     // VRK_TraceLoggingScope("SHM::Snapshot::Snapshot(FrameMetadata)");
     metadata_ = std::make_shared<FrameMetadata>(*metadata);
 
-    if (metadata_ && metadata_->haveFeeder()) {
+    if (metadata_ && metadata_->haveOverlayProducer()) {
       state_ = State::ValidWithoutTexture;
     }
   }
@@ -346,9 +346,9 @@ namespace IRacingTools::Shared::SHM {
       copier->copy(source->textureHandle.get(), dest.get(), source->fenceHandle.get(), fenceIn);
     }
 
-    if (metadata_ && metadata_->haveFeeder()) {
+    if (metadata_ && metadata_->haveOverlayProducer()) {
       // TraceLoggingWriteTagged(activity, "MarkingValid");
-      if (metadata_->layerCount > 0) {
+      if (metadata_->overlayFrameCount > 0) {
         state_ = State::ValidWithTexture;
       } else {
         state_ = State::ValidWithoutTexture;
@@ -390,15 +390,15 @@ namespace IRacingTools::Shared::SHM {
     if (!this->hasMetadata()) {
       return 0;
     }
-    return metadata_->layerCount;
+    return metadata_->overlayFrameCount;
   }
 
-  const LayerConfig* Snapshot::getLayerConfig(uint8_t layerIndex) const {
+  const SHMOverlayFrameConfig* Snapshot::getLayerConfig(uint8_t layerIndex) const {
     if (layerIndex >= this->getLayerCount()) [[unlikely]] {
       VRK_LOG_AND_FATAL("Asked for layer {}, but there are {} layers", layerIndex, this->getLayerCount());
     }
 
-    return &metadata_->layers[layerIndex];
+    return &metadata_->overlayFrameConfigs[layerIndex];
   }
 
   class SHMReader::Impl : public SHM::Impl {
@@ -422,7 +422,7 @@ namespace IRacingTools::Shared::SHM {
         return;
       }
 
-      feederProcessHandle_ = winrt::handle{OpenProcess(PROCESS_DUP_HANDLE, FALSE, metadata.feederProcessId)};
+      feederProcessHandle_ = winrt::handle{OpenProcess(PROCESS_DUP_HANDLE, FALSE, metadata.overlayProducerProcessId)};
     }
 
   private:
@@ -470,7 +470,7 @@ namespace IRacingTools::Shared::SHM {
   }
 
   SHMReader::operator bool() const {
-    return p && p->isValid() & p->metadata_->haveFeeder();
+    return p && p->isValid() & p->metadata_->haveOverlayProducer();
   }
 
   Writer::operator bool() const {
@@ -486,7 +486,7 @@ namespace IRacingTools::Shared::SHM {
   }
 
   Snapshot SHMReader::maybeGetUncached(
-    uint64_t gpuLUID,
+    uint64_t gpuAdapterId,
     IPCTextureCopier* copier,
     const std::shared_ptr<IPCClientTexture>& dest,
     ConsumerKind kind
@@ -513,16 +513,16 @@ namespace IRacingTools::Shared::SHM {
 
     p->updateSession();
 
-    if (!(gpuLUID && copier && dest)) {
+    if (!(gpuAdapterId && copier && dest)) {
       return {p->metadata_};
     }
 
-    if (p->metadata_->gpuLUID != gpuLUID) {
+    if (p->metadata_->gpuAdapterId != gpuAdapterId) {
       // TraceLoggingWriteTagged(
       //   activity,
       //   "SHM::Reader::MaybeGetUncached/incorrect_gpu",
-      //   TraceLoggingValue(p->mHeader->mGPULUID, "FeederLUID"),
-      //   TraceLoggingValue(gpuLUID, "ReaderLUID"));
+      //   TraceLoggingValue(p->mHeader->mGPUADAPTERID, "FeederLUID"),
+      //   TraceLoggingValue(gpuAdapterId, "ReaderLUID"));
       // activity.StopWithResult("incorrect_gpu");
       return {Snapshot::incorrect_gpu};
     }
@@ -603,7 +603,7 @@ namespace IRacingTools::Shared::SHM {
     // VRK_TraceLoggingScopedActivity(
     //   maybeGetActivity, "MaybeGetUncached");
 
-    if (p->metadata_->layerCount == 0) {
+    if (p->metadata_->overlayFrameCount == 0) {
       // maybeGetActivity.StopWithResult("NoLayers");
       return Snapshot{p->metadata_};
     }
@@ -611,7 +611,7 @@ namespace IRacingTools::Shared::SHM {
     const auto dimensions = p->metadata_->config.textureSize;
     auto dest = getIPCClientTexture(dimensions, swapchainIndex);
 
-    auto snapshot = this->maybeGetUncached(gpuluid_, textureCopier_, dest, consumerKind_);
+    auto snapshot = this->maybeGetUncached(gpuAdapterId_, textureCopier_, dest, consumerKind_);
     const auto state = snapshot.getState();
     // maybeGetActivity.StopWithResult(static_cast<int>(state));
 
@@ -697,11 +697,11 @@ namespace IRacingTools::Shared::SHM {
     sessionId_ = sessionID;
   }
 
-  void SHMCachedReader::initializeCache(uint64_t gpuLUID, uint8_t swapchainLength) {
+  void SHMCachedReader::initializeCache(uint64_t gpuAdapterId, uint8_t swapchainLength) {
     // VRK_TraceLoggingScope(
     //   "SHM::CachedReader::InitializeCache()",
     //   TraceLoggingValue(swapchainLength, "SwapchainLength"));
-    gpuluid_ = gpuLUID;
+    gpuAdapterId_ = gpuAdapterId;
     cache_ = {};
     cacheKey_ = {};
     clientTextures_ = {swapchainLength, nullptr};

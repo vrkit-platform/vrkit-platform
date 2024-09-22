@@ -29,4 +29,18 @@ namespace IRacingTools::SDK::Utils {
         std::atomic_bool running_{false};
         std::unique_ptr<std::thread> thread_{nullptr};
     };
+
+
+    class FnIndefiniteThread : public RunnableThread {
+    public:
+        using Fn = std::function<void(FnIndefiniteThread*)>;
+        explicit FnIndefiniteThread(Fn fn);
+        FnIndefiniteThread() = delete;
+        virtual ~FnIndefiniteThread() = default;
+
+        virtual void runnable() override;
+
+    private:
+        Fn fn_;
+    };
 }

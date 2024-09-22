@@ -31,6 +31,10 @@ namespace IRacingTools::Shared::VR {
     VRPose getHorizontalMirror() const;
 
     constexpr auto operator<=>(const VRPose &) const noexcept = default;
+
+    bool isValid() const {
+      return !(x == 0.0f && eyeY == 0.0f && z == 0.0f);
+    }
   };
 
   /** If gaze zoom is enabled, how close you need to be looking for zoom to

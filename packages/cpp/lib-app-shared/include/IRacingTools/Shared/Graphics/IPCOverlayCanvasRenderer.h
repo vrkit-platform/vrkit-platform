@@ -312,20 +312,26 @@ namespace IRacingTools::Shared::Graphics {
 
         D3D11_BOX destRegion{bounds.left(), bounds.top(), 0, bounds.left() + imageSize.width(), bounds.top() + imageSize.height(), 1};
         // ctx->CopySubresourceRegion(target_->d3d().texture(), 0, 0, 0, 0, sourceTarget->d3d().texture(), 0, &srcBox);
-        overlayData->imageData->consume(
-          [&](auto data, auto len, auto imageDataBuffer) -> std::uint32_t {
-            spdlog::info("Rendering overlay image data (idx={})", i);
-            ctx->UpdateSubresource(
-              target_->d3dTexture().get(),
-              0,
-              &destRegion,
-              data,
-              overlayData->imageData->getImageDataStride(),
-              0
-            );
-            return len;
-          }
-        );
+        auto imageDataBuffer = overlayData->imageData->newBuffer();
+        if (!overlayData->imageData->consume(imageDataBuffer) || !imageDataBuffer || !imageDataBuffer->isFilled()) {
+          spdlog::warn("no frame buffer consumed/populated/filled (idx={})", i);
+          continue;
+        }
+
+        spdlog::info("Rendering overlay image data (idx={})", i);
+        // std::scoped_lock lock(*imageDataBuffer);
+
+        imageDataBuffer->consume([&](auto data, auto len, auto) -> std::uint32_t {
+          ctx->UpdateSubresource(
+            target_->d3dTexture().get(),
+            0,
+            &destRegion,
+            data,
+            overlayData->imageData->getImageDataStride(),
+            0
+          );
+          return len;
+        });
 
         shmOverlayFrames.push_back(overlayFrameConfig);
 

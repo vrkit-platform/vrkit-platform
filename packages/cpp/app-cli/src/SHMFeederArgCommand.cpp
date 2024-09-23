@@ -161,8 +161,8 @@ namespace IRacingTools::App::Commands {
     L->info("SHM-Feeder");
 
     std::vector<SHMFeedRGBAImageDataSourceConfig> imageConfigs = {
-      {RGBAPixel{0, 0, 0, 1}, PixelSize{400, 400}},
-      {RGBAPixel{255, 0, 0, 1}, PixelSize{200, 200}}
+      {RGBAPixel{0, 0, 0, 255}, PixelSize{400, 400}},
+      {RGBAPixel{255, 0, 0, 255}, PixelSize{200, 200}}
     };
     auto producer = std::make_shared<SHMFeedImageDataProducer>(10, imageConfigs);
     gIPCRenderer = Graphics::RGBAIPCOverlayCanvasRenderer::Create(producer.get());

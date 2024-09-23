@@ -25,7 +25,8 @@ namespace IRacingTools::Shared::Graphics {
 
 
   enum class ImageFormatChannels : std::uint32_t {
-    RGB = 3, RGBA = 4
+    RGB = 3,
+    RGBA = 4
   };
 
 
@@ -37,26 +38,50 @@ namespace IRacingTools::Shared::Graphics {
    * @brief Manages writing to and reading from a buffer
    */
   template <ImageFormatChannels FormatChannels>
-  class ImageDataBuffer : public std::enable_shared_from_this<ImageDataBuffer<FormatChannels>>, public SDK::Utils::Lockable {
-  public:
+  class ImageDataBuffer : public std::enable_shared_from_this<ImageDataBuffer<FormatChannels>>,
+                          public SDK::Utils::Lockable {
 
+
+
+
+  public:
     static constexpr auto BPP = magic_enum::enum_underlying(FormatChannels);
 
     enum class Status {
-      Empty, Filled, Destroyed
+      Empty,
+      Filled,
+      Destroyed
     };
 
     using Byte = std::uint8_t;
     using Buffer = std::vector<Byte>;
-    using ConsumeFn = std::function<std::uint32_t(const Byte* data, std::uint32_t size, ImageDataBuffer* imageDataBuffer)>;
+    using ConsumeFn = std::function<std::uint32_t(
+      const Byte* data,
+      std::uint32_t size,
+      ImageDataBuffer* imageDataBuffer
+    )>;
     using ProduceFn = std::function<std::uint32_t(Byte* data, std::uint32_t size, ImageDataBuffer* imageDataBuffer)>;
 
-    const std::uint32_t width;
-    const std::uint32_t height;
     const std::uint32_t bpp = BPP;
 
-    bool isValid() const {
-      return width > 0 && height > 0 && bpp > 0 && !isDestroyed();
+    uint32_t frameIndex() {
+      return frameIndex_;
+    }
+
+    uint32_t setFrameIndex(std::uint32_t newFrameIndex) {
+      return frameIndex_.exchange(newFrameIndex);
+    }
+
+    bool isValid() {
+      return width_ > 0 && height_ > 0 && bpp > 0 && !isDestroyed();
+    }
+
+    std::uint32_t width()  {
+      return width_;
+    }
+
+    std::uint32_t height()  {
+      return height_;
     }
 
     /**
@@ -64,7 +89,7 @@ namespace IRacingTools::Shared::Graphics {
      * @return read buffer size
      */
     std::uint32_t size() const {
-      return width * height * bpp;
+      return width_ * height_ * bpp;
     }
 
     /**
@@ -72,7 +97,7 @@ namespace IRacingTools::Shared::Graphics {
      * @return read buffer size
      */
     std::uint32_t stride() const {
-      return width * bpp;
+      return width_ * bpp;
     }
 
     /**
@@ -80,8 +105,9 @@ namespace IRacingTools::Shared::Graphics {
      * @param width Width of the image data this will hold in pixels, NOT the stride
      * @param height Height in pixels of the image data
      */
-    ImageDataBuffer(const std::uint32_t& width, const std::uint32_t& height) : width(width), height(height), buffer_(width * height * BPP) {
-
+    ImageDataBuffer(const std::uint32_t& width, const std::uint32_t& height) : width_(width),
+                                                                               height_(height) {
+      resize(width_, height_);
     }
 
     ImageDataBuffer() = delete;
@@ -118,10 +144,10 @@ namespace IRacingTools::Shared::Graphics {
      * @return the status that was stored in `status_`
      */
     Status setStatus(Status newStatus) {
-      // std::scoped_lock lock(*this, statusMutex_);
       std::scoped_lock lock(*this);
+      if (isDestroyed()) return Status::Destroyed;
+
       auto oldStatus = status_.exchange(newStatus);
-      statusCondition_.notify_all();
       return oldStatus;
     }
 
@@ -165,27 +191,16 @@ namespace IRacingTools::Shared::Graphics {
         return createImageDataBufferError("Cannot write to buffer, it is not valid");
       }
 
-      // if (size != this->size()) {
-      //   return createImageDataBufferError("Cannot write to buffer, size({}) of buf doesn't match bufferSize({})", size, this->size());
-      // }
+      setStatus(Status::Empty);
+      auto res = fn(buffer_.data(), buffer_.size(), this);
+      if (res > 0) setStatus(Status::Filled);
 
-      std::uint32_t result;
-      if (waitFor(
-        Status::Empty,
-        [&] {
-          result = fn(buffer_.data(), buffer_.size(), this);
-          setStatus(Status::Filled);
-        }
-      )) {
-        return result;
-      }
-
-      return createImageDataBufferError("Status never reached Empty (status={})", std::string{magic_enum::enum_name<Status>(status())});;
+      return res;
     }
 
     std::expected<std::uint32_t, SDK::GeneralError> produce(const Byte* src, std::uint32_t size) {
       return produce(
-        [&](Byte* dst, std::uint32_t dstSize, ImageDataBuffer* _imageDataBuffer) -> std::uint32_t {
+        [&](Byte* dst, std::uint32_t dstSize, ImageDataBuffer*) -> std::uint32_t {
           if (dstSize != size) {
             return 0;
           }
@@ -202,87 +217,35 @@ namespace IRacingTools::Shared::Graphics {
       setStatus(Status::Destroyed);
     }
 
-    std::expected<bool, SDK::GeneralError> swap(ImageDataBuffer& other, bool skipWaitIfUnavailable = false) {
-      if (!isValid()) {
-        return createImageDataBufferError("Cannot swap to buffer, it is not valid");
-      }
-
-      if (skipWaitIfUnavailable) {
-        if (std::try_lock(*this, other) > -1) {
-          return false;
-        }
-      } else {
-        std::lock(*this, other);
-      }
-
-      gsl::finally(
-        [&] {
-          unlock();
-          other.unlock();
-        }
-      );
-
-      if (isDestroyed() || other.isDestroyed() || other.width != width || other.height != height || other.bpp != bpp || !isValid() || !other.isValid()) {
-        return createImageDataBufferError("Cannot swap buffers, sizes don't match or buffers are not valid");
-      }
-
-      std::swap(buffer_, other.buffer_);
-
-      auto otherStatus = other.status();
-      other.setStatus(status());
-      setStatus(otherStatus);
-
-      return true;
-    }
-
-    std::expected<bool, SDK::GeneralError> swap(const std::shared_ptr<ImageDataBuffer>& other, bool skipWaitIfUnavailable = false) {
-      return swap(*other, skipWaitIfUnavailable);
-    }
-
-    bool waitFor(Status targetStatus, std::function<void()> fn) {
-      // std::unique_lock lock(statusMutex_);
-      std::unique_lock lock(*this);
-      auto testFn = [this, targetStatus]() {
-        return status_ == targetStatus || status_ == Status::Destroyed;
-      };
-      if (!testFn()) {
-        statusCondition_.wait(lock, testFn);
-      }
-
-      if (status_ == targetStatus) {
-        fn();
-        return true;
-      }
-      return false;
-    };
-
-    std::expected<std::uint32_t, SDK::GeneralError> consume(Byte* dst, std::uint32_t size) {
-      return consume(
-        [&](const Byte* src, std::uint32_t srcSize, ImageDataBuffer* _imageDataBuffer) -> std::uint32_t {
-          if (srcSize != size) {
-            return 0;
-          }
-          return std::memcpy(dst, src, srcSize) ? srcSize : 0;
-        }
-      );
-    };
-
     std::expected<std::uint32_t, SDK::GeneralError> consume(ConsumeFn fn) {
+      std::scoped_lock lock(*this);
 
 
-      std::uint32_t res;
-      if (waitFor(
-        Status::Filled,
-        [&] {
-          std::scoped_lock lock(*this);
-          res = fn(buffer_.data(), size(), this);
-          setStatus(Status::Empty);
-        }
-      )) {
-        return res;
+      if (!isFilled()) {
+        return createImageDataBufferError(
+          "Status is not Filled (status={})",
+          std::string{magic_enum::enum_name<Status>(status())}
+        );
       }
 
-      return createImageDataBufferError("Status never reached Filled (status={})", std::string{magic_enum::enum_name<Status>(status())});
+      auto res = fn(buffer_.data(), size(), this);
+      setStatus(Status::Empty);
+
+      return res;
+    }
+
+    void reset() {
+      std::scoped_lock lock(*this);
+      setStatus(Status::Empty);
+      frameIndex_= 0;
+    }
+
+    void resize(const std::uint32_t& width,const std::uint32_t& height) {
+      std::scoped_lock lock(*this);
+
+      if (destroyed_ || setStatus(Status::Empty) == Status::Destroyed) return;
+      buffer_.resize(width * height * BPP);
+      frameIndex_= 0;
     }
 
   private:
@@ -290,11 +253,11 @@ namespace IRacingTools::Shared::Graphics {
     std::recursive_mutex mutex_{};
     Buffer buffer_{};
     std::atomic<Status> status_{Status::Empty};
-
-
     std::atomic_bool destroyed_{false};
-    // std::mutex statusMutex_{};
-    std::condition_variable_any statusCondition_{};
+    std::atomic_uint32_t frameIndex_{0};
+
+    std::atomic_uint32_t width_;
+    std::atomic_uint32_t height_;
 
   };
 

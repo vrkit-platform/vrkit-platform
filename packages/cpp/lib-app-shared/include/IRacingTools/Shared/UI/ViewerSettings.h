@@ -45,7 +45,7 @@ namespace IRacingTools::Shared::UI {
         bool streamerMode {false};
 
         ViewerFillMode fillMode {ViewerFillMode::Default};
-        ViewerAlignment alignment {ViewerAlignment::Center};
+        ViewerAlignment alignment {ViewerAlignment::TopLeft};
 
         static ViewerSettings Load();
         void save();

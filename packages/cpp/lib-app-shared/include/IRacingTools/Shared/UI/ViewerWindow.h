@@ -149,7 +149,7 @@ namespace IRacingTools::Shared::UI {
                 break;
             }
 
-            return {{renderLeft, renderTop}, {renderWidth, renderHeight}};
+            return {{renderLeft , renderTop}, {renderWidth, renderHeight}};
         }
 
 
@@ -244,23 +244,38 @@ namespace IRacingTools::Shared::UI {
                 L->info("Frame number ({})", frameNumber);
 
             bool rendered = false;
+
+            std::float_t totalWidth = 0, maxHeight = 0;
+            for (auto idx = 0; idx < overlayCount; idx++) {
+                const auto& overlayFrameConfig = *snapshot.getOverlayFrameConfig(idx);
+                auto imageSize = overlayFrameConfig.vr.locationOnTexture.size();
+                totalWidth += imageSize.width();
+                maxHeight = std::max<std::float_t>(maxHeight, imageSize.height());
+            }
+
+            const auto scalex = static_cast<float>(targetSize.width()) / static_cast<float>(totalWidth);
+            const auto scaley = static_cast<float>(targetSize.height()) / static_cast<float>(maxHeight);
+            const auto scale = std::min<float>(scalex, scaley);
+
+            std::uint32_t offsetX = 0;
             for (auto idx = 0; idx < overlayCount; idx++) {
                 const auto& overlayFrameConfig = *snapshot.getOverlayFrameConfig(idx);
                 const auto sourceRect = overlayFrameConfig.vr.locationOnTexture;
                 const auto& imageSize = sourceRect.size();
                 L->info("Render overlay ({}) with size({}x{})", idx, imageSize.width(), imageSize.height());
-                if (rendered)
-                    continue;
-
-                rendered = true;
+                // if (rendered)
+                //     continue;
+                //
+                // rendered = true;
                 // auto overlayIdx = overlayFrameConfig.overlayIdx;
 
 
-                const auto scalex = static_cast<float>(targetSize.width()) / static_cast<float>(imageSize.width());
-                const auto scaley = static_cast<float>(targetSize.height()) / static_cast<float>(imageSize.height());
-                const auto scale = std::min<float>(scalex, scaley);
+                // const auto scalex = static_cast<float>(targetSize.width()) / static_cast<float>(imageSize.width());
+                // const auto scaley = static_cast<float>(targetSize.height()) / static_cast<float>(imageSize.height());
+                // const auto scale = std::min<float>(scalex, scaley);
 
                 const PixelRect destRect = getDestRect(imageSize, scale);
+
 
                 auto ctx = dxr->getDXImmediateContext().get();
 
@@ -289,6 +304,8 @@ namespace IRacingTools::Shared::UI {
                 ctx->CopySubresourceRegion(windowTexture, 0, 0, 0, 0, rendererTexture_.get(), 0, &box);
 
                 renderCacheKey_ = snapshot.getRenderCacheKey();
+
+                offsetX += destRect.size().width();
             }
         }
     };

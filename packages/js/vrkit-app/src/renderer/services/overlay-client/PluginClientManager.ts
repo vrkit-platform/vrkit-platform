@@ -11,7 +11,6 @@ import { OverlayKind } from "vrkit-models"
 import OverlayClient from "./OverlayClient"
 import { asOption } from "@3fv/prelude-ts"
 import TrackManager from "../track-manager"
-import { isPromise } from "@3fv/guard"
 import { importDefault } from "vrkit-app-common/utils"
 import React from "react" // noinspection
 // TypeScriptUnresolvedVariable
@@ -21,6 +20,14 @@ const log = getLogger(__filename)
 
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
+
+const builtinPluginLoaders: Record<OverlayKind, () => Promise<React.ComponentType<PluginClientComponentProps>>> = {
+  [OverlayKind.CUSTOM]: (() => {
+    throw Error(`NotImplemented yet, will be part of plugin system`)
+  }) as any,
+  [OverlayKind.TRACK_MAP]: () => importDefault(import("../../overlays/track-map/TrackMapOverlayPlugin")),
+  [OverlayKind.CLOCK]: () => importDefault(import("../../overlays/clock/ClockOverlayPlugin"))
+}
 
 @Singleton()
 export class PluginClientManager {
@@ -72,8 +79,7 @@ export class PluginClientManager {
    * @param event
    * @private
    */
-  @Bind
-  private unload(event: Event = null) {
+  @Bind private unload(event: Event = null) {
     debug(`Unloading overlay manager client`)
 
     window.getVRKitPluginClient = undefined
@@ -98,18 +104,10 @@ export class PluginClientManager {
 
   private async launch() {
     const config = this.getConfig()
-    if (config.overlay.kind === OverlayKind.CUSTOM) {
-      throw Error(`NotImplemented yet, will be part of plugin system`)
-    }
-
-    const builtinPluginImportPromise =
-      config.overlay.kind === OverlayKind.TRACK_MAP ? import("../../overlays/track-map/TrackMapOverlayPlugin") : null
-
-    if (!isPromise(builtinPluginImportPromise)) {
-      throw Error(`${config.overlay.kind} is not implemented yet`)
-    }
-
-    this.reactComponent_ = await importDefault(builtinPluginImportPromise)
+    
+    
+    
+    this.reactComponent_ = await builtinPluginLoaders[config.overlay.kind]()
   }
 
   /**
@@ -153,8 +151,7 @@ export class PluginClientManager {
     return this.client.sessionData
   }
 
-  @Bind
-  async fetchSessionInfo() {
+  @Bind async fetchSessionInfo() {
     const session = await this.client.fetchSession()
     return session?.info
   }

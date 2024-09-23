@@ -30,11 +30,12 @@
 
 namespace IRacingTools::Shared::UI {
 
-class D3D11Renderer final : public Renderer {
+class ViewerWindowD3D11Renderer final : public Renderer {
  public:
-  D3D11Renderer() = delete;
-  D3D11Renderer(const winrt::com_ptr<ID3D11Device>&);
-  virtual ~D3D11Renderer();
+  ViewerWindowD3D11Renderer() = delete;
+
+  explicit ViewerWindowD3D11Renderer(const winrt::com_ptr<ID3D11Device>&);
+  virtual ~ViewerWindowD3D11Renderer();
   virtual std::wstring_view getName() const noexcept override;
 
   virtual SHM::SHMCachedReader* getSHM() override;

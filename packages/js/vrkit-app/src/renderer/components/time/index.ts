@@ -1,2 +1,2 @@
 export * from "./DurationView"
-export * from "./TimeConstants"
+export * from "./TimeTools"

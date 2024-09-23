@@ -25,31 +25,31 @@
 
 namespace IRacingTools::Shared::UI {
 
-D3D11Renderer::D3D11Renderer(const winrt::com_ptr<ID3D11Device>& device) {
+ViewerWindowD3D11Renderer::ViewerWindowD3D11Renderer(const winrt::com_ptr<ID3D11Device>& device) {
   d3dDevice_ = device.as<ID3D11Device1>();
   device->GetImmediateContext(d3dDeviceContext_.put());
 
   spriteBatch_ = std::make_unique<Graphics::SpriteBatch>(device.get());
 }
 
-D3D11Renderer::~D3D11Renderer() = default;
+ViewerWindowD3D11Renderer::~ViewerWindowD3D11Renderer() = default;
 
-std::wstring_view D3D11Renderer::getName() const noexcept {
+std::wstring_view ViewerWindowD3D11Renderer::getName() const noexcept {
   return {L"D3D11"};
 }
 
-SHM::SHMCachedReader* D3D11Renderer::getSHM() {
+SHM::SHMCachedReader* ViewerWindowD3D11Renderer::getSHM() {
   return &cachedReader_;
 }
 
-void D3D11Renderer::initialize(uint8_t swapchainLength) {
+void ViewerWindowD3D11Renderer::initialize(uint8_t swapchainLength) {
   cachedReader_.initializeCache(d3dDevice_.get(), swapchainLength);
 }
 
-uint64_t D3D11Renderer::render(
+uint64_t ViewerWindowD3D11Renderer::render(
   SHM::IPCClientTexture* sourceTexture,
   const PixelRect& sourceRect,
-  HANDLE destTextureHandle,
+  HANDLE destTexture,
   const PixelSize& destTextureDimensions,
   const PixelRect& destRect,
   [[maybe_unused]] HANDLE fence,
@@ -61,15 +61,15 @@ uint64_t D3D11Renderer::render(
   if (sessionId_ != cachedReader_.getSessionId()) {
     destHandle_ = {};
   }
-  if (destHandle_ != destTextureHandle) {
+  if (destHandle_ != destTexture) {
     destTexture_ = nullptr;
     destRenderTargetView_ = nullptr;
     check_hresult(d3dDevice_->OpenSharedResource1(
-      destTextureHandle, IID_PPV_ARGS(destTexture_.put())));
+      destTexture, IID_PPV_ARGS(destTexture_.put())));
 
     check_hresult(d3dDevice_->CreateRenderTargetView(
       destTexture_.get(), nullptr, destRenderTargetView_.put()));
-    destHandle_ = destTextureHandle;
+    destHandle_ = destTexture;
     destDimensions_ = destTextureDimensions;
   }
 
@@ -89,7 +89,7 @@ uint64_t D3D11Renderer::render(
   return fenceValueIn;
 }
 
-void D3D11Renderer::saveTextureToFile(
+void ViewerWindowD3D11Renderer::saveTextureToFile(
   SHM::IPCClientTexture* texture,
   const std::filesystem::path& path) {
   check_hresult(DirectX::SaveDDSTextureToFile(

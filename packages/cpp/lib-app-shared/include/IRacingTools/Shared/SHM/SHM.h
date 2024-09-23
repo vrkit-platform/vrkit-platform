@@ -33,7 +33,7 @@ namespace IRacingTools::Shared::SHM {
     };
 
     struct SHMOverlayFrameConfig final {
-        uint64_t layerID{};
+        uint64_t overlayIdx{};
 
         bool vrEnabled{true};
         VR::VRLayer vr{};
@@ -212,7 +212,7 @@ namespace IRacingTools::Shared::SHM {
         void submitEmptyFrame();
 
         NextFrameInfo beginFrame() noexcept;
-        void submitFrame(const SHMConfig& config, const std::vector<SHMOverlayFrameConfig>& layers, HANDLE texture, HANDLE fence);
+        void submitFrame(const SHMConfig& config, const std::vector<SHMOverlayFrameConfig>& overlayFrameConfigs, HANDLE texture, HANDLE fence);
 
         // "Lockable" C++ named concept: supports std::unique_lock
         void lock();
@@ -257,8 +257,8 @@ namespace IRacingTools::Shared::SHM {
         /// Changes even if the feeder restarts with frame ID 0
         size_t getRenderCacheKey() const;
         SHMConfig getConfig() const;
-        uint8_t getLayerCount() const;
-        const SHMOverlayFrameConfig* getLayerConfig(uint8_t layerIndex) const;
+        uint8_t getOverlayCount() const;
+        const SHMOverlayFrameConfig* getOverlayFrameConfig(uint8_t layerIndex) const;
 
         template <std::derived_from<IPCClientTexture> T>
         T* getTexture() const {

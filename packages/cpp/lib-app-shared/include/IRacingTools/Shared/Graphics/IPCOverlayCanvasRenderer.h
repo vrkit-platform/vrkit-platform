@@ -11,7 +11,7 @@
 
 
 #include <IRacingTools/Shared/Graphics/DXResources.h>
-#include <IRacingTools/Shared/Graphics/ImageDataBuffer.h>
+#include <IRacingTools/Shared/Graphics/ImageDataBufferContainer.h>
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
 #include <IRacingTools/Shared/Graphics/Spriting.h>
 
@@ -33,23 +33,32 @@ namespace IRacingTools::Shared::Graphics {
      */
     Rect<float> vrRect;
 
-    ImageDataBufferContainer<FormatChannels> imageData;
+    std::shared_ptr<ImageDataBufferContainer<FormatChannels>> imageData;
 
     PixelSize getImageSize() const {
-      return imageData.getImageSize();
+      return imageData->getImageSize();
     }
 
     std::uint32_t getImageDataSize() const {
-      return imageData.getImageDataSize();
+      return imageData->getImageDataSize();
     }
 
     std::uint32_t getImageDataStride() const {
-      return imageData.getImageDataStride();
+      return imageData->getImageDataStride();
+    }
+
+    IPCOverlayFrameData(const std::uint32_t& width,const std::uint32_t& height) : screenRect{}, vrRect{}, imageData(std::make_shared<ImageDataBufferContainer<FormatChannels>>(width, height)) {
+
     }
   };
 
   using RGBAIPCOverlayFrameData = IPCOverlayFrameData<ImageFormatChannels::RGBA>;
 
+  /**
+   * @brief Producer that provides & notifies the renderer of frame data
+   *
+   * @tparam FormatChannels channel config
+   */
   template <ImageFormatChannels FormatChannels>
   struct IPCOverlayFrameProducer {
     using OnFrameData = std::function<void(
@@ -286,7 +295,7 @@ namespace IRacingTools::Shared::Graphics {
         // mCanvas->SetActiveIdentity(i);
         auto imageSize = overlayData->getImageSize(); // sourceTarget->getDimensions();
         SHM::SHMOverlayFrameConfig overlayFrameConfig{
-          .layerID = i,
+          .overlayIdx = i,
           .vrEnabled = true,
           .vr = {
             .pose{
@@ -303,7 +312,7 @@ namespace IRacingTools::Shared::Graphics {
 
         D3D11_BOX destRegion{bounds.left(), bounds.top(), 0, bounds.left() + imageSize.width(), bounds.top() + imageSize.height(), 1};
         // ctx->CopySubresourceRegion(target_->d3d().texture(), 0, 0, 0, 0, sourceTarget->d3d().texture(), 0, &srcBox);
-        overlayData->imageData.consume(
+        overlayData->imageData->consume(
           [&](auto data, auto len, auto imageDataBuffer) -> std::uint32_t {
             spdlog::info("Rendering overlay image data (idx={})", i);
             ctx->UpdateSubresource(
@@ -311,7 +320,7 @@ namespace IRacingTools::Shared::Graphics {
               0,
               &destRegion,
               data,
-              overlayData->imageData.getImageDataStride(),
+              overlayData->imageData->getImageDataStride(),
               0
             );
             return len;
@@ -326,13 +335,13 @@ namespace IRacingTools::Shared::Graphics {
       this->submitFrame(shmOverlayFrames, inputLayerID);
     }
 
-    void submitFrame(const std::vector<SHM::SHMOverlayFrameConfig>& shmLayers, std::uint64_t inputLayerID) noexcept {
+    void submitFrame(const std::vector<SHM::SHMOverlayFrameConfig>& shmOverlayFrameConfigs, std::uint64_t inputLayerID) noexcept {
       if (!writer_) {
         return;
       }
 
 
-      const auto layerCount = shmLayers.size();
+      // const auto overlayCount = shmOverlayFrameConfigs.size();
 
       auto ctx = dxr_->getDXImmediateContext().get();
       const D3D11_BOX srcBox{
@@ -371,7 +380,10 @@ namespace IRacingTools::Shared::Graphics {
 
       SHM::SHMConfig config{
         .globalInputLayerId = 0,
-        .vr = {},
+
+        .vr = {
+
+        },
         //.mTarget = GetConsumerPatternForGame(mCurrentGame),
         .textureSize = destResources->textureSize,
       };
@@ -386,7 +398,7 @@ namespace IRacingTools::Shared::Graphics {
       // }
 
       {
-        writer_->submitFrame(config, shmLayers, destResources->textureHandle.get(), destResources->fenceHandle.get());
+        writer_->submitFrame(config, shmOverlayFrameConfigs, destResources->textureHandle.get(), destResources->fenceHandle.get());
       }
     }
   };

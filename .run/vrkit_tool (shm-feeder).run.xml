@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="vrkit_tool (shm-feeder)" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="shm-feeder" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_tool" CONFIG_NAME="DebugClionMsBuild" RUN_TARGET_PROJECT_NAME="vrkit" RUN_TARGET_NAME="vrkit_tool">
+    <envs>
+      <env name="Path" value="c:\qt\6.5.0\bin;c:\qt\6.5.0\lib" />
+    </envs>
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

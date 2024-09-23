@@ -81,7 +81,7 @@ namespace IRacingTools::Shared::UI {
 
             if (!renderer_) {
                 if constexpr (GP == Graphics::GraphicsPlatform::D3D11) {
-                    renderer_ = std::make_shared<D3D11Renderer>(dxr->getDXDevice());
+                    renderer_ = std::make_shared<ViewerWindowD3D11Renderer>(dxr->getDXDevice());
                     //cachedReader_ = std::make_shared<SHM::DX11::SHMDX11CachedReader>(SHM::ConsumerKind::Viewer);
                 }
                 else {
@@ -236,51 +236,60 @@ namespace IRacingTools::Shared::UI {
             }
 
             const auto config = snapshot.getConfig();
-            const auto layerId = 0;
+
+            const auto overlayCount = snapshot.getOverlayCount();
+
             const auto frameNumber = renderer_->getSHM()->getFrameCountForMetricsOnly();
             if (frameNumber % 60 == 0)
                 L->info("Frame number ({})", frameNumber);
 
-            const auto& layer = *snapshot.getLayerConfig(layerId);
+            bool rendered = false;
+            for (auto idx = 0; idx < overlayCount; idx++) {
+                const auto& overlayFrameConfig = *snapshot.getOverlayFrameConfig(idx);
+                const auto sourceRect = overlayFrameConfig.vr.locationOnTexture;
+                const auto& imageSize = sourceRect.size();
+                L->info("Render overlay ({}) with size({}x{})", idx, imageSize.width(), imageSize.height());
+                if (rendered)
+                    continue;
 
-            auto layerID = layer.layerID;
+                rendered = true;
+                // auto overlayIdx = overlayFrameConfig.overlayIdx;
 
-            const auto sourceRect = layer.vr.locationOnTexture;
 
-            const auto& imageSize = sourceRect.size();
-            const auto scalex = static_cast<float>(targetSize.width()) / static_cast<float>(imageSize.width());
-            const auto scaley = static_cast<float>(targetSize.height()) / static_cast<float>(imageSize.height());
-            const auto scale = std::min<float>(scalex, scaley);
+                const auto scalex = static_cast<float>(targetSize.width()) / static_cast<float>(imageSize.width());
+                const auto scaley = static_cast<float>(targetSize.height()) / static_cast<float>(imageSize.height());
+                const auto scale = std::min<float>(scalex, scaley);
 
-            const PixelRect destRect = getDestRect(imageSize, scale);
+                const PixelRect destRect = getDestRect(imageSize, scale);
 
-            auto ctx = dxr->getDXImmediateContext().get();
+                auto ctx = dxr->getDXImmediateContext().get();
 
-            const D3D11_BOX box{0, 0, 0, targetSize.width(), targetSize.height(), 1,};
+                const D3D11_BOX box{0, 0, 0, targetSize.width(), targetSize.height(), 1,};
 
-            // Forcing the renderer to render on top of the background to make sure it
-            // preserves the existing content; clearing is fine for VR, but for non-VR
-            // we need to preserve the original background.
+                // Forcing the renderer to render on top of the background to make sure it
+                // preserves the existing content; clearing is fine for VR, but for non-VR
+                // we need to preserve the original background.
 
-            ctx->CopySubresourceRegion(rendererTexture_.get(), 0, 0, 0, 0, windowTexture, 0, &box);
+                ctx->CopySubresourceRegion(rendererTexture_.get(), 0, 0, 0, 0, windowTexture, 0, &box);
 
-            check_hresult(ctx->Signal(fence_.get(), ++fenceValue_));
+                check_hresult(ctx->Signal(fence_.get(), ++fenceValue_));
 
-            fenceValue_ = renderer_->render(
-                snapshot.getTexture<SHM::IPCClientTexture>(),
-                sourceRect,
-                rendererTextureHandle_.get(),
-                rendererTextureSize_,
-                destRect,
-                fenceHandle_.get(),
-                fenceValue_
-            );
+                fenceValue_ = renderer_->render(
+                    snapshot.getTexture<SHM::IPCClientTexture>(),
+                    sourceRect,
+                    rendererTextureHandle_.get(),
+                    rendererTextureSize_,
+                    destRect,
+                    fenceHandle_.get(),
+                    fenceValue_
+                );
 
-            check_hresult(ctx->Wait(fence_.get(), fenceValue_));
+                check_hresult(ctx->Wait(fence_.get(), fenceValue_));
 
-            ctx->CopySubresourceRegion(windowTexture, 0, 0, 0, 0, rendererTexture_.get(), 0, &box);
+                ctx->CopySubresourceRegion(windowTexture, 0, 0, 0, 0, rendererTexture_.get(), 0, &box);
 
-            renderCacheKey_ = snapshot.getRenderCacheKey();
+                renderCacheKey_ = snapshot.getRenderCacheKey();
+            }
         }
     };
 };

@@ -37,7 +37,7 @@ namespace IRacingTools::App::Node {
     const std::int32_t& windowId,
     const std::string& overlayId,
     const PixelSize& size
-  ) : IPCOverlayFrameData{.screenRect = {}, .vrRect = {}, .imageData = {size.width(), size.height()}},
+  ) : Graphics::RGBAIPCOverlayFrameData{.screenRect = {}, .vrRect = {}, .imageData = {size.width(), size.height()}},
       windowId(windowId),
       overlayId(overlayId) {
 
@@ -314,7 +314,7 @@ namespace IRacingTools::App::Node {
     }
 
     auto buf = info[1].As<Napi::Uint8Array>();
-    auto res = resource->imageData.produce(buf.Data(), buf.ByteLength());
+    auto res = resource->imageData->produce(buf.Data(), buf.ByteLength());
     if (res && res.value() > 0) {
       LOCK(onFrameMutex_, lock);
       onFrameCondition_.notify_all();

@@ -150,7 +150,7 @@ namespace IRacingTools::OpenXR {
         const Pose& hmdPose,
         const Pose& kneeboardPose
     ) {
-        auto& lookingAtBoard = isLookingAtKneeboard_[layer.layerID];
+        auto& lookingAtBoard = isLookingAtKneeboard_[layer.overlayIdx];
 
         if (layer.vr.gazeTargetScale.horizontal < 0.1 || layer.vr.gazeTargetScale.vertical < 0.1) {
             return false;
@@ -275,12 +275,12 @@ namespace IRacingTools::OpenXR {
             return openXR_->xrEndFrame(session, frameEndInfo);
         }
 
-        if (snapshot.getLayerCount() < 1) {
+        if (snapshot.getOverlayCount() < 1) {
             TraceLoggingWriteTagged(activity, "No SHM layers");
             return openXR_->xrEndFrame(session, frameEndInfo);
         }
 
-        const auto swapchainDimensions = Graphics::Spriting::GetBufferSize(snapshot.getLayerCount());
+        const auto swapchainDimensions = Graphics::Spriting::GetBufferSize(snapshot.getOverlayCount());
 
         if (swapchain_) {
             if ((swapchainDimensions_ != swapchainDimensions) || (sessionID_ != snapshot.getSessionID())) {
@@ -351,7 +351,7 @@ namespace IRacingTools::OpenXR {
 
             cacheKeys.push_back(params.cacheKey);
             PixelRect destRect{
-                Graphics::Spriting::GetOffset(layerIndex, snapshot.getLayerCount()),
+                Graphics::Spriting::GetOffset(layerIndex, snapshot.getOverlayCount()),
                 layer->vr.locationOnTexture.size(),
             };
             // using Upscaling = VRConfig::Quirks::Upscaling;
@@ -539,12 +539,12 @@ namespace IRacingTools::OpenXR {
             eyeHeight_ = {hmdPose.position.y};
         }
 
-        const auto totalLayers = snapshot.getLayerCount();
+        const auto totalLayers = snapshot.getOverlayCount();
 
         std::vector<Layer> ret;
         ret.reserve(totalLayers);
         for (uint32_t layerIndex = 0; layerIndex < totalLayers; ++layerIndex) {
-            const auto layerConfig = snapshot.getLayerConfig(layerIndex);
+            const auto layerConfig = snapshot.getOverlayFrameConfig(layerIndex);
             if (!layerConfig->vrEnabled) {
                 continue;
             }
@@ -557,7 +557,7 @@ namespace IRacingTools::OpenXR {
             const auto activeLayerID = config.globalInputLayerId;
 
             for (const auto& [layerConfig, renderParams] : std::ranges::reverse_view(ret)) {
-                if (renderParams.isLookingAtKneeboard && layerConfig->layerID != activeLayerID) {
+                if (renderParams.isLookingAtKneeboard && layerConfig->overlayIdx != activeLayerID) {
                     // SHM::ActiveConsumers::SetActiveInGameViewID(layerConfig->layerID_);
                     break;
                 }

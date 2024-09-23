@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="vrkit_tool (feeder &amp; viewer)" type="CompoundRunConfigurationType">
+    <toRun name="vrkit_tool (shm-feeder)" targetId="CMakeBuildProfile:DebugClionNinja" type="CMakeRunConfiguration" />
+    <toRun name="vrkit_tool (shm-viewer)" targetId="CMakeBuildProfile:DebugClionNinja" type="CMakeRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>

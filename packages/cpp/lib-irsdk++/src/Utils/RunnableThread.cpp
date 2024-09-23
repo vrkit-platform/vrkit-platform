@@ -5,6 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include <IRacingTools/SDK/Utils/RunnableThread.h>
+#include <IRacingTools/SDK/Utils/ThreadHelpers.h>
 
 namespace IRacingTools::SDK::Utils {
   void RunnableThread::stop() {
@@ -41,6 +42,10 @@ namespace IRacingTools::SDK::Utils {
     return running_;
   }
 
+  void RunnableThread::setThreadName(const std::string& threadName) {
+    SetThreadName(thread_.get(), threadName);
+  }
+
   void RunnableThread::runnableWrapper() {
     auto cleanup = gsl::finally(
       [&] {
@@ -60,6 +65,7 @@ namespace IRacingTools::SDK::Utils {
   }
 
   FnIndefiniteThread::FnIndefiniteThread(Fn fn) : fn_(fn) {
+
   }
 
   void FnIndefiniteThread::runnable() {

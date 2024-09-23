@@ -22,6 +22,8 @@ namespace IRacingTools::SDK::Utils {
 
         bool isRunning();
 
+        void setThreadName(const std::string& threadName);
+
     protected:
         void runnableWrapper();
 

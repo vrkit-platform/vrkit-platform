@@ -262,7 +262,7 @@ namespace IRacingTools::Shared::SHM {
 
   void Writer::submitFrame(
     const SHMConfig& config,
-    const std::vector<SHMOverlayFrameConfig>& layers,
+    const std::vector<SHMOverlayFrameConfig>& overlayFrameConfigs,
     HANDLE texture,
     HANDLE fence
   ) {
@@ -270,20 +270,20 @@ namespace IRacingTools::Shared::SHM {
       throw std::logic_error("Attempted to update invalid SHM");
     }
 
-    if (layers.size() > MaxViewCount) [[unlikely]] {
+    if (overlayFrameConfigs.size() > MaxViewCount) [[unlikely]] {
       VRK_LOG_AND_FATAL(
-        "Asked to publish {} layers, but max is {}", layers.size(), MaxViewCount);
+        "Asked to publish {} layers, but max is {}", overlayFrameConfigs.size(), MaxViewCount);
     }
 
     impl_->metadata_->gpuAdapterId = impl_->gpuAdapterId_;
     impl_->metadata_->config = config;
     impl_->metadata_->frameNumber++;
     impl_->metadata_->flags = static_cast<SHMHeaderFlags>(impl_->metadata_->flags | FEEDER_ATTACHED);
-    impl_->metadata_->overlayFrameCount = static_cast<uint8_t>(layers.size());
+    impl_->metadata_->overlayFrameCount = static_cast<uint8_t>(overlayFrameConfigs.size());
     impl_->metadata_->overlayProducerProcessId = impl_->processId_;
     impl_->metadata_->texture = texture;
     impl_->metadata_->fence = fence;
-    memcpy(impl_->metadata_->overlayFrameConfigs, layers.data(), sizeof(SHMOverlayFrameConfig) * layers.size());
+    memcpy(impl_->metadata_->overlayFrameConfigs, overlayFrameConfigs.data(), sizeof(SHMOverlayFrameConfig) * overlayFrameConfigs.size());
   }
 
   void Writer::lock() {
@@ -386,16 +386,16 @@ namespace IRacingTools::Shared::SHM {
     return metadata_->config;
   }
 
-  uint8_t Snapshot::getLayerCount() const {
+  uint8_t Snapshot::getOverlayCount() const {
     if (!this->hasMetadata()) {
       return 0;
     }
     return metadata_->overlayFrameCount;
   }
 
-  const SHMOverlayFrameConfig* Snapshot::getLayerConfig(uint8_t layerIndex) const {
-    if (layerIndex >= this->getLayerCount()) [[unlikely]] {
-      VRK_LOG_AND_FATAL("Asked for layer {}, but there are {} layers", layerIndex, this->getLayerCount());
+  const SHMOverlayFrameConfig* Snapshot::getOverlayFrameConfig(uint8_t layerIndex) const {
+    if (layerIndex >= this->getOverlayCount()) [[unlikely]] {
+      VRK_LOG_AND_FATAL("Asked for layer {}, but there are {} layers", layerIndex, this->getOverlayCount());
     }
 
     return &metadata_->overlayFrameConfigs[layerIndex];

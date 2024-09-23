@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="vrkit_tool (play &amp; viewer)" type="CompoundRunConfigurationType">
+    <toRun name="irt_tool (play) (red-bull-ring)" type="CMakeRunConfiguration" />
+    <toRun name="irt_tool (shm-viewer)" type="CMakeRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>

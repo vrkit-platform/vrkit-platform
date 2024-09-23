@@ -1,7 +1,5 @@
 
-@use "sass:map";
-
-$titlebarHeight: 2rem;
+//$titlebarHeight: 2rem;
 $transition: none 0.25s ease-out;
 $transition-props: background-color, opacity, color;
 
@@ -12,22 +10,26 @@ html, body, #root {
 
 html, body {
 	padding: 0;
+	width: 100vw;
+	height: 100vh;
 }
 
 #root {
 	padding: 1rem;
 	z-index: 1;
 	width: 100vw;
-	height: calc(100vh - $titlebarHeight);
+	height: 100vh;
 	position: fixed;
 	border-radius: 1rem;
-	top: $titlebarHeight;
+	top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
 	overflow: hidden;
 	transition: $transition;
 	transition-property: $transition-props;
+	
+	
 }
 
 .electronWindowDraggable {

@@ -35,6 +35,7 @@ import { OverlayClient } from "../../services/overlay-client"
 import Typography from "@mui/material/Typography"
 import Button from "@mui/material/Button"
 import SharedAppStateClient from "../../services/shared-app-state-client"
+import { SizeI } from "vrkit-models"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -89,6 +90,7 @@ const OverlayConfigEditorRoot = styled(Box, {
  */
 export interface OverlayWindowLayoutEditorProps extends BoxProps {
   mode: OverlayMode
+  size: SizeI
 }
 
 /**
@@ -98,7 +100,7 @@ export interface OverlayWindowLayoutEditorProps extends BoxProps {
  * @returns {JSX.Element}
  */
 export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps) {
-  const { mode, ...other } = props,
+  const { mode,size, ...other } = props,
     isEditMode = mode !== OverlayMode.NORMAL,
     overlayClient = useService(OverlayClient),
       sharedAppStateClient = useService(SharedAppStateClient),
@@ -113,7 +115,9 @@ export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps)
       })}
       {...other}
     >
+      {size.height > 200 ?<>
       <Box className={overlayConfigEditorClasses.header}>
+        
         <Typography
           className="electronWindowDraggable"
           sx={{ ...FlexScaleZero }}
@@ -135,6 +139,15 @@ export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps)
         <FlexRowCenterBox>Resize: drag corner anchors</FlexRowCenterBox>
         <FlexRowCenterBox>Move: click & drag anywhere in this window</FlexRowCenterBox>
       </Box>
+      </> : <>
+        <Typography
+            className="electronWindowDraggable"
+            sx={{ ...FlexScaleZero }}
+            variant="h4"
+        >
+          Resize & Drag
+        </Typography>
+      </>}
     </OverlayConfigEditorRoot>
   )
 }

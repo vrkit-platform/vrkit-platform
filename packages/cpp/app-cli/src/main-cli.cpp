@@ -15,6 +15,7 @@
 #include "LiveDataReplayArgCommand.h"
 #include "ProcessAllTelemetryArgCommand.h"
 #include "SHMViewerArgCommand.h"
+#include "SHMFeederArgCommand.h"
 #include "ServiceDaemonArgCommand.h"
 #include "SessionRecordArgCommand.h"
 #include "TelemetryDumpArgCommand.h"
@@ -27,7 +28,7 @@ using namespace IRacingTools::SDK;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::App::Commands;
 
-namespace di = boost::di;
+// namespace di = boost::di;
 
 int main(int argc, char **argv) {
   System::DisplayInfoSetup();
@@ -43,7 +44,7 @@ int main(int argc, char **argv) {
   app.set_version_flag("--version", appVersion);
 
   auto cmds =
-    ArgCommand::build<LiveDataReplayArgCommand, TelemetryDumpArgCommand, ProcessAllTelemetryArgCommand, DashboardArgCommand, GenerateTrackmapArgCommand, SessionRecordArgCommand, SHMViewerArgCommand, ServiceDaemonArgCommand>(&app);
+    ArgCommand::build<LiveDataReplayArgCommand, TelemetryDumpArgCommand, ProcessAllTelemetryArgCommand, DashboardArgCommand, GenerateTrackmapArgCommand, SessionRecordArgCommand, SHMFeederArgCommand, SHMViewerArgCommand, ServiceDaemonArgCommand>(&app);
 
   CLI11_PARSE(app, argc, argv);
 

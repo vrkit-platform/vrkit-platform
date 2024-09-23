@@ -10,33 +10,37 @@ import { ClassNamesKey, createClassNames } from "vrkit-app-renderer/styles/creat
 import { getLogger } from "@3fv/logger-proxy"
 import Box from "@mui/material/Box"
 import {
-  flexAlign,
+  Fill, flexAlign,
   FlexRow,
   FlexRowCenter,
   FlexScaleZero,
+  hasCls,
   heightConstraint,
   OverflowHidden
 } from "vrkit-app-renderer/styles/ThemedStyles"
 import { OverlayMode } from "vrkit-app-common/models/overlay-manager"
 import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
+import clsx from "clsx"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const classPrefix = "overlayConfigEditor"
-export const overlayConfigEditorClasses = createClassNames(classPrefix, "modeNormal", "modeEdit")
-export type OverlayConfigEditorClassKey = ClassNamesKey<typeof overlayConfigEditorClasses>
+const classNames = createClassNames(classPrefix, "root")
+
 
 const OverlayAppBodyContentRoot = styled(Box, {
   name: "OverlayAppBodyContentRoot",
   label: "OverlayAppBodyContentRoot"
 })(({ theme }) => ({
-  position: "relative",
-  objectFit: "contain",
-  ...FlexRowCenter,
-  ...FlexScaleZero,
-  ...heightConstraint("calc(100% - 2rem)")
+  [hasCls(classNames.root)]: {
+    position: "relative",
+    objectFit: "contain", ...FlexRowCenter,
+    ...Fill
+    // ...heightConstraint(
+    //     "calc(100% - 2rem)")
+  }
 }))
 
 export default function OverlayWindowAppBody() {
@@ -97,6 +101,7 @@ export default function OverlayWindowAppBody() {
       {!isEditMode && (
         <OverlayAppBodyContentRoot
           id="content"
+          className={clsx(classNames.root)}
           ref={contentRef}
         >
           {size && (
@@ -107,7 +112,9 @@ export default function OverlayWindowAppBody() {
           )}
         </OverlayAppBodyContentRoot>
       )}
-      <OverlayWindowLayoutEditor mode={mode} />
+      {!!size &&
+      <OverlayWindowLayoutEditor mode={mode} size={size} />
+      }
     </>
   )
 }

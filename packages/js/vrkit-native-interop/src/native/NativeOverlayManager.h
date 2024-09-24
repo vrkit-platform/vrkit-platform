@@ -22,7 +22,7 @@ namespace IRacingTools::App::Node {
   /**
    * @brief Holds resources required for each overlay window
    */
-  struct NativeOverlayWindowResources : Graphics::RGBAIPCOverlayFrameData {
+  struct NativeOverlayWindowResources : Graphics::BGRAIPCOverlayFrameData {
     std::int32_t windowId;
     std::string overlayId;
 
@@ -33,13 +33,13 @@ namespace IRacingTools::App::Node {
     explicit NativeOverlayWindowResources(
         const std::int32_t &windowId,
         const std::string &overlayId,
-        const PixelSize &size);
+        const PixelSize& imageSize, const ScreenRect& screenRect = {}, const VRRect& vrRect = {});
   };
 
   /**
    * @brief Native resource manager for overlay windows
    */
-  class NativeOverlayManager : public Napi::ObjectWrap<NativeOverlayManager>, public Graphics::RGBAIPCOverlayFrameProducer {
+  class NativeOverlayManager : public Napi::ObjectWrap<NativeOverlayManager>, public Graphics::BGRAIPCOverlayFrameProducer {
   public:
     static Napi::FunctionReference &Constructor(Napi::Env env) {
       return NativeSystemAddon::fromEnv(env)->overlayManagerCtor();
@@ -69,7 +69,7 @@ namespace IRacingTools::App::Node {
 
     virtual void Finalize(Napi::Env) override;
 
-    std::shared_ptr<Graphics::RGBAIPCOverlayCanvasRenderer> ipcDxRenderer();
+    std::shared_ptr<Graphics::BGRAIPCOverlayCanvasRenderer> ipcDxRenderer();
 
     std::shared_ptr<NativeOverlayWindowResources> getResourceByOverlayId(const std::string& overlayId);
    std::shared_ptr<NativeOverlayWindowResources> getResourceByWindowId(const std::int32_t& windowId);
@@ -158,6 +158,6 @@ namespace IRacingTools::App::Node {
     std::vector<std::shared_ptr<NativeOverlayWindowResources>> resources_{};
 
     std::shared_ptr<Graphics::DXResources> dxr_;
-    std::shared_ptr<Graphics::RGBAIPCOverlayCanvasRenderer> ipcDxRenderer_;
+    std::shared_ptr<Graphics::BGRAIPCOverlayCanvasRenderer> ipcDxRenderer_;
   };
 } // namespace IRacingTools::App::Node

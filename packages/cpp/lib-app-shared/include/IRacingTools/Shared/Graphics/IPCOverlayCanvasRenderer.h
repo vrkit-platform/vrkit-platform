@@ -22,37 +22,66 @@ namespace IRacingTools::Shared::Graphics {
    * @tparam FormatChannels
    */
   template <ImageFormatChannels FormatChannels>
-  struct IPCOverlayFrameData {
+  class IPCOverlayFrameData {
+    std::mutex mutex_{};
+
+
+    PixelSize imageSize_{};
     /**
      * @brief VR Rect
      */
-    PixelRect screenRect;
+    ScreenRect screenRect_{};
 
     /**
      * @brief VR rectangle
      */
-    Rect<float> vrRect;
+    VRRect vrRect_{};
 
-    std::shared_ptr<ImageDataBufferContainer<FormatChannels>> imageData;
+    const std::shared_ptr<ImageDataBufferContainer<FormatChannels>> imageData_;
+
+  public:
+
+    ScreenRect screenRect() {
+      return screenRect_;
+    };
+
+    VRRect vrRect() {
+      return vrRect_;
+    };
+
+    PixelSize imageSize() {
+      return imageSize_;
+    };
+
+    std::shared_ptr<ImageDataBufferContainer<FormatChannels>> imageData() {
+      return imageData_;
+    };
 
     PixelSize getImageSize() const {
-      return imageData->getImageSize();
+      return imageData_->getImageSize();
     }
 
     std::uint32_t getImageDataSize() const {
-      return imageData->getImageDataSize();
+      return imageData_->getImageDataSize();
     }
 
     std::uint32_t getImageDataStride() const {
-      return imageData->getImageDataStride();
+      return imageData_->getImageDataStride();
     }
 
-    IPCOverlayFrameData(const std::uint32_t& width,const std::uint32_t& height) : screenRect{}, vrRect{}, imageData(std::make_shared<ImageDataBufferContainer<FormatChannels>>(width, height)) {
+    bool update(const PixelSize& imageSize, const ScreenRect& screenRect, const VRRect& vrRect) {
+      LOCK(mutex_, lock);
+      screenRect_ = screenRect;
+      vrRect_ = vrRect;
+      return imageData_->resize(imageSize.width(), imageSize.height());
+    }
 
+    IPCOverlayFrameData(const PixelSize& imageSize, const ScreenRect& screenRect = {}, const VRRect& vrRect = {}) : screenRect_(screenRect), vrRect_(vrRect), imageData_(std::make_shared<ImageDataBufferContainer<FormatChannels>>(imageSize.width(), imageSize.height())) {
+      update(imageSize,screenRect, vrRect);
     }
   };
 
-  using RGBAIPCOverlayFrameData = IPCOverlayFrameData<ImageFormatChannels::RGBA>;
+  using BGRAIPCOverlayFrameData = IPCOverlayFrameData<ImageFormatChannels::RGBA>;
 
   /**
    * @brief Producer that provides & notifies the renderer of frame data
@@ -296,24 +325,30 @@ namespace IRacingTools::Shared::Graphics {
         auto imageSize = overlayData->getImageSize(); // sourceTarget->getDimensions();
         SHM::SHMOverlayFrameConfig overlayFrameConfig{
           .overlayIdx = i,
+          .locationOnTexture{.offset_ = {bounds.left(), 0}, .size_ = imageSize, .origin_ = PixelRect::Origin::TopLeft},
           .vrEnabled = true,
           .vr = {
             .pose{
               -0.25f, 0.0f, -1.0f
             },
             .physicalSize{0.15f, 0.25f},
+            .rect = overlayData->vrRect(),
+
             .enableGazeZoom{false},
             .zoomScale{1.0f},
             .gazeTargetScale{},
             .opacity{},
-            .locationOnTexture{.offset_ = {0, 0}, .size_ = imageSize, .origin_ = PixelRect::Origin::TopLeft}
+
+          },
+          .screen = {
+            .rect = overlayData->screenRect()
           }
         };
 
         D3D11_BOX destRegion{bounds.left(), bounds.top(), 0, bounds.left() + imageSize.width(), bounds.top() + imageSize.height(), 1};
         // ctx->CopySubresourceRegion(target_->d3d().texture(), 0, 0, 0, 0, sourceTarget->d3d().texture(), 0, &srcBox);
-        auto imageDataBuffer = overlayData->imageData->newBuffer();
-        if (!overlayData->imageData->consume(imageDataBuffer) || !imageDataBuffer || !imageDataBuffer->isFilled()) {
+        auto imageDataBuffer = overlayData->imageData()->newBuffer();
+        if (!overlayData->imageData()->consume(imageDataBuffer) || !imageDataBuffer || !imageDataBuffer->isFilled()) {
           spdlog::warn("no frame buffer consumed/populated/filled (idx={})", i);
           continue;
         }
@@ -327,7 +362,7 @@ namespace IRacingTools::Shared::Graphics {
             0,
             &destRegion,
             data,
-            overlayData->imageData->getImageDataStride(),
+            overlayData->imageData()->getImageDataStride(),
             0
           );
           return len;
@@ -409,7 +444,7 @@ namespace IRacingTools::Shared::Graphics {
     }
   };
 
-  using RGBAIPCOverlayFrameProducer = IPCOverlayFrameProducer<ImageFormatChannels::RGBA>;
-  using RGBAIPCOverlayCanvasRenderer = IPCOverlayCanvasRenderer<ImageFormatChannels::RGBA>;
+  using BGRAIPCOverlayFrameProducer = IPCOverlayFrameProducer<ImageFormatChannels::RGBA>;
+  using BGRAIPCOverlayCanvasRenderer = IPCOverlayCanvasRenderer<ImageFormatChannels::RGBA>;
 
 } // namespace IRacingTools::Shared::Graphics

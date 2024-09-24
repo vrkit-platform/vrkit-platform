@@ -48,10 +48,11 @@ void ViewerWindowD3D11Renderer::initialize(uint8_t swapchainLength) {
 
 uint64_t ViewerWindowD3D11Renderer::render(
   SHM::IPCClientTexture* sourceTexture,
-  const PixelRect& sourceRect,
+  const std::vector<std::pair<PixelRect, PixelRect>> &sourceDestRects,
+  // const PixelRect& sourceRect,
   HANDLE destTexture,
   const PixelSize& destTextureDimensions,
-  const PixelRect& destRect,
+  // const PixelRect& destRect,
   [[maybe_unused]] HANDLE fence,
   uint64_t fenceValueIn) {
   //VRK_TraceLoggingScope("Viewer::D3D11Renderer::Render");
@@ -82,7 +83,9 @@ uint64_t ViewerWindowD3D11Renderer::render(
   // It will also be more consistent with the other viewer
   // renderers.
   spriteBatch_->begin(destRenderTargetView_.get(), destTextureDimensions);
-  spriteBatch_->draw(sourceSRV, sourceRect, destRect);
+  for (auto&[sourceRect, destRect] : sourceDestRects) {
+    spriteBatch_->draw(sourceSRV, sourceRect, destRect);
+  }
   spriteBatch_->end();
 
   // No need for a fence wait with D3D11

@@ -16,8 +16,8 @@ message DisplayConfig {
 }
 
 message DisplayLayoutConfig {
-  Position origin = 1;
-  Position origin_offset = 2;
+  PositionI origin = 1;
+  PositionI origin_offset = 2;
   repeated DisplayConfig displays = 5;
 }
 

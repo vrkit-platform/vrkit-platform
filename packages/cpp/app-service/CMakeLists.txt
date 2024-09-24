@@ -10,7 +10,8 @@ set(APP_VERSION ${appVersion})
 EMBED_MC_RESOURCE("${CMAKE_CURRENT_SOURCE_DIR}/src/event_ids.mc" MC_HEADER_FILE MC_OUTPUT_BIN_FILE)
 get_filename_component(MC_INCLUDE_DIR ${MC_HEADER_FILE} DIRECTORY)
 message(STATUS "MC HEADER FILE ${MC_HEADER_FILE}, MC INCLUDE DIR ${MC_INCLUDE_DIR}")
-# TODO: I removed WIN32 to facilitate the entry signature/symbol `int wmain(int,wchar_t*)` vs `WinMain`
+
+# NOTE: I removed WIN32 to facilitate the entry signature/symbol `int wmain(int,wchar_t*)` vs `WinMain`
 add_executable(${targetName} ${appSources} ${appHeaders} ${sdkInternalHeaders} ${MC_HEADER_FILE} ${MC_OUTPUT_BIN_FILE})
 
 # Include headers for generated files

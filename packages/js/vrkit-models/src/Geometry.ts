@@ -11,15 +11,28 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 /**
- * @generated from protobuf message IRacingTools.Models.Position
+ * @generated from protobuf message IRacingTools.Models.PositionI
  */
-export interface Position {
+export interface PositionI {
     /**
      * @generated from protobuf field: int32 x = 1;
      */
     x: number;
     /**
      * @generated from protobuf field: int32 y = 2;
+     */
+    y: number;
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.PositionF
+ */
+export interface PositionF {
+    /**
+     * @generated from protobuf field: float x = 1;
+     */
+    x: number;
+    /**
+     * @generated from protobuf field: float y = 2;
      */
     y: number;
 }
@@ -58,9 +71,9 @@ export interface RectI {
      */
     size?: SizeI;
     /**
-     * @generated from protobuf field: IRacingTools.Models.Position position = 2;
+     * @generated from protobuf field: IRacingTools.Models.PositionI position = 2;
      */
-    position?: Position;
+    position?: PositionI;
 }
 /**
  * @generated from protobuf message IRacingTools.Models.RectF
@@ -71,27 +84,27 @@ export interface RectF {
      */
     size?: SizeF;
     /**
-     * @generated from protobuf field: IRacingTools.Models.Position position = 2;
+     * @generated from protobuf field: IRacingTools.Models.PositionF position = 2;
      */
-    position?: Position;
+    position?: PositionF;
 }
 // @generated message type with reflection information, may provide speed optimized methods
-class Position$Type extends MessageType<Position> {
+class PositionI$Type extends MessageType<PositionI> {
     constructor() {
-        super("IRacingTools.Models.Position", [
+        super("IRacingTools.Models.PositionI", [
             { no: 1, name: "x", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
             { no: 2, name: "y", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
         ]);
     }
-    create(value?: PartialMessage<Position>): Position {
+    create(value?: PartialMessage<PositionI>): PositionI {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.x = 0;
         message.y = 0;
         if (value !== undefined)
-            reflectionMergePartial<Position>(this, message, value);
+            reflectionMergePartial<PositionI>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Position): Position {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PositionI): PositionI {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -113,7 +126,7 @@ class Position$Type extends MessageType<Position> {
         }
         return message;
     }
-    internalBinaryWrite(message: Position, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: PositionI, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* int32 x = 1; */
         if (message.x !== 0)
             writer.tag(1, WireType.Varint).int32(message.x);
@@ -127,9 +140,64 @@ class Position$Type extends MessageType<Position> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.Position
+ * @generated MessageType for protobuf message IRacingTools.Models.PositionI
  */
-export const Position = new Position$Type();
+export const PositionI = new PositionI$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class PositionF$Type extends MessageType<PositionF> {
+    constructor() {
+        super("IRacingTools.Models.PositionF", [
+            { no: 1, name: "x", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
+            { no: 2, name: "y", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<PositionF>): PositionF {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.x = 0;
+        message.y = 0;
+        if (value !== undefined)
+            reflectionMergePartial<PositionF>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PositionF): PositionF {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* float x */ 1:
+                    message.x = reader.float();
+                    break;
+                case /* float y */ 2:
+                    message.y = reader.float();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: PositionF, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* float x = 1; */
+        if (message.x !== 0)
+            writer.tag(1, WireType.Bit32).float(message.x);
+        /* float y = 2; */
+        if (message.y !== 0)
+            writer.tag(2, WireType.Bit32).float(message.y);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.PositionF
+ */
+export const PositionF = new PositionF$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class SizeI$Type extends MessageType<SizeI> {
     constructor() {
@@ -245,7 +313,7 @@ class RectI$Type extends MessageType<RectI> {
     constructor() {
         super("IRacingTools.Models.RectI", [
             { no: 1, name: "size", kind: "message", T: () => SizeI },
-            { no: 2, name: "position", kind: "message", T: () => Position }
+            { no: 2, name: "position", kind: "message", T: () => PositionI }
         ]);
     }
     create(value?: PartialMessage<RectI>): RectI {
@@ -262,8 +330,8 @@ class RectI$Type extends MessageType<RectI> {
                 case /* IRacingTools.Models.SizeI size */ 1:
                     message.size = SizeI.internalBinaryRead(reader, reader.uint32(), options, message.size);
                     break;
-                case /* IRacingTools.Models.Position position */ 2:
-                    message.position = Position.internalBinaryRead(reader, reader.uint32(), options, message.position);
+                case /* IRacingTools.Models.PositionI position */ 2:
+                    message.position = PositionI.internalBinaryRead(reader, reader.uint32(), options, message.position);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -280,9 +348,9 @@ class RectI$Type extends MessageType<RectI> {
         /* IRacingTools.Models.SizeI size = 1; */
         if (message.size)
             SizeI.internalBinaryWrite(message.size, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* IRacingTools.Models.Position position = 2; */
+        /* IRacingTools.Models.PositionI position = 2; */
         if (message.position)
-            Position.internalBinaryWrite(message.position, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            PositionI.internalBinaryWrite(message.position, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -298,7 +366,7 @@ class RectF$Type extends MessageType<RectF> {
     constructor() {
         super("IRacingTools.Models.RectF", [
             { no: 1, name: "size", kind: "message", T: () => SizeF },
-            { no: 2, name: "position", kind: "message", T: () => Position }
+            { no: 2, name: "position", kind: "message", T: () => PositionF }
         ]);
     }
     create(value?: PartialMessage<RectF>): RectF {
@@ -315,8 +383,8 @@ class RectF$Type extends MessageType<RectF> {
                 case /* IRacingTools.Models.SizeF size */ 1:
                     message.size = SizeF.internalBinaryRead(reader, reader.uint32(), options, message.size);
                     break;
-                case /* IRacingTools.Models.Position position */ 2:
-                    message.position = Position.internalBinaryRead(reader, reader.uint32(), options, message.position);
+                case /* IRacingTools.Models.PositionF position */ 2:
+                    message.position = PositionF.internalBinaryRead(reader, reader.uint32(), options, message.position);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -333,9 +401,9 @@ class RectF$Type extends MessageType<RectF> {
         /* IRacingTools.Models.SizeF size = 1; */
         if (message.size)
             SizeF.internalBinaryWrite(message.size, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* IRacingTools.Models.Position position = 2; */
+        /* IRacingTools.Models.PositionF position = 2; */
         if (message.position)
-            Position.internalBinaryWrite(message.position, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            PositionF.internalBinaryWrite(message.position, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

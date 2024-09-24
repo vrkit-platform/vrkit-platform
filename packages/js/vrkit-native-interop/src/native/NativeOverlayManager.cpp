@@ -4,6 +4,8 @@
 #include "NativeOverlayManager.h"
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 
+#include "Utils/NAPITypeHelpers.h"
+
 using namespace IRacingTools::App::Node;
 using namespace IRacingTools::Models::RPC;
 using namespace Napi;
@@ -23,7 +25,7 @@ namespace IRacingTools::App::Node {
     o.Set("windowId", Napi::Number::New(env, windowId));
     o.Set("overlayId", Napi::String::New(env, overlayId));
 
-    auto size = imageData.getImageSize();
+    auto size = imageData()->getImageSize();
     auto s = Napi::Object::New(env);
     s.Set("width", Napi::Number::New(env, size.width()));
     s.Set("height", Napi::Number::New(env, size.height()));
@@ -36,8 +38,8 @@ namespace IRacingTools::App::Node {
   NativeOverlayWindowResources::NativeOverlayWindowResources(
     const std::int32_t& windowId,
     const std::string& overlayId,
-    const PixelSize& size
-  ) : Graphics::RGBAIPCOverlayFrameData{.screenRect = {}, .vrRect = {}, .imageData = {size.width(), size.height()}},
+    const PixelSize& imageSize, const ScreenRect& screenRect, const VRRect& vrRect
+  ) : Graphics::BGRAIPCOverlayFrameData{imageSize, screenRect, vrRect},
       windowId(windowId),
       overlayId(overlayId) {
 
@@ -92,7 +94,7 @@ namespace IRacingTools::App::Node {
     L->info("NativeOverlayManager() new instance: {}", info.Length());
 
     dxr_ = std::make_shared<Graphics::DXResources>();
-    ipcDxRenderer_ = Graphics::RGBAIPCOverlayCanvasRenderer::Create(this);
+    ipcDxRenderer_ = Graphics::BGRAIPCOverlayCanvasRenderer::Create(this);
   }
 
   /**
@@ -128,7 +130,7 @@ namespace IRacingTools::App::Node {
     ObjectWrap::Finalize(napi_env);
   }
 
-  std::shared_ptr<Graphics::RGBAIPCOverlayCanvasRenderer> NativeOverlayManager::ipcDxRenderer() {
+  std::shared_ptr<Graphics::BGRAIPCOverlayCanvasRenderer> NativeOverlayManager::ipcDxRenderer() {
     return ipcDxRenderer_;
   }
 
@@ -169,36 +171,50 @@ namespace IRacingTools::App::Node {
   }
 
 
+
   Napi::Value NativeOverlayManager::jsCreateOrUpdateResources(const Napi::CallbackInfo& info) {
     std::scoped_lock lock(resourcesMutex_);
     auto env = info.Env();
     auto throwInvalidArgs = [&] {
       throw TypeError::New(
         env,
-        "invalid arguments `createOrUpdateResources(overlayId: string, windowId: number, width: number, height: number): NativeOverlayWindowResourceInfo`"
+        "invalid arguments `createOrUpdateResources(overlayId: string, windowId: number, imageSize: SizeI, screenRect: RectI, vrRect: RectF): NativeOverlayWindowResourceInfo`"
       );
     };
 
-    if (info.Length() != 4 || !info[0].IsString() || !info[1].IsNumber() || !info[2].IsNumber() || !info[3].
-      IsNumber()) {
+    if (info.Length() != 5 || !info[0].IsString() || !info[1].IsNumber() || !info[2].IsObject() || !info[3].IsObject() || !info[4].IsObject()) {
       throwInvalidArgs();
     }
 
     auto overlayId = info[0].As<Napi::String>().Utf8Value();
     auto windowId = info[1].As<Napi::Number>().Int32Value();
-    auto width = info[2].As<Napi::Number>().Int32Value();
-    auto height = info[3].As<Napi::Number>().Int32Value();
-    PixelSize size{static_cast<const unsigned&>(width), static_cast<const unsigned&>(height)};
+
+    auto imageSizeObj = info[2].As<Napi::Object>();
+    auto screenRectObj = info[3].As<Napi::Object>();
+    auto vrRectObj = info[4].As<Napi::Object>();
+
+    auto imageSize = Utils::SizeObjectToNative<uint32_t>(env, imageSizeObj);
+    auto vrRect = Utils::RectObjectToNative<float>(env, vrRectObj);
+    auto screenRect = Utils::RectObjectToNative<int32_t>(env, screenRectObj);
+
+    // auto width = info[2].As<Napi::Number>().Int32Value();
+    // auto height = info[3].As<Napi::Number>().Int32Value();
 
     auto resource = getResourceByOverlayId(overlayId);
     if (!resource) resource = getResourceByWindowId(windowId);
 
     if (!resource) {
-      resource = std::make_shared<NativeOverlayWindowResources>(windowId, overlayId, size);
+      L->info("Creating NativeOverlayWindowResources (size={})", imageSize.toString());
+      resource = std::make_shared<NativeOverlayWindowResources>(windowId, overlayId, imageSize, screenRect, vrRect);
       resources_.push_back(resource);
     } else {
-      //resource->resize(size);
+      auto currentSize = resource->getImageSize();
+      L->info("Resizing NativeOverlayWindowResources (from={},to={})", currentSize.toString(), imageSize.toString());
+      resource->update(imageSize, screenRect, vrRect);
+
     }
+
+
 
     return resource->toNapiObject(env);
   }
@@ -314,7 +330,7 @@ namespace IRacingTools::App::Node {
     }
 
     auto buf = info[1].As<Napi::Uint8Array>();
-    auto res = resource->imageData->produce(buf.Data(), buf.ByteLength());
+    auto res = resource->imageData()->produce(buf.Data(), buf.ByteLength());
     if (res && res.value() > 0) {
       LOCK(onFrameMutex_, lock);
       onFrameCondition_.notify_all();

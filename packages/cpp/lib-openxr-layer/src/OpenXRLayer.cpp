@@ -352,7 +352,7 @@ namespace IRacingTools::OpenXR {
             cacheKeys.push_back(params.cacheKey);
             PixelRect destRect{
                 Graphics::Spriting::GetOffset(layerIndex, snapshot.getOverlayCount()),
-                layer->vr.locationOnTexture.size(),
+                layer->locationOnTexture.size(),
             };
             // using Upscaling = VRConfig::Quirks::Upscaling;
             // switch (config.vr.quirks.openXR_Upscaling) {
@@ -371,7 +371,7 @@ namespace IRacingTools::OpenXR {
 
             layerSprites.push_back(
                 SHM::LayerSprite{
-                    .sourceRect = layer->vr.locationOnTexture,
+                    .sourceRect = layer->locationOnTexture,
                     .destRect = destRect,
                     .opacity = params.kneeboardOpacity,
                 }

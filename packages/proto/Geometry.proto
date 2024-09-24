@@ -2,9 +2,14 @@ syntax = "proto3";
 
 package IRacingTools.Models;
 
-message Position {
+message PositionI {
   int32 x = 1;
   int32 y = 2;
+}
+
+message PositionF {
+  float x = 1;
+  float y = 2;
 }
 
 message SizeI {
@@ -19,10 +24,10 @@ message SizeF {
 
 message RectI {
   SizeI size = 1;
-  Position position = 2;
+  PositionI position = 2;
 }
 
 message RectF {
   SizeF size = 1;
-  Position position = 2;
+  PositionF position = 2;
 }

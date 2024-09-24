@@ -37,6 +37,7 @@ namespace IRacingTools::Shared::Utils {
       }
       head_ = (head_ + 1) % Size;
       full_ = head_ == tail_;
+      return true;
     }
 
     std::optional<T> pop() {

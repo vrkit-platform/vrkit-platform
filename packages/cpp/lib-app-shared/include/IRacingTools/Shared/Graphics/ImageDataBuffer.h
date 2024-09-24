@@ -26,7 +26,8 @@ namespace IRacingTools::Shared::Graphics {
 
   enum class ImageFormatChannels : std::uint32_t {
     RGB = 3,
-    RGBA = 4
+    RGBA = 4,
+    BGRA = 4
   };
 
 
@@ -262,6 +263,6 @@ namespace IRacingTools::Shared::Graphics {
   };
 
 
-  using RGBAImageDataBuffer = ImageDataBuffer<ImageFormatChannels::RGBA>;
+  using BGRAImageDataBuffer = ImageDataBuffer<ImageFormatChannels::RGBA>;
 
 } // namespace IRacingTools::Shared::Graphics

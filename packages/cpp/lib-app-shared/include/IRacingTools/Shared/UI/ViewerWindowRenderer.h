@@ -25,9 +25,9 @@
 
 namespace IRacingTools::Shared::UI {
 
-    class Renderer {
+    class IViewerWindowRenderer {
     public:
-        virtual ~Renderer() = default;
+        virtual ~IViewerWindowRenderer() = default;
         virtual SHM::SHMCachedReader* getSHM() = 0;
 
         virtual std::wstring_view getName() const noexcept = 0;
@@ -48,10 +48,11 @@ namespace IRacingTools::Shared::UI {
          */
         virtual uint64_t render(
           SHM::IPCClientTexture* sourceTexture,
-          const PixelRect& sourceRect,
+          const std::vector<std::pair<PixelRect, PixelRect>> & sourceDestRects,
+          // const PixelRect& sourceRect,
           HANDLE destTexture,
           const PixelSize& destTextureDimensions,
-          const PixelRect& destRect,
+          // const PixelRect& destRect,
           HANDLE fence,
           uint64_t fenceValueIn)
           = 0;

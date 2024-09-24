@@ -171,7 +171,18 @@ namespace IRacingTools::Shared {
       };
     }
 
-    constexpr operator D2D1_SIZE_U() const
+    explicit operator std::string() const {
+      return to_json(this);
+    }
+
+    std::string toString() const {
+      nlohmann::json j;
+      j["width"] = width_;
+      j["height"] = height_;
+      return j.dump();
+    }
+
+    explicit constexpr operator D2D1_SIZE_U() const
       requires std::integral<T>
     {
       return staticCast<UINT32, D2D1_SIZE_U>();
@@ -469,6 +480,13 @@ namespace IRacingTools::Shared {
   using PixelSize = Size<uint32_t>;
   using PixelPoint [[maybe_unused]] = Point<uint32_t>;
   using PixelRect = Rect<uint32_t>;
+  using ScreenRect = Rect<int32_t>;
+  using VRRect = Rect<float>;
+
+  template<typename T>
+  bool IsNonZeroSize(Size<T> size) {
+    return size.width() > T(0) && size.height() > T(0);
+  }
 
   template<class T>
   void from_json(const nlohmann::json &j, Size<T> &v) {
@@ -481,6 +499,7 @@ namespace IRacingTools::Shared {
     j["width"] = v.width_;
     j["height"] = v.height_;
   }
+
 
 
 } // namespace IRacingTools::Shared

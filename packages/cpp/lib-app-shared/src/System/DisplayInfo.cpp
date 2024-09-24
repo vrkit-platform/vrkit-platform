@@ -9,7 +9,7 @@ namespace IRacingTools::Shared::System {
             return s1.width() == s2.width() && s1.height() == s2.height();
         };
 
-        auto IsPositionEqual = [](const Models::Position& o1, const Models::Position& o2) -> bool {
+        auto IsPositionEqual = [](const Models::PositionI& o1, const Models::PositionI& o2) -> bool {
             return o1.x() == o2.x() && o1.y() == o2.y();
         };
 

@@ -16,6 +16,7 @@
 #include <IRacingTools/Shared/Geometry2D.h>
 #include <IRacingTools/Shared/VRTypes.h>
 #include <IRacingTools/Shared/Macros.h>
+#include <IRacingTools/Shared/ScreenTypes.h>
 
 namespace IRacingTools::Shared::SHM {
     static constexpr DXGI_FORMAT SHARED_TEXTURE_PIXEL_FORMAT = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -35,8 +36,11 @@ namespace IRacingTools::Shared::SHM {
     struct SHMOverlayFrameConfig final {
         uint64_t overlayIdx{};
 
+        PixelRect locationOnTexture{};
+
         bool vrEnabled{true};
-        VR::VRLayer vr{};
+        VR::VROverlayFrameRenderConfig vr{};
+        Screen::ScreenOverlayFrameRenderConfig screen{};
     };
 
     static_assert(std::is_standard_layout_v<SHMOverlayFrameConfig>);

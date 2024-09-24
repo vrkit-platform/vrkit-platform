@@ -66,8 +66,14 @@ namespace IRacingTools::Shared::Graphics {
       return std::make_shared<Buffer>(width(), height());
     }
 
-    void resize(const std::uint32_t& width, const std::uint32_t& height) {
+    bool resize(const std::uint32_t& width, const std::uint32_t& height) {
       std::scoped_lock lock(queueMutex_);
+      if (width == width_ && height == height_) {
+        return true;
+      }
+
+      if (!IsNonZeroSize<uint32_t>({width, height}))
+        return false;
 
       availableBuffers_.clear(BufferPtr{nullptr});
       width_ = width;
@@ -78,6 +84,8 @@ namespace IRacingTools::Shared::Graphics {
 
         availableBuffers_.push(newBuffer());
       }
+
+      return true;
     }
 
     std::expected<std::uint32_t, SDK::GeneralError> produce(const Byte* data, std::uint32_t len) {
@@ -157,5 +165,5 @@ namespace IRacingTools::Shared::Graphics {
     }
   };
 
-  using RGBAImageDataBufferContainer = ImageDataBufferContainer<ImageFormatChannels::RGBA>;
+  using BGRAImageDataBufferContainer = ImageDataBufferContainer<ImageFormatChannels::RGBA>;
 } // namespace IRacingTools::Shared::Graphics

@@ -21,27 +21,27 @@ namespace IRacingTools::App::Commands {
 
   namespace {
     auto L = Logging::GetCategoryWithType<SHMFeederArgCommand>();
-    using RGBAPixel = std::array<std::uint8_t, 4>;
+    using BGRAPixel = std::array<std::uint8_t, 4>;
 
 
-    struct SHMFeedRGBAImageDataSourceConfig {
-      RGBAPixel pixel;
+    struct SHMFeedBGRAImageDataSourceConfig {
+      BGRAPixel pixel;
       PixelSize imageSize;
     };
 
     struct SHMFeedRGBAImageDataSource {
-      std::shared_ptr<Graphics::RGBAIPCOverlayFrameData> frameData;
+      std::shared_ptr<Graphics::BGRAIPCOverlayFrameData> frameData;
       std::vector<std::uint8_t> sourceFrameData{};
 
       void produce() {
-        frameData->imageData->produce(sourceFrameData.data(), sourceFrameData.size());
+        frameData->imageData()->produce(sourceFrameData.data(), sourceFrameData.size());
       }
 
       SHMFeedRGBAImageDataSource(
-        const RGBAPixel& pixel,
+        const BGRAPixel& pixel,
         const std::uint32_t& width,
         const std::uint32_t& height
-      ) : frameData(std::make_shared<Graphics::RGBAIPCOverlayFrameData>(width, height)) {
+      ) : frameData(std::make_shared<Graphics::BGRAIPCOverlayFrameData>(PixelSize{width, height})) {
         sourceFrameData.resize(width * height * 4);
         for (int i = 0; i < sourceFrameData.size(); i += 4) {
           sourceFrameData[i] = pixel[0];
@@ -53,9 +53,9 @@ namespace IRacingTools::App::Commands {
       };
     };
 
-    class SHMFeedImageDataProducer : public Graphics::RGBAIPCOverlayFrameProducer {
+    class SHMFeedImageDataProducer : public Graphics::BGRAIPCOverlayFrameProducer {
       std::size_t fps_;
-      std::vector<SHMFeedRGBAImageDataSourceConfig> configs_;
+      std::vector<SHMFeedBGRAImageDataSourceConfig> configs_;
       std::vector<std::shared_ptr<SHMFeedRGBAImageDataSource>> imageDatas_{};
 
       FnIndefiniteThread producerThread_;
@@ -111,7 +111,7 @@ namespace IRacingTools::App::Commands {
       //     }
       // }
       //, notifyThread_([&] (auto t) { notifyRunnable(t); })
-      explicit SHMFeedImageDataProducer(std::size_t fps, const std::vector<SHMFeedRGBAImageDataSourceConfig>& configs) :
+      explicit SHMFeedImageDataProducer(std::size_t fps, const std::vector<SHMFeedBGRAImageDataSourceConfig>& configs) :
         fps_(fps),
         configs_(configs),
         producerThread_(
@@ -130,7 +130,7 @@ namespace IRacingTools::App::Commands {
         return imageDatas_.size();
       };
 
-      virtual std::shared_ptr<Graphics::IPCOverlayFrameData<Graphics::ImageFormatChannels::RGBA>> getOverlayData(
+      virtual std::shared_ptr<Graphics::IPCOverlayFrameData<Graphics::ImageFormatChannels::BGRA>> getOverlayData(
         std::size_t idx
       ) override {
       if (imageDatas_.size() > idx)
@@ -148,7 +148,7 @@ namespace IRacingTools::App::Commands {
       }
     };
 
-    std::shared_ptr<Graphics::RGBAIPCOverlayCanvasRenderer> gIPCRenderer{nullptr};
+    std::shared_ptr<Graphics::BGRAIPCOverlayCanvasRenderer> gIPCRenderer{nullptr};
   }
 
   CLI::App* SHMFeederArgCommand::createCommand(CLI::App* app) {
@@ -160,12 +160,12 @@ namespace IRacingTools::App::Commands {
   int SHMFeederArgCommand::execute() {
     L->info("SHM-Feeder");
 
-    std::vector<SHMFeedRGBAImageDataSourceConfig> imageConfigs = {
-      {RGBAPixel{0, 0, 0, 255}, PixelSize{400, 400}},
-      {RGBAPixel{255, 0, 0, 255}, PixelSize{200, 200}}
+    std::vector<SHMFeedBGRAImageDataSourceConfig> imageConfigs = {
+      {BGRAPixel{0, 0, 0, 255}, PixelSize{400, 400}},
+      {BGRAPixel{0, 0, 255, 255}, PixelSize{200, 200}}
     };
     auto producer = std::make_shared<SHMFeedImageDataProducer>(10, imageConfigs);
-    gIPCRenderer = Graphics::RGBAIPCOverlayCanvasRenderer::Create(producer.get());
+    gIPCRenderer = Graphics::BGRAIPCOverlayCanvasRenderer::Create(producer.get());
 
     producer->waitForDone();
     return 0;

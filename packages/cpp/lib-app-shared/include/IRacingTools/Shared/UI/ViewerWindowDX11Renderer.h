@@ -30,7 +30,7 @@
 
 namespace IRacingTools::Shared::UI {
 
-class ViewerWindowD3D11Renderer final : public Renderer {
+class ViewerWindowD3D11Renderer final : public IViewerWindowRenderer {
  public:
   ViewerWindowD3D11Renderer() = delete;
 
@@ -48,10 +48,11 @@ class ViewerWindowD3D11Renderer final : public Renderer {
 
   virtual uint64_t render(
     SHM::IPCClientTexture* sourceTexture,
-    const PixelRect& sourceRect,
+    const std::vector<std::pair<PixelRect, PixelRect>> &sourceDestRects,
+    // const PixelRect& sourceRect,
     HANDLE destTexture,
     const PixelSize& destTextureDimensions,
-    const PixelRect& destRect,
+    // const PixelRect& destRect,
     HANDLE fence,
     uint64_t fenceValueIn) override;
 

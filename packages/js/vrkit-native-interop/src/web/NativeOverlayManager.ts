@@ -1,4 +1,4 @@
-import type { SizeI } from "vrkit-models"
+import type { RectF, RectI, SizeI } from "vrkit-models"
 import { GetNativeExports } from "./NativeBinding"
 
 export interface NativeOverlayWindowResourceInfo {
@@ -8,7 +8,7 @@ export interface NativeOverlayWindowResourceInfo {
 }
 
 export interface NativeOverlayManager {
-  createOrUpdateResources(overlayId: string, windowId: number, width: number, height: number): NativeOverlayWindowResourceInfo
+  createOrUpdateResources(overlayId: string, windowId: number, imageSize: SizeI, screenRect: RectI, vrRect: RectF): NativeOverlayWindowResourceInfo
   
   getResourceCount(): number
   

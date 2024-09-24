@@ -2,7 +2,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent, NativeImage } from "electron"
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
-import { DashboardConfig, OverlayInfo, OverlayPlacement, RectI, SessionDataVariableValueMap } from "vrkit-models"
+import { DashboardConfig, OverlayInfo, OverlayPlacement, RectF, RectI, SessionDataVariableValueMap } from "vrkit-models"
 import { isDefined, isFunction } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
 import { Disposables, isDev, isEmpty, isEqual, Pair, SignalFlag } from "vrkit-app-common/utils"
@@ -369,8 +369,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @param event
    * @private
    */
-  @Bind
-  private async unload(event: Electron.Event = null) {
+  @Bind private async unload(event: Electron.Event = null) {
     debug(`Unloading OverlayManager`, event)
 
     this.disposers_.dispose()
@@ -469,8 +468,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @param config
    * @returns {Promise<void>} pending task promise scheduled in `p-queue`
    */
-  @Bind
-  private saveDashboardConfig(config: DashboardConfig): Promise<void> {
+  @Bind private saveDashboardConfig(config: DashboardConfig): Promise<void> {
     return this.persistQueue_.add(this.createSaveDashboardConfigTask(config))
   }
 
@@ -480,8 +478,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @param config
    * @returns {Promise<void>} pending task promise scheduled in `p-queue`
    */
-  @Bind
-  private deleteDashboardConfig(config: DashboardConfig): Promise<void> {
+  @Bind private deleteDashboardConfig(config: DashboardConfig): Promise<void> {
     return this.persistQueue_.add(this.createDeleteDashboardConfigTask(config.id))
   }
 
@@ -615,7 +612,14 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
     return (image: NativeImage, dirty: Electron.Rectangle) => {
       const buf = image.getBitmap()
-      this.nativeManager_.createOrUpdateResources(win.id, win.windowId, dirty.width, dirty.height)
+      // TODO: Get real screen & VR rectangles
+      this.nativeManager_.createOrUpdateResources(
+        win.id,
+        win.windowId,
+        { width: dirty.width, height: dirty.height },
+        RectI.create(),
+        RectF.create()
+      )
       this.nativeManager_.processFrame(win.id, buf)
       if (cap) cap.push(image)
     }

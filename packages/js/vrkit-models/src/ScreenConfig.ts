@@ -10,7 +10,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
-import { Position } from "./Geometry";
+import { PositionI } from "./Geometry";
 import { RectI } from "./Geometry";
 import { SizeI } from "./Geometry";
 /**
@@ -51,13 +51,13 @@ export interface DisplayConfig {
  */
 export interface DisplayLayoutConfig {
     /**
-     * @generated from protobuf field: IRacingTools.Models.Position origin = 1;
+     * @generated from protobuf field: IRacingTools.Models.PositionI origin = 1;
      */
-    origin?: Position;
+    origin?: PositionI;
     /**
-     * @generated from protobuf field: IRacingTools.Models.Position origin_offset = 2;
+     * @generated from protobuf field: IRacingTools.Models.PositionI origin_offset = 2;
      */
-    originOffset?: Position;
+    originOffset?: PositionI;
     /**
      * @generated from protobuf field: repeated IRacingTools.Models.DisplayConfig displays = 5;
      */
@@ -203,8 +203,8 @@ export const DisplayConfig = new DisplayConfig$Type();
 class DisplayLayoutConfig$Type extends MessageType<DisplayLayoutConfig> {
     constructor() {
         super("IRacingTools.Models.DisplayLayoutConfig", [
-            { no: 1, name: "origin", kind: "message", T: () => Position },
-            { no: 2, name: "origin_offset", kind: "message", T: () => Position },
+            { no: 1, name: "origin", kind: "message", T: () => PositionI },
+            { no: 2, name: "origin_offset", kind: "message", T: () => PositionI },
             { no: 5, name: "displays", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => DisplayConfig }
         ]);
     }
@@ -220,11 +220,11 @@ class DisplayLayoutConfig$Type extends MessageType<DisplayLayoutConfig> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* IRacingTools.Models.Position origin */ 1:
-                    message.origin = Position.internalBinaryRead(reader, reader.uint32(), options, message.origin);
+                case /* IRacingTools.Models.PositionI origin */ 1:
+                    message.origin = PositionI.internalBinaryRead(reader, reader.uint32(), options, message.origin);
                     break;
-                case /* IRacingTools.Models.Position origin_offset */ 2:
-                    message.originOffset = Position.internalBinaryRead(reader, reader.uint32(), options, message.originOffset);
+                case /* IRacingTools.Models.PositionI origin_offset */ 2:
+                    message.originOffset = PositionI.internalBinaryRead(reader, reader.uint32(), options, message.originOffset);
                     break;
                 case /* repeated IRacingTools.Models.DisplayConfig displays */ 5:
                     message.displays.push(DisplayConfig.internalBinaryRead(reader, reader.uint32(), options));
@@ -241,12 +241,12 @@ class DisplayLayoutConfig$Type extends MessageType<DisplayLayoutConfig> {
         return message;
     }
     internalBinaryWrite(message: DisplayLayoutConfig, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* IRacingTools.Models.Position origin = 1; */
+        /* IRacingTools.Models.PositionI origin = 1; */
         if (message.origin)
-            Position.internalBinaryWrite(message.origin, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
-        /* IRacingTools.Models.Position origin_offset = 2; */
+            PositionI.internalBinaryWrite(message.origin, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.PositionI origin_offset = 2; */
         if (message.originOffset)
-            Position.internalBinaryWrite(message.originOffset, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            PositionI.internalBinaryWrite(message.originOffset, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         /* repeated IRacingTools.Models.DisplayConfig displays = 5; */
         for (let i = 0; i < message.displays.length; i++)
             DisplayConfig.internalBinaryWrite(message.displays[i], writer.tag(5, WireType.LengthDelimited).fork(), options).join();

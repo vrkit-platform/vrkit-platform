@@ -84,16 +84,22 @@ namespace IRacingTools::Shared::VR {
     constexpr auto operator<=>(const VRRenderConfig &) const noexcept = default;
   };
 
-  // Distances in metres, positions in radians.
-  struct VRLayer {
-    VRPose pose;
-    Size<float> physicalSize {0.15f, 0.25f};
 
+
+  // Distances in metres, positions in radians.
+  struct VROverlayFrameRenderConfig {
+    VRPose pose;
+
+    //TODO: move physical size references -> `rect.size()` references
+    Size<float> physicalSize {0.15f, 0.25f};
+    VRRect rect{};
+
+    // TODO: Remove `enableGazeZoom`, `gazeTargetScale`
     bool enableGazeZoom{true};
     float zoomScale = 2.0f;
     GazeTargetScale gazeTargetScale{};
     VROpacityConfig opacity{};
-    PixelRect locationOnTexture{};
+    // PixelRect locationOnTexture{};
   };
 
 }

@@ -62,9 +62,9 @@ TEST_F(WriteReadBufferTests, ReadWaitForWrite) {
 
 TEST_F(WriteReadBufferTests, ImageDataBuffer_single) {
 
-  auto imageDataBuf = std::make_shared<Graphics::RGBAImageDataBuffer>(400,400);
+  auto imageDataBuf = std::make_shared<Graphics::BGRAImageDataBuffer>(400,400);
   std::atomic_size_t readCount = 0;
-  auto consumeFn = [&] (const Graphics::RGBAImageDataBuffer::Byte* buf, std::uint32_t size, Graphics::RGBAImageDataBuffer* aImageDataBuf) -> std::uint32_t {
+  auto consumeFn = [&] (const Graphics::BGRAImageDataBuffer::Byte* buf, std::uint32_t size, Graphics::BGRAImageDataBuffer* aImageDataBuf) -> std::uint32_t {
     EXPECT_EQ(imageDataBuf->size(), size);
     EXPECT_EQ(aImageDataBuf->size(), size);
     ++readCount;
@@ -77,7 +77,7 @@ TEST_F(WriteReadBufferTests, ImageDataBuffer_single) {
   });
 
   std::this_thread::sleep_for(100ms);
-  Graphics::RGBAImageDataBuffer::Buffer buf{};
+  Graphics::BGRAImageDataBuffer::Buffer buf{};
   buf.resize(imageDataBuf->size(), '0');
   imageDataBuf->produce(buf.data(), imageDataBuf->size());
 
@@ -89,12 +89,12 @@ TEST_F(WriteReadBufferTests, ImageDataBuffer_single) {
 
 TEST_F(WriteReadBufferTests, ImageDataBuffer_swap) {
 
-  auto imageDataBuf1 = std::make_shared<Graphics::RGBAImageDataBuffer>(400,400);
-  auto imageDataBuf2 = std::make_shared<Graphics::RGBAImageDataBuffer>(400,400);
+  auto imageDataBuf1 = std::make_shared<Graphics::BGRAImageDataBuffer>(400,400);
+  auto imageDataBuf2 = std::make_shared<Graphics::BGRAImageDataBuffer>(400,400);
 
 
   std::atomic_size_t readCount = 0;
-  auto consumeFn = [&] (const Graphics::RGBAImageDataBuffer::Byte* buf, std::uint32_t size, Graphics::RGBAImageDataBuffer* aImageDataBuf) -> std::uint32_t {
+  auto consumeFn = [&] (const Graphics::BGRAImageDataBuffer::Byte* buf, std::uint32_t size, Graphics::BGRAImageDataBuffer* aImageDataBuf) -> std::uint32_t {
     EXPECT_EQ(imageDataBuf1->size(), size);
     EXPECT_EQ(aImageDataBuf->size(), size);
     ++readCount;
@@ -107,7 +107,7 @@ TEST_F(WriteReadBufferTests, ImageDataBuffer_swap) {
   });
 
   std::this_thread::sleep_for(100ms);
-  Graphics::RGBAImageDataBuffer::Buffer buf{};
+  Graphics::BGRAImageDataBuffer::Buffer buf{};
   buf.resize(imageDataBuf1->size(), '0');
   imageDataBuf1->produce(buf.data(), imageDataBuf1->size());
   imageDataBuf1->swap(imageDataBuf2);

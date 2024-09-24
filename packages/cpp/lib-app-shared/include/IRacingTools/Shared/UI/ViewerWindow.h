@@ -41,7 +41,7 @@ namespace IRacingTools::Shared::UI {
         uint64_t fenceValue_{};
 
 
-        std::shared_ptr<Renderer> renderer_{nullptr};
+        std::shared_ptr<IViewerWindowRenderer> renderer_{nullptr};
         std::mutex renderMutex_{};
 
         winrt::com_ptr<ID2D1SolidColorBrush> brushRed_{};
@@ -106,7 +106,7 @@ namespace IRacingTools::Shared::UI {
         }
 
     protected:
-        PixelRect getDestRect(const Size<uint32_t> imageSize, const float scale) {
+        PixelRect getDestRect(const uint32_t offsetX, const Size<uint32_t> imageSize, const float scale) {
             const auto clientSize = Base::getSize();
 
             const auto renderWidth = static_cast<uint32_t>(static_cast<float>(imageSize.width()) * scale);
@@ -115,41 +115,41 @@ namespace IRacingTools::Shared::UI {
             unsigned int renderLeft = 0;
             unsigned int renderTop = 0;
 
-            switch (settings_.alignment) {
-            case ViewerAlignment::TopLeft:
-                // Topleft is default
-                break;
-            case ViewerAlignment::Top:
-                renderLeft = (clientSize.width() - renderWidth) / 2;
-                break;
-            case ViewerAlignment::TopRight:
-                renderLeft = (clientSize.width() - renderWidth);
-                break;
-            case ViewerAlignment::Left:
-                renderTop = (clientSize.height() - renderHeight) / 2;
-                break;
-            case ViewerAlignment::Center:
-                renderTop = (clientSize.height() - renderHeight) / 2;
-                renderLeft = (clientSize.width() - renderWidth) / 2;
-                break;
-            case ViewerAlignment::Right:
-                renderTop = (clientSize.height() - renderHeight) / 2;
-                renderLeft = (clientSize.width() - renderWidth);
-                break;
-            case ViewerAlignment::BottomLeft:
-                renderTop = (clientSize.height() - renderHeight);
-                break;
-            case ViewerAlignment::Bottom:
-                renderTop = (clientSize.height() - renderHeight);
-                renderLeft = (clientSize.width() - renderWidth) / 2;
-                break;
-            case ViewerAlignment::BottomRight:
-                renderTop = (clientSize.height() - renderHeight);
-                renderLeft = (clientSize.width() - renderWidth);
-                break;
-            }
+            // switch (settings_.alignment) {
+            // case ViewerAlignment::TopLeft:
+            //     // Topleft is default
+            //     break;
+            // case ViewerAlignment::Top:
+            //     renderLeft = (clientSize.width() - renderWidth) / 2;
+            //     break;
+            // case ViewerAlignment::TopRight:
+            //     renderLeft = (clientSize.width() - renderWidth);
+            //     break;
+            // case ViewerAlignment::Left:
+            //     renderTop = (clientSize.height() - renderHeight) / 2;
+            //     break;
+            // case ViewerAlignment::Center:
+            //     renderTop = (clientSize.height() - renderHeight) / 2;
+            //     renderLeft = (clientSize.width() - renderWidth) / 2;
+            //     break;
+            // case ViewerAlignment::Right:
+            //     renderTop = (clientSize.height() - renderHeight) / 2;
+            //     renderLeft = (clientSize.width() - renderWidth);
+            //     break;
+            // case ViewerAlignment::BottomLeft:
+            //     renderTop = (clientSize.height() - renderHeight);
+            //     break;
+            // case ViewerAlignment::Bottom:
+            //     renderTop = (clientSize.height() - renderHeight);
+            //     renderLeft = (clientSize.width() - renderWidth) / 2;
+            //     break;
+            // case ViewerAlignment::BottomRight:
+            //     renderTop = (clientSize.height() - renderHeight);
+            //     renderLeft = (clientSize.width() - renderWidth);
+            //     break;
+            // }
 
-            return {{renderLeft , renderTop}, {renderWidth, renderHeight}};
+            return {{renderLeft + offsetX, renderTop}, {renderWidth, renderHeight}};
         }
 
 
@@ -245,10 +245,17 @@ namespace IRacingTools::Shared::UI {
 
             bool rendered = false;
 
+
+            auto ctx = dxr->getDXImmediateContext().get();
+            const D3D11_BOX box{0, 0, 0, targetSize.width(), targetSize.height(), 1,};
+            ctx->CopySubresourceRegion(rendererTexture_.get(), 0, 0, 0, 0, windowTexture, 0, &box);
+            check_hresult(ctx->Signal(fence_.get(), ++fenceValue_));
+
+
             std::float_t totalWidth = 0, maxHeight = 0;
             for (auto idx = 0; idx < overlayCount; idx++) {
                 const auto& overlayFrameConfig = *snapshot.getOverlayFrameConfig(idx);
-                auto imageSize = overlayFrameConfig.vr.locationOnTexture.size();
+                auto imageSize = overlayFrameConfig.locationOnTexture.size();
                 totalWidth += imageSize.width();
                 maxHeight = std::max<std::float_t>(maxHeight, imageSize.height());
             }
@@ -258,9 +265,10 @@ namespace IRacingTools::Shared::UI {
             const auto scale = std::min<float>(scalex, scaley);
 
             std::uint32_t offsetX = 0;
+            std::vector<std::pair<PixelRect, PixelRect>> sourceDestRects{};
             for (auto idx = 0; idx < overlayCount; idx++) {
                 const auto& overlayFrameConfig = *snapshot.getOverlayFrameConfig(idx);
-                const auto sourceRect = overlayFrameConfig.vr.locationOnTexture;
+                const auto sourceRect = overlayFrameConfig.locationOnTexture;
                 const auto& imageSize = sourceRect.size();
                 L->info("Render overlay ({}) with size({}x{})", idx, imageSize.width(), imageSize.height());
                 // if (rendered)
@@ -274,39 +282,35 @@ namespace IRacingTools::Shared::UI {
                 // const auto scaley = static_cast<float>(targetSize.height()) / static_cast<float>(imageSize.height());
                 // const auto scale = std::min<float>(scalex, scaley);
 
-                const PixelRect destRect = getDestRect(imageSize, scale);
+                const PixelRect destRect = getDestRect(offsetX,imageSize, scale);
 
-
-                auto ctx = dxr->getDXImmediateContext().get();
-
-                const D3D11_BOX box{0, 0, 0, targetSize.width(), targetSize.height(), 1,};
-
+                sourceDestRects.emplace_back(sourceRect, destRect);
                 // Forcing the renderer to render on top of the background to make sure it
                 // preserves the existing content; clearing is fine for VR, but for non-VR
                 // we need to preserve the original background.
 
-                ctx->CopySubresourceRegion(rendererTexture_.get(), 0, 0, 0, 0, windowTexture, 0, &box);
 
-                check_hresult(ctx->Signal(fence_.get(), ++fenceValue_));
 
-                fenceValue_ = renderer_->render(
+                offsetX += destRect.size().width();
+            }
+
+            fenceValue_ = renderer_->render(
                     snapshot.getTexture<SHM::IPCClientTexture>(),
-                    sourceRect,
+                    sourceDestRects,
+                    // sourceRect,
                     rendererTextureHandle_.get(),
                     rendererTextureSize_,
-                    destRect,
+                    // destRect,
                     fenceHandle_.get(),
                     fenceValue_
                 );
 
-                check_hresult(ctx->Wait(fence_.get(), fenceValue_));
+            check_hresult(ctx->Wait(fence_.get(), fenceValue_));
 
-                ctx->CopySubresourceRegion(windowTexture, 0, 0, 0, 0, rendererTexture_.get(), 0, &box);
+            ctx->CopySubresourceRegion(windowTexture, 0, 0, 0, 0, rendererTexture_.get(), 0, &box);
 
-                renderCacheKey_ = snapshot.getRenderCacheKey();
+            renderCacheKey_ = snapshot.getRenderCacheKey();
 
-                offsetX += destRect.size().width();
-            }
         }
     };
 };

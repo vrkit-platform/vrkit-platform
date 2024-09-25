@@ -50,7 +50,8 @@ namespace IRacingTools::Shared::Graphics {
 
     enum class Status {
       Empty,
-      Filled,
+      NewData,
+      OldData,
       Destroyed
     };
 
@@ -165,9 +166,17 @@ namespace IRacingTools::Shared::Graphics {
     };
 
 
-    bool isFilled() const {
-      return status() == Status::Filled;
+    bool hasNewData() const {
+      return status() == Status::NewData;
     };
+
+    bool hasOldData() const {
+      return status() == Status::OldData;
+    };
+
+    bool hasData() const {
+      return !isDestroyed() &&  (hasNewData() || hasOldData());
+    }
 
     bool isDestroyed() const {
       return status() == Status::Destroyed;
@@ -194,7 +203,7 @@ namespace IRacingTools::Shared::Graphics {
 
       setStatus(Status::Empty);
       auto res = fn(buffer_.data(), buffer_.size(), this);
-      if (res > 0) setStatus(Status::Filled);
+      if (res > 0) setStatus(Status::NewData);
 
       return res;
     }
@@ -221,8 +230,7 @@ namespace IRacingTools::Shared::Graphics {
     std::expected<std::uint32_t, SDK::GeneralError> consume(ConsumeFn fn) {
       std::scoped_lock lock(*this);
 
-
-      if (!isFilled()) {
+      if (!hasData()) {
         return createImageDataBufferError(
           "Status is not Filled (status={})",
           std::string{magic_enum::enum_name<Status>(status())}
@@ -230,7 +238,7 @@ namespace IRacingTools::Shared::Graphics {
       }
 
       auto res = fn(buffer_.data(), size(), this);
-      setStatus(Status::Empty);
+      setStatus(Status::OldData);
 
       return res;
     }

@@ -115,7 +115,8 @@ namespace IRacingTools::Shared::Graphics {
   template <ImageFormatChannels FormatChannels>
   class IPCOverlayCanvasRenderer : public std::enable_shared_from_this<IPCOverlayCanvasRenderer<FormatChannels>> {
   public:
-
+    using Buffer = ImageDataBuffer<FormatChannels>;
+    using BufferPtr = std::shared_ptr<Buffer>;
     using Producer = IPCOverlayFrameProducer<FormatChannels>;
     // using ProducerPtr = std::shared_ptr<Producer>;
     using ProducerPtr = Producer*;
@@ -123,7 +124,7 @@ namespace IRacingTools::Shared::Graphics {
     /**
      * Hold shared texture resources
      */
-    struct TextureResources {
+    struct TextureResources { // NOLINT(*-pro-type-member-init)
       winrt::com_ptr<ID3D11Texture2D> texture;
       winrt::com_ptr<ID3D11RenderTargetView> renderTargetView;
 
@@ -162,7 +163,7 @@ namespace IRacingTools::Shared::Graphics {
 
     std::shared_ptr<RenderTarget> target_{};
     PixelSize canvasSize_{};
-
+    std::map<uint8_t, BufferPtr> overlayImageDataBuffers_{};
     std::mutex destroyMutex_{};
     std::atomic_bool isDestroyed_{false};
     std::atomic_flag isRendering_;
@@ -343,9 +344,21 @@ namespace IRacingTools::Shared::Graphics {
           1
         };
 
-        auto imageDataBuffer = overlayData->imageData()->newBuffer();
-        if (!overlayData->imageData()->consume(imageDataBuffer) || !imageDataBuffer || !imageDataBuffer->isFilled()) {
-          L->warn("no frame buffer consumed/populated/filled (idx={})", i);
+        // bool isNewBuffer = false;
+        BufferPtr imageDataBuffer;
+        if(overlayImageDataBuffers_.contains(i)) {
+          imageDataBuffer = overlayImageDataBuffers_[i];
+        }
+
+        if (!imageDataBuffer) {
+          imageDataBuffer =  overlayData->imageData()->newBuffer();
+          overlayImageDataBuffers_[i] = imageDataBuffer;
+          // isNewBuffer = true;
+        }
+
+        if (!overlayData->imageData()->consume(imageDataBuffer) || !imageDataBuffer || !imageDataBuffer->hasData()) {
+          L->debug("no frame buffer consumed/populated/filled (idx={})", i);
+          //if (isNewBuffer)
           continue;
         }
 

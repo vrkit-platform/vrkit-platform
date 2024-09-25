@@ -128,7 +128,7 @@ namespace IRacingTools::Shared::Graphics {
     bool consume(BufferPtr& targetBuffer) {
       std::scoped_lock lock(queueMutex_);
 
-      if (!targetBuffer || !readyBuffer_ || targetBuffer->bpp != readyBuffer_->bpp || targetBuffer->isDestroyed() || readyBuffer_->isDestroyed())
+      if (!targetBuffer || !readyBuffer_ || targetBuffer->bpp != readyBuffer_->bpp || targetBuffer->isDestroyed() || readyBuffer_->isDestroyed() || !readyBuffer_->hasData())
         return false;
 
       if (targetBuffer->size() != readyBuffer_->size()) {

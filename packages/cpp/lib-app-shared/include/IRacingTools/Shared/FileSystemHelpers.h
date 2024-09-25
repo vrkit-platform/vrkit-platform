@@ -235,7 +235,7 @@ namespace IRacingTools::Shared {
   } // namespace Directories
 
   namespace Files {
-    constexpr auto LOG_FILENAME = "VRKit.log";
+    constexpr auto LOG_FILENAME_PREFIX = "VRKit";
     extern const std::filesystem::path OPENXR_JSON;
   } // namespace Files
 } // namespace IRacingTools::Shared

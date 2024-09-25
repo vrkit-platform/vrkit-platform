@@ -41,7 +41,7 @@ export class SignalFlag extends EventEmitter3Async<SignalFlagEvents> {
     }
     return this
   }
-
+  
   /**
    * Reset signal to unused
    *

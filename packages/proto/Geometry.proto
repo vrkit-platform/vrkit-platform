@@ -31,3 +31,14 @@ message RectF {
   SizeF size = 1;
   PositionF position = 2;
 }
+
+message VRPose {
+  float x = 1;
+  float eyeY = 2;
+  float z = 3;
+}
+
+message VRLayout {
+  VRPose pose = 1;
+  SizeF size = 2;
+}

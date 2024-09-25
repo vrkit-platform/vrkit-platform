@@ -24,17 +24,22 @@ namespace IRacingTools::Shared::VR {
    * This is what's stored in the config file, so intended to be
    * semi-human-editable: distances in meters, rotations in radians.
    */
-  struct VRPose {
+  struct VRNativePose {
     float x = 0.15f, eyeY = -0.7f, z = -0.4f;
     float rX = -2 * std::numbers::pi_v<float> / 5, rY = -std::numbers::pi_v<float> / 32, rZ = 0.0f;
 
-    VRPose getHorizontalMirror() const;
+    VRNativePose getHorizontalMirror() const;
 
-    constexpr auto operator<=>(const VRPose &) const noexcept = default;
+    constexpr auto operator<=>(const VRNativePose &) const noexcept = default;
 
     bool isValid() const {
       return !(x == 0.0f && eyeY == 0.0f && z == 0.0f);
     }
+  };
+
+  struct VRNativeLayout {
+    VRNativePose pose{-0.25f, 0.0f, -1.0f};
+    VRSize size{0.15f, 0.25f};
   };
 
   /** If gaze zoom is enabled, how close you need to be looking for zoom to
@@ -88,11 +93,12 @@ namespace IRacingTools::Shared::VR {
 
   // Distances in metres, positions in radians.
   struct VROverlayFrameRenderConfig {
-    VRPose pose;
+    VRNativeLayout layout;
+    //VRPose pose;
 
     //TODO: move physical size references -> `rect.size()` references
-    Size<float> physicalSize {0.15f, 0.25f};
-    VRRect rect{};
+    //VRSize physicalSize {0.15f, 0.25f};
+    //VRRect rect{};
 
     // TODO: Remove `enableGazeZoom`, `gazeTargetScale`
     bool enableGazeZoom{true};

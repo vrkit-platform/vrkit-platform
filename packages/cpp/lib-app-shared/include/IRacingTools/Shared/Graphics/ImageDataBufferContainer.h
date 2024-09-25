@@ -47,9 +47,8 @@ namespace IRacingTools::Shared::Graphics {
 
     const std::uint32_t bpp = ToBPP(FormatChannels);
 
-    ImageDataBufferContainer(const std::uint32_t& width, const std::uint32_t& height) : width_(width),
-      height_(height) {
-      resize(width, height);
+    ImageDataBufferContainer(const std::uint32_t& width, const std::uint32_t& height) : width_(width), height_(height) {
+      resize(width, height, true);
     }
 
     ImageDataBufferContainer() = delete;
@@ -66,21 +65,19 @@ namespace IRacingTools::Shared::Graphics {
       return std::make_shared<Buffer>(width(), height());
     }
 
-    bool resize(const std::uint32_t& width, const std::uint32_t& height) {
+    bool resize(const std::uint32_t& width, const std::uint32_t& height, bool force = false) {
       std::scoped_lock lock(queueMutex_);
-      if (width == width_ && height == height_) {
+      if (!force && width == width_ && height == height_) {
         return true;
       }
 
-      if (!IsNonZeroSize<uint32_t>({width, height}))
-        return false;
+      if (!IsNonZeroSize<uint32_t>({width, height})) return false;
 
       availableBuffers_.clear(BufferPtr{nullptr});
       width_ = width;
       height_ = height;
       for (int i = 0; i < availableBuffers_.capacity(); i++) {
-        if (availableBuffers_.full())
-          break;
+        if (availableBuffers_.full()) break;
 
         availableBuffers_.push(newBuffer());
       }
@@ -131,8 +128,8 @@ namespace IRacingTools::Shared::Graphics {
     bool consume(BufferPtr& targetBuffer) {
       std::scoped_lock lock(queueMutex_);
 
-      if (!targetBuffer || !readyBuffer_ || targetBuffer->bpp != readyBuffer_->bpp || targetBuffer->isDestroyed() ||
-        readyBuffer_->isDestroyed()) return false;
+      if (!targetBuffer || !readyBuffer_ || targetBuffer->bpp != readyBuffer_->bpp || targetBuffer->isDestroyed() || readyBuffer_->isDestroyed())
+        return false;
 
       if (targetBuffer->size() != readyBuffer_->size()) {
         targetBuffer->resize(readyBuffer_->width(), readyBuffer_->height());

@@ -18,7 +18,7 @@ export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardC
       {
         id: "track-map-placement-0",
         overlayId: "track-map-0",
-        rect: {
+        screenRect: {
           size: {
             width: 400,
             height: 400

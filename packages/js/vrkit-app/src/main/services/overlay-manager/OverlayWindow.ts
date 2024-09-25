@@ -1,7 +1,7 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { BrowserWindow, BrowserWindowConstructorOptions } from "electron"
-import { OverlayInfo, OverlayPlacement } from "vrkit-models"
-import { isDev } from "vrkit-app-common/utils"
+import { OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
+import { isDev, isRectValid } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
   OverlayClientEventType,
@@ -10,6 +10,9 @@ import {
   OverlayMode
 } from "vrkit-app-common/models/overlay-manager"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
+import { isDefined } from "@3fv/guard"
+import { asOption } from "@3fv/prelude-ts"
+import type OverlayManager from "./OverlayManager"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -45,6 +48,10 @@ export class OverlayWindow {
 
   get windowId() {
     return this.window_?.id
+  }
+  
+  get screenRect(): RectI {
+    return this.manager.getOverlayScreenRect(this)
   }
 
   get isClosing() {
@@ -82,6 +89,10 @@ export class OverlayWindow {
   get config() {
     return this.config_
   }
+  
+  get placement() {
+    return this.config.placement
+  }
 
   whenReady(): Promise<OverlayWindow> {
     return this.readyDeferred_.promise
@@ -98,7 +109,7 @@ export class OverlayWindow {
     this.window?.webContents?.send(OverlayClientEventTypeToIPCName(OverlayClientEventType.OVERLAY_CONFIG), this.config)
   }
 
-  private constructor(overlay: OverlayInfo, placement: OverlayPlacement) {
+  private constructor(readonly manager: OverlayManager, overlay: OverlayInfo, placement: OverlayPlacement) {
     this.config_ = { overlay, placement }
     this.windowOptions = {
       ...windowOptionDefaults({
@@ -112,8 +123,8 @@ export class OverlayWindow {
       backgroundColor: "#00000000",
       alwaysOnTop: true,
 
-      ...placement.rect.position,
-      ...placement.rect.size
+      ...placement.screenRect.position,
+      ...placement.screenRect.size
     }
 
     this.window_ = new BrowserWindow(this.windowOptions)
@@ -150,8 +161,8 @@ export class OverlayWindow {
     return deferred.promise
   }
 
-  static create(overlay: OverlayInfo, placement: OverlayPlacement): OverlayWindow {
-    return new OverlayWindow(overlay, placement)
+  static create(manager: OverlayManager,overlay: OverlayInfo, placement: OverlayPlacement): OverlayWindow {
+    return new OverlayWindow(manager, overlay, placement)
   }
 
   private setIgnoreMouseEvents(ignore: boolean): void {

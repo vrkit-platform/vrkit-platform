@@ -6,8 +6,8 @@
 extern "C" {
 #endif
 
-extern unsigned char RCDataTrackMapShader[];
-extern size_t RCDataTrackMapShader_len;
+// extern unsigned char RCDataTrackMapShader[];
+// extern size_t RCDataTrackMapShader_len;
 
 extern unsigned char RCDataSampleImage[];
 extern size_t RCDataSampleImage_len;

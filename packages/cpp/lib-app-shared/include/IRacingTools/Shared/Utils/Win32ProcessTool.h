@@ -8,4 +8,5 @@
 namespace IRacingTools::Shared::Utils {
   void WindowsSetHighPriorityProcess();
 
+  std::string GetProcessName();
 }// namespace IRacingTools::Shared::Utils

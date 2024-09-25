@@ -3,7 +3,7 @@
 
 namespace IRacingTools::Shared::VR {
 
-  VRPose VRPose::getHorizontalMirror() const {
+  VRNativePose VRNativePose::getHorizontalMirror() const {
     auto ret = *this;
     ret.x = -ret.x;
     // Yaw

@@ -28,7 +28,7 @@
 #include <iostream>
 #include <utility>
 
-#include <IRacingTools/OpenXR/OpenXRLayer.h>
+#include <IRacingTools/OpenXR/OpenXROverlayLayer.h>
 #include <IRacingTools/OpenXR/OpenXRNext.h>
 
 #include <spdlog/spdlog.h>
@@ -40,14 +40,14 @@
 namespace IRacingTools::OpenXR::DX11 {
 using namespace DirectX::SimpleMath;
 
-OpenXRDX11Layer::OpenXRDX11Layer(
+OpenXRDX11OverlayLayer::OpenXRDX11OverlayLayer(
   XrInstance instance,
   XrSystemId systemID,
   XrSession session,
   OpenXRRuntimeID runtimeID,
   const std::shared_ptr<OpenXRNext>& next,
   const XrGraphicsBindingD3D11KHR& binding)
-  : OpenXRLayer(instance, systemID, session, runtimeID, next) {
+  : OpenXROverlayLayer(instance, systemID, session, runtimeID, next) {
   spdlog::debug("{}", __FUNCTION__);
   VRK_TraceLoggingScope("OpenXRDX11Layer()");
 
@@ -57,11 +57,11 @@ OpenXRDX11Layer::OpenXRDX11Layer(
   renderer_ = std::make_unique<DX11::OpenXRDX11Renderer>(device_.get());
 }
 
-OpenXRDX11Layer::~OpenXRDX11Layer() {
+OpenXRDX11OverlayLayer::~OpenXRDX11OverlayLayer() {
   VRK_TraceLoggingScope("~OpenXRDX11Layer()");
 }
 
-OpenXRDX11Layer::DXGIFormats OpenXRDX11Layer::GetDXGIFormats(
+OpenXRDX11OverlayLayer::DXGIFormats OpenXRDX11OverlayLayer::GetDXGIFormats(
   OpenXRNext* oxr,
   XrSession session) {
   uint32_t formatCount {0};
@@ -99,7 +99,7 @@ OpenXRDX11Layer::DXGIFormats OpenXRDX11Layer::GetDXGIFormats(
   return {format, format};
 }
 
-XrSwapchain OpenXRDX11Layer::createSwapchain(
+XrSwapchain OpenXRDX11OverlayLayer::createSwapchain(
   XrSession session,
   const PixelSize& size) {
   spdlog::debug("{}", __FUNCTION__);
@@ -187,13 +187,13 @@ XrSwapchain OpenXRDX11Layer::createSwapchain(
   return swapchain;
 }
 
-void OpenXRDX11Layer::releaseSwapchainResources(XrSwapchain swapchain) {
+void OpenXRDX11OverlayLayer::releaseSwapchainResources(XrSwapchain swapchain) {
   if (swapchainResources_.contains(swapchain)) {
     swapchainResources_.erase(swapchain);
   }
 }
 
-void OpenXRDX11Layer::renderLayers(
+void OpenXRDX11OverlayLayer::renderLayers(
   XrSwapchain swapchain,
   uint32_t swapchainTextureIndex,
   const SHM::Snapshot& snapshot,
@@ -211,7 +211,7 @@ void OpenXRDX11Layer::renderLayers(
     RenderMode::ClearAndRender);
 }
 
-SHM::SHMCachedReader* OpenXRDX11Layer::getSHM() {
+SHM::SHMCachedReader* OpenXRDX11OverlayLayer::getSHM() {
   return &shm_;
 }
 

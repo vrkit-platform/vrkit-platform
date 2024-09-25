@@ -10,7 +10,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
-import { RectF } from "./Geometry";
+import { VRLayout } from "./Geometry";
 import { RectI } from "./Geometry";
 /**
  * @generated from protobuf message IRacingTools.Models.Dashboard.OverlayBaseSettings
@@ -63,13 +63,17 @@ export interface OverlayPlacement {
      */
     overlayId: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.RectI rect = 10;
+     * @generated from protobuf field: IRacingTools.Models.RectI screen_rect = 10;
      */
-    rect?: RectI;
+    screenRect?: RectI;
     /**
-     * @generated from protobuf field: IRacingTools.Models.RectF vr_rect = 20;
+     * @generated from protobuf field: bool vr_enabled = 20;
      */
-    vrRect?: RectF;
+    vrEnabled: boolean;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.VRLayout vr_layout = 21;
+     */
+    vrLayout?: VRLayout;
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.Dashboard.OverlayKind
@@ -227,14 +231,16 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
         super("IRacingTools.Models.Dashboard.OverlayPlacement", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "overlay_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 10, name: "rect", kind: "message", T: () => RectI },
-            { no: 20, name: "vr_rect", kind: "message", T: () => RectF }
+            { no: 10, name: "screen_rect", kind: "message", T: () => RectI },
+            { no: 20, name: "vr_enabled", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 21, name: "vr_layout", kind: "message", T: () => VRLayout }
         ]);
     }
     create(value?: PartialMessage<OverlayPlacement>): OverlayPlacement {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
         message.overlayId = "";
+        message.vrEnabled = false;
         if (value !== undefined)
             reflectionMergePartial<OverlayPlacement>(this, message, value);
         return message;
@@ -250,11 +256,14 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
                 case /* string overlay_id */ 5:
                     message.overlayId = reader.string();
                     break;
-                case /* IRacingTools.Models.RectI rect */ 10:
-                    message.rect = RectI.internalBinaryRead(reader, reader.uint32(), options, message.rect);
+                case /* IRacingTools.Models.RectI screen_rect */ 10:
+                    message.screenRect = RectI.internalBinaryRead(reader, reader.uint32(), options, message.screenRect);
                     break;
-                case /* IRacingTools.Models.RectF vr_rect */ 20:
-                    message.vrRect = RectF.internalBinaryRead(reader, reader.uint32(), options, message.vrRect);
+                case /* bool vr_enabled */ 20:
+                    message.vrEnabled = reader.bool();
+                    break;
+                case /* IRacingTools.Models.VRLayout vr_layout */ 21:
+                    message.vrLayout = VRLayout.internalBinaryRead(reader, reader.uint32(), options, message.vrLayout);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -274,12 +283,15 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
         /* string overlay_id = 5; */
         if (message.overlayId !== "")
             writer.tag(5, WireType.LengthDelimited).string(message.overlayId);
-        /* IRacingTools.Models.RectI rect = 10; */
-        if (message.rect)
-            RectI.internalBinaryWrite(message.rect, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
-        /* IRacingTools.Models.RectF vr_rect = 20; */
-        if (message.vrRect)
-            RectF.internalBinaryWrite(message.vrRect, writer.tag(20, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.RectI screen_rect = 10; */
+        if (message.screenRect)
+            RectI.internalBinaryWrite(message.screenRect, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
+        /* bool vr_enabled = 20; */
+        if (message.vrEnabled !== false)
+            writer.tag(20, WireType.Varint).bool(message.vrEnabled);
+        /* IRacingTools.Models.VRLayout vr_layout = 21; */
+        if (message.vrLayout)
+            VRLayout.internalBinaryWrite(message.vrLayout, writer.tag(21, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

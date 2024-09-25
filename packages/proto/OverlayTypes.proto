@@ -31,8 +31,10 @@ message OverlayPlacement {
   string id = 1;
   string overlay_id = 5;
 
-  RectI rect = 10;
+  RectI screen_rect = 10;
 
-  RectF vr_rect = 20;
+  bool vr_enabled = 20;
+  VRLayout vr_layout = 21;
+
 }
 

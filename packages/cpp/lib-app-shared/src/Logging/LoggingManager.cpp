@@ -2,6 +2,7 @@
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/Utils/TypeIdHelpers.h>
+#include <IRacingTools/Shared/Utils/Win32ProcessTool.h>
 
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/wincolor_sink.h>
@@ -22,7 +23,7 @@ namespace IRacingTools::Shared::Logging {
 
   LoggingManager::LoggingManager(token) {
     auto logDir = GetAppDataPath(Directories::LOGS);
-    auto logFile = logDir / Files::LOG_FILENAME;
+    auto logFile = logDir / std::format("{}-{}.log", Files::LOG_FILENAME_PREFIX, Utils::GetProcessName());
     std::cerr << std::format("Writing to log file ({})\n", logFile.string());
 
     gFileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFile.string(), LogFileMaxSize, 1u);

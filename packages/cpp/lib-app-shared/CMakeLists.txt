@@ -10,15 +10,14 @@ file(GLOB_RECURSE sharedAppLibHeadersPublic include/*.h)
 # Embed Resources
 set(RC_SRC_DIR "${CMAKE_CURRENT_LIST_DIR}/resources")
 set(RC_OUT_SRC_FILES)
-embed_shader_fx_resource("${RC_SRC_DIR}/TrackMapShader.fx" RCDataTrackMapShader RC_OUT_SRC_FILES)
-embed_resource("${RC_SRC_DIR}/sampleImage.jpg" RCDataSampleImage RC_OUT_SRC_FILES)
+#embed_shader_fx_resource("${RC_SRC_DIR}/TrackMapShader.fx" RCDataTrackMapShader RC_OUT_SRC_FILES)
+#embed_resource("${RC_SRC_DIR}/sampleImage.jpg" RCDataSampleImage RC_OUT_SRC_FILES)
 
-message(NOTICE "RC SRC Generated: ${RC_OUT_SRC_FILES}")
-list(APPEND sharedAppLibSources ${RC_OUT_SRC_FILES})
+#message(NOTICE "RC SRC Generated: ${RC_OUT_SRC_FILES}")
+#list(APPEND sharedAppLibSources ${RC_OUT_SRC_FILES})
 
 ## SETUP
 add_library(${sharedAppLibTargetStatic} STATIC ${sharedAppLibSources} ${sharedAppLibHeaders} ${sharedAppLibHeadersPublic} )
-#target_link_libraries(${sharedAppLibTargetStatic} PUBLIC ${sdkTargetStatic} ${modelsTargetStatic} ${ALL_APP_DEPS})
 
 VRK_CONFIGURE_TARGET(${sharedAppLibTargetStatic})
 

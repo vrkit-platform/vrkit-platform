@@ -1,4 +1,7 @@
 import { asOption } from "@3fv/prelude-ts"
+import { RectF, RectI } from "vrkit-models"
+import { isDefined, isNumber } from "@3fv/guard"
+import { greaterThan } from "../fp"
 
 export interface DimensionSize {
   width: number
@@ -32,4 +35,12 @@ export const boundsToChromeArgs = (bounds: Bounds) =>
 export function isPointInRect(p: Electron.Point, rect: Electron.Rectangle) {
   const { x, y, width, height } = rect
   return p.x >= x && p.x <= x + width && p.y >= y && p.y <= y + height
+}
+
+
+export function isRectValid(rect: RectI | RectF): boolean  {
+  return asOption(rect)
+      .filter(isDefined)
+      .map(({size, position}) => size && position && [...Object.values(size), ...Object.values(position)].every(isNumber) && Object.values(size).every(greaterThan(0)))
+      .getOrElse(false)
 }

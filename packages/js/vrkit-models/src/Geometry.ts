@@ -88,6 +88,36 @@ export interface RectF {
      */
     position?: PositionF;
 }
+/**
+ * @generated from protobuf message IRacingTools.Models.VRPose
+ */
+export interface VRPose {
+    /**
+     * @generated from protobuf field: float x = 1;
+     */
+    x: number;
+    /**
+     * @generated from protobuf field: float eyeY = 2;
+     */
+    eyeY: number;
+    /**
+     * @generated from protobuf field: float z = 3;
+     */
+    z: number;
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.VRLayout
+ */
+export interface VRLayout {
+    /**
+     * @generated from protobuf field: IRacingTools.Models.VRPose pose = 1;
+     */
+    pose?: VRPose;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.SizeF size = 2;
+     */
+    size?: SizeF;
+}
 // @generated message type with reflection information, may provide speed optimized methods
 class PositionI$Type extends MessageType<PositionI> {
     constructor() {
@@ -414,3 +444,119 @@ class RectF$Type extends MessageType<RectF> {
  * @generated MessageType for protobuf message IRacingTools.Models.RectF
  */
 export const RectF = new RectF$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class VRPose$Type extends MessageType<VRPose> {
+    constructor() {
+        super("IRacingTools.Models.VRPose", [
+            { no: 1, name: "x", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
+            { no: 2, name: "eyeY", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
+            { no: 3, name: "z", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ }
+        ]);
+    }
+    create(value?: PartialMessage<VRPose>): VRPose {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.x = 0;
+        message.eyeY = 0;
+        message.z = 0;
+        if (value !== undefined)
+            reflectionMergePartial<VRPose>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: VRPose): VRPose {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* float x */ 1:
+                    message.x = reader.float();
+                    break;
+                case /* float eyeY */ 2:
+                    message.eyeY = reader.float();
+                    break;
+                case /* float z */ 3:
+                    message.z = reader.float();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: VRPose, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* float x = 1; */
+        if (message.x !== 0)
+            writer.tag(1, WireType.Bit32).float(message.x);
+        /* float eyeY = 2; */
+        if (message.eyeY !== 0)
+            writer.tag(2, WireType.Bit32).float(message.eyeY);
+        /* float z = 3; */
+        if (message.z !== 0)
+            writer.tag(3, WireType.Bit32).float(message.z);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.VRPose
+ */
+export const VRPose = new VRPose$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class VRLayout$Type extends MessageType<VRLayout> {
+    constructor() {
+        super("IRacingTools.Models.VRLayout", [
+            { no: 1, name: "pose", kind: "message", T: () => VRPose },
+            { no: 2, name: "size", kind: "message", T: () => SizeF }
+        ]);
+    }
+    create(value?: PartialMessage<VRLayout>): VRLayout {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<VRLayout>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: VRLayout): VRLayout {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* IRacingTools.Models.VRPose pose */ 1:
+                    message.pose = VRPose.internalBinaryRead(reader, reader.uint32(), options, message.pose);
+                    break;
+                case /* IRacingTools.Models.SizeF size */ 2:
+                    message.size = SizeF.internalBinaryRead(reader, reader.uint32(), options, message.size);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: VRLayout, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* IRacingTools.Models.VRPose pose = 1; */
+        if (message.pose)
+            VRPose.internalBinaryWrite(message.pose, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.SizeF size = 2; */
+        if (message.size)
+            SizeF.internalBinaryWrite(message.size, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.VRLayout
+ */
+export const VRLayout = new VRLayout$Type();

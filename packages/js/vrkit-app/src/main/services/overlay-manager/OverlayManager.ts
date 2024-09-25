@@ -5,7 +5,7 @@ import { Bind } from "vrkit-app-common/decorators"
 import { DashboardConfig, OverlayInfo, OverlayPlacement, RectF, RectI, SessionDataVariableValueMap } from "vrkit-models"
 import { isDefined, isFunction } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
-import { Disposables, isDev, isEmpty, isEqual, Pair, SignalFlag } from "vrkit-app-common/utils"
+import { assign, Disposables, isDev, isEmpty, isEqual, isRectValid, Pair, SignalFlag } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
   OverlayClientEventType,
@@ -41,6 +41,8 @@ import { MainSharedAppState } from "../store"
 import { pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
 import { CreateNativeOverlayManager } from "vrkit-native-interop"
+import type { OverlayManagerState, OverlayManagerStatePatchFn } from "./OverlayManagerState"
+
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 
@@ -52,20 +54,8 @@ const dashDir = AppPaths.dashboardsDir
 const WinRendererEvents = OverlayWindowRendererEvents
 const WinMainEvents = OverlayWindowMainEvents
 
-export type OverlayManagerStatePatchFn = (state: OverlayManagerState) => Partial<OverlayManagerState>
-
 export interface OverlayManagerEventArgs {
   [OverlayManagerEventType.STATE_CHANGED]: (manager: OverlayManager, newState: OverlayManagerState) => void
-}
-
-export interface OverlayManagerState {
-  configs: DashboardConfig[]
-
-  activeSessionId: string
-
-  overlays: OverlayWindow[]
-
-  // mode: OverlayMode
 }
 
 @Singleton()
@@ -217,7 +207,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
               return null
             }
 
-            const newWin = OverlayWindow.create(overlay, placement)
+            const newWin = OverlayWindow.create(this, overlay, placement)
 
             const onBoundsChanged = this.createOnBoundsChangedHandler(config, placement, newWin)
             newWin.window
@@ -275,6 +265,10 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       overlayWindow = this.state.overlays.find(it => it.window?.id === windowId)
 
     return overlayWindow?.config
+  }
+
+  async fetchDashboardConfigsHandler(event: IpcMainInvokeEvent): Promise<DashboardConfig[]> {
+    return this.state.configs.map(it => DashboardConfig.toJson(it) as any)
   }
 
   /**
@@ -369,7 +363,8 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @param event
    * @private
    */
-  @Bind private async unload(event: Electron.Event = null) {
+  @Bind
+  private async unload(event: Electron.Event = null) {
     debug(`Unloading OverlayManager`, event)
 
     this.disposers_.dispose()
@@ -386,9 +381,6 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       .catch(err => warn(`error closing windows`, err))
 
     this.state.overlays = []
-    // this.patchState({
-    //   overlays: []
-    // })
   }
 
   /**
@@ -403,6 +395,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
     const { sessionManager } = this,
       ipcFnHandlers = Array<Pair<OverlayClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
+        [OverlayClientFnType.FETCH_DASHBOARD_CONFIGS, this.fetchDashboardConfigsHandler.bind(this)],
         [OverlayClientFnType.FETCH_CONFIG, this.fetchOverlayConfigHandler.bind(this)],
         [OverlayClientFnType.FETCH_SESSION, this.fetchSessionHandler.bind(this)],
         [OverlayClientFnType.SET_OVERLAY_MODE, this.setOverlayModeHandler.bind(this)],
@@ -468,7 +461,8 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @param config
    * @returns {Promise<void>} pending task promise scheduled in `p-queue`
    */
-  @Bind private saveDashboardConfig(config: DashboardConfig): Promise<void> {
+  @Bind
+  private saveDashboardConfig(config: DashboardConfig): Promise<void> {
     return this.persistQueue_.add(this.createSaveDashboardConfigTask(config))
   }
 
@@ -478,7 +472,8 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @param config
    * @returns {Promise<void>} pending task promise scheduled in `p-queue`
    */
-  @Bind private deleteDashboardConfig(config: DashboardConfig): Promise<void> {
+  @Bind
+  private deleteDashboardConfig(config: DashboardConfig): Promise<void> {
     return this.persistQueue_.add(this.createDeleteDashboardConfigTask(config.id))
   }
 
@@ -613,12 +608,13 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     return (image: NativeImage, dirty: Electron.Rectangle) => {
       const buf = image.getBitmap()
       // TODO: Get real screen & VR rectangles
+      // const win = this.overlays.find(it => it.id === config.id)
       this.nativeManager_.createOrUpdateResources(
         win.id,
         win.windowId,
         { width: dirty.width, height: dirty.height },
-        RectI.create(),
-        RectF.create()
+        this.getOverlayScreenRect(win),
+        this.getOverlayVRRect(win)
       )
       this.nativeManager_.processFrame(win.id, buf)
       if (cap) cap.push(image)
@@ -639,23 +635,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     win: OverlayWindow
   ): Function {
     return (event: Electron.Event) => {
-      asOption(config.placements.find(p => p.overlayId === targetPlacement.overlayId))
-        .ifNone(() => error(`Unable to find placement ${targetPlacement.overlayId} in config`, config))
-        .ifSome(placement => {
-          const bounds = win.window.getBounds(),
-            rect: RectI = {
-              size: pick(bounds, "width", "height"),
-              position: pick(bounds, "x", "y")
-            }
-
-          placement.rect = rect
-          debug(`Saving updated dashboard config updated rect`, rect)
-          this.saveDashboardConfig(config)
-            .then(() => info(`Saved updated dashboard config`, config))
-            .catch(err => {
-              error(`failed to save config`, config)
-            })
-        })
+      this.updateOverlayWindowBounds(win)
     }
   }
 
@@ -681,6 +661,72 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
       await Fsx.writeJSON(dashFile, DashboardConfig.toJson(config))
     }
+  }
+
+  updateOverlayPlacement(
+    win: OverlayWindow,
+    mutator: (placement: OverlayPlacement, dashboardConfig: DashboardConfig) => OverlayPlacement
+  ): OverlayPlacement {
+    return asOption(this.activeDashboardConfig)
+      .map(config =>
+        asOption(config.placements.find(p => p.overlayId === win.id)).match({
+          None: () => {
+            error(`Unable to find placement ${win.id} in config`, config)
+            return null
+          },
+          Some: placement => {
+            const newPlacement = mutator(placement, config)
+            if (newPlacement !== placement && !isEqual(placement, newPlacement)) {
+              assign(placement, { ...newPlacement })
+            }
+
+            this.saveDashboardConfig(config)
+              .then(() => info(`Saved updated dashboard config`, config))
+              .catch(err => {
+                error(`failed to save config`, config)
+              })
+
+            return placement
+          }
+        })
+      )
+      .getOrNull()
+  }
+
+  updateOverlayWindowBounds(win: OverlayWindow): RectI {
+    let screenRect: RectI = null
+    this.updateOverlayPlacement(win, (placement, _dashboardConfig) => {
+      const bounds = win.window.getBounds(),
+        rect = RectI.create({
+          size: pick(bounds, "width", "height"),
+          position: pick(bounds, "x", "y")
+        })
+
+      screenRect = placement.screenRect = rect
+      debug(`Saving updated dashboard config updated rect`, rect)
+      return placement
+    })
+
+    return screenRect
+  }
+
+  getOverlayScreenRect(win: OverlayWindow): RectI {
+    return asOption(win.placement?.screenRect)
+      .filter(isDefined)
+      .filter(isRectValid)
+      .getOrCall(() => this.updateOverlayWindowBounds(win))
+  }
+
+  getOverlayVRRect(win: OverlayWindow): RectF {
+    return asOption(win.placement?.vrRect)
+      .filter(isDefined)
+      .filter(isRectValid)
+      .getOrCall(() => {
+        return RectF.create({
+          size: { width: 1, height: 1 },
+          position: { x: 0, y: 0 }
+        })
+      })
   }
 }
 

@@ -35,7 +35,7 @@ namespace IRacingTools::Shared::Graphics {
     /**
      * @brief VR rectangle
      */
-    VRRect vrRect_{};
+    VR::VRNativeLayout vrLayout_{};
 
     const std::shared_ptr<ImageDataBufferContainer<FormatChannels>> imageData_;
 
@@ -45,8 +45,8 @@ namespace IRacingTools::Shared::Graphics {
       return screenRect_;
     };
 
-    VRRect vrRect() {
-      return vrRect_;
+    VR::VRNativeLayout vrLayout() {
+      return vrLayout_;
     };
 
     PixelSize imageSize() {
@@ -69,15 +69,18 @@ namespace IRacingTools::Shared::Graphics {
       return imageData_->getImageDataStride();
     }
 
-    bool update(const PixelSize& imageSize, const ScreenRect& screenRect, const VRRect& vrRect) {
+    bool update(const PixelSize& imageSize, const ScreenRect& screenRect, const VR::VRNativeLayout& vrLayout) {
       LOCK(mutex_, lock);
       screenRect_ = screenRect;
-      vrRect_ = vrRect;
+      vrLayout_ = vrLayout;
       return imageData_->resize(imageSize.width(), imageSize.height());
     }
 
-    IPCOverlayFrameData(const PixelSize& imageSize, const ScreenRect& screenRect = {}, const VRRect& vrRect = {}) : screenRect_(screenRect), vrRect_(vrRect), imageData_(std::make_shared<ImageDataBufferContainer<FormatChannels>>(imageSize.width(), imageSize.height())) {
-      update(imageSize,screenRect, vrRect);
+    IPCOverlayFrameData(const PixelSize& imageSize, const ScreenRect& screenRect = {}, const VR::VRNativeLayout& vrLayout = {}) :
+      screenRect_(screenRect),
+      vrLayout_(vrLayout),
+      imageData_(std::make_shared<ImageDataBufferContainer<FormatChannels>>(imageSize.width(), imageSize.height())) {
+      update(imageSize, screenRect, vrLayout);
     }
   };
 
@@ -168,7 +171,7 @@ namespace IRacingTools::Shared::Graphics {
 
     explicit IPCOverlayCanvasRenderer(const ProducerPtr& producer, const std::shared_ptr<DXResources>& dxr) :
       consumerThread_(
-        [&] (auto t) {
+        [&](auto t) {
           consumerRunnable(t);
         }
       ),
@@ -179,13 +182,9 @@ namespace IRacingTools::Shared::Graphics {
       consumerThread_.start();
     }
 
-    static std::shared_ptr<IPCOverlayCanvasRenderer> Create(
-      const ProducerPtr& producer
-    ) {
+    static std::shared_ptr<IPCOverlayCanvasRenderer> Create(const ProducerPtr& producer) {
 
-      return std::make_shared<IPCOverlayCanvasRenderer>(
-        producer, std::make_shared<Graphics::DXResources>()
-      );
+      return std::make_shared<IPCOverlayCanvasRenderer>(producer, std::make_shared<Graphics::DXResources>());
     }
 
     ~IPCOverlayCanvasRenderer() {
@@ -328,24 +327,26 @@ namespace IRacingTools::Shared::Graphics {
           .locationOnTexture{.offset_ = {bounds.left(), 0}, .size_ = imageSize, .origin_ = PixelRect::Origin::TopLeft},
           .vrEnabled = true,
           .vr = {
-            .pose{
-              -0.25f, 0.0f, -1.0f
-            },
-            .physicalSize{0.15f, 0.25f},
-            .rect = overlayData->vrRect(),
-
+            .layout = overlayData->vrLayout(),
+            // .pose{-0.25f, 0.0f, -1.0f},
+            // .physicalSize{0.15f, 0.25f},
+            // .rect = overlayData->vrRect(),
             .enableGazeZoom{false},
             .zoomScale{1.0f},
             .gazeTargetScale{},
             .opacity{},
-
           },
-          .screen = {
-            .rect = overlayData->screenRect()
-          }
+          .screen = {.rect = overlayData->screenRect()}
         };
 
-        D3D11_BOX destRegion{bounds.left(), bounds.top(), 0, bounds.left() + imageSize.width(), bounds.top() + imageSize.height(), 1};
+        D3D11_BOX destRegion{
+          bounds.left(),
+          bounds.top(),
+          0,
+          bounds.left() + imageSize.width(),
+          bounds.top() + imageSize.height(),
+          1
+        };
         // ctx->CopySubresourceRegion(target_->d3d().texture(), 0, 0, 0, 0, sourceTarget->d3d().texture(), 0, &srcBox);
         auto imageDataBuffer = overlayData->imageData()->newBuffer();
         if (!overlayData->imageData()->consume(imageDataBuffer) || !imageDataBuffer || !imageDataBuffer->isFilled()) {
@@ -356,17 +357,19 @@ namespace IRacingTools::Shared::Graphics {
         spdlog::info("Rendering overlay image data (idx={})", i);
         // std::scoped_lock lock(*imageDataBuffer);
 
-        imageDataBuffer->consume([&](auto data, auto len, auto) -> std::uint32_t {
-          ctx->UpdateSubresource(
-            target_->d3dTexture().get(),
-            0,
-            &destRegion,
-            data,
-            overlayData->imageData()->getImageDataStride(),
-            0
-          );
-          return len;
-        });
+        imageDataBuffer->consume(
+          [&](auto data, auto len, auto) -> std::uint32_t {
+            ctx->UpdateSubresource(
+              target_->d3dTexture().get(),
+              0,
+              &destRegion,
+              data,
+              overlayData->imageData()->getImageDataStride(),
+              0
+            );
+            return len;
+          }
+        );
 
         shmOverlayFrames.push_back(overlayFrameConfig);
 
@@ -376,7 +379,10 @@ namespace IRacingTools::Shared::Graphics {
       this->submitFrame(shmOverlayFrames, inputLayerID);
     }
 
-    void submitFrame(const std::vector<SHM::SHMOverlayFrameConfig>& shmOverlayFrameConfigs, std::uint64_t inputLayerID) noexcept {
+    void submitFrame(
+      const std::vector<SHM::SHMOverlayFrameConfig>& shmOverlayFrameConfigs,
+      std::uint64_t inputLayerID
+    ) noexcept {
       if (!writer_) {
         return;
       }
@@ -421,10 +427,7 @@ namespace IRacingTools::Shared::Graphics {
 
       SHM::SHMConfig config{
         .globalInputLayerId = 0,
-
-        .vr = {
-
-        },
+        .vr = {},
         //.mTarget = GetConsumerPatternForGame(mCurrentGame),
         .textureSize = destResources->textureSize,
       };
@@ -439,7 +442,12 @@ namespace IRacingTools::Shared::Graphics {
       // }
 
       {
-        writer_->submitFrame(config, shmOverlayFrameConfigs, destResources->textureHandle.get(), destResources->fenceHandle.get());
+        writer_->submitFrame(
+          config,
+          shmOverlayFrameConfigs,
+          destResources->textureHandle.get(),
+          destResources->fenceHandle.get()
+        );
       }
     }
   };

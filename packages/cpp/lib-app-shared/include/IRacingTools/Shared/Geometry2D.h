@@ -481,6 +481,8 @@ namespace IRacingTools::Shared {
   using PixelPoint [[maybe_unused]] = Point<uint32_t>;
   using PixelRect = Rect<uint32_t>;
   using ScreenRect = Rect<int32_t>;
+  using VRSize = Size<float>;
+  using VRPoint = Point<float>;
   using VRRect = Rect<float>;
 
   template<typename T>

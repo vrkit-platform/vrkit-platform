@@ -27,21 +27,29 @@ namespace IRacingTools::App::Commands {
     struct SHMFeedBGRAImageDataSourceConfig {
       BGRAPixel pixel;
       PixelSize imageSize;
+      VR::VRNativeLayout vrLayout;
     };
 
     struct SHMFeedRGBAImageDataSource {
       std::shared_ptr<Graphics::BGRAIPCOverlayFrameData> frameData;
       std::vector<std::uint8_t> sourceFrameData{};
+      VR::VRNativeLayout vrLayout;
 
       void produce() {
-        frameData->imageData()->produce(sourceFrameData.data(), sourceFrameData.size());
+        if (auto res = frameData->imageData()->produce(sourceFrameData.data(), sourceFrameData.size()); !res) {
+          L->error("Failed to produce frame: {}", res.error().what());
+        }
       }
 
       SHMFeedRGBAImageDataSource(
         const BGRAPixel& pixel,
         const std::uint32_t& width,
-        const std::uint32_t& height
-      ) : frameData(std::make_shared<Graphics::BGRAIPCOverlayFrameData>(PixelSize{width, height})) {
+        const std::uint32_t& height,
+        const VR::VRNativeLayout& vrLayout
+      ) : frameData(
+            std::make_shared<Graphics::BGRAIPCOverlayFrameData>(PixelSize{width, height}, ScreenRect{}, vrLayout)
+          ),
+          vrLayout(vrLayout) {
         sourceFrameData.resize(width * height * 4);
         for (int i = 0; i < sourceFrameData.size(); i += 4) {
           sourceFrameData[i] = pixel[0];
@@ -91,10 +99,14 @@ namespace IRacingTools::App::Commands {
           }
 
           auto framePaddingTime = intervalTime - frameDuration;
-          L->info("Frame duration {}ms, paddingTime={}ms, interval={}ms", frameDuration.count(), framePaddingTime.count(), intervalTime.count());
+          L->info(
+            "Frame duration {}ms, paddingTime={}ms, interval={}ms",
+            frameDuration.count(),
+            framePaddingTime.count(),
+            intervalTime.count()
+          );
 
-          if (framePaddingTime.count())
-            std::this_thread::sleep_for(framePaddingTime);
+          if (framePaddingTime.count()) std::this_thread::sleep_for(framePaddingTime);
         }
       }
 
@@ -120,7 +132,14 @@ namespace IRacingTools::App::Commands {
           }
         ) {
         for (auto& config : configs_) {
-          imageDatas_.push_back(std::make_shared<SHMFeedRGBAImageDataSource>(config.pixel, config.imageSize.width(), config.imageSize.height()));
+          imageDatas_.push_back(
+            std::make_shared<SHMFeedRGBAImageDataSource>(
+              config.pixel,
+              config.imageSize.width(),
+              config.imageSize.height(),
+              config.vrLayout
+            )
+          );
         }
 
         producerThread_.start();
@@ -133,8 +152,7 @@ namespace IRacingTools::App::Commands {
       virtual std::shared_ptr<Graphics::IPCOverlayFrameData<Graphics::ImageFormatChannels::BGRA>> getOverlayData(
         std::size_t idx
       ) override {
-      if (imageDatas_.size() > idx)
-              return imageDatas_[idx]->frameData;
+        if (imageDatas_.size() > idx) return imageDatas_[idx]->frameData;
         return nullptr;
       }
 
@@ -161,8 +179,16 @@ namespace IRacingTools::App::Commands {
     L->info("SHM-Feeder");
 
     std::vector<SHMFeedBGRAImageDataSourceConfig> imageConfigs = {
-      {BGRAPixel{0, 0, 0, 255}, PixelSize{400, 400}},
-      {BGRAPixel{0, 0, 255, 255}, PixelSize{200, 200}}
+      {
+        BGRAPixel{0, 0, 0, 255},
+        PixelSize{400, 400},
+        VR::VRNativeLayout{VR::VRNativePose{-0.25f, 0.0f, -1.0f}, VRSize{0.6f, 0.6f}}
+      },
+      {
+        BGRAPixel{0, 0, 255, 255},
+        PixelSize{200, 200},
+        VR::VRNativeLayout{VR::VRNativePose{0.25f, 0.0f, -1.0f}, VRSize{0.4f, 0.4f}}
+      }
     };
     auto producer = std::make_shared<SHMFeedImageDataProducer>(10, imageConfigs);
     gIPCRenderer = Graphics::BGRAIPCOverlayCanvasRenderer::Create(producer.get());

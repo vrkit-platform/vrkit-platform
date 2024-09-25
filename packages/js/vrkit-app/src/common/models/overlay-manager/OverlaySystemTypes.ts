@@ -1,4 +1,10 @@
-import { OverlayInfo, OverlayPlacement, SessionDataVariableValueMap, SessionTiming } from "vrkit-models"
+import {
+  DashboardConfig,
+  OverlayInfo,
+  OverlayPlacement,
+  SessionDataVariableValueMap,
+  SessionTiming
+} from "vrkit-models"
 import type { SessionInfoMessage, PluginClientEventArgs, PluginClientEventType } from "vrkit-plugin-sdk" // ------ OverlayManager events & types
 
 // ------ OverlayManager events & types
@@ -64,6 +70,7 @@ export type OverlayClientEventHandler<Type extends keyof OverlayClientEventArgs>
  * Functions that can be invoked via IPC using `ipcRenderer.invoke`
  */
 export enum OverlayClientFnType {
+  FETCH_DASHBOARD_CONFIGS = "FETCH_DASHBOARD_CONFIGS",
   FETCH_CONFIG = "FETCH_CONFIG",
   FETCH_SESSION = "FETCH_SESSION",
   SET_OVERLAY_MODE = "SET_OVERLAY_MODE",
@@ -123,7 +130,7 @@ export interface OverlaySessionData {
 
 export interface DefaultOverlayClient {
   readonly config: OverlayConfig
-
+  fetchDashboardConfigs(): Promise<DashboardConfig[]>
   fetchConfig(): Promise<OverlayConfig>
 
   fetchSession(): Promise<OverlaySessionData>

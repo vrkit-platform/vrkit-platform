@@ -33,7 +33,7 @@ namespace IRacingTools::App::Node {
     explicit NativeOverlayWindowResources(
         const std::int32_t &windowId,
         const std::string &overlayId,
-        const PixelSize& imageSize, const ScreenRect& screenRect = {}, const VRRect& vrRect = {});
+        const PixelSize& imageSize, const ScreenRect& screenRect = {}, const VR::VRNativeLayout& vrLayout = {});
   };
 
   /**

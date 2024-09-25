@@ -4,7 +4,7 @@ module.exports = {
   
   semi: false,
   singleQuote: false,
-  parser: "typescript",
+  //parser: "typescript",
   arrowParens: "avoid",
   printWidth: 120,
   quoteProps: "as-needed",

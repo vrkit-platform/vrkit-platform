@@ -9,6 +9,9 @@ message DashboardConfig {
   string name = 2;
   string description = 3;
 
+  bool vr_enabled = 8;
+  bool screen_enabled = 9;
+
   string screen_id = 10;
   ScreenConfig screen = 12;
 

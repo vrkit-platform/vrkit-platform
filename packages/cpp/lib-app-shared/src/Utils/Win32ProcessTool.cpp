@@ -32,14 +32,10 @@ namespace IRacingTools::Shared::Utils {
       return sProcessName;
     }
 
-    HANDLE processHandle = OpenProcess(
-      PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
-      FALSE,
-      8036
-    );
-    if (processHandle) {
+    auto moduleHandle = GetModuleHandleA(nullptr);
+    if (moduleHandle) {
       TCHAR processNameBuf[MAX_PATH];
-      if (GetModuleFileNameExA(processHandle, nullptr, processNameBuf, MAX_PATH)) {
+      if (GetModuleFileNameA(moduleHandle, processNameBuf, MAX_PATH)) {
         std::string filename{processNameBuf};
         fs::path file(filename);
         sProcessName.append(file.stem().string());
@@ -47,7 +43,9 @@ namespace IRacingTools::Shared::Utils {
         wprintf(L"Unable to get process name internally, aborting 0x%x\n", GetLastError());
         VRK_FATAL
       }
-      CloseHandle(processHandle);
+    } else {
+      wprintf(L"Unable to get module handle internally, aborting 0x%x\n", GetLastError());
+      VRK_FATAL
     }
 
     return sProcessName;

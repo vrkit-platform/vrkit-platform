@@ -1,17 +1,14 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { BrowserWindow, BrowserWindowConstructorOptions } from "electron"
-import { OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
+import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
 import { isDev, isRectValid } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
   OverlayClientEventType,
   OverlayClientEventTypeToIPCName,
-  OverlayConfig,
   OverlayMode
 } from "vrkit-app-common/models/overlay-manager"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
-import { isDefined } from "@3fv/guard"
-import { asOption } from "@3fv/prelude-ts"
 import type OverlayManager from "./OverlayManager"
 
 // noinspection TypeScriptUnresolvedVariable

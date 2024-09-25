@@ -30,15 +30,17 @@ namespace IRacingTools::OpenXR {
     using namespace IRacingTools::SDK;
     using namespace IRacingTools::Shared;
 
-    // constexpr XrPosef Default2DPose = {{0, 0, 0, 1}, {0, 0, 0}};
-    static constexpr XrPosef XR_POSEF_IDENTITY{
-        .orientation = {0.0f, 0.0f, 0.0f, 1.0f},
-        .position = {0.0f, 0.0f, 0.0f},
-    };
+    namespace {
+        constexpr XrPosef XR_POSEF_IDENTITY{
+            .orientation = {0.0f, 0.0f, 0.0f, 1.0f},
+            .position = {0.0f, 0.0f, 0.0f},
+        };
 
-    static constexpr XrExtent2Df XR_LAYER_DEFAULT_SIZE{
-        0.8f, 0.6f
-    };
+        constexpr XrExtent2Df XR_LAYER_DEFAULT_SIZE{
+            0.8f, 0.6f
+        };
+    }
+
 
     // constexpr std::string_view OpenXRLayerName{"IRTOpenXRLayer"};
     constexpr std::string_view OpenXRLayerName{"VRKitOpenXRLayer"};
@@ -378,14 +380,10 @@ namespace IRacingTools::OpenXR {
                 }
             );
 
-            // if (params.cacheKey != renderCacheKeys_.at(overlayIdx)) {
-            //     needRender = true;
-            // }
-            needRender = true;
-
-            // if (params.isLookingAtKneeboard) {
-            //     topMost = overlayIdx;
-            // }
+            if (params.cacheKey != renderCacheKeys_.at(overlayIdx)) {
+                needRender = true;
+            }
+            // needRender = true;
 
             static_assert(
                 SHM::SHARED_TEXTURE_IS_PREMULTIPLIED,

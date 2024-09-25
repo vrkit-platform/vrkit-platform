@@ -271,6 +271,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
             sessionManager: undefined
           })
         })
+        module.hot.accept()
       }
     }
   }

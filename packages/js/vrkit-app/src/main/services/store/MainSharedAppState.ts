@@ -2,19 +2,18 @@ import { Deferred } from "@3fv/deferred"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 import { applyDecorators, Bind, Once } from "vrkit-app-common/decorators"
-import { ISharedAppState, ThemeId } from "vrkit-app-common/models"
-import { once } from "vrkit-app-common/utils"
+import { DevSettings, ISharedAppState, newDevSettings, ThemeId } from "vrkit-app-common/models"
+import { assign, cloneDeep, once } from "vrkit-app-common/utils"
 import { action, makeObservable, observable, toJS } from "mobx"
 import { deepObserve, IDisposer } from "mobx-utils"
 
-import { broadcastToAllWindows, getAppThemeFromSystem, newNativeImageSequenceCaptureSettings } from "../../utils"
-import { OverlayMode } from "vrkit-app-common/models/overlay-manager"
-import { AppSettings, ThemeType } from "vrkit-models"
-import { isString } from "@3fv/guard"
+import { broadcastToAllWindows, getAppThemeFromSystem } from "../../utils"
+import { newOverlayManagerState, OverlayManagerState, OverlayMode } from "vrkit-app-common/models/overlay-manager"
+import { AppSettings } from "vrkit-models"
 import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
-import { pick } from "lodash"
-import { DevSettings } from "../../models"
+import { MainSharedAppStateSchema } from "../../models"
+import { serialize } from "serializr"
 
 const log = getLogger(__filename)
 
@@ -22,46 +21,51 @@ const { debug, trace, info, error, warn } = log
 const BindAction = () => applyDecorators(Bind, action)
 
 @Singleton()
-export class MainSharedAppState implements AppSettings, ISharedAppState {
+export class MainSharedAppState implements ISharedAppState {
   private initDeferred: Deferred<MainSharedAppState>
 
   private stopObserving: IDisposer
 
   private shutdownInProgress: boolean = false
 
-  @observable zoomFactor: number = 1.0
-
-  @observable customAccelerators: Record<string, string> = {}
-
-  @observable themeType: ThemeType = null
+  // @observable zoomFactor:number = 1.0
 
   @observable systemTheme: ThemeId = getAppThemeFromSystem()
 
   @observable overlayMode: OverlayMode = OverlayMode.NORMAL
 
-  @observable activeDashboardId: string = null
-
-  @observable autoconnect: boolean = false
-
-  @observable devSettings: DevSettings = {
-    imageSequenceCapture: newNativeImageSequenceCaptureSettings()
-  }
-
-  get theme(): ThemeId {
-    return (isString(this.themeType) ? this.themeType : ThemeType[this.themeType]) as ThemeId
-  }
-
   /**
    * Get app settings from state
    */
-  get appSettings(): AppSettings {
-    return AppSettings.create({
-      autoconnect: this.autoconnect,
-      themeType: this.themeType ?? ThemeType.AUTO,
-      activeDashboardId: this.activeDashboardId,
-      zoomFactor: this.zoomFactor
-    })
-  }
+  @observable appSettings: AppSettings = AppSettings.create()
+
+  // @observable customAccelerators:Record<string, string> = {}
+  //
+  // @observable themeType:ThemeType = null
+  //
+  // @observable activeDashboardId:string = null
+  //
+  // @observable autoconnect:boolean = false
+  //
+  //newNativeImageSequenceCaptureSettings()
+  @observable devSettings = newDevSettings()
+
+  // get theme():ThemeId {
+  //   return (
+  //       isString(this.themeType) ? this.themeType : ThemeType[this.themeType]
+  //   ) as ThemeId
+  // }
+
+  // get appSettings():AppSettings {
+  //   return AppSettings.create({
+  //     autoconnect: this.autoconnect,
+  //     themeType: this.themeType ?? ThemeType.AUTO,
+  //     activeDashboardId: this.activeDashboardId,
+  //     zoomFactor: this.zoomFactor
+  //   })
+  // }
+
+  @observable overlayManager = newOverlayManagerState()
 
   get isShutdownInProgress() {
     return this.shutdownInProgress
@@ -125,37 +129,44 @@ export class MainSharedAppState implements AppSettings, ISharedAppState {
     return this.initDeferred.promise
   }
 
-  @BindAction() setZoomFactor(zoomFactor: number) {
-    this.zoomFactor = zoomFactor
+  @BindAction() setAppSettings(appSettings: AppSettings) {
+    this.appSettings = appSettings
+  }
+
+  @BindAction() updateAppSettings(patch: Partial<AppSettings>) {
+    this.appSettings = assign(AppSettings.clone(this.appSettings), patch)
+  }
+
+  @BindAction() setOverlayManagerState(state: OverlayManagerState) {
+    this.overlayManager = state
+  }
+
+  @BindAction() updateOverlayManager(patch: Partial<OverlayManagerState>) {
+    this.overlayManager = assign(cloneDeep(this.overlayManager), patch)
+  }
+
+  @BindAction() updateDevSettings(patch: Partial<DevSettings>) {
+    this.devSettings = assign(cloneDeep(this.devSettings), patch)
   }
 
   @BindAction() setOverlayMode(overlayMode: OverlayMode) {
     this.overlayMode = overlayMode
   }
 
-  @BindAction() setTheme(theme: ThemeId) {
-    this.themeType = isString(theme) ? ThemeType[theme] : theme
-  }
-
   @BindAction() setSystemTheme(theme: ThemeId) {
     this.systemTheme = theme
   }
 
-  @BindAction() setAppSettings(settings: AppSettings) {
-    Object.assign(this, settings)
-  }
-
   @Bind
   private async fetchSharedAppStateHandler(_ev: IpcMainInvokeEvent): Promise<ISharedAppState> {
-    const stateJs = toJS(this.toJSON())
+    const stateJs = this.toJSON()
     info("Sending state js", stateJs)
     return stateJs
   }
-  
+
   toJSON() {
-    return pick(this, "zoomFactor", "themeType", "systemTheme", "overlayMode", "activeDashboardId", "autoconnect")
+    return serialize(MainSharedAppStateSchema, this)
   }
-  
 }
 
 const instanceDeferred = new Deferred<MainSharedAppState>()

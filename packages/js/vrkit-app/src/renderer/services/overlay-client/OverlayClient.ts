@@ -15,12 +15,12 @@ import {
   OverlayClientFnType,
   OverlayClientFnTypeToIPCName,
   OverlayClientState,
-  OverlayConfig,
+  
   OverlayMode,
   OverlaySessionData
 } from "vrkit-app-common/models/overlay-manager"
 import { PluginClientEventType, type SessionInfoMessage } from "vrkit-plugin-sdk"
-import { SessionDataVariableValueMap, SessionTiming } from "vrkit-models"
+import { OverlayConfig,SessionDataVariableValueMap, SessionTiming } from "vrkit-models"
 import { isFunction } from "@3fv/guard"
 
 // noinspection TypeScriptUnresolvedVariable
@@ -96,13 +96,14 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
    * On overlay config changed
    *
    * @param _event
-   * @param config
+   * @param configJs
    */
-  private onOverlayConfigEvent(_event: IpcRendererEvent, config: OverlayConfig) {
+  private onOverlayConfigEvent(_event: IpcRendererEvent, configJs: OverlayConfig) {
+    const config = OverlayConfig.fromJson(configJs as any);
     this.patchState({
       config
     })
-
+    
     this.emit(OverlayClientEventType.OVERLAY_CONFIG, config)
   }
 
@@ -200,7 +201,7 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
     }
 
     const [config, session, mode] = await Promise.all([this.fetchOverlayConfig(), this.fetchSession(), this.fetchMode()])
-
+    //debugger
     this.patchState({
       config,
       session,
@@ -229,7 +230,7 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
 
   @Bind
   async fetchOverlayConfig(): Promise<OverlayConfig> {
-    const newConfig = await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_CONFIG))
+    const newConfig = OverlayConfig.fromJson(await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_CONFIG)))
     this.patchState({
       config: newConfig
     })

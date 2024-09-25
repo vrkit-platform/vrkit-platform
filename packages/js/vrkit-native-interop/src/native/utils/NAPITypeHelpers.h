@@ -1,17 +1,15 @@
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
-
+#pragma once
 
 #include <napi.h>
-
-#include "NativeOverlayManager.h"
+#include <IRacingTools/Shared/VRTypes.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
-
-using namespace IRacingTools::App::Node;
-using namespace IRacingTools::Models::RPC;
-using namespace Napi;
 
 
 namespace IRacingTools::App::Node::Utils {
+  using namespace Napi;
+  using namespace IRacingTools::Shared;
+
   template<typename T>
     auto NumberToNative(Napi::Env& env, const Napi::Number& n, T defaultValue) -> T {
     if constexpr (std::is_same_v<T, double>) {
@@ -65,4 +63,7 @@ namespace IRacingTools::App::Node::Utils {
     };
     return Shared::Rect<T>{offset, size};
   }
+
+
+  Shared::VR::VRNativeLayout VRLayoutObjectToNative(Napi::Env& env, const Napi::Object& o);
 }

@@ -2,18 +2,39 @@ import { getLogger } from "@3fv/logger-proxy"
 import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent, NativeImage } from "electron"
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
-import { DashboardConfig, OverlayInfo, OverlayPlacement, RectF, RectI, SessionDataVariableValueMap } from "vrkit-models"
+import {
+  OverlayConfig,
+  DashboardConfig,
+  OverlayInfo,
+  OverlayPlacement,
+  RectI,
+  SessionDataVariableValueMap,
+  VRLayout
+} from "vrkit-models"
 import { isDefined, isFunction } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
-import { assign, Disposables, isDev, isEmpty, isEqual, isRectValid, Pair, SignalFlag } from "vrkit-app-common/utils"
+import {
+  assign,
+  defaults,
+  Disposables,
+  hasProps,
+  isDev,
+  isEmpty,
+  isEqual,
+  isRectValid,
+  Pair,
+  SignalFlag
+} from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
   OverlayClientEventType,
   OverlayClientEventTypeToIPCName,
   OverlayClientFnType,
   OverlayClientFnTypeToIPCName,
-  OverlayConfig,
+  
   OverlayManagerEventType,
+  OverlayManagerState,
+  OverlayManagerStatePatchFn,
   OverlayMode,
   OverlaySessionData,
   OverlayWindowMainEvents,
@@ -41,8 +62,10 @@ import { MainSharedAppState } from "../store"
 import { pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
 import { CreateNativeOverlayManager } from "vrkit-native-interop"
-import type { OverlayManagerState, OverlayManagerStatePatchFn } from "./OverlayManagerState"
+import type { IArrayDidChange, IMapDidChange, IObjectDidChange } from "mobx"
+import { deepObserve, IDisposer } from "mobx-utils"
 
+type IChange = IObjectDidChange | IArrayDidChange | IMapDidChange
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 
@@ -60,13 +83,17 @@ export interface OverlayManagerEventArgs {
 
 @Singleton()
 export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
+  private overlays_: OverlayWindow[] = []
+
   private persistQueue_ = new PQueue({
     concurrency: 1
   })
 
-  private state_: OverlayManagerState = null
+  // private state_: OverlayManagerState = null
 
   private readonly disposers_ = new Disposables()
+
+  private stopObserving: IDisposer = null
 
   private readonly shutdownFlag_ = SignalFlag.new()
 
@@ -75,7 +102,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   private readonly nativeManager_ = CreateNativeOverlayManager()
 
   get state() {
-    return this.state_
+    return this.mainAppState.overlayManager
   }
 
   get isShutdown() {
@@ -83,11 +110,11 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   }
 
   get mode() {
-    return this.sharedAppState.overlayMode
+    return this.mainAppState.overlayMode
   }
 
   get overlays() {
-    return this.state.overlays ?? []
+    return this.overlays_ ?? []
   }
 
   get activeDashboardId() {
@@ -114,6 +141,11 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       state.configs.push(defaultConfig)
     }
 
+    
+  }
+  
+  private checkActiveDashboardConfig() {
+    const state = this.state
     const activeDashboardId = this.activeDashboardId
     if (!activeDashboardId || !state.configs.some(it => it.id === activeDashboardId)) {
       this.appSettingsService.changeSettings({
@@ -149,8 +181,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
     const state: OverlayManagerState = {
       configs,
-      activeSessionId: null,
-      overlays: [] //mode: OverlayMode.NORMAL
+      activeSessionId: null
     }
 
     this.validateState(state)
@@ -163,11 +194,10 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
   async closeAll(skipPatch = false): Promise<void> {
     await Promise.all(this.overlays.map(overlay => overlay.close()))
+    this.overlays_ = []
 
     if (!skipPatch) {
-      this.patchState({
-        overlays: []
-      })
+      this.patchState({})
     }
   }
 
@@ -179,10 +209,6 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     if (idChanged || notActive) {
       await this.closeAll(true)
     }
-
-    // this.patchState({
-    //   mode: OverlayMode.NORMAL
-    // })
 
     if (!idChanged) return
 
@@ -227,9 +253,9 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       )
     }
 
+    this.overlays_ = overlays
     this.patchState({
-      activeSessionId: activeSession?.id,
-      overlays
+      activeSessionId: activeSession?.id
     })
 
     if (overlays.length) await Promise.all(overlays.map(overlay => overlay.whenReady()))
@@ -262,9 +288,11 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   async fetchOverlayConfigHandler(event: IpcMainInvokeEvent): Promise<OverlayConfig> {
     const window = BrowserWindow.fromWebContents(event.sender),
       windowId = window.id,
-      overlayWindow = this.state.overlays.find(it => it.window?.id === windowId)
+      overlayWindow = this.overlays.find(it => it.window?.id === windowId)
 
-    return overlayWindow?.config
+    return asOption(overlayWindow?.config)
+        .map(config => OverlayConfig.toJson(config))
+        .getOrNull() as OverlayConfig
   }
 
   async fetchDashboardConfigsHandler(event: IpcMainInvokeEvent): Promise<DashboardConfig[]> {
@@ -307,7 +335,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     const window = BrowserWindow.fromWebContents(event.sender),
       windowId = window.id
 
-    return asOption(this.state.overlays.find(it => it.window?.id === windowId)).match({
+    return asOption(this.overlays.find(it => it.window?.id === windowId)).match({
       Some: overlayWindow => {
         return overlayWindow.close()
       },
@@ -342,7 +370,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       ow.setMode(mode)
     }
 
-    this.sharedAppState.setOverlayMode(mode)
+    this.mainAppState.setOverlayMode(mode)
 
     return mode
   }
@@ -380,7 +408,12 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       .then(() => info(`All windows closed`))
       .catch(err => warn(`error closing windows`, err))
 
-    this.state.overlays = []
+    this.overlays_ = []
+  }
+
+  @Bind
+  private onStateChanged(change: IChange, path: string, root: OverlayManagerState) {
+    info(`Received mobx state change (${path})`, change)
   }
 
   /**
@@ -389,8 +422,9 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    */
   @PostConstruct() // @ts-ignore
   private async init(): Promise<void> {
-    this.state_ = await this.createInitialState()
-
+    this.mainAppState.setOverlayManagerState(await this.createInitialState())
+    this.checkActiveDashboardConfig()
+    
     app.on("before-quit", this.unload)
 
     const { sessionManager } = this,
@@ -410,6 +444,8 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(OverlayClientFnTypeToIPCName(type), handler))
 
+    this.stopObserving = deepObserve(this.mainAppState.overlayManager, this.onStateChanged)
+    
     // In dev mode, make everything accessible
     if (isDev) {
       Object.assign(global, {
@@ -418,6 +454,9 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     }
 
     this.disposers_.push(() => {
+      if (this.stopObserving) {
+        this.stopObserving()
+      }
       ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayClientFnTypeToIPCName(type)))
       sessionManagerEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
       app.off("before-quit", this.unload)
@@ -443,14 +482,14 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @param sessionManager
    * @param appSettingsService
    * @param mainWindowManager
-   * @param sharedAppState
+   * @param mainAppState
    */
   constructor(
     @InjectContainer() readonly container: Container,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
     readonly mainWindowManager: MainWindowManager,
-    readonly sharedAppState: MainSharedAppState
+    readonly mainAppState: MainSharedAppState
   ) {
     super()
   }
@@ -485,13 +524,15 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     newStateOrFn: Partial<OverlayManagerState> | OverlayManagerStatePatchFn = {},
     skipBroadcast: boolean = false
   ): OverlayManagerState {
-    const currentState = this.state_
+    const currentState = this.state
     const currentConfigs = currentState.configs ?? []
 
     const newStatePatch = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn
 
-    const newState = (this.state_ = { ...this.state_, ...newStatePatch })
-    const newConfigs = newState.configs ?? []
+    const newState = defaults({ ...this.state, ...newStatePatch }, { configs: [] }),
+      newConfigs = newState.configs
+
+    this.mainAppState.updateOverlayManager(newState)
 
     // HANDLE REMOVALS
     const missingConfigs = currentConfigs.filter(({ id }) => !newConfigs.some(({ id: newId }) => newId === id))
@@ -511,7 +552,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    *
    * @private
    */
-  private broadcastMainStateChanged(state: OverlayManagerState = this.state_) {
+  private broadcastMainStateChanged(state: OverlayManagerState = this.state) {
     this.broadcastMain(OverlayManagerEventType.STATE_CHANGED, state)
   }
 
@@ -560,7 +601,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @private
    */
   private isValidOverlayWindowId(windowId: number): boolean {
-    return this.state.overlays.some(it => it.window?.id === windowId)
+    return this.overlays.some(it => it.window?.id === windowId)
   }
 
   /**
@@ -570,9 +611,8 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    */
   private createOnCloseHandler(windowId: number): Function {
     return (event: Electron.Event) => {
-      this.patchState(state => ({
-        overlays: state.overlays.filter(overlay => overlay.windowId !== windowId)
-      }))
+      this.overlays_ = this.overlays.filter(overlay => overlay.windowId !== windowId)
+      this.patchState(state => ({}))
     }
   }
 
@@ -585,7 +625,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @private
    */
   private createOnPaintHandler(config: DashboardConfig, targetPlacement: OverlayPlacement, win: OverlayWindow) {
-    let cap: NativeImageSequenceCapture = asOption(this.sharedAppState.devSettings?.imageSequenceCapture)
+    let cap: NativeImageSequenceCapture = asOption(this.mainAppState.devSettings?.imageSequenceCapture)
       .filter(it => it !== false)
       .map(
         ({ format, outputPath }) => new NativeImageSequenceCapture(win.config.overlay.id + "-paint", format, outputPath)
@@ -598,7 +638,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   }
 
   private createOnFrameHandler(config: DashboardConfig, targetPlacement: OverlayPlacement, win: OverlayWindow) {
-    let cap: NativeImageSequenceCapture = asOption(this.sharedAppState.devSettings?.imageSequenceCapture)
+    let cap: NativeImageSequenceCapture = asOption(this.mainAppState.devSettings?.imageSequenceCapture)
       .filter(it => it !== false)
       .map(
         ({ format, outputPath }) => new NativeImageSequenceCapture(win.config.overlay.id + "-frame", format, outputPath)
@@ -606,15 +646,17 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       .getOrNull()
 
     return (image: NativeImage, dirty: Electron.Rectangle) => {
-      const buf = image.getBitmap()
+      const buf = image.getBitmap(),
+          screenRect = this.getOverlayScreenRect(win),
+          vrLayout = this.getOverlayVRLayout(win)
       // TODO: Get real screen & VR rectangles
       // const win = this.overlays.find(it => it.id === config.id)
       this.nativeManager_.createOrUpdateResources(
         win.id,
         win.windowId,
         { width: dirty.width, height: dirty.height },
-        this.getOverlayScreenRect(win),
-        this.getOverlayVRRect(win)
+        screenRect,
+        vrLayout
       )
       this.nativeManager_.processFrame(win.id, buf)
       if (cap) cap.push(image)
@@ -707,26 +749,32 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       return placement
     })
 
-    return screenRect
+    return RectI.toJson(screenRect) as RectI
   }
 
   getOverlayScreenRect(win: OverlayWindow): RectI {
     return asOption(win.placement?.screenRect)
       .filter(isDefined)
       .filter(isRectValid)
+        .map(screenRect => RectI.toJson(screenRect) as RectI)
       .getOrCall(() => this.updateOverlayWindowBounds(win))
   }
 
-  getOverlayVRRect(win: OverlayWindow): RectF {
-    return asOption(win.placement?.vrRect)
+  getOverlayVRLayout(win: OverlayWindow): VRLayout {
+    return asOption(win.placement?.vrLayout)
       .filter(isDefined)
-      .filter(isRectValid)
+      .filter(hasProps("size", "pose"))
+      .map(vrLayout => VRLayout.toJson(vrLayout))
       .getOrCall(() => {
-        return RectF.create({
-          size: { width: 1, height: 1 },
-          position: { x: 0, y: 0 }
-        })
-      })
+        return {
+          pose: {
+            x: -0.25,
+            eyeY: 0.0,
+            z: -1.0
+          },
+          size: { width: 0.5, height: 0.5 }
+        }
+      }) as VRLayout
   }
 }
 

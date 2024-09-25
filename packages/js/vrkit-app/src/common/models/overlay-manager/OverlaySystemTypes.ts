@@ -1,13 +1,29 @@
+import { defaults } from "vrkit-app-common/utils"
 import {
   DashboardConfig,
-  OverlayInfo,
-  OverlayPlacement,
+  OverlayConfig,
   SessionDataVariableValueMap,
   SessionTiming
 } from "vrkit-models"
 import type { SessionInfoMessage, PluginClientEventArgs, PluginClientEventType } from "vrkit-plugin-sdk" // ------ OverlayManager events & types
 
 // ------ OverlayManager events & types
+
+// import type { DashboardConfig } from "vrkit-models"
+
+export interface OverlayManagerState {
+  configs: DashboardConfig[]
+  activeSessionId: string
+}
+
+export type OverlayManagerStatePatchFn = (state: OverlayManagerState) => Partial<OverlayManagerState>
+
+export function newOverlayManagerState(state: Partial<OverlayManagerState> = {}): OverlayManagerState {
+  return defaults({...state},{
+    configs: [],
+    activeSessionId: null
+  }) as OverlayManagerState
+}
 
 /**
  * Overlay manager event types `manager -> manager`
@@ -114,11 +130,11 @@ export function OverlayClientEventTypeToIPCName(type: OverlayClientEventType | P
   return `OVERLAY_CLIENT_EVENT_${type.toUpperCase()}` as OverlayClientEventIPCName
 }
 
-export interface OverlayConfig {
-  overlay: OverlayInfo
-
-  placement: OverlayPlacement
-}
+// export interface OverlayConfig {
+//   overlay: OverlayInfo
+//
+//   placement: OverlayPlacement
+// }
 
 export interface OverlaySessionData {
   info: SessionInfoMessage

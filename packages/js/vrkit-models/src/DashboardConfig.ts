@@ -30,6 +30,14 @@ export interface DashboardConfig {
      */
     description: string;
     /**
+     * @generated from protobuf field: bool vr_enabled = 8;
+     */
+    vrEnabled: boolean;
+    /**
+     * @generated from protobuf field: bool screen_enabled = 9;
+     */
+    screenEnabled: boolean;
+    /**
      * @generated from protobuf field: string screen_id = 10;
      */
     screenId: string;
@@ -53,6 +61,8 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 8, name: "vr_enabled", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 9, name: "screen_enabled", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 10, name: "screen_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 12, name: "screen", kind: "message", T: () => ScreenConfig },
             { no: 20, name: "overlays", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => OverlayInfo },
@@ -64,6 +74,8 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
         message.id = "";
         message.name = "";
         message.description = "";
+        message.vrEnabled = false;
+        message.screenEnabled = false;
         message.screenId = "";
         message.overlays = [];
         message.placements = [];
@@ -84,6 +96,12 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
                     break;
                 case /* string description */ 3:
                     message.description = reader.string();
+                    break;
+                case /* bool vr_enabled */ 8:
+                    message.vrEnabled = reader.bool();
+                    break;
+                case /* bool screen_enabled */ 9:
+                    message.screenEnabled = reader.bool();
                     break;
                 case /* string screen_id */ 10:
                     message.screenId = reader.string();
@@ -118,6 +136,12 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
         /* string description = 3; */
         if (message.description !== "")
             writer.tag(3, WireType.LengthDelimited).string(message.description);
+        /* bool vr_enabled = 8; */
+        if (message.vrEnabled !== false)
+            writer.tag(8, WireType.Varint).bool(message.vrEnabled);
+        /* bool screen_enabled = 9; */
+        if (message.screenEnabled !== false)
+            writer.tag(9, WireType.Varint).bool(message.screenEnabled);
         /* string screen_id = 10; */
         if (message.screenId !== "")
             writer.tag(10, WireType.LengthDelimited).string(message.screenId);

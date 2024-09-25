@@ -57,5 +57,5 @@ foreach(target ${modelsTarget} ${modelsTargetStatic})
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMAND ${pwshExe} ARGS "${CMAKE_SOURCE_DIR}/scripts/protoc-ts.ps1" "${protoCompiler}"
   )
-#  target_compile_options(${target} PRIVATE "/permissive")
+  target_compile_options(${target} PRIVATE "/permissive")
 endforeach()

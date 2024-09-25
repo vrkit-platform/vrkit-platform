@@ -30,6 +30,12 @@ export interface AppSettings {
      * @generated from protobuf field: bool autoconnect = 5;
      */
     autoconnect: boolean;
+    /**
+     * @generated from protobuf field: map<string, string> custom_accelerators = 10;
+     */
+    customAccelerators: {
+        [key: string]: string;
+    };
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.ThemeType
@@ -55,7 +61,8 @@ class AppSettings$Type extends MessageType<AppSettings> {
             { no: 1, name: "active_dashboard_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "theme_type", kind: "enum", T: () => ["IRacingTools.Models.ThemeType", ThemeType] },
             { no: 3, name: "zoom_factor", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
-            { no: 5, name: "autoconnect", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
+            { no: 5, name: "autoconnect", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 10, name: "custom_accelerators", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } }
         ]);
     }
     create(value?: PartialMessage<AppSettings>): AppSettings {
@@ -64,6 +71,7 @@ class AppSettings$Type extends MessageType<AppSettings> {
         message.themeType = 0;
         message.zoomFactor = 0;
         message.autoconnect = false;
+        message.customAccelerators = {};
         if (value !== undefined)
             reflectionMergePartial<AppSettings>(this, message, value);
         return message;
@@ -85,6 +93,9 @@ class AppSettings$Type extends MessageType<AppSettings> {
                 case /* bool autoconnect */ 5:
                     message.autoconnect = reader.bool();
                     break;
+                case /* map<string, string> custom_accelerators */ 10:
+                    this.binaryReadMap10(message.customAccelerators, reader, options);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -95,6 +106,22 @@ class AppSettings$Type extends MessageType<AppSettings> {
             }
         }
         return message;
+    }
+    private binaryReadMap10(map: AppSettings["customAccelerators"], reader: IBinaryReader, options: BinaryReadOptions): void {
+        let len = reader.uint32(), end = reader.pos + len, key: keyof AppSettings["customAccelerators"] | undefined, val: AppSettings["customAccelerators"][any] | undefined;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case 1:
+                    key = reader.string();
+                    break;
+                case 2:
+                    val = reader.string();
+                    break;
+                default: throw new globalThis.Error("unknown map entry field for field IRacingTools.Models.AppSettings.custom_accelerators");
+            }
+        }
+        map[key ?? ""] = val ?? "";
     }
     internalBinaryWrite(message: AppSettings, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string active_dashboard_id = 1; */
@@ -109,6 +136,9 @@ class AppSettings$Type extends MessageType<AppSettings> {
         /* bool autoconnect = 5; */
         if (message.autoconnect !== false)
             writer.tag(5, WireType.Varint).bool(message.autoconnect);
+        /* map<string, string> custom_accelerators = 10; */
+        for (let k of globalThis.Object.keys(message.customAccelerators))
+            writer.tag(10, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.LengthDelimited).string(message.customAccelerators[k]).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

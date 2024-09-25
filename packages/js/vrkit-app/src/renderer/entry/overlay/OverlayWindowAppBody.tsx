@@ -22,6 +22,7 @@ import { OverlayMode } from "vrkit-app-common/models/overlay-manager"
 import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 import clsx from "clsx"
+import { isObject } from "@3fv/guard"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -104,7 +105,7 @@ export default function OverlayWindowAppBody() {
           className={clsx(classNames.root)}
           ref={contentRef}
         >
-          {size && (
+          {isObject(size) && (
             <PluginComponent
               client={getVRKitPluginClient()}
               {...size}

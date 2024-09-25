@@ -1,5 +1,4 @@
-import "vrkit-plugin-sdk"
-import { PluginClientComponentProps } from "vrkit-plugin-sdk"
+import type { PluginClientComponentProps } from "vrkit-plugin-sdk"
 import React, { useEffect, useRef, useState } from "react"
 import TrackMapOverlayCanvasRenderer from "./TrackMapOverlayCanvasRenderer"
 

@@ -166,6 +166,7 @@ namespace IRacingTools::Shared::Graphics {
     std::mutex destroyMutex_{};
     std::atomic_bool isDestroyed_{false};
     std::atomic_flag isRendering_;
+    std::atomic_int renderCount_{0};
 
   public:
 
@@ -279,10 +280,10 @@ namespace IRacingTools::Shared::Graphics {
       writer_->detach();
     }
 
-    // void renderNow(std::size_t idx, const std::shared_ptr<IPCOverlayFrameData<FormatChannels>>& frameData) noexcept {
     void renderNow() noexcept {
+      static auto L = Logging::GetCategoryWithName("IPCOverlayCanvasRenderer");
       if (isRendering_.test_and_set()) {
-        spdlog::debug("Two renders in the same instance");
+        L->debug("Two renders in the same instance");
         VRK_BREAK;
         return;
       }
@@ -293,7 +294,9 @@ namespace IRacingTools::Shared::Graphics {
         }
       );
 
-      const auto overlayCount = producer_->getOverlayCount(); // renderInfos.size();
+      auto renderCount = ++renderCount_;
+
+      const auto overlayCount = producer_->getOverlayCount();
 
       const auto canvasSize = Spriting::GetBufferSize(overlayCount);
 
@@ -312,25 +315,17 @@ namespace IRacingTools::Shared::Graphics {
         const auto bounds = Spriting::GetRect(i, overlayCount);
         auto overlayData = producer_->getOverlayData(i);
         if (!overlayData) {
-          spdlog::warn("producer returned null of overlay idx ({})", i);
+          L->warn("producer returned null of overlay idx ({})", i);
           continue;
         }
-        // const auto& renderInfo = renderInfos.at(i);
-        // if (renderInfo.mIsActiveForInput) {
-        //     inputLayerID = renderInfo.mView->GetRuntimeID().GetTemporaryValue();
-        // }
-        //
-        // mCanvas->SetActiveIdentity(i);
-        auto imageSize = overlayData->getImageSize(); // sourceTarget->getDimensions();
+
+        auto imageSize = overlayData->getImageSize();
         SHM::SHMOverlayFrameConfig overlayFrameConfig{
           .overlayIdx = i,
           .locationOnTexture{.offset_ = {bounds.left(), 0}, .size_ = imageSize, .origin_ = PixelRect::Origin::TopLeft},
           .vrEnabled = true,
           .vr = {
             .layout = overlayData->vrLayout(),
-            // .pose{-0.25f, 0.0f, -1.0f},
-            // .physicalSize{0.15f, 0.25f},
-            // .rect = overlayData->vrRect(),
             .enableGazeZoom{false},
             .zoomScale{1.0f},
             .gazeTargetScale{},
@@ -347,15 +342,16 @@ namespace IRacingTools::Shared::Graphics {
           bounds.top() + imageSize.height(),
           1
         };
-        // ctx->CopySubresourceRegion(target_->d3d().texture(), 0, 0, 0, 0, sourceTarget->d3d().texture(), 0, &srcBox);
+
         auto imageDataBuffer = overlayData->imageData()->newBuffer();
         if (!overlayData->imageData()->consume(imageDataBuffer) || !imageDataBuffer || !imageDataBuffer->isFilled()) {
-          spdlog::warn("no frame buffer consumed/populated/filled (idx={})", i);
+          L->warn("no frame buffer consumed/populated/filled (idx={})", i);
           continue;
         }
 
-        spdlog::info("Rendering overlay image data (idx={})", i);
-        // std::scoped_lock lock(*imageDataBuffer);
+        if (renderCount % 100 == 0) {
+          L->info("Rendering frame ({}) overlay image data (idx={})", renderCount, i);
+        }
 
         imageDataBuffer->consume(
           [&](auto data, auto len, auto) -> std::uint32_t {
@@ -372,8 +368,6 @@ namespace IRacingTools::Shared::Graphics {
         );
 
         shmOverlayFrames.push_back(overlayFrameConfig);
-
-        // this->RenderLayer(renderInfo, bounds)
       }
 
       this->submitFrame(shmOverlayFrames, inputLayerID);

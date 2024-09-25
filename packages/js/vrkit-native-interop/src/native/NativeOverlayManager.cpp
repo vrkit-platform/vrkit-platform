@@ -38,8 +38,8 @@ namespace IRacingTools::App::Node {
   NativeOverlayWindowResources::NativeOverlayWindowResources(
     const std::int32_t& windowId,
     const std::string& overlayId,
-    const PixelSize& imageSize, const ScreenRect& screenRect, const VRRect& vrRect
-  ) : Graphics::BGRAIPCOverlayFrameData{imageSize, screenRect, vrRect},
+    const PixelSize& imageSize, const ScreenRect& screenRect, const VR::VRNativeLayout& vrLayout
+  ) : Graphics::BGRAIPCOverlayFrameData{imageSize, screenRect, vrLayout},
       windowId(windowId),
       overlayId(overlayId) {
 
@@ -191,10 +191,10 @@ namespace IRacingTools::App::Node {
 
     auto imageSizeObj = info[2].As<Napi::Object>();
     auto screenRectObj = info[3].As<Napi::Object>();
-    auto vrRectObj = info[4].As<Napi::Object>();
+    auto vrLayoutObj = info[4].As<Napi::Object>();
 
     auto imageSize = Utils::SizeObjectToNative<uint32_t>(env, imageSizeObj);
-    auto vrRect = Utils::RectObjectToNative<float>(env, vrRectObj);
+    auto vrLayout = Utils::VRLayoutObjectToNative(env, vrLayoutObj);
     auto screenRect = Utils::RectObjectToNative<int32_t>(env, screenRectObj);
 
     // auto width = info[2].As<Napi::Number>().Int32Value();
@@ -205,12 +205,12 @@ namespace IRacingTools::App::Node {
 
     if (!resource) {
       L->info("Creating NativeOverlayWindowResources (size={})", imageSize.toString());
-      resource = std::make_shared<NativeOverlayWindowResources>(windowId, overlayId, imageSize, screenRect, vrRect);
+      resource = std::make_shared<NativeOverlayWindowResources>(windowId, overlayId, imageSize, screenRect, vrLayout);
       resources_.push_back(resource);
     } else {
       auto currentSize = resource->getImageSize();
       L->info("Resizing NativeOverlayWindowResources (from={},to={})", currentSize.toString(), imageSize.toString());
-      resource->update(imageSize, screenRect, vrRect);
+      resource->update(imageSize, screenRect, vrLayout);
 
     }
 

@@ -7,12 +7,10 @@ import PQueue from "p-queue"
 import * as OS from "node:os"
 import { Identity, isNotEmpty } from "vrkit-app-common/utils"
 import { asOption } from "@3fv/prelude-ts"
+import { NativeImageSeqSettings, NativeImageSequenceFormat, NativeImageSequenceFormats } from "vrkit-app-common/models"
 
 const log = getLogger(__filename)
 
-export type NativeImageSequenceFormat = "raw" | "png"
-
-export const NativeImageSequenceFormats:NativeImageSequenceFormat[] = ["raw", "png"]
 
 export class NativeImageSequenceCapture {
   private readonly queue = new PQueue({
@@ -51,12 +49,6 @@ export class NativeImageSequenceCapture {
     })
   }
   
-  
-}
-
-export type NativeImageSeqSettings = false | {
-  format: NativeImageSequenceFormat
-  outputPath?: string
   
 }
 

@@ -67,13 +67,22 @@ export interface OverlayPlacement {
      */
     screenRect?: RectI;
     /**
-     * @generated from protobuf field: bool vr_enabled = 20;
-     */
-    vrEnabled: boolean;
-    /**
      * @generated from protobuf field: IRacingTools.Models.VRLayout vr_layout = 21;
      */
     vrLayout?: VRLayout;
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.Dashboard.OverlayConfig
+ */
+export interface OverlayConfig {
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Dashboard.OverlayInfo overlay = 1;
+     */
+    overlay?: OverlayInfo;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Dashboard.OverlayPlacement placement = 2;
+     */
+    placement?: OverlayPlacement;
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.Dashboard.OverlayKind
@@ -232,7 +241,6 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "overlay_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 10, name: "screen_rect", kind: "message", T: () => RectI },
-            { no: 20, name: "vr_enabled", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 21, name: "vr_layout", kind: "message", T: () => VRLayout }
         ]);
     }
@@ -240,7 +248,6 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
         message.overlayId = "";
-        message.vrEnabled = false;
         if (value !== undefined)
             reflectionMergePartial<OverlayPlacement>(this, message, value);
         return message;
@@ -258,9 +265,6 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
                     break;
                 case /* IRacingTools.Models.RectI screen_rect */ 10:
                     message.screenRect = RectI.internalBinaryRead(reader, reader.uint32(), options, message.screenRect);
-                    break;
-                case /* bool vr_enabled */ 20:
-                    message.vrEnabled = reader.bool();
                     break;
                 case /* IRacingTools.Models.VRLayout vr_layout */ 21:
                     message.vrLayout = VRLayout.internalBinaryRead(reader, reader.uint32(), options, message.vrLayout);
@@ -286,9 +290,6 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
         /* IRacingTools.Models.RectI screen_rect = 10; */
         if (message.screenRect)
             RectI.internalBinaryWrite(message.screenRect, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
-        /* bool vr_enabled = 20; */
-        if (message.vrEnabled !== false)
-            writer.tag(20, WireType.Varint).bool(message.vrEnabled);
         /* IRacingTools.Models.VRLayout vr_layout = 21; */
         if (message.vrLayout)
             VRLayout.internalBinaryWrite(message.vrLayout, writer.tag(21, WireType.LengthDelimited).fork(), options).join();
@@ -302,3 +303,56 @@ class OverlayPlacement$Type extends MessageType<OverlayPlacement> {
  * @generated MessageType for protobuf message IRacingTools.Models.Dashboard.OverlayPlacement
  */
 export const OverlayPlacement = new OverlayPlacement$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class OverlayConfig$Type extends MessageType<OverlayConfig> {
+    constructor() {
+        super("IRacingTools.Models.Dashboard.OverlayConfig", [
+            { no: 1, name: "overlay", kind: "message", T: () => OverlayInfo },
+            { no: 2, name: "placement", kind: "message", T: () => OverlayPlacement }
+        ]);
+    }
+    create(value?: PartialMessage<OverlayConfig>): OverlayConfig {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<OverlayConfig>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: OverlayConfig): OverlayConfig {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* IRacingTools.Models.Dashboard.OverlayInfo overlay */ 1:
+                    message.overlay = OverlayInfo.internalBinaryRead(reader, reader.uint32(), options, message.overlay);
+                    break;
+                case /* IRacingTools.Models.Dashboard.OverlayPlacement placement */ 2:
+                    message.placement = OverlayPlacement.internalBinaryRead(reader, reader.uint32(), options, message.placement);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: OverlayConfig, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* IRacingTools.Models.Dashboard.OverlayInfo overlay = 1; */
+        if (message.overlay)
+            OverlayInfo.internalBinaryWrite(message.overlay, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.Dashboard.OverlayPlacement placement = 2; */
+        if (message.placement)
+            OverlayPlacement.internalBinaryWrite(message.placement, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.Dashboard.OverlayConfig
+ */
+export const OverlayConfig = new OverlayConfig$Type();

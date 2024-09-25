@@ -99,30 +99,11 @@ namespace IRacingTools::App::Commands {
           }
 
           auto framePaddingTime = intervalTime - frameDuration;
-          L->info(
-            "Frame duration {}ms, paddingTime={}ms, interval={}ms",
-            frameDuration.count(),
-            framePaddingTime.count(),
-            intervalTime.count()
-          );
-
-          if (framePaddingTime.count()) std::this_thread::sleep_for(framePaddingTime);
+          if (framePaddingTime.count())
+            std::this_thread::sleep_for(framePaddingTime);
         }
       }
 
-      // void notifyRunnable(FnIndefiniteThread * t) {
-      //     while (t->isRunning()) {
-      //         {
-      //             std::unique_lock lock(notifyMutex_);
-      //             notifyCondition_.wait(lock);
-      //         }
-      //
-      //         if (t->isRunning()) {
-      //
-      //         }
-      //     }
-      // }
-      //, notifyThread_([&] (auto t) { notifyRunnable(t); })
       explicit SHMFeedImageDataProducer(std::size_t fps, const std::vector<SHMFeedBGRAImageDataSourceConfig>& configs) :
         fps_(fps),
         configs_(configs),

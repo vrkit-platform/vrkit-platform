@@ -5,9 +5,9 @@ import { Bind } from "vrkit-app-common/decorators"
 
 import { isDev } from "../../constants"
 
-import { OverlayClientEventHandler, OverlayConfig, OverlaySessionData } from "vrkit-app-common/models/overlay-manager"
+import { OverlayClientEventHandler, OverlaySessionData } from "vrkit-app-common/models/overlay-manager"
 import type { PluginClient, PluginClientComponentProps, PluginClientEventArgs } from "vrkit-plugin-sdk"
-import { OverlayKind } from "vrkit-models"
+import { OverlayConfig, OverlayKind } from "vrkit-models"
 import OverlayClient from "./OverlayClient"
 import { asOption } from "@3fv/prelude-ts"
 import TrackManager from "../track-manager"
@@ -104,10 +104,12 @@ export class PluginClientManager {
 
   private async launch() {
     const config = this.getConfig()
-    
-    
-    
-    this.reactComponent_ = await builtinPluginLoaders[config.overlay.kind]()
+
+    const kind = config.overlay.kind ?? OverlayKind.TRACK_MAP
+    const componentFn = builtinPluginLoaders[kind]
+    if (!componentFn)
+      throw Error(`Kind ${kind} is invalid`)
+    this.reactComponent_ = await componentFn()
   }
 
   /**

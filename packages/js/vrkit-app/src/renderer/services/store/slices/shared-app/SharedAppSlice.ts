@@ -3,11 +3,17 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { type ISharedAppState, newSharedAppState, type ThemeId } from "vrkit-app-common/models/app"
 import { assign } from "vrkit-app-common/utils"
 
-import { ThemeType } from "vrkit-models"
+import { AppSettings, ThemeType } from "vrkit-models"
 import { OverlayMode } from "vrkit-app-common/models/overlay-manager"
+import { flow } from "lodash/fp"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
+
+const
+    selectAppSettings = (state: ISharedAppState) => state.appSettings,
+    createAppSettingsSelector = <T>(selector: (appSettings: AppSettings) => T) =>
+    flow(selectAppSettings, selector)
 
 const slice = createSlice({
   name: "shared",
@@ -27,8 +33,9 @@ const slice = createSlice({
   extraReducers: builder => builder,
   selectors: {
     selectOverlayMode: (state: ISharedAppState) => state.overlayMode ?? OverlayMode.NORMAL,
-    selectThemeType: (state: ISharedAppState) => state.themeType,
-    selectThemeId: (state: ISharedAppState) => ThemeType[state.themeType] as ThemeId
+    selectAppSettings,
+    selectThemeType: createAppSettingsSelector(settings => settings.themeType),
+    selectThemeId:createAppSettingsSelector(settings => ThemeType[settings.themeType]  as ThemeId)
   }
 })
 

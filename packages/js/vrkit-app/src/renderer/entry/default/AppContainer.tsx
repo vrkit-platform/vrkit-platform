@@ -11,7 +11,7 @@ export default function AppContainer() {
     <StrictMode>
       <PageMetadataProvider>
         <HelmetProvider>
-          <HashRouter basename={DefaultConfig.site.basePath}>
+          <HashRouter basename={DefaultConfig.app.basePath}>
             <Suspense>
               <App />
             </Suspense>

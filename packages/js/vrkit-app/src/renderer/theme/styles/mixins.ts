@@ -205,7 +205,7 @@ export function paper({ theme, color, dropdown }: PaperProps) {
       color: color ?? varAlpha(theme.vars.palette.background.paperChannel, 0.9),
       blur: 20,
     }),
-    backgroundImage: `url(${DefaultConfig.site.basePath}/assets/cyan-blur.png), url(${DefaultConfig.site.basePath}/assets/red-blur.png)`,
+    backgroundImage: `url(${DefaultConfig.app.basePath}/assets/cyan-blur.png), url(${DefaultConfig.app.basePath}/assets/red-blur.png)`,
     backgroundRepeat: 'no-repeat, no-repeat',
     backgroundPosition: 'top right, left bottom',
     backgroundSize: '50%, 50%',

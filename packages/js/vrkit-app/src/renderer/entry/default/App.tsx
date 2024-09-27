@@ -1,7 +1,7 @@
 import { useScrollToTop } from "vrkit-app-renderer/hooks/use-scroll-to-top"
 import { LocalizationProvider } from "vrkit-app-renderer/locales"
 import { I18nProvider } from "vrkit-app-renderer/locales/i18n-provider"
-import { ThemeProvider } from "vrkit-app-renderer/theme/theme-provider"
+import { ThemeProvider } from "../../theme/ThemeProvider"
 
 import { MotionLazy } from "vrkit-app-renderer/components/animate/motion-lazy"
 import { Provider as ReduxProvider } from "react-redux"

@@ -3,7 +3,7 @@ import type { BoxProps } from '@mui/material/Box';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 
-import { UploadIllustration } from 'vrkit-app-renderer/assets/illustrations';
+
 
 // ----------------------------------------------------------------------
 
@@ -18,7 +18,7 @@ export function UploadPlaceholder({ ...other }: BoxProps) {
       }}
       {...other}
     >
-      <UploadIllustration hideBackground sx={{ width: 200 }} />
+
 
       <Stack spacing={1} sx={{ textAlign: 'center' }}>
         <Box sx={{ typography: 'h6' }}>Drop or select file</Box>

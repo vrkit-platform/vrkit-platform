@@ -44,13 +44,13 @@ const classNames = createClassNames(
   "active"
 )
 
-export interface SessionPlayerControlBarProps {}
+export interface SessionPlayerControlBarProps extends BoxProps {}
 
-const SPCRoot = styled("div", { name: "SessionPlayerControlBar" })(
+const SPCRoot = styled(Box, { name: "SessionPlayerControlBar" })(
   ({ theme }) => ({
     [hasCls(classNames.root)]: {
       backgroundColor: theme.palette.background.session,
-      backgroundImage: theme.palette.background.sessionImage,
+      // backgroundImage: theme.palette.background.sessionImage,
       ...FillWidth,
       ...FlexRow,
       [hasCls(classNames.active)]: {
@@ -238,7 +238,7 @@ function SessionTimingView({
   )
 }
 
-export function SessionPlayerControlBar(props: SessionPlayerControlBarProps) {
+export function SessionPlayerControlBar({className,...other}: SessionPlayerControlBarProps) {
   const theme = useTheme(),
     hasAvailableSession = useAppSelector(
       sessionManagerSelectors.hasAvailableSession
@@ -261,10 +261,8 @@ export function SessionPlayerControlBar(props: SessionPlayerControlBarProps) {
       className={clsx(classNames.root, {
         [classNames.active]: hasAvailableSession,
         [classNames.inactive]: !hasAvailableSession
-      })}
-      sx={{
-        ...FillWidth
-      }}
+      }, className)}
+      {...other}
     >
       <FlexRowBox
         sx={{

@@ -53,7 +53,7 @@ export function updateCoreWithSettings(
       primary:
         coreCustomShadows('dark').primary,
     },
-  };
+  } as any
 }
 
 // ----------------------------------------------------------------------
@@ -79,6 +79,7 @@ export function updateComponentsWithSettings(settings: SettingsState) {
       },
     };
 
+    // noinspection TypeScriptValidateTypes
     components.MuiCard = MuiCard;
   }
 
@@ -98,7 +99,7 @@ const PRIMARY_COLORS = {
 
 function getPalettePrimary(primaryColorName: SettingsState['primaryColor']) {
   /** [1] */
-  const selectedPrimaryColor = PRIMARY_COLORS[primaryColorName];
+  const selectedPrimaryColor = PRIMARY_COLORS[primaryColorName] as Record<string, string>;
   const updatedPrimaryPalette = createPaletteChannel(selectedPrimaryColor);
 
   return primaryColorName === 'default' ? corePrimaryPalette : updatedPrimaryPalette;

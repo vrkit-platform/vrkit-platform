@@ -11,7 +11,7 @@ export function AppView() {
   
   return (
       <AppContent>
-        <SessionPlayerControlBar />
+        {/*<SessionPlayerControlBar />*/}
       </AppContent>
   );
 }

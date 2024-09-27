@@ -54,7 +54,7 @@ export function FontOptions({ value, options, onClickOption }: Props) {
                 }}
               >
                 <SvgColor
-                  src={`${DefaultConfig.site.basePath}/assets/icons/setting/ic-font.svg`}
+                  src={`${DefaultConfig.app.basePath}/assets/icons/setting/ic-font.svg`}
                   sx={{
                     width: 28,
                     height: 28,

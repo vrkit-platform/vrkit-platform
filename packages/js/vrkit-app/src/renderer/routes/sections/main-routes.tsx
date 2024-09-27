@@ -5,13 +5,13 @@ import { Navigate } from "react-router-dom"
 // ----------------------------------------------------------------------
 
 // Overview
-const IndexPage = lazy(() => import('../../pages/app'));
+const DashboardsPage = lazy(() => import('../../pages/dashboards'));
 
 
 
 export const mainRoutes = [
-  { element: <Navigate to={WebPaths.app.root} replace />, index: true },
-  { element: <IndexPage />, path: getWebPathPart(WebPaths.app.root) },
+  { element: <Navigate to={WebPaths.app.dashboards} replace />, index: true },
+  { element: <DashboardsPage />, path: getWebPathPart(WebPaths.app.dashboards) },
   // { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.tracks) },
   // { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.laps) },
   // { element: <FileManagerPage />, path: getWebPathPart(WebPaths.app.games) },

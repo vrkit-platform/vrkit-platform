@@ -49,7 +49,7 @@ test("SessionPlayer.open", async () => {
   
   const sessionTimeVar = player.getDataVariable(sessionTimeHeader.name)
   const sampleIndexes = Array<[number, number]>()
-  player.on(SessionEventType.DATA_FRAME, (player, ev) => {
+  player.on(SessionEventType.DATA_FRAME, (player: SessionPlayer, ev) => {
     const
         evData = ev.payload,
         {sampleIndex, sampleCount} = evData.sessionData.timing

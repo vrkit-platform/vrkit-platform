@@ -6,7 +6,7 @@ import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
 // ----------------------------------------------------------------------
 
-const axiosInstance = axios.create({ baseURL: DefaultConfig.site.serverUrl });
+const axiosInstance = axios.create({ baseURL: DefaultConfig.app.basePath });
 
 axiosInstance.interceptors.response.use(
   (response) => response,

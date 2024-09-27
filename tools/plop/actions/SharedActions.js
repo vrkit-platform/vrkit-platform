@@ -16,19 +16,19 @@ module.exports = function register(plop) {
     writeFile = plopFileWriter(outputs)
 
   plop.setActionType("print-files", (answers, config, plopfileApi) => {
-    outputs.forEach(({ filename, content }) => {
-      console.log(`File: ${filename}\n\n${content}`)
-      //Fs.writeFileSync(filename, content)
-    })
+    // outputs.forEach(({ filename, content }) => {
+    //   console.log(`File: ${filename}\n\n${content}`)
+    //   //Fs.writeFileSync(filename, content)
+    // })
 
     return "success"
   })
 
   plop.setActionType("flush-files", (answers, config, plopfileApi) => {
-    outputs.forEach(({ filename, content }) => {
-      console.log(`Writing: ${filename}`)
-      Fs.writeFileSync(filename, content)
-    })
+    // outputs.forEach(({ filename, content }) => {
+    //   console.log(`Writing: ${filename}`)
+    //   Fs.writeFileSync(filename, content)
+    // })
 
     return "success"
   })

@@ -38,7 +38,7 @@ export function FullScreenButton() {
         }}
       >
         <SvgColor
-          src={`${DefaultConfig.site.basePath}/assets/icons/setting/${fullscreen ? 'ic-exit-full-screen' : 'ic-full-screen'}.svg`}
+          src={`${DefaultConfig.app.basePath}/assets/icons/setting/${fullscreen ? 'ic-exit-full-screen' : 'ic-full-screen'}.svg`}
           sx={{ width: 18, height: 18 }}
         />
       </IconButton>

@@ -5,7 +5,7 @@ import { SvgColor } from 'vrkit-app-renderer/components/svg-color';
 // ----------------------------------------------------------------------
 
 const icon = (name: string) => (
-  <SvgColor src={`${DefaultConfig.site.basePath}/assets/icons/navbar/${name}.svg`} />
+  <SvgColor src={`${DefaultConfig.app.basePath}/assets/icons/navbar/${name}.svg`} />
 );
 
 const Icons = {
@@ -41,21 +41,22 @@ const Icons = {
 
 export const navData = [
   {
-    title: "Overview",
-    path: WebPaths.app.overview,
+    title: "Dashboards",
+    path: WebPaths.app.dashboards,
     icon: Icons.dashboard
   },
-  {
-    subheader: 'Data',
-    items: [
-      {
-        title: 'Tracks',
-        path: WebPaths.app.tracks,
-        icon: Icons.dashboard
-      },
-      { title: 'Laps', path: WebPaths.app.laps, icon: Icons.folder },
-      { title: 'Games', path: WebPaths.app.games, icon: Icons.folder },
-      
-    ],
-  }
+  
+  // {
+  //   subheader: 'Data',
+  //   items: [
+  //     {
+  //       title: 'Tracks',
+  //       path: WebPaths.app.tracks,
+  //       icon: Icons.dashboard
+  //     },
+  //     { title: 'Laps', path: WebPaths.app.laps, icon: Icons.folder },
+  //     { title: 'Games', path: WebPaths.app.games, icon: Icons.folder },
+  //
+  //   ],
+  // }
 ];

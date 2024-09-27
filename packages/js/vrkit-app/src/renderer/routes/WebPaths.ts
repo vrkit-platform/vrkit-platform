@@ -15,17 +15,17 @@ export const WebPaths = {
   page403: '/error/403',
   page404: '/error/404',
   page500: '/error/500',
-  components: '/components',
+  //components: '/components',
   
   
   
   // APP
   app: {
-    root: leaf(WebRootPath.app,"overview"),
-    overview: leaf(WebRootPath.app,"overview"),
-    tracks: leaf(WebRootPath.app,"tracks"),
-    laps: leaf(WebRootPath.app,"laps"),
-    games: leaf(WebRootPath.app,"games"),
+    dashboards: leaf(WebRootPath.app,"dashboards"),
+    // overview: leaf(WebRootPath.app,"overview"),
+    // tracks: leaf(WebRootPath.app,"tracks"),
+    // laps: leaf(WebRootPath.app,"laps"),
+    // games: leaf(WebRootPath.app,"games"),
   },
 };
 

@@ -104,7 +104,7 @@ export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps)
     isEditMode = mode !== OverlayMode.NORMAL,
     overlayClient = useService(OverlayClient),
       sharedAppStateClient = useService(SharedAppStateClient),
-    overlayConfig = overlayClient.config,
+    overlayConfig = overlayClient.overlayConfig,
     overlayInfo = overlayConfig?.overlay
 
   return (

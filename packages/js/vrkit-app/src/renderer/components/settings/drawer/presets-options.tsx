@@ -41,7 +41,7 @@ export function PresetsOptions({ value, options, onClickOption }: Props) {
                 }}
               >
                 <SvgColor
-                  src={`${DefaultConfig.site.basePath}/assets/icons/setting/ic-siderbar-duotone.svg`}
+                  src={`${DefaultConfig.app.basePath}/assets/icons/setting/ic-siderbar-duotone.svg`}
                   sx={{ width: 28, height: 28, color: 'currentColor' }}
                 />
               </ButtonBase>

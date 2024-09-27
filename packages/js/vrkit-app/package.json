@@ -148,6 +148,7 @@
     "yet-another-react-lightbox": "^3.20.0",
     "@awesome.me/kit-79150a3eed": "latest",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "mobx": "^6.13.1",
     "mobx-utils": "^6.0.8",
     "zod": "^3.23.8",

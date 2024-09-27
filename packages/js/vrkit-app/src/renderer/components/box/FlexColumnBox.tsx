@@ -6,19 +6,17 @@ import {
 import type { BoxProps } from "@mui/material"
 import { Box, styled } from "@mui/material"
 
-const FlexColumnBoxRoot = styled(Box, { name: "FlexColumnBoxRoot" })(
+const FlexColumnBoxRoot = styled<typeof Box>(Box, { name: "FlexColumnBoxRoot" })(
   ({ theme }) => ({
     ...FlexColumn,
     ...FlexAuto
   })
 )
 
-const FlexColumnCenterBoxRoot = styled(Box, { name: "FlexColumnBoxRoot" })(
-  ({ theme }) => ({
-    ...FlexColumnCenter,
-    ...FlexAuto
-  })
-)
+const FlexColumnCenterBoxRoot = styled<typeof Box>(Box, { name: "FlexColumnBoxRoot" })(({ theme }) => ({
+  ...FlexColumnCenter,
+  ...FlexAuto
+}))
 
 export function FlexColumnBox(props: BoxProps) {
   return <FlexColumnBoxRoot {...props} />

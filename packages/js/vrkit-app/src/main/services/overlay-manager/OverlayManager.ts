@@ -3,8 +3,8 @@ import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent, NativeImage } from "el
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
 import {
-  OverlayConfig,
   DashboardConfig,
+  OverlayConfig,
   OverlayInfo,
   OverlayPlacement,
   RectI,
@@ -31,7 +31,6 @@ import {
   OverlayClientEventTypeToIPCName,
   OverlayClientFnType,
   OverlayClientFnTypeToIPCName,
-  
   OverlayManagerEventType,
   OverlayManagerState,
   OverlayManagerStatePatchFn,
@@ -65,7 +64,9 @@ import { CreateNativeOverlayManager } from "vrkit-native-interop"
 import type { IArrayDidChange, IMapDidChange, IObjectDidChange } from "mobx"
 import { deepObserve, IDisposer } from "mobx-utils"
 
+// noinspection TypeScriptDuplicateUnionOrIntersectionType
 type IChange = IObjectDidChange | IArrayDidChange | IMapDidChange
+
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 
@@ -124,32 +125,30 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   get activeDashboardConfig() {
     this.validateState(this.state)
 
-    const { configs } = this.state
+    const { dashboardConfigs } = this.state
     const { activeDashboardId } = this
 
-    return configs.find(it => it.id === activeDashboardId)
+    return dashboardConfigs.find(it => it.id === activeDashboardId)
   }
 
   private validateState(state: OverlayManagerState) {
     // CREATE A DEFAULT CONFIG IF NONE EXIST
-    if (isEmpty(state.configs)) {
+    if (isEmpty(state.dashboardConfigs)) {
       const defaultConfig = DashboardConfig.create(newDashboardTrackMapMockConfig())
       this.saveDashboardConfig(defaultConfig).catch(err => {
         error("Failed to save default config", err)
       })
 
-      state.configs.push(defaultConfig)
+      state.dashboardConfigs.push(defaultConfig)
     }
-
-    
   }
-  
+
   private checkActiveDashboardConfig() {
     const state = this.state
     const activeDashboardId = this.activeDashboardId
-    if (!activeDashboardId || !state.configs.some(it => it.id === activeDashboardId)) {
+    if (!activeDashboardId || !state.dashboardConfigs.some(it => it.id === activeDashboardId)) {
       this.appSettingsService.changeSettings({
-        activeDashboardId: state.configs[0].id
+        activeDashboardId: state.dashboardConfigs[0].id
       })
     }
   }
@@ -180,8 +179,9 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       .getOrThrow()
 
     const state: OverlayManagerState = {
-      configs,
-      activeSessionId: null
+      dashboardConfigs: configs,
+      activeSessionId: null,
+      overlayMode: OverlayMode.NORMAL
     }
 
     this.validateState(state)
@@ -291,12 +291,12 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       overlayWindow = this.overlays.find(it => it.window?.id === windowId)
 
     return asOption(overlayWindow?.config)
-        .map(config => OverlayConfig.toJson(config))
-        .getOrNull() as OverlayConfig
+      .map(config => OverlayConfig.toJson(config))
+      .getOrNull() as OverlayConfig
   }
 
   async fetchDashboardConfigsHandler(event: IpcMainInvokeEvent): Promise<DashboardConfig[]> {
-    return this.state.configs.map(it => DashboardConfig.toJson(it) as any)
+    return this.state.dashboardConfigs.map(it => DashboardConfig.toJson(it) as any)
   }
 
   /**
@@ -424,7 +424,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   private async init(): Promise<void> {
     this.mainAppState.setOverlayManagerState(await this.createInitialState())
     this.checkActiveDashboardConfig()
-    
+
     app.on("before-quit", this.unload)
 
     const { sessionManager } = this,
@@ -445,7 +445,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(OverlayClientFnTypeToIPCName(type), handler))
 
     this.stopObserving = deepObserve(this.mainAppState.overlayManager, this.onStateChanged)
-    
+
     // In dev mode, make everything accessible
     if (isDev) {
       Object.assign(global, {
@@ -525,12 +525,12 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     skipBroadcast: boolean = false
   ): OverlayManagerState {
     const currentState = this.state
-    const currentConfigs = currentState.configs ?? []
+    const currentConfigs = currentState.dashboardConfigs ?? []
 
     const newStatePatch = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn
 
-    const newState = defaults({ ...this.state, ...newStatePatch }, { configs: [] }),
-      newConfigs = newState.configs
+    const newState = defaults({ ...this.state, ...newStatePatch }, { dashboardConfigs: [] }),
+      newConfigs = newState.dashboardConfigs
 
     this.mainAppState.updateOverlayManager(newState)
 
@@ -647,8 +647,8 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
     return (image: NativeImage, dirty: Electron.Rectangle) => {
       const buf = image.getBitmap(),
-          screenRect = this.getOverlayScreenRect(win),
-          vrLayout = this.getOverlayVRLayout(win)
+        screenRect = this.getOverlayScreenRect(win),
+        vrLayout = this.getOverlayVRLayout(win)
       // TODO: Get real screen & VR rectangles
       // const win = this.overlays.find(it => it.id === config.id)
       this.nativeManager_.createOrUpdateResources(
@@ -756,7 +756,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     return asOption(win.placement?.screenRect)
       .filter(isDefined)
       .filter(isRectValid)
-        .map(screenRect => RectI.toJson(screenRect) as RectI)
+      .map(screenRect => RectI.toJson(screenRect) as RectI)
       .getOrCall(() => this.updateOverlayWindowBounds(win))
   }
 

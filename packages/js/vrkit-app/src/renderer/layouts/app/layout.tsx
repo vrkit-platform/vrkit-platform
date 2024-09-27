@@ -1,16 +1,27 @@
 import GlobalStyles from "@mui/material/GlobalStyles"
-import { useSettingsContext } from "vrkit-app-renderer/components/settings"
-import type { NavSectionProps } from "vrkit-app-renderer/components/nav-section"
 import { styled, SxProps, Theme, useTheme } from "@mui/material/styles"
 
-import React from "react"
+import React, { useState } from "react"
 
-import Alert from "@mui/material/Alert"
-
-import { useBoolean } from "vrkit-app-renderer/hooks/use-boolean"
-import { Logo } from "../../components/logo"
-import { AppTitleBar } from "../core/AppTitleBar"
 import MainAppBar from "../core/MainAppBar"
+import type { BoxProps } from "@mui/material/Box"
+import Box from "@mui/material/Box"
+import {
+  dimensionConstraints,
+  Fill,
+  FillHeight,
+  FillWidth,
+  FillWindow, flex,
+  flexAlign,
+  FlexAuto,
+  FlexColumn,
+  FlexRow,
+  FlexScaleZero,
+  OverflowHidden,
+  widthConstraint
+} from "../../styles"
+import Drawer from "@mui/material/Drawer"
+import AppDrawerMenu from "vrkit-app-renderer/components/app-drawer-menu"
 
 const StyledDivider = styled("span")(({ theme }) => ({
   width: 1,
@@ -23,7 +34,7 @@ const StyledDivider = styled("span")(({ theme }) => ({
   marginLeft: theme.spacing(2.5),
   marginRight: theme.spacing(2.5),
   backgroundColor: "currentColor",
-  color: theme.vars.palette.divider,
+  // color: theme.vars.palette.divider,
   "&::before, &::after": {
     top: -5,
     width: 3,
@@ -39,16 +50,6 @@ const StyledDivider = styled("span")(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-import type { BoxProps } from "@mui/material/Box"
-import Box from "@mui/material/Box"
-import {
-  dimensionConstraints,
-  Fill,
-  FillWidth,
-  FlexColumn,
-  OverflowHidden,
-  widthConstraint
-} from "../../styles"
 
 // ----------------------------------------------------------------------
 
@@ -58,7 +59,11 @@ export type AppLayoutProps = {
 }
 
 export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
-  const theme = useTheme()
+  const theme = useTheme(),
+      [isDrawerOpen, setDrawerOpen] = useState(true),
+     toggleDrawer = (newOpen: boolean) => () => {
+        setDrawerOpen(newOpen);
+      }
 
   // const isNavVertical = isNavMini || settings.navLayout === 'vertical';
 
@@ -66,7 +71,13 @@ export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
     <>
       <GlobalStyles
         styles={{
-          body: {}
+          body: {
+            [`& > #root`]: {
+              ...FlexColumn,
+              ...FillWindow,
+              ...OverflowHidden,
+            }
+          }
         }}
       />
       <MainAppBar />
@@ -74,21 +85,40 @@ export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
       <Box
           component="main"
           sx={{
-            position: "absolute",
-            display: "flex",
-            // ...dimensionConstraints("100%", "100%"),
-            top: theme.dimen.appBarHeight,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            //position: "absolute",
+            ...FlexRow,
+            ...flexAlign("stretch", "stretch"),
+            // top: theme.dimen.appBarHeight,
+            // left: 0,
+            // right: 0,
+            // bottom: 0,
+            ...FlexScaleZero,
             backgroundColor: "transparent",
             ...widthConstraint("100vw"),
             ...OverflowHidden,
             ...sx
           }}
       >
+        <Drawer
+            variant="permanent"
+            open={isDrawerOpen}
+            onClose={toggleDrawer(false)}
+            sx={{
+              position: "relative",
+              ...flex(0,1,"calc(min(300px,25vw))"),
+              ...FlexColumn,
+              ...flexAlign("stretch","stretch"),
+              [`& .MuiDrawer-paper`]: {
+                position: "relative",
+              },
+            }}
+        >
+          <AppDrawerMenu/>
+        </Drawer>
         <Box sx={{
-          ...FillWidth,
+          ...FlexScaleZero,
+          ...OverflowHidden,
+          ...FillHeight,
           ...FlexColumn}}>
           {children}
         </Box>

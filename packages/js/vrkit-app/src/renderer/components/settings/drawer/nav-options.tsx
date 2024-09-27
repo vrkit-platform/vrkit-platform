@@ -251,7 +251,7 @@ export function ColorOption({ option, selected, sx, ...other }: OptionProps) {
       {...other}
     >
       <SvgColor
-        src={`${DefaultConfig.site.basePath}/assets/icons/setting/ic-sidebar-${option === 'integrate' ? 'outline' : 'filled'}.svg`}
+        src={`${DefaultConfig.app.basePath}/assets/icons/setting/ic-sidebar-${option === 'integrate' ? 'outline' : 'filled'}.svg`}
       />
 
       <Box

@@ -6,7 +6,7 @@ import { NotFoundView } from 'vrkit-app-renderer/sections/error';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `404 page not found! | Error - ${DefaultConfig.site.name}` };
+const metadata = { title: `${DefaultConfig.app.name}` };
 
 export default function Page() {
   return (

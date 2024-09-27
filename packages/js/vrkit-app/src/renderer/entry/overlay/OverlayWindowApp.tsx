@@ -5,7 +5,7 @@ import globalStyles from "!!raw-loader!sass-loader!assets/css/global-electron.sc
 import React, { useLayoutEffect } from "react"
 import { LocalizationProvider } from "vrkit-app-renderer/locales"
 import { I18nProvider } from "vrkit-app-renderer/locales/i18n-provider"
-import { ThemeProvider } from "vrkit-app-renderer/theme/theme-provider"
+import { ThemeProvider } from "../../theme/ThemeProvider"
 import { Provider as ReduxProvider } from "react-redux"
 
 import OverlayWindowAppBody from "./OverlayWindowAppBody"

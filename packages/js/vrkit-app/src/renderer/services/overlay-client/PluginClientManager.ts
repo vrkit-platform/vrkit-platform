@@ -146,7 +146,7 @@ export class PluginClientManager {
   ) {}
 
   @Bind getConfig(): OverlayConfig {
-    return this.client.config
+    return this.client.overlayConfig
   }
 
   @Bind getSessionData(): OverlaySessionData {

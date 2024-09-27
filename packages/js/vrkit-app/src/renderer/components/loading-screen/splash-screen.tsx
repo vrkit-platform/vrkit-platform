@@ -3,7 +3,7 @@ import type { BoxProps } from '@mui/material/Box';
 import Box from '@mui/material/Box';
 import Portal from '@mui/material/Portal';
 
-import { AnimateLogo1 } from 'vrkit-app-renderer/components/animate';
+// import { AnimateLogo1 } from 'vrkit-app-renderer/components/animate';
 
 // ----------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ export function SplashScreen({ portal = true, sx, ...other }: Props) {
         }}
         {...other}
       >
-        <AnimateLogo1 />
+        {/*<AnimateLogo1 />*/}
       </Box>
     </Box>
   );

@@ -70,16 +70,16 @@ module.exports = plop => {
 				path: `${rootDir}/{{reactTargetToPath targetModule}}/{{dashCase name}}/{{name}}.tsx`
 			},
 			// PRINT FILES
-			{
-				type: "print-files",
-				abortOnFail: true
-			},
-
-			// DUMP FILES
-			{
-				type: "flush-files",
-				abortOnFail: true
-			}
+			// {
+			// 	type: "print-files",
+			// 	abortOnFail: true
+			// },
+			//
+			// // DUMP FILES
+			// {
+			// 	type: "flush-files",
+			// 	abortOnFail: true
+			// }
 
 			// UPDATE PROJECT
 			// {

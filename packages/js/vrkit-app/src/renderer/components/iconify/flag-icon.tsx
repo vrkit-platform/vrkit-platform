@@ -38,7 +38,7 @@ export const FlagIcon = forwardRef<HTMLSpanElement, FlagIconProps>(
           <Box
             component="img"
             alt={code}
-            src={`${DefaultConfig.site.basePath}/assets/icons/flagpack/${code?.toLowerCase()}.webp`}
+            src={`${DefaultConfig.app.basePath}/assets/icons/flagpack/${code?.toLowerCase()}.webp`}
             sx={{ width: 1, height: 1, objectFit: 'cover' }}
           />
         </Box>

@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import { RouterLink } from 'vrkit-app-renderer/routes/components';
 
 import { AppLayout } from 'vrkit-app-renderer/layouts/app';
-import { PageNotFoundIllustration } from 'vrkit-app-renderer/assets/illustrations';
+
 
 import { varBounce, MotionContainer } from 'vrkit-app-renderer/components/animate';
 
@@ -31,7 +31,7 @@ export function NotFoundView() {
         </m.div>
 
         <m.div variants={varBounce().in}>
-          <PageNotFoundIllustration sx={{ my: { xs: 5, sm: 10 } }} />
+        
         </m.div>
 
         <Button component={RouterLink} href="/" size="large" variant="contained">

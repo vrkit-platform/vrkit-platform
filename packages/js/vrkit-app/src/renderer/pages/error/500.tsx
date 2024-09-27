@@ -6,7 +6,7 @@ import { View500 } from 'vrkit-app-renderer/sections/error';
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `500 Internal server error! | Error - ${DefaultConfig.site.name}` };
+const metadata = { title: `500 Internal server error! | Error - ${DefaultConfig.app.name}` };
 
 export default function Page() {
   return (

@@ -19,7 +19,7 @@ function makeDefaultRouteConfigs(
 ): (IndexRouteObject | NonIndexRouteObject)[] {
   const element = (
     <Navigate
-      to={WebPaths.app.root}
+      to={WebPaths.app.dashboards}
       replace
     />
   )

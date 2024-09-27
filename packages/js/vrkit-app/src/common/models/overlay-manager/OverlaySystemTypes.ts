@@ -12,16 +12,22 @@ import type { SessionInfoMessage, PluginClientEventArgs, PluginClientEventType }
 // import type { DashboardConfig } from "vrkit-models"
 
 export interface OverlayManagerState {
-  configs: DashboardConfig[]
+  dashboardConfigs: DashboardConfig[]
   activeSessionId: string
+  
+  overlayConfig?: OverlayConfig
+  session?: OverlaySessionData
+  
+  overlayMode: OverlayMode
 }
 
 export type OverlayManagerStatePatchFn = (state: OverlayManagerState) => Partial<OverlayManagerState>
 
 export function newOverlayManagerState(state: Partial<OverlayManagerState> = {}): OverlayManagerState {
   return defaults({...state},{
-    configs: [],
-    activeSessionId: null
+    dashboardConfigs: [],
+    activeSessionId: null,
+    overlayMode: OverlayMode.NORMAL
   }) as OverlayManagerState
 }
 
@@ -49,14 +55,6 @@ export function OverlayManagerEventTypeToIPCName(type: OverlayManagerEventType):
 
 // ------ OverlayClient events & types
 
-export interface OverlayClientState {
-  config: OverlayConfig
-  
-  session: OverlaySessionData
-  
-  mode: OverlayMode
-}
-
 
 /**
  * Overlay client event types `manager -> client`
@@ -73,7 +71,7 @@ export enum OverlayClientEventType {
 export interface OverlayClientEventArgs extends PluginClientEventArgs {
   [OverlayClientEventType.OVERLAY_CONFIG]: (config: OverlayConfig) => void
   [OverlayClientEventType.OVERLAY_MODE]: (mode: OverlayMode) => void
-  [OverlayClientEventType.STATE_CHANGED]: (state: OverlayClientState) => void
+  [OverlayClientEventType.STATE_CHANGED]: (state: OverlayManagerState) => void
   
 }
 
@@ -91,6 +89,10 @@ export enum OverlayClientFnType {
   FETCH_SESSION = "FETCH_SESSION",
   SET_OVERLAY_MODE = "SET_OVERLAY_MODE",
   FETCH_OVERLAY_MODE = "FETCH_OVERLAY_MODE",
+  
+  UPDATE_DASHBOARD_CONFIG = "UPDATE_DASHBOARD_CONFIG",
+  LAUNCH_DASHBOARD_LAYOUT_EDITOR = "LAUNCH_DASHBOARD_LAYOUT_EDITOR",
+  
   CLOSE = "CLOSE"
 }
 

@@ -148,7 +148,7 @@ namespace IRacingTools::Shared::Graphics {
       producer_->onOverlayFrameData(
         [&]() {
           if (isDestroyed_) return;
-          renderNow();
+          render();
           // renderNow(idx, frameData);
         }
       );
@@ -281,7 +281,31 @@ namespace IRacingTools::Shared::Graphics {
       writer_->detach();
     }
 
-    void renderNow() noexcept {
+    /**
+     * @brief Get or create an ImageDataBuffer for a specific overlay index
+     *
+     * @param idx overlay index
+     * @param overlayData frame data wrapper
+     * @return A valid buffer ptr
+     */
+    BufferPtr getOrCreateOverlayImageDataBuffer(std::uint8_t idx, std::shared_ptr<IPCOverlayFrameData<FormatChannels>> overlayData) {
+      BufferPtr imageDataBuffer;
+      if(overlayImageDataBuffers_.contains(idx)) {
+        imageDataBuffer = overlayImageDataBuffers_[idx];
+      }
+
+      if (!imageDataBuffer) {
+        imageDataBuffer =  overlayData->imageData()->newBuffer();
+        overlayImageDataBuffers_[idx] = imageDataBuffer;
+      }
+
+      return imageDataBuffer;
+    }
+
+    /**
+     * @brief Render all overlays and submit the frame
+     */
+    void render() noexcept {
       static auto L = Logging::GetCategoryWithName("IPCOverlayCanvasRenderer");
       if (isRendering_.test_and_set()) {
         L->debug("Two renders in the same instance");
@@ -302,15 +326,14 @@ namespace IRacingTools::Shared::Graphics {
       const auto canvasSize = Spriting::GetBufferSize(overlayCount);
 
       // TraceLoggingWriteTagged(activity, "AcquireDXLock/start");
-      const std::unique_lock dxlock(*dxr_);
+      const std::unique_lock dxLock(*dxr_);
       // TraceLoggingWriteTagged(activity, "AcquireDXLock/stop");
-      this->initializeCanvas(canvasSize);
+      initializeCanvas(canvasSize);
       auto ctx = dxr_->getDXImmediateContext();
       ctx->ClearRenderTargetView(target_->d3d().rtv(), DirectX::Colors::Transparent);
 
       std::vector<SHM::SHMOverlayFrameConfig> shmOverlayFrames;
       shmOverlayFrames.reserve(overlayCount);
-      uint64_t inputLayerID = 0;
 
       for (uint8_t i = 0; i < overlayCount; ++i) {
         const auto bounds = Spriting::GetRect(i, overlayCount);
@@ -344,28 +367,24 @@ namespace IRacingTools::Shared::Graphics {
           1
         };
 
-        // bool isNewBuffer = false;
-        BufferPtr imageDataBuffer;
-        if(overlayImageDataBuffers_.contains(i)) {
-          imageDataBuffer = overlayImageDataBuffers_[i];
-        }
-
+        // GET A BUFFER TO HOLD THE IMAGE DATA
+        BufferPtr imageDataBuffer = getOrCreateOverlayImageDataBuffer(i, overlayData);
         if (!imageDataBuffer) {
-          imageDataBuffer =  overlayData->imageData()->newBuffer();
-          overlayImageDataBuffers_[i] = imageDataBuffer;
-          // isNewBuffer = true;
-        }
-
-        if (!overlayData->imageData()->consume(imageDataBuffer) || !imageDataBuffer || !imageDataBuffer->hasData()) {
-          L->debug("no frame buffer consumed/populated/filled (idx={})", i);
-          //if (isNewBuffer)
+          L->error("imageDataBuffer is invalid (idx={})", i);
           continue;
         }
 
-        if (renderCount % 100 == 0) {
-          L->info("Rendering frame ({}) overlay image data (idx={})", renderCount, i);
+        // CAPTURE/CONSUME AN AVAILABLE FRAME
+        if (!overlayData->imageData()->consume(imageDataBuffer)) {
+          if (!imageDataBuffer || !imageDataBuffer->hasData()) {
+            L->warn("no frame buffer consumed/populated/filled (idx={})", i);
+            continue;
+          }
+
+          L->debug("No new frame data, but using previous (idx={})", i);
         }
 
+        // CONSUME THE DATA & UPDATING DX TEXTURE ON GPU
         imageDataBuffer->consume(
           [&](auto data, auto len, auto) -> std::uint32_t {
             ctx->UpdateSubresource(
@@ -380,30 +399,31 @@ namespace IRacingTools::Shared::Graphics {
           }
         );
 
+        // ADD CONFIG TO THE SHM FRAME DATA
         shmOverlayFrames.push_back(overlayFrameConfig);
       }
 
-      this->submitFrame(shmOverlayFrames, inputLayerID);
+      if (renderCount % 100 == 0) {
+        L->debug("Rendering frame ({}) overlay image data (overlayCount={})", renderCount, overlayCount);
+      }
+
+      submitFrame(shmOverlayFrames);
     }
 
     void submitFrame(
-      const std::vector<SHM::SHMOverlayFrameConfig>& shmOverlayFrameConfigs,
-      std::uint64_t inputLayerID
+      const std::vector<SHM::SHMOverlayFrameConfig>& shmOverlayFrameConfigs
     ) noexcept {
       if (!writer_) {
         return;
       }
-
-
-      // const auto overlayCount = shmOverlayFrameConfigs.size();
 
       auto ctx = dxr_->getDXImmediateContext().get();
       const D3D11_BOX srcBox{
         0,
         0,
         0,
-        static_cast<UINT>(canvasSize_.width()),
-        static_cast<UINT>(canvasSize_.height()),
+        canvasSize_.width(),
+        canvasSize_.height(),
         1,
       };
 
@@ -414,7 +434,7 @@ namespace IRacingTools::Shared::Graphics {
       // TraceLoggingWriteTagged(activity, "AcquireSHMLock/stop");
 
       auto ipcTextureInfo = writer_->beginFrame();
-      auto destResources = this->getTextureResources(ipcTextureInfo.textureIndex, canvasSize_);
+      auto destResources = getTextureResources(ipcTextureInfo.textureIndex, canvasSize_);
 
       auto fence = destResources->fence.get();
       {

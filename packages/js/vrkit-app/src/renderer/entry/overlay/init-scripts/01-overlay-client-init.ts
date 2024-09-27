@@ -9,7 +9,7 @@ const { info, debug, warn, error } = log
 export async function init(container: Container) {
   debug(`init sessionManagerClient state`)
   const overlayClient = container.get(OverlayClient)
-  info(`overlayClient initialized with config`, overlayClient.config)
+  info(`overlayClient initialized with config`, overlayClient.overlayConfig)
   
   
 }

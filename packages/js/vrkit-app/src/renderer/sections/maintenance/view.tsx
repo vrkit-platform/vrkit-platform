@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 
 import { RouterLink } from 'vrkit-app-renderer/routes/components';
 
-import { MaintenanceIllustration } from 'vrkit-app-renderer/assets/illustrations';
+
 
 // ----------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ export function MaintenanceView() {
         We are currently working hard on this page!
       </Typography>
 
-      <MaintenanceIllustration sx={{ my: { xs: 5, sm: 10 } }} />
+      
 
       <Button component={RouterLink} href="/" size="large" variant="contained">
         Go to home

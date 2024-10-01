@@ -10,7 +10,7 @@ enum ThemeType {
 
 message AppSettings {
 
-  string active_dashboard_id = 1;
+  string default_dashboard_config_id = 1;
 
   ThemeType theme_type = 2;
 

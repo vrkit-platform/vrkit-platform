@@ -1,4 +1,4 @@
-import { getLogger } from "@3fv/logger-proxy"
+ import { getLogger } from "@3fv/logger-proxy"
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
 import { APP_STORE_ID, isDev } from "../../constants"
@@ -8,7 +8,9 @@ import type { ISharedAppState } from "vrkit-app-common/models/app"
 import type { AppStore } from "../store"
 import { sharedAppActions } from "../store/slices/shared-app"
 import { ElectronIPCChannel } from "vrkit-app-common/services"
-import { OverlayClientFnType, OverlayClientFnTypeToIPCName, OverlayMode } from "vrkit-app-common/models/overlay-manager"
+import { OverlayClientFnType, OverlayClientFnTypeToIPCName, OverlayMode } from "../../../common/models/overlays"
+ import { SharedAppStateSchema } from "vrkit-app-common/models/app"
+ import { deserialize } from "serializr"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -20,17 +22,17 @@ const { debug, trace, info, error, warn } = log
 export class SharedAppStateClient {
 
   private patchState(patch: Partial<ISharedAppState>) {
-    info(`shared app state`, patch)
+    //info(`shared app state`, patch)
     this.appStore.dispatch(sharedAppActions.patch(patch))
   }
   
   @Bind
   private onSharedAppStateChanged(ev: IpcRendererEvent, sharedAppState: ISharedAppState) {
-    this.patchState(sharedAppState)
+    this.patchState(deserialize(SharedAppStateSchema, sharedAppState))
   }
 
-  fetchSharedAppState(): Promise<ISharedAppState> {
-    return ipcRenderer.invoke(ElectronIPCChannel.fetchSharedAppState)
+  async fetchSharedAppState(): Promise<ISharedAppState> {
+    return deserialize(SharedAppStateSchema, await ipcRenderer.invoke(ElectronIPCChannel.fetchSharedAppState))
   }
   
   /**

@@ -155,7 +155,8 @@
     "vrkit-plugin-sdk": "1.0.0",
     "vrkit-shared": "1.0.0",
     "two.js": "latest",
-    "iohook-raub": "^0.1.1"
+    "iohook-raub": "^0.1.1",
+    "@hazae41/mutex": "^2.1.0"
   },
   "devDependencies": {
     "@electron/notarize": "^2.3.2",

@@ -42,8 +42,8 @@ async function bootstrapElectronMain() {
 
 
 // HMR
-if (module.hot) {
-  module.hot.accept(bootstrapKeys, () => {
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept(bootstrapKeys, () => {
     log.warn("HMR updates")
   })
 }

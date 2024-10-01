@@ -4,27 +4,16 @@ import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy
 import { Bind } from "vrkit-app-common/decorators"
 import {
   DashboardConfig,
-  OverlayConfig,
-  OverlayInfo,
+  OverlayInfo, OverlayKind,
   OverlayPlacement,
   RectI,
   SessionDataVariableValueMap,
+  SessionTiming,
   VRLayout
 } from "vrkit-models"
-import { isDefined, isFunction } from "@3fv/guard"
+import { isDefined, isFunction, isNumber } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
-import {
-  assign,
-  defaults,
-  Disposables,
-  hasProps,
-  isDev,
-  isEmpty,
-  isEqual,
-  isRectValid,
-  Pair,
-  SignalFlag
-} from "vrkit-app-common/utils"
+import { assign, Disposables, hasProps, isDev, isEqual, isRectValid, Pair, SignalFlag } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
   OverlayClientEventType,
@@ -32,40 +21,37 @@ import {
   OverlayClientFnType,
   OverlayClientFnTypeToIPCName,
   OverlayManagerEventType,
-  OverlayManagerState,
   OverlayManagerStatePatchFn,
   OverlayMode,
-  OverlaySessionData,
+  OverlaysState,
   OverlayWindowMainEvents,
   OverlayWindowRendererEvents
-} from "vrkit-app-common/models/overlay-manager"
+} from "../../../common/models/overlays"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
 import {
   ActiveSessionType,
   SessionDetail,
   SessionManagerEventType,
-  SessionManagerState
-} from "vrkit-app-common/models/session-manager"
+  SessionsState
+} from "../../../common/models/sessions"
 import { PluginClientEventType } from "vrkit-plugin-sdk"
 import { AppPaths, FileExtensions } from "vrkit-app-common/constants"
 import { AppSettingsService } from "../app-settings"
 import Fsx from "fs-extra"
-import { endsWith } from "lodash/fp"
 import Path from "path"
 import PQueue from "p-queue"
-import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
 import { OverlayWindow } from "./OverlayWindow"
 import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { pick } from "lodash"
-import { NativeImageSequenceCapture } from "../../utils"
+import { IObserveChange, NativeImageSequenceCapture } from "../../utils"
 import { CreateNativeOverlayManager } from "vrkit-native-interop"
-import type { IArrayDidChange, IMapDidChange, IObjectDidChange } from "mobx"
-import { deepObserve, IDisposer } from "mobx-utils"
 
-// noinspection TypeScriptDuplicateUnionOrIntersectionType
-type IChange = IObjectDidChange | IArrayDidChange | IMapDidChange
+import { IValueDidChange, observe, toJS } from "mobx"
+import { deepObserve, IDisposer } from "mobx-utils"
+import { DashboardManager } from "../dashboard-manager"
+
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -79,7 +65,11 @@ const WinRendererEvents = OverlayWindowRendererEvents
 const WinMainEvents = OverlayWindowMainEvents
 
 export interface OverlayManagerEventArgs {
-  [OverlayManagerEventType.STATE_CHANGED]: (manager: OverlayManager, newState: OverlayManagerState) => void
+  [OverlayManagerEventType.STATE_CHANGED]: (manager: OverlayManager, newState: OverlaysState) => void
+}
+
+function overlayInfoToComponentId(overlayInfo:OverlayInfo):string {
+  return `overlay-${overlayInfo.id}-${isNumber(overlayInfo.kind) ? OverlayKind[overlayInfo.kind] : overlayInfo.kind}`
 }
 
 @Singleton()
@@ -94,7 +84,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
   private readonly disposers_ = new Disposables()
 
-  private stopObserving: IDisposer = null
+  private stopObservingCallbacks = Array<IDisposer>()
 
   private readonly shutdownFlag_ = SignalFlag.new()
 
@@ -103,7 +93,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   private readonly nativeManager_ = CreateNativeOverlayManager()
 
   get state() {
-    return this.mainAppState.overlayManager
+    return this.mainAppState.overlays
   }
 
   get isShutdown() {
@@ -119,38 +109,11 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   }
 
   get activeDashboardId() {
-    return this.appSettingsService.appSettings?.activeDashboardId
+    return this.dashManager.activeDashboardId
   }
 
-  get activeDashboardConfig() {
-    this.validateState(this.state)
-
-    const { dashboardConfigs } = this.state
-    const { activeDashboardId } = this
-
-    return dashboardConfigs.find(it => it.id === activeDashboardId)
-  }
-
-  private validateState(state: OverlayManagerState) {
-    // CREATE A DEFAULT CONFIG IF NONE EXIST
-    if (isEmpty(state.dashboardConfigs)) {
-      const defaultConfig = DashboardConfig.create(newDashboardTrackMapMockConfig())
-      this.saveDashboardConfig(defaultConfig).catch(err => {
-        error("Failed to save default config", err)
-      })
-
-      state.dashboardConfigs.push(defaultConfig)
-    }
-  }
-
-  private checkActiveDashboardConfig() {
-    const state = this.state
-    const activeDashboardId = this.activeDashboardId
-    if (!activeDashboardId || !state.dashboardConfigs.some(it => it.id === activeDashboardId)) {
-      this.appSettingsService.changeSettings({
-        activeDashboardId: state.dashboardConfigs[0].id
-      })
-    }
+  get activeDashboardConfig(): DashboardConfig {
+    return this.dashManager.activeDashboardConfig
   }
 
   /**
@@ -158,124 +121,90 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    *
    * @private
    */
-  private async createInitialState(): Promise<OverlayManagerState> {
-    const dashFiles = await Fsx.promises
-      .readdir(dashDir)
-      .then(files => files.filter(endsWith(FileExtensions.Dashboard)).map(f => Path.join(dashDir, f)))
-
-    const configs = asOption<DashboardConfig[]>(
-      await Promise.all(
-        dashFiles.map(file =>
-          Fsx.readJSON(file)
-            .then(json => DashboardConfig.fromJson(json))
-            .catch(err => {
-              error(`Unable to read file ${file}`, err)
-              return null
-            })
-        )
-      )
-    )
-      .filter(isDefined)
-      .getOrThrow()
-
-    const state: OverlayManagerState = {
-      dashboardConfigs: configs,
-      activeSessionId: null,
+  private async createInitialState(): Promise<OverlaysState> {
+    return {
       overlayMode: OverlayMode.NORMAL
     }
-
-    this.validateState(state)
-    return state
   }
 
   getOverlayByWindowId(windowId: number) {
     return this.overlays.find(overlay => overlay.windowId === windowId)
   }
 
-  async closeAll(skipPatch = false): Promise<void> {
+  async closeAllOverlays(): Promise<void> {
     await Promise.all(this.overlays.map(overlay => overlay.close()))
     this.overlays_ = []
-
-    if (!skipPatch) {
-      this.patchState({})
-    }
   }
 
-  private async updateActiveSession(activeSessionType: ActiveSessionType, activeSession: SessionDetail) {
-    const currentActiveSessionId = this.state.activeSessionId,
-      idChanged = currentActiveSessionId !== activeSession?.id,
-      notActive = activeSessionType === "NONE"
-
-    if (idChanged || notActive) {
-      await this.closeAll(true)
+  @Bind
+  async onActiveDashboardConfigIdChanged(change: IValueDidChange<string>) {
+    const config = this.activeDashboardConfig
+    await this.closeAllOverlays()
+    if (!config) {
+      log.warn("No dashboard config provided to open, closed all")
+      return
     }
-
-    if (!idChanged) return
-
     const overlays = Array<OverlayWindow>()
-    if (!notActive) {
-      const config = this.activeDashboardConfig
-      const activePlayer = this.sessionManager.getActivePlayer()
-      const overlayMap = config.overlays.filter(isDefined).reduce((map, overlayInfo) => {
-        activePlayer.getDataVariables(...(overlayInfo.dataVarNames ?? []))
-        return {
-          ...map,
-          [overlayInfo.id]: overlayInfo
-        }
-      }, {}) as { [id: string]: OverlayInfo }
-
-      overlays.push(
+  
+    
+    const activePlayer = this.sessionManager.getActivePlayer()
+    const overlayMap = config.overlays.filter(isDefined<OverlayInfo>).reduce((map, overlayInfo) => {
+      // activePlayer.getDataVariables(...(overlayInfo.dataVarNames ?? []))
+      this.sessionManager.registerComponentDataVars(overlayInfoToComponentId(overlayInfo), overlayInfo.dataVarNames)
+      return {
+        ...map,
+        [overlayInfo.id]: overlayInfo
+      }
+    }, {}) as { [id: string]: OverlayInfo }
+    
+    overlays.push(
         ...config.placements
-          .map(placement => {
-            const overlay = overlayMap[placement.overlayId]
-            if (!overlay) {
-              log.error("Unable to locate overlay with id", placement.overlayId)
-              return null
-            }
-
-            const newWin = OverlayWindow.create(this, overlay, placement)
-
-            const onBoundsChanged = this.createOnBoundsChangedHandler(config, placement, newWin)
-            newWin.window
-              .on("closed", this.createOnCloseHandler(newWin.windowId))
-              .on("moved", onBoundsChanged)
-              .on("resized", onBoundsChanged)
-
-            newWin.window.webContents.setFrameRate(overlay.settings?.fps ?? 10)
-            newWin.window.webContents.beginFrameSubscription(
-              false,
-              this.createOnFrameHandler(config, placement, newWin)
-            )
-            //on("paint",this.createOnPaintHandler(config, placement, newWin))
-            return newWin
-          })
-          .filter(isDefined)
-      )
-    }
-
+            .map(placement => {
+              const overlay = overlayMap[placement.overlayId]
+              if (!overlay) {
+                log.error("Unable to locate overlay with id", placement.overlayId)
+                return null
+              }
+              
+              const newWin = OverlayWindow.create(this, overlay, placement)
+              
+              const onBoundsChanged = this.createOnBoundsChangedHandler(config, placement, newWin)
+              newWin.window
+                  .on("closed", this.createOnCloseHandler(overlayInfoToComponentId(overlay),newWin.windowId))
+                  .on("moved", onBoundsChanged)
+                  .on("resized", onBoundsChanged)
+              
+              newWin.window.webContents.setFrameRate(overlay.settings?.fps ?? 10)
+              newWin.window.webContents.beginFrameSubscription(
+                  false,
+                  this.createOnFrameHandler(config, placement, newWin)
+              )
+              //on("paint",this.createOnPaintHandler(config, placement, newWin))
+              return newWin
+            })
+            .filter(isDefined)
+    )
+    
+    
     this.overlays_ = overlays
-    this.patchState({
-      activeSessionId: activeSession?.id
-    })
-
+    
     if (overlays.length) await Promise.all(overlays.map(overlay => overlay.whenReady()))
-
-    this.broadcastRendererOverlays(PluginClientEventType.SESSION_INFO, activeSession?.id, activeSession?.info)
+    
   }
-
-  private async onActiveSessionChangedEvent(
-    activeSessionType: ActiveSessionType,
-    activeSession: SessionDetail,
-    _newState: SessionManagerState
-  ) {
-    await this.updateActiveSession(activeSessionType, activeSession)
+  
+  private async updateActiveSession(activeSessionId: string, activeSessionType: ActiveSessionType, activeSession: SessionDetail,oldActiveSessionId: string) {
+    const
+      idChanged = activeSessionId !== oldActiveSessionId,
+      notActive = activeSessionType === "NONE"
+    
+    if (!idChanged) {
+      log.warn(`ID did not change (${activeSessionId}), no changes will be made to overlays`)
+      return
+    }
+  
+    // this.broadcastRendererOverlays(PluginClientEventType.SESSION_INFO, activeSession?.id, toJS(activeSession?.info))
   }
-
-  private onSessionStateChangedEvent(_newState: SessionManagerState) {
-    const activeSession = this.sessionManager.activeSession
-    this.broadcastRendererOverlays(PluginClientEventType.SESSION_INFO, activeSession?.id, activeSession?.info)
-  }
-
+  
   private onSessionDataFrameEvent(sessionId: string, dataVarValues: SessionDataVariableValueMap) {
     this.broadcastRendererOverlays(
       PluginClientEventType.DATA_FRAME,
@@ -285,47 +214,14 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     )
   }
 
-  async fetchOverlayConfigHandler(event: IpcMainInvokeEvent): Promise<OverlayConfig> {
+  async fetchOverlayConfigIdHandler(event: IpcMainInvokeEvent): Promise<string> {
     const window = BrowserWindow.fromWebContents(event.sender),
       windowId = window.id,
       overlayWindow = this.overlays.find(it => it.window?.id === windowId)
 
-    return asOption(overlayWindow?.config)
-      .map(config => OverlayConfig.toJson(config))
-      .getOrNull() as OverlayConfig
+    return overlayWindow?.config?.overlay?.id
   }
-
-  async fetchDashboardConfigsHandler(event: IpcMainInvokeEvent): Promise<DashboardConfig[]> {
-    return this.state.dashboardConfigs.map(it => DashboardConfig.toJson(it) as any)
-  }
-
-  /**
-   * Handles renderer invocations for session info
-   *
-   * @param event
-   */
-  async fetchSessionHandler(event: IpcMainInvokeEvent): Promise<OverlaySessionData> {
-    const window = BrowserWindow.fromWebContents(event.sender),
-      windowId = window.id
-
-    if (!this.isValidOverlayWindowId(windowId)) {
-      error(`Unknown overlay window ${windowId}`)
-      return {
-        id: null,
-        info: null,
-        timing: null
-      }
-    }
-
-    const session = this.sessionManager.activeSession
-
-    return {
-      id: session.id,
-      info: session.info,
-      timing: session.timing
-    }
-  }
-
+  
   /**
    * ipcMain invoke handler for window close
    * @param event
@@ -333,28 +229,17 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    */
   private async closeHandler(event: IpcMainInvokeEvent): Promise<void> {
     const window = BrowserWindow.fromWebContents(event.sender),
-      windowId = window.id
-
-    return asOption(this.overlays.find(it => it.window?.id === windowId)).match({
-      Some: overlayWindow => {
-        return overlayWindow.close()
-      },
-      None: () => {
-        log.warn(`Unable to find overlay window with id: ${windowId}`)
-        return Deferred.resolve<void>().promise
-      }
-    })
+      windowId = window.id,
+        overlayWindow = this.overlays.find(it => it.window?.id === windowId)
+    
+    if (overlayWindow)
+      await overlayWindow.close()
+    else
+      log.warn(`Unable to find overlay window with id: ${windowId}`)
+    
   }
 
-  /**
-   * Get the current overlay mode for the app
-   *
-   * @param _event
-   */
-  async fetchOverlayModeHandler(_event: IpcMainInvokeEvent) {
-    return this.mode
-  }
-
+  
   /**
    * Set overlay mode
    *
@@ -366,12 +251,12 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       return mode
     }
 
+    this.mainAppState.setOverlayMode(mode)
+    
     for (const ow of this.overlays) {
       ow.setMode(mode)
     }
-
-    this.mainAppState.setOverlayMode(mode)
-
+    
     return mode
   }
 
@@ -412,8 +297,10 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
   }
 
   @Bind
-  private onStateChanged(change: IChange, path: string, root: OverlayManagerState) {
-    info(`Received mobx state change (${path})`, change)
+  private onActiveSessionIdChanged(change: IValueDidChange<string>) {
+    info(`Active session id changed from (${change.oldValue}) to (${change.newValue}) `, change)
+    const {activeSessionId, activeSessionType, activeSession} = this.sessionManager
+    this.updateActiveSession(activeSessionId, activeSessionType, activeSession, change.oldValue)
   }
 
   /**
@@ -422,29 +309,26 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    */
   @PostConstruct() // @ts-ignore
   private async init(): Promise<void> {
-    this.mainAppState.setOverlayManagerState(await this.createInitialState())
-    this.checkActiveDashboardConfig()
+    this.mainAppState.setOverlays(await this.createInitialState())
 
     app.on("before-quit", this.unload)
 
     const { sessionManager } = this,
       ipcFnHandlers = Array<Pair<OverlayClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
-        [OverlayClientFnType.FETCH_DASHBOARD_CONFIGS, this.fetchDashboardConfigsHandler.bind(this)],
-        [OverlayClientFnType.FETCH_CONFIG, this.fetchOverlayConfigHandler.bind(this)],
-        [OverlayClientFnType.FETCH_SESSION, this.fetchSessionHandler.bind(this)],
+        [OverlayClientFnType.FETCH_CONFIG_ID, this.fetchOverlayConfigIdHandler.bind(this)],
         [OverlayClientFnType.SET_OVERLAY_MODE, this.setOverlayModeHandler.bind(this)],
-        [OverlayClientFnType.FETCH_OVERLAY_MODE, this.fetchOverlayModeHandler.bind(this)],
         [OverlayClientFnType.CLOSE, this.closeHandler.bind(this)]
       ),
       sessionManagerEventHandlers = Array<Pair<SessionManagerEventType, (...args: any[]) => void>>(
-        [SessionManagerEventType.ACTIVE_SESSION_CHANGED, this.onActiveSessionChangedEvent.bind(this)],
-        [SessionManagerEventType.STATE_CHANGED, this.onSessionStateChangedEvent.bind(this)],
         [SessionManagerEventType.DATA_FRAME, this.onSessionDataFrameEvent.bind(this)]
       )
 
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(OverlayClientFnTypeToIPCName(type), handler))
 
-    this.stopObserving = deepObserve(this.mainAppState.overlayManager, this.onStateChanged)
+    this.stopObservingCallbacks.push(observe(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged))
+    
+    this.stopObservingCallbacks.push(observe(this.mainAppState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged))
+    // this.stopObserving = deepObserve(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged)
 
     // In dev mode, make everything accessible
     if (isDev) {
@@ -454,9 +338,8 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
     }
 
     this.disposers_.push(() => {
-      if (this.stopObserving) {
-        this.stopObserving()
-      }
+      this.stopObservingCallbacks.filter(isFunction).forEach(fn => fn())
+      
       ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayClientFnTypeToIPCName(type)))
       sessionManagerEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
       app.off("before-quit", this.unload)
@@ -466,8 +349,8 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
       })
     })
 
-    if (module.hot) {
-      module.hot.addDisposeHandler(() => {
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.addDisposeHandler(() => {
         this.unload()
       })
     }
@@ -483,78 +366,21 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    * @param appSettingsService
    * @param mainWindowManager
    * @param mainAppState
+   * @param dashManager
    */
   constructor(
     @InjectContainer() readonly container: Container,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
     readonly mainWindowManager: MainWindowManager,
-    readonly mainAppState: MainSharedAppState
+    readonly mainAppState: MainSharedAppState,
+    readonly dashManager: DashboardManager
   ) {
     super()
   }
 
-  /**
-   * Save a dashboard config
-   *
-   * @param config
-   * @returns {Promise<void>} pending task promise scheduled in `p-queue`
-   */
-  @Bind
-  private saveDashboardConfig(config: DashboardConfig): Promise<void> {
-    return this.persistQueue_.add(this.createSaveDashboardConfigTask(config))
-  }
 
-  /**
-   * Delete a dashboard config
-   *
-   * @param config
-   * @returns {Promise<void>} pending task promise scheduled in `p-queue`
-   */
-  @Bind
-  private deleteDashboardConfig(config: DashboardConfig): Promise<void> {
-    return this.persistQueue_.add(this.createDeleteDashboardConfigTask(config.id))
-  }
 
-  /**
-   * Merge & patch OverlayManagerState slice
-   */
-
-  private patchState(
-    newStateOrFn: Partial<OverlayManagerState> | OverlayManagerStatePatchFn = {},
-    skipBroadcast: boolean = false
-  ): OverlayManagerState {
-    const currentState = this.state
-    const currentConfigs = currentState.dashboardConfigs ?? []
-
-    const newStatePatch = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn
-
-    const newState = defaults({ ...this.state, ...newStatePatch }, { dashboardConfigs: [] }),
-      newConfigs = newState.dashboardConfigs
-
-    this.mainAppState.updateOverlayManager(newState)
-
-    // HANDLE REMOVALS
-    const missingConfigs = currentConfigs.filter(({ id }) => !newConfigs.some(({ id: newId }) => newId === id))
-    missingConfigs.forEach(this.deleteDashboardConfig)
-
-    // HANDLE ADDITIONS
-    const diffConfigs = newConfigs.filter((newConfig, i) => !isEqual(currentConfigs[i], newConfig))
-    diffConfigs.forEach(this.saveDashboardConfig)
-
-    if (!skipBroadcast) this.broadcastMainStateChanged(newState)
-
-    return newState
-  }
-
-  /**
-   * Broadcast a state change
-   *
-   * @private
-   */
-  private broadcastMainStateChanged(state: OverlayManagerState = this.state) {
-    this.broadcastMain(OverlayManagerEventType.STATE_CHANGED, state)
-  }
 
   /**
    * Generate broadcast/emit function.  This emits via it's super
@@ -577,8 +403,9 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
    */
   private broadcastRendererOverlays(type: OverlayClientEventType | PluginClientEventType, ...args: any[]): void {
     const ipcEventName = OverlayClientEventTypeToIPCName(type)
+    const jsArgs = args.map(arg => toJS(arg))
     this.overlays.forEach(overlay => {
-      if (overlay.ready) overlay.window?.webContents?.send(ipcEventName, ...args)
+      if (overlay.ready) overlay.window?.webContents?.send(ipcEventName, ...jsArgs)
     })
   }
 
@@ -606,13 +433,15 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
 
   /**
    * Create on window close handler
+   * @param overlayComponentId
    * @param windowId
    * @private
    */
-  private createOnCloseHandler(windowId: number): Function {
+  private createOnCloseHandler(overlayComponentId: string, windowId: number): Function {
     return (event: Electron.Event) => {
+      this.sessionManager.unregisterComponentDataVars(overlayComponentId)
       this.overlays_ = this.overlays.filter(overlay => overlay.windowId !== windowId)
-      this.patchState(state => ({}))
+      
     }
   }
 
@@ -722,7 +551,7 @@ export class OverlayManager extends EventEmitter3<OverlayManagerEventArgs> {
               assign(placement, { ...newPlacement })
             }
 
-            this.saveDashboardConfig(config)
+            this.dashManager.updateDashboardConfig(config.id, config)
               .then(() => info(`Saved updated dashboard config`, config))
               .catch(err => {
                 error(`failed to save config`, config)

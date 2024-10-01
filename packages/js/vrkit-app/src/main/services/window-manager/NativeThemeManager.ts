@@ -35,8 +35,8 @@ export class NativeThemeManager {
     nativeTheme.on("updated", this.onUpdated)
     ipcMain.on(ElectronIPCChannel.getNativeThemeSync,this.getNativeThemeSync)
     
-    if (module.hot) {
-      module.hot.addDisposeHandler(() => {
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.addDisposeHandler(() => {
         ipcMain.off(ElectronIPCChannel.getNativeThemeSync,this.getNativeThemeSync)
       })
     }

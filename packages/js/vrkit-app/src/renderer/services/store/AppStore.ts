@@ -8,7 +8,6 @@ import { globalReducer } from "./slices/global/GlobalSlice"
 import { asOption } from "@3fv/prelude-ts"
 import { dataReducer } from "./slices/data"
 import { getLogger } from "@3fv/logger-proxy"
-import { sessionManagerReducer } from "./slices/session-manager"
 import { sharedAppReducer } from "./slices/shared-app"
 
 const log = getLogger(__filename)
@@ -33,8 +32,7 @@ export const appStore = configureStore<AppRootState>({
   reducer: {
     data: dataReducer,
     global: globalReducer,
-    shared: sharedAppReducer,
-    sessionManager: sessionManagerReducer
+    shared: sharedAppReducer
   },
 
   middleware: getDefaultMiddleware =>

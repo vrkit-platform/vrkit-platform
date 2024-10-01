@@ -7,7 +7,8 @@ import type {
 import type { SessionInfoMessage } from "./SessionInfoTypes"
 
 export enum PluginClientEventType {
-  SESSION_INFO = "SESSION_INFO",
+  SESSION_ID_CHANGED = "SESSION_ID_CHANGED",
+  SESSION_INFO_CHANGED = "SESSION_INFO_CHANGED",
   DATA_FRAME = "DATA_FRAME"
 }
 
@@ -17,17 +18,16 @@ export interface PluginClientEventArgs {
     timing: SessionTiming,
     dataVarValues: SessionDataVariableValueMap
   ) => void
-
-  [PluginClientEventType.SESSION_INFO]: (sessionId: string, info: SessionInfoMessage) => void
+  [PluginClientEventType.SESSION_ID_CHANGED]: (sessionId: string, info: SessionInfoMessage) => void
+  [PluginClientEventType.SESSION_INFO_CHANGED]: (sessionId: string, info: SessionInfoMessage) => void
 }
 
 export type PluginClientEventHandler<Type extends keyof PluginClientEventArgs> = PluginClientEventArgs[Type]
 
 
 export interface PluginClient {
+  inActiveSession(): boolean
   getOverlayInfo(): OverlayInfo
-  
-  fetchSessionInfo(): Promise<SessionInfoMessage>
   
   getSessionInfo(): SessionInfoMessage
   

@@ -12,6 +12,7 @@ import FileSystemManager from "../../services/file-system-manager"
 import TrackManager from "../../services/track-manager"
 import SharedAppStateClient from "vrkit-app-renderer/services/shared-app-state-client"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
+import AppSettingsClient from "../../services/app-settings-client"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log
@@ -44,6 +45,7 @@ async function createContainer(): Promise<Container> {
       .bindClass(FileSystemManager)
       .bindClass(TrackManager)
       .bindClass(SessionManagerClient)
+      .bindClass(AppSettingsClient)
       .resolveAll()
 
     // container = await container.resolveAll()

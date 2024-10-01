@@ -138,8 +138,8 @@ export abstract class AbstractScheduledTrigger {
       this.schedule()
     }
 
-    if (module.hot) {
-      module.hot.addDisposeHandler(() => {
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.addDisposeHandler(() => {
         this.clear()
       })
     }

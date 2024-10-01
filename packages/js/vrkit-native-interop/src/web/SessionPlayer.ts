@@ -30,6 +30,7 @@ import {
 } from "./NativeSessionPlayer"
 
 
+
 const log = getLogger(__filename)
 const isNotEmpty = negate(isEmpty)
 
@@ -270,7 +271,21 @@ export class SessionPlayer extends EventEmitter3<
       .map(headers => headers[0])
       .getOrNull()
   }
-
+  
+  resetDataVariables(
+      ...argNames: Array<string | string[]>
+  ): Record<string, SessionDataVariable> {
+    // const names = flatten(argNames)
+    //
+    // // TODO: RESET THE LIST ON THE NATIVE SIDE TOO
+    // this.dataVariableMap = Object.fromEntries(
+    //     names.map(name => [name, this.nativePlayer.getDataVariable(name)])
+    // ) as Record<string, SessionDataVariable>
+    this.getDataVariables(...argNames)
+    
+    return this.dataVariableMap
+  }
+  
   getDataVariables(
     ...argNames: Array<string | string[]>
   ): Array<SessionDataVariable> {
@@ -327,7 +342,7 @@ export class SessionPlayer extends EventEmitter3<
 
   get sessionData(): SessionData {
     return Either.try(() =>
-      SessionData.create(this.nativePlayer.sessionData)
+      SessionData.fromJson(this.nativePlayer.sessionData as any)
     ).match({
       Left: err => {
         log.error(`Unable to get session data`, err)

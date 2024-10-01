@@ -96,8 +96,15 @@ namespace IRacingTools::Shared::Graphics {
         writeBuffer = writeBufferOpt.value();
       }
 
-      VRK_LOG_AND_FATAL_IF(len != writeBuffer->size(), "Data len does == buffer len")
       std::unique_lock writeLock(*writeBuffer);
+      if (len != writeBuffer->size()) {
+        L->error("Data len ({}) !== buffer len ({})", len, writeBuffer->size());
+        std::scoped_lock lock(queueMutex_);
+        availableBuffers_.push(writeBuffer);
+        return createImageDataBufferError("Buffer len mismatch, ignoring frame");
+        // VRK_LOG_AND_FATAL_IF(, "Data len does == buffer len")
+      }
+
       auto res = writeBuffer->produce(data, len);
 
       std::scoped_lock lock(queueMutex_);

@@ -17,8 +17,8 @@ export async function init(container: Container) {
     // }
   })
 
-  if (module.hot) {
-    module.hot.addDisposeHandler(unsubscribe)
+  if (import.meta.webpackHot) {
+    import.meta.webpackHot.addDisposeHandler(unsubscribe)
   }
 }
 

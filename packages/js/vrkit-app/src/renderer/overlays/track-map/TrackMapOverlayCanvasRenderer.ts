@@ -371,11 +371,14 @@ class TrackMapOverlayCanvasRenderer {
    */
   @Bind
   private onDataFrame(sessionId, timing, dataVarValues) {
-    if (!this.isInitialized) return
-
-    // log.debug("DATA_FRAME EVENT", sessionId, timing.currentTimeMillis, "DATA
-    // VAR VALUE COUNT = ", dataVarValues.length)
-    this.updateCars(dataVarValues)
+    if (!this.isInitialized || !dataVarValues) return
+    try {
+      // log.debug("DATA_FRAME EVENT", sessionId, timing.currentTimeMillis, "DATA
+      // VAR VALUE COUNT = ", dataVarValues.length)
+      this.updateCars(dataVarValues)
+    } catch (err) {
+      log.error(`Unable to process data frame`, err)
+    }
   }
 
   /**
@@ -407,7 +410,7 @@ class TrackMapOverlayCanvasRenderer {
         { client } = state,
         { sessionInfo } = assign(state, {
           overlayInfo: client.getOverlayInfo(),
-          sessionInfo: await client.fetchSessionInfo()
+          sessionInfo: client.getSessionInfo()
         }),
         weekendInfo = sessionInfo.weekendInfo,
         { trackID: trackId, trackName, trackConfigName } = pick(weekendInfo, "trackID", "trackName", "trackConfigName"),
@@ -428,8 +431,13 @@ class TrackMapOverlayCanvasRenderer {
       }
 
       // ATTACH LISTENERS
-      client.on(PluginClientEventType.SESSION_INFO, this.onSessionInfo)
+      client.on(PluginClientEventType.SESSION_INFO_CHANGED, this.onSessionInfo)
       client.on(PluginClientEventType.DATA_FRAME, this.onDataFrame)
+      
+      asOption(client.getSessionInfo())
+          .ifSome(info => {
+            this.updateSessionInfo(info)
+          })
     } catch (err) {
       deferred.reject(err)
     }
@@ -464,7 +472,7 @@ class TrackMapOverlayCanvasRenderer {
     this.clear()
 
     const client = getVRKitPluginClient()
-    client.off(PluginClientEventType.SESSION_INFO)
+    client.off(PluginClientEventType.SESSION_INFO_CHANGED)
     client.off(PluginClientEventType.DATA_FRAME)
 
     this.initializeDeferred = new Deferred()
@@ -482,7 +490,7 @@ class TrackMapOverlayCanvasRenderer {
 
   destroy() {
     const client = getVRKitPluginClient()
-    client.off(PluginClientEventType.SESSION_INFO)
+    client.off(PluginClientEventType.SESSION_INFO_CHANGED)
     client.off(PluginClientEventType.DATA_FRAME)
 
     this.clear()

@@ -1,6 +1,8 @@
-import { newOverlayManagerState, OverlayManagerState, OverlayMode } from "../overlay-manager"
+import { OverlayMode } from "../overlays"
 import { AppSettings, ThemeType } from "vrkit-models"
 import { DevSettings, newDevSettings } from "./DevSettings"
+import { DashboardsState, newDashboardsState } from "../dashboards"
+import { newSessionsState, SessionsState } from "../sessions"
 
 export interface ISharedAppState {
   // themeType: ThemeType
@@ -8,7 +10,8 @@ export interface ISharedAppState {
   // activeDashboardId?: string
   appSettings: AppSettings
   devSettings: DevSettings
-  overlayManager: OverlayManagerState
+  dashboards: DashboardsState
+  sessions: SessionsState
   overlayMode: OverlayMode
   
 }
@@ -20,7 +23,9 @@ export function newSharedAppState(): ISharedAppState {
     // activeDashboardId: null
     devSettings: newDevSettings(),
     appSettings: AppSettings.create(),
-    overlayManager: newOverlayManagerState(),
+    
+    dashboards: newDashboardsState(),
+    sessions: newSessionsState(),
     overlayMode: OverlayMode.NORMAL,
     
   }

@@ -23,7 +23,7 @@ import {
 } from "../../styles"
 import { GlobalCSSClassNames } from "vrkit-app-renderer/constants"
 import { usePageMetadata } from "../../components/page-metadata"
-import { sessionManagerSelectors } from "../../services/store/slices/session-manager"
+
 import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { Logo } from "../../components/logo"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
@@ -115,7 +115,7 @@ function MainAppBar({ className, ...other }: MainAppBarProps) {
     theme = useTheme(),
     appBarHeight = appBar?.height ?? theme.dimen.appBarHeight,
     activeDashboardConfig = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
-    isLiveAvailable = useAppSelector(sessionManagerSelectors.isLiveSessionAvailable)
+    isLiveAvailable = useAppSelector(sharedAppSelectors.isLiveSessionAvailable)
 
   return (
     <MainAppBarRoot
@@ -137,7 +137,7 @@ function MainAppBar({ className, ...other }: MainAppBarProps) {
             {appBar?.content?.center}
           </Box>
           <Box className={clsx(mainAppBarClasses.right)}>
-            {appBar?.content?.right ?? <ActiveDashboardConfigWidget />}
+            <ActiveDashboardConfigWidget />
           </Box>
         </MainToolbarRoot>
       </Box>

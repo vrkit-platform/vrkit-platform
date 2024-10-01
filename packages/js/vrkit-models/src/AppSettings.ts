@@ -15,9 +15,9 @@ import { MessageType } from "@protobuf-ts/runtime";
  */
 export interface AppSettings {
     /**
-     * @generated from protobuf field: string active_dashboard_id = 1;
+     * @generated from protobuf field: string default_dashboard_config_id = 1;
      */
-    activeDashboardId: string;
+    defaultDashboardConfigId: string;
     /**
      * @generated from protobuf field: IRacingTools.Models.ThemeType theme_type = 2;
      */
@@ -58,7 +58,7 @@ export enum ThemeType {
 class AppSettings$Type extends MessageType<AppSettings> {
     constructor() {
         super("IRacingTools.Models.AppSettings", [
-            { no: 1, name: "active_dashboard_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 1, name: "default_dashboard_config_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "theme_type", kind: "enum", T: () => ["IRacingTools.Models.ThemeType", ThemeType] },
             { no: 3, name: "zoom_factor", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
             { no: 5, name: "autoconnect", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
@@ -67,7 +67,7 @@ class AppSettings$Type extends MessageType<AppSettings> {
     }
     create(value?: PartialMessage<AppSettings>): AppSettings {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.activeDashboardId = "";
+        message.defaultDashboardConfigId = "";
         message.themeType = 0;
         message.zoomFactor = 0;
         message.autoconnect = false;
@@ -81,8 +81,8 @@ class AppSettings$Type extends MessageType<AppSettings> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string active_dashboard_id */ 1:
-                    message.activeDashboardId = reader.string();
+                case /* string default_dashboard_config_id */ 1:
+                    message.defaultDashboardConfigId = reader.string();
                     break;
                 case /* IRacingTools.Models.ThemeType theme_type */ 2:
                     message.themeType = reader.int32();
@@ -124,9 +124,9 @@ class AppSettings$Type extends MessageType<AppSettings> {
         map[key ?? ""] = val ?? "";
     }
     internalBinaryWrite(message: AppSettings, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string active_dashboard_id = 1; */
-        if (message.activeDashboardId !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.activeDashboardId);
+        /* string default_dashboard_config_id = 1; */
+        if (message.defaultDashboardConfigId !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.defaultDashboardConfigId);
         /* IRacingTools.Models.ThemeType theme_type = 2; */
         if (message.themeType !== 0)
             writer.tag(2, WireType.Varint).int32(message.themeType);

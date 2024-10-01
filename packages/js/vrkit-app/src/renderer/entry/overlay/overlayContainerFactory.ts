@@ -10,6 +10,7 @@ import FileSystemManager from "../../services/file-system-manager"
 import TrackManager from "../../services/track-manager"
 import OverlayClient, { PluginClientManager } from "../../services/overlay-client"
 import SharedAppStateClient from "vrkit-app-renderer/services/shared-app-state-client"
+import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log
@@ -39,6 +40,7 @@ async function createContainer(): Promise<Container> {
       .bindClass(SharedAppStateClient)
       .bindClass(FileSystemManager)
       .bindClass(TrackManager)
+      .bindClass(DashboardManagerClient)
       .bindClass(OverlayClient)
       .bindClass(PluginClientManager)
       .resolveAll()

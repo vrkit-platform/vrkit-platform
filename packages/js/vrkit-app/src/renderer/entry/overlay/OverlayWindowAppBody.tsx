@@ -18,7 +18,7 @@ import {
   heightConstraint,
   OverflowHidden
 } from "vrkit-app-renderer/styles/ThemedStyles"
-import { OverlayMode } from "vrkit-app-common/models/overlay-manager"
+import { OverlayMode } from "../../../common/models/overlays"
 import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 import clsx from "clsx"

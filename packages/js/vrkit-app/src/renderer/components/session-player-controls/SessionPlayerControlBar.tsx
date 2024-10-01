@@ -18,7 +18,6 @@ import {
 } from "../../styles/ThemedStyles"
 import clsx from "clsx"
 import { useAppSelector } from "../../services/store/AppStoreHooks"
-import { sessionManagerSelectors } from "../../services/store/slices/session-manager"
 import React, { useCallback } from "react"
 import { FlexAutoBox, FlexRowBox, FlexRowCenterBox, FlexScaleZeroBox } from "../box"
 import { match, P } from "ts-pattern"
@@ -28,10 +27,11 @@ import { useService } from "../service-container"
 import type { SessionTiming } from "vrkit-models"
 
 import { DurationView, MILLIS_IN_HR } from "../time"
-import type { ActiveSessionType, SessionDetail } from "vrkit-app-common/models/session-manager"
+import type { ActiveSessionType, SessionDetail } from "../../../common/models/sessions"
 
 import { OverlayModeSessionWidget } from "./OverlayModeSessionWidget"
 import { createClassNames } from "vrkit-app-renderer/styles/createClasses"
+import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 
 const log = getLogger(__filename)
 
@@ -111,7 +111,7 @@ export function LiveSessionButton({
   ...other
 }: LiveSessionButtonProps) {
   const isAvailable = useAppSelector(
-      sessionManagerSelectors.isLiveSessionAvailable
+          sharedAppSelectors.isLiveSessionAvailable
     ),
     isActive = activeSessionType === "LIVE",
     sessionManagerClient = useService(SessionManagerClient),
@@ -121,8 +121,8 @@ export function LiveSessionButton({
       .with([true, true], () => "Disconnect")
       .otherwise(() => "unknown"),
     onClick = useCallback(() => {
-      sessionManagerClient.setActiveSessionType(
-        isActive || !isAvailable ? "NONE" : "LIVE"
+      sessionManagerClient.setLiveSessionActive(
+        isActive || !isAvailable ? false : true
       )
     }, [isActive, isAvailable])
 
@@ -166,7 +166,7 @@ export function DiskSessionButton({
   activeSessionType,
   ...other
 }: DiskSessionButtonProps) {
-  const diskSession = useAppSelector(sessionManagerSelectors.selectDiskSession),
+  const diskSession = useAppSelector(sharedAppSelectors.selectDiskSession),
     isActive = activeSessionType === "DISK",
     isAvailable = diskSession?.isAvailable === true,
       sessionManagerClient = useService(SessionManagerClient),
@@ -241,19 +241,19 @@ function SessionTimingView({
 export function SessionPlayerControlBar({className,...other}: SessionPlayerControlBarProps) {
   const theme = useTheme(),
     hasAvailableSession = useAppSelector(
-      sessionManagerSelectors.hasAvailableSession
+        sharedAppSelectors.hasAvailableSession
     ),
     isLiveSessionAvailable = useAppSelector(
-      sessionManagerSelectors.isLiveSessionAvailable
+        sharedAppSelectors.isLiveSessionAvailable
     ),
-    liveSession = useAppSelector(sessionManagerSelectors.selectLiveSession),
-    diskSession = useAppSelector(sessionManagerSelectors.selectDiskSession),
-    activeSession = useAppSelector(sessionManagerSelectors.selectActiveSession),
+    liveSession = useAppSelector(sharedAppSelectors.selectLiveSession),
+    diskSession = useAppSelector(sharedAppSelectors.selectDiskSession),
+    activeSession = useAppSelector(sharedAppSelectors.selectActiveSession),
     activeSessionType = useAppSelector(
-      sessionManagerSelectors.selectActiveSessionType
+        sharedAppSelectors.selectActiveSessionType
     ),
     activeSessionTiming = useAppSelector(
-      sessionManagerSelectors.selectActiveSessionTiming
+        sharedAppSelectors.selectActiveSessionTiming
     )
 
   return (

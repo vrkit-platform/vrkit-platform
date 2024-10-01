@@ -1,2 +1,3 @@
 export * from "./app"
-export * from "./overlay-manager"
+export * from "./overlays"
+export * from "./dashboards"

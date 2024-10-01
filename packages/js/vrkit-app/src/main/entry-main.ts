@@ -9,6 +9,7 @@
  * to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
+
 import "./prepareElectronMain"
 
 import { app } from "electron"
@@ -44,8 +45,8 @@ if (app.requestSingleInstanceLock()) {
 }
 
 // HMR
-if (module.hot) {
-  module.hot.accept(() => {
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept(() => {
     log.warn("HMR updates")
   })
 }

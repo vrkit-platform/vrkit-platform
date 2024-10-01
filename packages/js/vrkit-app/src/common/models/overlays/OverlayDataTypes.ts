@@ -11,24 +11,20 @@ import type { SessionInfoMessage, PluginClientEventArgs, PluginClientEventType }
 
 // import type { DashboardConfig } from "vrkit-models"
 
-export interface OverlayManagerState {
-  dashboardConfigs: DashboardConfig[]
-  activeSessionId: string
+export interface OverlaysState {
   
-  overlayConfig?: OverlayConfig
-  session?: OverlaySessionData
+  // activeSessionId: string
   
   overlayMode: OverlayMode
 }
 
-export type OverlayManagerStatePatchFn = (state: OverlayManagerState) => Partial<OverlayManagerState>
+export type OverlayManagerStatePatchFn = (state: OverlaysState) => Partial<OverlaysState>
 
-export function newOverlayManagerState(state: Partial<OverlayManagerState> = {}): OverlayManagerState {
+export function newOverlayManagerState(state: Partial<OverlaysState> = {}): OverlaysState {
   return defaults({...state},{
-    dashboardConfigs: [],
-    activeSessionId: null,
+    //activeSessionId: null,
     overlayMode: OverlayMode.NORMAL
-  }) as OverlayManagerState
+  }) as OverlaysState
 }
 
 /**
@@ -61,8 +57,8 @@ export function OverlayManagerEventTypeToIPCName(type: OverlayManagerEventType):
  */
 export enum OverlayClientEventType {
   OVERLAY_CONFIG = "OVERLAY_CONFIG",
-  OVERLAY_MODE = "OVERLAY_MODE",
-  STATE_CHANGED = "STATE_CHANGED"
+  // OVERLAY_MODE = "OVERLAY_MODE",
+  // STATE_CHANGED = "STATE_CHANGED"
 }
 
 /**
@@ -70,8 +66,6 @@ export enum OverlayClientEventType {
  */
 export interface OverlayClientEventArgs extends PluginClientEventArgs {
   [OverlayClientEventType.OVERLAY_CONFIG]: (config: OverlayConfig) => void
-  [OverlayClientEventType.OVERLAY_MODE]: (mode: OverlayMode) => void
-  [OverlayClientEventType.STATE_CHANGED]: (state: OverlayManagerState) => void
   
 }
 
@@ -84,14 +78,9 @@ export type OverlayClientEventHandler<Type extends keyof OverlayClientEventArgs>
  * Functions that can be invoked via IPC using `ipcRenderer.invoke`
  */
 export enum OverlayClientFnType {
-  FETCH_DASHBOARD_CONFIGS = "FETCH_DASHBOARD_CONFIGS",
-  FETCH_CONFIG = "FETCH_CONFIG",
-  FETCH_SESSION = "FETCH_SESSION",
-  SET_OVERLAY_MODE = "SET_OVERLAY_MODE",
-  FETCH_OVERLAY_MODE = "FETCH_OVERLAY_MODE",
   
-  UPDATE_DASHBOARD_CONFIG = "UPDATE_DASHBOARD_CONFIG",
-  LAUNCH_DASHBOARD_LAYOUT_EDITOR = "LAUNCH_DASHBOARD_LAYOUT_EDITOR",
+  FETCH_CONFIG_ID = "FETCH_CONFIG_ID",
+  SET_OVERLAY_MODE = "SET_OVERLAY_MODE",
   
   CLOSE = "CLOSE"
 }
@@ -138,21 +127,19 @@ export function OverlayClientEventTypeToIPCName(type: OverlayClientEventType | P
 //   placement: OverlayPlacement
 // }
 
-export interface OverlaySessionData {
-  info: SessionInfoMessage
-
-  timing: SessionTiming
-
-  id: string
-}
+// export interface OverlaySessionData {
+//   info: SessionInfoMessage
+//
+//   timing: SessionTiming
+//
+//   id: string
+// }
 
 export interface DefaultOverlayClient {
   readonly config: OverlayConfig
-  fetchDashboardConfigs(): Promise<DashboardConfig[]>
+  
   fetchConfig(): Promise<OverlayConfig>
-
-  fetchSession(): Promise<OverlaySessionData>
-
+  
   close(): Promise<void>
 }
 

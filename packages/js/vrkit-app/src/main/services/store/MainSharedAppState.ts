@@ -3,22 +3,32 @@ import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 import { applyDecorators, Bind, Once } from "vrkit-app-common/decorators"
 import { DevSettings, ISharedAppState, newDevSettings, ThemeId } from "vrkit-app-common/models"
-import { assign, cloneDeep, once } from "vrkit-app-common/utils"
-import { action, makeObservable, observable, toJS } from "mobx"
+import { assign, cloneDeep, entriesOf, once } from "vrkit-app-common/utils"
+import { action, makeObservable, observable, set, toJS } from "mobx"
 import { deepObserve, IDisposer } from "mobx-utils"
 
 import { broadcastToAllWindows, getAppThemeFromSystem } from "../../utils"
-import { newOverlayManagerState, OverlayManagerState, OverlayMode } from "vrkit-app-common/models/overlay-manager"
+import { newOverlayManagerState, OverlaysState, OverlayMode } from "../../../common/models/overlays"
 import { AppSettings } from "vrkit-models"
 import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
-import { MainSharedAppStateSchema } from "../../models"
+import { SharedAppStateSchema } from "vrkit-app-common/models/app"
 import { serialize } from "serializr"
+import {
+  DashboardsState,
+  newDashboardsState
+} from "vrkit-app-common/models/dashboards"
+import {
+  newSessionsState, SessionsState
+} from "vrkit-app-common/models/sessions"
+import { BindAction } from "../../decorators"
+import { isDev } from "../../constants"
 
 const log = getLogger(__filename)
 
 const { debug, trace, info, error, warn } = log
-const BindAction = () => applyDecorators(Bind, action)
+
+
 
 @Singleton()
 export class MainSharedAppState implements ISharedAppState {
@@ -39,33 +49,13 @@ export class MainSharedAppState implements ISharedAppState {
    */
   @observable appSettings: AppSettings = AppSettings.create()
 
-  // @observable customAccelerators:Record<string, string> = {}
-  //
-  // @observable themeType:ThemeType = null
-  //
-  // @observable activeDashboardId:string = null
-  //
-  // @observable autoconnect:boolean = false
-  //
-  //newNativeImageSequenceCaptureSettings()
   @observable devSettings = newDevSettings()
-
-  // get theme():ThemeId {
-  //   return (
-  //       isString(this.themeType) ? this.themeType : ThemeType[this.themeType]
-  //   ) as ThemeId
-  // }
-
-  // get appSettings():AppSettings {
-  //   return AppSettings.create({
-  //     autoconnect: this.autoconnect,
-  //     themeType: this.themeType ?? ThemeType.AUTO,
-  //     activeDashboardId: this.activeDashboardId,
-  //     zoomFactor: this.zoomFactor
-  //   })
-  // }
-
-  @observable overlayManager = newOverlayManagerState()
+  
+  @observable sessions = newSessionsState()
+  
+  @observable overlays = newOverlayManagerState()
+  
+  @observable dashboards = newDashboardsState()
 
   get isShutdownInProgress() {
     return this.shutdownInProgress
@@ -88,11 +78,17 @@ export class MainSharedAppState implements ISharedAppState {
   }
 
   private broadcast() {
-    const sharedAppStateObj = toJS(this.toJSON())
-    info("Broadcasting shared app state", sharedAppStateObj)
+    const sharedAppStateJson = this.toJSON()
+    const sharedAppStateObj = toJS(sharedAppStateJson)
+    //info("Broadcasting shared app state", sharedAppStateObj)
     broadcastToAllWindows(ElectronIPCChannel.sharedAppStateChanged, sharedAppStateObj)
   }
-
+  
+  private unload() {
+    ipcMain.removeHandler(ElectronIPCChannel.fetchSharedAppState)
+    this.stopObserving?.()
+  }
+  
   @Once()
   private async init() {
     if (this.initDeferred) {
@@ -101,13 +97,12 @@ export class MainSharedAppState implements ISharedAppState {
     this.initDeferred = new Deferred<MainSharedAppState>()
     try {
       makeObservable(this)
-      const unsubscribe = (this.stopObserving = deepObserve(this, this.onChange))
+      this.stopObserving = deepObserve(this, this.onChange)
       ipcMain.handle(ElectronIPCChannel.fetchSharedAppState, this.fetchSharedAppStateHandler)
-      if (module.hot) {
-        module.hot.addDisposeHandler(() => {
+      if (import.meta.webpackHot) {
+        import.meta.webpackHot.addDisposeHandler(() => {
           warn(`HMR removing observer`)
-          ipcMain.removeHandler(ElectronIPCChannel.fetchSharedAppState)
-          unsubscribe()
+          this.unload()
         })
       }
 
@@ -137,12 +132,36 @@ export class MainSharedAppState implements ISharedAppState {
     this.appSettings = assign(AppSettings.clone(this.appSettings), patch)
   }
 
-  @BindAction() setOverlayManagerState(state: OverlayManagerState) {
-    this.overlayManager = state
+  @BindAction() setOverlays(state: OverlaysState) {
+    this.overlays = state
   }
 
-  @BindAction() updateOverlayManager(patch: Partial<OverlayManagerState>) {
-    this.overlayManager = assign(cloneDeep(this.overlayManager), patch)
+  @BindAction() updateOverlays(patch: Partial<OverlaysState>) {
+    this.overlays = assign(cloneDeep(this.overlays), patch)
+  }
+  
+  
+  @BindAction() setSessions(state: SessionsState) {
+    this.sessions = state
+  }
+  
+  @BindAction() updateSessions(patch: Partial<SessionsState>) {
+    set(this.sessions, patch)
+    // entriesOf(patch).forEach(([key, value]) => {
+    //   set(this.sessions, key, value)
+    // })
+    
+  }
+  
+  
+  @BindAction() setDashboards(state: DashboardsState) {
+    this.dashboards = state
+    return this.dashboards
+  }
+  
+  @BindAction() updateDashboards(patch: Partial<DashboardsState>) {
+    this.dashboards = assign(cloneDeep(this.dashboards), patch)
+    return this.dashboards
   }
 
   @BindAction() updateDevSettings(patch: Partial<DevSettings>) {
@@ -160,12 +179,17 @@ export class MainSharedAppState implements ISharedAppState {
   @Bind
   private async fetchSharedAppStateHandler(_ev: IpcMainInvokeEvent): Promise<ISharedAppState> {
     const stateJs = this.toJSON()
-    info("Sending state js", stateJs)
+    // info("Sending state js", stateJs)
     return stateJs
   }
 
   toJSON() {
-    return serialize(MainSharedAppStateSchema, this)
+    try {
+      return serialize(SharedAppStateSchema, this)
+    } catch (err) {
+      log.error(`Error while serializing`, err)
+      throw err
+    }
   }
 }
 
@@ -198,5 +222,9 @@ export const createSharedAppStateStore = once(async () => {
       throw err
     }
   )
+  
+  if (isDev) {
+    global["appStore"] = store
+  }
   return store
 })

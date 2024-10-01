@@ -4,14 +4,14 @@ import { styled, useTheme } from "@mui/material/styles"
 import { alpha, flex, FlexColumnCenter, FlexRowCenter, paddingRem, rem } from "../../styles/ThemedStyles"
 
 import { useAppSelector } from "../../services/store/AppStoreHooks"
-import { sessionManagerSelectors } from "../../services/store/slices/session-manager"
+
 import React, { useCallback } from "react"
 import { FlexRowCenterBox } from "../box"
 
 import { getLogger } from "@3fv/logger-proxy"
 import { useService } from "../service-container"
 
-import { OverlayMode } from "vrkit-app-common/models/overlay-manager"
+import { OverlayMode } from "../../../common/models/overlays"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import SharedAppStateClient from "vrkit-app-renderer/services/shared-app-state-client"
 // import { SharedAppStateClient } from "../../services/shared-app-state-client"
@@ -47,7 +47,7 @@ interface OverlayModeButtonProps extends ButtonProps {
  * @return {JSX.Element} The rendered button component.
  */
 function OverlayModeSessionButton({ sx, ...other }: OverlayModeButtonProps) {
-  const hasActiveSession = useAppSelector(sessionManagerSelectors.hasActiveSession),
+  const hasActiveSession = useAppSelector(sharedAppSelectors.hasActiveSession),
     overlayMode = useAppSelector(sharedAppSelectors.selectOverlayMode),
     sharedAppClient = useService(SharedAppStateClient),
     onClick = useCallback(() => {

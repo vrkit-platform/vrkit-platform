@@ -3,7 +3,7 @@
 //import type { RouterState } from "connected-react-router"
 import type { GlobalState } from "./slices/global"
 import type { DataState } from "./slices/data"
-import type { SessionManagerState } from "vrkit-app-common/models/session-manager"
+import type { SessionsState } from "../../../common/models/sessions"
 import type { ISharedAppState } from "vrkit-app-common/models/app"
 
 export interface AppRootState {
@@ -11,7 +11,7 @@ export interface AppRootState {
   shared: ISharedAppState
   data: DataState
   
-  sessionManager: SessionManagerState
+//  sessionManager: SessionsState
   //router: RouterState<any>
 
 }

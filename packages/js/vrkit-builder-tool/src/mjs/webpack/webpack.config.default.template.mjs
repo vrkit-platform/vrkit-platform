@@ -295,7 +295,8 @@ function defaultWebpackConfig(target, name, projectDir = cwd, options = {}) {
     //"eval-source-map" | "inline-source-map" | "source-map"
     // devtool: isDevEnabled ? "source-map" : "source-map",
     devtool: isDevEnabled
-      ? DevTools.evalCheapModuleSourceMap
+      ? DevTools.inlineSourceMap
+      //? DevTools.evalCheapModuleSourceMap
       : //"eval-cheap-source-map" :
         "inline-source-map",
     output: {

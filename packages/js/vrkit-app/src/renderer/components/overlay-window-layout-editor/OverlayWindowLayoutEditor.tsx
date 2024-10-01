@@ -26,7 +26,7 @@ import {
   transition
 } from "../../styles/ThemedStyles"
 
-import { OverlayMode } from "vrkit-app-common/models/overlay-manager"
+import { OverlayMode } from "../../../common/models/overlays"
 import { ClassNamesKey, createClassNames } from "../../styles/createClasses"
 import clsx from "clsx"
 import { FlexRowCenterBox } from "../box"

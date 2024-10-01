@@ -26,7 +26,11 @@ export function getService<T>(id: string | ClassConstructor<T>): T {
  */
 export function setServiceContainer(container: Container) {
   serviceContainer = container
-
+  
+  if (import.meta.webpackHot)
+    import.meta.webpackHot.addDisposeHandler(() => {
+      serviceContainer = null
+    })
   return serviceContainer
 }
 

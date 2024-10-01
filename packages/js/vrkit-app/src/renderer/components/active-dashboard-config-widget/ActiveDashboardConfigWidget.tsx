@@ -1,5 +1,5 @@
 // REACT
-import React from "react"
+import React, { useCallback } from "react"
 
 // CLSX
 import clsx from "clsx"
@@ -7,20 +7,24 @@ import clsx from "clsx"
 // 3FV
 import { getLogger } from "@3fv/logger-proxy"
 
+import type { BoxProps } from "@mui/material/Box"
 // MUI
 import Box from "@mui/material/Box"
-import type {BoxProps} from "@mui/material/Box"
 import { styled } from "@mui/material/styles"
-import type { Theme } from "@mui/material"
-import type { SxProps } from "@mui/system"
 
 // APP
-import { borderRadius, ClassNamesKey, createClassNames, dimensionConstraints, hasCls } from "vrkit-app-renderer/styles"
+import { borderRadius, ClassNamesKey, createClassNames, FlexAuto, FlexRowCenter } from "vrkit-app-renderer/styles"
 import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 
-import Select, {selectClasses} from "@mui/material/Select"
+import Select, { selectClasses } from "@mui/material/Select"
 import MenuItem from "@mui/material/MenuItem"
+import { useService } from "../service-container"
+import AppSettingsClient from "../../services/app-settings-client"
+import { DashboardManagerClient } from "../../services/dashboard-manager-client"
+import Button from "@mui/material/Button"
+import SharedAppStateClient from "../../services/shared-app-state-client"
+import { OverlayMode } from "vrkit-app-common/models"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -35,6 +39,9 @@ const ActiveDashboardConfigWidgetRoot = styled(Box, {
   label: "ActiveDashboardConfigWidgetRoot"
 })(({theme}) => ({
   // root styles here
+  ...FlexRowCenter,
+  ...FlexAuto,
+  gap: "1rem",
   [`& div.${activeDashboardConfigWidgetClasses.select}` ]: {
     padding: 0,
     ...borderRadius(4),
@@ -63,10 +70,32 @@ export interface ActiveDashboardConfigWidgetProps extends BoxProps {
  */
 export function ActiveDashboardConfigWidget(props:ActiveDashboardConfigWidgetProps) {
   const { ...other } = props,
-      activeId = useAppSelector(sharedAppSelectors.selectActiveDashboardConfigId),
+      configId = useAppSelector(sharedAppSelectors.selectDefaultDashboardConfigId),
       // activeConfig = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
-      configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs)
-
+      configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
+      appSettingsClient = useService(AppSettingsClient),
+      sharedAppClient = useService(SharedAppStateClient),
+      dashClient = useService(DashboardManagerClient),
+      setDefaultDashboardConfigId = useCallback((id:string) => {
+        appSettingsClient.changeSettings({defaultDashboardConfigId: id})
+      },[]),
+      
+      hasActiveDashboard = !!useAppSelector(sharedAppSelectors.selectActiveDashboardConfigId),
+      overlayMode = useAppSelector(sharedAppSelectors.selectOverlayMode),
+      
+      toggleDashboard = useCallback(() => {
+        if (hasActiveDashboard) {
+          dashClient.closeDashboard()
+        } else {
+          dashClient.openDashboard(configId)
+        }
+      },[configId, hasActiveDashboard]),
+      
+      toggleOverlayMode = useCallback(() => {
+        sharedAppClient.setOverlayMode(overlayMode === OverlayMode.NORMAL ? OverlayMode.EDIT : OverlayMode.NORMAL)
+      }, [sharedAppClient, overlayMode])
+  
+  
   return <ActiveDashboardConfigWidgetRoot
     
     {...other}
@@ -74,13 +103,20 @@ export function ActiveDashboardConfigWidget(props:ActiveDashboardConfigWidgetPro
     <Select
         className={clsx(activeDashboardConfigWidgetClasses.select)}
         disableUnderline
-        variant="filled" color="success"  id="selectActiveDashboardConfig" value={activeId} label="Dashboard Config"
+        variant="filled" color="success"  id="selectActiveDashboardConfig"
+        value={configId}
+        
+        label="Dashboard Config"
     
     >
-      {configs.map(config => <MenuItem key={config.id} value={config.id}>
+      {configs.map(config => <MenuItem key={config.id} onClick={() => {
+        setDefaultDashboardConfigId(config.id)
+      }} value={config.id}>
         {config.name}
       </MenuItem>)}
     </Select>
+    <Button variant="contained" color={hasActiveDashboard ? "error" : "info"} onClick={toggleDashboard}>{hasActiveDashboard ? "Close" : "Open"}</Button>
+    <Button variant="outlined" disabled={!hasActiveDashboard} color="error" onClick={toggleOverlayMode}>{overlayMode === OverlayMode.EDIT ? "Done" : "Edit"}</Button>
   </ActiveDashboardConfigWidgetRoot>
 }
 

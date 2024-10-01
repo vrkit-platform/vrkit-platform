@@ -7,7 +7,7 @@ import {
   OverlayClientEventType,
   OverlayClientEventTypeToIPCName,
   OverlayMode
-} from "vrkit-app-common/models/overlay-manager"
+} from "../../../common/models/overlays"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
 import type OverlayManager from "./OverlayManager"
 
@@ -138,16 +138,22 @@ export class OverlayWindow {
       const win = this.window_
       const url = resolveHtmlPath("index-overlay.html")
       info(`Resolved overlay url: ${url}`)
-
+      
+      
+      
       await win.loadURL(url)
+      info(`Loaded overlay url: ${url}`)
       win.show()
-
+      
       if (isDev) {
+        info(`Showing devtools`)
         win.webContents.openDevTools({
           mode: "detach"
         })
+        info(`Shown devtools`)
       }
-
+      
+      
       deferred.resolve(this)
 
       await deferred.promise

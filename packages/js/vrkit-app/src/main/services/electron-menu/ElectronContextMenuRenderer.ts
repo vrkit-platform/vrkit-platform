@@ -103,8 +103,8 @@ export class ElectronContextMenuRenderer extends ElectronMenuRenderer {
   @PostConstruct()
   protected async init() {
     ipcMain.handle(ElectronIPCChannel.showContextMenu, this.onContextMenuShow)
-    if (module.hot) {
-      module.hot.addDisposeHandler(() => {
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.addDisposeHandler(() => {
         ipcMain.removeHandler(ElectronIPCChannel.showContextMenu)
       })
     }

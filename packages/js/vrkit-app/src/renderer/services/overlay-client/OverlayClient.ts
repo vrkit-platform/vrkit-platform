@@ -14,21 +14,13 @@ import {
   OverlayClientEventTypeToIPCName,
   OverlayClientFnType,
   OverlayClientFnTypeToIPCName,
-  OverlayManagerState,
-  
   OverlayMode,
-  OverlaySessionData
-} from "vrkit-app-common/models/overlay-manager"
+  OverlaysState
+} from "../../../common/models/overlays"
 import { PluginClientEventType, type SessionInfoMessage } from "vrkit-plugin-sdk"
-import {
-  DashboardConfig,
-  OverlayConfig,
-  SessionDataVariableValueMap,
-  SessionTiming
-} from "vrkit-models"
-import { isFunction } from "@3fv/guard"
+import { OverlayConfig, SessionDataVariableValueMap, SessionTiming } from "vrkit-models"
 import type { AppStore } from "../store"
-import { sharedAppActions } from "../store/slices/shared-app"
+import { sharedAppSelectors } from "../store/slices/shared-app"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -36,73 +28,27 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-
 /**
  * State patcher
  */
-export type OverlayManagerStatePatchFn = (state: OverlayManagerState) => Partial<OverlayManagerState>
+export type OverlayManagerStatePatchFn = (state: OverlaysState) => Partial<OverlaysState>
 
 @Singleton()
 export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
-  // private state_: OverlayManagerState = {
-  //   // config: null,
-  //   session: null,
-  //   // mode: OverlayMode.NORMAL
-  // }
-  get state(): OverlayManagerState {
-    return this.appStore.getState().shared.overlayManager
-  }
-  
-  get sessionData() {
-    return this.state?.session
+  private cache_ = {
+    sessionId: "",
+    sessionInfo: null as SessionInfoMessage,
+    sessionTiming: null as SessionTiming
   }
 
-  get dashboardConfigs() {
-    return this.state?.dashboardConfigs
-  }
-  
+  private overlayConfig_: OverlayConfig = null
+
   get overlayConfig() {
-    return this.state?.overlayConfig
+    return this.overlayConfig_
   }
 
   get mode() {
-    return this.state.overlayMode
-  }
-
-  /**
-   * Merge & patch OverlayManagerState slice
-   */
-
-  private patchState(newStateOrFn: Partial<OverlayManagerState> | OverlayManagerStatePatchFn = {}): OverlayManagerState {
-    const currentState = this.state
-    const patch = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn
-    const oldState = {...this.state}
-    this.appStore.dispatch(sharedAppActions.patch(state => ({...patch})))
-    // const newState = this.state_ = {...this.state_, ...patch}
-    
-    // TODO: make sure this still works without STATE_CHANGED event
-    const newState = this.state
-    if (!isEqual(oldState, newState)) {
-      this.emit(OverlayClientEventType.STATE_CHANGED, newState)
-    }
-
-    return newState
-  }
-
-  /**
-   * On overlay mode changed
-   *
-   * @param _event
-   * @param mode
-   */
-  private onOverlayModeEvent(_event: IpcRendererEvent, mode: OverlayMode) {
-    // if (mode === this.mode) return
-
-    this.patchState({
-      overlayMode: mode
-    })
-
-    this.emit(OverlayClientEventType.OVERLAY_MODE, mode)
+    return this.appStore.getState().shared.overlayMode
   }
 
   /**
@@ -112,32 +58,30 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
    * @param configJs
    */
   private onOverlayConfigEvent(_event: IpcRendererEvent, configJs: OverlayConfig) {
-    const config = OverlayConfig.fromJson(configJs as any);
-    this.patchState({
-      overlayConfig: config
-    })
-    
+    const config = OverlayConfig.fromJson(configJs as any)
+    this.overlayConfig_ = config
+
     this.emit(OverlayClientEventType.OVERLAY_CONFIG, config)
   }
 
-  /**
-   * On session info changed
-   *
-   * @param _event
-   * @param sessionId
-   * @param info
-   */
-  private onSessionInfoEvent(_event: IpcRendererEvent, sessionId: string, info: SessionInfoMessage) {
-    this.patchState({
-      session: {
-        ...this.state.session,
-        info,
-        id: sessionId
-      }
-    })
-
-    this.emit(PluginClientEventType.SESSION_INFO, sessionId, info)
-  }
+  // /**
+  //  * On session info changed
+  //  *
+  //  * @param _event
+  //  * @param sessionId
+  //  * @param info
+  //  */
+  // private onSessionInfoEvent(_event: IpcRendererEvent, sessionId: string, info: SessionInfoMessage) {
+  //   // this.patchState({
+  //   //   session: {
+  //   //     ...this.state.session,
+  //   //     info,
+  //   //     id: sessionId
+  //   //   }
+  //   // })
+  //
+  //   this.emit(PluginClientEventType.SESSION_INFO_CHANGED, sessionId, info)
+  // }
 
   /**
    * Handles events when a new data frame is received. This method processes
@@ -157,6 +101,29 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
     dataVarValues: SessionDataVariableValueMap
   ) {
     this.emit(PluginClientEventType.DATA_FRAME, sessionId, timing, dataVarValues)
+  }
+
+  @Bind
+  private onAppStoreStateChange() {
+    const rootState = this.appStore.getState(),
+      [sessionId, sessionInfo] = [
+        sharedAppSelectors.selectActiveSessionId(rootState),
+        sharedAppSelectors.selectActiveSessionInfo(rootState)
+      ],
+      cache = this.cache_
+
+    let evType: PluginClientEventType = null
+    if (sessionId !== cache.sessionId) evType = PluginClientEventType.SESSION_ID_CHANGED
+    else if (!isEqual(sessionInfo, cache.sessionInfo)) evType = PluginClientEventType.SESSION_INFO_CHANGED
+
+    if (evType) {
+      Object.assign(cache, {
+        sessionId,
+        sessionInfo
+      })
+
+      this.emit(evType, sessionId, sessionInfo)
+    }
   }
 
   /**
@@ -185,14 +152,14 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
       Pair<OverlayClientEventType | PluginClientEventType, (event: IpcRendererEvent, ...args: any[]) => any>
     >(
       [OverlayClientEventType.OVERLAY_CONFIG, this.onOverlayConfigEvent.bind(this)],
-      [OverlayClientEventType.OVERLAY_MODE, this.onOverlayModeEvent.bind(this)],
-      [PluginClientEventType.SESSION_INFO, this.onSessionInfoEvent.bind(this)],
       [PluginClientEventType.DATA_FRAME, this.onDataFrameEvent.bind(this)]
     )
 
     ipcEventHandlers.forEach(([type, handler]) => {
       ipcRenderer.on(OverlayClientEventTypeToIPCName(type), handler)
     })
+
+    this.appStore.subscribe(this.onAppStoreStateChange)
 
     if (isDev) {
       Object.assign(global, {
@@ -213,16 +180,12 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
       }
     }
 
-    const [config, session, mode] = await Promise.all([this.fetchOverlayConfig(), this.fetchSession(), this.fetchMode()])
-    //debugger
-    this.patchState({
-      overlayConfig:config,
-      session,
-      overlayMode:mode
-    })
+    const config = await this.fetchOverlayConfig()
+    log.info("Init loaded overlay config", config, "mode", this.overlayMode)
+  }
 
-    // await this.loadOverlay()
-    //     .catch(err => error(`Failed to load overlay`, err))
+  get overlayMode() {
+    return sharedAppSelectors.selectOverlayMode(this.appStore.getState())
   }
 
   // private async loadOverlay() {
@@ -243,54 +206,37 @@ export class OverlayClient extends EventEmitter3<OverlayClientEventArgs> {
 
   @Bind
   async fetchOverlayConfig(): Promise<OverlayConfig> {
-    const newConfig = OverlayConfig.fromJson(await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_CONFIG)))
-    this.patchState({
-      overlayConfig: newConfig
-    })
-    return newConfig
+    const overlayId: string = await ipcRenderer.invoke(
+        OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_CONFIG_ID)
+      ),
+      //{dashboards:dashState, appSettings, overlays: overlayState} = this.appStore.getState().shared,
+      activeDashConfig = sharedAppSelectors.selectActiveDashboardConfig(this.appStore.getState())
+    if (!activeDashConfig) {
+      log.error("Active dashboard not found")
+      return null
+    }
+    const overlay = activeDashConfig.overlays.find(it => it.id === overlayId),
+      placement = activeDashConfig.placements.find(it => it.overlayId === overlayId),
+      overlayConfig: OverlayConfig = {
+        overlay,
+        placement
+      }
+    // overlayConfig?: OverlayConfig
+    log.info(`Loaded overlay config`, overlayConfig)
+
+    this.overlayConfig_ = overlayConfig
+
+    return this.overlayConfig
   }
 
-  @Bind
-  async fetchSession(): Promise<OverlaySessionData> {
-    const newSession = await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_SESSION))
-    this.patchState({
-      session: newSession
-    })
-    return newSession
-  }
-
-  @Bind
-  async fetchMode(): Promise<OverlayMode> {
-    const mode = await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.FETCH_OVERLAY_MODE))
-    // if (mode === this.state_?.mode) return mode
-
-    this.patchState({
-      overlayMode: mode
-    })
-
-    return mode
-  }
-  
   @Bind
   async setMode(mode: OverlayMode): Promise<OverlayMode> {
-    if (mode === this.state?.overlayMode) return mode
-    const newMode = await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.SET_OVERLAY_MODE), mode)
-    
-    return this.patchState({
-      overlayMode:newMode
-    })?.overlayMode
+    if (mode === this.mode) return mode
+    return await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.SET_OVERLAY_MODE), mode)
   }
 
   @Bind close(): Promise<void> {
     return ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.CLOSE))
-  }
-  
-  updateDashboardConfig(id: string, patch:Partial<DashboardConfig>):Promise<DashboardConfig> {
-    return ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.UPDATE_DASHBOARD_CONFIG), id, patch)
-  }
-  
-  launchLayoutEditor(id: string): Promise<DashboardConfig> {
-    return ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.LAUNCH_DASHBOARD_LAYOUT_EDITOR), id)
   }
 }
 

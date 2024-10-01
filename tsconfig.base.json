@@ -30,6 +30,8 @@
     
     "outDir": "lib",
     "inlineSourceMap": true,
-    "preserveConstEnums": true
-  }
+    "preserveConstEnums": true,
+    
+  },
+  
 }

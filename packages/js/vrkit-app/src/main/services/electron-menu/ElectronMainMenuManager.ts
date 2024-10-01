@@ -219,8 +219,8 @@ export class ElectronMainMenuManager {
       info(`App menu`, inspect(current))
     }
 
-    if (module.hot) {
-      module.hot.addDisposeHandler(() => {
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.addDisposeHandler(() => {
         Menu.setApplicationMenu(defaultMenu)
       })
     }

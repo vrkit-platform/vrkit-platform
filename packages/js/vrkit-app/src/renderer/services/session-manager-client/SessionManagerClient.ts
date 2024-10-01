@@ -15,19 +15,16 @@ import {
   SessionManagerEventTypeToIPCName,
   SessionManagerFnType,
   SessionManagerFnTypeToIPCName,
-  SessionManagerState,
+  SessionsState,
   SessionPlayerId
-} from "vrkit-app-common/models/session-manager"
+} from "../../../common/models/sessions"
 import EventEmitter3 from "eventemitter3"
-import { sessionManagerActions } from "../store/slices/session-manager"
+
 import { Disposables, Pair } from "vrkit-app-common/utils"
 import {
   OverlayClientEventType,
-  OverlayClientEventTypeToIPCName,
-  OverlayClientFnType,
-  OverlayClientFnTypeToIPCName,
-  OverlayMode
-} from "vrkit-app-common/models/overlay-manager"
+  OverlayClientEventTypeToIPCName
+} from "../../../common/models/overlays"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -65,18 +62,8 @@ class SessionPlayerContainer {
   }
 }
 
-// export enum SessionManagerClientEventType {
-//   UNKNOWN = "UNKNOWN",
-//   STATE_CHANGED = "STATE_CHANGED",
-//   DATA_FRAME = "DATA_FRAME"
-// }
-
 export interface SessionManagerClientEventArgs {
-  [SessionManagerEventType.STATE_CHANGED]: (
-    client: SessionManagerClient,
-    state: SessionManagerState
-  ) => void
-
+  
   [SessionManagerEventType.DATA_FRAME]: (
     client: SessionManagerClient,
     dataVars: SessionDataVariable[]
@@ -98,30 +85,12 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
   
   private disposers = new Disposables()
   
-  @Bind
-  private onSessionManagerStateChangedEvent(
-    _event: IpcRendererEvent,
-    newState: SessionManagerState
-  ) {
-    this.updateState(newState)
-  }
-
-  
   private onSessionManagerDataFrameEvent(
     _event: IpcRendererEvent,
     sessionId: string,
     dataVars: SessionDataVariable[]
   ) {}
   
-  
-  private onOverlayModeEvent(
-      _event: IpcRendererEvent,
-      mode: OverlayMode
-  ) {
-    log.info("OVERLAY MODE RECEIVED", mode)
-    this.appStore.dispatch(sessionManagerActions.patch({overlayMode: mode}))
-  }
-
   /**
    * Cleanup resources on unload
    *
@@ -147,39 +116,18 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
     
     const ipcSessionEventHandlers = Array<SessionEventHandlerPair>(
       [
-        SessionManagerEventType.STATE_CHANGED,
-        this.onSessionManagerStateChangedEvent.bind(this)
-      ],
-      [
         SessionManagerEventType.DATA_FRAME,
         this.onSessionManagerDataFrameEvent.bind(this)
       ]
     )
     
-    const ipcOverlayEventHandlers = Array<
-        OverlayEventHandlerPair
-    >(
-        [
-          OverlayClientEventType.OVERLAY_MODE,
-          this.onOverlayModeEvent.bind(this)
-        ]
-    )
-
     ipcSessionEventHandlers.forEach(([type, handler]) => {
       ipcRenderer.on(SessionManagerEventTypeToIPCName(type), handler)
-    })
-    
-    ipcOverlayEventHandlers.forEach(([type, handler]) => {
-      ipcRenderer.on(OverlayClientEventTypeToIPCName(type), handler)
     })
     
     this.disposers.push(() => {
       ipcSessionEventHandlers.forEach(([type, handler]) => {
         ipcRenderer.off(SessionManagerEventTypeToIPCName(type), handler)
-      })
-      
-      ipcOverlayEventHandlers.forEach(([type, handler]) => {
-        ipcRenderer.off(OverlayClientEventTypeToIPCName(type), handler)
       })
       
       Object.assign(global, {
@@ -204,13 +152,6 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
   }
 
   /**
-   * Update the whole SessionManagerState slice
-   */
-  updateState(newState: Partial<SessionManagerState>) {
-    this.appStore.dispatch(sessionManagerActions.patch(newState))
-  }
-
-  /**
    * Service constructor
    *
    * @param appStore
@@ -219,23 +160,23 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
     super()
   }
 
-  @Bind setActiveSessionType(
-    type: ActiveSessionType
+  @Bind setLiveSessionActive(
+    active: boolean
   ): Promise<ActiveSessionType> {
     return ipcRenderer.invoke(
       SessionManagerFnTypeToIPCName(
-        SessionManagerFnType.SET_ACTIVE_SESSION_TYPE
+        SessionManagerFnType.SET_LIVE_SESSION_ACTIVE
       ),
-      type
+        active
     )
   }
 
-  @Bind
-  async getMainSessionManagerState(): Promise<SessionManagerState> {
-    return ipcRenderer.invoke(
-      SessionManagerFnTypeToIPCName(SessionManagerFnType.GET_STATE)
-    )
-  }
+  // @Bind
+  // async getMainSessionManagerState(): Promise<SessionsState> {
+  //   return deserialize(SessionsStateSchema, await ipcRenderer.invoke(
+  //     SessionManagerFnTypeToIPCName(SessionManagerFnType.GET_STATE)
+  //   ))
+  // }
 
   @Bind closeDiskSession(): Promise<boolean> {
     return ipcRenderer.invoke(

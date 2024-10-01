@@ -88,6 +88,6 @@ export interface SessionDataVariableValue<Type extends SessionDataVariableType =
   values: SessionDataVariableTypeToPrimitive<Type>[]
 }
 
-export type SessionDataVariableMap = { [name: string]: SessionDataVariable }
+export type SessionDataVariableMap = Record<string, SessionDataVariable>
 
 export type SessionDataVariableValueMap = { [name: string]: SessionDataVariableValue }

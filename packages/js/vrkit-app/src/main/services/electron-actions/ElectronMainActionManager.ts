@@ -178,14 +178,14 @@ export class ElectronMainActionManager {
     actionRegistry.addAll(...actions)
 
     // ADD HANDLER
-    ipcMain.handle(ElectronIPCChannel.invokeMainAction, this.onInvokeMainAction)
-
-    if (module.hot) {
-      module.hot.addDisposeHandler(() => {
-        actionRegistry.removeAll(...actions.map(get("id")))
-        ipcMain.removeHandler(ElectronIPCChannel.invokeMainAction)
-      })
-    }
+    // ipcMain.handle(ElectronIPCChannel.invokeMainAction, this.onInvokeMainAction)
+    //
+    // if (import.meta.webpackHot) {
+    //   import.meta.webpackHot.addDisposeHandler(() => {
+    //     actionRegistry.removeAll(...actions.map(get("id")))
+    //     ipcMain.removeHandler(ElectronIPCChannel.invokeMainAction)
+    //   })
+    // }
   }
 
   constructor(

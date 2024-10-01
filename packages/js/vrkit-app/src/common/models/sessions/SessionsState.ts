@@ -1,7 +1,7 @@
 import { SessionData, SessionTiming, SessionType } from "vrkit-models"
 import type { SessionPlayerId } from "vrkit-native-interop"
 import type { SessionInfoMessage } from "vrkit-plugin-sdk"
-import { OverlayMode } from "../overlay-manager"
+import { OverlayMode } from "../overlays"
 
 export { SessionPlayerId }
 
@@ -30,31 +30,34 @@ export const sessionDetailDefaults = (): SessionDetail => ({
 
 export type ActiveSessionType = "LIVE" | "DISK" | "NONE"
 
-export interface SessionManagerState {
+export interface SessionsState {
   liveSession?: SessionDetail
 
   diskSession?: SessionDetail
 
-  activeSessionType: ActiveSessionType
+  activeSessionType?: ActiveSessionType
   
+  activeSessionId?: string
   
+  componentDataVars?: Record<string, string[]>
 }
 
-export const newSessionState = (): SessionManagerState => ({
-  
+export const newSessionsState = (): SessionsState => ({
+  componentDataVars: {},
   activeSessionType: "NONE",
+  activeSessionId: "",
   liveSession: sessionDetailDefaults(),
   diskSession: sessionDetailDefaults()
 })
 
 export type SessionManagerStateSessionKey = keyof Pick<
-  SessionManagerState,
+  SessionsState,
   "liveSession" | "diskSession"
 >
 
 export enum SessionManagerEventType {
-  ACTIVE_SESSION_CHANGED = "ACTIVE_SESSION_CHANGED",
-  STATE_CHANGED = "STATE_CHANGED",
+  // ACTIVE_SESSION_CHANGED = "ACTIVE_SESSION_CHANGED",
+  // STATE_CHANGED = "STATE_CHANGED",
   DATA_FRAME = "DATA_FRAME"
 }
 
@@ -70,7 +73,7 @@ export function SessionManagerEventTypeToIPCName(
 export enum SessionManagerFnType {
   UNKNOWN = "UNKNOWN",
   GET_STATE = "GET_STATE",
-  SET_ACTIVE_SESSION_TYPE = "SET_ACTIVE_SESSION_TYPE",
+  SET_LIVE_SESSION_ACTIVE = "SET_LIVE_SESSION_ACTIVE",
   CLOSE_DISK_SESSION = "CLOSE_DISK_SESSION",
   SHOW_OPEN_DISK_SESSION = "SHOW_OPEN_DISK_SESSION"
 }
@@ -84,4 +87,4 @@ export function SessionManagerFnTypeToIPCName(
   return `SESSION_MANAGER_FN_${type.toUpperCase()}` as SessionManagerFnIPCName
 }
 
-export type SessionManagerStatePatchFn = (state: SessionManagerState) => Partial<SessionManagerState>
+export type SessionManagerStatePatchFn = (state: SessionsState) => Partial<SessionsState>

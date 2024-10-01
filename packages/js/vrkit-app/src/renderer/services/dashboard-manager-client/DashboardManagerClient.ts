@@ -12,8 +12,8 @@ import {
 
 import type { AppStore } from "../store"
 import {
-  OverlayClientFnType,
-  OverlayClientFnTypeToIPCName
+  DashboardManagerFnType, DashboardManagerFnTypeToIPCName,
+  
 } from "vrkit-app-common/models"
 
 
@@ -27,8 +27,12 @@ const { debug, trace, info, error, warn } = log
 @Singleton()
 export class DashboardManagerClient {
   
-  get dashboardConfigs() {
-    return this.appStore.getState().shared?.overlayManager?.dashboardConfigs ?? []
+  get state() {
+    return this.appStore.getState().shared?.dashboards
+  }
+  
+  get configs() {
+    return this.state.configs ?? []
   }
   
   
@@ -78,16 +82,38 @@ export class DashboardManagerClient {
   constructor(@Inject(APP_STORE_ID) readonly appStore: AppStore) {
   
   }
-
+  
+  @Bind
+  createDashboardConfig(patch:Partial<DashboardConfig>):Promise<DashboardConfig> {
+    return ipcRenderer.invoke(DashboardManagerFnTypeToIPCName(DashboardManagerFnType.CREATE_DASHBOARD_CONFIG), patch)
+  }
+  
   @Bind
   updateDashboardConfig(id: string, patch:Partial<DashboardConfig>):Promise<DashboardConfig> {
-    return ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.UPDATE_DASHBOARD_CONFIG), id, patch)
+    return ipcRenderer.invoke(DashboardManagerFnTypeToIPCName(DashboardManagerFnType.UPDATE_DASHBOARD_CONFIG), id, patch)
+  }
+  
+  @Bind
+  deleteDashboardConfig(id: string):Promise<DashboardConfig> {
+    return ipcRenderer.invoke(DashboardManagerFnTypeToIPCName(DashboardManagerFnType.DELETE_DASHBOARD_CONFIG), id)
+  }
+  
+  @Bind
+  openDashboard(id: string):Promise<string> {
+    return ipcRenderer.invoke(DashboardManagerFnTypeToIPCName(DashboardManagerFnType.OPEN_DASHBOARD), id)
+  }
+  
+  @Bind
+  closeDashboard():Promise<void> {
+    return ipcRenderer.invoke(DashboardManagerFnTypeToIPCName(DashboardManagerFnType.CLOSE_DASHBOARD))
   }
   
   @Bind
   launchLayoutEditor(id: string): Promise<DashboardConfig> {
-    return ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.LAUNCH_DASHBOARD_LAYOUT_EDITOR), id)
+    return ipcRenderer.invoke(DashboardManagerFnTypeToIPCName(DashboardManagerFnType.LAUNCH_DASHBOARD_LAYOUT_EDITOR), id)
   }
+  
+  
 }
 
 export default DashboardManagerClient

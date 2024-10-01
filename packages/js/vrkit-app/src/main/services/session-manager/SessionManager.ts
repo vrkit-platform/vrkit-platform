@@ -10,31 +10,46 @@ import {
   SessionPlayerEventDataDefault
 } from "vrkit-native-interop"
 import { isDefined, isFunction, isString } from "@3fv/guard"
-import { SessionDataVariableValueMap, SessionEventData, SessionEventType, SessionTiming } from "vrkit-models"
+import {
+  SessionData,
+  SessionDataVariableValueMap,
+  SessionEventData,
+  SessionEventType,
+  SessionTiming
+} from "vrkit-models"
 import {
   ActiveSessionType,
   LiveSessionId,
-  newSessionState,
   SessionDetail,
   sessionDetailDefaults,
   SessionManagerEventType,
   SessionManagerEventTypeToIPCName,
   SessionManagerFnType,
   SessionManagerFnTypeToIPCName,
-  SessionManagerState,
   SessionManagerStatePatchFn,
   SessionManagerStateSessionKey,
-  SessionPlayerId
-} from "vrkit-app-common/models/session-manager"
-import { first, isEmpty } from "lodash"
+  SessionPlayerId,
+  SessionsState
+} from "../../../common/models/sessions"
+import { first, flatten, isEmpty, uniq } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
 import EventEmitter3 from "eventemitter3"
-import { isDev, isNotEmpty, propEqualTo } from "vrkit-app-common/utils"
+import {
+  arrayOf, Disposables, isDev, isNotEmpty, propEqualTo, valuesOf
+} from "vrkit-app-common/utils"
 import { app, dialog, ipcMain, IpcMainInvokeEvent } from "electron"
 import { get } from "lodash/fp"
 import { Deferred } from "@3fv/deferred"
 import { match } from "ts-pattern"
 import { MainWindowManager } from "../window-manager"
+import { MainSharedAppState } from "../store"
+import {
+  SessionDetailSchema,
+  SessionsStateSchema
+} from "vrkit-app-common/models"
+import { serialize } from "serializr"
+import { BindAction } from "../../decorators"
+import { observe, remove, set } from "mobx"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -73,13 +88,6 @@ class SessionPlayerContainer {
 }
 
 export interface SessionManagerEventArgs {
-  [SessionManagerEventType.ACTIVE_SESSION_CHANGED]: (
-    activeSessionType: ActiveSessionType,
-    activeSession: SessionDetail,
-    newState: SessionManagerState
-  ) => void
-
-  [SessionManagerEventType.STATE_CHANGED]: (newState: SessionManagerState) => void
 
   [SessionManagerEventType.DATA_FRAME]: (sessionId: string, dataVarValues: SessionDataVariableValueMap) => void
 }
@@ -90,7 +98,12 @@ function getWeekendInfo(session: SessionDetail) {
 
 @Singleton()
 export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
-  private state_ = newSessionState()
+  
+  private readonly disposers_ = new Disposables()
+  
+  private get state() {
+    return this.sharedAppState.sessions
+  }
 
   private pendingOpenDiskPlayerDeferred_: Deferred<string> = null
 
@@ -106,8 +119,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return this.playerContainers_.filter(isDefined).find(({ id }) => id === player.id)
   }
 
-  @Bind
-  private onEventSessionStateChange(player: SessionPlayer, ev: SessionPlayerEventDataDefault) {
+  @Bind private onEventSessionStateChange(player: SessionPlayer, ev: SessionPlayerEventDataDefault) {
     if (!this.checkPlayerIsManaged(player)) {
       log.warn("Player is not currently managed & has been removed", player.id)
       return
@@ -119,16 +131,34 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     }
 
     const data = ev.payload
-    info(
-      `SESSION_EVENT(${SessionEventType[ev.type]}),SESSION(${data.sessionId}): Session availability change event`,
-      data
-    )
+    // info(
+    //   `SESSION_EVENT(${SessionEventType[ev.type]}),SESSION(${data.sessionId}): Session availability change event`,
+    //   data
+    // )
 
     this.updateSession(player, data)
   }
 
+  @BindAction()
+  registerComponentDataVars(componentId: string, ...dataVarNameArgs:Array<string | string[]>) {
+    set(this.state.componentDataVars,componentId,uniq(flatten(dataVarNameArgs)))
+  }
+  
+  @BindAction()
+  unregisterComponentDataVars(componentId: string) {
+    remove(this.state.componentDataVars,componentId)
+  }
+  
   @Bind
-  private onEventDataFrame(
+  onComponentDataVarsChanged() {
+    this.configureDataVarNames()
+  }
+  
+  get allComponentDataVars() {
+    return uniq(flatten(valuesOf(this.state.componentDataVars)))
+  }
+  
+  @Bind private onEventDataFrame(
     player: SessionPlayer,
     data: SessionPlayerEventDataDefault,
     dataVarValues: SessionDataVariableValueMap
@@ -139,8 +169,6 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       return
     }
 
-    // const { activeSessionType } = this.state
-    // if (activeSessionType !== "NONE")
     asOption(data.payload?.sessionData?.timing).ifSome(timing => {
       container.setDataFrame(timing, dataVarValues)
       const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession"
@@ -156,13 +184,9 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     })
   }
 
-  get state() {
-    return this.state_
-  }
-
-  async getStateHandler(event: IpcMainInvokeEvent): Promise<SessionManagerState> {
-    return this.state
-  }
+  // async getStateHandler(event: IpcMainInvokeEvent): Promise<SessionsState> {
+  //   return serialize(SessionsStateSchema, this.state)
+  // }
 
   /**
    * Remove `SessionPlayerContainer` mapped to the id
@@ -200,6 +224,8 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       error(`${sessionId} is already registered, not adding`, player)
       return null
     }
+    this.configureDataVarNames(player)
+    
     const container = new SessionPlayerContainer(sessionId, player)
     player.on(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
     player.on(SessionEventType.INFO_CHANGED, this.onEventSessionStateChange)
@@ -219,22 +245,25 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return container
   }
 
+  [Symbol.dispose]() {
+    debug(`Unloading SessionManager`)
+    this.disposers_.dispose()
+    Array<SessionPlayerContainer>(...this.playerContainers_.values())
+    .filter(isDefined<SessionPlayerContainer>)
+    .forEach(container => container.player?.destroy())
+    
+    // this.playerContainers_.clear()
+    delete this.livePlayerContainer_
+    delete this.diskPlayerContainer_
+  }
   /**
    * Cleanup resources on unload
    *
    * @param event
    * @private
    */
-  @Bind
-  private unload(event: Event) {
-    debug(`Unloading Native Manager`)
-    Array<SessionPlayerContainer>(...this.playerContainers_.values())
-      .filter(isDefined<SessionPlayerContainer>)
-      .forEach(container => container.player?.destroy())
-
-    // this.playerContainers_.clear()
-    delete this.livePlayerContainer_
-    delete this.diskPlayerContainer_
+  @Bind private unload(event: Event) {
+    this[Symbol.dispose]()
   }
 
   /**
@@ -244,14 +273,24 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   @PostConstruct() // @ts-ignore
   private async init(): Promise<void> {
     const ipcFnHandlers = Array<[SessionManagerFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any]>(
-      [SessionManagerFnType.SET_ACTIVE_SESSION_TYPE, this.setActiveSessionTypeHandler.bind(this)],
+      [SessionManagerFnType.SET_LIVE_SESSION_ACTIVE, this.setLiveSessionActiveHandler.bind(this)],
       [SessionManagerFnType.SHOW_OPEN_DISK_SESSION, this.showOpenDiskPlayerDialogHandler.bind(this)],
       [SessionManagerFnType.CLOSE_DISK_SESSION, this.closeDiskSessionHandler.bind(this)],
-      [SessionManagerFnType.GET_STATE, this.getStateHandler.bind(this)]
+      // [SessionManagerFnType.GET_STATE, this.getStateHandler.bind(this)]
     )
 
     app.on("before-quit", this.unload)
-
+    this.disposers_.push(() => {
+      app.off("before-quit", this.unload)
+      ipcFnHandlers.forEach(([type]) => ipcMain.removeHandler(SessionManagerFnTypeToIPCName(type)))
+      
+      Object.assign(global, {
+        sessionManager: undefined
+      })
+    })
+    
+    this.disposers_.push(observe(this.state.componentDataVars,this.onComponentDataVarsChanged))
+    
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(SessionManagerFnTypeToIPCName(type), handler))
 
     this.createLivePlayer()
@@ -261,18 +300,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       Object.assign(global, {
         sessionManager: this
       })
-
-      if (module.hot) {
-        module.hot.addDisposeHandler(() => {
-          app.off("before-quit", this.unload)
-          ipcFnHandlers.forEach(([type]) => ipcMain.removeHandler(SessionManagerFnTypeToIPCName(type)))
-
-          Object.assign(global, {
-            sessionManager: undefined
-          })
-        })
-        module.hot.accept()
-      }
+    }
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.addDisposeHandler(() => {
+        this.disposers_.dispose()
+      })
     }
   }
 
@@ -287,8 +319,12 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    * Service constructor
    *
    * @param mainWindowManager
+   * @param sharedAppState
    */
-  constructor(readonly mainWindowManager: MainWindowManager) {
+  constructor(
+    readonly mainWindowManager: MainWindowManager,
+    readonly sharedAppState: MainSharedAppState
+  ) {
     super()
   }
 
@@ -311,14 +347,14 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
         id: data.id,
         isAvailable: player.isAvailable,
         info: player.sessionInfo,
-        data,
-        timing: data.timing
+        data: SessionData.create(data as any),
+        timing: SessionTiming.create(data.timing)
       }),
       None: (): SessionDetail => ({
         id: player.id,
         isAvailable: player.isAvailable,
         info: player.sessionInfo,
-        data: player.sessionData,
+        data: !player.sessionData ? null : player.sessionData,// instanceof SessionData$ ? player.sessionData : SessionData.fromJson(player.sessionData),
         timing: player.sessionTiming
       })
     })
@@ -338,21 +374,32 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   get activeSession(): SessionDetail {
     return this.getActiveSessionFromState()
   }
+  
+  get activeSessionId(): string {
+    return this.state.activeSessionId
+  }
 
-  getActiveSessionFromState(state: SessionManagerState = this.state): SessionDetail {
+  getActiveSessionFromState(state: SessionsState = this.state): SessionDetail {
     const type = state.activeSessionType
     return type === "DISK" ? state.diskSession : type === "LIVE" ? state.liveSession : null
   }
 
-  @Bind setActiveSessionType(type: ActiveSessionType) {
-    this.patchState({ activeSessionType: type })
-  }
+  // @Bind setActiveSessionType(type: ActiveSessionType) {
+  //   this.patchState({ activeSessionType: type })
+  // }
 
-  @Bind
-  async setActiveSessionTypeHandler(event: IpcMainInvokeEvent, type: ActiveSessionType): Promise<ActiveSessionType> {
+  @Bind async setLiveSessionActiveHandler(
+    event: IpcMainInvokeEvent,
+    active: boolean
+  ): Promise<ActiveSessionType> {
     log.info(`Received handler callback setActiveSessionTypeHandler`, event)
-    this.setActiveSessionType(type)
-    return type
+    const activeSessionType:ActiveSessionType = active ? "LIVE" : "NONE"
+    if (activeSessionType !== this.activeSessionType) {
+      this.patchState({ activeSessionType,
+        activeSessionId: activeSessionType === "LIVE" ? LiveSessionId : ""
+      })
+    }
+    return activeSessionType
   }
 
   @Bind hasActiveSession() {
@@ -376,8 +423,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    *
    * @private
    */
-  @Bind
-  private updateSession(
+  @Bind private updateSession(
     playerOrContainer: SessionPlayer | SessionPlayerContainer,
     data: SessionEventData,
     activeSessionType: ActiveSessionType = this.state.activeSessionType
@@ -403,11 +449,9 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       })
       .otherwise(() => {})
 
-    // if (isLive && activeSessionType === "LIVE" && !isAvailable) {
-    //   activeSessionType = "NONE"
-    // }
 
     this.patchState({
+      activeSessionId: sessionDetail?.id,
       activeSessionType,
       [stateKey]: {
         ...this.state[stateKey],
@@ -444,10 +488,9 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     player.start()
 
     this.addPlayer(filePath, player)
-    
-    // await Deferred.delay(1500)
 
     this.updateSession(player, null, "DISK")
+    this.configureDataVarNames(player)
   }
 
   get activeSessionType() {
@@ -470,12 +513,12 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     this.patchState({
       diskSession: sessionDetailDefaults(),
-      activeSessionType
+      activeSessionType,
+      activeSessionId: ""
     })
   }
 
-  @Bind
-  async closeDiskSessionHandler(event: IpcMainInvokeEvent): Promise<boolean> {
+  @Bind async closeDiskSessionHandler(event: IpcMainInvokeEvent): Promise<boolean> {
     info(`Received closeDiskSessionHandler`, event)
     this.closeDiskSession()
     return true
@@ -503,7 +546,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   getPlayerContainer(sessionId: SessionPlayerId): SessionPlayerContainer {
     return this.playerContainers_.filter(isDefined).find(propEqualTo("id", sessionId))
   }
-  
+
   getActivePlayer(): SessionPlayer {
     const id = this.activeSession?.id
     return !id ? null : this.getPlayerContainer(id)?.player
@@ -513,35 +556,23 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    * Merge & patch SessionManagerState slice
    */
 
-  private patchState(newStateOrFn: Partial<SessionManagerState> | SessionManagerStatePatchFn = {}): void {
+  private patchState(newStateOrFn: Partial<SessionsState> | SessionManagerStatePatchFn = {}): void {
     const currentState = this.state
     const newStatePatch = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn,
-      newState = { ...this.state, ...newStatePatch }
+      newState: SessionsState = { ...this.state, ...newStatePatch }
 
-    const currentActiveSessionType = this.state.activeSessionType,
+    const currentActiveSessionType =currentState.activeSessionType,
       newActiveSessionType = newState?.activeSessionType,
-      currentActiveSession = this.getActiveSessionFromState(),
+      currentActiveSession = this.getActiveSessionFromState(currentState),
       currentActiveSessionId = getWeekendInfo(currentActiveSession)?.sessionID,
       newActiveSession = this.getActiveSessionFromState(newState),
       newActiveSessionId = getWeekendInfo(newActiveSession)?.sessionID,
       activeSessionChanged =
         currentActiveSessionType !== newActiveSessionType || currentActiveSessionId !== newActiveSessionId
 
-    this.state_ = newState
-    this.broadcastState()
-
-    if (activeSessionChanged) {
-      this.broadcast(SessionManagerEventType.ACTIVE_SESSION_CHANGED, newActiveSessionType, newActiveSession, newState)
-    }
-  }
-
-  /**
-   * Broadcast a state change
-   *
-   * @private
-   */
-  private broadcastState() {
-    this.broadcast(SessionManagerEventType.STATE_CHANGED, this.state_)
+    //this.state_ = newState
+    this.sharedAppState.updateSessions(newState)
+    
   }
 
   /**
@@ -568,8 +599,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    * @return {Promise<string>} A promise that resolves with the selected file
    *     path or rejects with an error.
    */
-  @Bind
-  async showOpenDiskPlayerDialogHandler(event: IpcMainInvokeEvent): Promise<string> {
+  @Bind async showOpenDiskPlayerDialogHandler(event: IpcMainInvokeEvent): Promise<string> {
     info(`Received showOpenDiskPlayerDialog event`)
     if (this.pendingOpenDiskPlayerDeferred_ && !this.pendingOpenDiskPlayerDeferred_.isSettled()) {
       log.warn("Pending show open dialog is not completed yet, ignoring call")
@@ -598,6 +628,24 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     }
 
     return deferred.promise
+  }
+  
+  private configureDataVarNames(...sessionPlayers: SessionPlayer[]):void {
+    const dataVarNames = this.allComponentDataVars
+    
+    asOption(sessionPlayers)
+        .filter(isEmpty)
+        .orCall(() =>
+            asOption(
+                arrayOf<SessionPlayer>(this.liveSessionPlayer, this.diskSessionPlayer)
+                  .filter(isDefined<SessionPlayer>)
+            )
+        )
+        .ifSome(players => {
+          players.forEach(player => {
+            player.resetDataVariables(...dataVarNames)
+          })
+        })
   }
 }
 

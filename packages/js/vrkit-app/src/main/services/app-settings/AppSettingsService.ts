@@ -2,7 +2,6 @@ import { getLogger } from "@3fv/logger-proxy"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { ipcMain, webContents } from "electron"
 
-import { Future } from "@3fv/prelude-ts"
 import { cloneDeep, ErrorKind, isEqual, throwError } from "vrkit-app-common/utils"
 import { Bind } from "vrkit-app-common/decorators"
 import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
@@ -10,8 +9,12 @@ import { AppSettings } from "vrkit-models"
 import { AppFiles } from "vrkit-app-common/constants"
 import Fs from "fs"
 import PQueue from "p-queue"
-import { IObjectDidChange, observe } from "mobx"
+import { IObjectDidChange, observe, set } from "mobx"
 import SharedAppState from "../store"
+import { BindAction } from "../../decorators"
+import { AppSettingsSchema } from "vrkit-app-common/models"
+import { serialize } from "serializr"
+import { deepObserve } from "mobx-utils"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -28,19 +31,25 @@ export class AppSettingsService {
     concurrency: 1
   })
   
-  private state: AppSettingsServiceState = {
-    appSettings: AppSettings.create()
+  // private state: AppSettingsServiceState = {
+  //   appSettings: AppSettings.create()
+  // }
+  get state() {
+    return this.sharedAppState.appSettings
   }
   
+  @BindAction()
   private patchSettings(settings:Partial<AppSettings>):AppSettings {
-    const patched = this.state.appSettings = AppSettings.create({ ...this.state.appSettings, ...settings })
-    this.saveAppSettings(patched)
-    return patched
+    set(this.sharedAppState.appSettings, settings)
+    
+    return this.sharedAppState.appSettings
+    
+    
   }
 
   @Bind
   private onGetAppSettingsSync(event: Electron.IpcMainEvent) {
-    event.returnValue = this.state.appSettings
+    event.returnValue = this.sharedAppState.appSettings
   }
 
   @Bind
@@ -63,7 +72,7 @@ export class AppSettingsService {
    */
   @Bind
   private async onGetAppSettings(event: Electron.IpcMainInvokeEvent) {
-    return this.state.appSettings
+    return this.sharedAppState.appSettings
   }
 
   /**
@@ -73,8 +82,8 @@ export class AppSettingsService {
    * @param settings
    */
   @Bind
-  private onSaveAppSettings(_event: Electron.IpcMainInvokeEvent, settings: Partial<AppSettings>) {
-    return this.patchSettings(settings)
+  private async onSaveAppSettings(_event: Electron.IpcMainInvokeEvent, settings: Partial<AppSettings>) {
+    return serialize(AppSettingsSchema, this.patchSettings(settings))
   }
 
   /**
@@ -83,11 +92,11 @@ export class AppSettingsService {
    */
   @Bind
   private broadcastAppSettingsChange() {
-    const {appSettings} = this
-
-    webContents.getAllWebContents().forEach(webContent => {
-      webContent.send(ElectronIPCChannel.settingsChanged, appSettings)
-    })
+    // const {appSettings} = this
+    //
+    // webContents.getAllWebContents().forEach(webContent => {
+    //   webContent.send(ElectronIPCChannel.settingsChanged, appSettings)
+    // })
   }
 
   /**
@@ -95,21 +104,18 @@ export class AppSettingsService {
    */
   @PostConstruct()
   private async init() {
-    this.state = {
-      ...this.state,
-      appSettings:await this.loadAppSettings()
-    }
+    this.sharedAppState.setAppSettings(await this.loadAppSettings())
     
-    this.sharedAppState.setAppSettings(this.state.appSettings)
+    this.sharedAppState.setAppSettings(this.sharedAppState.appSettings)
 
     ipcMain.handle(ElectronIPCChannel.getAppSettings, this.onGetAppSettings)
     ipcMain.handle(ElectronIPCChannel.saveAppSettings, this.onSaveAppSettings)
     ipcMain.on(ElectronIPCChannel.getAppSettingsSync, this.onGetAppSettingsSync)
     ipcMain.on(ElectronIPCChannel.saveAppSettingsSync, this.onSaveAppSettingsSync)
     
-    const unsubscribe = observe(this.sharedAppState, this.onStateChange, false)
-    if (module.hot) {
-      module.hot.addDisposeHandler(() => {
+    const unsubscribe = deepObserve(this.sharedAppState.appSettings, this.onStateChange)
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.addDisposeHandler(() => {
         ipcMain.removeHandler(ElectronIPCChannel.getAppSettings)
         ipcMain.removeHandler(ElectronIPCChannel.saveAppSettings)
         ipcMain.off(ElectronIPCChannel.getAppSettingsSync, this.onGetAppSettingsSync)
@@ -126,11 +132,13 @@ export class AppSettingsService {
         throw Error(`${settingsFile} is not a normal file`)
       }
       const jsonStr = await Fs.promises.readFile(settingsFile, "utf-8")
-      return AppSettings.fromJsonString(jsonStr)
+      return AppSettings.fromJsonString(jsonStr, {
+        ignoreUnknownFields: true
+      })
     } catch (err) {
       warn(`Failed to load app settings, using defaults`, err)
       return AppSettings.create({
-        activeDashboardId: null,
+        defaultDashboardConfigId: null,
         autoconnect: false
       })
       
@@ -162,25 +170,24 @@ export class AppSettingsService {
    * @param change
    */
   @Bind
-  private onStateChange(change: IObjectDidChange<SharedAppState>) {
-    const newSettings = change.object.appSettings
-    if (!isEqual(newSettings, this.state.appSettings)) {
-      this.state.appSettings = cloneDeep(newSettings)
-      
-      webContents.getAllWebContents().forEach(webContent => {
-        webContent.send(ElectronIPCChannel.settingsChanged, newSettings)
-      })
-    }
+  private onStateChange(change: IObjectDidChange<AppSettings>) {
+    this.saveAppSettings(this.appSettings)
+    // const newSettings = change.object.appSettings
+    // if (!isEqual(newSettings, this.state.appSettings)) {
+    //   this.state.appSettings = cloneDeep(newSettings)
+    //
+    //   webContents.getAllWebContents().forEach(webContent => {
+    //     webContent.send(ElectronIPCChannel.settingsChanged, newSettings)
+    //   })
+    // }
   }
   
   constructor(readonly sharedAppState: SharedAppState) {
-    this.state = {
-      appSettings: sharedAppState.appSettings
-    }
+  
   }
   
   get appSettings() {
-    return this.state.appSettings
+    return this.sharedAppState.appSettings
   }
   
   changeSettings(newSettings: Partial<AppSettings>): AppSettings {

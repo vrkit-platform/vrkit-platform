@@ -117,6 +117,10 @@ export interface VRLayout {
      * @generated from protobuf field: IRacingTools.Models.SizeF size = 2;
      */
     size?: SizeF;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.RectI screen_rect = 10;
+     */
+    screenRect?: RectI;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class PositionI$Type extends MessageType<PositionI> {
@@ -512,7 +516,8 @@ class VRLayout$Type extends MessageType<VRLayout> {
     constructor() {
         super("IRacingTools.Models.VRLayout", [
             { no: 1, name: "pose", kind: "message", T: () => VRPose },
-            { no: 2, name: "size", kind: "message", T: () => SizeF }
+            { no: 2, name: "size", kind: "message", T: () => SizeF },
+            { no: 10, name: "screen_rect", kind: "message", T: () => RectI }
         ]);
     }
     create(value?: PartialMessage<VRLayout>): VRLayout {
@@ -532,6 +537,9 @@ class VRLayout$Type extends MessageType<VRLayout> {
                 case /* IRacingTools.Models.SizeF size */ 2:
                     message.size = SizeF.internalBinaryRead(reader, reader.uint32(), options, message.size);
                     break;
+                case /* IRacingTools.Models.RectI screen_rect */ 10:
+                    message.screenRect = RectI.internalBinaryRead(reader, reader.uint32(), options, message.screenRect);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -550,6 +558,9 @@ class VRLayout$Type extends MessageType<VRLayout> {
         /* IRacingTools.Models.SizeF size = 2; */
         if (message.size)
             SizeF.internalBinaryWrite(message.size, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.RectI screen_rect = 10; */
+        if (message.screenRect)
+            RectI.internalBinaryWrite(message.screenRect, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

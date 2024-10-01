@@ -20,6 +20,7 @@
 #include <IRacingTools/SDK/Utils/Tracing.h>
 #include <IRacingTools/Shared/Graphics/RayIntersectsRect.h>
 #include <IRacingTools/Shared/Graphics/Spriting.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
 #include <openxr/openxr_reflection.h>
@@ -31,6 +32,8 @@ namespace IRacingTools::OpenXR {
     using namespace IRacingTools::Shared;
 
     namespace {
+        auto L = Logging::GetCategoryWithType<OpenXROverlayLayer>();
+    
         constexpr XrPosef XR_POSEF_IDENTITY{
             .orientation = {0.0f, 0.0f, 0.0f, 1.0f},
             .position = {0.0f, 0.0f, 0.0f},
@@ -41,8 +44,6 @@ namespace IRacingTools::OpenXR {
         };
     }
 
-
-    // constexpr std::string_view OpenXRLayerName{"IRTOpenXRLayer"};
     constexpr std::string_view OpenXRLayerName{"VRKitOpenXRLayer"};
 
     static_assert(OpenXRLayerName.size() <= XR_MAX_API_LAYER_NAME_SIZE);
@@ -106,21 +107,10 @@ namespace IRacingTools::OpenXR {
         auto pos = hmdPose.position;
         eyeHeight_ = {pos.y};
         pos.y = 0;
-
-        // We're only going to respect ry (yaw) as we want the new
-        // center to remain gravity-aligned
-
-        // auto quat = hmdPose.orientation;
-        //
-        // // clang-format off
-        // recenter_ = Matrix::CreateRotationY(quat.ToEuler().y) * Matrix::CreateTranslation({pos.x, pos.y, pos.z});
-        // // clang-format on
-        //
-        // recenterCount_ = vr.recenterCount;
     }
 
 
-    OpenXROverlayLayer::Pose OpenXROverlayLayer::getKneeboardPose(
+    OpenXROverlayLayer::Pose OpenXROverlayLayer::checkVRKitPose(
         const VR::VRRenderConfig& vr,
         const SHM::SHMOverlayFrameConfig& layer,
         const Pose& hmdPose
@@ -128,63 +118,18 @@ namespace IRacingTools::OpenXR {
         if (!eyeHeight_) {
             eyeHeight_ = {hmdPose.position.y};
         }
-        // const auto& pose = layer.vr.layout.pose;
-        // // this->maybeRecenter(vr, hmdPose);
-        // auto matrix = Matrix::CreateRotationX(pose.rX) * Matrix::CreateRotationY(pose.rY) *
-        //     Matrix::CreateRotationZ(pose.rZ) * Matrix::CreateTranslation({pose.x, pose.eyeY + *eyeHeight_, pose.z,}) *
-        //     recenter_;
-        //
-        // return {.position = matrix.Translation(), .orientation = Quaternion::CreateFromRotationMatrix(matrix),};
+
         return {};
     }
+    
 
-    OpenXROverlayLayer::Vector2 OpenXROverlayLayer::getKneeboardSize(
-        const SHM::SHMConfig& config,
-        const SHM::SHMOverlayFrameConfig& layer
-    ) {
-        const auto sizes = this->getSizes(config.vr, layer);
-
-        return sizes.normalSize;
-    }
-
-    bool OpenXROverlayLayer::isLookingAtKneeboard(
-        const SHM::SHMConfig& config,
-        const SHM::SHMOverlayFrameConfig& layer,
-        const Pose& hmdPose,
-        const Pose& kneeboardPose
-    ) {
-        auto& lookingAtBoard = isLookingAtKneeboard_[layer.overlayIdx];
-
-        if (layer.vr.gazeTargetScale.horizontal < 0.1 || layer.vr.gazeTargetScale.vertical < 0.1) {
-            return false;
-        }
-
-        const auto sizes = this->getSizes(config.vr, layer);
-        auto currentSize = sizes.normalSize;
-
-        currentSize.x *= layer.vr.gazeTargetScale.horizontal;
-        currentSize.y *= layer.vr.gazeTargetScale.vertical;
-
-        lookingAtBoard = Graphics::RayIntersectsRect(
-            hmdPose.position,
-            hmdPose.orientation,
-            kneeboardPose.position,
-            kneeboardPose.orientation,
-            currentSize
-        );
-
-        return lookingAtBoard;
-    }
-
-    OpenXROverlayLayer::Sizes OpenXROverlayLayer::getSizes(const VR::VRRenderConfig& vrc, const SHM::SHMOverlayFrameConfig& layer) const {
+    OpenXROverlayLayer::Vector2 OpenXROverlayLayer::getOverlaySize(const SHM::SHMConfig& config, const SHM::SHMOverlayFrameConfig& layer) const {
+        // const VR::VRRenderConfig& vrc = config.vr;
         const auto& physicalSize = layer.vr.layout.size;
         const auto virtualWidth = physicalSize.width();
         const auto virtualHeight = physicalSize.height();
 
-        return {
-            .normalSize = {virtualWidth, virtualHeight},
-            // .zoomedSize = {virtualWidth * layer.vr.zoomScale, virtualHeight * layer.vr.zoomScale},
-        };
+        return {virtualWidth, virtualHeight};
     }
 
     OpenXROverlayLayer::OpenXROverlayLayer(
@@ -195,14 +140,14 @@ namespace IRacingTools::OpenXR {
         const std::shared_ptr<OpenXRNext>& next
     )
         : openXR_(next) {
-        spdlog::debug("{}", __FUNCTION__);
+        L->debug("{}", __FUNCTION__);
         VRK_TraceLoggingScope("OpenXRLayer::OpenXRLayer()");
 
         XrSystemProperties systemProperties{.type = XR_TYPE_SYSTEM_PROPERTIES,};
         check_xrresult(next->xrGetSystemProperties(instance, system, &systemProperties));
         maxLayerCount_ = systemProperties.graphicsProperties.maxLayerCount;
 
-        spdlog::debug("XR system: {}", std::string_view{systemProperties.systemName});
+        L->debug("XR system: {}", std::string_view{systemProperties.systemName});
         // 'Max' appears to be a recommendation for the eyebox:
         // - ignoring it for quads appears to be widely compatible, and is common
         //   practice with other tools
@@ -210,7 +155,7 @@ namespace IRacingTools::OpenXR {
         //   graphics API's limits, not this one
         // - some runtimes (e.g. Steavr) have a *really* small size here that
         //   prevents spriting.
-        spdlog::debug(
+        L->debug(
             "System supports up to {} layers, with a suggested resolution of {}x{}",
             maxLayerCount_,
             systemProperties.graphicsProperties.maxSwapchainImageWidth,
@@ -235,7 +180,7 @@ namespace IRacingTools::OpenXR {
 
         isVarjoRuntime_ = std::string_view(runtimeID.name).starts_with("Varjo");
         if (isVarjoRuntime_) {
-            spdlog::debug("Varjo runtime detected");
+            L->debug("Varjo runtime detected");
         }
     }
 
@@ -306,7 +251,7 @@ namespace IRacingTools::OpenXR {
             }
             swapchainDimensions_ = swapchainDimensions;
             sessionID_ = snapshot.getSessionID();
-            spdlog::info("Created {}x{} swapchain", swapchainDimensions.width_, swapchainDimensions.height_);
+            L->info("Created {}x{} swapchain", swapchainDimensions.width_, swapchainDimensions.height_);
         }
 
         if (!snapshot.hasTexture()) {
@@ -473,10 +418,10 @@ namespace IRacingTools::OpenXR {
             const auto codeAsString = xrresult_to_string(nextResult);
 
             if (codeAsString.empty()) {
-                spdlog::warn("next_xrEndFrame() failed: {}", static_cast<int>(nextResult));
+                L->warn("next_xrEndFrame() failed: {}", static_cast<int>(nextResult));
             }
             else {
-                spdlog::warn("next_xrEndFrame() failed: {} ({})", codeAsString, static_cast<int>(nextResult));
+                L->warn("next_xrEndFrame() failed: {} ({})", codeAsString, static_cast<int>(nextResult));
             }
         }
         return nextResult;
@@ -517,16 +462,11 @@ namespace IRacingTools::OpenXR {
 
         auto cacheKey = snapshot.getRenderCacheKey();
         cacheKey &= ~static_cast<size_t>(1);
-        // if (isLookingAtKneeboard) {
-        //     cacheKey |= 1;
-        // }
-        // else {
-        //     cacheKey &= ~static_cast<size_t>(1);
-        // }
+
 
         return {
             .kneeboardPose = {},
-            .kneeboardSize = this->getKneeboardSize(config, ofc),
+            .kneeboardSize = this->getOverlaySize(config, ofc),
             .kneeboardOpacity = ofc.vr.opacity.normal,
             .cacheKey = cacheKey,
             .isLookingAtKneeboard = false,
@@ -598,16 +538,16 @@ namespace IRacingTools::OpenXR {
         gNext->xrGetInstanceProperties(instance, &instanceProps);
         gRuntime.version = instanceProps.runtimeVersion;
         std::strncpy(gRuntime.name, instanceProps.runtimeName, XR_MAX_RUNTIME_NAME_SIZE);
-        spdlog::debug("OpenXR runtime: '{}' v{:#x}", gRuntime.name, gRuntime.version);
+        L->debug("OpenXR runtime: '{}' v{:#x}", gRuntime.name, gRuntime.version);
 
         const auto ret = gNext->xrCreateSession(instance, createInfo, session);
         if (XR_FAILED(ret)) {
-            spdlog::debug("next xrCreateSession failed: {}", static_cast<int>(ret));
+            L->debug("next xrCreateSession failed: {}", static_cast<int>(ret));
             return ret;
         }
 
         if (gLayerInstance) {
-            spdlog::debug("Already have a kneeboard, refusing to initialize twice");
+            L->debug("Already have a kneeboard, refusing to initialize twice");
             return XR_ERROR_INITIALIZATION_FAILED;
         }
 
@@ -620,7 +560,7 @@ namespace IRacingTools::OpenXR {
         }
 
 
-        spdlog::error("Unsupported graphics API");
+        L->error("Unsupported graphics API");
 
         return ret;
     }
@@ -681,7 +621,7 @@ namespace IRacingTools::OpenXR {
             return XR_SUCCESS;
         }
 
-        spdlog::critical(
+        L->critical(
             "Unsupported OpenXR call '{}' with instance {:#016x} and no next",
             name,
             reinterpret_cast<uintptr_t>(instance)
@@ -702,19 +642,19 @@ namespace IRacingTools::OpenXR {
         const XrApiLayerCreateInfo* layerInfo,
         XrInstance* instance
     ) {
-        spdlog::info("{}", __FUNCTION__);
+        L->info("{}", __FUNCTION__);
         // TODO: check version fields etc in layerInfo
         XrApiLayerCreateInfo nextLayerInfo = *layerInfo;
         nextLayerInfo.nextInfo = layerInfo->nextInfo->next;
         auto nextResult = layerInfo->nextInfo->nextCreateApiLayerInstance(info, &nextLayerInfo, instance);
         if (nextResult != XR_SUCCESS) {
-            spdlog::debug("Next failed.");
+            L->debug("Next failed.");
             return nextResult;
         }
 
         gNext = std::make_shared<OpenXRNext>(*instance, layerInfo->nextInfo->nextGetInstanceProcAddr);
 
-        spdlog::info("Created API layer instance");
+        L->info("Created API layer instance");
 
         return XR_SUCCESS;
     }
@@ -740,12 +680,12 @@ BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved) {
         // DPrintSettings::Set({
         //   .prefix = "OpenKneeboard-OpenXR",
         // });
-        // spdlog::info(
+        // L->info(
         //   "{} {}, {}",
         //   __FUNCTION__,
         //   Version::ReleaseName,
         //   IsElevated(GetCurrentProcess()) ? "elevated" : "not elevated");
-        spdlog::info("OpenXR Layer Attach {}", __FUNCTION__);
+        L->info("OpenXR Layer Attach {}", __FUNCTION__);
         break;
     case DLL_PROCESS_DETACH:
         // TraceLoggingUnregister(gTraceProvider);
@@ -761,10 +701,10 @@ XrResult __declspec(dllexport) XRAPI_CALL VRK_xrNegotiateLoaderApiLayerInterface
     XrNegotiateApiLayerRequest* apiLayerRequest
 ) {
     using namespace IRacingTools::OpenXR;
-    spdlog::debug("{}", __FUNCTION__);
+    L->debug("{}", __FUNCTION__);
 
     if (layerName != OpenXRLayerName) {
-        spdlog::info("Layer name mismatch:\n -{}\n +{}", OpenXRLayerName, layerName);
+        L->info("Layer name mismatch:\n -{}\n +{}", OpenXRLayerName, layerName);
         return XR_ERROR_INITIALIZATION_FAILED;
     }
 

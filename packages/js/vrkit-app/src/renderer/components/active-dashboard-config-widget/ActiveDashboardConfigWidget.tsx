@@ -33,34 +33,28 @@ const classPrefix = "activeDashboardConfigWidget"
 export const activeDashboardConfigWidgetClasses = createClassNames(classPrefix, "select")
 export type ActiveDashboardConfigWidgetClassKey = ClassNamesKey<typeof activeDashboardConfigWidgetClasses>
 
-
 const ActiveDashboardConfigWidgetRoot = styled(Box, {
   name: "ActiveDashboardConfigWidgetRoot",
   label: "ActiveDashboardConfigWidgetRoot"
-})(({theme}) => ({
+})(({ theme }) => ({
   // root styles here
   ...FlexRowCenter,
   ...FlexAuto,
   gap: "1rem",
-  [`& div.${activeDashboardConfigWidgetClasses.select}` ]: {
+  [`& div.${activeDashboardConfigWidgetClasses.select}`]: {
     padding: 0,
     ...borderRadius(4),
     [`& > div.${selectClasses.filled}`]: {
       paddingTop: 5,
-      paddingBottom: 5,
+      paddingBottom: 5
     }
-    
   }
 }))
-
 
 /**
  * ActiveDashboardConfigWidget Component Properties
  */
-export interface ActiveDashboardConfigWidgetProps extends BoxProps {
-
-}
-
+export interface ActiveDashboardConfigWidgetProps extends BoxProps {}
 
 /**
  * ActiveDashboardConfigWidget Component
@@ -68,56 +62,69 @@ export interface ActiveDashboardConfigWidgetProps extends BoxProps {
  * @param { ActiveDashboardConfigWidgetProps } props
  * @returns {JSX.Element}
  */
-export function ActiveDashboardConfigWidget(props:ActiveDashboardConfigWidgetProps) {
+export function ActiveDashboardConfigWidget(props: ActiveDashboardConfigWidgetProps) {
   const { ...other } = props,
-      configId = useAppSelector(sharedAppSelectors.selectDefaultDashboardConfigId),
-      // activeConfig = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
-      configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
-      appSettingsClient = useService(AppSettingsClient),
-      sharedAppClient = useService(SharedAppStateClient),
-      dashClient = useService(DashboardManagerClient),
-      setDefaultDashboardConfigId = useCallback((id:string) => {
-        appSettingsClient.changeSettings({defaultDashboardConfigId: id})
-      },[]),
-      
-      hasActiveDashboard = !!useAppSelector(sharedAppSelectors.selectActiveDashboardConfigId),
-      overlayMode = useAppSelector(sharedAppSelectors.selectOverlayMode),
-      
-      toggleDashboard = useCallback(() => {
-        if (hasActiveDashboard) {
-          dashClient.closeDashboard()
-        } else {
-          dashClient.openDashboard(configId)
-        }
-      },[configId, hasActiveDashboard]),
-      
-      toggleOverlayMode = useCallback(() => {
-        sharedAppClient.setOverlayMode(overlayMode === OverlayMode.NORMAL ? OverlayMode.EDIT : OverlayMode.NORMAL)
-      }, [sharedAppClient, overlayMode])
-  
-  
-  return <ActiveDashboardConfigWidgetRoot
-    
-    {...other}
-  >
-    <Select
+    configId = useAppSelector(sharedAppSelectors.selectDefaultDashboardConfigId), // activeConfig = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
+    configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
+    appSettingsClient = useService(AppSettingsClient),
+    sharedAppClient = useService(SharedAppStateClient),
+    dashClient = useService(DashboardManagerClient),
+    setDefaultDashboardConfigId = useCallback((id: string) => {
+      appSettingsClient.changeSettings({ defaultDashboardConfigId: id })
+    }, []),
+    hasActiveDashboard = !!useAppSelector(sharedAppSelectors.selectActiveDashboardConfigId),
+    overlayMode = useAppSelector(sharedAppSelectors.selectOverlayMode),
+    toggleDashboard = useCallback(() => {
+      if (hasActiveDashboard) {
+        dashClient.closeDashboard()
+      } else {
+        dashClient.openDashboard(configId)
+      }
+    }, [configId, hasActiveDashboard]),
+    toggleOverlayMode = useCallback(() => {
+      sharedAppClient.setOverlayMode(overlayMode === OverlayMode.NORMAL ? OverlayMode.EDIT : OverlayMode.NORMAL)
+    }, [sharedAppClient, overlayMode])
+
+  return (
+    <ActiveDashboardConfigWidgetRoot {...other}>
+      <Select
         className={clsx(activeDashboardConfigWidgetClasses.select)}
         disableUnderline
-        variant="filled" color="success"  id="selectActiveDashboardConfig"
+        variant="filled"
+        color="success"
+        id="selectActiveDashboardConfig"
         value={configId}
-        
         label="Dashboard Config"
-    
-    >
-      {configs.map(config => <MenuItem key={config.id} onClick={() => {
-        setDefaultDashboardConfigId(config.id)
-      }} value={config.id}>
-        {config.name}
-      </MenuItem>)}
-    </Select>
-    <Button variant="contained" color={hasActiveDashboard ? "error" : "info"} onClick={toggleDashboard}>{hasActiveDashboard ? "Close" : "Open"}</Button>
-    <Button variant="outlined" disabled={!hasActiveDashboard} color="error" onClick={toggleOverlayMode}>{overlayMode === OverlayMode.EDIT ? "Done" : "Edit"}</Button>
-  </ActiveDashboardConfigWidgetRoot>
+      >
+        {configs.map(config => (
+          <MenuItem
+            key={config.id}
+            onClick={() => {
+              setDefaultDashboardConfigId(config.id)
+            }}
+            value={config.id}
+          >
+            {config.name}
+          </MenuItem>
+        ))}
+      </Select>
+      <Button
+        variant="contained"
+        color={hasActiveDashboard ? "error" : "info"}
+        onClick={toggleDashboard}
+      >
+        {hasActiveDashboard ? "Close" : "Open"}
+      </Button>
+      <Button
+        variant="outlined"
+        disabled={!hasActiveDashboard}
+        color="error"
+        onClick={toggleOverlayMode}
+      >
+        {overlayMode === OverlayMode.EDIT ? "Done" : "Edit"}
+      </Button>
+    </ActiveDashboardConfigWidgetRoot>
+  )
 }
 
 export default ActiveDashboardConfigWidget

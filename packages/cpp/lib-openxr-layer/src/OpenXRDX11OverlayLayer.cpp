@@ -36,10 +36,15 @@
 #include "loader_interfaces.h"
 
 #include <IRacingTools/SDK/Utils/Tracing.h>
+#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 namespace IRacingTools::OpenXR::DX11 {
 using namespace DirectX::SimpleMath;
 
+namespace {
+  auto L = Logging::GetCategoryWithType<OpenXRDX11OverlayLayer>();
+}
+  
 OpenXRDX11OverlayLayer::OpenXRDX11OverlayLayer(
   XrInstance instance,
   XrSystemId systemID,
@@ -48,13 +53,13 @@ OpenXRDX11OverlayLayer::OpenXRDX11OverlayLayer(
   const std::shared_ptr<OpenXRNext>& next,
   const XrGraphicsBindingD3D11KHR& binding)
   : OpenXROverlayLayer(instance, systemID, session, runtimeID, next) {
-  spdlog::debug("{}", __FUNCTION__);
+  L->debug("{}", __FUNCTION__);
   VRK_TraceLoggingScope("OpenXRDX11Layer()");
 
   device_.copy_from(binding.device);
   device_->GetImmediateContext(immediateContext_.put());
 
-  renderer_ = std::make_unique<DX11::OpenXRDX11Renderer>(device_.get());
+  renderer_ = std::make_unique<DX11::OpenXRDX11OverlayRenderer>(device_.get());
 }
 
 OpenXRDX11OverlayLayer::~OpenXRDX11OverlayLayer() {
@@ -67,7 +72,7 @@ OpenXRDX11OverlayLayer::DXGIFormats OpenXRDX11OverlayLayer::GetDXGIFormats(
   uint32_t formatCount {0};
   if (XR_FAILED(
         oxr->xrEnumerateSwapchainFormats(session, 0, &formatCount, nullptr))) {
-    spdlog::warn("Failed to get swapchain format count");
+    L->warn("Failed to get swapchain format count");
     return {};
   }
   std::vector<int64_t> formats;
@@ -76,11 +81,11 @@ OpenXRDX11OverlayLayer::DXGIFormats OpenXRDX11OverlayLayer::GetDXGIFormats(
     XR_FAILED(oxr->xrEnumerateSwapchainFormats(
       session, formatCount, &formatCount, formats.data()))
     || formatCount == 0) {
-    spdlog::warn("Failed to enumerate swapchain formats");
+    L->warn("Failed to enumerate swapchain formats");
     return {};
   }
   for (const auto it: formats) {
-    spdlog::debug("Runtime supports swapchain format: {}", it);
+    L->debug("Runtime supports swapchain format: {}", it);
   }
   // If this changes, we probably want to change the preference list below
   static_assert(SHM::SHARED_TEXTURE_PIXEL_FORMAT == DXGI_FORMAT_B8G8R8A8_UNORM);
@@ -102,13 +107,13 @@ OpenXRDX11OverlayLayer::DXGIFormats OpenXRDX11OverlayLayer::GetDXGIFormats(
 XrSwapchain OpenXRDX11OverlayLayer::createSwapchain(
   XrSession session,
   const PixelSize& size) {
-  spdlog::debug("{}", __FUNCTION__);
+  L->debug("{}", __FUNCTION__);
   VRK_TraceLoggingScope("OpenXRDX11Layer::CreateSwapchain()"); // NOLINT(*-pro-type-member-init)
 
   auto oxr = this->getOpenXR();
 
   auto formats = GetDXGIFormats(oxr, session);
-  spdlog::debug(
+  L->debug(
     "Creating swapchain with format {}",
     static_cast<int>(formats.textureFormat));
 
@@ -128,7 +133,7 @@ XrSwapchain OpenXRDX11OverlayLayer::createSwapchain(
 
   auto nextResult = oxr->xrCreateSwapchain(session, &swapchainInfo, &swapchain);
   if (XR_FAILED(nextResult)) {
-    //spdlog::debug("Failed to create swapchain: {}", nextResult);
+    //L->debug("Failed to create swapchain: {}", nextResult);
     return nullptr;
   }
 
@@ -136,11 +141,11 @@ XrSwapchain OpenXRDX11OverlayLayer::createSwapchain(
   nextResult
     = oxr->xrEnumerateSwapchainImages(swapchain, 0, &imageCount, nullptr);
   if (imageCount == 0 || XR_FAILED(nextResult)) {
-    // spdlog::debug("No images in swapchain: {}", nextResult);
+    // L->debug("No images in swapchain: {}", nextResult);
     return nullptr;
   }
 
-  spdlog::debug("{} images in swapchain", imageCount);
+  L->debug("{} images in swapchain", imageCount);
   shm_.initializeCache(device_.get(), static_cast<uint8_t>(imageCount));
 
   std::vector<XrSwapchainImageD3D11KHR> images;
@@ -155,13 +160,13 @@ XrSwapchain OpenXRDX11OverlayLayer::createSwapchain(
     &imageCount,
     reinterpret_cast<XrSwapchainImageBaseHeader*>(images.data()));
   if (XR_FAILED(nextResult)) {
-    // spdlog::debug("Failed to enumerate images in swapchain: {}", nextResult);
+    // L->debug("Failed to enumerate images in swapchain: {}", nextResult);
     oxr->xrDestroySwapchain(swapchain);
     return nullptr;
   }
 
   if (images.at(0).type != XR_TYPE_SWAPCHAIN_IMAGE_D3D11_KHR) {
-    spdlog::debug("Swap chain is not a D3D11 swapchain");
+    L->debug("Swap chain is not a D3D11 swapchain");
     VRK_BREAK;
     oxr->xrDestroySwapchain(swapchain);
     return nullptr;

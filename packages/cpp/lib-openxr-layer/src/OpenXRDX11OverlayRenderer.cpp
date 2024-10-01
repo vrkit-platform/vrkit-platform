@@ -1,6 +1,6 @@
 #define XR_USE_GRAPHICS_API_D3D11
 
-#include <IRacingTools/OpenXR/OpenXRDX11Renderer.h>
+#include <IRacingTools/OpenXR/OpenXRDX11OverlayRenderer.h>
 #include <IRacingTools/SDK/Utils/Tracing.h>
 #include <IRacingTools/Shared/Graphics/DX113D.h>
 
@@ -27,11 +27,11 @@ namespace IRacingTools::OpenXR::DX11 {
           device->CreateRenderTargetView(texture, &rtvDesc, this->renderTargetView.put()));
     }
 
-    OpenXRDX11Renderer::OpenXRDX11Renderer(ID3D11Device* device) {
+    OpenXRDX11OverlayRenderer::OpenXRDX11OverlayRenderer(ID3D11Device* device) {
         spriteBatch_ = std::make_unique<Graphics::SpriteBatch>(device);
     }
 
-    void OpenXRDX11Renderer::renderLayers(
+    void OpenXRDX11OverlayRenderer::renderLayers(
       const SwapchainResources& sr,
       uint32_t swapchainTextureIndex,
       const SHM::Snapshot& snapshot,

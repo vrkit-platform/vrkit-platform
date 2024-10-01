@@ -1,5 +1,8 @@
 import { getLogger } from "@3fv/logger-proxy"
-import { BrowserWindow, BrowserWindowConstructorOptions } from "electron"
+import {
+  BrowserWindow,
+  BrowserWindowConstructorOptions, WebPreferences
+} from "electron"
 import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
 import { isDev, isRectValid } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
@@ -17,7 +20,12 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-export class OverlayWindow {
+export enum OverlayBrowserWindowKind {
+  SCREEN = "SCREEN",
+  VR = "VR"
+}
+
+export class OverlayBrowserWindow {
   private mode_: OverlayMode = OverlayMode.NORMAL
 
   private focused_: boolean = false
@@ -26,7 +34,7 @@ export class OverlayWindow {
 
   private readonly config_: OverlayConfig
 
-  private readonly readyDeferred_ = new Deferred<OverlayWindow>()
+  private readonly readyDeferred_ = new Deferred<OverlayBrowserWindow>()
 
   private closeDeferred: Deferred<void> = null
 
@@ -36,6 +44,13 @@ export class OverlayWindow {
     return this.config_?.overlay.id
   }
 
+  get uniqueId() {
+    return `${this.id}::${this.kind}`
+  }
+  
+  get uniqueIdDebugString() {
+    return `uniqueId=${this.uniqueId},id=${this.id},kind=${this.kind}`
+  }
   /**
    * Get the browser window
    */
@@ -91,7 +106,7 @@ export class OverlayWindow {
     return this.config.placement
   }
 
-  whenReady(): Promise<OverlayWindow> {
+  whenReady(): Promise<OverlayBrowserWindow> {
     return this.readyDeferred_.promise
   }
 
@@ -100,28 +115,43 @@ export class OverlayWindow {
 
     return this.readyDeferred_.isSettled()
   }
+  
+  get isVR() {
+    return this.kind === OverlayBrowserWindowKind.VR
+  }
+  
+  get isScreen() {
+    return !this.isVR
+  }
 
   sendConfig() {
     log.info(`Sending overlay config`, this.config?.overlay?.id)
     this.window?.webContents?.send(OverlayClientEventTypeToIPCName(OverlayClientEventType.OVERLAY_CONFIG), this.config)
   }
 
-  private constructor(readonly manager: OverlayManager, overlay: OverlayInfo, placement: OverlayPlacement) {
+  private constructor(readonly manager: OverlayManager, readonly kind: OverlayBrowserWindowKind, overlay: OverlayInfo, placement: OverlayPlacement) {
     this.config_ = { overlay, placement }
+    const screenRect = this.isScreen ? placement.screenRect : placement.vrLayout.screenRect
+    
+    const extraWebPrefs: Partial<WebPreferences> = this.isVR ? {
+      offscreen: true
+    } : {
+      transparent: true,
+    }
+    
+    
     this.windowOptions = {
       ...windowOptionDefaults({
         devTools: isDev,
-        transparent: true
-        // offscreen: true
+        ...extraWebPrefs
       }),
-      transparent: true,
+      transparent: this.isScreen,
       show: false,
       frame: false,
       backgroundColor: "#00000000",
-      alwaysOnTop: true,
-
-      ...placement.screenRect.position,
-      ...placement.screenRect.size
+      alwaysOnTop: this.isScreen,
+      ...screenRect.position,
+      ...screenRect.size
     }
 
     this.window_ = new BrowserWindow(this.windowOptions)
@@ -132,18 +162,21 @@ export class OverlayWindow {
     })
   }
 
-  private async initialize(): Promise<OverlayWindow> {
+  private async initialize(): Promise<OverlayBrowserWindow> {
     const deferred = this.readyDeferred_
     try {
       const win = this.window_
       const url = resolveHtmlPath("index-overlay.html")
       info(`Resolved overlay url: ${url}`)
       
-      
-      
       await win.loadURL(url)
-      info(`Loaded overlay url: ${url}`)
-      win.show()
+      info(`Loaded overlay url(${url}) for overlayWindow(${this.uniqueIdDebugString})`)
+      if (this.isScreen) {
+        info(`Showing window in SCREEN kind (${this.uniqueIdDebugString})`)
+        win.show()
+      } else {
+        info(`VR Windows are not shown as they render offscreen for performance (${this.uniqueIdDebugString})`)
+      }
       
       if (isDev) {
         info(`Showing devtools`)
@@ -164,8 +197,8 @@ export class OverlayWindow {
     return deferred.promise
   }
 
-  static create(manager: OverlayManager,overlay: OverlayInfo, placement: OverlayPlacement): OverlayWindow {
-    return new OverlayWindow(manager, overlay, placement)
+  static create(manager: OverlayManager, kind: OverlayBrowserWindowKind,overlay: OverlayInfo, placement: OverlayPlacement): OverlayBrowserWindow {
+    return new OverlayBrowserWindow(manager, kind, overlay, placement)
   }
 
   private setIgnoreMouseEvents(ignore: boolean): void {

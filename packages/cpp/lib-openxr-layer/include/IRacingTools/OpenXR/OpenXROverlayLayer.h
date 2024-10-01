@@ -25,7 +25,7 @@
 #include <IRacingTools/Shared/Timer.h>
 #include <IRacingTools/Shared/UI/ViewerWindowRenderer.h>
 
-#include "OpenXRDX11Renderer.h"
+#include "OpenXRDX11OverlayRenderer.h"
 
 
 // template <class CharT>
@@ -85,19 +85,9 @@ namespace IRacingTools::OpenXR {
         RenderParameters getRenderParameters(const SHM::Snapshot&, const SHM::SHMOverlayFrameConfig&, const Pose& hmdPose);
 
 
-        Pose getKneeboardPose(const VR::VRRenderConfig& vr, const SHM::SHMOverlayFrameConfig&, const Pose& hmdPose);
+        Pose checkVRKitPose(const VR::VRRenderConfig& vr, const SHM::SHMOverlayFrameConfig&, const Pose& hmdPose);
 
-        Vector2 getKneeboardSize(const SHM::SHMConfig& config, const SHM::SHMOverlayFrameConfig&);
-
-        bool isLookingAtKneeboard(
-            const SHM::SHMConfig&,
-            const SHM::SHMOverlayFrameConfig&,
-            const Pose& hmdPose,
-            const Pose& kneeboardPose
-        );
-
-        Sizes getSizes(const VR::VRRenderConfig&, const SHM::SHMOverlayFrameConfig&) const;
-
+        Vector2 getOverlaySize(const SHM::SHMConfig& config, const SHM::SHMOverlayFrameConfig&) const;
 
         void maybeRecenter(const VR::VRRenderConfig& vr, const Pose& hmdPose);
         void recenter(const VR::VRRenderConfig& vr, const Pose& hmdPose);
@@ -180,7 +170,7 @@ namespace IRacingTools::OpenXR {
 
             winrt::com_ptr<ID3D11Device> device_;
             winrt::com_ptr<ID3D11DeviceContext> immediateContext_;
-            std::unique_ptr<DX11::OpenXRDX11Renderer> renderer_;
+            std::unique_ptr<DX11::OpenXRDX11OverlayRenderer> renderer_;
 
             using SwapchainBufferResources = DX11::SwapchainBufferResources;
             using SwapchainResources = DX11::SwapchainResources;

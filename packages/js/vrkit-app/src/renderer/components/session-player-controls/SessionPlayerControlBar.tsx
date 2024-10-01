@@ -29,7 +29,6 @@ import type { SessionTiming } from "vrkit-models"
 import { DurationView, MILLIS_IN_HR } from "../time"
 import type { ActiveSessionType, SessionDetail } from "../../../common/models/sessions"
 
-import { OverlayModeSessionWidget } from "./OverlayModeSessionWidget"
 import { createClassNames } from "vrkit-app-renderer/styles/createClasses"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 
@@ -291,7 +290,6 @@ export function SessionPlayerControlBar({className,...other}: SessionPlayerContr
           )}
         </FlexScaleZeroBox>
         
-        <OverlayModeSessionWidget/>
         
         <DiskSessionBox>
           <DiskSessionButton activeSessionType={activeSessionType} />

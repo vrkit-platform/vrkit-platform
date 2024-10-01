@@ -8,6 +8,7 @@
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/SHM/SHM.h>
 #include <IRacingTools/SDK/Utils/LockHelpers.h>
+#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
 
 #include <spdlog/spdlog.h>
 
@@ -21,12 +22,15 @@ namespace IRacingTools::Shared::SHM {
 
 
   enum class LockState {
-    Unlocked, TryLock, Locked,
+    Unlocked,
+    TryLock,
+    Locked,
   };
 
 
   class Impl : public SDK::Utils::Lockable {
   protected:
+
     winrt::handle fileHandle_;
     winrt::handle eventHandle_;
     winrt::handle mutexHandle_;
@@ -38,6 +42,7 @@ namespace IRacingTools::Shared::SHM {
     friend class Writer;
 
   public:
+
     Impl() {
       auto fileHandle = Win32::CreateFileMappingW(
         INVALID_HANDLE_VALUE,
@@ -271,8 +276,7 @@ namespace IRacingTools::Shared::SHM {
     }
 
     if (overlayFrameConfigs.size() > MaxViewCount) [[unlikely]] {
-      VRK_LOG_AND_FATAL(
-        "Asked to publish {} layers, but max is {}", overlayFrameConfigs.size(), MaxViewCount);
+      VRK_LOG_AND_FATAL("Asked to publish {} layers, but max is {}", overlayFrameConfigs.size(), MaxViewCount);
     }
 
     impl_->metadata_->gpuAdapterId = impl_->gpuAdapterId_;
@@ -283,7 +287,11 @@ namespace IRacingTools::Shared::SHM {
     impl_->metadata_->overlayProducerProcessId = impl_->processId_;
     impl_->metadata_->texture = texture;
     impl_->metadata_->fence = fence;
-    memcpy(impl_->metadata_->overlayFrameConfigs, overlayFrameConfigs.data(), sizeof(SHMOverlayFrameConfig) * overlayFrameConfigs.size());
+    memcpy(
+      impl_->metadata_->overlayFrameConfigs,
+      overlayFrameConfigs.data(),
+      sizeof(SHMOverlayFrameConfig) * overlayFrameConfigs.size()
+    );
   }
 
   void Writer::lock() {
@@ -331,7 +339,8 @@ namespace IRacingTools::Shared::SHM {
     IPCHandles* source,
     const std::shared_ptr<IPCClientTexture>& dest
   )
-    : ipcTexture_(dest), state_(State::Empty) {
+    : ipcTexture_(dest),
+      state_(State::Empty) {
     // VRK_TraceLoggingScopedActivity(
     //   activity, "SHM::Snapshot::Snapshot(metadataAndTextures)");
 
@@ -403,6 +412,7 @@ namespace IRacingTools::Shared::SHM {
 
   class SHMReader::Impl : public SHM::Impl {
   public:
+
     winrt::handle feederProcessHandle_;
     uint64_t sessionId_{~(0ui64)};
 
@@ -426,6 +436,7 @@ namespace IRacingTools::Shared::SHM {
     }
 
   private:
+
     // Only valid in the feeder process, but keep track of them to see if they
     // change
     HANDLE foreignTextureHandle_{};
@@ -436,7 +447,7 @@ namespace IRacingTools::Shared::SHM {
   SHMReader::SHMReader() {
     // VRK_TraceLoggingScope("SHM::Reader::Reader()");
     const auto path = SHMPath();
-    //L->info(L"Initializing SHM reader with path {}", path);
+    L->info("Initializing SHM reader with path {}", SDK::Utils::ToUtf8(path));
 
     this->p = std::make_shared<Impl>();
     if (!p->isValid()) {
@@ -446,7 +457,8 @@ namespace IRacingTools::Shared::SHM {
     L->info("Reader initialized.");
   }
 
-  SHMReader::~SHMReader() { // NOLINT(*-use-equals-default)
+  SHMReader::~SHMReader() {
+    // NOLINT(*-use-equals-default)
     //VRK_TraceLoggingScope("SHM::Reader::~Reader()");
   }
 
@@ -478,7 +490,8 @@ namespace IRacingTools::Shared::SHM {
   }
 
   SHMCachedReader::SHMCachedReader(IPCTextureCopier* copier, ConsumerKind kind)
-    : textureCopier_(copier), consumerKind_(kind) {
+    : textureCopier_(copier),
+      consumerKind_(kind) {
   }
 
   Snapshot SHMReader::maybeGetUncached(ConsumerKind kind) {
@@ -709,9 +722,11 @@ namespace IRacingTools::Shared::SHM {
 
 
   IPCClientTexture::IPCClientTexture(const PixelSize& dimensions, uint8_t swapchainIndex)
-    : dimensions_(dimensions), swapchainIndex_(swapchainIndex) {
+    : dimensions_(dimensions),
+      swapchainIndex_(swapchainIndex) {
   }
 
   IPCClientTexture::~IPCClientTexture() = default;
+
   IPCTextureCopier::~IPCTextureCopier() = default;
 } // namespace IRacingTools::Shared

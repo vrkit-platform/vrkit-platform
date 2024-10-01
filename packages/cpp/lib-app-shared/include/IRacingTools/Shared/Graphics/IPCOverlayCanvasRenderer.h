@@ -455,7 +455,6 @@ namespace IRacingTools::Shared::Graphics {
       SHM::SHMConfig config{
         .globalInputLayerId = 0,
         .vr = {},
-        //.mTarget = GetConsumerPatternForGame(mCurrentGame),
         .textureSize = destResources->textureSize,
       };
       // const auto tint = mKneeboard->GetAppSettings().mTint;

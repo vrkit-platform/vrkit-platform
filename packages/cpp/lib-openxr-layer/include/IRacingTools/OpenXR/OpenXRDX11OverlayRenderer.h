@@ -51,10 +51,10 @@ namespace IRacingTools::OpenXR::DX11 {
         std::vector<SwapchainBufferResources> bufferResources;
     };
 
-    class OpenXRDX11Renderer {
+    class OpenXRDX11OverlayRenderer {
     public:
-        OpenXRDX11Renderer() = delete;
-        explicit OpenXRDX11Renderer(ID3D11Device*);
+        OpenXRDX11OverlayRenderer() = delete;
+        explicit OpenXRDX11OverlayRenderer(ID3D11Device*);
 
         void renderLayers(
             const SwapchainResources&,

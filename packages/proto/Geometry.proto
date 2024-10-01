@@ -41,4 +41,5 @@ message VRPose {
 message VRLayout {
   VRPose pose = 1;
   SizeF size = 2;
+  RectI screen_rect = 10;
 }

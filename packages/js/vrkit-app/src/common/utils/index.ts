@@ -45,6 +45,7 @@ export * from "./assignDeep"
 
 export * from "./MergeUtil"
 export * from "./mapKeysDeep"
+export * from "./EnumUtils"
 
 export { default as HTTPStatus } from "./HTTPStatus"
 export { default as fetch } from "./Fetch"

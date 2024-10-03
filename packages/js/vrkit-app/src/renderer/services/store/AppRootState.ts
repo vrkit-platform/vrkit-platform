@@ -3,17 +3,14 @@
 //import type { RouterState } from "connected-react-router"
 import type { GlobalState } from "./slices/global"
 import type { DataState } from "./slices/data"
-import type { SessionsState } from "../../../common/models/sessions"
 import type { ISharedAppState } from "vrkit-app-common/models/app"
+import type { OverlayWindowState } from "./slices/overlay-window"
 
 export interface AppRootState {
   global: GlobalState
+  overlayWindow: OverlayWindowState
   shared: ISharedAppState
   data: DataState
-  
-//  sessionManager: SessionsState
-  //router: RouterState<any>
-
 }
 
 export type AppRootStateGetter = () => AppRootState

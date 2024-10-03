@@ -99,7 +99,11 @@ export enum OverlayKind {
     /**
      * @generated from protobuf enum value: OVERLAY_KIND_CUSTOM = 10;
      */
-    CUSTOM = 10
+    CUSTOM = 10,
+    /**
+     * @generated from protobuf enum value: OVERLAY_KIND_VR_EDITOR = 99;
+     */
+    VR_EDITOR = 99
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class OverlayBaseSettings$Type extends MessageType<OverlayBaseSettings> {

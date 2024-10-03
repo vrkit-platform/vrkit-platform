@@ -31,7 +31,7 @@ import { ClassNamesKey, createClassNames } from "../../styles/createClasses"
 import clsx from "clsx"
 import { FlexRowCenterBox } from "../box"
 import { useService } from "../service-container"
-import { OverlayClient } from "../../services/overlay-client"
+import { OverlayManagerClient } from "../../services/overlay-client"
 import Typography from "@mui/material/Typography"
 import Button from "@mui/material/Button"
 import SharedAppStateClient from "../../services/shared-app-state-client"
@@ -102,7 +102,7 @@ export interface OverlayWindowLayoutEditorProps extends BoxProps {
 export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps) {
   const { mode,size, ...other } = props,
     isEditMode = mode !== OverlayMode.NORMAL,
-    overlayClient = useService(OverlayClient),
+    overlayClient = useService(OverlayManagerClient),
       sharedAppStateClient = useService(SharedAppStateClient),
     overlayConfig = overlayClient.overlayConfig,
     overlayInfo = overlayConfig?.overlay

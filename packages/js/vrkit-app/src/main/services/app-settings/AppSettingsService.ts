@@ -1,15 +1,15 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
-import { ipcMain, webContents } from "electron"
+import { ipcMain } from "electron"
 
-import { cloneDeep, ErrorKind, isEqual, throwError } from "vrkit-app-common/utils"
+import { ErrorKind } from "vrkit-app-common/utils"
 import { Bind } from "vrkit-app-common/decorators"
 import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
 import { AppSettings } from "vrkit-models"
 import { AppFiles } from "vrkit-app-common/constants"
 import Fs from "fs"
 import PQueue from "p-queue"
-import { IObjectDidChange, observe, set } from "mobx"
+import { IObjectDidChange, set } from "mobx"
 import SharedAppState from "../store"
 import { BindAction } from "../../decorators"
 import { AppSettingsSchema } from "vrkit-app-common/models"
@@ -30,21 +30,19 @@ export class AppSettingsService {
   private readonly saveQueue_ = new PQueue({
     concurrency: 1
   })
-  
+
   // private state: AppSettingsServiceState = {
   //   appSettings: AppSettings.create()
   // }
   get state() {
     return this.sharedAppState.appSettings
   }
-  
+
   @BindAction()
-  private patchSettings(settings:Partial<AppSettings>):AppSettings {
+  private patchSettings(settings: Partial<AppSettings>): AppSettings {
     set(this.sharedAppState.appSettings, settings)
-    
+
     return this.sharedAppState.appSettings
-    
-    
   }
 
   @Bind
@@ -105,14 +103,14 @@ export class AppSettingsService {
   @PostConstruct()
   private async init() {
     this.sharedAppState.setAppSettings(await this.loadAppSettings())
-    
+
     this.sharedAppState.setAppSettings(this.sharedAppState.appSettings)
 
     ipcMain.handle(ElectronIPCChannel.getAppSettings, this.onGetAppSettings)
     ipcMain.handle(ElectronIPCChannel.saveAppSettings, this.onSaveAppSettings)
     ipcMain.on(ElectronIPCChannel.getAppSettingsSync, this.onGetAppSettingsSync)
     ipcMain.on(ElectronIPCChannel.saveAppSettingsSync, this.onSaveAppSettingsSync)
-    
+
     const unsubscribe = deepObserve(this.sharedAppState.appSettings, this.onStateChange)
     if (import.meta.webpackHot) {
       import.meta.webpackHot.addDisposeHandler(() => {
@@ -141,29 +139,26 @@ export class AppSettingsService {
         defaultDashboardConfigId: null,
         autoconnect: false
       })
-      
     }
-    
   }
 
   private saveAppSettings(appSettings: AppSettings): void {
     if (this.saveQueue_.size) {
       this.saveQueue_.clear()
     }
-    
+
     this.saveQueue_.add(async () => {
       const jsonStr = AppSettings.toJsonString(appSettings, {
         enumAsInteger: false,
         emitDefaultValues: true
       })
-      
+
       await Fs.promises.writeFile(AppFiles.appSettingsFile, jsonStr)
-      
+
       return appSettings
     })
   }
-  
-  
+
   /**
    * On state change, emit to renderers
    *
@@ -181,20 +176,16 @@ export class AppSettingsService {
     //   })
     // }
   }
-  
-  constructor(readonly sharedAppState: SharedAppState) {
-  
-  }
-  
+
+  constructor(readonly sharedAppState: SharedAppState) {}
+
   get appSettings() {
     return this.sharedAppState.appSettings
   }
-  
+
   changeSettings(newSettings: Partial<AppSettings>): AppSettings {
     return this.patchSettings(newSettings)
   }
-  
-  
 }
 
 export default AppSettingsService

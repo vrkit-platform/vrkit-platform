@@ -8,7 +8,7 @@ import type { ISharedAppState } from "vrkit-app-common/models/app"
 import type { AppStore } from "../store"
 import { sharedAppActions } from "../store/slices/shared-app"
 import { ElectronIPCChannel } from "vrkit-app-common/services"
-import { OverlayClientFnType, OverlayClientFnTypeToIPCName, OverlayMode } from "../../../common/models/overlays"
+import { OverlayManagerClientFnType, OverlayManagerClientFnTypeToIPCName, OverlayMode } from "../../../common/models/overlays"
  import { SharedAppStateSchema } from "vrkit-app-common/models/app"
  import { deserialize } from "serializr"
 
@@ -97,7 +97,7 @@ export class SharedAppStateClient {
   
   @Bind
   async setOverlayMode(mode: OverlayMode): Promise<void> {
-    const newMode = await ipcRenderer.invoke(OverlayClientFnTypeToIPCName(OverlayClientFnType.SET_OVERLAY_MODE), mode)
+    const newMode = await ipcRenderer.invoke(OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.SET_OVERLAY_MODE), mode)
     
     //this.appStore.dispatch(sharedAppActions.setOverlayMode(newMode))
   }

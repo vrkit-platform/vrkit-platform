@@ -1,4 +1,5 @@
 // noinspection DuplicatedCode
+// noinspection DuplicatedCode
 
 import { Deferred } from "@3fv/deferred"
 import { Container } from "@3fv/ditsy"
@@ -8,8 +9,11 @@ import { setContainerResolver } from "../../utils"
 import { APP_STORE_ID, isDev } from "../../constants"
 import FileSystemManager from "../../services/file-system-manager"
 import TrackManager from "../../services/track-manager"
-import OverlayClient, { PluginClientManager } from "../../services/overlay-client"
-import SharedAppStateClient from "vrkit-app-renderer/services/shared-app-state-client"
+import OverlayManagerClient, {
+  PluginClientManager
+} from "../../services/overlay-client"
+import SharedAppStateClient
+  from "vrkit-app-renderer/services/shared-app-state-client"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 
 const log = getLogger(__filename)
@@ -41,7 +45,7 @@ async function createContainer(): Promise<Container> {
       .bindClass(FileSystemManager)
       .bindClass(TrackManager)
       .bindClass(DashboardManagerClient)
-      .bindClass(OverlayClient)
+      .bindClass(OverlayManagerClient)
       .bindClass(PluginClientManager)
       .resolveAll()
 
@@ -49,6 +53,7 @@ async function createContainer(): Promise<Container> {
     containerDeferred.resolve(container)
 
     info(`Container fully resolved & ready to rock`)
+    // noinspection TypeScriptUnresolvedReference
     const bootstrapCtx = require.context("./init-scripts", false, /\.tsx?$/, "lazy"),
       bootstrapKeys = bootstrapCtx.keys().sort()
 

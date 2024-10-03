@@ -76,7 +76,7 @@ const slice = createSlice({
     selectActiveDashboardConfig: (state: ISharedAppState):DashboardConfig => asOption(state.dashboards.configs)
         .filter(isArray)
         .map((configs: DashboardConfig[]) => {
-          const configId = selectActiveDashboardConfigId(state)
+          const configId = state.dashboards.activeConfigId
           return configs.find(it => it.id === configId)
         })
         .getOrNull(),

@@ -5,22 +5,20 @@ import { Bind } from "vrkit-app-common/decorators"
 
 import { APP_STORE_ID, isDev } from "../../constants"
 
-import { OverlayClientEventHandler } from "../../../common/models/overlays"
+import { OverlayManagerClientEventHandler } from "../../../common/models/overlays"
 import type {
   PluginClient,
   PluginClientComponentProps,
   PluginClientEventArgs, SessionInfoMessage
 } from "vrkit-plugin-sdk"
 import { OverlayConfig, OverlayKind, SessionTiming } from "vrkit-models"
-import OverlayClient from "./OverlayClient"
+import OverlayManagerClient from "./OverlayManagerClient"
 import { asOption } from "@3fv/prelude-ts"
 import TrackManager from "../track-manager"
 import { assign, importDefault, isEqual } from "vrkit-app-common/utils"
 import React from "react"
 import { sharedAppSelectors } from "../store/slices/shared-app"
 import { AppStore } from "../store"
-import { PluginClientEventType } from "vrkit-plugin-sdk" // noinspection
-// TypeScriptUnresolvedVariable
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -32,6 +30,7 @@ const builtinPluginLoaders: Record<OverlayKind, () => Promise<React.ComponentTyp
   [OverlayKind.CUSTOM]: (() => {
     throw Error(`NotImplemented yet, will be part of plugin system`)
   }) as any,
+  [OverlayKind.VR_EDITOR]: () => importDefault(import("../../overlays/vr-editor/VREditorOverlayPlugin")),
   [OverlayKind.TRACK_MAP]: () => importDefault(import("../../overlays/track-map/TrackMapOverlayPlugin")),
   [OverlayKind.CLOCK]: () => importDefault(import("../../overlays/clock/ClockOverlayPlugin"))
 }
@@ -117,7 +116,11 @@ export class PluginClientManager {
 
   private async launch() {
     const config = this.getConfig()
-
+    if (!config) {
+      log.warn(`No OverlayConfig available, assuming internal window`)
+      return null
+    }
+    
     const kind = config.overlay.kind ?? OverlayKind.TRACK_MAP
     const componentFn = builtinPluginLoaders[kind]
     if (!componentFn)
@@ -155,7 +158,7 @@ export class PluginClientManager {
    */
   constructor(
       @Inject(APP_STORE_ID) readonly appStore: AppStore,
-      readonly client: OverlayClient,
+      readonly client: OverlayManagerClient,
     readonly trackManager: TrackManager
   ) {}
 
@@ -165,11 +168,11 @@ export class PluginClientManager {
 
   
 
-  on<Type extends keyof PluginClientEventArgs>(type: Type, handler: OverlayClientEventHandler<Type>) {
+  on<Type extends keyof PluginClientEventArgs>(type: Type, handler: OverlayManagerClientEventHandler<Type>) {
     this.client.on(type, handler as any)
   }
 
-  off<Type extends keyof PluginClientEventArgs>(type: Type, handler?: OverlayClientEventHandler<Type>) {
+  off<Type extends keyof PluginClientEventArgs>(type: Type, handler?: OverlayManagerClientEventHandler<Type>) {
     this.client.off(type, handler as any)
   }
 
@@ -178,4 +181,4 @@ export class PluginClientManager {
   }
 }
 
-export default OverlayClient
+export default OverlayManagerClient

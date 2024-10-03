@@ -1,4 +1,4 @@
-import "!!style-loader!css-loader!sass-loader!assets/css/fonts/fonts.global.scss"
+
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import GlobalStyles from "@mui/material/GlobalStyles"
 import { styled, useTheme } from "@mui/material/styles"
@@ -27,7 +27,7 @@ import { isObject } from "@3fv/guard"
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
-const classPrefix = "overlayConfigEditor"
+const classPrefix = "overlayWindowBody"
 const classNames = createClassNames(classPrefix, "root")
 
 

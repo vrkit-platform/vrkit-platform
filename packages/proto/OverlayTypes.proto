@@ -7,6 +7,7 @@ enum OverlayKind {
   OVERLAY_KIND_TRACK_MAP = 0;
   OVERLAY_KIND_CLOCK = 1;
   OVERLAY_KIND_CUSTOM = 10;
+  OVERLAY_KIND_VR_EDITOR = 99;
 }
 
 message OverlayBaseSettings {

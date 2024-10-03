@@ -1,4 +1,4 @@
-export * from "./OverlayClient"
+export * from "./OverlayManagerClient"
 export * from "./PluginClientManager"
 
-export {default} from "./OverlayClient"
+export {default} from "./OverlayManagerClient"

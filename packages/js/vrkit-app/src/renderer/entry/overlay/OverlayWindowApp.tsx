@@ -1,3 +1,5 @@
+// noinspection DuplicatedCode
+
 import "!!style-loader!css-loader!sass-loader!assets/css/fonts/fonts.global.scss"
 import "!!style-loader!css-loader!sass-loader!assets/css/global-overlay-window.scss"
 import globalStyles from "!!raw-loader!sass-loader!assets/css/global-electron.scss"
@@ -10,9 +12,13 @@ import { Provider as ReduxProvider } from "react-redux"
 
 import OverlayWindowAppBody from "./OverlayWindowAppBody"
 import useAppStore from "vrkit-app-renderer/hooks/useAppStore"
+import { overlayWindowSelectors } from "../../services/store/slices/overlay-window"
+import { OverlayWindowRole } from "vrkit-app-common/models"
+import OverlayWindowAppBodyVREditor from "./OverlayWindowAppBodyVREditor"
 
 export default function OverlayWindowApp() {
-  const appStore = useAppStore()
+  const appStore = useAppStore(),
+    windowRole = overlayWindowSelectors.selectWindowRole(appStore.getState())
 
   useLayoutEffect(() => {
     const headEl = document.head || document.getElementsByTagName("head")[0],
@@ -31,7 +37,8 @@ export default function OverlayWindowApp() {
       <I18nProvider>
         <LocalizationProvider>
           <ThemeProvider>
-            <OverlayWindowAppBody />
+            {windowRole === OverlayWindowRole.VR_EDITOR ? <OverlayWindowAppBodyVREditor /> :
+            <OverlayWindowAppBody />}
           </ThemeProvider>
         </LocalizationProvider>
       </I18nProvider>

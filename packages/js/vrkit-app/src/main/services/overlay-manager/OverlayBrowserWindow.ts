@@ -1,29 +1,31 @@
 import { getLogger } from "@3fv/logger-proxy"
 import {
   BrowserWindow,
-  BrowserWindowConstructorOptions, WebPreferences
+  BrowserWindowConstructorOptions, IpcMainInvokeEvent,
+  WebPreferences
 } from "electron"
 import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
-import { isDev, isRectValid } from "vrkit-app-common/utils"
+import { isDev } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
-  OverlayClientEventType,
   OverlayClientEventTypeToIPCName,
-  OverlayMode
+  OverlayManagerClientEventType, OverlayManagerClientFnType,
+  OverlayManagerClientFnTypeToIPCName,
+  OverlayMode,
+  OverlaySpecialIds,
+  OverlayWindowRole
 } from "../../../common/models/overlays"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
 import type OverlayManager from "./OverlayManager"
+import { OverlayBrowserWindowType, overlayInfoToUniqueId } from "./OverlayManagerUtils"
+import { asOption } from "@3fv/prelude-ts"
+import { VREditorOverlayOUID } from "./DefaultOverlayConfigData"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
-
-export enum OverlayBrowserWindowKind {
-  SCREEN = "SCREEN",
-  VR = "VR"
-}
 
 export class OverlayBrowserWindow {
   private mode_: OverlayMode = OverlayMode.NORMAL
@@ -36,6 +38,14 @@ export class OverlayBrowserWindow {
 
   private readonly readyDeferred_ = new Deferred<OverlayBrowserWindow>()
 
+  private readonly uniqueId_: string
+
+  get role(): OverlayWindowRole {
+    return this.config.overlay.id === OverlaySpecialIds.VR_EDITOR
+      ? OverlayWindowRole.VR_EDITOR
+      : OverlayWindowRole.OVERLAY
+  }
+
   private closeDeferred: Deferred<void> = null
 
   readonly windowOptions: BrowserWindowConstructorOptions
@@ -45,12 +55,13 @@ export class OverlayBrowserWindow {
   }
 
   get uniqueId() {
-    return `${this.id}::${this.kind}`
+    return this.uniqueId_
   }
-  
+
   get uniqueIdDebugString() {
     return `uniqueId=${this.uniqueId},id=${this.id},kind=${this.kind}`
   }
+
   /**
    * Get the browser window
    */
@@ -61,7 +72,7 @@ export class OverlayBrowserWindow {
   get windowId() {
     return this.window_?.id
   }
-  
+
   get screenRect(): RectI {
     return this.manager.getOverlayScreenRect(this)
   }
@@ -77,7 +88,15 @@ export class OverlayBrowserWindow {
   get mode() {
     return this.mode_
   }
-
+  
+  get isVREditor() {
+    return this.uniqueId === VREditorOverlayOUID
+  }
+  
+  get vrEditorController() {
+    return this.manager.vrEditorController
+  }
+  
   /**
    * Close the window
    */
@@ -101,7 +120,7 @@ export class OverlayBrowserWindow {
   get config() {
     return this.config_
   }
-  
+
   get placement() {
     return this.config.placement
   }
@@ -111,35 +130,70 @@ export class OverlayBrowserWindow {
   }
 
   get ready() {
-    if (this.readyDeferred_.isRejected()) throw this.readyDeferred_.error ?? Error(`Failed to reach ready state`)
+    if (this.readyDeferred_.isRejected()) {
+      throw this.readyDeferred_.error ?? Error(`Failed to reach ready state`)
+    }
 
     return this.readyDeferred_.isSettled()
   }
-  
+
   get isVR() {
-    return this.kind === OverlayBrowserWindowKind.VR
+    return this.kind === OverlayBrowserWindowType.VR
   }
-  
+
   get isScreen() {
     return !this.isVR
   }
 
   sendConfig() {
     log.info(`Sending overlay config`, this.config?.overlay?.id)
-    this.window?.webContents?.send(OverlayClientEventTypeToIPCName(OverlayClientEventType.OVERLAY_CONFIG), this.config)
+    this.window?.webContents?.send(
+      OverlayClientEventTypeToIPCName(OverlayManagerClientEventType.OVERLAY_CONFIG),
+      this.config
+    )
+  }
+  
+  private async fetchConfigHandler(event: IpcMainInvokeEvent) {
+    log.info(`FETCH_CONFIG_HANDLER`, this.config)
+    return {overlay: OverlayInfo.toJson(this.config.overlay),
+      placement: OverlayPlacement.toJson(this.config.placement)}
   }
 
-  private constructor(readonly manager: OverlayManager, readonly kind: OverlayBrowserWindowKind, overlay: OverlayInfo, placement: OverlayPlacement) {
+  private constructor(
+    readonly manager: OverlayManager,
+    readonly kind: OverlayBrowserWindowType,
+    overlay: OverlayInfo,
+    placement: OverlayPlacement
+  ) {
     this.config_ = { overlay, placement }
-    const screenRect = this.isScreen ? placement.screenRect : placement.vrLayout.screenRect
-    
-    const extraWebPrefs: Partial<WebPreferences> = this.isVR ? {
-      offscreen: true
-    } : {
-      transparent: true,
-    }
-    
-    
+    this.uniqueId_ = overlayInfoToUniqueId(this.config.overlay, this.kind)
+
+    const screenRect = this.isScreen
+      ? placement.screenRect
+      : asOption(placement.vrLayout.screenRect).getOrCall(() => {
+          const size = placement.vrLayout.size,
+            aspectRatio = size.height / size.width,
+            defaultWidth = 200
+
+          placement.vrLayout.screenRect = {
+            size: {
+              width: defaultWidth,
+              height: defaultWidth * aspectRatio
+            },
+            position: { x: 0, y: 0 }
+          }
+
+          return placement.vrLayout.screenRect
+        })
+
+    const extraWebPrefs: Partial<WebPreferences> = this.isVR
+      ? {
+          offscreen: true
+        }
+      : {
+          transparent: true
+        }
+
     this.windowOptions = {
       ...windowOptionDefaults({
         devTools: isDev,
@@ -155,7 +209,7 @@ export class OverlayBrowserWindow {
     }
 
     this.window_ = new BrowserWindow(this.windowOptions)
-
+    this.window_.webContents.ipc.handle(OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG), this.fetchConfigHandler.bind(this))
     // The returned promise is tracked via `readyDeferred`
     this.initialize().catch(err => {
       log.error(`failed to initialize overlay window`, err)
@@ -168,7 +222,7 @@ export class OverlayBrowserWindow {
       const win = this.window_
       const url = resolveHtmlPath("index-overlay.html")
       info(`Resolved overlay url: ${url}`)
-      
+
       await win.loadURL(url)
       info(`Loaded overlay url(${url}) for overlayWindow(${this.uniqueIdDebugString})`)
       if (this.isScreen) {
@@ -177,7 +231,7 @@ export class OverlayBrowserWindow {
       } else {
         info(`VR Windows are not shown as they render offscreen for performance (${this.uniqueIdDebugString})`)
       }
-      
+
       if (isDev) {
         info(`Showing devtools`)
         win.webContents.openDevTools({
@@ -185,8 +239,7 @@ export class OverlayBrowserWindow {
         })
         info(`Shown devtools`)
       }
-      
-      
+
       deferred.resolve(this)
 
       await deferred.promise
@@ -197,7 +250,12 @@ export class OverlayBrowserWindow {
     return deferred.promise
   }
 
-  static create(manager: OverlayManager, kind: OverlayBrowserWindowKind,overlay: OverlayInfo, placement: OverlayPlacement): OverlayBrowserWindow {
+  static create(
+    manager: OverlayManager,
+    kind: OverlayBrowserWindowType,
+    overlay: OverlayInfo,
+    placement: OverlayPlacement
+  ): OverlayBrowserWindow {
     return new OverlayBrowserWindow(manager, kind, overlay, placement)
   }
 
@@ -216,7 +274,9 @@ export class OverlayBrowserWindow {
   }
 
   setMode(mode: OverlayMode): void {
-    if (mode === this.mode) return
+    if (mode === this.mode) {
+      return
+    }
 
     this.mode_ = mode
     this.setIgnoreMouseEvents(mode !== OverlayMode.EDIT)

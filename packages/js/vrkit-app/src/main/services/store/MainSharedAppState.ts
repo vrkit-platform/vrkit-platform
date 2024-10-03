@@ -8,7 +8,7 @@ import { action, makeObservable, observable, set, toJS } from "mobx"
 import { deepObserve, IDisposer } from "mobx-utils"
 
 import { broadcastToAllWindows, getAppThemeFromSystem } from "../../utils"
-import { newOverlayManagerState, OverlaysState, OverlayMode } from "../../../common/models/overlays"
+import { OverlayMode } from "../../../common/models/overlays"
 import { AppSettings } from "vrkit-models"
 import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
@@ -53,7 +53,7 @@ export class MainSharedAppState implements ISharedAppState {
   
   @observable sessions = newSessionsState()
   
-  @observable overlays = newOverlayManagerState()
+  //@observable overlays = newOverlayManagerState()
   
   @observable dashboards = newDashboardsState()
 
@@ -132,14 +132,13 @@ export class MainSharedAppState implements ISharedAppState {
     this.appSettings = assign(AppSettings.clone(this.appSettings), patch)
   }
 
-  @BindAction() setOverlays(state: OverlaysState) {
-    this.overlays = state
-  }
-
-  @BindAction() updateOverlays(patch: Partial<OverlaysState>) {
-    this.overlays = assign(cloneDeep(this.overlays), patch)
-  }
-  
+  // @BindAction() setOverlays(state: OverlaysState) {
+  //   this.overlays = state
+  // }
+  //
+  // @BindAction() updateOverlays(patch: Partial<OverlaysState>) {
+  //   this.overlays = assign(cloneDeep(this.overlays), patch)
+  // }
   
   @BindAction() setSessions(state: SessionsState) {
     this.sessions = state
@@ -147,10 +146,6 @@ export class MainSharedAppState implements ISharedAppState {
   
   @BindAction() updateSessions(patch: Partial<SessionsState>) {
     set(this.sessions, patch)
-    // entriesOf(patch).forEach(([key, value]) => {
-    //   set(this.sessions, key, value)
-    // })
-    
   }
   
   

@@ -22,7 +22,7 @@ import EventEmitter3 from "eventemitter3"
 
 import { Disposables, Pair } from "vrkit-app-common/utils"
 import {
-  OverlayClientEventType,
+  OverlayManagerClientEventType,
   OverlayClientEventTypeToIPCName
 } from "../../../common/models/overlays"
 
@@ -76,7 +76,7 @@ type SessionEventHandlerPair = Pair<
 >
 
 type OverlayEventHandlerPair = Pair<
-    OverlayClientEventType,
+    OverlayManagerClientEventType,
     (event: IpcRendererEvent, ...args: any[]) => any
 >
 

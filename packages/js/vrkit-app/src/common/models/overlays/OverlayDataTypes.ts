@@ -1,31 +1,77 @@
 import { defaults } from "vrkit-app-common/utils"
-import {
-  DashboardConfig,
-  OverlayConfig,
-  SessionDataVariableValueMap,
-  SessionTiming
-} from "vrkit-models"
-import type { SessionInfoMessage, PluginClientEventArgs, PluginClientEventType } from "vrkit-plugin-sdk" // ------ OverlayManager events & types
+import { OverlayConfig } from "vrkit-models"
+import type { PluginClientEventArgs, PluginClientEventType } from "vrkit-plugin-sdk"
+import { createSimpleSchema, custom, list, primitive } from "serializr" // ------ OverlayManager events & types
+
+export enum OverlayWindowRole {
+  NONE = "NONE",
+  OVERLAY = "OVERLAY",
+  VR_EDITOR = "VR_EDITOR"
+}
+
+export const OverlaySpecialIds = {
+  [OverlayWindowRole.VR_EDITOR]: `::VRKIT::INTERNAL::${OverlayWindowRole.VR_EDITOR}`
+}
+
+export interface OverlayVREditorState {
+  overlayConfigs: OverlayConfig[]
+  selectedOverlayConfigId: string
+}
+
+export const OverlayVREditorStateSchema = createSimpleSchema<OverlayVREditorState>({
+  overlays: list(custom(v => OverlayConfig.toJson(v ?? {}), v => OverlayConfig.fromJson(v ?? {}))),
+  selectedOverlayId: primitive()
+})
+
+export enum OverlayVREditorEventType {
+  STATE_CHANGED = "STATE_CHANGED"
+}
+
+
+/**
+ * OverlayVREditorEventIPCName -> ipc channel name conversion
+ */
+export type OverlayVREditorEventIPCName = `OVERLAY_VR_EDITOR_EVENT_${OverlayManagerEventType}`
+
+/**
+ * OverlayVREditorEventTypeToIPCName
+ *
+ * @param type
+ * @constructor
+ */
+export function OverlayVREditorEventTypeToIPCName(type: OverlayVREditorEventType): OverlayVREditorEventIPCName {
+  return `OVERLAY_VR_EDITOR_EVENT_${type.toUpperCase()}` as OverlayVREditorEventIPCName
+}
+
+/**
+ * Functions that can be invoked via IPC using `ipcRenderer.invoke`
+ */
+export enum OverlayVREditorFnType {
+  FETCH_STATE = "FETCH_STATE"
+}
+
+/**
+ * Represents a string literal type derived from concatenating
+ * "OVERLAY_VR_EDITOR_FN_" with the value of an OverlayClientFnType.
+ *
+ * This type is primarily used to ensure that IPC (Inter-Process Communication)
+ * names for overlay client functions follow a specific naming convention.
+ */
+export type OverlayVREditorFnIPCName = `OVERLAY_VR_EDITOR_FN_${OverlayVREditorFnType}`
+
+/**
+ * Converts a given OverlayVREditor function type to its corresponding IPC name.
+ *
+ * @param {OverlayVREditorFnType} type - The type of the OverlayClient
+ *     function to be converted.
+ * @return {OverlayVREditorFnIPCName} The corresponding IPC name for the
+ *     specified OverlayClient function type.
+ */
+export function OverlayVREditorFnTypeToIPCName(type: OverlayVREditorFnType): OverlayVREditorFnIPCName {
+  return `OVERLAY_VR_EDITOR_FN_${type.toUpperCase()}` as OverlayVREditorFnIPCName
+}
 
 // ------ OverlayManager events & types
-
-// import type { DashboardConfig } from "vrkit-models"
-
-export interface OverlaysState {
-  
-  // activeSessionId: string
-  
-  overlayMode: OverlayMode
-}
-
-export type OverlayManagerStatePatchFn = (state: OverlaysState) => Partial<OverlaysState>
-
-export function newOverlayManagerState(state: Partial<OverlaysState> = {}): OverlaysState {
-  return defaults({...state},{
-    //activeSessionId: null,
-    overlayMode: OverlayMode.NORMAL
-  }) as OverlaysState
-}
 
 /**
  * Overlay manager event types `manager -> manager`
@@ -51,74 +97,73 @@ export function OverlayManagerEventTypeToIPCName(type: OverlayManagerEventType):
 
 // ------ OverlayClient events & types
 
-
 /**
  * Overlay client event types `manager -> client`
  */
-export enum OverlayClientEventType {
-  OVERLAY_CONFIG = "OVERLAY_CONFIG",
-  // OVERLAY_MODE = "OVERLAY_MODE",
-  // STATE_CHANGED = "STATE_CHANGED"
+export enum OverlayManagerClientEventType {
+  OVERLAY_CONFIG = "OVERLAY_CONFIG"
 }
 
 /**
  * Overlay event handler signatures `manager -> client`
  */
-export interface OverlayClientEventArgs extends PluginClientEventArgs {
-  [OverlayClientEventType.OVERLAY_CONFIG]: (config: OverlayConfig) => void
-  
+export interface OverlayManagerClientEventArgs extends PluginClientEventArgs {
+  [OverlayManagerClientEventType.OVERLAY_CONFIG]: (config: OverlayConfig) => void
 }
 
 /**
  * Handler type dependent on OverlayClientEventType
  */
-export type OverlayClientEventHandler<Type extends keyof OverlayClientEventArgs> = OverlayClientEventArgs[Type]
+export type OverlayManagerClientEventHandler<Type extends keyof OverlayManagerClientEventArgs> =
+  OverlayManagerClientEventArgs[Type]
 
 /**
  * Functions that can be invoked via IPC using `ipcRenderer.invoke`
  */
-export enum OverlayClientFnType {
-  
+export enum OverlayManagerClientFnType {
+  FETCH_WINDOW_ROLE = "FETCH_WINDOW_ROLE",
+  FETCH_CONFIG = "FETCH_CONFIG",
   FETCH_CONFIG_ID = "FETCH_CONFIG_ID",
   SET_OVERLAY_MODE = "SET_OVERLAY_MODE",
-  
   CLOSE = "CLOSE"
 }
 
 /**
  * Represents a string literal type derived from concatenating
- * "OVERLAY_CLIENT_FN_" with the value of an OverlayClientFnType.
+ * "OVERLAY_MANAGER_CLIENT_FN_" with the value of an OverlayClientFnType.
  *
  * This type is primarily used to ensure that IPC (Inter-Process Communication)
  * names for overlay client functions follow a specific naming convention.
  */
-export type OverlayClientFnIPCName = `OVERLAY_CLIENT_FN_${OverlayClientFnType}`
+export type OverlayManagerClientFnIPCName = `OVERLAY_MANAGER_CLIENT_FN_${OverlayManagerClientFnType}`
 
 /**
  * Converts a given OverlayClient function type to its corresponding IPC name.
  *
- * @param {OverlayClientFnType} type - The type of the OverlayClient function
- *     to be converted.
- * @return {OverlayClientFnIPCName} The corresponding IPC name for the
+ * @param {OverlayManagerClientFnType} type - The type of the OverlayClient
+ *     function to be converted.
+ * @return {OverlayManagerClientFnIPCName} The corresponding IPC name for the
  *     specified OverlayClient function type.
  */
-export function OverlayClientFnTypeToIPCName(type: OverlayClientFnType): OverlayClientFnIPCName {
-  return `OVERLAY_CLIENT_FN_${type.toUpperCase()}` as OverlayClientFnIPCName
+export function OverlayManagerClientFnTypeToIPCName(type: OverlayManagerClientFnType): OverlayManagerClientFnIPCName {
+  return `OVERLAY_MANAGER_CLIENT_FN_${type.toUpperCase()}` as OverlayManagerClientFnIPCName
 }
 
 /**
  * OverlayClientEventIPCName is a template literal type that forms a string
  * based on the `OverlayClientEventType` type. This string follows the
- * pattern `OVERLAY_CLIENT_EVENT_${OverlayClientEventType}`.
+ * pattern `OVERLAY_MANAGER_CLIENT_EVENT_${OverlayClientEventType}`.
  *
  * OverlayClientEventType is expected to be a string type representing
  * various kinds of overlay client events. The resulting type is useful
  * for ensuring that event names conform to a specific naming convention.
  */
-export type OverlayClientEventIPCName = `OVERLAY_CLIENT_EVENT_${OverlayClientEventType}`
+export type OverlayManagerClientEventIPCName = `OVERLAY_MANAGER_CLIENT_EVENT_${OverlayManagerClientEventType}`
 
-export function OverlayClientEventTypeToIPCName(type: OverlayClientEventType | PluginClientEventType): OverlayClientEventIPCName {
-  return `OVERLAY_CLIENT_EVENT_${type.toUpperCase()}` as OverlayClientEventIPCName
+export function OverlayClientEventTypeToIPCName(
+  type: OverlayManagerClientEventType | PluginClientEventType
+): OverlayManagerClientEventIPCName {
+  return `OVERLAY_MANAGER_CLIENT_EVENT_${type.toUpperCase()}` as OverlayManagerClientEventIPCName
 }
 
 // export interface OverlayConfig {
@@ -135,11 +180,13 @@ export function OverlayClientEventTypeToIPCName(type: OverlayClientEventType | P
 //   id: string
 // }
 
-export interface DefaultOverlayClient {
-  readonly config: OverlayConfig
+export interface DefaultOverlayManagerClient {
+  readonly overlayConfig: OverlayConfig
+  readonly windowRole: OverlayWindowRole
   
-  fetchConfig(): Promise<OverlayConfig>
-  
+  fetchOverlayWindowRole(): Promise<OverlayWindowRole>
+  fetchOverlayConfig(): Promise<OverlayConfig>
+
   close(): Promise<void>
 }
 
@@ -149,8 +196,6 @@ export enum OverlayMode {
 }
 
 export namespace OverlayWindowRendererEvents {
-  
-  
   /**
    * Events emitted by `renderer` to `main`
    *
@@ -160,15 +205,13 @@ export namespace OverlayWindowRendererEvents {
    * of an overlay window.
    */
   export enum EventType {
-    // MOUSE_ENTER = "MOUSE_ENTER",
-    // MOUSE_LEAVE = "MOUSE_LEAVE",
     BOUNDS_CHANGED = "BOUNDS_CHANGED",
     CLOSE = "CLOSE"
   }
-  
+
   export type EventIPCName = `OVERLAY_WINDOW_RENDERER_EVENT_${EventType}`
-  
-  export function EventTypeToIPCName(type:EventType):EventIPCName {
+
+  export function EventTypeToIPCName(type: EventType): EventIPCName {
     return `OVERLAY_WINDOW_RENDERER_EVENT_${type.toUpperCase()}` as EventIPCName
   }
 }
@@ -183,10 +226,10 @@ export namespace OverlayWindowMainEvents {
   export enum EventType {
     BOUNDS_CHANGED = "BOUNDS_CHANGED"
   }
-  
+
   export type EventIPCName = `OVERLAY_WINDOW_MAIN_EVENT_${EventType}`
-  
-  export function EventTypeToIPCName(type:EventType):EventIPCName {
+
+  export function EventTypeToIPCName(type: EventType): EventIPCName {
     return `OVERLAY_WINDOW_MAIN_EVENT_${type.toUpperCase()}` as EventIPCName
   }
 }

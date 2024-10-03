@@ -9,6 +9,7 @@ import { asOption } from "@3fv/prelude-ts"
 import { dataReducer } from "./slices/data"
 import { getLogger } from "@3fv/logger-proxy"
 import { sharedAppReducer } from "./slices/shared-app"
+import { overlayWindowReducer } from "./slices/overlay-window"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -30,6 +31,7 @@ export const appStore = configureStore<AppRootState>({
     import.meta.webpackHot?.data?.state
   ).getOrUndefined(),
   reducer: {
+    overlayWindow: overlayWindowReducer,
     data: dataReducer,
     global: globalReducer,
     shared: sharedAppReducer
@@ -48,7 +50,7 @@ export const appStore = configureStore<AppRootState>({
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.addDisposeHandler(data => {
-    assign(data, { state: appStore.getState() })
+    Object.assign(data, { state: appStore.getState() })
     delete global["appStore"]
   })
 }

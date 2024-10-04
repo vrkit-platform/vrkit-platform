@@ -617,7 +617,7 @@ export class OverlayManager {
    */
   private createOnBoundsChangedHandler(targetPlacement: OverlayPlacement, win: OverlayBrowserWindow): Function {
     return (event: Electron.Event) => {
-      this.updateOverlayWindowBounds(win)
+      this.updateScreenOverlayWindowBounds(win)
     }
   }
 
@@ -683,21 +683,20 @@ export class OverlayManager {
       position: pick(bounds, "x", "y")
     })
   }
-
-  updateOverlayWindowBounds(win: OverlayBrowserWindow): RectI {
+  
+  updateScreenOverlayWindowBounds(win: OverlayBrowserWindow): RectI {
     const screenRect = this.getOverlayWindowScreenRect(win)
 
-    if (win.role !== OverlayWindowRole.OVERLAY) {
+    if (win.isVR || win.role !== OverlayWindowRole.OVERLAY) {
       log.warn(`Ignoring bounds change as this is not a standard overlay window`, win.id, win.role)
       return screenRect
     }
 
     this.updateOverlayPlacement(win, (placement, _dashboardConfig) => {
       if (win.isVR) {
-        placement.vrLayout.screenRect = screenRect
-      } else {
-        placement.screenRect = screenRect
+        return placement
       }
+      placement.screenRect = screenRect
       debug(`Saving updated dashboard config updated rect`, screenRect)
       return placement
     })
@@ -710,7 +709,7 @@ export class OverlayManager {
       .filter(isDefined)
       .filter(isRectValid)
       .map(screenRect => RectI.toJson(screenRect) as RectI)
-      .getOrCall(() => this.updateOverlayWindowBounds(win))
+      .getOrCall(() => this.updateScreenOverlayWindowBounds(win))
   }
 
   getOverlayVRLayout(win: OverlayBrowserWindow): VRLayout {

@@ -11,6 +11,8 @@ import { Action, ActionRuntime, ActionType } from "../../../common/services"
 import { Container } from "@3fv/ditsy"
 import { isFunction } from "@3fv/guard"
 import { get } from "lodash/fp"
+import { VRLayout } from "vrkit-models"
+import { toJS } from "mobx"
 
 const log = getLogger(__filename)
 
@@ -41,6 +43,30 @@ function createVREditorActions(container: Container, editor: OverlayVREditorCont
       ...toAccelerators("Control+Alt+1"),
       execute: () => {
         editor.executeSelectOverlay(-1)
+      },
+      ...defaultActionProps
+    },
+    {
+      id: toId("position", "left"),
+      type: ActionType.Global,
+      ...toAccelerators("Control+Alt+3"),
+      execute: () => {
+        editor.updateSelectedOverlayConfigVRLayout(layout => {
+          layout.pose.x += -0.1
+          return layout
+        })
+      },
+      ...defaultActionProps
+    },
+    {
+      id: toId("position", "right"),
+      type: ActionType.Global,
+      ...toAccelerators("Control+Alt+4"),
+      execute: () => {
+        editor.updateSelectedOverlayConfigVRLayout(layout => {
+          layout.pose.x += 0.1
+          return layout
+        })
       },
       ...defaultActionProps
     }
@@ -79,7 +105,28 @@ export class OverlayVREditorController {
   get selectedOverlayConfigId() {
     return this.state.selectedOverlayConfigId
   }
-
+  
+  updateSelectedOverlayConfigVRLayout(vrLayoutMutator: (vrLayout: VRLayout) => VRLayout) {
+    const selectedId = this.selectedOverlayConfigId,
+      win = this.manager.vrOverlays.find(it => it.id === selectedId)
+    if (!win) {
+      log.warn(`No window for selected id ${selectedId}`)
+      return
+    }
+    
+    this.manager.updateOverlayPlacement(win, (placement, _dashboardConfig) => {
+      if (!win.isVR) {
+        return placement
+      }
+      
+      placement.vrLayout = vrLayoutMutator(placement.vrLayout)
+      Object.assign(win.placement.vrLayout,toJS(placement.vrLayout))
+      win.window.webContents.invalidate()
+      log.debug(`Saving updated dashboard config updated vrLayout`, placement.vrLayout)
+      return placement
+    })
+  }
+  
   @BindAction()
   setSelectedOverlayConfigId(selectedOverlayConfigId: string) {
     this.state.selectedOverlayConfigId = selectedOverlayConfigId

@@ -1,19 +1,27 @@
 import { OverlayConfig } from "vrkit-models"
-import { createSimpleSchema, custom, list, object, primitive } from "serializr"
+import { Props, createSimpleSchema, custom, list, object, primitive } from "serializr"
 
 export interface OverlayVREditorState {
   selectedOverlayConfigId: string
+  enabled: boolean
 }
 
 export const OverlayVREditorStateSchema = createSimpleSchema<OverlayVREditorState>({
-  selectedOverlayConfigId: primitive()
+  selectedOverlayConfigId: primitive(),
+  enabled: primitive()
 })
 
+export function newOverlayVREditorState():OverlayVREditorState {
+  return {
+    selectedOverlayConfigId:  "",
+    enabled: false
+  }
+}
 
 
 export interface OverlaysState {
   overlayConfigs:OverlayConfig[]
-  editor?:OverlayVREditorState
+  editor:OverlayVREditorState
 }
 
 export const OverlaysStateSchema = createSimpleSchema<OverlaysState>({
@@ -24,6 +32,6 @@ export const OverlaysStateSchema = createSimpleSchema<OverlaysState>({
 export function newOverlaysState():OverlaysState {
   return {
     overlayConfigs: [],
-    editor: null
+    editor: newOverlayVREditorState()
   }
 }

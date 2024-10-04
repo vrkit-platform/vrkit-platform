@@ -319,7 +319,15 @@ export class MainWindowManager {
   
   @PostConstruct() // @ts-ignore
   private async init(): Promise<void> {
-  
+    if (import.meta.webpackHot) {
+      const previousMainWindow = import.meta.webpackHot.data?.["mainWindow"]
+      if (previousMainWindow)
+        this.setMainWindow(previousMainWindow)
+      
+      import.meta.webpackHot.dispose(data => {
+        data["mainWindow"] = this.mainWindow
+      })
+    }
   }
   
   setMainWindow(newMainWindow: Electron.BrowserWindow = null) {

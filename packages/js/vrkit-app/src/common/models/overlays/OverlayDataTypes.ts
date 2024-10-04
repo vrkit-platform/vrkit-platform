@@ -8,11 +8,13 @@ import { uniq } from "lodash"
 export enum OverlayWindowRole {
   NONE = "NONE",
   OVERLAY = "OVERLAY",
-  VR_EDITOR = "VR_EDITOR"
+  SCREEN_EDITOR_INFO = "SCREEN_EDITOR_INFO",
+  VR_EDITOR_INFO = "VR_EDITOR_INFO"
 }
 
 export const OverlaySpecialIds = {
-  [OverlayWindowRole.VR_EDITOR]: `::VRKIT::INTERNAL::${OverlayWindowRole.VR_EDITOR}`
+  [OverlayWindowRole.VR_EDITOR_INFO]: `::VRKIT::INTERNAL::${OverlayWindowRole.VR_EDITOR_INFO}`,
+  [OverlayWindowRole.SCREEN_EDITOR_INFO]: `::VRKIT::INTERNAL::${OverlayWindowRole.SCREEN_EDITOR_INFO}`
 }
 
 
@@ -124,7 +126,7 @@ export enum OverlayManagerClientFnType {
   FETCH_WINDOW_ROLE = "FETCH_WINDOW_ROLE",
   FETCH_CONFIG = "FETCH_CONFIG",
   FETCH_CONFIG_ID = "FETCH_CONFIG_ID",
-  SET_OVERLAY_MODE = "SET_OVERLAY_MODE",
+  SET_EDITOR_ENABLED = "SET_EDITOR_ENABLED",
   CLOSE = "CLOSE"
 }
 
@@ -189,11 +191,11 @@ export interface DefaultOverlayManagerClient {
 
   close(): Promise<void>
 }
-
-export enum OverlayMode {
-  NORMAL = "NORMAL",
-  EDIT = "EDIT"
-}
+//
+// export enum OverlayMode {
+//   NORMAL = "NORMAL",
+//   EDIT = "EDIT"
+// }
 
 export namespace OverlayWindowRendererEvents {
   /**

@@ -50,4 +50,6 @@ export interface PluginClientComponentProps {
 
 declare global {
   function getVRKitPluginClient(): PluginClient
+  
+  const isVRKitOverlayWindow: boolean
 }

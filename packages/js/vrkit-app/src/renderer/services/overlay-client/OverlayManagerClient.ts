@@ -21,7 +21,6 @@ import {
   OverlayManagerClientEventType,
   OverlayManagerClientFnType,
   OverlayManagerClientFnTypeToIPCName,
-  OverlayMode
 } from "../../../common/models/overlays"
 import { PluginClientEventType, type SessionInfoMessage } from "vrkit-plugin-sdk"
 import { OverlayConfig, SessionDataVariableValueMap, SessionTiming } from "vrkit-models"
@@ -59,8 +58,11 @@ export class OverlayManagerClient
     return this.windowRole_
   }
 
-  get mode() {
-    return this.appStore.getState().shared.overlayMode
+  get state() {
+    return this.appStore.getState().shared.overlays
+  }
+  get editorEnabled() {
+    return this.state.editor.enabled
   }
 
   /**
@@ -158,34 +160,41 @@ export class OverlayManagerClient
     
     window.addEventListener("beforeunload", this.unload)
     
-    // IPC EVENT CHANNEL <> HANDLER PAIRS
-    const ipcEventHandlers = Array<
-      Pair<OverlayManagerClientEventType | PluginClientEventType, (event: IpcRendererEvent, ...args: any[]) => any>
-    >(
-      [OverlayManagerClientEventType.OVERLAY_CONFIG, this.onOverlayConfigEvent.bind(this)],
-      [PluginClientEventType.DATA_FRAME, this.onDataFrameEvent.bind(this)]
-    )
-    
-    // IPC SETUP
-    ipcEventHandlers.forEach(([type, handler]) => {
-      ipcRenderer.on(OverlayClientEventTypeToIPCName(type), handler)
-    })
-    
-    // SUBSCRIBE TO `appStore`
-    this.disposers_.push(this.appStore.subscribe(this.onAppStoreStateChange))
-    
-    // ADD DISPOSER OF EVENT HANDLERS/FNS, ETC
-    this.disposers_.push(() => {
-      window.removeEventListener("beforeunload", this.unload)
-      Object.assign(global, {
-        overlayClient: null
+    if (isVRKitOverlayWindow) {
+      // IPC EVENT CHANNEL <> HANDLER PAIRS
+      const ipcEventHandlers = Array<
+        Pair<OverlayManagerClientEventType | PluginClientEventType, (event: IpcRendererEvent, ...args: any[]) => any>
+      >(
+        [OverlayManagerClientEventType.OVERLAY_CONFIG, this.onOverlayConfigEvent.bind(this)],
+        [PluginClientEventType.DATA_FRAME, this.onDataFrameEvent.bind(this)]
+      )
+
+      // IPC SETUP
+      ipcEventHandlers.forEach(([type, handler]) => {
+        ipcRenderer.on(OverlayClientEventTypeToIPCName(type), handler)
+      })
+
+      // SUBSCRIBE TO `appStore`
+      this.disposers_.push(this.appStore.subscribe(this.onAppStoreStateChange))
+
+      // ADD DISPOSER OF EVENT HANDLERS/FNS, ETC
+      this.disposers_.push(() => {
+        window.removeEventListener("beforeunload", this.unload)
+        Object.assign(global, {
+          overlayClient: null
+        })
+
+        ipcEventHandlers.forEach(([type, handler]) => {
+          //ipcRenderer.off(OverlayClientEventTypeToIPCName(type), handler)
+          ipcRenderer.removeAllListeners(OverlayClientEventTypeToIPCName(type))
+        })
       })
       
-      ipcEventHandlers.forEach(([type, handler]) => {
-        //ipcRenderer.off(OverlayClientEventTypeToIPCName(type), handler)
-        ipcRenderer.removeAllListeners(OverlayClientEventTypeToIPCName(type))
-      })
-    })
+      const role = await this.fetchOverlayWindowRole()
+      const config = await this.fetchOverlayConfig()
+      
+      log.info("Init loaded overlay config", config, "role", role, "mode", this.overlayMode)
+    }
     
     if (isDev) {
       Object.assign(global, {
@@ -199,16 +208,11 @@ export class OverlayManagerClient
       }
     }
     
-    const role = await this.fetchOverlayWindowRole()
     
-    const config = await this.fetchOverlayConfig()
-    
-    
-    log.info("Init loaded overlay config", config, "role", role, "mode", this.overlayMode)
   }
 
   get overlayMode() {
-    return sharedAppSelectors.selectOverlayMode(this.appStore.getState())
+    return sharedAppSelectors.selectEditorEnabled(this.appStore.getState())
   }
 
 
@@ -279,16 +283,16 @@ export class OverlayManagerClient
   }
 
   @Bind
-  async setMode(mode: OverlayMode): Promise<OverlayMode> {
-    if (mode === this.mode) {
-      return mode
+  async setEditorEnabled(enabled: boolean): Promise<boolean> {
+    if (enabled === this.editorEnabled) {
+      return enabled
     }
     return await ipcRenderer.invoke(
-      OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.SET_OVERLAY_MODE),
-      mode
+      OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.SET_EDITOR_ENABLED),
+      enabled
     )
   }
-
+  
   @Bind
   close(): Promise<void> {
     return ipcRenderer.invoke(OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.CLOSE))

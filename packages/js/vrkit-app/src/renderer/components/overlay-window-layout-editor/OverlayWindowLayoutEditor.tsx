@@ -26,7 +26,6 @@ import {
   transition
 } from "../../styles/ThemedStyles"
 
-import { OverlayMode } from "../../../common/models/overlays"
 import { ClassNamesKey, createClassNames } from "../../styles/createClasses"
 import clsx from "clsx"
 import { FlexRowCenterBox } from "../box"
@@ -36,12 +35,14 @@ import Typography from "@mui/material/Typography"
 import Button from "@mui/material/Button"
 import SharedAppStateClient from "../../services/shared-app-state-client"
 import { SizeI } from "vrkit-models"
+import { sharedAppSelectors } from "../../services/store/slices/shared-app"
+import { useAppSelector } from "../../services/store"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const classPrefix = "overlayConfigEditor"
-export const overlayConfigEditorClasses = createClassNames(classPrefix, "modeNormal", "modeEdit", "header", "content")
+export const overlayConfigEditorClasses = createClassNames(classPrefix, "modeNormal", "modeEdit", "header", "content", "selected")
 export type OverlayConfigEditorClassKey = ClassNamesKey<typeof overlayConfigEditorClasses>
 
 const OverlayConfigEditorRoot = styled(Box, {
@@ -51,6 +52,9 @@ const OverlayConfigEditorRoot = styled(Box, {
   position: "fixed",
   zIndex: 10000,
   borderRadius: "1rem",
+  borderColor: "transparent",
+  borderStyle: "inset",
+  borderWidth: "3px",
   backgroundColor: theme.palette.background.gradient,
   backgroundImage: theme.palette.background.gradientImage,
   gap: "2rem",
@@ -58,9 +62,13 @@ const OverlayConfigEditorRoot = styled(Box, {
   ...FlexAlignCenter,
   ...FillWindow,
   ...FillBounds,
+  top: 0,
+  left: 0,
 
   ...transition(["opacity"]),
-
+  [hasCls(overlayConfigEditorClasses.selected)]: {
+    borderColor: theme.palette.action.active,
+  },
   [hasCls(overlayConfigEditorClasses.modeNormal)]: {
     opacity: 0,
     pointerEvents: "none"
@@ -89,7 +97,7 @@ const OverlayConfigEditorRoot = styled(Box, {
  * OverlayConfigEditor Component Properties
  */
 export interface OverlayWindowLayoutEditorProps extends BoxProps {
-  mode: OverlayMode
+  editorEnabled: boolean
   size: SizeI
 }
 
@@ -100,8 +108,9 @@ export interface OverlayWindowLayoutEditorProps extends BoxProps {
  * @returns {JSX.Element}
  */
 export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps) {
-  const { mode,size, ...other } = props,
-    isEditMode = mode !== OverlayMode.NORMAL,
+  const { editorEnabled,size, ...other } = props,
+    isEditMode = editorEnabled,
+      selectedOverlayConfigId = useAppSelector(sharedAppSelectors.selectEditorSelectedOverlayConfigId),
     overlayClient = useService(OverlayManagerClient),
       sharedAppStateClient = useService(SharedAppStateClient),
     overlayConfig = overlayClient.overlayConfig,
@@ -111,7 +120,8 @@ export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps)
     <OverlayConfigEditorRoot
       className={clsx({
         [overlayConfigEditorClasses.modeNormal]: !isEditMode,
-        [overlayConfigEditorClasses.modeEdit]: isEditMode
+        [overlayConfigEditorClasses.modeEdit]: isEditMode,
+        [overlayConfigEditorClasses.selected]: selectedOverlayConfigId === overlayInfo.id
       })}
       {...other}
     >
@@ -129,7 +139,7 @@ export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps)
           variant="contained"
           sx={{ ...FlexAuto }}
           onClick={() => {
-            sharedAppStateClient.setOverlayMode(OverlayMode.NORMAL)
+            overlayClient.setEditorEnabled(false)
           }}
         >
           Done

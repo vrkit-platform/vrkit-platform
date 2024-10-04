@@ -4,7 +4,6 @@ import { type ISharedAppState, newSharedAppState, type ThemeId } from "vrkit-app
 import { assign, Identity, isNotEmpty } from "vrkit-app-common/utils"
 
 import { AppSettings, DashboardConfig, ThemeType } from "vrkit-models"
-import { OverlayMode } from "../../../../../common/models/overlays"
 import { flow } from "lodash/fp"
 import { isArray } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
@@ -57,16 +56,17 @@ const slice = createSlice({
       return assign(state, action.payload ?? {})
     },
 
-    setOverlayMode: (state: ISharedAppState, { payload: overlayMode }: PayloadAction<OverlayMode>) => {
-      return {
-        ...state,
-        overlayMode
-      }
-    }
+    // setOverlayMode: (state: ISharedAppState, { payload: overlayMode }: PayloadAction<OverlayMode>) => {
+    //   return {
+    //     ...state,
+    //     overlayMode
+    //   }
+    // }
   },
   extraReducers: builder => builder,
   selectors: {
-    selectOverlayMode: (state: ISharedAppState) => state.overlayMode ?? OverlayMode.NORMAL,
+    selectEditorEnabled: (state: ISharedAppState) => state.overlays.editor.enabled,
+    selectEditorSelectedOverlayConfigId: (state: ISharedAppState) => state.overlays.editor.selectedOverlayConfigId,
     selectAppSettings,
     selectDefaultDashboardConfigId,
     

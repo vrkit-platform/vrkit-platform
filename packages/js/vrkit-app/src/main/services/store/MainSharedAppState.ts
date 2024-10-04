@@ -1,39 +1,33 @@
 import { Deferred } from "@3fv/deferred"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { applyDecorators, Bind, Once } from "vrkit-app-common/decorators"
+import { Bind, Once } from "vrkit-app-common/decorators"
 import {
   DevSettings,
   ISharedAppState,
-  newDevSettings, newOverlaysState,
+  newDevSettings,
+  newOverlaysState,
+  OverlaysState,
   ThemeId
 } from "vrkit-app-common/models"
-import { assign, cloneDeep, entriesOf, once } from "vrkit-app-common/utils"
-import { action, makeObservable, observable, set, toJS } from "mobx"
+import { assign, cloneDeep, once } from "vrkit-app-common/utils"
+import { makeObservable, observable, set, toJS } from "mobx"
 import { deepObserve, IDisposer } from "mobx-utils"
 
 import { broadcastToAllWindows, getAppThemeFromSystem } from "../../utils"
-import { OverlayMode } from "../../../common/models/overlays"
 import { AppSettings } from "vrkit-models"
 import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
 import { SharedAppStateSchema } from "vrkit-app-common/models/app"
 import { serialize } from "serializr"
-import {
-  DashboardsState,
-  newDashboardsState
-} from "vrkit-app-common/models/dashboards"
-import {
-  newSessionsState, SessionsState
-} from "vrkit-app-common/models/sessions"
+import { DashboardsState, newDashboardsState } from "vrkit-app-common/models/dashboards"
+import { newSessionsState, SessionsState } from "vrkit-app-common/models/sessions"
 import { BindAction } from "../../decorators"
 import { isDev } from "../../constants"
 
 const log = getLogger(__filename)
 
 const { debug, trace, info, error, warn } = log
-
-
 
 @Singleton()
 export class MainSharedAppState implements ISharedAppState {
@@ -46,8 +40,7 @@ export class MainSharedAppState implements ISharedAppState {
   // @observable zoomFactor:number = 1.0
 
   @observable systemTheme: ThemeId = getAppThemeFromSystem()
-
-  @observable overlayMode: OverlayMode = OverlayMode.NORMAL
+  
 
   /**
    * Get app settings from state
@@ -55,11 +48,11 @@ export class MainSharedAppState implements ISharedAppState {
   @observable appSettings: AppSettings = AppSettings.create()
 
   @observable devSettings = newDevSettings()
-  
+
   @observable sessions = newSessionsState()
-  
-  @observable overlays = newOverlaysState()
-  
+
+  @observable overlays: OverlaysState = newOverlaysState()
+
   @observable dashboards = newDashboardsState()
 
   get isShutdownInProgress() {
@@ -88,12 +81,12 @@ export class MainSharedAppState implements ISharedAppState {
     //info("Broadcasting shared app state", sharedAppStateObj)
     broadcastToAllWindows(ElectronIPCChannel.sharedAppStateChanged, sharedAppStateObj)
   }
-  
+
   private unload() {
     ipcMain.removeHandler(ElectronIPCChannel.fetchSharedAppState)
     this.stopObserving?.()
   }
-  
+
   @Once()
   private async init() {
     if (this.initDeferred) {
@@ -134,7 +127,8 @@ export class MainSharedAppState implements ISharedAppState {
   }
 
   @BindAction() updateAppSettings(patch: Partial<AppSettings>) {
-    this.appSettings = assign(AppSettings.clone(this.appSettings), patch)
+    // this.appSettings = assign(AppSettings.clone(this.appSettings), patch)
+    set(this.appSettings, patch)
   }
 
   // @BindAction() setOverlays(state: OverlaysState) {
@@ -144,21 +138,20 @@ export class MainSharedAppState implements ISharedAppState {
   // @BindAction() updateOverlays(patch: Partial<OverlaysState>) {
   //   this.overlays = assign(cloneDeep(this.overlays), patch)
   // }
-  
+
   @BindAction() setSessions(state: SessionsState) {
     this.sessions = state
   }
-  
+
   @BindAction() updateSessions(patch: Partial<SessionsState>) {
     set(this.sessions, patch)
   }
-  
-  
+
   @BindAction() setDashboards(state: DashboardsState) {
     this.dashboards = state
     return this.dashboards
   }
-  
+
   @BindAction() updateDashboards(patch: Partial<DashboardsState>) {
     this.dashboards = assign(cloneDeep(this.dashboards), patch)
     return this.dashboards
@@ -167,20 +160,14 @@ export class MainSharedAppState implements ISharedAppState {
   @BindAction() updateDevSettings(patch: Partial<DevSettings>) {
     this.devSettings = assign(cloneDeep(this.devSettings), patch)
   }
-
-  @BindAction() setOverlayMode(overlayMode: OverlayMode) {
-    this.overlayMode = overlayMode
-  }
-
+  
   @BindAction() setSystemTheme(theme: ThemeId) {
     this.systemTheme = theme
   }
 
   @Bind
   private async fetchSharedAppStateHandler(_ev: IpcMainInvokeEvent): Promise<ISharedAppState> {
-    const stateJs = this.toJSON()
-    // info("Sending state js", stateJs)
-    return stateJs
+    return this.toJSON()
   }
 
   toJSON() {
@@ -222,7 +209,7 @@ export const createSharedAppStateStore = once(async () => {
       throw err
     }
   )
-  
+
   if (isDev) {
     global["appStore"] = store
   }

@@ -1,34 +1,16 @@
 import "vrkit-plugin-sdk"
-import Box, { BoxProps } from "@mui/material/Box"
+import { BoxProps } from "@mui/material/Box"
 
 import { getLogger } from "@3fv/logger-proxy"
 
 import { createClassNames } from "vrkit-app-renderer/styles/createClasses"
 import { PluginClientComponentProps } from "vrkit-plugin-sdk"
-import React, { useEffect, useState } from "react"
-import { useInterval } from "usehooks-ts"
-
-import { getLocalTimeParts, TimeParts } from "vrkit-app-renderer/components/time"
-import { FlexRowCenterBox, FlexScaleZeroBox } from "../../components/box"
-import { padStart } from "lodash"
+import React from "react"
+import { FlexRowCenterBox } from "../../components/box"
 import clsx from "clsx"
 import { styled, useTheme } from "@mui/material/styles"
-import {
-  alpha,
-  Ellipsis,
-  FillWidth,
-  FillWindow,
-  flexAlign,
-  FlexAuto,
-  FlexColumn,
-  FlexColumnCenter,
-  FlexRow,
-  FlexRowCenter,
-  hasCls, padding,
-  paddingRem,
-  rem
-} from "../../styles"
-import createVREditorControllerClient, {useVREditorState} from "./VREditorControllerClient"
+import { alpha, FillWindow, flexAlign, FlexColumn, hasCls, rem } from "../../styles"
+import { Kbd } from "../../components/keyboard-key"
 
 const log = getLogger(__filename)
 
@@ -42,28 +24,24 @@ const VREditorViewRoot = styled(FlexRowCenterBox, {
 })(({ theme }) => {
   return {
     [hasCls(classNames.root)]: {
-      
       borderRadius: rem(1),
       backgroundColor: alpha(theme.palette.grey.A700, 0.9),
       color: theme.palette.getContrastText(theme.palette.grey.A700),
       ...FillWindow,
       ...FlexColumn,
-      ...flexAlign("flex-start","flex-start"),
-      
+      ...flexAlign("flex-start", "flex-start")
     }
   }
 })
 
-
-interface VREditorViewProps extends BoxProps {
-
-}
+interface VREditorViewProps extends BoxProps {}
 
 function VREditorView({ className, ...other }: VREditorViewProps) {
-  const vreState = useVREditorState(),
-      theme = useTheme()
+  // const vreState = useVREditorState(),
+  const  theme = useTheme()
   return (
-    <VREditorViewRoot className={clsx(classNames.root,className)}>
+    <VREditorViewRoot className={clsx(classNames.root, className)}>
+      <Kbd>Ctrl</Kbd>+<Kbd>Enter</Kbd>
       {/*{vreState.overlayConfigs.map(config =>*/}
       {/*    <Box*/}
       {/*        key={config.overlay.id}*/}
@@ -84,21 +62,20 @@ function VREditorView({ className, ...other }: VREditorViewProps) {
       {/*        {config.overlay.name}*/}
       {/*      </FlexScaleZeroBox>*/}
       {/*</Box>)}*/}
+      VREditor Info Window
     </VREditorViewRoot>
   )
 }
 
-function VREditorOverlayPlugin(props: PluginClientComponentProps) {
+function VREditorInfoOverlayPlugin(props: PluginClientComponentProps) {
   const { client, width, height } = props
 
-  return (
-    <VREditorView />
-  )
+  return <VREditorView />
 }
 
-async function loadVREditorPlugin(): Promise<React.ComponentType<PluginClientComponentProps>> {
-  await createVREditorControllerClient()
-  return VREditorOverlayPlugin
-}
+// async function loadVREditorPlugin(): Promise<React.ComponentType<PluginClientComponentProps>> {
+//   // await createVREditorControllerClient()
+//   return VREditorOverlayPlugin
+// }
 
-export default loadVREditorPlugin()
+export default VREditorInfoOverlayPlugin

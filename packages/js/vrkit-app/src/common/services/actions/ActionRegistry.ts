@@ -2,11 +2,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import { Singleton } from "@3fv/ditsy"
 import { Action, ActionOptions, ActionType } from "./ActionTypes"
 import {
-  devExposeGlobal,
-  equalTo,
-  isEqual,
-  propEqualTo,
-  removeFirstMutation
+  devExposeGlobal, equalTo, isEqual, Pair, propEqualTo, removeFirstMutation
 } from "vrkit-app-common/utils"
 import { flatten } from "lodash"
 import { assert, isObject, isString } from "@3fv/guard"
@@ -16,6 +12,7 @@ import type { ActionContainer } from "./ActionContainer"
 import EventEmitter3 from "eventemitter3"
 import { get } from "lodash/fp"
 import { AppActionId } from "./AppActionIds"
+import { IDisposer } from "mobx-utils"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -54,6 +51,7 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
    * Internal private state
    */
   private readonly state = {
+    
     containerActions: Array<Action>(),
     allActions: Array<Action>()
   }
@@ -62,6 +60,14 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
 
   get containerActions() {
     return this.state.containerActions
+  }
+  
+  get globalActions() {
+    return this.state.allActions.filter(action => action.type === ActionType.Global)
+  }
+  
+  get globalActionIds() {
+    return this.globalActions.map(get("id"))
   }
 
   /**
@@ -279,6 +285,8 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
   getRegistry() {
     return new Map(this.appActions)
   }
+  
+  
 
   constructor() {
     super()

@@ -61,6 +61,5 @@ export const SharedAppStateSchema = createSimpleSchema<ISharedAppState>({
   dashboards: object(DashboardsStateSchema),
   sessions: object(SessionsStateSchema),
   overlays: object(OverlaysStateSchema),
-  overlayMode: primitive(),
   devSettings: custom(toPlainObject, Identity),
 })

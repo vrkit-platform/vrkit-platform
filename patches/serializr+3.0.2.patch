@@ -1,0 +1,23 @@
+diff --git a/node_modules/serializr/lib/api/createSimpleSchema.d.ts b/node_modules/serializr/lib/api/createSimpleSchema.d.ts
+index f3f361d..5d6d084 100644
+--- a/node_modules/serializr/lib/api/createSimpleSchema.d.ts
++++ b/node_modules/serializr/lib/api/createSimpleSchema.d.ts
+@@ -15,4 +15,4 @@ import { Props, ModelSchema } from "./types";
+  * @param props property mapping,
+  * @returns model schema
+  */
+-export default function createSimpleSchema<T extends object>(props: Props): ModelSchema<T>;
++export default function createSimpleSchema<T extends object>(props: Props<T>): ModelSchema<T>;
+diff --git a/node_modules/serializr/src/api/createSimpleSchema.ts b/node_modules/serializr/src/api/createSimpleSchema.ts
+index d89e724..365fbaf 100644
+--- a/node_modules/serializr/src/api/createSimpleSchema.ts
++++ b/node_modules/serializr/src/api/createSimpleSchema.ts
+@@ -16,7 +16,7 @@ import { Props, ModelSchema } from "./types";
+  * @param props property mapping,
+  * @returns model schema
+  */
+-export default function createSimpleSchema<T extends object>(props: Props): ModelSchema<T> {
++export default function createSimpleSchema<T extends object>(props: Props<T>): ModelSchema<T> {
+     return {
+         factory: function () {
+             return {} as any;

@@ -1,5 +1,6 @@
 import { isNil, isString } from "@3fv/guard"
 import { arrayOf, defaults, generateShortId } from 'vrkit-app-common/utils'
+import { flatten } from "lodash"
 
 export type ActionManagerPromiseResolver<T = any, TResult1 = T> = (
   value: T
@@ -264,13 +265,14 @@ export type ActionOptionsTuple = [
 ]
 
 export function actionOptionsWithTuple(
-  ...args: ActionOptionsTuple | Array<ActionOptionsTuple>
+  ...args: any[]
 ) {
-  const tuples: Array<ActionOptionsTuple> = isString(args[0])
-    ? [args as ActionOptionsTuple]
-    : (args as ActionOptionsTuple[])
+  const tuples:Array<ActionOptionsTuple> = flatten(args)
+    //   [0])
+    // ? args as ActionOptionsTuple[]
+    // : (args as ActionOptionsTuple[][])
 
-  return tuples.map(([name, execute, accelerators = [], extraOptions = {}]) => ({
+  return tuples.map(([name, execute, accelerators = [], extraOptions = {} as any]) => ({
     id: extraOptions?.id ?? generateShortId(),
     name,
     execute,

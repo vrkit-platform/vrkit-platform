@@ -2,24 +2,28 @@ import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 import { Bind, LazyGetter } from "vrkit-app-common/decorators"
 import {
+  Action,
   ActionDefaultAccelerator,
   ActionMenuItemDesktopRole,
   ActionMenuItemDesktopRoleKind,
   ActionOptions,
   ActionRegistry,
   ActionType,
-  ElectronIPCChannel,
   ElectronMainAppActions,
   electronRoleToId
 } from "vrkit-app-common/services"
-import { app, ipcMain, IpcMainInvokeEvent } from "electron"
-import { flatten } from "lodash"
+import { app, globalShortcut, IpcMainInvokeEvent } from "electron"
+import { flatten, partition } from "lodash"
 import {
   isDev, ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin
 } from "../../constants"
 
 import { assert, isPromise } from "@3fv/guard"
 import { get } from "lodash/fp"
+import { getSharedAppStateStore } from "../store"
+import { IDisposer } from "mobx-utils"
+import { isNotEmpty, removeIfMutation } from "../../../common/utils"
+import Accelerator = Electron.Accelerator
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -111,33 +115,35 @@ export const electronGlobalActions: Array<ActionOptions> = [
   {
     ...ElectronMainAppActions.quit,
     execute: () => {
-      // const store = getMainStateStore()
-      // store.setShutdownInProgress()
+      const store = getSharedAppStateStore()
+      store.setShutdownInProgress()
       app.quit()
     }
   },
   {
     ...ElectronMainAppActions.zoomDefault,
     execute: () => {
-      // const store = getMainStateStore()
+      const store = getSharedAppStateStore()
       // store.setZoomFactor(1)
+      store.updateAppSettings({zoomFactor:1})
     }
   },
   {
     ...ElectronMainAppActions.zoomIn,
     execute: () => {
-      // const store = getMainStateStore(),
-      //   newZoomFactor = store.zoomFactor + ZoomFactorIncrement
-      //
-      // store.setZoomFactor(Math.min(newZoomFactor, ZoomFactorMax))
+      const store = getSharedAppStateStore(),
+        newZoomFactor = store.appSettings.zoomFactor + ZoomFactorIncrement
+
+      store.updateAppSettings({zoomFactor:Math.min(newZoomFactor, ZoomFactorMax)})
     }
   },
   {
     ...ElectronMainAppActions.zoomOut,
     execute: () => {
-      // const store = getMainStateStore(),
-      //   newZoomFactor = store.zoomFactor - ZoomFactorIncrement
-      //
+      const store = getSharedAppStateStore(),
+        newZoomFactor = store.appSettings.zoomFactor - ZoomFactorIncrement
+      
+      store.updateAppSettings({zoomFactor:Math.max(newZoomFactor, ZoomFactorMin)})
       // store.setZoomFactor(Math.max(newZoomFactor, ZoomFactorMin))
     }
   }
@@ -145,6 +151,8 @@ export const electronGlobalActions: Array<ActionOptions> = [
 
 @Singleton()
 export class ElectronMainActionManager {
+  
+  private readonly enabledGlobalActionIds = Array<string>()
   /**
    * Create electron actions
    *
@@ -189,9 +197,56 @@ export class ElectronMainActionManager {
   }
 
   constructor(
-    // readonly windowManager: DesktopElectronWindowManager,
     readonly actionRegistry: ActionRegistry
   ) {}
+  
+  registerGlobalActions(...actions: Action[]) {
+    actions.forEach(action => {
+      this.actionRegistry.register(action.id, {...action, type: ActionType.Global})
+    })
+  }
+  
+  unregisterGlobalActions(...actions: Action[]) {
+    this.actionRegistry.removeAll(...actions.map(get("id")))
+  }
+  
+  enableGlobalActions(...ids: string[]): IDisposer {
+    const
+        reg = this.actionRegistry,
+        actions = reg.globalActions.filter(it => ids.includes(it.id)),
+        [enableActions, ignoredActions] = partition(actions, it => !this.enabledGlobalActionIds.includes(it.id)),
+        enableActionIds = enableActions.map(get("id")),
+        enabledAccelerators = Array<Accelerator>()
+        
+    if (isNotEmpty(ignoredActions))
+      log.warn("Already active actions", ignoredActions)
+    
+    enableActions.forEach(action => {
+      const [accels, registeredAccels] = partition(action.accelerators, accel => !globalShortcut.isRegistered(accel))
+      
+      if (registeredAccels.length)
+        log.info(`Already assigned shortcuts`, registeredAccels)
+      
+      enabledAccelerators.push(...accels)
+      globalShortcut.registerAll(accels, () => action.execute())
+    })
+    
+    const disposer = () => {
+      enabledAccelerators.forEach(accel => {
+        globalShortcut.unregister(accel)
+      })
+      
+      removeIfMutation(this.enabledGlobalActionIds, id => enableActionIds.includes(id))
+    }
+    
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.addDisposeHandler(() => {
+        disposer()
+      })
+    }
+    
+    return disposer
+  }
 }
 
 export default ElectronMainActionManager

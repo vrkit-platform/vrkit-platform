@@ -24,7 +24,7 @@ import AppSettingsClient from "../../services/app-settings-client"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 import Button from "@mui/material/Button"
 import SharedAppStateClient from "../../services/shared-app-state-client"
-import { OverlayMode } from "vrkit-app-common/models"
+import { OverlayManagerClient } from "../../services/overlay-client"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -68,22 +68,23 @@ export function ActiveDashboardConfigWidget(props: ActiveDashboardConfigWidgetPr
     configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
     appSettingsClient = useService(AppSettingsClient),
     sharedAppClient = useService(SharedAppStateClient),
+      overlayClient = useService(OverlayManagerClient),
     dashClient = useService(DashboardManagerClient),
     setDefaultDashboardConfigId = useCallback((id: string) => {
       appSettingsClient.changeSettings({ defaultDashboardConfigId: id })
-    }, []),
+    }, [appSettingsClient]),
     hasActiveDashboard = !!useAppSelector(sharedAppSelectors.selectActiveDashboardConfigId),
-    overlayMode = useAppSelector(sharedAppSelectors.selectOverlayMode),
+      editorEnabled = useAppSelector(sharedAppSelectors.selectEditorEnabled),
     toggleDashboard = useCallback(() => {
       if (hasActiveDashboard) {
         dashClient.closeDashboard()
       } else {
         dashClient.openDashboard(configId)
       }
-    }, [configId, hasActiveDashboard]),
+    }, [configId, hasActiveDashboard, dashClient]),
     toggleOverlayMode = useCallback(() => {
-      sharedAppClient.setOverlayMode(overlayMode === OverlayMode.NORMAL ? OverlayMode.EDIT : OverlayMode.NORMAL)
-    }, [sharedAppClient, overlayMode])
+      overlayClient.setEditorEnabled(!editorEnabled)
+    }, [overlayClient, editorEnabled])
 
   return (
     <ActiveDashboardConfigWidgetRoot {...other}>
@@ -121,7 +122,7 @@ export function ActiveDashboardConfigWidget(props: ActiveDashboardConfigWidgetPr
         color="error"
         onClick={toggleOverlayMode}
       >
-        {overlayMode === OverlayMode.EDIT ? "Done" : "Edit"}
+        {editorEnabled ? "Done" : "Edit"}
       </Button>
     </ActiveDashboardConfigWidgetRoot>
   )

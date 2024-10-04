@@ -214,10 +214,10 @@ export class ElectronMainMenuManager {
     const defaultMenu = Menu.getApplicationMenu()
     const menu = Menu.buildFromTemplate(this.template)
     Menu.setApplicationMenu(menu)
-    if (isDev) {
-      const current = Menu.getApplicationMenu()
-      info(`App menu`, inspect(current))
-    }
+    // if (isDev) {
+    //   const current = Menu.getApplicationMenu()
+    //   info(`App menu`, inspect(current))
+    // }
 
     if (import.meta.webpackHot) {
       import.meta.webpackHot.addDisposeHandler(() => {

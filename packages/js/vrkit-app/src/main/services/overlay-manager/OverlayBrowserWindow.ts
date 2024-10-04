@@ -8,7 +8,6 @@ import {
   OverlayManagerClientEventType,
   OverlayManagerClientFnType,
   OverlayManagerClientFnTypeToIPCName,
-  OverlayMode,
   OverlaySpecialIds,
   OverlayWindowRole
 } from "../../../common/models/overlays"
@@ -16,7 +15,7 @@ import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
 import type OverlayManager from "./OverlayManager"
 import { OverlayBrowserWindowType, overlayInfoToUniqueId } from "./OverlayManagerUtils"
 import { asOption } from "@3fv/prelude-ts"
-import { VREditorOverlayOUID } from "./DefaultOverlayConfigData" // noinspection
+import { VREditorInfoOverlayOUID } from "./DefaultOverlayConfigData" // noinspection
 // TypeScriptUnresolvedVariable
 
 // noinspection TypeScriptUnresolvedVariable
@@ -26,8 +25,6 @@ const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
 export class OverlayBrowserWindow {
-  private mode_: OverlayMode = OverlayMode.NORMAL
-
   private focused_: boolean = false
 
   private readonly window_: BrowserWindow
@@ -39,9 +36,11 @@ export class OverlayBrowserWindow {
   private readonly uniqueId_: string
 
   get role(): OverlayWindowRole {
-    return this.config.overlay.id === OverlaySpecialIds.VR_EDITOR
-      ? OverlayWindowRole.VR_EDITOR
-      : OverlayWindowRole.OVERLAY
+    return this.config.overlay.id === OverlaySpecialIds.VR_EDITOR_INFO
+      ? OverlayWindowRole.VR_EDITOR_INFO
+      : this.config.overlay.id === OverlaySpecialIds.SCREEN_EDITOR_INFO
+        ? OverlayWindowRole.SCREEN_EDITOR_INFO
+        : OverlayWindowRole.OVERLAY
   }
 
   private closeDeferred: Deferred<void> = null
@@ -83,12 +82,8 @@ export class OverlayBrowserWindow {
     return this.isClosing && this.closeDeferred.isSettled()
   }
 
-  get mode() {
-    return this.mode_
-  }
-
   get isVREditor() {
-    return this.uniqueId === VREditorOverlayOUID
+    return this.uniqueId === VREditorInfoOverlayOUID
   }
 
   get vrEditorController() {
@@ -200,7 +195,7 @@ export class OverlayBrowserWindow {
           transparent: true,
           alwaysOnTop: true
         }
-    
+
     this.windowOptions = {
       ...windowOptionDefaults({
         devTools: isDev,
@@ -216,11 +211,14 @@ export class OverlayBrowserWindow {
 
     this.window_ = new BrowserWindow(this.windowOptions)
     this.window_.setTitle(this.uniqueId)
-    
+
     this.window_.webContents.ipc.handle(
       OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG),
       this.fetchConfigHandler.bind(this)
     )
+
+    this.setEditorEnabled(manager.editorEnabled)
+
     // The returned promise is tracked via `readyDeferred`
     this.initialize().catch(err => {
       log.error(`failed to initialize overlay window`, err)
@@ -293,12 +291,7 @@ export class OverlayBrowserWindow {
     this.focused_ = focused
   }
 
-  setMode(mode: OverlayMode): void {
-    if (mode === this.mode) {
-      return
-    }
-
-    this.mode_ = mode
-    this.setIgnoreMouseEvents(mode !== OverlayMode.EDIT)
+  setEditorEnabled(enabled: boolean): void {
+    this.setIgnoreMouseEvents(!enabled)
   }
 }

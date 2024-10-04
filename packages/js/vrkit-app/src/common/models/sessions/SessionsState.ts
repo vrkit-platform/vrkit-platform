@@ -1,7 +1,6 @@
 import { SessionData, SessionTiming, SessionType } from "vrkit-models"
 import type { SessionPlayerId } from "vrkit-native-interop"
 import type { SessionInfoMessage } from "vrkit-plugin-sdk"
-import { OverlayMode } from "../overlays"
 
 export { SessionPlayerId }
 

@@ -28,7 +28,7 @@ import {
   OverlayManagerClientEventType,
   OverlayManagerClientFnType,
   OverlayManagerClientFnTypeToIPCName,
-  OverlayMode,
+  OverlaysState,
   OverlayWindowMainEvents,
   OverlayWindowRendererEvents,
   OverlayWindowRole
@@ -58,12 +58,15 @@ import {
   overlayInfoToUniqueId
 } from "./OverlayManagerUtils"
 import {
-  defaultVRScreenRect,
-  VREditorOverlayInfo,
-  VREditorOverlayOUID,
-  VREditorOverlayPlacement
+  ScreenEditorInfoOverlayOUID,
+  VREditorInfoOverlayInfo,
+  VREditorInfoOverlayOUID,
+  VREditorInfoOverlayPlacement
 } from "./DefaultOverlayConfigData"
 import { OverlayVREditorController } from "./OverlayVREditorController"
+import { BindAction } from "../../decorators"
+import { ElectronMainActionManager } from "../electron-actions"
+import ActionRegistry from "../../../common/services/actions/ActionRegistry"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -84,7 +87,7 @@ export class OverlayManager {
     concurrency: 1
   })
 
-  private vrEditorController_: OverlayVREditorController = null
+  private readonly vrEditorController_: OverlayVREditorController
 
   private readonly disposers_ = new Disposables()
 
@@ -96,8 +99,20 @@ export class OverlayManager {
 
   private readonly nativeManager_ = CreateNativeOverlayManager()
 
-  get vrEditorWindow(): OverlayBrowserWindow {
-    return this.vrOverlays.find(it => it.uniqueId === VREditorOverlayOUID || it.role === OverlayWindowRole.VR_EDITOR)
+  get state(): OverlaysState {
+    return this.mainAppState.overlays
+  }
+
+  get editorEnabled(): boolean {
+    return this.state.editor.enabled
+  }
+  
+  get screenEditorInfoWindow(): OverlayBrowserWindow {
+    return this.allOverlays.find(it => it.uniqueId === ScreenEditorInfoOverlayOUID || it.role === OverlayWindowRole.SCREEN_EDITOR_INFO)
+  }
+  
+  get vrEditorInfoWindow(): OverlayBrowserWindow {
+    return this.allOverlays.find(it => it.uniqueId === VREditorInfoOverlayOUID || it.role === OverlayWindowRole.VR_EDITOR_INFO)
   }
 
   get vrEditorController(): OverlayVREditorController {
@@ -106,14 +121,6 @@ export class OverlayManager {
 
   get isShutdown() {
     return this.shutdownFlag_.isSet
-  }
-
-  get mode() {
-    return this.mainAppState.overlayMode
-  }
-
-  get isEditMode() {
-    return this.mode === OverlayMode.EDIT
   }
 
   get isVREnabled() {
@@ -125,11 +132,11 @@ export class OverlayManager {
   }
 
   get vrOverlays() {
-    return this.allOverlays.filter(it => it.isVR)
+    return this.allOverlays.filter(it => it.isVR && it.uniqueId !== VREditorInfoOverlayOUID)
   }
 
   get screenOverlays() {
-    return this.allOverlays.filter(it => it.isScreen)
+    return this.allOverlays.filter(it => it.isScreen && it.uniqueId !== ScreenEditorInfoOverlayOUID)
   }
 
   get activeDashboardId() {
@@ -200,15 +207,14 @@ export class OverlayManager {
    * @private
    */
   private async getOrCreateVREditorWindow() {
-    const mode = this.mode
-    if (!this.isEditMode || !this.isVREnabled) {
+    const { editorEnabled } = this
+    if (!this.editorEnabled || !this.isVREnabled) {
       return null
     }
 
-    const info = VREditorOverlayInfo
-    const placement = VREditorOverlayPlacement
-    const ouid = VREditorOverlayOUID
-    let win = this.overlayWindowByUniqueId(ouid)
+    const info = VREditorInfoOverlayInfo
+    const placement = VREditorInfoOverlayPlacement
+    let win = this.overlayWindowByUniqueId(VREditorInfoOverlayOUID)
     if (win) {
       return win
     }
@@ -272,13 +278,15 @@ export class OverlayManager {
         })
       )
     )
-
+    
     this.overlayWindows_ = overlayWindows
-
+    this.vrEditorController.update();
+    
     if (overlayWindows.length) {
       await Promise.all(overlayWindows.map(overlay => overlay.whenReady()))
     }
   }
+  
 
   private async updateActiveSession(
     activeSessionId: string,
@@ -342,34 +350,31 @@ export class OverlayManager {
   /**
    * Set overlay mode
    *
-   * @param mode
+   * @param enabled
    */
-  async setOverlayMode(mode: OverlayMode) {
-    if (mode === this.mode) {
-      log.debug(`mode is unchanged`, mode, this.mode)
-      return mode
-    }
+  @BindAction()
+  async setEditorEnabled(enabled: boolean) {
+    if (this.editorEnabled === enabled) return enabled
 
-    this.mainAppState.setOverlayMode(mode)
-    this.setupVREditorController()
-
+    this.state.editor.enabled = enabled
+    
     for (const ow of this.allOverlays) {
-      ow.setMode(mode)
+      ow.setEditorEnabled(enabled)
     }
-
-    await this.setupVREditorWindow()
-
-    return mode
+    
+    await this.setupInfoEditorWindows()
+    
+    return enabled
   }
 
   /**
-   * Set the overlay mode
+   * Set editor enabled
    *
    * @param event
-   * @param mode
+   * @param editorEnabled
    */
-  async setOverlayModeHandler(event: IpcMainInvokeEvent, mode: OverlayMode): Promise<OverlayMode> {
-    return this.setOverlayMode(mode)
+  async setEditorEnabledHandler(event: IpcMainInvokeEvent, editorEnabled: boolean): Promise<boolean> {
+    return this.setEditorEnabled(editorEnabled)
   }
 
   /**
@@ -417,22 +422,29 @@ export class OverlayManager {
       ipcFnHandlers = Array<Pair<OverlayManagerClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
         [OverlayManagerClientFnType.FETCH_WINDOW_ROLE, this.fetchOverlayWindowRoleHandler.bind(this)],
         [OverlayManagerClientFnType.FETCH_CONFIG_ID, this.fetchOverlayConfigIdHandler.bind(this)],
-        [OverlayManagerClientFnType.SET_OVERLAY_MODE, this.setOverlayModeHandler.bind(this)],
+        [OverlayManagerClientFnType.SET_EDITOR_ENABLED, this.setEditorEnabledHandler.bind(this)],
         [OverlayManagerClientFnType.CLOSE, this.closeHandler.bind(this)]
       ),
-      sessionManagerEventHandlers = Array<Pair<SessionManagerEventType, (...args: any[]) => void>>([
+      ipcEventHandlers = Array<Pair<SessionManagerEventType, (...args: any[]) => void>>([
         SessionManagerEventType.DATA_FRAME,
         this.onSessionDataFrameEvent.bind(this)
       ])
 
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(OverlayManagerClientFnTypeToIPCName(type), handler))
 
-    this.disposers_.push(observe(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged))
-
-    this.disposers_.push(observe(this.mainAppState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged))
-    // this.stopObserving = deepObserve(this.mainAppState.sessions,
-    // "activeSessionId", this.onActiveSessionIdChanged)
-
+    this.disposers_.push(
+        observe(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged),
+        observe(this.mainAppState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged),
+        () => {
+          ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayManagerClientFnTypeToIPCName(type)))
+          ipcEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
+          app.off("before-quit", this.unload)
+          
+          Object.assign(global, {
+            overlayManager: undefined
+          })
+        })
+    
     // In dev mode, make everything accessible
     if (isDev) {
       Object.assign(global, {
@@ -440,31 +452,21 @@ export class OverlayManager {
       })
     }
 
-    this.disposers_.push(() => {
-      // this.stopObservingCallbacks.filter(isFunction).forEach(fn => fn())
-
-      ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayManagerClientFnTypeToIPCName(type)))
-      sessionManagerEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
-      app.off("before-quit", this.unload)
-
-      Object.assign(global, {
-        overlayManager: undefined
-      })
-    })
-
     if (import.meta.webpackHot) {
       import.meta.webpackHot.addDisposeHandler(() => {
-        this.unload()
+        return this.unload()
       })
     }
 
-    sessionManagerEventHandlers.forEach(([type, handler]) => sessionManager.on(type, handler))
+    ipcEventHandlers.forEach(([type, handler]) => sessionManager.on(type, handler))
   }
 
   /**
    * Service constructor
    *
    * @param container
+   * @param actionRegistry
+   * @param mainActionManager
    * @param sessionManager
    * @param appSettingsService
    * @param mainWindowManager
@@ -473,12 +475,16 @@ export class OverlayManager {
    */
   constructor(
     @InjectContainer() readonly container: Container,
-    readonly sessionManager: SessionManager,
+    readonly actionRegistry: ActionRegistry,
+      readonly mainActionManager: ElectronMainActionManager,
+      readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
     readonly mainWindowManager: MainWindowManager,
     readonly mainAppState: MainSharedAppState,
     readonly dashManager: DashboardManager
-  ) {}
+  ) {
+    this.vrEditorController_ = new OverlayVREditorController(this.container, this)
+  }
 
   /**
    * Broadcast to overlay windows
@@ -605,7 +611,6 @@ export class OverlayManager {
   /**
    * Create a bounds changed (`moved`, `resized`) event handler
    *
-   * @param config
    * @param targetPlacement
    * @param win
    * @private
@@ -737,17 +742,17 @@ export class OverlayManager {
    *
    * @private
    */
-  private async setupVREditorWindow() {
-    let vrEditorWindow = this.vrEditorWindow
+  private async setupInfoEditorWindows() {
+    let vrEditorWindow = this.vrEditorInfoWindow
 
-    if (!this.isEditMode || !this.isVREnabled) {
+    if (!this.editorEnabled || !this.isVREnabled) {
       if (vrEditorWindow) {
         await vrEditorWindow.close()
       }
 
       removeIfMutation(
         this.overlayWindows_,
-        it => it.uniqueId === VREditorOverlayOUID || it.role === OverlayWindowRole.VR_EDITOR
+        it => it.uniqueId === VREditorInfoOverlayOUID || it.role === OverlayWindowRole.VR_EDITOR_INFO
       )
       return null
     }
@@ -756,25 +761,10 @@ export class OverlayManager {
       vrEditorWindow = await this.getOrCreateVREditorWindow()
     }
 
-    vrEditorWindow.setMode(this.mode)
+    vrEditorWindow.setEditorEnabled(this.editorEnabled)
   }
 
-  setupVREditorController(): OverlayVREditorController {
-    if (!this.isEditMode || !this.isVREnabled) {
-      log.error(`VREditorController requires edit mode & VR enabled`)
-      if (this.vrEditorController_) {
-        this.vrEditorController_.destroy()
-        this.vrEditorController_ = null
-      }
-      return null
-    }
-
-    if (!this.vrEditorController_) {
-      this.vrEditorController_ = new OverlayVREditorController(this)
-    }
-
-    return this.vrEditorController_
-  }
+  
 }
 
 export default OverlayManager

@@ -18,7 +18,6 @@ import {
   heightConstraint,
   OverflowHidden
 } from "vrkit-app-renderer/styles/ThemedStyles"
-import { OverlayMode } from "../../../common/models/overlays"
 import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 import clsx from "clsx"
@@ -49,10 +48,10 @@ const OverlayAppBodyContentRoot = styled(Box, {
 
 export default function OverlayWindowAppBody() {
   const theme = useTheme(),
-    mode = useAppSelector(sharedAppSelectors.selectOverlayMode),
+    editorEnabled = useAppSelector(sharedAppSelectors.selectEditorEnabled),
       PluginComponent = useAppSelector(overlayWindowSelectors.selectOverlayComponent),
       isVR = window.location.hash.endsWith("VR"),
-      isEditMode = mode !== OverlayMode.NORMAL,
+      isEditMode = editorEnabled,
     
     contentRef = useRef<HTMLDivElement>(),
     [size, setSize] = useState<SizeI>(null),
@@ -105,8 +104,7 @@ export default function OverlayWindowAppBody() {
           }
         }}
       />
-      { (!isEditMode || isVR)  ? (
-        <OverlayAppBodyContentRoot
+      { <OverlayAppBodyContentRoot
           id="content"
           className={clsx(classNames.root)}
           ref={contentRef}
@@ -117,10 +115,10 @@ export default function OverlayWindowAppBody() {
             {...size}
           />
           }
-        </OverlayAppBodyContentRoot>
-      ) :
-      <OverlayWindowLayoutEditor mode={mode} size={size} />
+        </OverlayAppBodyContentRoot>}
+      {isEditMode && isObject(size) ? <OverlayWindowLayoutEditor editorEnabled={editorEnabled} size={size} /> : <></>
       }
+      
     </>
   )
 }

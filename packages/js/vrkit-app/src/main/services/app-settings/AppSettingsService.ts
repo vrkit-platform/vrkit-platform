@@ -2,7 +2,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { ipcMain } from "electron"
 
-import { ErrorKind } from "vrkit-app-common/utils"
+import { Disposables, ErrorKind } from "vrkit-app-common/utils"
 import { Bind } from "vrkit-app-common/decorators"
 import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
 import { AppSettings } from "vrkit-models"
@@ -27,6 +27,7 @@ interface AppSettingsServiceState {
 
 @Singleton()
 export class AppSettingsService {
+  private readonly disposers_ = new Disposables()
   private readonly saveQueue_ = new PQueue({
     concurrency: 1
   })
@@ -97,6 +98,12 @@ export class AppSettingsService {
     // })
   }
 
+  [Symbol.dispose]() {
+    this.disposers_.dispose()
+  }
+  private unload() {
+    this[Symbol.dispose]()
+  }
   /**
    * Initialize
    */
@@ -111,13 +118,17 @@ export class AppSettingsService {
     ipcMain.on(ElectronIPCChannel.getAppSettingsSync, this.onGetAppSettingsSync)
     ipcMain.on(ElectronIPCChannel.saveAppSettingsSync, this.onSaveAppSettingsSync)
 
-    const unsubscribe = deepObserve(this.sharedAppState.appSettings, this.onStateChange)
+    this.disposers_.push(deepObserve(this.sharedAppState.appSettings, this.onStateChange))
+    this.disposers_.push(() => {
+      ipcMain.removeHandler(ElectronIPCChannel.getAppSettings)
+      ipcMain.removeHandler(ElectronIPCChannel.saveAppSettings)
+      ipcMain.off(ElectronIPCChannel.getAppSettingsSync, this.onGetAppSettingsSync)
+      ipcMain.off(ElectronIPCChannel.saveAppSettingsSync, this.onSaveAppSettingsSync)
+    })
     if (import.meta.webpackHot) {
       import.meta.webpackHot.addDisposeHandler(() => {
-        ipcMain.removeHandler(ElectronIPCChannel.getAppSettings)
-        ipcMain.removeHandler(ElectronIPCChannel.saveAppSettings)
-        ipcMain.off(ElectronIPCChannel.getAppSettingsSync, this.onGetAppSettingsSync)
-        ipcMain.off(ElectronIPCChannel.saveAppSettingsSync, this.onSaveAppSettingsSync)
+        this.unload()
+        
       })
     }
   }

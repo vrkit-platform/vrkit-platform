@@ -2,7 +2,12 @@ import { Deferred } from "@3fv/deferred"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 import { applyDecorators, Bind, Once } from "vrkit-app-common/decorators"
-import { DevSettings, ISharedAppState, newDevSettings, ThemeId } from "vrkit-app-common/models"
+import {
+  DevSettings,
+  ISharedAppState,
+  newDevSettings, newOverlaysState,
+  ThemeId
+} from "vrkit-app-common/models"
 import { assign, cloneDeep, entriesOf, once } from "vrkit-app-common/utils"
 import { action, makeObservable, observable, set, toJS } from "mobx"
 import { deepObserve, IDisposer } from "mobx-utils"
@@ -53,7 +58,7 @@ export class MainSharedAppState implements ISharedAppState {
   
   @observable sessions = newSessionsState()
   
-  //@observable overlays = newOverlayManagerState()
+  @observable overlays = newOverlaysState()
   
   @observable dashboards = newDashboardsState()
 

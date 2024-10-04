@@ -41,7 +41,7 @@ export class OverlayVREditorController {
   }
 
   get overlayConfigs() {
-    return this.state.overlayConfigs
+    return []
   }
 
   get selectedOverlayConfigId() {
@@ -102,6 +102,8 @@ export class OverlayVREditorController {
     this.disposers_.push(() => {
       ipcFnHandlers.forEach(([type]) => ipcMain.removeHandler(OverlayVREditorFnTypeToIPCName(type)))
     })
+    
+    this.updateOverlaysFromState()
   }
   
   [Symbol.dispose]() {

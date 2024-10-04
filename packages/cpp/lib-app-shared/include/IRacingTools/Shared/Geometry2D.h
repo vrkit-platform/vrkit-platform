@@ -57,6 +57,10 @@ namespace IRacingTools::Shared {
       return width_ >= 1 && height_ >= 1;
     }
 
+    constexpr bool operator==(const Size& other) const {
+      return other.width_ == width_ && other.height_ == height_;
+    }
+
     constexpr Size<T> operator/(const T divisor) const noexcept {
       return {width_ / divisor, height_ / divisor};
     }

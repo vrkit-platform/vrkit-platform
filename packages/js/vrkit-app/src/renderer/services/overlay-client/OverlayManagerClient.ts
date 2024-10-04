@@ -263,7 +263,8 @@ export class OverlayManagerClient
     let overlayConfig:OverlayConfig = null
     if (!placement || !overlay) {
       log.warn("Unable to find OverlayConfig in dashboard configs, getting directly")
-      overlayConfig = await ipcRenderer.invoke(OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG))
+      const overlayConfigJs = await ipcRenderer.invoke(OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG))
+      overlayConfig = OverlayConfig.fromJson(overlayConfigJs as any)
     } else {
       overlayConfig = {
         overlay, placement

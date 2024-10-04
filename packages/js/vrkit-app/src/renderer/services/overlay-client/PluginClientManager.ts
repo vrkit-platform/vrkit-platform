@@ -19,6 +19,8 @@ import { assign, importDefault, isEqual } from "vrkit-app-common/utils"
 import React from "react"
 import { sharedAppSelectors } from "../store/slices/shared-app"
 import { AppStore } from "../store"
+import { isPromise } from "@3fv/guard"
+import { overlayWindowActions } from "../store/slices/overlay-window"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -26,7 +28,9 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-const builtinPluginLoaders: Record<OverlayKind, () => Promise<React.ComponentType<PluginClientComponentProps>>> = {
+type ReactPluginComponent = React.ComponentType<PluginClientComponentProps> | Promise<React.ComponentType<PluginClientComponentProps>>
+
+const builtinPluginLoaders: Record<OverlayKind, () => Promise<ReactPluginComponent>> = {
   [OverlayKind.CUSTOM]: (() => {
     throw Error(`NotImplemented yet, will be part of plugin system`)
   }) as any,
@@ -111,10 +115,10 @@ export class PluginClientManager {
     
     window["getVRKitPluginClient"] = this.getPluginClient.bind(this)
 
-    await this.launch().catch(err => error(`Failed to launch overlay`, err))
+    // await this.launch().catch(err => error(`Failed to launch overlay`, err))
   }
 
-  private async launch() {
+  async launch() {
     const config = this.getConfig()
     if (!config) {
       log.warn(`No OverlayConfig available, assuming internal window`)
@@ -122,10 +126,14 @@ export class PluginClientManager {
     }
     
     const kind = config.overlay.kind ?? OverlayKind.TRACK_MAP
-    const componentFn = builtinPluginLoaders[kind]
-    if (!componentFn)
+    const loaderFn = builtinPluginLoaders[kind]
+    if (!loaderFn)
       throw Error(`Kind ${kind} is invalid`)
-    this.reactComponent_ = await componentFn()
+    
+    const componentOrPromise = await loaderFn()
+    
+    this.reactComponent_ = isPromise(componentOrPromise) ? await componentOrPromise : componentOrPromise
+    this.appStore.dispatch(overlayWindowActions.setOverlayComponent(this.reactComponent_))
   }
 
   /**

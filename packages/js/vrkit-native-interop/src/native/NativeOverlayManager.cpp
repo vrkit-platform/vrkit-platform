@@ -209,9 +209,11 @@ namespace IRacingTools::App::Node {
       resources_.push_back(resource);
     } else {
       auto currentSize = resource->getImageSize();
-      L->info("Resizing NativeOverlayWindowResources (from={},to={})", currentSize.toString(), imageSize.toString());
-      resource->update(imageSize, screenRect, vrLayout);
-
+      auto changed = currentSize != imageSize;
+      if (changed) {
+        L->info("Resizing NativeOverlayWindowResources (from={},to={})", currentSize.toString(), imageSize.toString());
+        resource->update(imageSize, screenRect, vrLayout);
+      }
     }
 
 
@@ -298,12 +300,16 @@ namespace IRacingTools::App::Node {
         }
       }
 
+      auto beforeCount = resources_.size();
       std::erase_if(
         resources_,
         [&](auto& resource) {
           return windowIds.contains(resource->windowId) || overlayIds.contains(resource->overlayId);
         }
       );
+
+      auto afterCount = resources_.size();
+      L->info("Release resources (before={},after={})", beforeCount, afterCount);
     }
     return {};
   }

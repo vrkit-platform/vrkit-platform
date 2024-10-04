@@ -23,6 +23,9 @@ import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 import clsx from "clsx"
 import { isObject } from "@3fv/guard"
+import {
+  overlayWindowSelectors
+} from "../../services/store/slices/overlay-window"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -47,10 +50,13 @@ const OverlayAppBodyContentRoot = styled(Box, {
 export default function OverlayWindowAppBody() {
   const theme = useTheme(),
     mode = useAppSelector(sharedAppSelectors.selectOverlayMode),
-    isEditMode = mode !== OverlayMode.NORMAL,
+      PluginComponent = useAppSelector(overlayWindowSelectors.selectOverlayComponent),
+      isVR = window.location.hash.endsWith("VR"),
+      isEditMode = mode !== OverlayMode.NORMAL,
+    
     contentRef = useRef<HTMLDivElement>(),
     [size, setSize] = useState<SizeI>(null),
-    pluginClientManager = useService(PluginClientManager),
+    // pluginClientManager = useService(PluginClientManager),
     updateSize = useCallback((el: HTMLElement) => {
       const { clientWidth: width, clientHeight: height } = el,
         newSize = { width, height }
@@ -64,8 +70,8 @@ export default function OverlayWindowAppBody() {
         updateSize(entries[0].target as HTMLElement)
       },
       [updateSize]
-    ),
-    PluginComponent = pluginClientManager.getReactComponent()
+    )
+    // PluginComponent = pluginClientManager.getReactComponent()
 
   // Create & Apply a resize observer
   // TODO: Move this to a hook
@@ -99,21 +105,20 @@ export default function OverlayWindowAppBody() {
           }
         }}
       />
-      {!isEditMode && (
+      { (!isEditMode || isVR)  ? (
         <OverlayAppBodyContentRoot
           id="content"
           className={clsx(classNames.root)}
           ref={contentRef}
         >
-          {isObject(size) && (
-            <PluginComponent
-              client={getVRKitPluginClient()}
-              {...size}
-            />
-          )}
+          {!PluginComponent || size === null ? <></> :
+          <PluginComponent
+            client={getVRKitPluginClient()}
+            {...size}
+          />
+          }
         </OverlayAppBodyContentRoot>
-      )}
-      {!!size &&
+      ) :
       <OverlayWindowLayoutEditor mode={mode} size={size} />
       }
     </>

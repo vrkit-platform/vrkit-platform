@@ -1,28 +1,33 @@
-import { OverlayInfo, OverlayKind, OverlayPlacement } from "vrkit-models"
+import { OverlayInfo, OverlayKind, OverlayPlacement, RectI } from "vrkit-models"
 import { OverlaySpecialIds } from "vrkit-app-common/models"
 import { OverlayBrowserWindowType, overlayInfoToUniqueId } from "./OverlayManagerUtils"
 
-function createVREditorOverlayPlacement(): OverlayPlacement {
-  const screenRect = {
+export function defaultVRScreenRect(width:number = 200, height: number = 200) {
+  return {
     size: {
-      width: 200,
-      height: 200
+      width,
+      height
     },
     position: {
       x: 0,
       y: 0
     }
-  }
+  } as RectI
+}
+
+function createVREditorOverlayPlacement(): OverlayPlacement {
+  const screenRect = defaultVRScreenRect(400,400)
 
   return OverlayPlacement.create({
     id: OverlaySpecialIds.VR_EDITOR,
     overlayId: OverlaySpecialIds.VR_EDITOR,
     screenRect,
     vrLayout: {
-      pose: { x: -0.5, eyeY: -0.5, z: -1.0 },
+      // pose: { x: -0.5, eyeY: 0, z: -1.0 },
+      pose: { x: 0.5, eyeY: 0.25, z: -1.0 },
       size: {
-        width: 1.0,
-        height: 1.0
+        width: 0.75,
+        height: 0.75
       },
       screenRect
     }

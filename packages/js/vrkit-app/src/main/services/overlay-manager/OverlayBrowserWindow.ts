@@ -1,15 +1,12 @@
 import { getLogger } from "@3fv/logger-proxy"
-import {
-  BrowserWindow,
-  BrowserWindowConstructorOptions, IpcMainInvokeEvent,
-  WebPreferences
-} from "electron"
+import { BrowserWindow, BrowserWindowConstructorOptions, IpcMainInvokeEvent, WebPreferences } from "electron"
 import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
 import { isDev } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
   OverlayClientEventTypeToIPCName,
-  OverlayManagerClientEventType, OverlayManagerClientFnType,
+  OverlayManagerClientEventType,
+  OverlayManagerClientFnType,
   OverlayManagerClientFnTypeToIPCName,
   OverlayMode,
   OverlaySpecialIds,
@@ -19,7 +16,8 @@ import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
 import type OverlayManager from "./OverlayManager"
 import { OverlayBrowserWindowType, overlayInfoToUniqueId } from "./OverlayManagerUtils"
 import { asOption } from "@3fv/prelude-ts"
-import { VREditorOverlayOUID } from "./DefaultOverlayConfigData"
+import { VREditorOverlayOUID } from "./DefaultOverlayConfigData" // noinspection
+// TypeScriptUnresolvedVariable
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -88,15 +86,15 @@ export class OverlayBrowserWindow {
   get mode() {
     return this.mode_
   }
-  
+
   get isVREditor() {
     return this.uniqueId === VREditorOverlayOUID
   }
-  
+
   get vrEditorController() {
     return this.manager.vrEditorController
   }
-  
+
   /**
    * Close the window
    */
@@ -152,11 +150,13 @@ export class OverlayBrowserWindow {
       this.config
     )
   }
-  
+
   private async fetchConfigHandler(event: IpcMainInvokeEvent) {
     log.info(`FETCH_CONFIG_HANDLER`, this.config)
-    return {overlay: OverlayInfo.toJson(this.config.overlay),
-      placement: OverlayPlacement.toJson(this.config.placement)}
+    return {
+      overlay: OverlayInfo.toJson(this.config.overlay),
+      placement: OverlayPlacement.toJson(this.config.placement)
+    }
   }
 
   private constructor(
@@ -194,22 +194,33 @@ export class OverlayBrowserWindow {
           transparent: true
         }
 
+    const extraWindowOpts = this.isVR
+      ? {}
+      : {
+          transparent: true,
+          alwaysOnTop: true
+        }
+    
     this.windowOptions = {
       ...windowOptionDefaults({
         devTools: isDev,
         ...extraWebPrefs
       }),
-      transparent: this.isScreen,
+      ...extraWindowOpts,
       show: false,
       frame: false,
       backgroundColor: "#00000000",
-      alwaysOnTop: this.isScreen,
       ...screenRect.position,
       ...screenRect.size
     }
 
     this.window_ = new BrowserWindow(this.windowOptions)
-    this.window_.webContents.ipc.handle(OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG), this.fetchConfigHandler.bind(this))
+    this.window_.setTitle(this.uniqueId)
+    
+    this.window_.webContents.ipc.handle(
+      OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG),
+      this.fetchConfigHandler.bind(this)
+    )
     // The returned promise is tracked via `readyDeferred`
     this.initialize().catch(err => {
       log.error(`failed to initialize overlay window`, err)
@@ -221,15 +232,18 @@ export class OverlayBrowserWindow {
     try {
       const win = this.window_
       const url = resolveHtmlPath("index-overlay.html")
-      info(`Resolved overlay url: ${url}`)
+      const urlWithHash = `${url}#${this.uniqueId}`
+      info(`Resolved overlay url: ${url} with hash: ${urlWithHash}`)
 
-      await win.loadURL(url)
+      // await win.loadURL(url)
+      await win.loadURL(urlWithHash)
       info(`Loaded overlay url(${url}) for overlayWindow(${this.uniqueIdDebugString})`)
       if (this.isScreen) {
         info(`Showing window in SCREEN kind (${this.uniqueIdDebugString})`)
         win.show()
       } else {
         info(`VR Windows are not shown as they render offscreen for performance (${this.uniqueIdDebugString})`)
+        win.webContents.startPainting()
       }
 
       if (isDev) {
@@ -238,6 +252,12 @@ export class OverlayBrowserWindow {
           mode: "detach"
         })
         info(`Shown devtools`)
+      }
+
+      if (this.isVR) {
+        // CONFIGURE THE `webContents` OF THE NEW WINDOW
+        win.webContents.setFrameRate(this.config.overlay.settings?.fps ?? 10)
+        win.webContents.on("paint", this.manager.createOnPaintHandler(this.config.placement, this))
       }
 
       deferred.resolve(this)

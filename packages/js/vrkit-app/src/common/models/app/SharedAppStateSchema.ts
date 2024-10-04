@@ -11,6 +11,7 @@ import {
 } from "vrkit-models"
 import type { SessionDetail, SessionsState } from "../sessions"
 import { toJS } from "mobx"
+import { OverlaysStateSchema } from "../overlays"
 
 
 
@@ -59,6 +60,7 @@ export const SharedAppStateSchema = createSimpleSchema<ISharedAppState>({
   appSettings: object(AppSettingsSchema),
   dashboards: object(DashboardsStateSchema),
   sessions: object(SessionsStateSchema),
+  overlays: object(OverlaysStateSchema),
   overlayMode: primitive(),
   devSettings: custom(toPlainObject, Identity),
 })

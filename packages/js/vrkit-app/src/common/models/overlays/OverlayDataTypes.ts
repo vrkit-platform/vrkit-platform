@@ -1,7 +1,9 @@
 import { defaults } from "vrkit-app-common/utils"
 import { OverlayConfig } from "vrkit-models"
 import type { PluginClientEventArgs, PluginClientEventType } from "vrkit-plugin-sdk"
-import { createSimpleSchema, custom, list, primitive } from "serializr" // ------ OverlayManager events & types
+import { createSimpleSchema, custom, list, primitive } from "serializr"
+import { isString } from "@3fv/guard"
+import { uniq } from "lodash"
 
 export enum OverlayWindowRole {
   NONE = "NONE",
@@ -13,15 +15,6 @@ export const OverlaySpecialIds = {
   [OverlayWindowRole.VR_EDITOR]: `::VRKIT::INTERNAL::${OverlayWindowRole.VR_EDITOR}`
 }
 
-export interface OverlayVREditorState {
-  overlayConfigs: OverlayConfig[]
-  selectedOverlayConfigId: string
-}
-
-export const OverlayVREditorStateSchema = createSimpleSchema<OverlayVREditorState>({
-  overlays: list(custom(v => OverlayConfig.toJson(v ?? {}), v => OverlayConfig.fromJson(v ?? {}))),
-  selectedOverlayId: primitive()
-})
 
 export enum OverlayVREditorEventType {
   STATE_CHANGED = "STATE_CHANGED"
@@ -42,6 +35,13 @@ export type OverlayVREditorEventIPCName = `OVERLAY_VR_EDITOR_EVENT_${OverlayMana
 export function OverlayVREditorEventTypeToIPCName(type: OverlayVREditorEventType): OverlayVREditorEventIPCName {
   return `OVERLAY_VR_EDITOR_EVENT_${type.toUpperCase()}` as OverlayVREditorEventIPCName
 }
+
+export const OverlayVREditorEventIPCNames = uniq(Object.keys(OverlayVREditorEventType).filter(isString))
+    .reduce((map, name) =>
+        ({
+          ...map, [name as OverlayVREditorEventType]:  OverlayVREditorEventTypeToIPCName(name as OverlayVREditorEventType)
+        }), {} as Record<OverlayVREditorEventType, string>)
+
 
 /**
  * Functions that can be invoked via IPC using `ipcRenderer.invoke`

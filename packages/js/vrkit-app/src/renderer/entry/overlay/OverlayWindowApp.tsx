@@ -14,7 +14,6 @@ import OverlayWindowAppBody from "./OverlayWindowAppBody"
 import useAppStore from "vrkit-app-renderer/hooks/useAppStore"
 import { overlayWindowSelectors } from "../../services/store/slices/overlay-window"
 import { OverlayWindowRole } from "vrkit-app-common/models"
-import OverlayWindowAppBodyVREditor from "./OverlayWindowAppBodyVREditor"
 
 export default function OverlayWindowApp() {
   const appStore = useAppStore(),
@@ -37,8 +36,7 @@ export default function OverlayWindowApp() {
       <I18nProvider>
         <LocalizationProvider>
           <ThemeProvider>
-            {windowRole === OverlayWindowRole.VR_EDITOR ? <OverlayWindowAppBodyVREditor /> :
-            <OverlayWindowAppBody />}
+            <OverlayWindowAppBody />
           </ThemeProvider>
         </LocalizationProvider>
       </I18nProvider>

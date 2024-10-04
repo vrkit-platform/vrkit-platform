@@ -11,7 +11,7 @@ import {
   SessionDataVariableValueMap,
   VRLayout
 } from "vrkit-models"
-import { isDefined, isFunction } from "@3fv/guard"
+import { isDefined } from "@3fv/guard"
 import {
   assign,
   Disposables,
@@ -19,7 +19,8 @@ import {
   isDev,
   isEqual,
   isRectValid,
-  Pair, removeIfMutation,
+  Pair,
+  removeIfMutation,
   SignalFlag
 } from "vrkit-app-common/utils"
 import {
@@ -44,12 +45,11 @@ import PQueue from "p-queue"
 import { OverlayBrowserWindow } from "./OverlayBrowserWindow"
 import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
-import { flatten, pick } from "lodash"
+import { defaultsDeep, flatten, pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
 import { CreateNativeOverlayManager } from "vrkit-native-interop"
 
 import { IValueDidChange, observe, toJS } from "mobx"
-import { IDisposer } from "mobx-utils"
 import { DashboardManager } from "../dashboard-manager"
 import {
   assertIsValidOverlayUniqueId,
@@ -57,7 +57,12 @@ import {
   OverlayBrowserWindowType,
   overlayInfoToUniqueId
 } from "./OverlayManagerUtils"
-import { VREditorOverlayInfo, VREditorOverlayOUID, VREditorOverlayPlacement } from "./DefaultOverlayConfigData"
+import {
+  defaultVRScreenRect,
+  VREditorOverlayInfo,
+  VREditorOverlayOUID,
+  VREditorOverlayPlacement
+} from "./DefaultOverlayConfigData"
 import { OverlayVREditorController } from "./OverlayVREditorController"
 
 // noinspection TypeScriptUnresolvedVariable
@@ -80,7 +85,7 @@ export class OverlayManager {
   })
 
   private vrEditorController_: OverlayVREditorController = null
-  
+
   private readonly disposers_ = new Disposables()
 
   //private stopObservingCallbacks = Array<IDisposer>()
@@ -98,7 +103,7 @@ export class OverlayManager {
   get vrEditorController(): OverlayVREditorController {
     return this.vrEditorController_
   }
-  
+
   get isShutdown() {
     return this.shutdownFlag_.isSet
   }
@@ -186,13 +191,6 @@ export class OverlayManager {
           .on("moved", onBoundsChanged)
           .on("resized", onBoundsChanged)
 
-        // CONFIGURE THE `webContents` OF THE NEW WINDOW
-        asOption(newWin.window.webContents)
-          .tap(it => it.setFrameRate(overlayInfo.settings?.fps ?? 10))
-          .tapIf(windowKind === OverlayBrowserWindowType.VR, it =>
-            it.on("paint", this.createOnPaintHandler(placement, newWin))
-          )
-
         return newWin
       })
   }
@@ -216,7 +214,7 @@ export class OverlayManager {
     }
 
     win = await this.createOrUpdateOverlayBrowserWindow(info, placement, OverlayBrowserWindowType.VR)
-    
+
     try {
       await win.whenReady()
       this.overlayWindows_.push(win)
@@ -354,14 +352,13 @@ export class OverlayManager {
 
     this.mainAppState.setOverlayMode(mode)
     this.setupVREditorController()
-    
+
     for (const ow of this.allOverlays) {
       ow.setMode(mode)
     }
 
-    
     await this.setupVREditorWindow()
-    
+
     return mode
   }
 
@@ -430,13 +427,9 @@ export class OverlayManager {
 
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(OverlayManagerClientFnTypeToIPCName(type), handler))
 
-    this.disposers_.push(
-      observe(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged)
-    )
+    this.disposers_.push(observe(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged))
 
-    this.disposers_.push(
-      observe(this.mainAppState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged)
-    )
+    this.disposers_.push(observe(this.mainAppState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged))
     // this.stopObserving = deepObserve(this.mainAppState.sessions,
     // "activeSessionId", this.onActiveSessionIdChanged)
 
@@ -479,8 +472,7 @@ export class OverlayManager {
    * @param dashManager
    */
   constructor(
-    @InjectContainer()
-    readonly container: Container,
+    @InjectContainer() readonly container: Container,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
     readonly mainWindowManager: MainWindowManager,
@@ -539,7 +531,8 @@ export class OverlayManager {
   private createOnCloseHandler(overlayUniqueId: string, windowId: number): Function {
     return (event: Electron.Event) => {
       this.sessionManager.unregisterComponentDataVars(overlayUniqueId)
-      this.overlayWindows_ = this.allOverlays.filter(overlay => overlay.windowId !== windowId)
+      this.nativeManager_.releaseResources(overlayUniqueId, windowId)
+      removeIfMutation(this.overlayWindows_, overlay => overlay.windowId === windowId)
     }
   }
 
@@ -551,7 +544,7 @@ export class OverlayManager {
    * @param win
    * @private
    */
-  private createOnPaintHandler(targetPlacement: OverlayPlacement, win: OverlayBrowserWindow) {
+  createOnPaintHandler(targetPlacement: OverlayPlacement, win: OverlayBrowserWindow) {
     let cap: NativeImageSequenceCapture = asOption(this.mainAppState.devSettings?.imageSequenceCapture)
       .filter(it => it !== false)
       .map(
@@ -561,17 +554,20 @@ export class OverlayManager {
 
     return (_ev: Electron.Event, dirty: Electron.Rectangle, image: NativeImage) => {
       const buf = image.getBitmap(),
+        imageSize = image.getSize(),
         vrLayout = this.getOverlayVRLayout(win),
         screenRect = vrLayout.screenRect
 
+      //log.info(`OnPaint event`, win.uniqueId, "size", imageSize, "dirty", dirty, "vrLayout", vrLayout)
       this.nativeManager_.createOrUpdateResources(
-        win.id,
+        win.uniqueId,
         win.windowId,
-        { width: dirty.width, height: dirty.height },
-        screenRect,
+        // { width: dirty.width, height: dirty.height },
+        { width: imageSize.width, height: imageSize.height },
+        vrLayout.screenRect,
         vrLayout
       )
-      this.nativeManager_.processFrame(win.id, buf)
+      this.nativeManager_.processFrame(win.uniqueId, buf)
       if (cap) {
         cap.push(image)
       }
@@ -675,12 +671,16 @@ export class OverlayManager {
       .getOrNull()
   }
 
+  getOverlayWindowScreenRect(win: OverlayBrowserWindow): RectI {
+    const bounds = win.window.getBounds()
+    return RectI.create({
+      size: pick(bounds, "width", "height"),
+      position: pick(bounds, "x", "y")
+    })
+  }
+
   updateOverlayWindowBounds(win: OverlayBrowserWindow): RectI {
-    const bounds = win.window.getBounds(),
-      screenRect = RectI.create({
-        size: pick(bounds, "width", "height"),
-        position: pick(bounds, "x", "y")
-      })
+    const screenRect = this.getOverlayWindowScreenRect(win)
 
     if (win.role !== OverlayWindowRole.OVERLAY) {
       log.warn(`Ignoring bounds change as this is not a standard overlay window`, win.id, win.role)
@@ -712,17 +712,24 @@ export class OverlayManager {
     return asOption(win.placement?.vrLayout)
       .filter(isDefined)
       .filter(hasProps("size", "pose"))
-      .map(vrLayout => VRLayout.toJson(vrLayout))
-      .getOrCall(() => {
-        return {
-          pose: {
-            x: -0.25,
-            eyeY: 0.0,
-            z: -1.0
-          },
-          size: { width: 0.5, height: 0.5 }
-        }
-      }) as VRLayout
+      .orElse(() => asOption(VRLayout.create()))
+      .map(vrLayout =>
+        VRLayout.toJson(
+          defaultsDeep(vrLayout, {
+            pose: {
+              x: -0.25,
+              eyeY: 0.0,
+              z: -1.0
+            },
+            size: { width: 0.5, height: 0.5 },
+            screenRect: this.getOverlayWindowScreenRect(win)
+          }),
+          {
+            emitDefaultValues: true
+          }
+        )
+      )
+      .getOrThrow() as VRLayout
   }
 
   /**
@@ -737,8 +744,11 @@ export class OverlayManager {
       if (vrEditorWindow) {
         await vrEditorWindow.close()
       }
-      
-      removeIfMutation(this.overlayWindows_, it => it.uniqueId === VREditorOverlayOUID || it.role === OverlayWindowRole.VR_EDITOR)
+
+      removeIfMutation(
+        this.overlayWindows_,
+        it => it.uniqueId === VREditorOverlayOUID || it.role === OverlayWindowRole.VR_EDITOR
+      )
       return null
     }
 
@@ -748,25 +758,22 @@ export class OverlayManager {
 
     vrEditorWindow.setMode(this.mode)
   }
-  
-  setupVREditorController():OverlayVREditorController {
-    
-      if (!this.isEditMode || !this.isVREnabled) {
-        log.error(`VREditorController requires edit mode & VR enabled`)
-        if (this.vrEditorController_) {
-          this.vrEditorController_.destroy()
-          this.vrEditorController_ = null
-        }
-        return null
+
+  setupVREditorController(): OverlayVREditorController {
+    if (!this.isEditMode || !this.isVREnabled) {
+      log.error(`VREditorController requires edit mode & VR enabled`)
+      if (this.vrEditorController_) {
+        this.vrEditorController_.destroy()
+        this.vrEditorController_ = null
       }
-      
-      if (!this.vrEditorController_) {
-        this.vrEditorController_ = new OverlayVREditorController(this)
-      }
-    
+      return null
+    }
+
+    if (!this.vrEditorController_) {
+      this.vrEditorController_ = new OverlayVREditorController(this)
+    }
+
     return this.vrEditorController_
-    
-    
   }
 }
 

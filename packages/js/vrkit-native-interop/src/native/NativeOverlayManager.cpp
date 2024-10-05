@@ -209,7 +209,8 @@ namespace IRacingTools::App::Node {
       resources_.push_back(resource);
     } else {
       auto currentSize = resource->getImageSize();
-      auto changed = currentSize != imageSize;
+      auto currentVRLayout = resource->vrLayout();
+      auto changed = currentSize != imageSize || currentVRLayout != vrLayout;
       if (changed) {
         L->info("Resizing NativeOverlayWindowResources (from={},to={})", currentSize.toString(), imageSize.toString());
         resource->update(imageSize, screenRect, vrLayout);

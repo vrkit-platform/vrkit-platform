@@ -347,6 +347,7 @@ namespace IRacingTools::OpenXR {
             auto& layerPose = layout.pose;
             auto& layerSize = layout.size;
             pose.position = {layerPose.x, layerPose.eyeY, layerPose.z};
+            L->info("XR Frame Pose idx={},x={}", overlayIdx, pose.position.x);
             //auto pose = GetXrPosef(params.kneeboardPose);
             auto imageRect = destRect.staticCast<int, XrRect2Di>();
             addedXRLayers.push_back(

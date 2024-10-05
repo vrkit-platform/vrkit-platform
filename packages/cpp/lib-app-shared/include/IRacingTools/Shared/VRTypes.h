@@ -30,7 +30,12 @@ namespace IRacingTools::Shared::VR {
 
     VRNativePose getHorizontalMirror() const;
 
+    // constexpr auto operator==(const VRNativePose &) const noexcept = default;
     constexpr auto operator<=>(const VRNativePose &) const noexcept = default;
+    constexpr auto operator==(const VRNativePose & other) const noexcept {
+        return x == other.x && eyeY == other.eyeY && z == other.z &&
+          rX == other.rX && rY == other.rY && rZ == other.rZ;
+    };
 
     bool isValid() const {
       return !(x == 0.0f && eyeY == 0.0f && z == 0.0f);
@@ -40,6 +45,11 @@ namespace IRacingTools::Shared::VR {
   struct VRNativeLayout {
     VRNativePose pose{-0.25f, 0.0f, -1.0f};
     VRSize size{0.15f, 0.25f};
+
+    constexpr auto operator<=>(const VRNativeLayout &) const noexcept = default;
+    constexpr auto operator==(const VRNativeLayout & other) const noexcept {
+      return pose == other.pose && size == other.size;
+    };
   };
 
   /** If gaze zoom is enabled, how close you need to be looking for zoom to

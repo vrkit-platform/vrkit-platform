@@ -342,14 +342,15 @@ namespace IRacingTools::Shared::Graphics {
           L->warn("producer returned null of overlay idx ({})", i);
           continue;
         }
-
+        auto vrLayout = overlayData->vrLayout();
+        L->info("Frame Pose idx={},x={}", i, vrLayout.pose.x);
         auto imageSize = overlayData->getImageSize();
         SHM::SHMOverlayFrameConfig overlayFrameConfig{
           .overlayIdx = i,
           .locationOnTexture{.offset_ = {bounds.left(), 0}, .size_ = imageSize, .origin_ = PixelRect::Origin::TopLeft},
           .vrEnabled = true,
           .vr = {
-            .layout = overlayData->vrLayout(),
+            .layout = vrLayout,
             .enableGazeZoom{false},
             .zoomScale{1.0f},
             .gazeTargetScale{},

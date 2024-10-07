@@ -27,6 +27,7 @@ import { OverlayConfig, SessionDataVariableValueMap, SessionTiming } from "vrkit
 import type { AppStore } from "../store"
 import { sharedAppSelectors } from "../store/slices/shared-app"
 import { overlayWindowActions } from "../store/slices/overlay-window"
+import "vrkit-plugin-sdk"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -271,6 +272,7 @@ export class OverlayManagerClient
       overlayConfig = OverlayConfig.fromJson(overlayConfigJs as any)
     } else {
       overlayConfig = {
+        isScreen: !isVRKitEnvVR,
         overlay, placement
       }
     }

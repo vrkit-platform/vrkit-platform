@@ -8,70 +8,13 @@ import { uniq } from "lodash"
 export enum OverlayWindowRole {
   NONE = "NONE",
   OVERLAY = "OVERLAY",
-  SCREEN_EDITOR_INFO = "SCREEN_EDITOR_INFO",
-  VR_EDITOR_INFO = "VR_EDITOR_INFO"
+  EDITOR_INFO = "EDITOR_INFO"
 }
 
 export const OverlaySpecialIds = {
-  [OverlayWindowRole.VR_EDITOR_INFO]: `::VRKIT::INTERNAL::${OverlayWindowRole.VR_EDITOR_INFO}`,
-  [OverlayWindowRole.SCREEN_EDITOR_INFO]: `::VRKIT::INTERNAL::${OverlayWindowRole.SCREEN_EDITOR_INFO}`
+  [OverlayWindowRole.EDITOR_INFO]: `::VRKIT::INTERNAL::${OverlayWindowRole.EDITOR_INFO}`
 }
 
-
-export enum OverlayVREditorEventType {
-  STATE_CHANGED = "STATE_CHANGED"
-}
-
-
-/**
- * OverlayVREditorEventIPCName -> ipc channel name conversion
- */
-export type OverlayVREditorEventIPCName = `OVERLAY_VR_EDITOR_EVENT_${OverlayManagerEventType}`
-
-/**
- * OverlayVREditorEventTypeToIPCName
- *
- * @param type
- * @constructor
- */
-export function OverlayVREditorEventTypeToIPCName(type: OverlayVREditorEventType): OverlayVREditorEventIPCName {
-  return `OVERLAY_VR_EDITOR_EVENT_${type.toUpperCase()}` as OverlayVREditorEventIPCName
-}
-
-export const OverlayVREditorEventIPCNames = uniq(Object.keys(OverlayVREditorEventType).filter(isString))
-    .reduce((map, name) =>
-        ({
-          ...map, [name as OverlayVREditorEventType]:  OverlayVREditorEventTypeToIPCName(name as OverlayVREditorEventType)
-        }), {} as Record<OverlayVREditorEventType, string>)
-
-
-/**
- * Functions that can be invoked via IPC using `ipcRenderer.invoke`
- */
-export enum OverlayVREditorFnType {
-  FETCH_STATE = "FETCH_STATE"
-}
-
-/**
- * Represents a string literal type derived from concatenating
- * "OVERLAY_VR_EDITOR_FN_" with the value of an OverlayClientFnType.
- *
- * This type is primarily used to ensure that IPC (Inter-Process Communication)
- * names for overlay client functions follow a specific naming convention.
- */
-export type OverlayVREditorFnIPCName = `OVERLAY_VR_EDITOR_FN_${OverlayVREditorFnType}`
-
-/**
- * Converts a given OverlayVREditor function type to its corresponding IPC name.
- *
- * @param {OverlayVREditorFnType} type - The type of the OverlayClient
- *     function to be converted.
- * @return {OverlayVREditorFnIPCName} The corresponding IPC name for the
- *     specified OverlayClient function type.
- */
-export function OverlayVREditorFnTypeToIPCName(type: OverlayVREditorFnType): OverlayVREditorFnIPCName {
-  return `OVERLAY_VR_EDITOR_FN_${type.toUpperCase()}` as OverlayVREditorFnIPCName
-}
 
 // ------ OverlayManager events & types
 

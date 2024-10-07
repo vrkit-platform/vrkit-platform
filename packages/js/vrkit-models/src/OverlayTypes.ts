@@ -83,6 +83,10 @@ export interface OverlayConfig {
      * @generated from protobuf field: IRacingTools.Models.Dashboard.OverlayPlacement placement = 2;
      */
     placement?: OverlayPlacement;
+    /**
+     * @generated from protobuf field: bool is_screen = 10;
+     */
+    isScreen: boolean;
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.Dashboard.OverlayKind
@@ -101,13 +105,9 @@ export enum OverlayKind {
      */
     CUSTOM = 10,
     /**
-     * @generated from protobuf enum value: OVERLAY_KIND_SCREEN_EDITOR_INFO = 98;
+     * @generated from protobuf enum value: OVERLAY_KIND_EDITOR_INFO = 99;
      */
-    SCREEN_EDITOR_INFO = 98,
-    /**
-     * @generated from protobuf enum value: OVERLAY_KIND_VR_EDITOR_INFO = 99;
-     */
-    VR_EDITOR_INFO = 99
+    EDITOR_INFO = 99
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class OverlayBaseSettings$Type extends MessageType<OverlayBaseSettings> {
@@ -316,11 +316,13 @@ class OverlayConfig$Type extends MessageType<OverlayConfig> {
     constructor() {
         super("IRacingTools.Models.Dashboard.OverlayConfig", [
             { no: 1, name: "overlay", kind: "message", T: () => OverlayInfo },
-            { no: 2, name: "placement", kind: "message", T: () => OverlayPlacement }
+            { no: 2, name: "placement", kind: "message", T: () => OverlayPlacement },
+            { no: 10, name: "is_screen", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
     create(value?: PartialMessage<OverlayConfig>): OverlayConfig {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.isScreen = false;
         if (value !== undefined)
             reflectionMergePartial<OverlayConfig>(this, message, value);
         return message;
@@ -335,6 +337,9 @@ class OverlayConfig$Type extends MessageType<OverlayConfig> {
                     break;
                 case /* IRacingTools.Models.Dashboard.OverlayPlacement placement */ 2:
                     message.placement = OverlayPlacement.internalBinaryRead(reader, reader.uint32(), options, message.placement);
+                    break;
+                case /* bool is_screen */ 10:
+                    message.isScreen = reader.bool();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -354,6 +359,9 @@ class OverlayConfig$Type extends MessageType<OverlayConfig> {
         /* IRacingTools.Models.Dashboard.OverlayPlacement placement = 2; */
         if (message.placement)
             OverlayPlacement.internalBinaryWrite(message.placement, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* bool is_screen = 10; */
+        if (message.isScreen !== false)
+            writer.tag(10, WireType.Varint).bool(message.isScreen);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

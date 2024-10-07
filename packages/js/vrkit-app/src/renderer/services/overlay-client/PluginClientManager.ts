@@ -34,8 +34,7 @@ const builtinPluginLoaders: Record<OverlayKind, () => Promise<ReactPluginCompone
   [OverlayKind.CUSTOM]: (() => {
     throw Error(`NotImplemented yet, will be part of plugin system`)
   }) as any,
-  [OverlayKind.SCREEN_EDITOR_INFO]: () => importDefault(import("../../overlays/screen-editor-info/ScreenEditorInfoOverlayPlugin")),
-  [OverlayKind.VR_EDITOR_INFO]: () => importDefault(import("../../overlays/vr-editor-info/VREditorInfoOverlayPlugin")),
+  [OverlayKind.EDITOR_INFO]: () => importDefault(import("../../overlays/editor-info/EditorInfoOverlayPlugin")),
   [OverlayKind.TRACK_MAP]: () => importDefault(import("../../overlays/track-map/TrackMapOverlayPlugin")),
   [OverlayKind.CLOCK]: () => importDefault(import("../../overlays/clock/ClockOverlayPlugin"))
 }

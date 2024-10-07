@@ -67,7 +67,7 @@ function VREditorView({ className, ...other }: VREditorViewProps) {
   )
 }
 
-function VREditorInfoOverlayPlugin(props: PluginClientComponentProps) {
+function EditorInfoOverlayPlugin(props: PluginClientComponentProps) {
   const { client, width, height } = props
 
   return <VREditorView />
@@ -78,4 +78,4 @@ function VREditorInfoOverlayPlugin(props: PluginClientComponentProps) {
 //   return VREditorOverlayPlugin
 // }
 
-export default VREditorInfoOverlayPlugin
+export default EditorInfoOverlayPlugin

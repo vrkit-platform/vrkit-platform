@@ -52,4 +52,5 @@ declare global {
   function getVRKitPluginClient(): PluginClient
   
   const isVRKitOverlayWindow: boolean
+  const isVRKitEnvVR: boolean
 }

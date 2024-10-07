@@ -54,19 +54,6 @@ export interface DashboardConfig {
      */
     placements: OverlayPlacement[];
 }
-/**
- * @generated from protobuf enum IRacingTools.Models.Dashboard.DashboardLayoutType
- */
-export enum DashboardLayoutType {
-    /**
-     * @generated from protobuf enum value: DASHBOARD_LAYOUT_TYPE_SCREEN = 0;
-     */
-    SCREEN = 0,
-    /**
-     * @generated from protobuf enum value: DASHBOARD_LAYOUT_TYPE_VR = 1;
-     */
-    VR = 1
-}
 // @generated message type with reflection information, may provide speed optimized methods
 class DashboardConfig$Type extends MessageType<DashboardConfig> {
     constructor() {

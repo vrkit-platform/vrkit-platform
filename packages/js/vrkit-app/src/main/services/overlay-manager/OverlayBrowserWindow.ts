@@ -1,6 +1,13 @@
 import { getLogger } from "@3fv/logger-proxy"
-import { BrowserWindow, BrowserWindowConstructorOptions, IpcMainInvokeEvent, WebPreferences } from "electron"
-import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
+import {
+  BrowserWindow,
+  BrowserWindowConstructorOptions,
+  IpcMainInvokeEvent,
+  WebPreferences
+} from "electron"
+import {
+  OverlayConfig, OverlayInfo, OverlayPlacement, RectI
+} from "vrkit-models"
 import { isDev } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
@@ -13,9 +20,11 @@ import {
 } from "../../../common/models/overlays"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
 import type OverlayManager from "./OverlayManager"
-import { OverlayBrowserWindowType, overlayInfoToUniqueId } from "./OverlayManagerUtils"
+import {
+  OverlayBrowserWindowType, overlayInfoToUniqueId
+} from "./OverlayManagerUtils"
 import { asOption } from "@3fv/prelude-ts"
-import { VREditorInfoOverlayOUID } from "./DefaultOverlayConfigData" // noinspection
+import { isEditorInfoOUID } from "./DefaultOverlayConfigData"
 // TypeScriptUnresolvedVariable
 
 // noinspection TypeScriptUnresolvedVariable
@@ -36,10 +45,10 @@ export class OverlayBrowserWindow {
   private readonly uniqueId_: string
 
   get role(): OverlayWindowRole {
-    return this.config.overlay.id === OverlaySpecialIds.VR_EDITOR_INFO
-      ? OverlayWindowRole.VR_EDITOR_INFO
-      : this.config.overlay.id === OverlaySpecialIds.SCREEN_EDITOR_INFO
-        ? OverlayWindowRole.SCREEN_EDITOR_INFO
+    return this.config.overlay.id === OverlaySpecialIds.EDITOR_INFO
+      ? OverlayWindowRole.EDITOR_INFO
+      : this.config.overlay.id === OverlaySpecialIds.EDITOR_INFO
+        ? OverlayWindowRole.EDITOR_INFO
         : OverlayWindowRole.OVERLAY
   }
 
@@ -82,12 +91,12 @@ export class OverlayBrowserWindow {
     return this.isClosing && this.closeDeferred.isSettled()
   }
 
-  get isVREditor() {
-    return this.uniqueId === VREditorInfoOverlayOUID
+  get isEditorInfo() {
+    return isEditorInfoOUID(this.uniqueId)
   }
 
-  get vrEditorController() {
-    return this.manager.vrEditorController
+  get editorController() {
+    return this.manager.editorController
   }
 
   /**
@@ -131,11 +140,11 @@ export class OverlayBrowserWindow {
   }
 
   get isVR() {
-    return this.kind === OverlayBrowserWindowType.VR
+    return !this.config.isScreen
   }
 
   get isScreen() {
-    return !this.isVR
+    return this.config.isScreen
   }
 
   sendConfig() {
@@ -160,7 +169,7 @@ export class OverlayBrowserWindow {
     overlay: OverlayInfo,
     placement: OverlayPlacement
   ) {
-    this.config_ = { overlay, placement }
+    this.config_ = { isScreen: kind === OverlayBrowserWindowType.SCREEN,  overlay, placement }
     this.uniqueId_ = overlayInfoToUniqueId(this.config.overlay, this.kind)
 
     const screenRect = this.isScreen
@@ -290,8 +299,36 @@ export class OverlayBrowserWindow {
   setFocused(focused: boolean) {
     this.focused_ = focused
   }
-
+  
+  /**
+   * Set whether editor is enabled or not
+   *
+   * @param enabled
+   */
   setEditorEnabled(enabled: boolean): void {
     this.setIgnoreMouseEvents(!enabled)
+  }
+  
+  /**
+   * Invalidate, which forces a repaint
+   */
+  invalidate():void {
+    this.window_?.webContents?.invalidate()
+  }
+  
+  /**
+   * Explicitly set the window bounds
+   *
+   * @param rect
+   */
+  setBounds(rect:RectI):void {
+    const newBounds:Electron.Rectangle = {
+      ...rect.position,
+      ...rect.size
+    }
+    
+    log.info(`Setting new bounds`, newBounds)
+    
+    this.window?.setBounds(newBounds)
   }
 }

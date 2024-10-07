@@ -7,8 +7,7 @@ enum OverlayKind {
   OVERLAY_KIND_TRACK_MAP = 0;
   OVERLAY_KIND_CLOCK = 1;
   OVERLAY_KIND_CUSTOM = 10;
-  OVERLAY_KIND_SCREEN_EDITOR_INFO = 98;
-  OVERLAY_KIND_VR_EDITOR_INFO = 99;
+  OVERLAY_KIND_EDITOR_INFO = 99;
 }
 
 message OverlayBaseSettings {
@@ -41,4 +40,5 @@ message OverlayPlacement {
 message OverlayConfig {
   OverlayInfo overlay = 1;
   OverlayPlacement placement = 2;
+  bool is_screen = 10;
 }

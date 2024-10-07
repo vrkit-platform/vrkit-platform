@@ -4,11 +4,6 @@ import "ScreenConfig.proto";
 
 package IRacingTools.Models.Dashboard;
 
-enum DashboardLayoutType {
-  DASHBOARD_LAYOUT_TYPE_SCREEN = 0;
-  DASHBOARD_LAYOUT_TYPE_VR = 1;
-}
-
 
 message DashboardConfig {
 

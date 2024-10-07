@@ -1,8 +1,14 @@
-import { OverlayInfo, OverlayKind, OverlayPlacement, RectI } from "vrkit-models"
+import {
+  OverlayInfo,
+  OverlayKind,
+  OverlayPlacement,
+  RectI, VRPose
+} from "vrkit-models"
 import { OverlaySpecialIds } from "vrkit-app-common/models"
 import { OverlayBrowserWindowType, overlayInfoToUniqueId } from "./OverlayManagerUtils"
+import { pairOf } from "vrkit-app-common/utils"
 
-export function defaultScreenRect(width:number = 200, height: number = 200) {
+export function defaultScreenRect(width:number = 400, height: number = 400) {
   return {
     size: {
       width,
@@ -15,16 +21,20 @@ export function defaultScreenRect(width:number = 200, height: number = 200) {
   } as RectI
 }
 
-function createVREditorInfoOverlayPlacement(): OverlayPlacement {
-  const screenRect = defaultScreenRect(400,400)
+function defaultEditorInfoVRPose():VRPose {
+  return VRPose.create({ x: -0.35, eyeY: -0.35, z: -1.0 })
+}
+
+function createEditorInfoOverlayPlacement(): OverlayPlacement {
+  const screenRect = defaultScreenRect()
 
   return OverlayPlacement.create({
-    id: OverlaySpecialIds.VR_EDITOR_INFO,
-    overlayId: OverlaySpecialIds.VR_EDITOR_INFO,
+    id: OverlaySpecialIds.EDITOR_INFO,
+    overlayId: OverlaySpecialIds.EDITOR_INFO,
     screenRect,
     vrLayout: {
       // pose: { x: -0.5, eyeY: 0, z: -1.0 },
-      pose: { x: 0.5, eyeY: 0.25, z: -1.0 },
+      pose: defaultEditorInfoVRPose(),
       size: {
         width: 0.75,
         height: 0.75
@@ -34,14 +44,14 @@ function createVREditorInfoOverlayPlacement(): OverlayPlacement {
   })
 }
 
-export const VREditorInfoOverlayPlacement = createVREditorInfoOverlayPlacement()
+export const EditorInfoOverlayPlacement = createEditorInfoOverlayPlacement()
 
-function createVREditorInfoOverlayInfo(): OverlayInfo {
+function createEditorInfoOverlayInfo(): OverlayInfo {
   return OverlayInfo.create({
-    id: OverlaySpecialIds.VR_EDITOR_INFO,
-    kind: OverlayKind.VR_EDITOR_INFO,
-    name: OverlaySpecialIds.VR_EDITOR_INFO,
-    description: OverlaySpecialIds.VR_EDITOR_INFO,
+    id: OverlaySpecialIds.EDITOR_INFO,
+    kind: OverlayKind.EDITOR_INFO,
+    name: OverlaySpecialIds.EDITOR_INFO,
+    description: OverlaySpecialIds.EDITOR_INFO,
     dataVarNames: [],
     settings: {
       fps: 10
@@ -49,45 +59,13 @@ function createVREditorInfoOverlayInfo(): OverlayInfo {
   })
 }
 
-export const VREditorInfoOverlayInfo = createVREditorInfoOverlayInfo()
+export const EditorInfoOverlayInfo = createEditorInfoOverlayInfo()
 
-export const VREditorInfoOverlayOUID = overlayInfoToUniqueId(VREditorInfoOverlayInfo, OverlayBrowserWindowType.VR)
+export const EditorInfoScreenOverlayOUID = overlayInfoToUniqueId(EditorInfoOverlayInfo, OverlayBrowserWindowType.SCREEN)
+export const EditorInfoVROverlayOUID = overlayInfoToUniqueId(EditorInfoOverlayInfo, OverlayBrowserWindowType.VR)
 
+export const EditorInfoOverlayOUIDs = pairOf(EditorInfoVROverlayOUID, EditorInfoScreenOverlayOUID)
 
-function createScreenEditorInfoOverlayPlacement(): OverlayPlacement {
-  const screenRect = defaultScreenRect(400,400)
-  
-  return OverlayPlacement.create({
-    id: OverlaySpecialIds.SCREEN_EDITOR_INFO,
-    overlayId: OverlaySpecialIds.SCREEN_EDITOR_INFO,
-    screenRect,
-    vrLayout: {
-      // pose: { x: -0.5, eyeY: 0, z: -1.0 },
-      pose: { x: 0.5, eyeY: 0.25, z: -1.0 },
-      size: {
-        width: 0.75,
-        height: 0.75
-      },
-      screenRect
-    }
-  })
+export function isEditorInfoOUID(id: string) {
+  return EditorInfoOverlayOUIDs.includes(id)
 }
-
-export const ScreenEditorInfoOverlayPlacement = createScreenEditorInfoOverlayPlacement()
-
-function createScreenEditorInfoOverlayInfo(): OverlayInfo {
-  return OverlayInfo.create({
-    id: OverlaySpecialIds.SCREEN_EDITOR_INFO,
-    kind: OverlayKind.SCREEN_EDITOR_INFO,
-    name: OverlaySpecialIds.SCREEN_EDITOR_INFO,
-    description: OverlaySpecialIds.SCREEN_EDITOR_INFO,
-    dataVarNames: [],
-    settings: {
-      fps: 10
-    }
-  })
-}
-
-export const ScreenEditorInfoOverlayInfo = createScreenEditorInfoOverlayInfo()
-
-export const ScreenEditorInfoOverlayOUID = overlayInfoToUniqueId(ScreenEditorInfoOverlayInfo, OverlayBrowserWindowType.SCREEN)

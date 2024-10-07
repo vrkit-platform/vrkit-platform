@@ -16,7 +16,7 @@ export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardC
     placements: [
       {
         id: "track-map-placement-0",
-        overlayId: "track-map-0",
+        overlayId: trackMapOverlay.id,
         screenRect: {
           size: {
             width: 400,
@@ -36,12 +36,22 @@ export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardC
           size: {
             width: 0.5,
             height: 0.5
+          },
+          screenRect: {
+            size: {
+              width: 400,
+              height: 400
+            },
+            position: {
+              x: 0,
+              y: 0
+            }
           }
         }
       },
       {
         id: "clock-placement-0",
-        overlayId: "clock-0",
+        overlayId: clockOverlay.id,
         screenRect: {
           size: {
             width: 253,
@@ -56,6 +66,16 @@ export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardC
           size: {
             width: 0.5,
             height: 0.5
+          },
+          screenRect: {
+            size: {
+              width: 253,
+              height: 32
+            },
+            position: {
+              x: 0,
+              y: 0
+            }
           }
         }
       }

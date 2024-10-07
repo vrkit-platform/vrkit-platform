@@ -42,7 +42,7 @@ import Icon from "../icon"
 import { faClose } from "@awesome.me/kit-79150a3eed/icons/sharp/light"
 import Typography from "@mui/material/Typography"
 import { isDefined } from "@3fv/guard"
-import { DashboardConfig, DashboardLayoutType } from "vrkit-models"
+import { DashboardConfig } from "vrkit-models"
 import { OverlayManagerClient } from "../../services/overlay-client"
 import { useService } from "../service-container"
 import { useAsyncCallback } from "../../hooks"
@@ -155,7 +155,7 @@ const DashboardsListEditorRoot = styled(Box, {
 export interface DashboardsListEditorProps extends BoxProps {}
 
 interface LayoutFieldProps {
-  type: DashboardLayoutType
+  vr: boolean
   label: string
   enabled: boolean
 
@@ -164,7 +164,7 @@ interface LayoutFieldProps {
   onChange: (enabled: boolean) => void
 }
 
-function LayoutField({ type, label, enabled, config, onChange }: LayoutFieldProps) {
+function LayoutField({ vr: isVR, label, enabled, config, onChange }: LayoutFieldProps) {
   return (
     <Box className={clsx(classNames.layout)}>
       <Box
@@ -277,7 +277,7 @@ export function DashboardsListEditor(props: DashboardsListEditorProps) {
                   </Button>
                 </FlexRowCenterBox>
                 <LayoutField
-                  type={DashboardLayoutType.VR}
+                  vr
                   enabled={config.vrEnabled}
                   label="VR"
                   config={config}
@@ -286,7 +286,8 @@ export function DashboardsListEditor(props: DashboardsListEditorProps) {
                   }}
                 />
                 <LayoutField
-                  type={DashboardLayoutType.SCREEN}
+                    vr={false}
+                    
                   enabled={config.screenEnabled}
                   config={config}
                   label="Screen"

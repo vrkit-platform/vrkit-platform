@@ -16,7 +16,7 @@ import { toJS } from "mobx"
 
 const log = getLogger(__filename)
 
-function createVREditorActions(container: Container, editor: OverlayVREditorController): Action[] {
+function createVREditorActions(container: Container, editor: OverlayEditorController): Action[] {
   const toId = (...parts: string[]) => ["vr.editor.overlay", ...parts].join("."),
     toAccelerators = (...accelerators: string[]) => ({
       defaultAccelerators: accelerators,
@@ -73,7 +73,7 @@ function createVREditorActions(container: Container, editor: OverlayVREditorCont
   ] as Action[]
 }
 
-export class OverlayVREditorController {
+export class OverlayEditorController {
   private readonly disposers_ = new Disposables()
 
   private acceleratorDisposer_: IDisposer = null

@@ -9,7 +9,8 @@ import {
   OverlayPlacement,
   RectI,
   SessionDataVariableValueMap,
-  VRLayout
+  VRLayout,
+  VRPose
 } from "vrkit-models"
 import { isDefined } from "@3fv/guard"
 import {
@@ -20,8 +21,12 @@ import {
   isEqual,
   isRectValid,
   Pair,
+  pairOf,
+  RectangleLayoutTool,
   removeIfMutation,
-  SignalFlag
+  SignalFlag,
+  Triple,
+  tripleOf
 } from "vrkit-app-common/utils"
 import {
   OverlayClientEventTypeToIPCName,
@@ -58,15 +63,18 @@ import {
   overlayInfoToUniqueId
 } from "./OverlayManagerUtils"
 import {
-  ScreenEditorInfoOverlayOUID,
-  VREditorInfoOverlayInfo,
-  VREditorInfoOverlayOUID,
-  VREditorInfoOverlayPlacement
+  EditorInfoOverlayInfo,
+  EditorInfoOverlayPlacement,
+  EditorInfoScreenOverlayOUID,
+  EditorInfoVROverlayOUID,
+  isEditorInfoOUID
 } from "./DefaultOverlayConfigData"
-import { OverlayVREditorController } from "./OverlayVREditorController"
+import { OverlayEditorController } from "./OverlayEditorController"
 import { BindAction } from "../../decorators"
 import { ElectronMainActionManager } from "../electron-actions"
 import ActionRegistry from "../../../common/services/actions/ActionRegistry"
+import { match } from "ts-pattern"
+import { getScreenRectangleLayoutTool, getVRRectangleLayoutTool } from "./OverlayLayoutTools"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -79,6 +87,8 @@ const dashDir = AppPaths.dashboardsDir
 const WinRendererEvents = OverlayWindowRendererEvents
 const WinMainEvents = OverlayWindowMainEvents
 
+export type EditorInfoWithStatus = Triple<OverlayBrowserWindowType, boolean, OverlayBrowserWindow>
+
 @Singleton()
 export class OverlayManager {
   private overlayWindows_: OverlayBrowserWindow[] = []
@@ -87,7 +97,7 @@ export class OverlayManager {
     concurrency: 1
   })
 
-  private readonly vrEditorController_: OverlayVREditorController
+  private readonly editorController_: OverlayEditorController
 
   private readonly disposers_ = new Disposables()
 
@@ -106,17 +116,25 @@ export class OverlayManager {
   get editorEnabled(): boolean {
     return this.state.editor.enabled
   }
-  
-  get screenEditorInfoWindow(): OverlayBrowserWindow {
-    return this.allOverlays.find(it => it.uniqueId === ScreenEditorInfoOverlayOUID || it.role === OverlayWindowRole.SCREEN_EDITOR_INFO)
-  }
-  
-  get vrEditorInfoWindow(): OverlayBrowserWindow {
-    return this.allOverlays.find(it => it.uniqueId === VREditorInfoOverlayOUID || it.role === OverlayWindowRole.VR_EDITOR_INFO)
+
+  get editorInfoWindows(): OverlayBrowserWindow[] {
+    return pairOf(this.screenEditorInfoWindow, this.vrEditorInfoWindow)
   }
 
-  get vrEditorController(): OverlayVREditorController {
-    return this.vrEditorController_
+  get screenEditorInfoWindow(): OverlayBrowserWindow {
+    return this.allOverlays.find(
+      it => it.uniqueId === EditorInfoScreenOverlayOUID
+    )
+  }
+
+  get vrEditorInfoWindow(): OverlayBrowserWindow {
+    return this.allOverlays.find(
+      it => it.uniqueId === EditorInfoVROverlayOUID
+    )
+  }
+
+  get editorController(): OverlayEditorController {
+    return this.editorController_
   }
 
   get isShutdown() {
@@ -127,16 +145,20 @@ export class OverlayManager {
     return this.activeDashboardConfig.vrEnabled
   }
 
+  get isScreenEnabled() {
+    return this.activeDashboardConfig.screenEnabled
+  }
+
   get allOverlays(): OverlayBrowserWindow[] {
     return this.overlayWindows_ ?? []
   }
 
   get vrOverlays() {
-    return this.allOverlays.filter(it => it.isVR && it.uniqueId !== VREditorInfoOverlayOUID)
+    return this.allOverlays.filter(it => it.isVR && !isEditorInfoOUID(it.uniqueId))
   }
 
   get screenOverlays() {
-    return this.allOverlays.filter(it => it.isScreen && it.uniqueId !== ScreenEditorInfoOverlayOUID)
+    return this.allOverlays.filter(it => it.isScreen && !isEditorInfoOUID(it.uniqueId))
   }
 
   get activeDashboardId() {
@@ -206,26 +228,28 @@ export class OverlayManager {
    * Get or create VR Editor Window overlay
    * @private
    */
-  private async getOrCreateVREditorWindow() {
+  private async getOrCreateEditorInfoWindow(kind: OverlayBrowserWindowType) {
     const { editorEnabled } = this
-    if (!this.editorEnabled || !this.isVREnabled) {
+    if (!this.editorEnabled) {
       return null
     }
 
-    const info = VREditorInfoOverlayInfo
-    const placement = VREditorInfoOverlayPlacement
-    let win = this.overlayWindowByUniqueId(VREditorInfoOverlayOUID)
+    const info = EditorInfoOverlayInfo,
+      placement = EditorInfoOverlayPlacement,
+      ouid = kind === OverlayBrowserWindowType.VR ? EditorInfoVROverlayOUID : EditorInfoScreenOverlayOUID
+
+    let win = this.overlayWindowByUniqueId(ouid)
     if (win) {
       return win
     }
 
-    win = await this.createOrUpdateOverlayBrowserWindow(info, placement, OverlayBrowserWindowType.VR)
+    win = await this.createOrUpdateOverlayBrowserWindow(info, placement, kind)
 
     try {
       await win.whenReady()
       this.overlayWindows_.push(win)
     } catch (err) {
-      log.error(`Failed to create VREditor window`, err)
+      log.error(`Failed to create Editor Info window`, err)
       if (win) {
         await win.close()
       }
@@ -248,8 +272,6 @@ export class OverlayManager {
 
     const activePlayer = this.sessionManager.getActivePlayer()
     const overlayMap = config.overlays.filter(isDefined<OverlayInfo>).reduce((map, overlayInfo) => {
-      // activePlayer.getDataVariables(...(overlayInfo.dataVarNames ?? []))
-
       return {
         ...map,
         [overlayInfo.id]: overlayInfo
@@ -276,17 +298,16 @@ export class OverlayManager {
           }
           return windows
         })
-      )
+      ).filter(isDefined<OverlayBrowserWindow>)
     )
-    
+
     this.overlayWindows_ = overlayWindows
-    this.vrEditorController.update();
-    
+    this.editorController.update()
+
     if (overlayWindows.length) {
       await Promise.all(overlayWindows.map(overlay => overlay.whenReady()))
     }
   }
-  
 
   private async updateActiveSession(
     activeSessionId: string,
@@ -354,16 +375,18 @@ export class OverlayManager {
    */
   @BindAction()
   async setEditorEnabled(enabled: boolean) {
-    if (this.editorEnabled === enabled) return enabled
+    if (this.editorEnabled === enabled) {
+      return enabled
+    }
 
     this.state.editor.enabled = enabled
-    
+
     for (const ow of this.allOverlays) {
       ow.setEditorEnabled(enabled)
     }
-    
-    await this.setupInfoEditorWindows()
-    
+
+    await this.checkEditorInfoWindows()
+
     return enabled
   }
 
@@ -433,18 +456,19 @@ export class OverlayManager {
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(OverlayManagerClientFnTypeToIPCName(type), handler))
 
     this.disposers_.push(
-        observe(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged),
-        observe(this.mainAppState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged),
-        () => {
-          ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayManagerClientFnTypeToIPCName(type)))
-          ipcEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
-          app.off("before-quit", this.unload)
-          
-          Object.assign(global, {
-            overlayManager: undefined
-          })
+      observe(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged),
+      observe(this.mainAppState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged),
+      () => {
+        ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayManagerClientFnTypeToIPCName(type)))
+        ipcEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
+        app.off("before-quit", this.unload)
+
+        Object.assign(global, {
+          overlayManager: undefined
         })
-    
+      }
+    )
+
     // In dev mode, make everything accessible
     if (isDev) {
       Object.assign(global, {
@@ -476,14 +500,14 @@ export class OverlayManager {
   constructor(
     @InjectContainer() readonly container: Container,
     readonly actionRegistry: ActionRegistry,
-      readonly mainActionManager: ElectronMainActionManager,
-      readonly sessionManager: SessionManager,
+    readonly mainActionManager: ElectronMainActionManager,
+    readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
     readonly mainWindowManager: MainWindowManager,
     readonly mainAppState: MainSharedAppState,
     readonly dashManager: DashboardManager
   ) {
-    this.vrEditorController_ = new OverlayVREditorController(this.container, this)
+    this.editorController_ = new OverlayEditorController(this.container, this)
   }
 
   /**
@@ -564,7 +588,8 @@ export class OverlayManager {
         vrLayout = this.getOverlayVRLayout(win),
         screenRect = vrLayout.screenRect
 
-      //log.info(`OnPaint event`, win.uniqueId, "size", imageSize, "dirty", dirty, "vrLayout", vrLayout)
+      //log.info(`OnPaint event`, win.uniqueId, "size", imageSize, "dirty",
+      // dirty, "vrLayout", vrLayout)
       this.nativeManager_.createOrUpdateResources(
         win.uniqueId,
         win.windowId,
@@ -618,6 +643,8 @@ export class OverlayManager {
   private createOnBoundsChangedHandler(targetPlacement: OverlayPlacement, win: OverlayBrowserWindow): Function {
     return (event: Electron.Event) => {
       this.updateScreenOverlayWindowBounds(win)
+
+      this.autoLayoutEditorInfoWindows()
     }
   }
 
@@ -683,7 +710,7 @@ export class OverlayManager {
       position: pick(bounds, "x", "y")
     })
   }
-  
+
   updateScreenOverlayWindowBounds(win: OverlayBrowserWindow): RectI {
     const screenRect = this.getOverlayWindowScreenRect(win)
 
@@ -737,33 +764,106 @@ export class OverlayManager {
   }
 
   /**
+   * Get editor info windows with status & enablement
+   */
+  get editorInfoWindowsWithStatus(): Array<EditorInfoWithStatus> {
+    return pairOf(
+      tripleOf(OverlayBrowserWindowType.VR, this.isVREnabled, this.vrEditorInfoWindow),
+      tripleOf(OverlayBrowserWindowType.SCREEN, this.isScreenEnabled, this.screenEditorInfoWindow)
+    )
+  }
+
+  /**
+   * Auto layout the editor info windows
+   */
+  autoLayoutEditorInfoWindows() {
+    if (!this.editorEnabled) {
+      return
+    }
+
+    this.editorInfoWindowsWithStatus
+      .filter(([_, enabled, win]: EditorInfoWithStatus) => !!enabled && isDefined<OverlayBrowserWindow>(win))
+      .forEach(([kind, _, win]: EditorInfoWithStatus) => {
+        match(kind === OverlayBrowserWindowType.VR)
+          .with(true, () => {
+            const tool = getVRRectangleLayoutTool()
+            this.vrOverlays
+              .map(it => it.placement.vrLayout)
+              .map(vrl => new RectangleLayoutTool.Rectangle(vrl.pose.x, vrl.pose.eyeY, vrl.size.width, vrl.size.height))
+              .forEach(rect => {
+                tool.push(rect)
+              })
+
+            const { placement } = win,
+              size = placement.vrLayout.size,
+              newPosition = tool.findPositionClosestToAnchor(size.width, size.height),
+              newPose = assign(VRPose.clone(placement.vrLayout.pose), {
+                x: newPosition.x,
+                eyeY: newPosition.y
+              })
+
+            log.info(`New EditorInfo VR pose`, newPose)
+            placement.vrLayout.pose = newPose
+            win.invalidate()
+          })
+          .otherwise(() => {
+            const tool = getScreenRectangleLayoutTool()
+            this.screenOverlays
+              .map(it => it.placement.screenRect)
+              .map(
+                rect =>
+                  new RectangleLayoutTool.Rectangle(rect.position.x, rect.position.y, rect.size.width, rect.size.height)
+              )
+              .forEach(rect => {
+                tool.push(rect)
+              })
+
+            const { placement } = win,
+              size = placement.screenRect.size,
+              newPosition = tool.findPositionClosestToAnchor(size.width, size.height)
+
+            log.info(`New EditorInfo Screen position`, newPosition)
+            placement.screenRect.position = newPosition
+
+            win.setBounds(placement.screenRect)
+          })
+      })
+  }
+
+  /**
    * Setup VR Editor Window based on current mode
    *
    * @private
    */
-  private async setupInfoEditorWindows() {
-    let vrEditorWindow = this.vrEditorInfoWindow
+  private async checkEditorInfoWindows() {
+    const windows = this.editorInfoWindowsWithStatus
 
-    if (!this.editorEnabled || !this.isVREnabled) {
-      if (vrEditorWindow) {
-        await vrEditorWindow.close()
-      }
+    await match(this.editorEnabled)
+      .with(false, () =>
+        Promise.all(
+          windows.map(async ([kind, kindEnabled, win]) => {
+            if (win) {
+              await win.close()
 
-      removeIfMutation(
-        this.overlayWindows_,
-        it => it.uniqueId === VREditorInfoOverlayOUID || it.role === OverlayWindowRole.VR_EDITOR_INFO
+              removeIfMutation(this.overlayWindows_, it => it.uniqueId === win.uniqueId)
+            }
+          })
+        )
       )
-      return null
-    }
+      .otherwise(async () => {
+        await Promise.all(
+          windows.map(async ([kind, enabled, win]) => {
+            if (enabled && !win) {
+              win = await this.getOrCreateEditorInfoWindow(kind)
+            }
 
-    if (!vrEditorWindow) {
-      vrEditorWindow = await this.getOrCreateVREditorWindow()
-    }
+            if (win) win.setEditorEnabled(this.editorEnabled)
+          })
+        )
 
-    vrEditorWindow.setEditorEnabled(this.editorEnabled)
+        this.autoLayoutEditorInfoWindows()
+      })
   }
-
-  
 }
 
 export default OverlayManager

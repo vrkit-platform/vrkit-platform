@@ -6,7 +6,7 @@ import {
   ActionKeyInterceptor,
   ActionOptions,
   ActionRegistry,
-  AppActionIds,
+  AppActionId,
   WebAppActions
 } from "vrkit-app-common/services"
 import { Bind, LazyGetter } from "vrkit-app-common/decorators"

@@ -24,6 +24,7 @@ import { DashboardsState, newDashboardsState } from "vrkit-app-common/models/das
 import { newSessionsState, SessionsState } from "vrkit-app-common/models/sessions"
 import { BindAction } from "../../decorators"
 import { isDev } from "../../constants"
+import { newActionsState } from "vrkit-app-common/models/actions"
 
 const log = getLogger(__filename)
 
@@ -36,19 +37,18 @@ export class MainSharedAppState implements ISharedAppState {
   private stopObserving: IDisposer
 
   private shutdownInProgress: boolean = false
-
-  // @observable zoomFactor:number = 1.0
-
+  
   @observable systemTheme: ThemeId = getAppThemeFromSystem()
   
-
   /**
    * Get app settings from state
    */
   @observable appSettings: AppSettings = AppSettings.create()
 
   @observable devSettings = newDevSettings()
-
+  
+  @observable actions = newActionsState()
+  
   @observable sessions = newSessionsState()
 
   @observable overlays: OverlaysState = newOverlaysState()
@@ -153,12 +153,13 @@ export class MainSharedAppState implements ISharedAppState {
   }
 
   @BindAction() updateDashboards(patch: Partial<DashboardsState>) {
-    this.dashboards = assign(cloneDeep(this.dashboards), patch)
+    assign(this.dashboards, patch)
     return this.dashboards
   }
 
-  @BindAction() updateDevSettings(patch: Partial<DevSettings>) {
-    this.devSettings = assign(cloneDeep(this.devSettings), patch)
+  @BindAction()
+  updateDevSettings(patch: Partial<DevSettings>) {
+    assign(this.devSettings, patch)
   }
   
   @BindAction() setSystemTheme(theme: ThemeId) {

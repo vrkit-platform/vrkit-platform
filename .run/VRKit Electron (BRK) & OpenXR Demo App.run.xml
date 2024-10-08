@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="VRKit Electron (BRK) &amp; OpenXR Demo App" type="CompoundRunConfigurationType">
+    <toRun name="VRKit: Electron Main (BRK)" type="CMakeRunConfiguration" />
+    <toRun name="openxr-demo-app" type="CMakeRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>

@@ -10,7 +10,7 @@ import type { BoxProps } from "@mui/material/Box"
 import Box from "@mui/material/Box"
 import { styled } from "@mui/material/styles"
 import {
-  child,
+  alpha, child,
   FillBounds,
   FillWidth,
   FillWindow,
@@ -37,6 +37,8 @@ import SharedAppStateClient from "../../services/shared-app-state-client"
 import { SizeI } from "vrkit-models"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import { useAppSelector } from "../../services/store"
+import { getContrastText } from "../../styles"
+import { darken } from "@mui/material"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -52,11 +54,13 @@ const OverlayConfigEditorRoot = styled(Box, {
   position: "fixed",
   zIndex: 10000,
   borderRadius: "1rem",
-  borderColor: "transparent",
+  // borderColor: "transparent",
+  borderColor: darken(theme.palette.action.active, 0.3),
   borderStyle: "inset",
-  borderWidth: "3px",
-  backgroundColor: theme.palette.background.gradient,
-  backgroundImage: theme.palette.background.gradientImage,
+  borderWidth: "5px",
+  backgroundColor: alpha(theme.palette.action.active, 0.7),
+  color: theme.palette.text.primary,
+  // backgroundImage: theme.palette.action.active,
   gap: "2rem",
   ...FlexColumn,
   ...FlexAlignCenter,
@@ -67,7 +71,8 @@ const OverlayConfigEditorRoot = styled(Box, {
 
   ...transition(["opacity"]),
   [hasCls(overlayConfigEditorClasses.selected)]: {
-    borderColor: theme.palette.action.active,
+    // borderColor: theme.palette.action.active,
+    // borderColor: darken(theme.palette.action.active, 0.3),
   },
   [hasCls(overlayConfigEditorClasses.modeNormal)]: {
     opacity: 0,
@@ -89,7 +94,8 @@ const OverlayConfigEditorRoot = styled(Box, {
   [child(overlayConfigEditorClasses.content)]: {
     ...FlexColumn,
     ...FlexScaleZero,
-    ...flexAlign("center", "center")
+    ...flexAlign("center", "center"),
+    ...theme.typography.h6
   }
 }))
 
@@ -126,25 +132,25 @@ export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps)
       {...other}
     >
       {size.height > 200 ?<>
-      <Box className={overlayConfigEditorClasses.header}>
-        
-        <Typography
-          className="electronWindowDraggable"
-          sx={{ ...FlexScaleZero }}
-          variant="h4"
-        >
-          Editing <i>&quot;{overlayInfo.name}&quot;</i>
-        </Typography>
-        <Button
-          variant="contained"
-          sx={{ ...FlexAuto }}
-          onClick={() => {
-            overlayClient.setEditorEnabled(false)
-          }}
-        >
-          Done
-        </Button>
-      </Box>
+      {/*<Box className={overlayConfigEditorClasses.header}>*/}
+      {/*  */}
+      {/*  <Typography*/}
+      {/*    className="electronWindowDraggable"*/}
+      {/*    sx={{ ...FlexScaleZero }}*/}
+      {/*    variant="h4"*/}
+      {/*  >*/}
+      {/*    Editing <i>&quot;{overlayInfo.name}&quot;</i>*/}
+      {/*  </Typography>*/}
+      {/*  <Button*/}
+      {/*    variant="contained"*/}
+      {/*    sx={{ ...FlexAuto }}*/}
+      {/*    onClick={() => {*/}
+      {/*      overlayClient.setEditorEnabled(false)*/}
+      {/*    }}*/}
+      {/*  >*/}
+      {/*    Done*/}
+      {/*  </Button>*/}
+      {/*</Box>*/}
       <Box className={clsx("electronWindowDraggable", overlayConfigEditorClasses.content)}>
         <FlexRowCenterBox>Resize: drag corner anchors</FlexRowCenterBox>
         <FlexRowCenterBox>Move: click & drag anywhere in this window</FlexRowCenterBox>

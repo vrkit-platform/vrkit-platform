@@ -11,7 +11,7 @@ import { asOption, Predicate } from "@3fv/prelude-ts"
 import type { ActionContainer } from "./ActionContainer"
 import EventEmitter3 from "eventemitter3"
 import { get } from "lodash/fp"
-import { AppActionId } from "./AppActionIds"
+import { AppActionIdName } from "./AppActionIds"
 import { IDisposer } from "mobx-utils"
 
 // noinspection TypeScriptUnresolvedVariable
@@ -19,9 +19,9 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-function actionMatcher(match: Partial<Action>) {
-  const criteria = Object.entries(match)
-  return Predicate.of<Action>(action =>
+function actionMatcher(match: Partial<Action>):Predicate<Action> {
+  const criteria:[string, any][] = Object.entries(match)
+  return Predicate.of<Action>((action:Action) =>
     criteria.every(([key, value]) => isEqual(action[key], value))
   )
 }
@@ -43,30 +43,30 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
   /**
    * Shortcut to get container ids
    */
-  get containerIds() {
+  get containerIds():string[] {
     return this.containers.map(get("id"))
   }
 
   /**
    * Internal private state
    */
-  private readonly state = {
+  private readonly state:{ allActions:Action[]; containerActions:Action[] } = {
     
     containerActions: Array<Action>(),
     allActions: Array<Action>()
   }
 
-  private readonly appActions = new Map<string, Action>()
+  private readonly appActions:Map<string, Action> = new Map<string, Action>()
 
-  get containerActions() {
+  get containerActions():Action[] {
     return this.state.containerActions
   }
   
-  get globalActions() {
-    return this.state.allActions.filter(action => action.type === ActionType.Global)
+  get globalActions():Action[] {
+    return this.state.allActions.filter((action:Action) => action.type === ActionType.Global)
   }
   
-  get globalActionIds() {
+  get globalActionIds():string[] {
     return this.globalActions.map(get("id"))
   }
 
@@ -74,10 +74,9 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
    * Get all actions as a list
    *
    * @return {Action[]}
-   * @private
    */
 
-  get allActions() {
+  get allActions():Action[] {
     return this.state.allActions
   }
 
@@ -88,7 +87,7 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
    * @return {Action}
    */
   @Bind
-  get(id: string | AppActionId) {
+  get(id: string | AppActionIdName):Action {
     return this.appActions.get(id)
   }
 
@@ -101,7 +100,7 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
    */
   @Bind
   find(match: Partial<Action>): Action {
-    const matcher = actionMatcher(match)
+    const matcher:Predicate<Action> = actionMatcher(match)
     for (const [, value] of this.appActions) {
       if (matcher(value)) {
         return value
@@ -118,7 +117,7 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
    */
   @Bind
   findAll(match: Partial<Action>): Action[] {
-    const matcher = actionMatcher(match)
+    const matcher:Predicate<Action> = actionMatcher(match)
 
     return [...this.appActions.values()].filter(matcher)
   }
@@ -142,7 +141,7 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
   add(
     idOrAction: string | Action | ActionOptions,
     actionArg?: Action | ActionOptions
-  ) {
+  ):void {
     let id: string = null
     if (isString(idOrAction)) {
       id = idOrAction
@@ -151,7 +150,7 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
       actionArg = idOrAction
     }
 
-    const action =
+    const action:Action =
       actionArg instanceof Action ? actionArg : new Action(actionArg)
     this.appActions.set(id, action)
     this.emit("appActionsChanged", this.appActions)
@@ -160,45 +159,45 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
   @Bind
   addAll(
     ...actionArgs: Array<Action | Action[] | ActionOptions | ActionOptions[]>
-  ) {
-    const actions = flatten(actionArgs).map(arg =>
+  ):void {
+    const actions:Action[] = flatten(actionArgs).map((arg:Action | ActionOptions) =>
       arg instanceof Action ? arg : new Action(arg)
     )
     actions.forEach(this.add)
   }
 
   @Bind
-  register(id: string, action: Action) {
+  register(id: string, action: Action):void {
     this.add(id, action)
   }
 
   @Bind
-  remove(id: string) {
+  remove(id: string):void {
     this.appActions.delete(id)
   }
 
   @Bind
-  removeAll(...ids: string[]) {
-    ids.forEach(id => {
+  removeAll(...ids: string[]):void {
+    ids.forEach((id:string) => {
       this.appActions.delete(id)
     })
   }
 
 
   @Bind
-  deregister(id: string) {
+  deregister(id: string):void {
     this.remove(id)
   }
 
   @Bind
-  all(type?: ActionType) {
+  all(type?: ActionType):Action[] {
     return !type
       ? [...this.appActions.values()]
       : [...this.appActions.values()].filter(propEqualTo("type", type))
   }
 
-  hasContainer(containerOrId: ActionContainer | string) {
-    const containerId = isString(containerOrId)
+  hasContainer(containerOrId: ActionContainer | string):boolean {
+    const containerId:string = isString(containerOrId)
       ? containerOrId
       : containerOrId.id
     return this.containers.some(propEqualTo("id", containerId))
@@ -210,16 +209,16 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
    * @param containerOrId
    * @returns
    */
-  removeContainer(containerOrId: ActionContainer | string) {
-    const containerId = isString(containerOrId)
+  removeContainer(containerOrId: ActionContainer | string):this {
+    const containerId:string = isString(containerOrId)
       ? containerOrId
       : containerOrId.id
     if (!this.hasContainer(containerId)) {
       debug(`Container is not known (%s)`, containerId)
     } else {
       // Unregister all container actions
-      const container = this.containers.find(propEqualTo("id", containerId))
-      container.allActionIds.forEach(id => this.appActions.delete(id))
+      const container:ActionContainer = this.containers.find(propEqualTo("id", containerId))
+      container.allActionIds.forEach((id:string) => this.appActions.delete(id))
 
       // Remove container
       removeFirstMutation(this.containers, propEqualTo("id", containerId))
@@ -231,7 +230,7 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
     return this
   }
 
-  addContainer(container: ActionContainer) {
+  addContainer(container: ActionContainer):this {
     if (this.hasContainer(container)) {
       warn(`Container (${container.id}) already added`)
       return this
@@ -247,11 +246,11 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
    * Rebuild actions on container change
    */
   @Bind
-  private onContainersChanged() {
+  private onContainersChanged():void {
     this.state.containerActions = this.containers.flatMap(
-      (container) =>
+      (container:ActionContainer) =>
             container.allActions
-              .map(action =>
+              .map((action:ActionOptions) =>
                 action instanceof Action ? action : new Action(action)
               )
 
@@ -261,19 +260,19 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
   }
 
   @Bind
-  private onAppActionsChanged() {
+  private onAppActionsChanged():void {
     this.rebuildAllActions()
   }
 
   @Bind
-  private rebuildAllActions() {
+  private rebuildAllActions():void {
     this.state.allActions = Array<Action>(
       ...this.appActions.values(),
       ...this.containerActions
     ).reverse()
   }
 
-  get allContainers() {
+  get allContainers():ActionContainer[] {
     return [...this.containers.values()]
   }
 
@@ -282,7 +281,7 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
    *
    * @return {Map<string, Action>}
    */
-  getRegistry() {
+  getRegistry():Map<string, Action> {
     return new Map(this.appActions)
   }
   

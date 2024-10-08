@@ -1,16 +1,17 @@
-export const AppActionIds = {
-  gotoAppSettings: "gotoAppSettings",
-  resetAll: "resetAll",
-  quit: "quit",
-  //newWindow: "newWindow",
-  closeWindow: "closeWindow",
+export enum AppActionId {
+  gotoAppSettings =  "gotoAppSettings",
+  resetAll =  "resetAll",
+  quit =  "quit",
+  //newWindow =  "newWindow",
+  closeWindow =  "closeWindow",
   
-  save: "save",
+  save =  "save",
   
-  zoomDefault: "zoomDefault",
-  zoomIn: "zoomIn",
-  zoomOut: "zoomOut",
-  importProject: "importProject",
-  newProject: "newProject"
+  zoomDefault =  "zoomDefault",
+  zoomIn =  "zoomIn",
+  zoomOut =  "zoomOut",
+  importProject =  "importProject",
+  newProject =  "newProject"
 }
-export type AppActionId = keyof typeof AppActionIds
+
+export type AppActionIdName = `${AppActionId}` | AppActionId | string

@@ -12,6 +12,7 @@ import {
 import type { SessionDetail, SessionsState } from "../sessions"
 import { toJS } from "mobx"
 import { OverlaysStateSchema } from "../overlays"
+import { ActionsState, ActionsStateSchema } from "../actions"
 
 
 
@@ -21,8 +22,10 @@ export const AppSettingsSchema = createSimpleSchema<AppSettings>({
   zoomFactor: primitive(),
   autoconnect: primitive(),
   defaultDashboardConfigId: primitive(),
+  openDashboardOnLaunch: primitive(),
   customAccelerators: map(primitive())
 })
+
 
 
 export const SessionDetailSchema = createSimpleSchema<SessionDetail>({
@@ -61,5 +64,6 @@ export const SharedAppStateSchema = createSimpleSchema<ISharedAppState>({
   dashboards: object(DashboardsStateSchema),
   sessions: object(SessionsStateSchema),
   overlays: object(OverlaysStateSchema),
+  actions: object(ActionsStateSchema),
   devSettings: custom(toPlainObject, Identity),
 })

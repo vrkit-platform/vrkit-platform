@@ -281,6 +281,12 @@ export function actionOptionsWithTuple(
   } as ActionOptions))
 }
 
+export interface ActionDef extends Omit<ActionOptions, "container" | "execute"> {
+  id: NonNullable<string>
+  type: NonNullable<ActionTypeKind>
+  name: NonNullable<string>
+}
+
 /**
  * Action options, used to defined
  * an action.

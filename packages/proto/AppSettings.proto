@@ -12,6 +12,8 @@ message AppSettings {
 
   string default_dashboard_config_id = 1;
 
+  bool open_dashboard_on_launch = 6;
+
   ThemeType theme_type = 2;
 
   float zoom_factor = 3;

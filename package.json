@@ -47,12 +47,14 @@
   },
 
   "devDependencies": {
+    "@swc/jest": "^0.2.36",
     "@electron/rebuild": "^3.6.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@protobuf-ts/plugin": "^2.9.4",
     "@svgr/webpack": "^8.1.0",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@testing-library/jest-dom": "^6.4.8",
+    
     "@testing-library/react": "^16.0.0",
     "@tomjs/electron-devtools-installer": "^2.3.2",
     "@tsconfig/node16": "^16.1.3",

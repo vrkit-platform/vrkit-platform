@@ -20,8 +20,8 @@ export class RectangleLayoutTool<
 
   get centerPosition() {
     return this.positionType.create({
-      x: this.totalWidth / 2.0,
-      y: this.totalHeight / 2.0
+      x: this.position.x + (this.totalWidth / 2.0),
+      y: this.position.y + (this.totalHeight / 2.0)
     })
   }
 
@@ -40,13 +40,16 @@ export class RectangleLayoutTool<
   get totalHeight() {
     return this.rect.size.height
   }
-  
+
   /**
    * Constructor for initializing the object.
    *
-   * @param {RectI | RectF} rect - The containing rectangle of all member rects.
-   * @param {boolean} isFloating - A flag to indicate whether `integral` or `floating` values should be used.
-   * @param {PositionI | PositionF} [preferredPosition=null] - The preferred position optionally provided; default is null.
+   * @param {RectI | RectF} rect - The containing rectangle of all member
+   *     rects.
+   * @param {boolean} isFloating - A flag to indicate whether `integral` or
+   *     `floating` values should be used.
+   * @param {PositionI | PositionF} [preferredPosition=null] - The preferred
+   *     position optionally provided; default is null.
    */
   constructor(
     readonly rect: R,
@@ -74,14 +77,17 @@ export class RectangleLayoutTool<
     const pointsToCheck: RectangleLayoutTool.MeasuredPoint<P>[] = []
     for (let i = 0.0; i <= this.totalWidth - targetWidth; i += this.increment) {
       for (let j = 0.0; j <= this.totalHeight - targetHeight; j += this.increment) {
+        const x = this.position.x + i,
+            y = this.position.y + j
+        
         const distance = RectangleLayoutTool.calculateDistance(
-            this.rect.position.x + i + (targetWidth / 2.0),
-            this.rect.position.y + j + (targetHeight / 2.0),
+          x + (targetWidth / 2.0),
+          y + (targetHeight / 2.0),
           anchorX,
           anchorY
         )
         pointsToCheck.push({
-          position: { x: i, y: j } as P,
+          position: { x, y } as P,
           distanceToCenter: distance
         })
       }
@@ -94,8 +100,8 @@ export class RectangleLayoutTool<
 
       if (!this.some(shape => newRect.intersects(shape))) {
         const adjustedPoint = this.positionType.create({
-          x: this.position.x + point.position.x,
-          y: this.position.y + point.position.y
+          x: point.position.x,
+          y: point.position.y
         }) as P
 
         log.info(`Optimal position is`, this.positionType.toJson(adjustedPoint))

@@ -1,9 +1,8 @@
 import { OverlayInfo, OverlayKind } from "vrkit-models"
 import { asOption } from "@3fv/prelude-ts"
 import { isString } from "@3fv/guard"
-import { assert, EnumValueToName } from "vrkit-app-common/utils"
+import { assert, EnumValueToName } from "../../utils"
 import { uniq } from "lodash"
-import { endsWith } from "lodash/fp"
 
 export enum OverlayBrowserWindowType {
   SCREEN = "SCREEN",

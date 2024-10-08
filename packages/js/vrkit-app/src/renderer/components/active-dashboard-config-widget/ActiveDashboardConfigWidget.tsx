@@ -25,6 +25,8 @@ import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 import Button from "@mui/material/Button"
 import SharedAppStateClient from "../../services/shared-app-state-client"
 import { OverlayManagerClient } from "../../services/overlay-client"
+import Checkbox from "@mui/material/Checkbox"
+import Typography from "@mui/material/Typography"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -60,21 +62,24 @@ export interface ActiveDashboardConfigWidgetProps extends BoxProps {}
  * ActiveDashboardConfigWidget Component
  *
  * @param { ActiveDashboardConfigWidgetProps } props
- * @returns {JSX.Element}
  */
 export function ActiveDashboardConfigWidget(props: ActiveDashboardConfigWidgetProps) {
   const { ...other } = props,
     configId = useAppSelector(sharedAppSelectors.selectDefaultDashboardConfigId), // activeConfig = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
     configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
-    appSettingsClient = useService(AppSettingsClient),
+    appSettings = useAppSelector(sharedAppSelectors.selectAppSettings),
+      appSettingsClient = useService(AppSettingsClient),
     sharedAppClient = useService(SharedAppStateClient),
-      overlayClient = useService(OverlayManagerClient),
+    overlayClient = useService(OverlayManagerClient),
     dashClient = useService(DashboardManagerClient),
-    setDefaultDashboardConfigId = useCallback((id: string) => {
-      appSettingsClient.changeSettings({ defaultDashboardConfigId: id })
-    }, [appSettingsClient]),
+    setDefaultDashboardConfigId = useCallback(
+      (id: string) => {
+        appSettingsClient.changeSettings({ defaultDashboardConfigId: id })
+      },
+      [appSettingsClient]
+    ),
     hasActiveDashboard = !!useAppSelector(sharedAppSelectors.selectActiveDashboardConfigId),
-      editorEnabled = useAppSelector(sharedAppSelectors.selectEditorEnabled),
+    editorEnabled = useAppSelector(sharedAppSelectors.selectEditorEnabled),
     toggleDashboard = useCallback(() => {
       if (hasActiveDashboard) {
         dashClient.closeDashboard()
@@ -88,6 +93,16 @@ export function ActiveDashboardConfigWidget(props: ActiveDashboardConfigWidgetPr
 
   return (
     <ActiveDashboardConfigWidgetRoot {...other}>
+      <Checkbox
+          onChange={(ev) => {
+            appSettingsClient.changeSettings({
+              openDashboardOnLaunch: ev.target.checked // !appSettings.openDashboardOnLaunch
+            })
+          }}
+          checked={appSettings.openDashboardOnLaunch} />
+      <div>
+        Auto Open
+      </div>
       <Select
         className={clsx(activeDashboardConfigWidgetClasses.select)}
         disableUnderline

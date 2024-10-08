@@ -13,7 +13,7 @@ import {
   ActionAccelerator,
   ActionMenuItemDesktopRoleKind,
   ActionRegistry,
-  AppActionIds,
+  AppActionId,
   electronRoleToId
 } from "vrkit-app-common/services"
 import { ElectronMainActionManager } from "../electron-actions"
@@ -127,7 +127,7 @@ export class ElectronMainMenuManager {
         submenu: [
           { role: "about" },
           { type: "separator" },
-          actionToItem(AppActionIds.gotoAppSettings),
+          actionToItem(AppActionId.gotoAppSettings),
           { type: "separator" },
           { role: "services" },
           { type: "separator" },
@@ -135,7 +135,7 @@ export class ElectronMainMenuManager {
           // { role: "hideOthers" as MenuItemRole },
           // { role: "unhide" as MenuItemRole },
           // { type: "separator" as MenuItemRole },
-          actionToItem(AppActionIds.quit)
+          actionToItem(AppActionId.quit)
         ] as MenuItemConstructorOptions["submenu"]
       },
       // { role: 'fileMenu' }
@@ -143,7 +143,7 @@ export class ElectronMainMenuManager {
         label: "File",
         submenu: [
           // actionToItem(AppActionIds.newWindow),
-          !isMac && actionToItem(AppActionIds.quit)
+          !isMac && actionToItem(AppActionId.quit)
         ].filter(Boolean)
       },
       // { role: 'editMenu' }
@@ -170,9 +170,9 @@ export class ElectronMainMenuManager {
             ]
           },
 
-          actionToItem(AppActionIds.zoomDefault),
-          actionToItem(AppActionIds.zoomIn),
-          actionToItem(AppActionIds.zoomOut),
+          actionToItem(AppActionId.zoomDefault),
+          actionToItem(AppActionId.zoomIn),
+          actionToItem(AppActionId.zoomOut),
           { type: "separator" },
           roleItem("togglefullscreen"),
 
@@ -189,7 +189,7 @@ export class ElectronMainMenuManager {
                 { type: "separator" },
                 roleItem("front"),
                 { type: "separator" },
-                roleItem("close", AppActionIds.closeWindow)
+                roleItem("close", AppActionId.closeWindow)
               ]
             : [])
         ] as MenuItemConstructorOptions[]

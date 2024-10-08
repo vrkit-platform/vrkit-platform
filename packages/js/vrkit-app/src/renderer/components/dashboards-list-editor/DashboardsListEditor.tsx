@@ -199,7 +199,6 @@ function LayoutField({ vr: isVR, label, enabled, config, onChange }: LayoutField
  * DashboardsListEditor Component
  *
  * @param { DashboardsListEditorProps } props
- * @returns {JSX.Element}
  */
 export function DashboardsListEditor(props: DashboardsListEditorProps) {
   const theme = useTheme(),

@@ -7,7 +7,7 @@ import { Bind } from "vrkit-app-common/decorators"
 import { WindowSizeDefault } from "../../constants"
 import { defaults } from "vrkit-app-common/utils"
 import { getLogger } from "@3fv/logger-proxy"
-import { PostConstruct, Singleton } from "@3fv/ditsy"
+import { Singleton } from "@3fv/ditsy"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -42,9 +42,7 @@ export interface PersistentWindowState {
   isFullScreen: boolean
 }
 
-export function getDisplayBounds(
-  win: Electron.BrowserWindow
-): Electron.Rectangle {
+export function getDisplayBounds(win: Electron.BrowserWindow): Electron.Rectangle {
   return screen.getDisplayMatching(win.getBounds()).bounds
 }
 
@@ -133,8 +131,7 @@ export class WindowManager {
 
   validateState() {
     const { state } = this
-    const isValid =
-      state && (this.hasBounds() || state.isMaximized || state.isFullScreen)
+    const isValid = state && (this.hasBounds() || state.isMaximized || state.isFullScreen)
 
     if (!isValid) {
       this.state = null
@@ -189,10 +186,7 @@ export class WindowManager {
   @Bind stateChangeHandler() {
     // Handles both 'resize' and 'move'
     clearTimeout(this.stateChangeTimer)
-    this.stateChangeTimer = setTimeout(
-      this.updateState,
-      WindowManager.EventHandlingDelay
-    ) as any
+    this.stateChangeTimer = setTimeout(this.updateState, WindowManager.EventHandlingDelay) as any
   }
 
   @Bind closeHandler() {
@@ -210,10 +204,9 @@ export class WindowManager {
       warn(`Window manager already enabled on window id`, win?.id)
       return
     }
-    
-    if (this.winRef)
-      this.disable()
-    
+
+    if (this.winRef) this.disable()
+
     const { config, state } = this
     if (config.maximize && state.isMaximized) {
       win.maximize()
@@ -247,8 +240,7 @@ export class WindowManager {
   // Load previous state
   load() {
     try {
-      if (Fs.existsSync(this.filename))
-        this.state = Fs.readJSONSync(this.filename)
+      if (Fs.existsSync(this.filename)) this.state = Fs.readJSONSync(this.filename)
     } catch (err) {
       error("Failed to load state", err)
     }
@@ -282,9 +274,7 @@ export class WindowManager {
   }
 
   get displayBounds() {
-    return (this.state?.displayBounds ?? !this.winRef)
-      ? null
-      : getDisplayBounds(this.winRef)
+    return (this.state?.displayBounds ?? !this.winRef) ? null : getDisplayBounds(this.winRef)
   }
 
   get isMaximized() {
@@ -302,37 +292,6 @@ export class WindowManager {
       width: this.width,
       height: this.height
     }
-  }
-}
-
-@Singleton()
-export class MainWindowManager {
-  private mainWindow_: Electron.BrowserWindow = null
-  
-  get mainWindow() {
-    return this.mainWindow_
-  }
-  
-  constructor(readonly windowManager: WindowManager) {
-  
-  }
-  
-  @PostConstruct() // @ts-ignore
-  private async init(): Promise<void> {
-    if (import.meta.webpackHot) {
-      const previousMainWindow = import.meta.webpackHot.data?.["mainWindow"]
-      if (previousMainWindow)
-        this.setMainWindow(previousMainWindow)
-      
-      import.meta.webpackHot.dispose(data => {
-        data["mainWindow"] = this.mainWindow
-      })
-    }
-  }
-  
-  setMainWindow(newMainWindow: Electron.BrowserWindow = null) {
-    this.mainWindow_ = newMainWindow
-    this.windowManager.enable(newMainWindow)
   }
 }
 

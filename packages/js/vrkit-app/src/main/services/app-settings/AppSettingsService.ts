@@ -84,23 +84,18 @@ export class AppSettingsService {
   private async onSaveAppSettings(_event: Electron.IpcMainInvokeEvent, settings: Partial<AppSettings>) {
     return serialize(AppSettingsSchema, this.patchSettings(settings))
   }
-
+  
   /**
-   * On state change, emit to renderers
-   *
+   * Resource cleanup
    */
-  @Bind
-  private broadcastAppSettingsChange() {
-    // const {appSettings} = this
-    //
-    // webContents.getAllWebContents().forEach(webContent => {
-    //   webContent.send(ElectronIPCChannel.settingsChanged, appSettings)
-    // })
-  }
-
   [Symbol.dispose]() {
     this.disposers_.dispose()
   }
+  
+  /**
+   * Simply calls dispose
+   * @private
+   */
   private unload() {
     this[Symbol.dispose]()
   }
@@ -148,7 +143,8 @@ export class AppSettingsService {
       warn(`Failed to load app settings, using defaults`, err)
       return AppSettings.create({
         defaultDashboardConfigId: null,
-        autoconnect: false
+        autoconnect: false,
+        openDashboardOnLaunch: true
       })
     }
   }

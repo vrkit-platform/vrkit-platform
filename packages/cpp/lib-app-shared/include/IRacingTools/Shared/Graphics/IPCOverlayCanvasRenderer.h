@@ -377,8 +377,10 @@ namespace IRacingTools::Shared::Graphics {
 
         // CAPTURE/CONSUME AN AVAILABLE FRAME
         if (!overlayData->imageData()->consume(imageDataBuffer)) {
-          if (!imageDataBuffer || !imageDataBuffer->hasData()) {
-            L->warn("no frame buffer consumed/populated/filled (idx={})", i);
+          auto invalidBuffer = !imageDataBuffer;
+          auto hasData = imageDataBuffer && imageDataBuffer->hasData();
+          if (invalidBuffer || !hasData) {
+            L->warn("no frame buffer consumed/populated/filled (idx={},invalidBuffer={},hasData={})", i, invalidBuffer, hasData);
             continue;
           }
 

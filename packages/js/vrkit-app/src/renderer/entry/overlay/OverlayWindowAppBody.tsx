@@ -25,6 +25,9 @@ import { isObject } from "@3fv/guard"
 import {
   overlayWindowSelectors
 } from "../../services/store/slices/overlay-window"
+import {
+  EditorInfoScreenOverlayOUID, EditorInfoVROverlayOUID
+} from "../../../common/models"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -51,6 +54,7 @@ export default function OverlayWindowAppBody() {
     editorEnabled = useAppSelector(sharedAppSelectors.selectEditorEnabled),
       PluginComponent = useAppSelector(overlayWindowSelectors.selectOverlayComponent),
       isVR = window.location.hash.endsWith("VR"),
+      isEditorInfo = [EditorInfoScreenOverlayOUID,EditorInfoVROverlayOUID].some(id => window.location.hash.includes(id)),
       isEditMode = editorEnabled,
     
     contentRef = useRef<HTMLDivElement>(),
@@ -116,7 +120,7 @@ export default function OverlayWindowAppBody() {
           />
           }
         </OverlayAppBodyContentRoot>}
-      {isEditMode && isObject(size) ? <OverlayWindowLayoutEditor editorEnabled={editorEnabled} size={size} /> : <></>
+      {!isEditorInfo && isEditMode && isObject(size) ? <OverlayWindowLayoutEditor editorEnabled={editorEnabled} size={size} /> : <></>
       }
       
     </>

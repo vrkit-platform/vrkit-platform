@@ -159,6 +159,7 @@
     "@hazae41/mutex": "^2.1.0"
   },
   "devDependencies": {
+    "@swc/jest": "^0.2.36",
     "@electron/notarize": "^2.3.2",
     "@protobuf-ts/plugin": "^2.9.4",
     "@tsconfig/node16": "^16.1.3",

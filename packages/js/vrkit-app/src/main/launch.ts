@@ -1,18 +1,19 @@
 import { isDev, isMac, WindowSizeDefault } from "./constants"
+import SharedAppState, { getSharedAppStateStore } from "./services/store"
 
 import Path from "path"
-import type { NativeImage, Rectangle } from "electron"
 import { app, BrowserWindow } from "electron"
 import { createWindowOpenHandler, resolveHtmlPath, windowOptionDefaults } from "./utils"
-import { Option } from "@3fv/prelude-ts"
 
-import { defaults, signalFlag } from "vrkit-app-common/utils"
+import { assert, defaults, signalFlag } from "vrkit-app-common/utils"
 
 import { getLogger } from "@3fv/logger-proxy"
 import { getService } from "./ServiceContainer"
 import { MainWindowManager, WindowManager } from "./services/window-manager"
 import * as ElectronRemote from "@electron/remote/main"
-import { getValue } from "@3fv/guard"
+import { DashboardManager } from "./services/dashboard-manager"
+import { asOption } from "@3fv/prelude-ts"
+import { Deferred } from "@3fv/deferred"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -54,25 +55,24 @@ function prepareWindow(win: BrowserWindow) {
   win.on("close", () => {
     windowMap.delete(id)
   })
- 
 
   const windowOpenHandler = createWindowOpenHandler((ev, result) => {
     log.info(`windowOpenHandler`, ev)
     return result
   })
-  
+
   ElectronRemote.enable(win.webContents)
-  win.webContents.on('render-process-gone', (event, details) => {
+  win.webContents.on("render-process-gone", (event, details) => {
     error(`Renderer process crashed`, details, event)
   })
-    
-    win.on("show", () => {
+
+  win.on("show", () => {
     win.webContents.setWindowOpenHandler(windowOpenHandler)
     if (isDev) {
       win.webContents.openDevTools()
     }
   })
-  
+
   win.webContents.setWindowOpenHandler(windowOpenHandler)
   win.webContents.on("did-create-window", (newWin, details) => {
     info(`Preparing new webContents window`)
@@ -83,7 +83,9 @@ function prepareWindow(win: BrowserWindow) {
 async function launch() {
   const windowManager = getService(WindowManager)
   const mainWindowManager = getService(MainWindowManager)
-
+  const dashManager = getService(DashboardManager)
+  const appState = getSharedAppStateStore(),
+    { appSettings, dashboards: dashState } = appState
   const createWindow = async () => {
     mainWindow = new BrowserWindow({
       ...defaults(windowManager.createWindowOptions, WindowSizeDefault),
@@ -100,30 +102,49 @@ async function launch() {
     app.on("browser-window-created", (_, newWin) => {
       prepareWindow(newWin)
     })
-    
+
     mainWindowManager.setMainWindow(mainWindow)
 
     const url = resolveHtmlPath("index.html")
-      if (url)
-        console.info("Resolved URL: ", url)
-      
+    if (url) {
+      log.info("Resolved URL: ", url)
+    }
+
     const firstLoadSignal = signalFlag()
     mainWindow.on("ready-to-show", () => {
-      firstLoadSignal.toggle()
-
-      if (!mainWindow) {
-        throw new Error('"mainWindow" is not defined')
+      if (firstLoadSignal.set()) {
+        log.warn(`Already called ready-to-show`)
+        return
       }
 
-      // Open devtools in `development` automatically
+      assert(!!mainWindow, '"mainWindow" is not defined')
+
+      // SHOW MAIN WINDOW
       mainWindow.show()
+      mainWindowManager.emit("UI_READY", mainWindow)
+      
+      
     })
 
     mainWindow.on("closed", () => {
       mainWindow = null
+
+      log.info(`Main window closed, exiting app`)
+      app.quit()
+      app.exit(0)
+      
+      Deferred.delay(200).then(() => {
+        const pid = process.pid
+        console.info(`Exiting process`)
+        
+        process.kill(pid)
+        process.exit(0)
+        
+      })
+      
     })
-    
-    await mainWindow.loadURL(url).catch(err => console.error("Failed to load url", url, err))
+
+    await mainWindow.loadURL(url).catch(err => log.error("Failed to load url", url, err))
     // const menuBuilder = new MenuBuilder(mainWindow)
     // menuBuilder.buildMenu()
     //
@@ -149,7 +170,11 @@ async function launch() {
   app.on("activate", async () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (!windowPromise) if (mainWindow === null) await createWindow()
+    if (!windowPromise) {
+      if (mainWindow === null) {
+        await createWindow()
+      }
+    }
   })
   return windowPromise
 }

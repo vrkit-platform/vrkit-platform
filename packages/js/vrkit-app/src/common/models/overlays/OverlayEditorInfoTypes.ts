@@ -4,7 +4,7 @@ import {
   OverlayPlacement,
   RectI, VRPose
 } from "vrkit-models"
-import { OverlaySpecialIds } from "vrkit-app-common/models"
+import { OverlaySpecialIds } from "./OverlayDataTypes"
 import { OverlayBrowserWindowType, overlayInfoToUniqueId } from "./OverlayManagerUtils"
 import { pairOf } from "vrkit-app-common/utils"
 
@@ -27,7 +27,7 @@ function defaultEditorInfoVRPose():VRPose {
 
 function createEditorInfoOverlayPlacement(): OverlayPlacement {
   const screenRect = defaultScreenRect()
-
+  
   return OverlayPlacement.create({
     id: OverlaySpecialIds.EDITOR_INFO,
     overlayId: OverlaySpecialIds.EDITOR_INFO,

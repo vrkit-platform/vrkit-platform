@@ -60,15 +60,14 @@ import {
   assertIsValidOverlayUniqueId,
   isValidOverlayUniqueId,
   OverlayBrowserWindowType,
-  overlayInfoToUniqueId
-} from "./OverlayManagerUtils"
-import {
+  overlayInfoToUniqueId,
   EditorInfoOverlayInfo,
   EditorInfoOverlayPlacement,
   EditorInfoScreenOverlayOUID,
   EditorInfoVROverlayOUID,
   isEditorInfoOUID
-} from "./DefaultOverlayConfigData"
+} from "vrkit-app-common/models"
+
 import { OverlayEditorController } from "./OverlayEditorController"
 import { BindAction } from "../../decorators"
 import { ElectronMainActionManager } from "../electron-actions"
@@ -439,7 +438,7 @@ export class OverlayManager {
    */
   @PostConstruct() // @ts-ignore
   private async init(): Promise<void> {
-    app.on("before-quit", this.unload)
+    app.on("quit", this.unload)
 
     const { sessionManager } = this,
       ipcFnHandlers = Array<Pair<OverlayManagerClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
@@ -461,7 +460,7 @@ export class OverlayManager {
       () => {
         ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayManagerClientFnTypeToIPCName(type)))
         ipcEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
-        app.off("before-quit", this.unload)
+        app.off("quit", this.unload)
 
         Object.assign(global, {
           overlayManager: undefined
@@ -585,9 +584,19 @@ export class OverlayManager {
     return (_ev: Electron.Event, dirty: Electron.Rectangle, image: NativeImage) => {
       const buf = image.getBitmap(),
         imageSize = image.getSize(),
-        vrLayout = this.getOverlayVRLayout(win),
+        vrLayout = win.placement.vrLayout,// this.getOverlayVRLayout(win),
         screenRect = vrLayout.screenRect
-
+      
+      screenRect.size = {width: imageSize.width, height: imageSize.height}
+      
+      // if (win.isEditorInfo) {
+      //   log.info(`onPaint editor info frame`, imageSize, VRLayout.toJson(vrLayout))
+      // }
+      
+      if (!imageSize.width || !imageSize.height) {
+        log.warn(`Invalid image size, ignoring frame`, imageSize)
+        return;
+      }
       //log.info(`OnPaint event`, win.uniqueId, "size", imageSize, "dirty",
       // dirty, "vrLayout", vrLayout)
       this.nativeManager_.createOrUpdateResources(
@@ -742,20 +751,10 @@ export class OverlayManager {
   getOverlayVRLayout(win: OverlayBrowserWindow): VRLayout {
     return asOption(win.placement?.vrLayout)
       .filter(isDefined)
-      .filter(hasProps("size", "pose"))
-      .orElse(() => asOption(VRLayout.create()))
+      .filter(hasProps("size", "pose", "screenRect"))
       .map(vrLayout =>
         VRLayout.toJson(
-          defaultsDeep(vrLayout, {
-            pose: {
-              x: -0.25,
-              eyeY: 0.0,
-              z: -1.0
-            },
-            size: { width: 0.5, height: 0.5 },
-            screenRect: this.getOverlayWindowScreenRect(win)
-          }),
-          {
+          vrLayout, {
             emitDefaultValues: true
           }
         )

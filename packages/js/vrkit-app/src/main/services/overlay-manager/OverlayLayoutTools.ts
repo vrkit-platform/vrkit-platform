@@ -1,20 +1,26 @@
 import { RectangleLayoutTool } from "../../../common/utils"
-import { PositionI, RectF, RectI } from "vrkit-models"
+import { PositionF, PositionI, RectF, RectI } from "vrkit-models"
 import { screen } from "electron"
 import { asOption } from "@3fv/prelude-ts"
 import { flow } from "lodash"
 
-export function getVRRectangleLayoutTool() {
+const VRDefaultDimension = 4.0
+
+export function getVRRectangleLayoutTool(dimension: number = VRDefaultDimension) {
+  const originOffset = 0 - (dimension / 2)
   return new RectangleLayoutTool(RectF.create({
     position: {
-      x: -1.0,
-      y: -1.0
+      x: originOffset,
+      y: originOffset
     },
     size: {
-      width: 2.0,
-      height: 2.0,
+      width: dimension,
+      height: dimension,
     }
-  }), true)
+  }), true, PositionF.create({
+    x: 0,
+    y: 0
+  }))
 }
 
 export function getAllDisplaysScreenRect(): RectI {

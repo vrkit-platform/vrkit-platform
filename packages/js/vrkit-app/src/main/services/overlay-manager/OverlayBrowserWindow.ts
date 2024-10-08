@@ -16,15 +16,14 @@ import {
   OverlayManagerClientFnType,
   OverlayManagerClientFnTypeToIPCName,
   OverlaySpecialIds,
-  OverlayWindowRole
+  OverlayWindowRole,
+  OverlayBrowserWindowType, overlayInfoToUniqueId,
+  isEditorInfoOUID
 } from "../../../common/models/overlays"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
 import type OverlayManager from "./OverlayManager"
-import {
-  OverlayBrowserWindowType, overlayInfoToUniqueId
-} from "./OverlayManagerUtils"
 import { asOption } from "@3fv/prelude-ts"
-import { isEditorInfoOUID } from "./DefaultOverlayConfigData"
+
 // TypeScriptUnresolvedVariable
 
 // noinspection TypeScriptUnresolvedVariable
@@ -328,7 +327,7 @@ export class OverlayBrowserWindow {
     }
     
     log.info(`Setting new bounds`, newBounds)
-    
+    this.config_.placement.screenRect = rect
     this.window?.setBounds(newBounds)
   }
 }

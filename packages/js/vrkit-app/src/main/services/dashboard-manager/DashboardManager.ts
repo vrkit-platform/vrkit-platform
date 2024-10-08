@@ -1,10 +1,19 @@
 import { getLogger } from "@3fv/logger-proxy"
-import { app, ipcMain, IpcMainInvokeEvent } from "electron"
+import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from "electron"
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
 import { DashboardConfig } from "vrkit-models"
 import { isDefined } from "@3fv/guard"
-import { Disposables, isDev, isEmpty, Pair, removeIfMutation, SignalFlag } from "vrkit-app-common/utils"
+import {
+  assert,
+  Disposables,
+  isDev,
+  isEmpty,
+  isNotEmpty,
+  Pair,
+  removeIfMutation,
+  SignalFlag
+} from "vrkit-app-common/utils"
 import { DashboardManagerFnType, DashboardManagerFnTypeToIPCName } from "../../../common/models/dashboards"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
@@ -17,7 +26,6 @@ import PQueue from "p-queue"
 import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
 import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
-import type { IArrayDidChange, IMapDidChange, IObjectDidChange } from "mobx"
 import { set } from "mobx"
 import { IDisposer } from "mobx-utils"
 import { DashboardsState } from "vrkit-app-common/models"
@@ -54,14 +62,22 @@ export class DashboardManager {
     return this.shutdownFlag_.isSet
   }
 
-  get dashboardConfigs() {
+  get dashboardConfigs(): DashboardConfig[] {
     return this.state?.configs ?? []
   }
-  
+
+  get defaultDashboardConfig() {
+    return this.dashboardConfigById(this.defaultDashboardId)
+  }
+
   get defaultDashboardId() {
     return this.mainAppState.appSettings.defaultDashboardConfigId
   }
-  
+
+  get defaultDashboardConfigIsValid() {
+    return isNotEmpty(this.defaultDashboardId) && !!this.dashboardConfigById(this.defaultDashboardId)
+  }
+
   get activeDashboardId() {
     return this.state.activeConfigId
   }
@@ -74,6 +90,11 @@ export class DashboardManager {
       .getOrNull() as DashboardConfig
   }
 
+  /**
+   * Verify & validate `DashboardsState`
+   * @param state
+   * @private
+   */
   private validateState(state: DashboardsState = this.state): DashboardsState {
     // CREATE A DEFAULT CONFIG IF NONE EXIST
     if (isEmpty(state.configs)) {
@@ -83,27 +104,32 @@ export class DashboardManager {
       })
 
       state.configs.push(defaultConfig)
-      return this.mainAppState.updateDashboards(state)
+      state = this.mainAppState.updateDashboards(state)
     }
+
+    if (!this.defaultDashboardConfigIsValid) {
+      const config = first(state.configs)
+      assert(isDefined(config) && isNotEmpty(config.id), "No dashboard configs exist after it was just checked")
+      this.appSettingsService.changeSettings({
+        defaultDashboardConfigId: config.id
+      })
+    }
+
+    assert(
+      this.defaultDashboardConfigIsValid,
+      "this.defaultDashboardConfigIsValid is false, but should've been resolved"
+    )
 
     return state
   }
 
-  getActiveOrDefaultDashboardConfig() {
-    const state = this.validateState()
-    const { activeDashboardConfig, activeDashboardId } = this
-    if (activeDashboardConfig)
-      return activeDashboardConfig
-    
-    const defaultDashboardConfigId = this.mainAppState.appSettings.defaultDashboardConfigId
-    let config = this.dashboardConfigById(defaultDashboardConfigId)
-    if (config)
-      return config
-      
-    this.appSettingsService.changeSettings({
-      defaultDashboardConfigId: state.configs[0].id
-    })
-  
+  /**
+   * Get either the active dashboard config or
+   * the default dashboard config
+   */
+  getActiveOrDefaultDashboardConfig(): DashboardConfig {
+    this.validateState()
+    return asOption(this.activeDashboardConfig).getOrCall(() => this.defaultDashboardConfig)
   }
 
   /**
@@ -131,12 +157,12 @@ export class DashboardManager {
       .filter(isDefined)
       .getOrThrow()
 
-    const state: DashboardsState = {
+    Object.assign(this.state, {
       configs,
       activeConfigId: "" //this.appSettingsService.appSettings?.activeDashboardId
-    }
+    })
 
-    return this.validateState(state)
+    return this.validateState()
   }
 
   @BindAction()
@@ -150,8 +176,10 @@ export class DashboardManager {
     return first(removedDashConfigs)
   }
 
-  deleteDashboardConfigHandler(event: IpcMainInvokeEvent, id: string): Promise<DashboardConfig> {
-    return this.deleteDashboardConfig(id).then(config => (!config ? null : (DashboardConfig.toJson(config) as any)))
+  async deleteDashboardConfigHandler(event: IpcMainInvokeEvent, id: string): Promise<DashboardConfig> {
+    return await this.deleteDashboardConfig(id).then(config =>
+      !config ? null : (DashboardConfig.toJson(config) as any)
+    )
   }
 
   @Bind
@@ -162,7 +190,9 @@ export class DashboardManager {
   @BindAction()
   async updateDashboardConfig(id: string, patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
     const dashConfig = this.dashboardConfigs.find(it => it.id === id)
-    if (!dashConfig) throw Error(`Unable to find dashboard with id(${id})`)
+    if (!dashConfig) {
+      throw Error(`Unable to find dashboard with id(${id})`)
+    }
     set(dashConfig, patch)
     await this.saveDashboardConfigTaskFactory(dashConfig)
     return dashConfig
@@ -202,7 +232,9 @@ export class DashboardManager {
 
   @BindAction()
   async openDashboard(id: string) {
-    if (!this.dashboardConfigById(id)) throw Error(`Unable to find config for id (${id})`)
+    if (!this.dashboardConfigById(id)) {
+      throw Error(`Unable to find config for id (${id})`)
+    }
 
     set(this.state, "activeConfigId", id)
     return id
@@ -214,6 +246,24 @@ export class DashboardManager {
 
   async launchDashboardLayoutEditorHandler(event: IpcMainInvokeEvent, id: string): Promise<void> {
     // return this.dashboardConfigs.map(it => DashboardConfig.toJson(it) as any)
+  }
+
+  @Bind
+  private async onUIReady(win: BrowserWindow) {
+    if (!this.mainAppState.appSettings.openDashboardOnLaunch) {
+      log.info(`open dash on launch is not enabled`)
+      return
+    }
+    await asOption(this.getActiveOrDefaultDashboardConfig()).match({
+      Some: dash => this.openDashboard(dash.id),
+      None: () => {
+        warn(
+          `appSettings.openDashboardOnLaunch is set, but not valid default dashboard was found`,
+          this.activeDashboardId
+        )
+        return Promise.resolve<string>(null)
+      }
+    })
   }
 
   [Symbol.dispose]() {
@@ -242,9 +292,9 @@ export class DashboardManager {
     this.mainAppState.setDashboards(await this.createInitialState())
     //this.checkActiveDashboardConfig()
 
-    app.on("before-quit", this.unload)
+    app.on("quit", this.unload)
 
-    const { sessionManager } = this,
+    const { mainWindowManager, sessionManager } = this,
       ipcFnHandlers = [
         [DashboardManagerFnType.LAUNCH_DASHBOARD_LAYOUT_EDITOR, this.launchDashboardLayoutEditorHandler.bind(this)],
         [DashboardManagerFnType.OPEN_DASHBOARD, this.openDashboardHandler.bind(this)],
@@ -254,6 +304,9 @@ export class DashboardManager {
         [DashboardManagerFnType.DELETE_DASHBOARD_CONFIG, this.deleteDashboardConfigHandler.bind(this)]
       ] as DashFnPair[]
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(DashboardManagerFnTypeToIPCName(type), handler))
+
+    mainWindowManager.on("UI_READY", this.onUIReady)
+    
     if (isDev) {
       Object.assign(global, {
         dashboardsManager: this
@@ -261,11 +314,13 @@ export class DashboardManager {
     }
     // In dev mode, make everything accessible
     this.disposers_.push(() => {
+      mainWindowManager.off("UI_READY", this.onUIReady)
+      
       if (this.stopObserving) {
         this.stopObserving()
       }
       ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(DashboardManagerFnTypeToIPCName(type)))
-      app.off("before-quit", this.unload)
+      app.off("quit", this.unload)
 
       Object.assign(global, {
         overlayManager: undefined
@@ -289,7 +344,8 @@ export class DashboardManager {
    * @param mainAppState
    */
   constructor(
-    @InjectContainer() readonly container: Container,
+    @InjectContainer()
+    readonly container: Container,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
     readonly mainWindowManager: MainWindowManager,
@@ -316,7 +372,12 @@ export class DashboardManager {
       const dashFile = Path.join(AppPaths.dashboardsDir, config.id + FileExtensions.Dashboard)
       info(`Saving dashboard ${dashFile}`)
 
-      await Fsx.writeJSON(dashFile, DashboardConfig.toJson(config))
+      await Fsx.writeJSON(
+        dashFile,
+        DashboardConfig.toJson(config, {
+          emitDefaultValues: true
+        })
+      )
     }
   }
 

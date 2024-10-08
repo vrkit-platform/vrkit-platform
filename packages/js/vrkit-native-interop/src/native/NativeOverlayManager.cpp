@@ -204,6 +204,10 @@ namespace IRacingTools::App::Node {
     if (!resource) resource = getResourceByWindowId(windowId);
 
     if (!resource) {
+      if (!imageSize) {
+        L->info("Unable to create NativeOverlayWindowResources, size is invalid ({})", imageSize.toString());
+        return env.Null();
+      }
       L->info("Creating NativeOverlayWindowResources (size={})", imageSize.toString());
       resource = std::make_shared<NativeOverlayWindowResources>(windowId, overlayId, imageSize, screenRect, vrLayout);
       resources_.push_back(resource);

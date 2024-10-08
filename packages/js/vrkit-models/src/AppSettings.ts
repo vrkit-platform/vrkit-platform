@@ -19,6 +19,10 @@ export interface AppSettings {
      */
     defaultDashboardConfigId: string;
     /**
+     * @generated from protobuf field: bool open_dashboard_on_launch = 6;
+     */
+    openDashboardOnLaunch: boolean;
+    /**
      * @generated from protobuf field: IRacingTools.Models.ThemeType theme_type = 2;
      */
     themeType: ThemeType;
@@ -59,6 +63,7 @@ class AppSettings$Type extends MessageType<AppSettings> {
     constructor() {
         super("IRacingTools.Models.AppSettings", [
             { no: 1, name: "default_dashboard_config_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "open_dashboard_on_launch", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 2, name: "theme_type", kind: "enum", T: () => ["IRacingTools.Models.ThemeType", ThemeType] },
             { no: 3, name: "zoom_factor", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
             { no: 5, name: "autoconnect", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
@@ -68,6 +73,7 @@ class AppSettings$Type extends MessageType<AppSettings> {
     create(value?: PartialMessage<AppSettings>): AppSettings {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.defaultDashboardConfigId = "";
+        message.openDashboardOnLaunch = false;
         message.themeType = 0;
         message.zoomFactor = 0;
         message.autoconnect = false;
@@ -83,6 +89,9 @@ class AppSettings$Type extends MessageType<AppSettings> {
             switch (fieldNo) {
                 case /* string default_dashboard_config_id */ 1:
                     message.defaultDashboardConfigId = reader.string();
+                    break;
+                case /* bool open_dashboard_on_launch */ 6:
+                    message.openDashboardOnLaunch = reader.bool();
                     break;
                 case /* IRacingTools.Models.ThemeType theme_type */ 2:
                     message.themeType = reader.int32();
@@ -127,6 +136,9 @@ class AppSettings$Type extends MessageType<AppSettings> {
         /* string default_dashboard_config_id = 1; */
         if (message.defaultDashboardConfigId !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.defaultDashboardConfigId);
+        /* bool open_dashboard_on_launch = 6; */
+        if (message.openDashboardOnLaunch !== false)
+            writer.tag(6, WireType.Varint).bool(message.openDashboardOnLaunch);
         /* IRacingTools.Models.ThemeType theme_type = 2; */
         if (message.themeType !== 0)
             writer.tag(2, WireType.Varint).int32(message.themeType);

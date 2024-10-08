@@ -279,9 +279,9 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       // [SessionManagerFnType.GET_STATE, this.getStateHandler.bind(this)]
     )
 
-    app.on("before-quit", this.unload)
+    app.on("quit", this.unload)
     this.disposers_.push(() => {
-      app.off("before-quit", this.unload)
+      app.off("quit", this.unload)
       ipcFnHandlers.forEach(([type]) => ipcMain.removeHandler(SessionManagerFnTypeToIPCName(type)))
       
       Object.assign(global, {

@@ -18,7 +18,7 @@ import {
 
 import { AppStore } from "../store"
 import { selectSettings } from "../store/selectors/GlobalSelectors"
-import { ElectronMainAppActions } from "vrkit-app-common/services/actions/ElectronMainAppActions"
+
 import {
   addWindowListener,
   removeWindowListener

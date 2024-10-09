@@ -498,7 +498,7 @@ export class OverlayManager {
    */
   constructor(
     @InjectContainer() readonly container: Container,
-    readonly actionRegistry: ActionRegistry,
+    // readonly actionRegistry: ActionRegistry,
     readonly mainActionManager: ElectronMainActionManager,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,

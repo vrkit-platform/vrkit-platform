@@ -1,29 +1,45 @@
-import { PostConstruct, Singleton } from "@3fv/ditsy"
+import {
+  Container,
+  InjectContainer,
+  PostConstruct,
+  Singleton
+} from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 import { Bind, LazyGetter } from "vrkit-app-common/decorators"
 import {
   Action,
-  ActionDefaultAccelerator,
+  ActionDef,
+  ActionDefaultAccelerator, ActionExecutor,
   ActionMenuItemDesktopRole,
   ActionMenuItemDesktopRoleKind,
   ActionOptions,
   ActionRegistry,
   ActionType,
-  ElectronMainAppActions,
   electronRoleToId
 } from "vrkit-app-common/services"
 import { app, globalShortcut, IpcMainInvokeEvent } from "electron"
-import { flatten, partition } from "lodash"
+import { flatten, omit, partition } from "lodash"
 import {
   isDev, ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin
 } from "../../constants"
 
-import { assert, isPromise } from "@3fv/guard"
+import { assert, isDefined, isPromise, isString } from "@3fv/guard"
 import { get } from "lodash/fp"
-import { getSharedAppStateStore } from "../store"
+import { getSharedAppStateStore, MainSharedAppState } from "../store"
 import { IDisposer } from "mobx-utils"
-import { isNotEmpty, removeIfMutation } from "../../../common/utils"
+import {
+  defaults, Disposables, isNotEmpty, Pair, pairOf, removeIfMutation
+} from "../../../common/utils"
 import Accelerator = Electron.Accelerator
+import { ElectronMainAppActions } from "./ElectronMainAppActions"
+import { ElectronMainGlobalActions } from "./ElectronMainGlobalActions"
+import { BindAction } from "../../decorators"
+import { set } from "mobx"
+import { ActionsState } from "vrkit-app-common/models/actions"
+import {
+  editorExecuteAction
+} from "../overlay-manager/OverlayEditorActionFactory"
+import { asOption } from "@3fv/prelude-ts"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -34,14 +50,15 @@ function electronMenuActionOptions(
   role: ActionMenuItemDesktopRoleKind,
   defaultAccelerator: string | string[],
   options: ActionOptions = {}
-): ActionOptions {
-  return {
-    id: electronRoleToId(role),
+): ActionDef {
+  const id = electronRoleToId(role)
+  return defaults({
+    id,
     role: role as ActionMenuItemDesktopRole,
     type: ActionType.App,
     defaultAccelerators: flatten([defaultAccelerator]),
     ...options
-  }
+  }, { name:  id }) as ActionDef
 }
 
 type ElectronRoleAcceleratorData = [
@@ -76,10 +93,55 @@ export const electronMenuActions = roleAccelerators.map(
     electronMenuActionOptions(role, accel, options)
 )
 
+
 /**
  * Global actions
  */
 export const electronGlobalActions: Array<ActionOptions> = [
+  {
+    ...ElectronMainGlobalActions.toggleOverlayEditor,
+    execute: editorExecuteAction(([om, editor]) => {
+      om.setEditorEnabled(!om.editorEnabled)
+    })
+    
+  },
+  {
+    ...ElectronMainGlobalActions.switchOverlayFocusNext,
+    execute: editorExecuteAction(([om, editor]) => {
+            editor.executeSelectOverlay(1)
+          })
+    
+  },
+  {
+    ...ElectronMainGlobalActions.switchOverlayFocusPrevious,
+    execute:editorExecuteAction(([om, editor]) => {
+      editor.executeSelectOverlay(-1)
+    })
+  },
+  {
+    ...ElectronMainGlobalActions.toggleOverlayPlacementProp,
+    execute: editorExecuteAction(([om, editor]) => {
+      editor.executeSelectNextOverlayProp()
+    })
+  },
+  {
+    ...ElectronMainGlobalActions.incrementOverlayPlacementProp,
+    execute: editorExecuteAction(([om, editor]) => {
+      editor.executeAdjustSelectedOverlayConfigProp(true)
+    })
+  },
+  {
+    ...ElectronMainGlobalActions.decrementOverlayPlacementProp,
+    execute: editorExecuteAction(([om, editor]) => {
+      editor.executeAdjustSelectedOverlayConfigProp(false)
+    })
+  }
+  
+]
+/**
+ * App actions
+ */
+export const electronAppActions: Array<ActionOptions> = [
   {
     ...ElectronMainAppActions.gotoAppSettings,
     execute: () => {
@@ -149,19 +211,36 @@ export const electronGlobalActions: Array<ActionOptions> = [
   }
 ]
 
+function actionOptionsToActionDefs(actions:ActionOptions[]):Array<ActionDef> {
+  return actions.map(it => omit(it,["execute","container"]) as ActionDef)
+}
+
 @Singleton()
 export class ElectronMainActionManager {
   
-  private readonly enabledGlobalActionIds = Array<string>()
+  private readonly disposers_ = new Disposables()
+  
+  get actionsState(): ActionsState {
+    return this.sharedAppState.actions
+  }
+  
+  get enabledGlobalActionIds() {
+    return this.actionsState.enabledGlobalIds
+  }
   /**
    * Create electron actions
    *
-   * @return {ActionOptions[]}
+   * @return {ActionDef[]}
    * @private
    */
   @LazyGetter
   private get actions(): ActionOptions[] {
-    return [...electronMenuActions, ...electronGlobalActions]
+    return [...electronMenuActions, ...electronAppActions, ...electronGlobalActions]
+  }
+  
+  @LazyGetter
+  private get actionDefs(): ActionDef[] {
+    return actionOptionsToActionDefs(this.actions)
   }
 
   @Bind
@@ -177,13 +256,51 @@ export class ElectronMainActionManager {
       await result
     }
   }
-
+  
+  /**
+   * On actions changed, update the shared app state
+   *
+   * @param actionMap
+   * @private
+   */
+  @BindAction()
+  private updateActionsState() {
+    const actionDefs: ActionDef[] = actionOptionsToActionDefs(this.actionRegistry.allActions)
+    set(this.sharedAppState.actions, "actions", Object.fromEntries<ActionDef>(actionDefs.map(it => [it.id, it])))
+  }
+  
+  @Bind
+  private onActionsChanged(actionMap: Map<string, Action>) {
+    debug("onActionsChanged, updating state")
+    this.updateActionsState()
+  }
+  
+  [Symbol.dispose]() {
+    this.disposers_.dispose()
+  }
+  
+  
+  private unload() {
+    this[Symbol.dispose]()
+  }
+  
+  
   @PostConstruct()
   private async init() {
     const { actions, actionRegistry } = this
-
+    
     // ADD MAIN ACTIONS
     actionRegistry.addAll(...actions)
+    
+    // UPDATE THE STATE
+    this.updateActionsState()
+    
+    actionRegistry.on("actionsChanged", this.onActionsChanged)
+    this.disposers_.push(() => {
+      actionRegistry.off("actionsChanged", this.onActionsChanged)
+    })
+    
+    
 
     // ADD HANDLER
     // ipcMain.handle(ElectronIPCChannel.invokeMainAction, this.onInvokeMainAction)
@@ -194,11 +311,23 @@ export class ElectronMainActionManager {
     //     ipcMain.removeHandler(ElectronIPCChannel.invokeMainAction)
     //   })
     // }
+    
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.addDisposeHandler(() => {
+        this.disposers_.dispose()
+      })
+    }
+    
   }
 
   constructor(
-    readonly actionRegistry: ActionRegistry
-  ) {}
+      @InjectContainer()
+      readonly container: Container,
+      readonly actionRegistry: ActionRegistry,
+      readonly sharedAppState: MainSharedAppState
+  ) {
+  
+  }
   
   registerGlobalActions(...actions: Action[]) {
     actions.forEach(action => {
@@ -207,9 +336,12 @@ export class ElectronMainActionManager {
   }
   
   unregisterGlobalActions(...actions: Action[]) {
-    this.actionRegistry.removeAll(...actions.map(get("id")))
+    const actionIds = actions.map(get("id"))
+    this.actionRegistry.removeAll(...actionIds)
+    this.disableGlobalActions(...actionIds)
   }
   
+  @BindAction()
   enableGlobalActions(...ids: string[]): IDisposer {
     const
         reg = this.actionRegistry,
@@ -222,30 +354,44 @@ export class ElectronMainActionManager {
       log.warn("Already active actions", ignoredActions)
     
     enableActions.forEach(action => {
-      const [accels, registeredAccels] = partition(action.accelerators, accel => !globalShortcut.isRegistered(accel))
+      const accelerators = asOption(action.accelerators?.filter(isString))
+          .filter(isNotEmpty)
+          .orCall(() => asOption(action.defaultAccelerators?.filter(isString)))
+          .filter(isNotEmpty)
+          .getOrThrow(`No accelerators found for action id (${action.id})`)
+      
+      const [accels, registeredAccels] = partition(accelerators, accel => !globalShortcut.isRegistered(accel))
       
       if (registeredAccels.length)
         log.info(`Already assigned shortcuts`, registeredAccels)
       
       enabledAccelerators.push(...accels)
       globalShortcut.registerAll(accels, () => action.execute())
+      this.enabledGlobalActionIds.push(action.id)
     })
     
     const disposer = () => {
-      enabledAccelerators.forEach(accel => {
-        globalShortcut.unregister(accel)
-      })
-      
-      removeIfMutation(this.enabledGlobalActionIds, id => enableActionIds.includes(id))
+      this.disableGlobalActions(enableActionIds)
     }
     
-    if (import.meta.webpackHot) {
-      import.meta.webpackHot.addDisposeHandler(() => {
-        disposer()
-      })
-    }
+    this.disposers_.push(disposer)
     
     return disposer
+  }
+  
+  @BindAction()
+  disableGlobalActions(...enableActionIdArgs:Array<string | string[]>):void {
+    const
+        enableActionIds = flatten(enableActionIdArgs),
+        enabledActionDefs = enableActionIds.map(id => this.actionsState.actions[id]).filter(isDefined<ActionDef>)
+    
+    enabledActionDefs.forEach(actionDef => {
+      actionDef.accelerators.forEach(accel => {
+        globalShortcut.unregister(accel)
+      })
+    })
+    
+    removeIfMutation(this.enabledGlobalActionIds, id => enableActionIds.includes(id))
   }
 }
 

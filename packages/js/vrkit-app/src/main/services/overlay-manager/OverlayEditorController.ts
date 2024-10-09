@@ -1,77 +1,35 @@
-import { OverlayVREditorState } from "../../../common/models"
+import { OverlayVREditorPropertyName, OverlayVREditorPropertyNames, OverlayVREditorState } from "../../../common/models"
 import type OverlayManager from "./OverlayManager"
 import { BindAction } from "../../decorators"
-import { Disposables, isEmpty } from "../../../common/utils"
+import { Disposables, isEmpty, isNotEmpty } from "../../../common/utils"
 import { getLogger } from "@3fv/logger-proxy"
 import { deepObserve, IDisposer } from "mobx-utils"
 import { IObserveChange } from "../../utils"
 import { asOption } from "@3fv/prelude-ts"
 import { first } from "lodash"
-import { Action, ActionRuntime, ActionType } from "../../../common/services"
+import { Action, GlobalActionId, GlobalActionIdName } from "../../../common/services"
 import { Container } from "@3fv/ditsy"
 import { isFunction } from "@3fv/guard"
 import { get } from "lodash/fp"
 import { VRLayout } from "vrkit-models"
 import { toJS } from "mobx"
+import { match } from "ts-pattern"
 
 const log = getLogger(__filename)
 
-function createVREditorActions(container: Container, editor: OverlayEditorController): Action[] {
-  const toId = (...parts: string[]) => ["vr.editor.overlay", ...parts].join("."),
-    toAccelerators = (...accelerators: string[]) => ({
-      defaultAccelerators: accelerators,
-      accelerators
-    })
-  const defaultActionProps: Partial<Action> = {
-    runtime: ActionRuntime.main,
-    overrideInput: true,
-    hidden: false, disableKeyReassign: false
-  }
-  return [
-    {
-      id: toId("switch", "next"),
-      type: ActionType.Global,
-      ...toAccelerators("Control+Alt+2"),
-      execute: () => {
-        editor.executeSelectOverlay(1)
-      },
-      ...defaultActionProps
-    },
-    {
-      id: toId("switch", "previous"),
-      type: ActionType.Global,
-      ...toAccelerators("Control+Alt+1"),
-      execute: () => {
-        editor.executeSelectOverlay(-1)
-      },
-      ...defaultActionProps
-    },
-    {
-      id: toId("position", "left"),
-      type: ActionType.Global,
-      ...toAccelerators("Control+Alt+3"),
-      execute: () => {
-        editor.updateSelectedOverlayConfigVRLayout(layout => {
-          layout.pose.x += -0.1
-          return layout
-        })
-      },
-      ...defaultActionProps
-    },
-    {
-      id: toId("position", "right"),
-      type: ActionType.Global,
-      ...toAccelerators("Control+Alt+4"),
-      execute: () => {
-        editor.updateSelectedOverlayConfigVRLayout(layout => {
-          layout.pose.x += 0.1
-          return layout
-        })
-      },
-      ...defaultActionProps
-    }
-  ] as Action[]
-}
+export const OverlayEditorGlobalActionIds = Array<GlobalActionIdName>(
+  // TOGGLE EDIT MODE ENABLED WHENEVER A DASHBOARD IS OPEN
+  GlobalActionId.toggleOverlayEditor,
+
+  // IN EDIT MODE - THESE ARE ACTIVE
+  GlobalActionId.switchOverlayFocusNext,
+  GlobalActionId.switchOverlayFocusPrevious,
+
+  // TOGGLE X / Y / WIDTH / HEIGHT TARGET PROP
+  GlobalActionId.toggleOverlayPlacementProp,
+  GlobalActionId.incrementOverlayPlacementProp,
+  GlobalActionId.decrementOverlayPlacementProp
+)
 
 export class OverlayEditorController {
   private readonly disposers_ = new Disposables()
@@ -80,14 +38,8 @@ export class OverlayEditorController {
 
   private isAttached_: boolean = false
 
-  private readonly actions_: Action[]
-
-  get actions() {
-    return this.actions_
-  }
-
   get actionIds() {
-    return this.actions.map(get("id"))
+    return OverlayEditorGlobalActionIds
   }
 
   get state(): OverlayVREditorState {
@@ -105,7 +57,11 @@ export class OverlayEditorController {
   get selectedOverlayConfigId() {
     return this.state.selectedOverlayConfigId
   }
-  
+
+  get selectedOverlayConfigProp() {
+    return this.state.selectedOverlayConfigProp
+  }
+
   updateSelectedOverlayConfigVRLayout(vrLayoutMutator: (vrLayout: VRLayout) => VRLayout) {
     const selectedId = this.selectedOverlayConfigId,
       win = this.manager.vrOverlays.find(it => it.id === selectedId)
@@ -113,35 +69,50 @@ export class OverlayEditorController {
       log.warn(`No window for selected id ${selectedId}`)
       return
     }
-    
+
     this.manager.updateOverlayPlacement(win, (placement, _dashboardConfig) => {
       if (!win.isVR) {
         return placement
       }
-      
+
       placement.vrLayout = vrLayoutMutator(placement.vrLayout)
-      Object.assign(win.placement.vrLayout,toJS(placement.vrLayout))
+      Object.assign(win.placement.vrLayout, toJS(placement.vrLayout))
       win.window.webContents.invalidate()
       log.debug(`Saving updated dashboard config updated vrLayout`, placement.vrLayout)
       return placement
     })
   }
-  
+
+  executeSelectNextOverlayProp() {
+    const idx = asOption(this.selectedOverlayConfigProp)
+      .map(value => OverlayVREditorPropertyNames.indexOf(value))
+      .filter(idx => idx >= 0)
+      .map(idx => (idx + 1) % OverlayVREditorPropertyNames.length)
+      .getOrElse(0)
+
+    this.setSelectedOverlayConfigProp(OverlayVREditorPropertyNames[idx])
+  }
+
   @BindAction()
   setSelectedOverlayConfigId(selectedOverlayConfigId: string) {
     this.state.selectedOverlayConfigId = selectedOverlayConfigId
+  }
+
+  @BindAction()
+  setSelectedOverlayConfigProp(selectedOverlayConfigProp: OverlayVREditorPropertyName) {
+    this.state.selectedOverlayConfigProp = selectedOverlayConfigProp
   }
 
   constructor(
     readonly container: Container,
     readonly manager: OverlayManager
   ) {
-    this.actions_ = createVREditorActions(this.container, this)
-    manager.mainActionManager.registerGlobalActions(...this.actions)
-
-    this.disposers_.push(() => {
-      manager.mainActionManager.unregisterGlobalActions(...this.actions)
-    })
+    // this.actions_ = createVREditorActions(this.container, this)
+    // manager.mainActionManager.registerGlobalActions(...this.actions)
+    //
+    // this.disposers_.push(() => {
+    //   manager.mainActionManager.unregisterGlobalActions(...this.actions)
+    // })
 
     this.disposers_.push(deepObserve(this.manager.state, this.onStateChange.bind(this)))
 
@@ -157,7 +128,7 @@ export class OverlayEditorController {
   }
 
   update() {
-    const { selectedOverlayConfigId } = this,
+    const { selectedOverlayConfigId, selectedOverlayConfigProp } = this,
       overlayConfigs = this.overlayConfigs
 
     if (isEmpty(overlayConfigs)) {
@@ -166,11 +137,17 @@ export class OverlayEditorController {
     }
 
     asOption(selectedOverlayConfigId)
-      .filter(id => overlayConfigs.some(it => it.overlay.id))
+      .filter(id => overlayConfigs.some(it => it.overlay.id === id))
       .ifNone(() => {
         this.setSelectedOverlayConfigId(first(overlayConfigs).overlay.id)
       })
-
+    
+    asOption(selectedOverlayConfigProp)
+        .filter(isNotEmpty)
+        .ifNone(() => {
+          this.setSelectedOverlayConfigProp("x")
+        })
+    
     if (this.isEnabled) {
       this.attach()
     } else {
@@ -219,5 +196,33 @@ export class OverlayEditorController {
 
     log.info(`Changing selected id from ${selectedId} to ${newSelectedId}`)
     this.setSelectedOverlayConfigId(newSelectedId)
+  }
+
+  executeAdjustSelectedOverlayConfigProp(increment: boolean, by: number = 0.05): void {
+    this.updateSelectedOverlayConfigVRLayout(layout => {
+      const prop = this.selectedOverlayConfigProp,
+        isSize = ["width", "height"].includes(prop),
+        aspectRatioWidth = layout.size.height / layout.size.width,
+        aspectRatioHeight = layout.size.width / layout.size.height,
+        value = increment ? by : -1 * by
+      match(prop)
+        .with("x", () => {
+          layout.pose.x += value
+        })
+        .with("y", () => {
+          layout.pose.eyeY += value
+        })
+        .with("width", () => {
+          layout.size.width += value
+          layout.size.height = layout.size.width * aspectRatioWidth
+        })
+        .with("height", () => {
+          layout.size.height += value
+          layout.size.width = layout.size.height * aspectRatioHeight
+        })
+        .run()
+
+      return layout
+    })
   }
 }

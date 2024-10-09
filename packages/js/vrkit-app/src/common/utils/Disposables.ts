@@ -24,4 +24,8 @@ export class Disposables extends Array {
 
     this.length = 0
   }
+  
+  [Symbol.dispose]() {
+    this.dispose()
+  }
 }

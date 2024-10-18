@@ -10,6 +10,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { OverlayAnchor } from "./OverlayTypes";
 /**
  * @generated from protobuf message IRacingTools.Models.AppSettings
  */
@@ -40,6 +41,12 @@ export interface AppSettings {
     customAccelerators: {
         [key: string]: string;
     };
+    /**
+     * @generated from protobuf field: map<string, IRacingTools.Models.Dashboard.OverlayAnchor> overlay_anchors = 20;
+     */
+    overlayAnchors: {
+        [key: string]: OverlayAnchor;
+    };
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.ThemeType
@@ -67,7 +74,8 @@ class AppSettings$Type extends MessageType<AppSettings> {
             { no: 2, name: "theme_type", kind: "enum", T: () => ["IRacingTools.Models.ThemeType", ThemeType] },
             { no: 3, name: "zoom_factor", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
             { no: 5, name: "autoconnect", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 10, name: "custom_accelerators", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } }
+            { no: 10, name: "custom_accelerators", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } },
+            { no: 20, name: "overlay_anchors", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "enum", T: () => ["IRacingTools.Models.Dashboard.OverlayAnchor", OverlayAnchor, "OVERLAY_ANCHOR_"] } }
         ]);
     }
     create(value?: PartialMessage<AppSettings>): AppSettings {
@@ -78,6 +86,7 @@ class AppSettings$Type extends MessageType<AppSettings> {
         message.zoomFactor = 0;
         message.autoconnect = false;
         message.customAccelerators = {};
+        message.overlayAnchors = {};
         if (value !== undefined)
             reflectionMergePartial<AppSettings>(this, message, value);
         return message;
@@ -104,6 +113,9 @@ class AppSettings$Type extends MessageType<AppSettings> {
                     break;
                 case /* map<string, string> custom_accelerators */ 10:
                     this.binaryReadMap10(message.customAccelerators, reader, options);
+                    break;
+                case /* map<string, IRacingTools.Models.Dashboard.OverlayAnchor> overlay_anchors */ 20:
+                    this.binaryReadMap20(message.overlayAnchors, reader, options);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -132,6 +144,22 @@ class AppSettings$Type extends MessageType<AppSettings> {
         }
         map[key ?? ""] = val ?? "";
     }
+    private binaryReadMap20(map: AppSettings["overlayAnchors"], reader: IBinaryReader, options: BinaryReadOptions): void {
+        let len = reader.uint32(), end = reader.pos + len, key: keyof AppSettings["overlayAnchors"] | undefined, val: AppSettings["overlayAnchors"][any] | undefined;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case 1:
+                    key = reader.string();
+                    break;
+                case 2:
+                    val = reader.int32();
+                    break;
+                default: throw new globalThis.Error("unknown map entry field for field IRacingTools.Models.AppSettings.overlay_anchors");
+            }
+        }
+        map[key ?? ""] = val ?? 0;
+    }
     internalBinaryWrite(message: AppSettings, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string default_dashboard_config_id = 1; */
         if (message.defaultDashboardConfigId !== "")
@@ -151,6 +179,9 @@ class AppSettings$Type extends MessageType<AppSettings> {
         /* map<string, string> custom_accelerators = 10; */
         for (let k of globalThis.Object.keys(message.customAccelerators))
             writer.tag(10, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.LengthDelimited).string(message.customAccelerators[k]).join();
+        /* map<string, IRacingTools.Models.Dashboard.OverlayAnchor> overlay_anchors = 20; */
+        for (let k of globalThis.Object.keys(message.overlayAnchors))
+            writer.tag(20, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.Varint).int32(message.overlayAnchors[k]).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

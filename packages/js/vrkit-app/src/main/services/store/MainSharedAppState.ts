@@ -23,7 +23,7 @@ import { serialize } from "serializr"
 import { DashboardsState, newDashboardsState } from "vrkit-app-common/models/dashboards"
 import { newSessionsState, SessionsState } from "vrkit-app-common/models/sessions"
 import { BindAction } from "../../decorators"
-import { isDev } from "../../constants"
+import { AutoOpenDevToolsOverride, isDev } from "../../constants"
 import { newActionsState } from "vrkit-app-common/models/actions"
 
 const log = getLogger(__filename)
@@ -45,7 +45,7 @@ export class MainSharedAppState implements ISharedAppState {
    */
   @observable appSettings: AppSettings = AppSettings.create()
 
-  @observable devSettings = newDevSettings()
+  @observable devSettings = newDevSettings(AutoOpenDevToolsOverride ? {alwaysOpenDevTools: true} : {})
   
   @observable actions = newActionsState()
   

@@ -14,7 +14,8 @@
 
 
 #ifdef DEBUG
-  #define VRK_BREAK __debugbreak()
+  #define VRK_BREAK
+  //__debugbreak()
 #else
   #define VRK_BREAK
 #endif
@@ -65,7 +66,7 @@ namespace IRacingTools::Shared {
   message, ...) \
   { \
     auto msg = std::format("FATAL: " message "\n", ##__VA_ARGS__); \
-    std::cerr << msg << "\n"; \
+    std::cerr << msg << "\n";  \
     VRK_FATAL; \
   }
 
@@ -110,17 +111,16 @@ namespace IRacingTools::Shared {
  *                                                                 *
  ******************************************************************/
 
-#define LOGD(s) \
-{ \
-auto c = s.c_str();\
-OutputDebugStringA(c); \
-}
+// #define LOGD(s) \
+// { \
+// auto c = s.c_str();\
+// OutputDebugStringA(c); \
+// }
 
 #ifndef Assert
 #if defined(DEBUG) ||defined(_DEBUG)
 #define Assert(b) \
     if (!(b)) { \
-        OutputDebugStringA("Assert: " #b "\n"); \
         VRK_LOG_AND_FATAL(#b);\
     }
 #else
@@ -132,9 +132,7 @@ OutputDebugStringA(c); \
 #if defined(DEBUG) ||defined(_DEBUG)
 #define AssertMsg(b, msg) \
     if (!(b)) { \
-        OutputDebugStringA("Assert: " #b " " msg "\n"); \
-            __debugbreak();\
-            VRK_LOG_AND_FATAL(#b);\
+            VRK_LOG_AND_FATAL(#b ": {}", msg);\
     }
 #else
 #define AssertMsg(b, msg)

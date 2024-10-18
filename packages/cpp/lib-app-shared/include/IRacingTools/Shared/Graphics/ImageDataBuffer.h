@@ -211,10 +211,13 @@ namespace IRacingTools::Shared::Graphics {
     std::expected<std::uint32_t, SDK::GeneralError> produce(const Byte* src, std::uint32_t size) {
       return produce(
         [&](Byte* dst, std::uint32_t dstSize, ImageDataBuffer*) -> std::uint32_t {
-          if (dstSize != size) {
+          if (dstSize < size) {
             return 0;
           }
-          return std::memcpy(dst, src, dstSize) ? dstSize : 0;
+
+          if (std::memcpy(dst, src, size))
+            return size;
+          return 0;
         }
       );
     }
@@ -249,12 +252,17 @@ namespace IRacingTools::Shared::Graphics {
       frameIndex_= 0;
     }
 
-    void resize(const std::uint32_t& width,const std::uint32_t& height) {
+    bool resize(const std::uint32_t& width,const std::uint32_t& height) {
       std::scoped_lock lock(*this);
 
-      if (destroyed_ || setStatus(Status::Empty) == Status::Destroyed) return;
+      if (destroyed_ || setStatus(Status::Empty) == Status::Destroyed) return false;
+      width_ = width;
+      height_ = height;
+
       buffer_.resize(width * height * BPP);
+
       frameIndex_= 0;
+      return true;
     }
 
   private:

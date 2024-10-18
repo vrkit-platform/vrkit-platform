@@ -97,7 +97,7 @@ namespace IRacingTools::Shared::Graphics {
       }
 
       std::unique_lock writeLock(*writeBuffer);
-      if (len != writeBuffer->size()) {
+      if (len < writeBuffer->size()) {
         L->warn("Data len ({}) !== buffer len ({}), resizing width={},height={},isDestroyed={}", len, writeBuffer->size(), width(), height(), writeBuffer->isDestroyed());
         writeBuffer->resize(width(),height());
         if (len != writeBuffer->size()) {

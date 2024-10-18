@@ -343,7 +343,7 @@ namespace IRacingTools::Shared::Graphics {
           continue;
         }
         auto vrLayout = overlayData->vrLayout();
-        L->info("Frame Pose idx={},x={}", i, vrLayout.pose.x);
+        // L->debug("Frame Pose idx={},x={}", i, vrLayout.pose.x);
         auto imageSize = overlayData->getImageSize();
         SHM::SHMOverlayFrameConfig overlayFrameConfig{
           .overlayIdx = i,

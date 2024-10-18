@@ -579,12 +579,15 @@ namespace IRacingTools::Shared::SHM {
       return {nullptr};
     }
 
+    L->info("maybeGet: updating session");
     this->updateSession();
 
     //ActiveConsumers::Set(consumerKind_);
-
+    L->info("maybeGet: swapchainIndex_={}",swapchainIndex_);
     const auto swapchainIndex = swapchainIndex_;
     if (swapchainIndex >= clientTextures_.size()) [[unlikely]] {
+      L->error("maybeGet: swapchainIndex_=={} >= clientTextures_.size() == {}",swapchainIndex_, clientTextures_.size());
+      L->flush();
       VRK_LOG_AND_FATAL("swapchainIndex > lnegth - initializeCache?");
       // VRK_LOG_SOURCE_LOCATION_AND_FATAL(
       //   loc,

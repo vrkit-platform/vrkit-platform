@@ -7,7 +7,7 @@ import { ActionRegistry } from "vrkit-app-common/services"
 import WebActionManager from "../../services/web-action-manager"
 import SessionManagerClient from "../../services/session-manager-client"
 
-import { APP_STORE_ID, isDev } from "../../constants"
+import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import { setContainerResolver } from "../../utils"
 import FileSystemManager from "../../services/file-system-manager"

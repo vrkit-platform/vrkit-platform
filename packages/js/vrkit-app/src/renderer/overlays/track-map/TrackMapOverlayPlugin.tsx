@@ -48,8 +48,8 @@ function TrackMapOverlayPlugin(props: PluginClientComponentProps) {
   return (inActiveSession && weekendInfo ?
     <canvas
       ref={ref => setCanvasRef(ref)}
-    /> :
-          <FlexRowCenterBox>No Active Session TODO: Make this pretty</FlexRowCenterBox>
+    /> : <></>
+          // <FlexRowCenterBox>No Active Session TODO: Make this pretty</FlexRowCenterBox>
   )
 }
 

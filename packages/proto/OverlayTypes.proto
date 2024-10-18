@@ -3,6 +3,14 @@ import "Geometry.proto";
 
 package IRacingTools.Models.Dashboard;
 
+enum OverlayAnchor {
+  OVERLAY_ANCHOR_CENTER = 0;
+  OVERLAY_ANCHOR_TOP_LEFT = 1;
+  OVERLAY_ANCHOR_TOP_RIGHT = 2;
+  OVERLAY_ANCHOR_BOTTOM_RIGHT = 3;
+  OVERLAY_ANCHOR_BOTTOM_LEFT = 4;
+}
+
 enum OverlayKind {
   OVERLAY_KIND_TRACK_MAP = 0;
   OVERLAY_KIND_CLOCK = 1;

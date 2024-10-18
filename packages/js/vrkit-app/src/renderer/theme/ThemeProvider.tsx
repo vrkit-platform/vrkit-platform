@@ -5,7 +5,7 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { createTheme } from "./createTheme"
 import React, { ReactNode } from "react"
 import { useTranslate } from "vrkit-app-renderer/locales/use-locales"
-import { isDev } from "../constants"
+import { isDev } from "../renderer-constants"
 
 
 export interface ThemeProviderProps {

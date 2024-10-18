@@ -1,4 +1,8 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
+const Fs = require("fs")
+
+const config = JSON.parse(Fs.readFileSync(`${__dirname}/../../../.swcrc`, 'utf-8'))
+
 module.exports = {
   testEnvironment: "node",
   testMatch: [
@@ -6,8 +10,7 @@ module.exports = {
     "**/src/**/*.spec.ts"
   ],
   transform: {
-    ".+\\.tsx?$": ["@swc/jest"]
-  },
+    ".+\\.tsx?$": ["@swc/jest", {...config}] },
   
   modulePathIgnorePatterns: [
     ".*\\.layers.*",

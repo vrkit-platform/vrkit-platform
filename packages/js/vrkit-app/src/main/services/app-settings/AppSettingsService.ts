@@ -82,7 +82,9 @@ export class AppSettingsService {
    */
   @Bind
   private async onSaveAppSettings(_event: Electron.IpcMainInvokeEvent, settings: Partial<AppSettings>) {
-    return serialize(AppSettingsSchema, this.patchSettings(settings))
+    return AppSettings.toJson(this.patchSettings(settings), {
+      emitDefaultValues: true
+    })
   }
   
   /**

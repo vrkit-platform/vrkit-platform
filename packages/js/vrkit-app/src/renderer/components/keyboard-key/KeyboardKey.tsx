@@ -32,11 +32,11 @@ const KeyboardKeyRoot = styled(Typography, {
 })(({theme}) => ({
   // root styles here
   [hasCls(keyboardKeyClasses.root)]: {
-    fontWeight: "lg",
+    fontWeight: "sm",
     // borderColor: theme.palette.background.,
     borderStyle: "solid",
-    borderWidth: "1px 1px 3px",
-    backgroundColor: "background.level4",
+    // borderWidth: "1px 1px 3px",
+    // backgroundColor: "background.level4",
     borderRadius: "0.35rem",
     px: 0.5,
     py: 0,

@@ -4,8 +4,13 @@ import { OverlayWindowRole } from "vrkit-app-common/models"
 import React from "react"
 import type { PluginClientComponentProps } from "vrkit-plugin-sdk"
 
+function isVROverlayWindow():boolean {
+  return typeof window !== "undefined" ? window.location.hash?.includes("::VR") : false
+}
+
 const newOverlayWindowState = (): OverlayWindowState => ({
   windowRole: OverlayWindowRole.NONE,
+  isVR: isVROverlayWindow(),
   OverlayComponent: null
 })
 
@@ -27,6 +32,7 @@ const slice = createSlice({
     }
   },
   selectors: {
+    selectedIsVR: (state: OverlayWindowState) => state.isVR,
     selectWindowRole: (state: OverlayWindowState) => state.windowRole,
     selectOverlayComponent: (state: OverlayWindowState) => state.OverlayComponent
   }

@@ -1,6 +1,7 @@
 import { isNil, isString } from "@3fv/guard"
 import { arrayOf, defaults, generateShortId } from 'vrkit-app-common/utils'
 import { flatten } from "lodash"
+import { ISharedAppState } from "../../models"
 
 export type ActionManagerPromiseResolver<T = any, TResult1 = T> = (
   value: T
@@ -102,6 +103,13 @@ export type ActionContainerElement = HTMLElement
  * Executor shape
  */
 export type ActionExecutor<Args extends any[] = any> = (...args: Args) => any
+
+/**
+ * Used to enable/disable dynamically based on state
+ *
+ * TODO: Implement the app side of this
+ */
+export type ActionPredicate = (state: ISharedAppState) => boolean
 
 /**
  * Default Implementation of Action, any things that fits the shape can be used
@@ -318,7 +326,10 @@ export interface ActionOptions {
    * HTML id attribute value of the container
    */
   containerId?: string
-
+  
+  
+  predicate?: ActionPredicate
+  
   /**
    * Execute the command, takes no args aside from the command
    *

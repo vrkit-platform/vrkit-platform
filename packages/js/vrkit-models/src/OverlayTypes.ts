@@ -89,6 +89,31 @@ export interface OverlayConfig {
     isScreen: boolean;
 }
 /**
+ * @generated from protobuf enum IRacingTools.Models.Dashboard.OverlayAnchor
+ */
+export enum OverlayAnchor {
+    /**
+     * @generated from protobuf enum value: OVERLAY_ANCHOR_CENTER = 0;
+     */
+    CENTER = 0,
+    /**
+     * @generated from protobuf enum value: OVERLAY_ANCHOR_TOP_LEFT = 1;
+     */
+    TOP_LEFT = 1,
+    /**
+     * @generated from protobuf enum value: OVERLAY_ANCHOR_TOP_RIGHT = 2;
+     */
+    TOP_RIGHT = 2,
+    /**
+     * @generated from protobuf enum value: OVERLAY_ANCHOR_BOTTOM_RIGHT = 3;
+     */
+    BOTTOM_RIGHT = 3,
+    /**
+     * @generated from protobuf enum value: OVERLAY_ANCHOR_BOTTOM_LEFT = 4;
+     */
+    BOTTOM_LEFT = 4
+}
+/**
  * @generated from protobuf enum IRacingTools.Models.Dashboard.OverlayKind
  */
 export enum OverlayKind {

@@ -1,4 +1,9 @@
-import { OverlayVREditorPropertyName, OverlayVREditorPropertyNames, OverlayVREditorState } from "../../../common/models"
+import {
+  EditorInfoScreenOverlayOUID, EditorInfoVROverlayOUID,
+  OverlayVREditorPropertyName,
+  OverlayVREditorPropertyNames,
+  OverlayVREditorState
+} from "../../../common/models"
 import type OverlayManager from "./OverlayManager"
 import { BindAction } from "../../decorators"
 import { Disposables, isEmpty, isNotEmpty } from "../../../common/utils"
@@ -6,30 +11,25 @@ import { getLogger } from "@3fv/logger-proxy"
 import { deepObserve, IDisposer } from "mobx-utils"
 import { IObserveChange } from "../../utils"
 import { asOption } from "@3fv/prelude-ts"
-import { first } from "lodash"
-import { Action, GlobalActionId, GlobalActionIdName } from "../../../common/services"
+import { first, uniq } from "lodash"
+import { GlobalActionId, GlobalActionIdName, OverlayEditorGlobalActionIds } from "../../../common/services"
 import { Container } from "@3fv/ditsy"
-import { isFunction } from "@3fv/guard"
+import { isFunction, isNumber, isString } from "@3fv/guard"
 import { get } from "lodash/fp"
-import { VRLayout } from "vrkit-models"
-import { toJS } from "mobx"
+import { OverlayAnchor, VRLayout } from "vrkit-models"
+import { set, toJS } from "mobx"
 import { match } from "ts-pattern"
 
 const log = getLogger(__filename)
 
-export const OverlayEditorGlobalActionIds = Array<GlobalActionIdName>(
-  // TOGGLE EDIT MODE ENABLED WHENEVER A DASHBOARD IS OPEN
-  GlobalActionId.toggleOverlayEditor,
+type OverlayAnchorValue = typeof OverlayAnchor.CENTER
+const AllOverlayAnchors = uniq(Object.values(OverlayAnchor).filter(isNumber)) as OverlayAnchorValue[]
 
-  // IN EDIT MODE - THESE ARE ACTIVE
-  GlobalActionId.switchOverlayFocusNext,
-  GlobalActionId.switchOverlayFocusPrevious,
+// ALWAYS ON GLOBAL SHORTCUTS
+const GlobalAlwaysOnActionIds = Array<GlobalActionIdName>(GlobalActionId.toggleOverlayEditor)
 
-  // TOGGLE X / Y / WIDTH / HEIGHT TARGET PROP
-  GlobalActionId.toggleOverlayPlacementProp,
-  GlobalActionId.incrementOverlayPlacementProp,
-  GlobalActionId.decrementOverlayPlacementProp
-)
+// EDIT MODE ONLY GLOBAL ACTIONS
+const GlobalEditOnlyActionIds = OverlayEditorGlobalActionIds.filter(it => it !== GlobalActionId.toggleOverlayEditor)
 
 export class OverlayEditorController {
   private readonly disposers_ = new Disposables()
@@ -103,6 +103,44 @@ export class OverlayEditorController {
     this.state.selectedOverlayConfigProp = selectedOverlayConfigProp
   }
 
+  @BindAction() executeNextVROverlayEditorInfoAnchor() {
+    const anchors = this.manager.mainAppState.appSettings.overlayAnchors ?? {},
+      currentAnchor = asOption(anchors[EditorInfoVROverlayOUID] ?? OverlayAnchor.CENTER)
+          .map(it => isString(it) ? OverlayAnchor[it] : it)
+          .filter(isNumber)
+          .getOrThrow(`No idea what the current value type is`),
+        newIdx = asOption(AllOverlayAnchors.indexOf(currentAnchor))
+            .filter(it => it > -1)
+            .map(it => (it + 1) % AllOverlayAnchors.length)
+            .getOrElse(0)
+    
+    anchors[EditorInfoVROverlayOUID] = AllOverlayAnchors[newIdx] as OverlayAnchor
+    
+    set(this.manager.mainAppState.appSettings,"overlayAnchors", anchors)
+    
+    this.manager.autoLayoutEditorInfoWindows()
+    
+  }
+  
+  @BindAction() executeNextScreenOverlayEditorInfoAnchor() {
+    const anchors = this.manager.mainAppState.appSettings.overlayAnchors ?? {},
+        currentAnchor = asOption(anchors[EditorInfoScreenOverlayOUID] ?? OverlayAnchor.CENTER)
+            .map(it => isString(it) ? OverlayAnchor[it] : it)
+            .filter(isNumber)
+            .getOrThrow(`No idea what the current value type is`),
+        newIdx = asOption(AllOverlayAnchors.indexOf(currentAnchor))
+            .filter(it => it > -1)
+            .map(it => (it + 1) % AllOverlayAnchors.length)
+            .getOrElse(0)
+    
+    anchors[EditorInfoScreenOverlayOUID] = AllOverlayAnchors[newIdx] as OverlayAnchor
+    
+    set(this.manager.mainAppState.appSettings,"overlayAnchors", anchors)
+    
+    this.manager.autoLayoutEditorInfoWindows()
+    
+  }
+
   constructor(
     readonly container: Container,
     readonly manager: OverlayManager
@@ -114,6 +152,7 @@ export class OverlayEditorController {
     //   manager.mainActionManager.unregisterGlobalActions(...this.actions)
     // })
 
+    this.disposers_.push(this.manager.mainActionManager.enableGlobalActions(...GlobalAlwaysOnActionIds))
     this.disposers_.push(deepObserve(this.manager.state, this.onStateChange.bind(this)))
 
     this.update()
@@ -121,6 +160,7 @@ export class OverlayEditorController {
 
   [Symbol.dispose]() {
     this.disposers_.dispose()
+    this.manager.mainActionManager.disableGlobalActions(...GlobalAlwaysOnActionIds)
   }
 
   destroy() {
@@ -141,13 +181,13 @@ export class OverlayEditorController {
       .ifNone(() => {
         this.setSelectedOverlayConfigId(first(overlayConfigs).overlay.id)
       })
-    
+
     asOption(selectedOverlayConfigProp)
-        .filter(isNotEmpty)
-        .ifNone(() => {
-          this.setSelectedOverlayConfigProp("x")
-        })
-    
+      .filter(isNotEmpty)
+      .ifNone(() => {
+        this.setSelectedOverlayConfigProp("x")
+      })
+
     if (this.isEnabled) {
       this.attach()
     } else {
@@ -167,7 +207,7 @@ export class OverlayEditorController {
 
     this.detach()
 
-    this.acceleratorDisposer_ = this.manager.mainActionManager.enableGlobalActions(...this.actionIds)
+    this.acceleratorDisposer_ = this.manager.mainActionManager.enableGlobalActions(...GlobalEditOnlyActionIds)
     this.isAttached_ = true
   }
 
@@ -176,6 +216,7 @@ export class OverlayEditorController {
       .filter(isFunction)
       .ifSome(fn => fn())
 
+    this.manager.mainActionManager.disableGlobalActions(...GlobalEditOnlyActionIds)
     this.isAttached_ = false
   }
 

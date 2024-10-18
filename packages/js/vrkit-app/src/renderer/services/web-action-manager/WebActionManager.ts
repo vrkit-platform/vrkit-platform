@@ -10,7 +10,7 @@ import {
   WebAppActions
 } from "vrkit-app-common/services"
 import { Bind, LazyGetter } from "vrkit-app-common/decorators"
-import { APP_STORE_ID, isDev } from "../../constants"
+import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import {
   isInputElement

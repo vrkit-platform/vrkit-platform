@@ -1,9 +1,10 @@
 import { getLogger } from "@3fv/logger-proxy"
-import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent, NativeImage } from "electron"
+import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent, NativeImage, screen } from "electron"
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
 import {
   DashboardConfig,
+  OverlayAnchor,
   OverlayInfo,
   OverlayKind,
   OverlayPlacement,
@@ -16,9 +17,11 @@ import { isDefined } from "@3fv/guard"
 import {
   assign,
   Disposables,
+  electronRectangleToRectI,
   hasProps,
   isDev,
   isEqual,
+  isEqualSize,
   isRectValid,
   Pair,
   pairOf,
@@ -50,7 +53,7 @@ import PQueue from "p-queue"
 import { OverlayBrowserWindow } from "./OverlayBrowserWindow"
 import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
-import { defaultsDeep, flatten, pick } from "lodash"
+import { flatten, pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
 import { CreateNativeOverlayManager } from "vrkit-native-interop"
 
@@ -58,22 +61,26 @@ import { IValueDidChange, observe, toJS } from "mobx"
 import { DashboardManager } from "../dashboard-manager"
 import {
   assertIsValidOverlayUniqueId,
-  isValidOverlayUniqueId,
-  OverlayBrowserWindowType,
-  overlayInfoToUniqueId,
   EditorInfoOverlayInfo,
   EditorInfoOverlayPlacement,
   EditorInfoScreenOverlayOUID,
   EditorInfoVROverlayOUID,
-  isEditorInfoOUID
+  isEditorInfoOUID,
+  isValidOverlayUniqueId,
+  OverlayBrowserWindowType,
+  overlayInfoToUniqueId
 } from "vrkit-app-common/models"
 
 import { OverlayEditorController } from "./OverlayEditorController"
 import { BindAction } from "../../decorators"
 import { ElectronMainActionManager } from "../electron-actions"
-import ActionRegistry from "../../../common/services/actions/ActionRegistry"
 import { match } from "ts-pattern"
-import { getScreenRectangleLayoutTool, getVRRectangleLayoutTool } from "./OverlayLayoutTools"
+import {
+  GetAnchorPosition,
+  getScreenRectangleLayoutTool,
+  getVRRectangleLayoutTool,
+  isValidOverlayScreenSize
+} from "./OverlayLayoutTools"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -121,15 +128,11 @@ export class OverlayManager {
   }
 
   get screenEditorInfoWindow(): OverlayBrowserWindow {
-    return this.allOverlays.find(
-      it => it.uniqueId === EditorInfoScreenOverlayOUID
-    )
+    return this.allOverlays.find(it => it.uniqueId === EditorInfoScreenOverlayOUID)
   }
 
   get vrEditorInfoWindow(): OverlayBrowserWindow {
-    return this.allOverlays.find(
-      it => it.uniqueId === EditorInfoVROverlayOUID
-    )
+    return this.allOverlays.find(it => it.uniqueId === EditorInfoVROverlayOUID)
   }
 
   get editorController(): OverlayEditorController {
@@ -229,7 +232,7 @@ export class OverlayManager {
    */
   private async getOrCreateEditorInfoWindow(kind: OverlayBrowserWindowType) {
     const { editorEnabled } = this
-    if (!this.editorEnabled) {
+    if (!editorEnabled) {
       return null
     }
 
@@ -242,7 +245,7 @@ export class OverlayManager {
       return win
     }
 
-    win = await this.createOrUpdateOverlayBrowserWindow(info, placement, kind)
+    win = this.createOrUpdateOverlayBrowserWindow(info, placement, kind)
 
     try {
       await win.whenReady()
@@ -497,7 +500,8 @@ export class OverlayManager {
    * @param dashManager
    */
   constructor(
-    @InjectContainer() readonly container: Container,
+    @InjectContainer()
+    readonly container: Container,
     // readonly actionRegistry: ActionRegistry,
     readonly mainActionManager: ElectronMainActionManager,
     readonly sessionManager: SessionManager,
@@ -583,34 +587,42 @@ export class OverlayManager {
 
     return (_ev: Electron.Event, dirty: Electron.Rectangle, image: NativeImage) => {
       const buf = image.getBitmap(),
-        imageSize = image.getSize(),
-        vrLayout = win.placement.vrLayout,// this.getOverlayVRLayout(win),
-        screenRect = vrLayout.screenRect
-      
-      screenRect.size = {width: imageSize.width, height: imageSize.height}
-      
-      // if (win.isEditorInfo) {
-      //   log.info(`onPaint editor info frame`, imageSize, VRLayout.toJson(vrLayout))
-      // }
-      
-      if (!imageSize.width || !imageSize.height) {
-        log.warn(`Invalid image size, ignoring frame`, imageSize)
-        return;
+        nativeImageSize = image.getSize(),
+        vrLayout = toJS(win.placement.vrLayout), // this.getOverlayVRLayout(win),
+        screenRect = (vrLayout.screenRect = asOption(win.window)
+          .map(bw => screen.dipToScreenRect(bw, bw.getBounds()))
+          .map(electronRectangleToRectI)
+          .getOrThrow() as RectI), //vrLayout.screenRect
+        imageSize = {
+          width: Math.min(screenRect.size.width, nativeImageSize.width),
+          height: Math.min(screenRect.size.height, nativeImageSize.height)
+        }
+
+      if (cap) {
+        cap.push(image)
       }
-      //log.info(`OnPaint event`, win.uniqueId, "size", imageSize, "dirty",
-      // dirty, "vrLayout", vrLayout)
+
+      if (!isValidOverlayScreenSize(imageSize) || !isEqualSize(imageSize, nativeImageSize)) {
+        log.warn(
+          `[${win.uniqueId}]: Invalid imageSize=`,
+          imageSize,
+          `,nativeImageSize=`,
+          nativeImageSize,
+          ` ignoring frame.  Window bounds=`,
+          win.window.getBounds()
+        )
+
+        return
+      }
+
       this.nativeManager_.createOrUpdateResources(
         win.uniqueId,
         win.windowId,
-        // { width: dirty.width, height: dirty.height },
         { width: imageSize.width, height: imageSize.height },
         vrLayout.screenRect,
         vrLayout
       )
       this.nativeManager_.processFrame(win.uniqueId, buf)
-      if (cap) {
-        cap.push(image)
-      }
     }
   }
 
@@ -650,8 +662,14 @@ export class OverlayManager {
    * @private
    */
   private createOnBoundsChangedHandler(targetPlacement: OverlayPlacement, win: OverlayBrowserWindow): Function {
-    return (event: Electron.Event) => {
-      this.updateScreenOverlayWindowBounds(win)
+    return (_event: Electron.Event) => {
+      if (!win.isEditorInfo) {
+        this.updateScreenOverlayWindowBounds(win)
+      }
+
+      if (win.isEditorInfo) {
+        win.setMovedManually(true)
+      }
 
       this.autoLayoutEditorInfoWindows()
     }
@@ -753,11 +771,9 @@ export class OverlayManager {
       .filter(isDefined)
       .filter(hasProps("size", "pose", "screenRect"))
       .map(vrLayout =>
-        VRLayout.toJson(
-          vrLayout, {
-            emitDefaultValues: true
-          }
-        )
+        VRLayout.toJson(vrLayout, {
+          emitDefaultValues: true
+        })
       )
       .getOrThrow() as VRLayout
   }
@@ -781,24 +797,29 @@ export class OverlayManager {
     }
 
     this.editorInfoWindowsWithStatus
-      .filter(([_, enabled, win]: EditorInfoWithStatus) => !!enabled && isDefined<OverlayBrowserWindow>(win))
+      .filter(
+        ([_, enabled, win]: EditorInfoWithStatus) =>
+          !!enabled && isDefined<OverlayBrowserWindow>(win) && !win.wasMovedManually
+      )
       .forEach(([kind, _, win]: EditorInfoWithStatus) => {
+        const anchor = this.mainAppState.appSettings.overlayAnchors?.[win.uniqueId] ?? OverlayAnchor.CENTER
+        
         match(kind === OverlayBrowserWindowType.VR)
           .with(true, () => {
-            const tool = getVRRectangleLayoutTool()
-            this.vrOverlays
-              .map(it => it.placement.vrLayout)
-              .map(vrl => new RectangleLayoutTool.Rectangle(vrl.pose.x, vrl.pose.eyeY, vrl.size.width, vrl.size.height))
-              .forEach(rect => {
-                tool.push(rect)
-              })
+            const tool = getVRRectangleLayoutTool({anchor})
+            // this.vrOverlays
+            //   .map(it => it.placement.vrLayout)
+            //   .map(vrl => new RectangleLayoutTool.Rectangle(vrl.pose.x, vrl.pose.eyeY, vrl.size.width, vrl.size.height))
+            //   .forEach(rect => {
+            //     tool.push(rect)
+            //   })
 
             const { placement } = win,
               size = placement.vrLayout.size,
               newPosition = tool.findPositionClosestToAnchor(size.width, size.height),
               newPose = assign(VRPose.clone(placement.vrLayout.pose), {
-                x: newPosition.x,
-                eyeY: newPosition.y
+                x: newPosition.x + (size.width /2),
+                eyeY: (newPosition.y * -1) + ((size.height /2) * -1 )
               })
 
             log.info(`New EditorInfo VR pose`, newPose)
@@ -806,20 +827,27 @@ export class OverlayManager {
             win.invalidate()
           })
           .otherwise(() => {
-            const tool = getScreenRectangleLayoutTool()
-            this.screenOverlays
-              .map(it => it.placement.screenRect)
-              .map(
-                rect =>
-                  new RectangleLayoutTool.Rectangle(rect.position.x, rect.position.y, rect.size.width, rect.size.height)
-              )
-              .forEach(rect => {
-                tool.push(rect)
-              })
+            const tool = getScreenRectangleLayoutTool(anchor)
+            // this.screenOverlays
+            //   .map(it => it.placement.screenRect)
+            //   .map(
+            //     rect =>
+            //       new RectangleLayoutTool.Rectangle(rect.position.x, rect.position.y, rect.size.width, rect.size.height)
+            //   )
+            //   .forEach(rect => {
+            //     tool.push(rect)
+            //   })
 
             const { placement } = win,
               size = placement.screenRect.size,
-              newPosition = tool.findPositionClosestToAnchor(size.width, size.height)
+                display = screen.getPrimaryDisplay(),
+              newPosition = asOption(GetAnchorPosition(anchor, electronRectangleToRectI(display.bounds)))
+                  .map(({x,y}) => ({
+                    x: x - (size.width / 2),
+                    y: y - (size.height / 2),
+                  }))
+                  .get()
+            // tool.findPositionClosestToAnchor(size.width, size.height)
 
             log.info(`New EditorInfo Screen position`, newPosition)
             placement.screenRect.position = newPosition
@@ -856,7 +884,9 @@ export class OverlayManager {
               win = await this.getOrCreateEditorInfoWindow(kind)
             }
 
-            if (win) win.setEditorEnabled(this.editorEnabled)
+            if (win) {
+              win.setEditorEnabled(this.editorEnabled)
+            }
           })
         )
 

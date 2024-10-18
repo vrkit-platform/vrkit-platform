@@ -6,7 +6,7 @@ import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 
 import { setContainerResolver } from "../../utils"
-import { APP_STORE_ID, isDev } from "../../constants"
+import { APP_STORE_ID, isDev } from "../../renderer-constants"
 import FileSystemManager from "../../services/file-system-manager"
 import TrackManager from "../../services/track-manager"
 import OverlayManagerClient, {

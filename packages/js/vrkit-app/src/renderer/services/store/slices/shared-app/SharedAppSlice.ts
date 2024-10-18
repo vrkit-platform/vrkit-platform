@@ -1,17 +1,28 @@
 import { getLogger } from "@3fv/logger-proxy"
-import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { type ISharedAppState, newSharedAppState, type ThemeId } from "vrkit-app-common/models/app"
 import { assign, Identity, isNotEmpty } from "vrkit-app-common/utils"
 
-import { AppSettings, DashboardConfig, ThemeType } from "vrkit-models"
+import {
+  AppSettings,
+  DashboardConfig, OverlayInfo,
+  ThemeType
+} from "vrkit-models"
 import { flow } from "lodash/fp"
-import { isArray } from "@3fv/guard"
+import { isArray, isDefined } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
 import type {
   SessionDetail,
   SessionsState
 } from "vrkit-app-common/models/sessions"
-import type { DashboardsState } from "vrkit-app-common/models"
+import type {
+  DashboardsState, OverlayVREditorPropertyName
+} from "vrkit-app-common/models"
+import {
+  ActionDef,
+  OverlayEditorGlobalActionIds
+} from "../../../../../common/services"
+import { ActionsState } from "../../../../../common/models/actions"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -35,7 +46,26 @@ const
     selectActiveDashboardConfigId = createDashboardsSelector(dashboards => dashboards.activeConfigId),
     
     createSessionsSelector = <T>(selector: (state: SessionsState) => T) =>
-        flow(selectSessionsState, selector)
+        flow(selectSessionsState, selector),
+    
+    createActiveDashboardConfigSelector = <T>(selector: (state: ISharedAppState, activeDashboardConfig: DashboardConfig) => T):((state: ISharedAppState) => T) => {
+      return (state: ISharedAppState) => {
+        const activeDashboardConfig = asOption(state.dashboards.configs)
+            .filter(isArray)
+            .map((configs:DashboardConfig[]) => {
+              const configId = state.dashboards.activeConfigId
+              return configs.find(it => it.id === configId)
+            })
+            .getOrNull()
+        
+        return selector(state, activeDashboardConfig)
+      }
+    },
+    
+    selectActionsState = (state: ISharedAppState) => state.actions,
+    createActionsSelector = <T>(selector: (state: ActionsState) => T) =>
+        createSelector(selectActionsState,selector)
+        // flow(selectActionsState, selector)
 
 function createActiveSessionSelector<T>(selector: (session: SessionDetail) => T) {
   return createSessionsSelector((state: SessionsState) =>
@@ -54,7 +84,7 @@ const slice = createSlice({
   reducers: {
     patch: (state: ISharedAppState, action: PayloadAction<Partial<ISharedAppState>>) => {
       return assign(state, action.payload ?? {})
-    },
+    }
 
     // setOverlayMode: (state: ISharedAppState, { payload: overlayMode }: PayloadAction<OverlayMode>) => {
     //   return {
@@ -67,13 +97,27 @@ const slice = createSlice({
   selectors: {
     selectEditorEnabled: (state: ISharedAppState) => state.overlays.editor.enabled,
     selectEditorSelectedOverlayConfigId: (state: ISharedAppState) => state.overlays.editor.selectedOverlayConfigId,
+    selectEditorSelectedOverlayConfigProp: (state: ISharedAppState) =>
+      state.overlays.editor.selectedOverlayConfigProp as OverlayVREditorPropertyName,
+    
+    selectEditorSelectedOverlayConfig: createActiveDashboardConfigSelector(
+      (state: ISharedAppState, dashConfig: DashboardConfig) =>
+        (dashConfig?.overlays ?? Array<OverlayInfo>()).find(
+          it => it.id === state.overlays.editor.selectedOverlayConfigId
+        )
+    ),
+    selectOverlayEditorActions: createActionsSelector(({ actions }) =>
+      OverlayEditorGlobalActionIds.map(id => actions[id]).filter(isDefined<ActionDef>)
+    ),
+    
     selectAppSettings,
     selectDefaultDashboardConfigId,
-    
+
     selectDashboardConfigs: (state: ISharedAppState): DashboardConfig[] => state.dashboards.configs ?? [],
     selectActiveDashboardConfigId,
-    
-    selectActiveDashboardConfig: (state: ISharedAppState):DashboardConfig => asOption(state.dashboards.configs)
+
+    selectActiveDashboardConfig: (state: ISharedAppState): DashboardConfig =>
+      asOption(state.dashboards.configs)
         .filter(isArray)
         .map((configs: DashboardConfig[]) => {
           const configId = state.dashboards.activeConfigId
@@ -81,18 +125,20 @@ const slice = createSlice({
         })
         .getOrNull(),
     selectThemeType: createAppSettingsSelector(settings => settings.themeType),
-    selectThemeId:createAppSettingsSelector(settings => ThemeType[settings.themeType]  as ThemeId),
-    
-  //   SESSION SELECTORS
-    
+    selectThemeId: createAppSettingsSelector(settings => ThemeType[settings.themeType] as ThemeId),
+
+    //   SESSION SELECTORS
+
     hasAvailableSession: createSessionsSelector((state: SessionsState) =>
-        [state.diskSession?.isAvailable, state.liveSession?.isAvailable].some(it => it === true)),
-    
-    hasActiveSession: createSessionsSelector((state: SessionsState) =>
-        isNotEmpty(state.activeSessionType) && state.activeSessionType !== "NONE"),
-    
+      [state.diskSession?.isAvailable, state.liveSession?.isAvailable].some(it => it === true)
+    ),
+
+    hasActiveSession: createSessionsSelector(
+      (state: SessionsState) => isNotEmpty(state.activeSessionType) && state.activeSessionType !== "NONE"
+    ),
+
     isLiveSessionAvailable: createSessionsSelector((state: SessionsState) => state.liveSession?.isAvailable === true),
-    
+
     // Active Session Selectors
     selectActiveSessionType: createSessionsSelector((state: SessionsState) => state.activeSessionType),
     selectActiveSession: createActiveSessionSelector(Identity),
@@ -101,12 +147,14 @@ const slice = createSlice({
     selectActiveSessionTiming: createActiveSessionSelector(session => session?.timing),
     selectActiveSessionInfo: createActiveSessionSelector(session => session?.info),
     selectActiveSessionWeekendInfo: createActiveSessionSelector(session => session?.info?.weekendInfo),
-    
+
     // Disk Session Selectors
     selectDiskSession: createSessionsSelector((state: SessionsState) => state.diskSession),
-    
+
     // Live Session Selectors
-    selectLiveSession: createSessionsSelector((state: SessionsState) => (isNotEmpty(state.liveSession?.id) ? state.liveSession : null)),
+    selectLiveSession: createSessionsSelector((state: SessionsState) =>
+      isNotEmpty(state.liveSession?.id) ? state.liveSession : null
+    ),
     selectLiveSessionData: createSessionsSelector((state: SessionsState) => state.liveSession?.data),
     selectLiveSessionId: createSessionsSelector((state: SessionsState) => state.liveSession?.id),
     selectLiveSessionTiming: createSessionsSelector((state: SessionsState) => state.liveSession?.timing),

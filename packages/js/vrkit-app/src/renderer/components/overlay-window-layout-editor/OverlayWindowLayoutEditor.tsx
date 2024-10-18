@@ -10,18 +10,19 @@ import type { BoxProps } from "@mui/material/Box"
 import Box from "@mui/material/Box"
 import { styled } from "@mui/material/styles"
 import {
-  alpha, child,
+  alpha,
+  child,
   FillBounds,
   FillWidth,
   FillWindow,
   flex,
   flexAlign,
   FlexAlignCenter,
-  FlexAuto,
   FlexColumn,
   FlexRow,
+  FlexRowCenter,
   FlexScaleZero,
-  hasCls,
+  hasCls, important,
   paddingRem,
   transition
 } from "../../styles/ThemedStyles"
@@ -32,19 +33,27 @@ import { FlexRowCenterBox } from "../box"
 import { useService } from "../service-container"
 import { OverlayManagerClient } from "../../services/overlay-client"
 import Typography from "@mui/material/Typography"
-import Button from "@mui/material/Button"
 import SharedAppStateClient from "../../services/shared-app-state-client"
 import { SizeI } from "vrkit-models"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import { useAppSelector } from "../../services/store"
-import { getContrastText } from "../../styles"
 import { darken } from "@mui/material"
+import { overlayWindowSelectors } from "../../services/store/slices/overlay-window"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const classPrefix = "overlayConfigEditor"
-export const overlayConfigEditorClasses = createClassNames(classPrefix, "modeNormal", "modeEdit", "header", "content", "selected")
+export const overlayConfigEditorClasses = createClassNames(
+  classPrefix,
+  "modeNormal",
+  "modeEdit",
+  "header",
+  "content",
+  "selected",
+  "vr",
+  "screen"
+)
 export type OverlayConfigEditorClassKey = ClassNamesKey<typeof overlayConfigEditorClasses>
 
 const OverlayConfigEditorRoot = styled(Box, {
@@ -54,13 +63,13 @@ const OverlayConfigEditorRoot = styled(Box, {
   position: "fixed",
   zIndex: 10000,
   borderRadius: "1rem",
-  // borderColor: "transparent",
-  borderColor: darken(theme.palette.action.active, 0.3),
+  borderColor: "transparent",
+
   borderStyle: "inset",
   borderWidth: "5px",
-  backgroundColor: alpha(theme.palette.action.active, 0.7),
-  color: theme.palette.text.primary,
-  // backgroundImage: theme.palette.action.active,
+
+  color: theme.palette.text.primary, // backgroundImage:
+  // theme.palette.action.active,
   gap: "2rem",
   ...FlexColumn,
   ...FlexAlignCenter,
@@ -70,8 +79,15 @@ const OverlayConfigEditorRoot = styled(Box, {
   left: 0,
 
   ...transition(["opacity"]),
+  [hasCls(overlayConfigEditorClasses.screen)]: {
+    backgroundColor: alpha(theme.palette.action.active, 0.7)
+  },
+  [hasCls(overlayConfigEditorClasses.vr)]: {
+    backgroundColor: alpha(theme.palette.action.active, 0.7)
+  },
   [hasCls(overlayConfigEditorClasses.selected)]: {
-    // borderColor: theme.palette.action.active,
+    borderColor: darken(theme.palette.action.active, 0.5),
+    backgroundColor: important(alpha(theme.palette.action.active, 0.8)) // borderColor: theme.palette.action.active,
     // borderColor: darken(theme.palette.action.active, 0.3),
   },
   [hasCls(overlayConfigEditorClasses.modeNormal)]: {
@@ -81,7 +97,8 @@ const OverlayConfigEditorRoot = styled(Box, {
 
   [hasCls(overlayConfigEditorClasses.modeEdit)]: {
     opacity: 0.95,
-    pointerEvents: "auto"
+    pointerEvents: "auto",
+    borderColor: darken(theme.palette.action.disabled, 0.3)
   },
   [child(overlayConfigEditorClasses.header)]: {
     ...FillWidth,
@@ -104,6 +121,7 @@ const OverlayConfigEditorRoot = styled(Box, {
  */
 export interface OverlayWindowLayoutEditorProps extends BoxProps {
   editorEnabled: boolean
+
   size: SizeI
 }
 
@@ -111,14 +129,15 @@ export interface OverlayWindowLayoutEditorProps extends BoxProps {
  * OverlayConfigEditor Component
  *
  * @param { OverlayWindowLayoutEditorProps } props
- * @returns {JSX.Element}
  */
 export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps) {
-  const { editorEnabled,size, ...other } = props,
+  const { editorEnabled, size, ...other } = props,
     isEditMode = editorEnabled,
-      selectedOverlayConfigId = useAppSelector(sharedAppSelectors.selectEditorSelectedOverlayConfigId),
+    isVR = useAppSelector(overlayWindowSelectors.selectedIsVR),
+    selectedOverlayConfigId = useAppSelector(sharedAppSelectors.selectEditorSelectedOverlayConfigId),
+    
     overlayClient = useService(OverlayManagerClient),
-      sharedAppStateClient = useService(SharedAppStateClient),
+    sharedAppStateClient = useService(SharedAppStateClient),
     overlayConfig = overlayClient.overlayConfig,
     overlayInfo = overlayConfig?.overlay
 
@@ -127,43 +146,36 @@ export function OverlayWindowLayoutEditor(props: OverlayWindowLayoutEditorProps)
       className={clsx({
         [overlayConfigEditorClasses.modeNormal]: !isEditMode,
         [overlayConfigEditorClasses.modeEdit]: isEditMode,
-        [overlayConfigEditorClasses.selected]: selectedOverlayConfigId === overlayInfo.id
+        [overlayConfigEditorClasses.selected]: isVR && selectedOverlayConfigId === overlayInfo.id,
+        [overlayConfigEditorClasses.screen]: !isVR && isEditMode,
+        [overlayConfigEditorClasses.vr]: isVR && isEditMode,
+        electronWindowDraggable: !isVR && isEditMode
       })}
       {...other}
     >
-      {size.height > 200 ?<>
-      {/*<Box className={overlayConfigEditorClasses.header}>*/}
-      {/*  */}
-      {/*  <Typography*/}
-      {/*    className="electronWindowDraggable"*/}
-      {/*    sx={{ ...FlexScaleZero }}*/}
-      {/*    variant="h4"*/}
-      {/*  >*/}
-      {/*    Editing <i>&quot;{overlayInfo.name}&quot;</i>*/}
-      {/*  </Typography>*/}
-      {/*  <Button*/}
-      {/*    variant="contained"*/}
-      {/*    sx={{ ...FlexAuto }}*/}
-      {/*    onClick={() => {*/}
-      {/*      overlayClient.setEditorEnabled(false)*/}
-      {/*    }}*/}
-      {/*  >*/}
-      {/*    Done*/}
-      {/*  </Button>*/}
-      {/*</Box>*/}
-      <Box className={clsx("electronWindowDraggable", overlayConfigEditorClasses.content)}>
-        <FlexRowCenterBox>Resize: drag corner anchors</FlexRowCenterBox>
-        <FlexRowCenterBox>Move: click & drag anywhere in this window</FlexRowCenterBox>
-      </Box>
-      </> : <>
-        <Typography
-            className="electronWindowDraggable"
-            sx={{ ...FlexScaleZero }}
+      {isVR ? (
+        <></>
+      ) : size.height > 200 ? (
+        <>
+          <Box className={clsx(overlayConfigEditorClasses.content)}>
+            <FlexRowCenterBox>Resize: drag corner anchors</FlexRowCenterBox>
+            <FlexRowCenterBox>Move: click & drag anywhere in this window</FlexRowCenterBox>
+          </Box>
+        </>
+      ) : (
+        <>
+          <Typography
+            sx={{
+              ...FlexScaleZero,
+              fontSize: "1.2rem",
+              ...FlexRowCenter
+            }}
             variant="h4"
-        >
-          Resize & Drag
-        </Typography>
-      </>}
+          >
+            Resize & Drag
+          </Typography>
+        </>
+      )}
     </OverlayConfigEditorRoot>
   )
 }

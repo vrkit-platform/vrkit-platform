@@ -1,6 +1,5 @@
-//import "zone.js"
 import { getLoggingManager, Level } from "@3fv/logger-proxy"
-import { isDev } from "./constants"
+import { isDev } from "./renderer-constants"
 
 const loggingManager = getLoggingManager()
 

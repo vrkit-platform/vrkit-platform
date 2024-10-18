@@ -20,7 +20,8 @@ export default function AppBody() {
         styles={{
           body: {
             backgroundColor: theme.palette.background.gradient,
-            backgroundImage: theme.palette.background.gradientImage
+            backgroundImage: theme.palette.background.gradientImage,
+            fontFamily: theme.typography.fontFamily
           }
         }}
       />

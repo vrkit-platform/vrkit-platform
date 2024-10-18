@@ -1,6 +1,6 @@
 import { configureStore, Middleware, Selector } from "@reduxjs/toolkit"
 import { assign } from "lodash"
-import { isDev } from "../../constants"
+import { isDev } from "../../renderer-constants"
 import type { AppRootState } from "./AppRootState"
 // noinspection ES6PreferShortImport
 import { globalReducer } from "./slices/global/GlobalSlice"

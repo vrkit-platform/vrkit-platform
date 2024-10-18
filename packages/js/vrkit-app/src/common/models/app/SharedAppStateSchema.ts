@@ -17,15 +17,16 @@ import { ActionsState, ActionsStateSchema } from "../actions"
 
 
 
-export const AppSettingsSchema = createSimpleSchema<AppSettings>({
-  themeType: primitive(),
-  zoomFactor: primitive(),
-  autoconnect: primitive(),
-  defaultDashboardConfigId: primitive(),
-  openDashboardOnLaunch: primitive(),
-  customAccelerators: map(primitive())
-})
+// export const AppSettingsSchema = createSimpleSchema<AppSettings>({
+//   themeType: primitive(),
+//   zoomFactor: primitive(),
+//   autoconnect: primitive(),
+//   defaultDashboardConfigId: primitive(),
+//   openDashboardOnLaunch: primitive(),
+//   customAccelerators: map(primitive())
+// })
 
+export const AppSettingsSchema = custom(v => AppSettings.toJson(v), v => AppSettings.fromJson(v))
 
 
 export const SessionDetailSchema = createSimpleSchema<SessionDetail>({
@@ -60,10 +61,11 @@ export const DashboardsStateSchema = createSimpleSchema<DashboardsState>({
 })
 
 export const SharedAppStateSchema = createSimpleSchema<ISharedAppState>({
-  appSettings: object(AppSettingsSchema),
+  appSettings: AppSettingsSchema,
+  devSettings: custom(v => toJS(v), Identity),
+  
   dashboards: object(DashboardsStateSchema),
   sessions: object(SessionsStateSchema),
   overlays: object(OverlaysStateSchema),
   actions: object(ActionsStateSchema),
-  devSettings: custom(toPlainObject, Identity),
 })

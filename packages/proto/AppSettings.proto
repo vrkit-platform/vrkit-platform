@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "OverlayTypes.proto";
 
 package IRacingTools.Models;
 
@@ -21,6 +22,8 @@ message AppSettings {
   bool autoconnect = 5;
 
   map<string, string> custom_accelerators = 10;
+
+  map<string, Dashboard.OverlayAnchor> overlay_anchors = 20;
 }
 
 

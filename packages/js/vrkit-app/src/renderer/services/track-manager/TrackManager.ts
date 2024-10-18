@@ -8,7 +8,7 @@ import {
   AppFiles,
   AppPaths,
   isDev
-} from "vrkit-app-renderer/constants"
+} from "../../renderer-constants"
 import EventEmitter3 from "eventemitter3"
 import { FileAccess, FileSystemManager } from "../file-system-manager"
 import { FileInfo, LapTrajectory, TrackMapFile } from "vrkit-models"
@@ -34,10 +34,9 @@ export interface TrackManagerEventArgs {
 
 @Singleton()
 export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
-  
   private trackFileMap: { [id: string]: TrackMapFile } = {}
   private trackFiles: TrackMapFile[] = []
-  
+
   private readyDeferred: Deferred<TrackManager> = null
   /**
    * Cleanup resources on unload
@@ -61,7 +60,7 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
         trackManager: this
       })
     }
-    
+
     this.readyDeferred = new Deferred()
     await this.reloadDatabase(true)
     if (typeof window !== "undefined") {
@@ -74,12 +73,10 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    *
    * @param fsManager
    */
-  constructor(
-    @Inject(FileSystemManager) readonly fsManager: FileSystemManager
-  ) {
+  constructor(@Inject(FileSystemManager) readonly fsManager: FileSystemManager) {
     super()
   }
-  
+
   /**
    * Get the underlying database file
    * @private
@@ -87,69 +84,73 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
   private getDatabaseFileAccess() {
     return this.fsManager.getFileAccess(AppFiles.trackMapListFile)
   }
-  
+
   /**
    * Rebuild the database from disk (EXPENSIVE)
    */
   async rebuildDatabase(): Promise<TrackMapFile[]> {
-    
     const dataFile = this.getDatabaseFileAccess()
     const tmDir = AppPaths.trackMapsDir
-    const tmFiles = await Fs.promises.readdir(tmDir)
-        .then(files => files.filter(endsWith(".trackmap"))
-            .map(f => Path.join(tmDir, f)))
-    
-    const tmfs = await Promise.all(tmFiles.map(async tmFile => {
-      const ltData = await Fs.promises.readFile(tmFile)
-      const lt = LapTrajectory.fromBinary(ltData)
-      return TrackMapFile.create({
-        fileInfo: await this.fsManager.getFileInfo(tmFile),
-        trackLayoutMetadata: lt.trackLayoutMetadata
+    const tmFiles = await Fs.promises
+      .readdir(tmDir)
+      .then(files => files.filter(endsWith(".trackmap")).map(f => Path.join(tmDir, f)))
+
+    const tmfs = await Promise.all(
+      tmFiles.map(async tmFile => {
+        const ltData = await Fs.promises.readFile(tmFile)
+        const lt = LapTrajectory.fromBinary(ltData)
+        return TrackMapFile.create({
+          fileInfo: await this.fsManager.getFileInfo(tmFile),
+          trackLayoutMetadata: lt.trackLayoutMetadata
+        })
       })
-    }))
-    
-    const jsonL = tmfs.reduce((data:string, tmf) => {
-      if (data.length)
-        data += '\n'
-      
-      return data + TrackMapFile.toJsonString(tmf, {
-        prettySpaces: 0
-      })
+    )
+
+    const jsonL = tmfs.reduce((data: string, tmf) => {
+      if (data.length) data += "\n"
+
+      return (
+        data +
+        TrackMapFile.toJsonString(tmf, {
+          prettySpaces: 0
+        })
+      )
     }, "")
-    
+
     await dataFile.writeText(jsonL)
-    
+
     log.info(`Created jsonl file for ${tmfs.length} track maps`, dataFile.filePath)
     this.setTrackMapFiles(tmfs)
     return tmfs
-    
   }
-  
+
   /**
    * List all track map files
    */
   async list(): Promise<TrackMapFile[]> {
     await this.readyDeferred.promise
     await this.reloadDatabase()
-    
+
     return this.trackFiles ?? []
-    
   }
-  
+
   /**
    * Internally hydrates a map of `id => TrackMapFile`
    *
    * @param tmfs
    * @private
    */
-  private setTrackMapFiles(tmfs:TrackMapFile[]):void {
+  private setTrackMapFiles(tmfs: TrackMapFile[]): void {
     this.trackFiles = tmfs
-    this.trackFileMap = tmfs.reduce((map, tmf) => ({
-      ...map,
-      [tmf.trackLayoutMetadata.id]: tmf
-    }), {} as any)
+    this.trackFileMap = tmfs.reduce(
+      (map, tmf) => ({
+        ...map,
+        [tmf.trackLayoutMetadata.id]: tmf
+      }),
+      {} as any
+    )
   }
-  
+
   /**
    * Reload the database file (json lines) from disk
    * @param ignoreCache
@@ -158,24 +159,26 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     if (!ignoreCache && this.readyDeferred.isFulfilled()) {
       return this
     }
-    
+
     const dataFile = this.getDatabaseFileAccess()
-    if (!await dataFile.exists) {
+    if (!(await dataFile.exists)) {
       return this
     }
-    
+
     const buf = await dataFile.readBytes()
     const jsonl = buf.toString()
     const lines = jsonl.split("\n").filter(it => it?.startsWith("{") && it.endsWith("}"))
-    
-    const files = lines.map(line => TrackMapFile.fromJsonString(line, {
-      ignoreUnknownFields: true
-    }))
+
+    const files = lines.map(line =>
+      TrackMapFile.fromJsonString(line, {
+        ignoreUnknownFields: true
+      })
+    )
     log.info(`Loaded track map files`, files)
     this.setTrackMapFiles(files)
     return this
   }
-  
+
   /**
    * Get `TrackMapFile` by layout id
    *
@@ -184,7 +187,7 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
   getTrackMapFile(id: string): TrackMapFile {
     return this.trackFileMap ? this.trackFileMap[id] : null
   }
-  
+
   /**
    * Load the `LapTrajectory` that `TrackMapFile` for `id` points to
    *
@@ -192,21 +195,26 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    */
   async getLapTrajectory(id: string): Promise<LapTrajectory> {
     const tmf = this.getTrackMapFile(id)
-    if (!tmf)
-      return null
-    
+    if (!tmf) return null
+
     const fileAccess = new FileAccess(tmf.fileInfo.file)
-    if (!await fileAccess.exists) {
+    if (!(await fileAccess.exists)) {
       log.error(`Lap trajectory file does not exist (${tmf.fileInfo.file}) for id: ${id}`)
       return null
     }
-    
+
     const lt = LapTrajectory.fromBinary(await fileAccess.readBytes())
     log.info(`Loaded trajectory (${id})`)
-    
+
     return lt
   }
-  
+
+  /**
+   * Get a track map from lap trajectory or id
+   *
+   * @param idOrTrajectory
+   * @returns {Promise<TrackMap>}
+   */
   async getTrackMapFromLapTrajectory(idOrTrajectory: string | LapTrajectory) {
     let trajectory: LapTrajectory
     if (isString(idOrTrajectory)) {
@@ -214,17 +222,10 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     } else {
       trajectory = idOrTrajectory
     }
-    
+
     const converter = new LapTrajectoryConverter(20)
     return converter.toTrackMap(trajectory)
-    
-    
-    return
   }
-  
-  
-  
-  
 }
 
 export default TrackManager

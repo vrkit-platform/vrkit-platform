@@ -21,7 +21,7 @@ import {
   OverflowHidden,
   PositionRelative
 } from "../../styles"
-import { GlobalCSSClassNames } from "vrkit-app-renderer/constants"
+import { GlobalCSSClassNames } from "../../renderer-constants"
 import { usePageMetadata } from "../../components/page-metadata"
 
 import { useAppSelector } from "vrkit-app-renderer/services/store"

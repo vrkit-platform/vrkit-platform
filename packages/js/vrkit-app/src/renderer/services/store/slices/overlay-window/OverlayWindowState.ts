@@ -4,5 +4,6 @@ import type { PluginClientComponentProps } from "vrkit-plugin-sdk"
 
 export interface OverlayWindowState {
   windowRole: OverlayWindowRole
+  isVR: boolean
   OverlayComponent: React.ComponentType<PluginClientComponentProps>
 }

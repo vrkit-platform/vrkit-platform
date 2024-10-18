@@ -14,6 +14,7 @@ import * as ElectronRemote from "@electron/remote/main"
 import { DashboardManager } from "./services/dashboard-manager"
 import { asOption } from "@3fv/prelude-ts"
 import { Deferred } from "@3fv/deferred"
+import { ISharedAppState } from "../common/models"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -42,8 +43,9 @@ const windowMap = new Map<number, BrowserWindow>()
  * Prepare window & attach event handlers, etc
  *
  * @param win
+ * @param state
  */
-function prepareWindow(win: BrowserWindow) {
+function prepareWindow(state: ISharedAppState, win: BrowserWindow) {
   if (windowMap.has(win.id)) {
     info(`Window ${win.id} is already configured`)
     return
@@ -68,7 +70,7 @@ function prepareWindow(win: BrowserWindow) {
 
   win.on("show", () => {
     win.webContents.setWindowOpenHandler(windowOpenHandler)
-    if (isDev) {
+    if (state.devSettings.alwaysOpenDevTools) {
       win.webContents.openDevTools()
     }
   })
@@ -76,7 +78,7 @@ function prepareWindow(win: BrowserWindow) {
   win.webContents.setWindowOpenHandler(windowOpenHandler)
   win.webContents.on("did-create-window", (newWin, details) => {
     info(`Preparing new webContents window`)
-    prepareWindow(newWin)
+    prepareWindow(state, newWin)
   })
 }
 
@@ -97,10 +99,10 @@ async function launch() {
     })
 
     //electronRemote = await importDefault(import('@electron/remote/main'))
-    prepareWindow(mainWindow)
+    prepareWindow(appState, mainWindow)
 
     app.on("browser-window-created", (_, newWin) => {
-      prepareWindow(newWin)
+      prepareWindow(getSharedAppStateStore(), newWin)
     })
 
     mainWindowManager.setMainWindow(mainWindow)

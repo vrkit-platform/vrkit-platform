@@ -333,32 +333,37 @@ class TrackMapOverlayCanvasRenderer {
    * @private
    */
   private updateCars(dataVarValues: SessionDataVariableValueMap) {
-    if (!this.isInitialized) {
-      log.warn("Not initialized yet")
-      return
-    }
-
-    if (this.carDataMap.size === 0) {
-      log.warn("Can not update cars because car info has not been set yet")
-      return
-    }
-
-    const pendingCarData = Array<CarData>()
-    this.carDataMap.forEach((data, idx) => {
-      Object.assign(data, {
-        lap: dataVarValues["CarIdxLap"].values[idx] ?? -1,
-        lapCompleted: dataVarValues["CarIdxLapCompleted"].values[idx] ?? -1,
-        lapPercentComplete: dataVarValues["CarIdxLapDistPct"].values[idx] ?? -1,
-        position: dataVarValues["CarIdxPosition"].values[idx] ?? -1,
-        classPosition: dataVarValues["CarIdxClassPosition"].values[idx] ?? -1
-      })
-
-      if (data.lap > -1) {
-        pendingCarData.push(data)
+    try {
+      if (!this.isInitialized) {
+        log.warn("Not initialized yet")
+        return
       }
-    })
-
-    this.renderCars(pendingCarData)
+      
+      if (this.carDataMap.size === 0) {
+        log.warn("Can not update cars because car info has not been set yet")
+        return
+      }
+      
+      const pendingCarData = Array<CarData>()
+      this.carDataMap.forEach((data, idx) => {
+        Object.assign(data, {
+          lap: dataVarValues["CarIdxLap"].values[idx] ?? -1,
+          lapCompleted: dataVarValues["CarIdxLapCompleted"].values[idx] ?? -1,
+          lapPercentComplete: dataVarValues["CarIdxLapDistPct"].values[idx] ??
+              -1,
+          position: dataVarValues["CarIdxPosition"].values[idx] ?? -1,
+          classPosition: dataVarValues["CarIdxClassPosition"].values[idx] ?? -1
+        })
+        
+        if (data.lap > -1) {
+          pendingCarData.push(data)
+        }
+      })
+      
+      this.renderCars(pendingCarData)
+    } catch (err) {
+      log.error(`Failed to update Cars`, err)
+    }
   }
 
   /**
@@ -414,7 +419,7 @@ class TrackMapOverlayCanvasRenderer {
         }),
         weekendInfo = sessionInfo.weekendInfo,
         { trackID: trackId, trackName, trackConfigName } = pick(weekendInfo, "trackID", "trackName", "trackConfigName"),
-        trackLayoutId = `${trackId}::${trackName}::${trackConfigName === "null" ? "NO_CONFIG_NAME" : trackConfigName}`
+        trackLayoutId = `${trackId}::${trackName}::${!trackConfigName || trackConfigName === "null" ? "NO_CONFIG_NAME" : trackConfigName}`
 
       state.trackMap = await client.getTrackMap(trackLayoutId)
 

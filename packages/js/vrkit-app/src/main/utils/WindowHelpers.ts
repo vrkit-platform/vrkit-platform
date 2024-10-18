@@ -14,8 +14,9 @@ export function windowOptionDefaults(webPreferences: Partial<WebPreferences> = {
   return {
     fullscreenable: false,
     icon: iconPng,
-    //resizable: true,
+    
     webPreferences: {
+      backgroundThrottling: false,
       allowRunningInsecureContent: true,
       webSecurity: false,
       nodeIntegration: true,

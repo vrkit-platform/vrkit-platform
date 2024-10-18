@@ -42,8 +42,13 @@ export class NativeImageSequenceCapture {
     const idx = ++this.counter
     
     this.queue.add(async () => {
-      const file = Path.join(this.tempDir, `${this.name}-${idx.toString().padStart(3,'0')}.${this.format}`)
-      const buf = this.format === "png" ? image.toPNG() : image.getBitmap()
+      const size = image.getSize(),
+          file = Path.join(
+              this.tempDir,
+              `${this.name}-${size.width}x${size.height}-${idx.toString().padStart(3,'0')}.${this.format}`
+          ),
+          buf = this.format === "png" ? image.toPNG() : image.getBitmap()
+      
       await Fs.promises.writeFile(file, buf)
       log.info(`Wrote ${file}`)
     })

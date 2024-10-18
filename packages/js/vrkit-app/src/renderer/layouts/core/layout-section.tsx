@@ -25,19 +25,19 @@ export function LayoutSection({
   headerSection,
   sidebarSection,
 }: LayoutSectionProps) {
-  const inputGlobalStyles = (
-    <GlobalStyles
-      styles={{
-        body: {
-          ...cssVars,
-        },
-      }}
-    />
-  );
+  // const inputGlobalStyles = (
+  //   <GlobalStyles
+  //     styles={{
+  //       body: {
+  //         ...cssVars,
+  //       },
+  //     }}
+  //   />
+  // );
 
   return (
     <>
-      {inputGlobalStyles}
+      {/*{inputGlobalStyles}*/}
       <Box id="root__layout"  sx={sx}>
         {sidebarSection ? (
           <>

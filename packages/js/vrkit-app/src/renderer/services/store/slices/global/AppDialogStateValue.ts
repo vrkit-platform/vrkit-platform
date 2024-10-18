@@ -1,5 +1,5 @@
 import type React from "react"
-import type { AppDialogTypeKind } from "../../../../constants"
+import type { AppDialogTypeKind } from "../../../../renderer-constants"
 
 
 export interface AppDialogStateValue<Payload = any> {

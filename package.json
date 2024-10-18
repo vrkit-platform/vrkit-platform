@@ -47,6 +47,8 @@
   },
 
   "devDependencies": {
+    "keyboard-css": "^1.2.4",
+    "tsc-watch": "^6.2.0",
     "@swc/jest": "^0.2.36",
     "@electron/rebuild": "^3.6.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
@@ -71,6 +73,7 @@
     "browserslist-config-erb": "^0.0.3",
     "chalk": "^5.3.0",
     "cmake-js": "^7.3.0",
+    "@faker-js/faker": "^9.0.3",
     "concurrently": "^8.2.2",
     "core-js": "^3.38.0",
     "cross-env": "^7.0.3",
@@ -128,14 +131,13 @@
     "react-test-renderer": "18.3.1"
   },
   "scripts": {
-    "//dev": "run-s compile:all && run-p compile:all:watch dev:vrkit-app",
     "compile": "tsc -b tsconfig.json",
     "compile:all": "run-s compile:tools compile",
     "compile:all:watch": "run-p compile:watch compile:tools:watch",
     "compile:tools": "yarn workspace vrkit-builder-tool build",
     "compile:tools:watch": "yarn workspace vrkit-builder-tool build",
     "compile:watch": "tsc -b tsconfig.json -w --preserveWatchOutput",
-    "dev": "./scripts/dev.mjs",
+    "dev": "tsc-watch -b tsconfig.json  --preserveWatchOutput  --onFirstSuccess \"./scripts/dev.mjs\"",
     "postinstall": "patch-package",
     "vrkit-app:dev": "yarn workspace vrkit-app run dev",
     "vrkit-app:start": "yarn workspace vrkit-app run start",

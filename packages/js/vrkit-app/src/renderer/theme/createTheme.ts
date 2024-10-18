@@ -115,6 +115,8 @@ export function createTheme(
     components,
     typography: {
       ...typography,
+      fontFamily: setFont("SanFranciscoDisplay")
+      
       // fontFamily: setFont(settings.fontFamily)
     },
     cssVarPrefix: "",
@@ -138,7 +140,10 @@ export function createTheme(
       listActionFooterHeight: rem(2),
       layoutPadding: [4, 2], // spacing unit
       projectIconSizes: [16, 32, 64, 128]
-    }
+    },
+    typography: {
+      fontFamily: setFont("SanFranciscoDisplay")
+    } as any
   })
 }
 

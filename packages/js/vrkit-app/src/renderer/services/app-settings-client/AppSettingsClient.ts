@@ -4,7 +4,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-app-common/decorators"
 
-import { APP_STORE_ID, isDev } from "../../constants"
+import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import {
   AppSettings

@@ -65,7 +65,7 @@ export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardC
           pose: { x: 0.25, eyeY: 0.0, z: -1.0 },
           size: {
             width: 0.5,
-            height: 0.5
+            height: 0.06
           },
           screenRect: {
             size: {

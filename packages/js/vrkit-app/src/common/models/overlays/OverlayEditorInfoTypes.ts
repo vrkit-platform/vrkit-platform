@@ -1,15 +1,27 @@
-import {
-  OverlayInfo,
-  OverlayKind,
-  OverlayPlacement,
-  RectI, VRPose
-} from "vrkit-models"
+import { OverlayInfo, OverlayKind, OverlayPlacement, RectI, SizeF, SizeI, VRPose } from "vrkit-models"
 import { OverlaySpecialIds } from "./OverlayDataTypes"
 import { OverlayBrowserWindowType, overlayInfoToUniqueId } from "./OverlayManagerUtils"
 import { pairOf } from "vrkit-app-common/utils"
 
-export function defaultScreenRect(width:number = 400, height: number = 400) {
-  return {
+export const EditorInfoDefaultScreenSize = SizeI.create({
+  width: 500,
+  height: 570
+})
+
+export const EditorInfoDefaultAspectRatio = EditorInfoDefaultScreenSize.height / EditorInfoDefaultScreenSize.width
+
+export const EditorInfoDefaultVRWidth = 0.45
+
+export const EditorInfoDefaultVRSize = SizeF.create({
+  width: EditorInfoDefaultVRWidth,
+  height: EditorInfoDefaultVRWidth * EditorInfoDefaultAspectRatio
+})
+
+export function defaultScreenRect(
+  width: number = EditorInfoDefaultScreenSize.width,
+  height: number = EditorInfoDefaultScreenSize.height
+) {
+  return RectI.create({
     size: {
       width,
       height
@@ -18,16 +30,20 @@ export function defaultScreenRect(width:number = 400, height: number = 400) {
       x: 0,
       y: 0
     }
-  } as RectI
+  }) as RectI
 }
 
-function defaultEditorInfoVRPose():VRPose {
-  return VRPose.create({ x: -0.35, eyeY: -0.35, z: -1.0 })
+function defaultEditorInfoVRPose(): VRPose {
+  return VRPose.create({
+    x: 0 - EditorInfoDefaultVRSize.width / 2,
+    eyeY: EditorInfoDefaultVRSize.height / 2,
+    z: -1.0
+  })
 }
 
 function createEditorInfoOverlayPlacement(): OverlayPlacement {
   const screenRect = defaultScreenRect()
-  
+
   return OverlayPlacement.create({
     id: OverlaySpecialIds.EDITOR_INFO,
     overlayId: OverlaySpecialIds.EDITOR_INFO,
@@ -35,10 +51,7 @@ function createEditorInfoOverlayPlacement(): OverlayPlacement {
     vrLayout: {
       // pose: { x: -0.5, eyeY: 0, z: -1.0 },
       pose: defaultEditorInfoVRPose(),
-      size: {
-        width: 0.75,
-        height: 0.75
-      },
+      size: SizeF.clone(EditorInfoDefaultVRSize),
       screenRect
     }
   })

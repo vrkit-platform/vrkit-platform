@@ -4,6 +4,15 @@ import { getLogger } from "@3fv/logger-proxy"
 import { asOption } from "@3fv/prelude-ts"
 const log = getLogger(__filename)
 
+export function electronRectangleToRectI(rect: Electron.Rectangle): RectI {
+  return asOption(rect).map(({ x, y, width, height }) =>
+    RectI.create({
+      position: { x, y },
+      size: {width, height}
+    })
+  ).getOrNull()
+}
+
 export class RectangleLayoutTool<
   R extends RectI | RectF,
   P extends PositionI | PositionF = R["position"]

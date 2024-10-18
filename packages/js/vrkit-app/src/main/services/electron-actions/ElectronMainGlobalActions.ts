@@ -11,6 +11,18 @@ export const ElectronMainGlobalActions = Object.fromEntries(Array<ActionDef>({
   name: "Toggle Overlay Edit Mode",
   defaultAccelerators: ["Control+Alt+F9"]
 }, {
+  id: GlobalActionId.switchOverlayVREditorInfoAnchor,
+  type: ActionType.Global,
+  runtime: "main",
+  name: "Change VR Info Panel Position",
+  defaultAccelerators: ["Control+Alt+F11"]
+},{
+  id: GlobalActionId.switchOverlayScreenEditorInfoAnchor,
+  type: ActionType.Global,
+  runtime: "main",
+  name: "Change Info Panel Position",
+  defaultAccelerators: ["Control+Alt+F10"]
+}, {
   id: GlobalActionId.switchOverlayFocusNext,
   type: ActionType.Global,
   runtime: "main",

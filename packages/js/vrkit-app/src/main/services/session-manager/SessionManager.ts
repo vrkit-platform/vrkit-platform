@@ -34,7 +34,14 @@ import {
 import { first, flatten, isEmpty, uniq } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
 import EventEmitter3 from "eventemitter3"
-import { arrayOf, Disposables, isDev, isNotEmpty, propEqualTo, valuesOf } from "vrkit-app-common/utils"
+import {
+  arrayOf, CachedStateComputation,
+  Disposables,
+  isDev,
+  isNotEmpty,
+  propEqualTo,
+  valuesOf
+} from "vrkit-app-common/utils"
 import { app, dialog, ipcMain, IpcMainInvokeEvent } from "electron"
 import { get } from "lodash/fp"
 import { Deferred } from "@3fv/deferred"
@@ -98,6 +105,13 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return this.sharedAppState.sessions
   }
 
+  private readonly liveAutoConnectComputation:CachedStateComputation<
+      MainSharedAppState,
+      [isAutoConnectEnabled: boolean, liveIsAvailable:boolean, activeSessionType: ActiveSessionType, liveSessionId: string],
+      boolean, // should connect to live
+      Set<string> // liveSessionIds cache
+  >
+  
   private pendingOpenDiskPlayerDeferred_: Deferred<string> = null
 
   private livePlayerContainer_: SessionPlayerContainer = null
@@ -314,6 +328,26 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     readonly sharedAppState: MainSharedAppState
   ) {
     super()
+    this.liveAutoConnectComputation = new CachedStateComputation(sharedAppState,
+        (state, selectorState) => [state.appSettings.autoconnect, state.sessions.liveSession?.isAvailable ?? false, state.sessions.activeSessionType, state.sessions.liveSession?.id ],
+        ([isAutoConnectEnabled, isAvailable, activeSessionType, liveSessionId], _oldValues, state) => {
+      if (!state.customCache) {
+        state.customCache = new Set<string>()
+      }
+          
+          if (!isAutoConnectEnabled || !isAvailable || activeSessionType !== "NONE" || isEmpty(liveSessionId ?? "")) {
+            return false
+          }
+      
+      const cache = state.customCache,
+        isNewSessionId = !cache.has(liveSessionId)
+        if (isNewSessionId)
+          cache.add(liveSessionId)
+          
+      return  isNewSessionId
+        })
+    
+    
   }
 
   /**

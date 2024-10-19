@@ -5,43 +5,45 @@ import { observe } from "mobx"
 import { getLogger } from "@3fv/logger-proxy"
 import EventEmitter3 from "eventemitter3"
 import { Bind } from "../decorators"
+import { C, S, T, V } from "@fullcalendar/core/internal-common"
+import { options } from "axios"
 
 const log = getLogger(__filename)
 
-export type ObservableMemoSourceSelector<S extends {}, V, T, C> = (
+export type CachedStateComputationSourceSelector<S extends {}, V, T, C> = (
   state: S,
-  selectorState: ObservableMemoSelectorState<S, V, T, C>
+  selectorState: CachedStateComputationState<S, V, T, C>
 ) => V
 
-export type ObservableMemoSourceIsEqual<V> = (newValue: V, oldValue: V) => boolean
+export type CachedStateComputationSourceIsEqual<V> = (newValue: V, oldValue: V) => boolean
 
-export type ObservableMemoTransformer<S extends {}, V, T, C> = (
+export type CachedStateComputationTransformer<S extends {}, V, T, C> = (
   sourceValue: V,
   oldSourceValue: V,
-  selectorState: ObservableMemoSelectorState<S, V, T, C>
+  selectorState: CachedStateComputationState<S, V, T, C>
 ) => T
 
 /**
  * (Optional) final filtering predicate
  */
-export type ObservableMemoPredicate<S extends {}, V, T, C> = (
-  values: ObservableMemoTargetSource<V, T>,
-  oldValues: ObservableMemoTargetSource<V, T>,
-  selectorState: ObservableMemoSelectorState<S, V, T, C>
+export type CachedStateComputationPredicate<S extends {}, V, T, C> = (
+  values: CachedStateComputationTargetSource<V, T>,
+  oldValues: CachedStateComputationTargetSource<V, T>,
+  selectorState: CachedStateComputationState<S, V, T, C>
 ) => boolean
 
 /**
  * Selector options
  */
-export interface ObservableMemoSelectorOptions<S extends {}, V, T, C> {
-  isEqual: ObservableMemoSourceIsEqual<V>
+export interface CachedStateComputationOptions<S extends {}, V, T, C> {
+  isEqual: CachedStateComputationSourceIsEqual<V>
 
   // fireImmediate: boolean
 
-  predicate?: ObservableMemoPredicate<S, V, T, C>
+  predicate?: CachedStateComputationPredicate<S, V, T, C>
 }
 
-function newObservableMemoSelectorOptionsDefault<S extends {}, V, T, C>(): ObservableMemoSelectorOptions<S, V, T, C> {
+function newCachedStateComputationSelectorOptionsDefault<S extends {}, V, T, C>(): CachedStateComputationOptions<S, V, T, C> {
   return {
     isEqual: isEqual,
     predicate: null
@@ -49,7 +51,7 @@ function newObservableMemoSelectorOptionsDefault<S extends {}, V, T, C>(): Obser
   }
 }
 
-export interface ObservableMemoSelectorState<S extends {}, V, T, C> {
+export interface CachedStateComputationState<S extends {}, V, T, C> {
   source: V
 
   target: T
@@ -58,21 +60,21 @@ export interface ObservableMemoSelectorState<S extends {}, V, T, C> {
 
   observableState: S
 
-  cache?: C
+  customCache?: C
 }
 
-function newObservableMemoTransformerDefault<S extends {}, V, T, C>(): ObservableMemoTransformer<S, V, T, C> {
+function newCachedStateComputationTransformerDefault<S extends {}, V, T, C>(): CachedStateComputationTransformer<S, V, T, C> {
   return (sourceValue, oldSourceValue, selectorState): T => sourceValue as T
 }
 
-export enum ObservableMemoSelectorEventType {
+export enum CachedStateComputationEventType {
   CHANGED = "CHANGED"
 }
 
 /**
  * Source value that was used to generate the target value
  */
-export interface ObservableMemoTargetSource<V, T> {
+export interface CachedStateComputationTargetSource<V, T> {
   target: T
 
   source: V
@@ -81,10 +83,10 @@ export interface ObservableMemoTargetSource<V, T> {
 /**
  * Change event struct
  */
-export interface ObservableMemoChangeEvent<S extends {}, V, T, C> extends ObservableMemoTargetSource<V, T> {
-  old: ObservableMemoTargetSource<V, T>
+export interface CachedStateComputationChangeEvent<S extends {}, V, T, C> extends CachedStateComputationTargetSource<V, T> {
+  old: CachedStateComputationTargetSource<V, T>
 
-  selectorState: ObservableMemoSelectorState<S, V, T, C>
+  selectorState: CachedStateComputationState<S, V, T, C>
 
   updatedAt: number
 }
@@ -95,24 +97,24 @@ export interface ObservableMemoChangeEvent<S extends {}, V, T, C> extends Observ
  * @template S - The shape of the state.
  * @template V - The type of value selected from the state
  * @template T - The type of the final transformed value, this may `===` V.
- * @template C - The type of `cache` on the `SelectorState`
+ * @template C - The type of `customCache` on the `SelectorState`
  *
- * @interface ObservableMemoSelectorEventTypes
- * @property [ObservableMemoSelectorEventType.CHANGED] - An event that is
+ * @interface CachedStateComputationEventTypes
+ * @property [CachedStateComputationEventType.CHANGED] - An event that is
  *     triggered when there is a change in the observable memo selector.
- * @param {ObservableMemoChangeEvent<S, V, T, C>} ev - The event object
+ * @param {CachedStateComputationChangeEvent<S, V, T, C>} ev - The event object
  *     containing details about the change.
  */
-export interface ObservableMemoSelectorEventTypes<S extends {}, V, T, C> {
-  [ObservableMemoSelectorEventType.CHANGED]: (ev: ObservableMemoChangeEvent<S, V, T, C>) => void
+export interface CachedStateComputationEventTypes<S extends {}, V, T, C> {
+  [CachedStateComputationEventType.CHANGED]: (ev: CachedStateComputationChangeEvent<S, V, T, C>) => void
 }
 
-export class ObservableMemoSelector<S extends {}, V, T = V, C = unknown> extends EventEmitter3<
-  ObservableMemoSelectorEventTypes<S, V, T, C>
+export class CachedStateComputation<S extends {}, V, T = V, C = unknown> extends EventEmitter3<
+  CachedStateComputationEventTypes<S, V, T, C>
 > {
-  private readonly state_: ObservableMemoSelectorState<S, V, T, C>
+  private readonly state_: CachedStateComputationState<S, V, T, C>
 
-  private readonly options_: ObservableMemoSelectorOptions<S, V, T, C>
+  private readonly options_: CachedStateComputationOptions<S, V, T, C>
 
   private readonly disposers_ = new Disposables()
 
@@ -153,7 +155,7 @@ export class ObservableMemoSelector<S extends {}, V, T = V, C = unknown> extends
     })
 
     // EMIT THE CHANGE
-    const ev: ObservableMemoChangeEvent<S, V, T, C> = {
+    const ev: CachedStateComputationChangeEvent<S, V, T, C> = {
       old,
       selectorState: this.state,
       target: state.target,
@@ -173,9 +175,9 @@ export class ObservableMemoSelector<S extends {}, V, T = V, C = unknown> extends
 
   constructor(
     observableState: S,
-    readonly sourceSelector: ObservableMemoSourceSelector<S, V, T, C>,
-    readonly transformer: ObservableMemoTransformer<S, V, T, C> = newObservableMemoTransformerDefault<S, V>(),
-    options: Partial<ObservableMemoSelectorOptions<S, V, T, C>> = {}
+    readonly sourceSelector: CachedStateComputationSourceSelector<S, V, T, C>,
+    readonly transformer: CachedStateComputationTransformer<S, V, T, C> = newCachedStateComputationTransformerDefault<S, V>(),
+    options: Partial<CachedStateComputationOptions<S, V, T, C>> = {}
   ) {
     super()
 
@@ -186,7 +188,7 @@ export class ObservableMemoSelector<S extends {}, V, T = V, C = unknown> extends
       updatedAt: 0
     }
 
-    this.options_ = { ...options, ...newObservableMemoSelectorOptionsDefault<S, V, T>() }
+    this.options_ = { ...options, ...newCachedStateComputationSelectorOptionsDefault<S, V, T>() }
     this.disposers_.push(observe(observableState, this.onChange.bind(this), false))
   }
 
@@ -201,4 +203,6 @@ export class ObservableMemoSelector<S extends {}, V, T = V, C = unknown> extends
   get options() {
     return this.options_
   }
+  
+  
 }

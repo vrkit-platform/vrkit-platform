@@ -1,2 +1,2 @@
 export * from "./Patchable"
-export * from "./ObservableMemoSelector"
+export * from "./CachedStateComputation"

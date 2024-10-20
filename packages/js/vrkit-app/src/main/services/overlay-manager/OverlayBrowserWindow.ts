@@ -1,32 +1,24 @@
 import { getLogger } from "@3fv/logger-proxy"
-import {
-  BrowserWindow,
-  BrowserWindowConstructorOptions,
-  IpcMainInvokeEvent,
-  WebPreferences
-} from "electron"
-import {
-  OverlayConfig, OverlayInfo, OverlayPlacement, RectI
-} from "vrkit-models"
+import { BrowserWindow, BrowserWindowConstructorOptions, IpcMainInvokeEvent, WebPreferences } from "electron"
+import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
 import { isDev } from "vrkit-app-common/utils"
 import { Deferred } from "@3fv/deferred"
 import {
+  isEditorInfoOUID,
+  OverlayBrowserWindowType,
   OverlayClientEventTypeToIPCName,
+  overlayInfoToUniqueId,
   OverlayManagerClientEventType,
   OverlayManagerClientFnType,
   OverlayManagerClientFnTypeToIPCName,
   OverlaySpecialIds,
-  OverlayWindowRole,
-  OverlayBrowserWindowType, overlayInfoToUniqueId,
-  isEditorInfoOUID
+  OverlayWindowRole
 } from "../../../common/models/overlays"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
 import type OverlayManager from "./OverlayManager"
 import { asOption, Option } from "@3fv/prelude-ts"
 
-import {
-  adjustScreenRect, MaxOverlayWindowDimension, MaxOverlayWindowDimensionPadding
-} from "./OverlayLayoutTools"
+import { adjustScreenRect, MaxOverlayWindowDimension, MaxOverlayWindowDimensionPadding } from "./OverlayLayoutTools"
 
 // TypeScriptUnresolvedVariable
 
@@ -39,9 +31,8 @@ const { debug, trace, info, error, warn } = log
 const MaxFPSIntervalMillis = Math.floor(1000 / 10)
 
 export class OverlayBrowserWindow {
-  
   private invalidateInterval_: NodeJS.Timeout
-  
+
   private readonly window_: BrowserWindow
 
   private readonly config_: OverlayConfig
@@ -49,17 +40,17 @@ export class OverlayBrowserWindow {
   private readonly readyDeferred_ = new Deferred<OverlayBrowserWindow>()
 
   private readonly uniqueId_: string
-  
-  private previousInvalidateTime_:number = 0
-  
+
+  private previousInvalidateTime_: number = 0
+
   private closeDeferred_: Deferred<void> = null
-  
-  private wasMovedManually_:boolean= false
-  
-  get wasMovedManually():boolean {
+
+  private wasMovedManually_: boolean = false
+
+  get wasMovedManually(): boolean {
     return this.wasMovedManually_
   }
-  
+
   get role(): OverlayWindowRole {
     return this.config.overlay.id === OverlaySpecialIds.EDITOR_INFO
       ? OverlayWindowRole.EDITOR_INFO
@@ -69,8 +60,7 @@ export class OverlayBrowserWindow {
   }
 
   readonly windowOptions: BrowserWindowConstructorOptions
-  
-  
+
   get id() {
     return this.config_?.overlay.id
   }
@@ -113,7 +103,7 @@ export class OverlayBrowserWindow {
   get editorController() {
     return this.manager.editorController
   }
-  
+
   setMovedManually(wasMovedManually: boolean) {
     this.wasMovedManually_ = wasMovedManually
   }
@@ -125,13 +115,13 @@ export class OverlayBrowserWindow {
     if (this.closeDeferred_) {
       return this.closeDeferred_.promise
     }
-    
+
     const deferred = (this.closeDeferred_ = new Deferred())
     if (this.invalidateInterval_) {
       clearInterval(this.invalidateInterval_)
       this.invalidateInterval_ = null
     }
-    
+
     try {
       this.window?.close()
       deferred.resolve()
@@ -185,33 +175,45 @@ export class OverlayBrowserWindow {
       placement: OverlayPlacement.toJson(this.config.placement)
     }
   }
-  
+
   private constructor(
     readonly manager: OverlayManager,
     readonly kind: OverlayBrowserWindowType,
     overlay: OverlayInfo,
     placement: OverlayPlacement
   ) {
-    this.config_ = { isScreen: kind === OverlayBrowserWindowType.SCREEN,  overlay, placement }
+    this.config_ = {
+      isScreen: kind === OverlayBrowserWindowType.SCREEN,
+      overlay,
+      placement
+    }
     this.uniqueId_ = overlayInfoToUniqueId(this.config.overlay, this.kind)
-    this.invalidateInterval_ = setInterval(() => {this.invalidate()}, MaxFPSIntervalMillis)
-    const screenRect = this.isScreen
-      ? adjustScreenRect(placement.screenRect)
-      : asOption(adjustScreenRect(placement.vrLayout.screenRect)).getOrCall(() => {
-          const size = placement.vrLayout.size,
-            aspectRatio = size.height / size.width,
-            defaultWidth = 200
+    this.invalidateInterval_ = setInterval(() => {
+      this.invalidate()
+    }, MaxFPSIntervalMillis)
+    const screenRect: RectI = this.isEditorInfo
+      ? this.isVR
+        ? placement.vrLayout.screenRect
+        : placement.screenRect
+      : this.isScreen
+        ? adjustScreenRect(placement.screenRect)
+        : asOption(placement.vrLayout.screenRect)
+            .map(adjustScreenRect)
+            .getOrCall(() => {
+              const size = placement.vrLayout.size,
+                aspectRatio = size.height / size.width,
+                defaultWidth = 200
 
-          placement.vrLayout.screenRect = {
-            size: {
-              width: defaultWidth,
-              height: defaultWidth * aspectRatio
-            },
-            position: { x: 0, y: 0 }
-          }
+              placement.vrLayout.screenRect = {
+                size: {
+                  width: defaultWidth,
+                  height: defaultWidth * aspectRatio
+                },
+                position: { x: 0, y: 0 }
+              }
 
-          return adjustScreenRect(placement.vrLayout.screenRect)
-        })
+              return adjustScreenRect(placement.vrLayout.screenRect)
+            })
 
     const extraWebPrefs: Partial<WebPreferences> = this.isVR
       ? {
@@ -240,8 +242,7 @@ export class OverlayBrowserWindow {
       ...screenRect.position,
       ...screenRect.size,
       maxWidth: MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding,
-      maxHeight: MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding,
-      
+      maxHeight: MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding
     }
 
     this.window_ = new BrowserWindow(this.windowOptions)
@@ -279,7 +280,7 @@ export class OverlayBrowserWindow {
         win.webContents.startPainting()
       }
 
-      if (this.manager.mainAppState.devSettings.alwaysOpenDevTools) {
+      if (isDev && this.manager.mainAppState.devSettings.alwaysOpenDevTools) {
         win.webContents.openDevTools({
           mode: "detach"
         })
@@ -328,30 +329,29 @@ export class OverlayBrowserWindow {
   setEditorEnabled(enabled: boolean): void {
     this.setIgnoreMouseEvents(!enabled)
   }
-  
+
   /**
    * Invalidate, which forces a repaint
    */
-  invalidate():void {
+  invalidate(): void {
     const now = Date.now()
-    if (now - this.previousInvalidateTime_ < MaxFPSIntervalMillis)
-      return
-    
+    if (now - this.previousInvalidateTime_ < MaxFPSIntervalMillis) return
+
     this.previousInvalidateTime_ = now
     Option.try(() => this.window_?.webContents?.invalidate())
   }
-  
+
   /**
    * Explicitly set the window bounds
    *
    * @param rect
    */
-  setBounds(rect:RectI):void {
-    const newBounds:Electron.Rectangle = {
+  setBounds(rect: RectI): void {
+    const newBounds: Electron.Rectangle = {
       ...rect.position,
       ...rect.size
     }
-    
+
     log.info(`Setting new bounds`, newBounds)
     this.config_.placement.screenRect = rect
     this.window?.setBounds(newBounds)

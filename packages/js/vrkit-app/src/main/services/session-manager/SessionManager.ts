@@ -9,7 +9,7 @@ import {
   SessionPlayer,
   SessionPlayerEventDataDefault
 } from "vrkit-native-interop"
-import { isDefined, isFunction, isString } from "@3fv/guard"
+import { isDefined, isFunction, isNumber, isString } from "@3fv/guard"
 import {
   SessionData,
   SessionDataVariableValueMap,
@@ -35,10 +35,12 @@ import { first, flatten, isEmpty, uniq } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
 import EventEmitter3 from "eventemitter3"
 import {
-  arrayOf, CachedStateComputation,
+  CachedStateComputation,
+  CachedStateComputationChangeEvent,
+  CachedStateComputationEventType,
   Disposables,
   isDev,
-  isNotEmpty,
+  isNotEmpty, isTrue,
   propEqualTo,
   valuesOf
 } from "vrkit-app-common/utils"
@@ -48,46 +50,15 @@ import { Deferred } from "@3fv/deferred"
 import { match } from "ts-pattern"
 import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
-import { SessionDetailSchema, SessionsStateSchema } from "vrkit-app-common/models"
-import { serialize } from "serializr"
 import { BindAction } from "../../decorators"
 import { observe, remove, set } from "mobx"
+import { SessionPlayerContainer } from "./SessionPlayerContainer"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
-
-class SessionPlayerContainer {
-  readonly disposers = Array<() => void>()
-
-  private timing_: SessionTiming = null
-
-  private dataVarValues_: SessionDataVariableValueMap = {}
-
-  get timing() {
-    return this.timing_
-  }
-
-  get dataVarValues() {
-    return this.dataVarValues_
-  }
-
-  constructor(
-    readonly id: SessionPlayerId,
-    readonly player: SessionPlayer
-  ) {}
-
-  dispose() {
-    this.disposers.forEach(disposer => disposer())
-  }
-
-  setDataFrame(timing: SessionTiming, dataVars: SessionDataVariableValueMap = {}): void {
-    this.timing_ = timing
-    this.dataVarValues_ = dataVars
-  }
-}
 
 export interface SessionManagerEventArgs {
   [SessionManagerEventType.DATA_FRAME]: (sessionId: string, dataVarValues: SessionDataVariableValueMap) => void
@@ -97,6 +68,32 @@ function getWeekendInfo(session: SessionDetail) {
   return session?.info?.weekendInfo
 }
 
+type LiveAutoConnectTypes = [
+  MainSharedAppState,
+  sourceSelectorResult: [
+    isAutoConnectEnabled: boolean,
+    liveIsAvailable: boolean,
+    activeSessionType: ActiveSessionType,
+    liveSessionId: number
+  ],
+  sessionId: number, // should connect to live
+  cachedSessionIds: Set<number> // liveSessionIds cache
+]
+
+type LiveAutoConnectChangeEvent = CachedStateComputationChangeEvent<
+  LiveAutoConnectTypes[0],
+  LiveAutoConnectTypes[1],
+  LiveAutoConnectTypes[2],
+  LiveAutoConnectTypes[3]
+>
+
+type LiveAutoConnectComputation = CachedStateComputation<
+  LiveAutoConnectTypes[0],
+  LiveAutoConnectTypes[1],
+  LiveAutoConnectTypes[2],
+  LiveAutoConnectTypes[3]
+>
+
 @Singleton()
 export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   private readonly disposers_ = new Disposables()
@@ -105,13 +102,8 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return this.sharedAppState.sessions
   }
 
-  private readonly liveAutoConnectComputation:CachedStateComputation<
-      MainSharedAppState,
-      [isAutoConnectEnabled: boolean, liveIsAvailable:boolean, activeSessionType: ActiveSessionType, liveSessionId: string],
-      boolean, // should connect to live
-      Set<string> // liveSessionIds cache
-  >
-  
+  private readonly liveAutoConnectComputation_: LiveAutoConnectComputation
+
   private pendingOpenDiskPlayerDeferred_: Deferred<string> = null
 
   private livePlayerContainer_: SessionPlayerContainer = null
@@ -160,6 +152,19 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
   get allComponentDataVars() {
     return uniq(flatten(valuesOf(this.state.componentDataVars)))
+  }
+  
+  /**
+   * Connects to live session automatically when triggered
+   *
+   * @param ev
+   * @private
+   */
+  private onLiveAutoConnectChanged(ev: LiveAutoConnectChangeEvent) {
+    log.info(`LiveAutoConnectChanged, connecting to LIVE session (${ev.target})`, ev)
+    
+    log.assert(this.activeSessionType === "NONE", `activeSessionType should be NONE, when triggered, but it is ${this.activeSessionType}`)
+    this.setLiveSessionActive(true)
   }
 
   @Bind
@@ -248,12 +253,12 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
   [Symbol.dispose]() {
     debug(`Unloading SessionManager`)
+    this.liveAutoConnectComputation_[Symbol.dispose]()
     this.disposers_.dispose()
     Array<SessionPlayerContainer>(...this.playerContainers_.values())
       .filter(isDefined<SessionPlayerContainer>)
       .forEach(container => container.player?.destroy())
 
-    // this.playerContainers_.clear()
     delete this.livePlayerContainer_
     delete this.diskPlayerContainer_
   }
@@ -295,7 +300,12 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(SessionManagerFnTypeToIPCName(type), handler))
 
+    // CREATE THE LIVE PLAYER
     this.createLivePlayer()
+
+    // START COMPUTATIONS
+    log.info(`Starting live auto connect computation`)
+    this.liveAutoConnectComputation_.start()
 
     // In dev mode, make everything accessible
     if (isDev) {
@@ -328,26 +338,47 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     readonly sharedAppState: MainSharedAppState
   ) {
     super()
-    this.liveAutoConnectComputation = new CachedStateComputation(sharedAppState,
-        (state, selectorState) => [state.appSettings.autoconnect, state.sessions.liveSession?.isAvailable ?? false, state.sessions.activeSessionType, state.sessions.liveSession?.id ],
-        ([isAutoConnectEnabled, isAvailable, activeSessionType, liveSessionId], _oldValues, state) => {
-      if (!state.customCache) {
-        state.customCache = new Set<string>()
+    this.liveAutoConnectComputation_ = new CachedStateComputation<
+      LiveAutoConnectTypes[0],
+      LiveAutoConnectTypes[1],
+      LiveAutoConnectTypes[2],
+      LiveAutoConnectTypes[3]
+    >(
+      sharedAppState,
+      // SELECTOR
+      (state: MainSharedAppState, selectorState) => [
+        state.appSettings.autoconnect,
+        state.sessions.liveSession?.isAvailable ?? false,
+        state.sessions.activeSessionType,
+        state.sessions.liveSession?.info?.weekendInfo?.sessionID ?? 0
+      ],
+      // TRANSFORM
+      ([isAutoConnectEnabled, isAvailable, activeSessionType, liveSessionId], _oldValues, state) => {
+        if (log.isDebugEnabled())
+          log.debug("LiveAutoConnect transform with", {isAutoConnectEnabled, isAvailable, activeSessionType, liveSessionId})
+        if (!isAutoConnectEnabled || !isAvailable || activeSessionType !== "NONE" || !liveSessionId) {
+          return 0
+        }
+
+        const cache = state.customCache,
+          isNewSessionId = !cache.has(liveSessionId)
+
+        if (isNewSessionId) cache.add(liveSessionId)
+
+        return isNewSessionId ? liveSessionId : 0
+      },
+      {
+        startImmediate: false,
+        predicate: ({ target, source }) => asOption(target)
+            .filter(isNumber)
+            .filter(it => it > 0)
+            .match({
+              None: () => false,
+              Some: () => true
+            }) && source.slice(0,2).every(isTrue),
+        customCacheInit: () => new Set<number>()
       }
-          
-          if (!isAutoConnectEnabled || !isAvailable || activeSessionType !== "NONE" || isEmpty(liveSessionId ?? "")) {
-            return false
-          }
-      
-      const cache = state.customCache,
-        isNewSessionId = !cache.has(liveSessionId)
-        if (isNewSessionId)
-          cache.add(liveSessionId)
-          
-      return  isNewSessionId
-        })
-    
-    
+    ).on(CachedStateComputationEventType.CHANGED, this.onLiveAutoConnectChanged.bind(this))
   }
 
   /**
@@ -401,7 +432,10 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   get activeSession(): SessionDetail {
     return this.getActiveSessionFromState()
   }
-
+  
+  /**
+   * Get current active session id
+   */
   get activeSessionId(): string {
     return this.state.activeSessionId
   }
@@ -411,13 +445,9 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return type === "DISK" ? state.diskSession : type === "LIVE" ? state.liveSession : null
   }
 
-  // @Bind setActiveSessionType(type: ActiveSessionType) {
-  //   this.patchState({ activeSessionType: type })
-  // }
-
+  
   @Bind
-  async setLiveSessionActiveHandler(event: IpcMainInvokeEvent, active: boolean): Promise<ActiveSessionType> {
-    log.info(`Received handler callback setActiveSessionTypeHandler`, event)
+  setLiveSessionActive(active: boolean): ActiveSessionType {
     const activeSessionType: ActiveSessionType = active ? "LIVE" : "NONE"
     if (activeSessionType !== this.activeSessionType) {
       this.patchState({
@@ -426,6 +456,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       })
     }
     return activeSessionType
+  }
+  @Bind
+  async setLiveSessionActiveHandler(event: IpcMainInvokeEvent, active: boolean): Promise<ActiveSessionType> {
+    log.info(`Received handler callback setActiveSessionTypeHandler`, event)
+    return this.setLiveSessionActive(active)
   }
 
   @Bind hasActiveSession() {
@@ -587,25 +622,22 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   private patchState(newStateOrFn: Partial<SessionsState> | SessionManagerStatePatchFn = {}): void {
     const currentState = this.state,
       currentActiveSessionType = currentState.activeSessionType,
-        currentActiveSession = this.getActiveSessionFromState(currentState),
-        currentActiveSessionId = getWeekendInfo(currentActiveSession)?.sessionID
-    
+      currentActiveSession = this.getActiveSessionFromState(currentState),
+      currentActiveSessionId = getWeekendInfo(currentActiveSession)?.sessionID
+
     const newStatePatch = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn
     //  newState: SessionsState = { ...this.state, ...newStatePatch }
-        
-        this.sharedAppState.updateSessions(newStatePatch)
-    
-    const
-        newState = this.state,
-        newActiveSessionType = newState?.activeSessionType,
-      
-        newActiveSession = this.getActiveSessionFromState(newState),
-        newActiveSessionId = getWeekendInfo(newActiveSession)?.sessionID,
-        activeSessionChanged =
-          currentActiveSessionType !== newActiveSessionType || currentActiveSessionId !== newActiveSessionId
+
+    this.sharedAppState.updateSessions(newStatePatch)
+
+    const newState = this.state,
+      newActiveSessionType = newState?.activeSessionType,
+      newActiveSession = this.getActiveSessionFromState(newState),
+      newActiveSessionId = getWeekendInfo(newActiveSession)?.sessionID,
+      activeSessionChanged =
+        currentActiveSessionType !== newActiveSessionType || currentActiveSessionId !== newActiveSessionId
 
     //this.state_ = newState
-    
   }
 
   /**
@@ -663,7 +695,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     return deferred.promise
   }
-  
+
   /**
    * Configure the data variables that are collected on each data frame
    * for 1..n players.  If no valid players are specified then all

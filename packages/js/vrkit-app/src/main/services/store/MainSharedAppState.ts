@@ -10,7 +10,7 @@ import {
   OverlaysState,
   ThemeId
 } from "vrkit-app-common/models"
-import { assign, cloneDeep, once } from "vrkit-app-common/utils"
+import { assign, once } from "vrkit-app-common/utils"
 import { makeObservable, observable, set, toJS } from "mobx"
 import { deepObserve, IDisposer } from "mobx-utils"
 
@@ -37,18 +37,18 @@ export class MainSharedAppState implements ISharedAppState {
   private stopObserving: IDisposer
 
   private shutdownInProgress: boolean = false
-  
+
   @observable systemTheme: ThemeId = getAppThemeFromSystem()
-  
+
   /**
    * Get app settings from state
    */
   @observable appSettings: AppSettings = AppSettings.create()
 
-  @observable devSettings = newDevSettings(AutoOpenDevToolsOverride ? {alwaysOpenDevTools: true} : {})
-  
+  @observable devSettings = newDevSettings(AutoOpenDevToolsOverride ? { alwaysOpenDevTools: true } : {})
+
   @observable actions = newActionsState()
-  
+
   @observable sessions = newSessionsState()
 
   @observable overlays: OverlaysState = newOverlaysState()
@@ -78,7 +78,6 @@ export class MainSharedAppState implements ISharedAppState {
   private broadcast() {
     const sharedAppStateJson = this.toJSON()
     const sharedAppStateObj = toJS(sharedAppStateJson)
-    //info("Broadcasting shared app state", sharedAppStateObj)
     broadcastToAllWindows(ElectronIPCChannel.sharedAppStateChanged, sharedAppStateObj)
   }
 
@@ -123,32 +122,27 @@ export class MainSharedAppState implements ISharedAppState {
   }
 
   @BindAction() setAppSettings(appSettings: AppSettings) {
-    this.appSettings = appSettings
+    set(this.appSettings, appSettings)
+    return this.appSettings
   }
 
   @BindAction() updateAppSettings(patch: Partial<AppSettings>) {
-    // this.appSettings = assign(AppSettings.clone(this.appSettings), patch)
-    set(this.appSettings, patch)
+    assign(this.appSettings, patch)
+    return this.appSettings
   }
 
-  // @BindAction() setOverlays(state: OverlaysState) {
-  //   this.overlays = state
-  // }
-  //
-  // @BindAction() updateOverlays(patch: Partial<OverlaysState>) {
-  //   this.overlays = assign(cloneDeep(this.overlays), patch)
-  // }
-
-  @BindAction() setSessions(state: SessionsState) {
-    this.sessions = state
+  @BindAction() setSessions(newSessions: SessionsState) {
+    set(this.sessions, newSessions)
+    return this.sessions
   }
 
   @BindAction() updateSessions(patch: Partial<SessionsState>) {
-    set(this.sessions, patch)
+    assign(this.sessions, patch)
+    return this.sessions
   }
 
   @BindAction() setDashboards(state: DashboardsState) {
-    this.dashboards = state
+    set(this.dashboards, state)
     return this.dashboards
   }
 
@@ -157,13 +151,14 @@ export class MainSharedAppState implements ISharedAppState {
     return this.dashboards
   }
 
-  @BindAction()
-  updateDevSettings(patch: Partial<DevSettings>) {
+  @BindAction() updateDevSettings(patch: Partial<DevSettings>) {
     assign(this.devSettings, patch)
+    return this.devSettings
   }
-  
+
   @BindAction() setSystemTheme(theme: ThemeId) {
-    this.systemTheme = theme
+    set(this, "systemTheme", theme)
+    return this.systemTheme
   }
 
   @Bind

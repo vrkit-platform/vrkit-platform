@@ -1,12 +1,14 @@
 import { isEqual } from "../ObjectUtil"
-import { Disposables } from "../Disposables"
-import type { IValueDidChange } from "mobx"
+//import { Disposables } from "../Disposables"
+import type { IValueDidChange, Lambda } from "mobx"
 import { observe } from "mobx"
 import { getLogger } from "@3fv/logger-proxy"
 import EventEmitter3 from "eventemitter3"
 import { Bind } from "../decorators"
-import { C, S, T, V } from "@fullcalendar/core/internal-common"
-import { options } from "axios"
+import { asOption } from "@3fv/prelude-ts"
+import { isDefined, isFunction } from "@3fv/guard"
+import { match } from "ts-pattern"
+import { deepObserve } from "mobx-utils"
 
 const log = getLogger(__filename)
 
@@ -38,16 +40,19 @@ export type CachedStateComputationPredicate<S extends {}, V, T, C> = (
 export interface CachedStateComputationOptions<S extends {}, V, T, C> {
   isEqual: CachedStateComputationSourceIsEqual<V>
 
-  // fireImmediate: boolean
-
+  startImmediate: boolean
+  
   predicate?: CachedStateComputationPredicate<S, V, T, C>
+  
+  customCacheInit?: C | (() => C)
 }
 
 function newCachedStateComputationSelectorOptionsDefault<S extends {}, V, T, C>(): CachedStateComputationOptions<S, V, T, C> {
   return {
     isEqual: isEqual,
-    predicate: null
-    // fireImmediate: false
+    startImmediate: true,
+    predicate: null,
+    customCacheInit: null
   }
 }
 
@@ -64,7 +69,7 @@ export interface CachedStateComputationState<S extends {}, V, T, C> {
 }
 
 function newCachedStateComputationTransformerDefault<S extends {}, V, T, C>(): CachedStateComputationTransformer<S, V, T, C> {
-  return (sourceValue, oldSourceValue, selectorState): T => sourceValue as T
+  return (sourceValue, oldSourceValue, selectorState): T => sourceValue as (T extends V ? T : never)
 }
 
 export enum CachedStateComputationEventType {
@@ -116,9 +121,11 @@ export class CachedStateComputation<S extends {}, V, T = V, C = unknown> extends
 
   private readonly options_: CachedStateComputationOptions<S, V, T, C>
 
-  private readonly disposers_ = new Disposables()
-
-  private onChange(change: IValueDidChange<S>) {
+  // private attached_: boolean = false
+  private stopObserving_: Lambda = null
+  
+  // private onChange(change: IValueDidChange<S>) {
+  private onChange(change: any, path: any, root: any) {
     const state = this.state_,
       source = this.sourceSelector(this.observableState, state),
       { isEqual, predicate } = this.options
@@ -162,11 +169,11 @@ export class CachedStateComputation<S extends {}, V, T = V, C = unknown> extends
       source: state.source,
       updatedAt: state.updatedAt
     }
-    this.emit("CHANGED", ev)
+    this.emit(CachedStateComputationEventType.CHANGED, ev)
   }
 
   @Bind dispose() {
-    this.disposers_.dispose()
+    this.stop()
   }
 
   [Symbol.dispose]() {
@@ -176,8 +183,8 @@ export class CachedStateComputation<S extends {}, V, T = V, C = unknown> extends
   constructor(
     observableState: S,
     readonly sourceSelector: CachedStateComputationSourceSelector<S, V, T, C>,
-    readonly transformer: CachedStateComputationTransformer<S, V, T, C> = newCachedStateComputationTransformerDefault<S, V>(),
-    options: Partial<CachedStateComputationOptions<S, V, T, C>> = {}
+    readonly transformer: CachedStateComputationTransformer<S, V, T, C> = newCachedStateComputationTransformerDefault<S, V,T,C>(),
+    overrideOptions: Partial<CachedStateComputationOptions<S, V, T, C>> = {}
   ) {
     super()
 
@@ -185,11 +192,52 @@ export class CachedStateComputation<S extends {}, V, T = V, C = unknown> extends
       source: null,
       target: null,
       observableState,
-      updatedAt: 0
+      updatedAt: 0,
     }
-
-    this.options_ = { ...options, ...newCachedStateComputationSelectorOptionsDefault<S, V, T>() }
-    this.disposers_.push(observe(observableState, this.onChange.bind(this), false))
+    
+    const options = this.options_ = { ...newCachedStateComputationSelectorOptionsDefault<S, V, T, C>(), ...overrideOptions }
+    this.state_.customCache = match(options.customCacheInit)
+        .when(isFunction, it => it())
+        .when(isDefined, it => it)
+        .otherwise(() => null)
+    
+    if (options.startImmediate)
+      this.start()
+    
+  }
+  
+  start() {
+    if (!this.stopObserving_) {
+      // this.stopObserving_ = observe(this.observableState, this.onChange.bind(this))
+      this.stopObserving_ = deepObserve(this.observableState, this.onChange.bind(this))
+    }
+    return this
+  }
+  
+  stop() {
+    if (this.stopObserving_) {
+      asOption(this.stopObserving_)
+          .filter(isFunction)
+          .ifSome(stopObserving => stopObserving())
+      this.stopObserving_ = null
+    }
+    return this
+  }
+  
+  get isStarted() {
+    return !!this.stopObserving_
+  }
+  
+  get isAttached() {
+    return this.isStarted
+  }
+  
+  get isObserving() {
+    return this.isStarted
+  }
+  
+  get isRunning() {
+    return this.isStarted
   }
 
   get state() {

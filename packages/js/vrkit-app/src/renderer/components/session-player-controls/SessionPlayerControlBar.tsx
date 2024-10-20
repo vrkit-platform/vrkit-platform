@@ -72,9 +72,11 @@ const SessionDetailTable = styled("table", { name: "SessionDetailTable" })(
 )
 
 function SessionDetailBox({ detail }: SessionDetailBoxProps) {
-  const { info, type } = detail,
-    { weekendInfo: winfo } = info
-
+  const winfo = detail?.info?.weekendInfo
+  if (!winfo) {
+    return <></>
+  }
+  
   return (
     <SessionDetailTable>
       <tbody>

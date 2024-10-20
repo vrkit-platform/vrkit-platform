@@ -2,7 +2,9 @@ import "jest"
 import { action, makeAutoObservable } from "mobx"
 import { faker } from "@faker-js/faker"
 
-import { CachedStateComputation } from "./CachedStateComputation"
+import {
+  CachedStateComputation, CachedStateComputationEventType
+} from "./CachedStateComputation"
 import { isNumber } from "@3fv/guard"
 
 function newRawState() {
@@ -46,21 +48,25 @@ describe("CachedStateComputationSelector", () => {
     )
 
     const changedFn = jest.fn()
-    selector.on("CHANGED", changedFn)
+    selector.on(CachedStateComputationEventType.CHANGED, changedFn)
 
     const incrementId = action(() => {
       observableState.id++
     })
 
-    const changeNested1 = action(() => {
-      observableState.nestedObj.nested1 = faker.word.words(1)
+    const changeNested = action(() => {
+      observableState.nestedObj.nested1 = !observableState.nestedObj.nested1
+      observableState.nestedObj.nested2 = faker.word.words(1)
     })
 
     incrementId()
     incrementId()
     expect(changedFn).toBeCalledTimes(2)
 
-    changeNested1()
+    changeNested()
     expect(changedFn).toBeCalledTimes(2)
+    
+    incrementId()
+    expect(changedFn).toBeCalledTimes(3)
   })
 })

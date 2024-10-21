@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../build/scripts-ts",
+    "rootDir": "."
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "NodeNext",
+      "allowJs": true,
+      "noEmit": false,
+      "declaration": true,
+      "moduleResolution": "node",
+      "target": "ESNext",
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true
+    }
+  },
+  "include": ["**/*.ts","*.ts"],
+  
+  "exclude": ["*.d.ts"]
+}

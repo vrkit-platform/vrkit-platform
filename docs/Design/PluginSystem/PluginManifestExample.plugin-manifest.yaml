@@ -1,0 +1,27 @@
+namespace: mycorp::myplugin
+components:
+  - id: leaderboard-overlay
+    type: OVERLAY
+    name: Leaderboard
+    description: A configurable leaderboard overlay
+    settings:
+      carClassColor1:
+        type: color
+        default: "#FF0000"
+      carClassColor2:
+        type: color
+        default: "#00FF00"
+      carClassColor3:
+        type: color
+        default: "#0000FF"
+    supportedGames:
+      - type: IRACING
+        dataVarsRequired:
+          - PlayerCarIdx
+          - CarIdxLap
+          - CarIdxLapCompleted
+          - CarIdxPosition
+          - CarIdxClassPosition
+          - CarIdxEstTime
+          - CarIdxLapDistPct
+

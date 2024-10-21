@@ -18,3 +18,6 @@ export * from "./TrackMetadata"
 export * from "./DashboardConfig"
 export * from "./TelemetryDataFile"
 export * from "./TrackLayoutMetadata"
+
+export * from "./PluginManifest"
+export * from "./AppInterfaceTypes"

@@ -1,0 +1,27 @@
+{
+  id: "mycorp::myplugin",
+  components: [
+    {
+      id: "leaderboard-overlay",
+      type: "OVERLAY",
+      name: "Leaderboard",
+      description: "A configurable leaderboard overlay",
+      supportedGames: [
+        {
+          type: "IRACING",
+          // Data Variables & Units/Types are available in
+          // iRacing forums, this is just an example
+          dataVarsRequired: [
+            "PlayerCarIdx",
+            "CarIdxLap",
+            "CarIdxLapCompleted",
+            "CarIdxPosition",
+            "CarIdxClassPosition",
+            "CarIdxEstTime",
+            "CarIdxLapDistPct"
+          ]
+        }
+      ]
+    }
+  ]
+}

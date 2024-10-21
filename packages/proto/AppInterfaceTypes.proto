@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package IRacingTools.Models;
+
+enum SupportedGame {
+  SUPPORTED_GAME_IRACING = 0;
+}

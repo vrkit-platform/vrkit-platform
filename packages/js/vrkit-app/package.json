@@ -161,6 +161,7 @@
   "devDependencies": {
     "@faker-js/faker": "^9.0.3",
     "keyboard-css": "^1.2.4",
+    "quicktype": "^23.0.170",
     "tsc-watch": "^6.2.0",
     "@swc/jest": "^0.2.36",
     "@electron/notarize": "^2.3.2",

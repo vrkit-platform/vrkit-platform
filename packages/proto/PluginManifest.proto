@@ -1,0 +1,86 @@
+syntax = "proto3";
+import "AppInterfaceTypes.proto";
+import "Geometry.proto";
+
+package IRacingTools.Models;
+
+enum PluginComponentType {
+  PLUGIN_COMPONENT_TYPE_OVERLAY = 0;
+}
+
+message PluginComponentDefinition {
+  string id = 1;
+  PluginComponentType type = 2;
+
+  string name = 5;
+  string description = 6;
+
+  repeated SupportedGame supported_games = 10;
+
+  /**
+   * Common parameters irrespective of game or component type
+   */
+  map<string, string> common_parameters = 15;
+
+  /**
+   * Common Overlay specific settings
+   */
+  message OverlayCommonSettings {
+    // FPS OVERRIDING USER/APP CONFIGURED
+    // < 1: USER/APP ARE USED TO CONFIGURE,
+    // DEFAULT VALUE (0) USES THE INTERNAL DEFAULT OF 10FPS
+    int32 fps = 1;
+
+    // THIS IS REQUIRED
+    SizeI initial_size = 2;
+
+    // THE ACTUAL ASPECT RATIO IS EXTRAPOLATED FROM
+    // `initial_size` PROVIDED
+    bool force_aspect_ratio = 3;
+
+    // CAN THE OVERLAY BE RESIZED
+    bool can_resize = 4;
+
+    // VISIBLE REGARDLESS OF AN ACTIVE GAME RUNNING
+    bool visible_without_connection = 5;
+  }
+
+  OverlayCommonSettings overlay_common_settings = 20;
+
+  /**
+   * IRacing Overlay specific settings
+   */
+  message OverlayIRSettings {
+    repeated string data_variables_used = 5;
+    map<string, string> parameters = 10;
+  }
+
+  // IROverlaySettings, can be omitted
+  OverlayIRSettings overlay_ir_settings = 21;
+
+
+}
+
+message PluginManifest {
+
+  string id = 1;
+
+  string name = 5;
+
+  string description = 6;
+
+  message PluginAuthor {
+    string name = 1;
+    string company = 2;
+
+    string email = 5;
+  }
+
+  PluginAuthor author = 10;
+
+  repeated PluginComponentDefinition components = 20;
+
+}
+
+
+

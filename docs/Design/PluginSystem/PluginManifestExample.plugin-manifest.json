@@ -1,0 +1,40 @@
+{
+  "id": "mycorp::myplugin",
+  "author": {
+    "company": "3FV",
+    "name": "Jonathan Glanz",
+    "email": "jonathan.glanz@gmail.com"
+  },
+  "name": "VRKitExternalPlugin",
+  "components": [
+    {
+      "id": "leaderboard-overlay",
+      "type": "PLUGIN_COMPONENT_TYPE_OVERLAY",
+      "name": "Leaderboard",
+      "description": "A configurable leaderboard overlay",
+      "supportedGames": [
+        "SUPPORTED_GAME_IRACING"
+      ],
+      "overlayCommonSettings": {
+        "canResize": true,
+        "forceAspectRatio": false,
+        "fps": 0,
+        "initialSize": {
+          "height": 300,
+          "width": 400
+        }
+      },
+      "overlayIrSettings": {
+        "dataVariablesUsed": [
+          "PlayerCarIdx",
+          "CarIdxLap",
+          "CarIdxLapCompleted",
+          "CarIdxPosition",
+          "CarIdxClassPosition",
+          "CarIdxEstTime",
+          "CarIdxLapDistPct"
+        ]
+      }
+    }
+  ]
+}

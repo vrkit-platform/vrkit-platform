@@ -1,38 +1,63 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "$ref": "#/definitions/Screen",
+    "$ref": "#/definitions/PluginComponentDefinition",
     "definitions": {
-        "IRacingTools.Models.UI.Display": {
+        "IRacingTools.Models.PluginComponentDefinition.OverlayCommonSettings": {
             "properties": {
-                "id": {
+                "fps": {
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {
-                            "type": "string"
+                            "type": "integer"
                         }
-                    ]
+                    ],
+                    "description": "FPS OVERRIDING USER/APP CONFIGURED \u003c 1: USER/APP ARE USED TO CONFIGURE, DEFAULT VALUE (0) USES THE INTERNAL DEFAULT OF 10FPS"
                 },
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "rect": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.RectI",
+                "initialSize": {
+                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {}
-                    ]
+                    ],
+                    "description": "THIS IS REQUIRED"
+                },
+                "forceAspectRatio": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "description": "THE ACTUAL ASPECT RATIO IS EXTRAPOLATED FROM `initial_size` PROVIDED"
+                },
+                "canResize": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "description": "CAN THE OVERLAY BE RESIZED"
+                },
+                "visibleWithoutConnection": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ],
+                    "description": "VISIBLE REGARDLESS OF AN ACTIVE GAME RUNNING"
                 }
             },
             "additionalProperties": true,
@@ -44,64 +69,48 @@
                     "type": "object"
                 }
             ],
-            "title": "Display"
+            "title": "Overlay Common Settings",
+            "description": "* Common Overlay specific settings"
         },
-        "IRacingTools.Models.UI.DisplayLayout": {
+        "IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings": {
             "properties": {
-                "origin": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.Position",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "displays": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.UI.Display"
+                "dataVariablesUsed": {
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "null"
                             },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
                             "type": "array"
                         }
                     ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
                 },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Display Layout"
-        },
-        "IRacingTools.Models.UI.Position": {
-            "properties": {
-                "x": {
+                "parameters": {
+                    "additionalProperties": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "y": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
+                            "type": "object"
                         }
                     ]
                 }
@@ -115,43 +124,10 @@
                     "type": "object"
                 }
             ],
-            "title": "Position"
+            "title": "Overlay IR Settings",
+            "description": "* IRacing Overlay specific settings"
         },
-        "IRacingTools.Models.UI.RectI": {
-            "properties": {
-                "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.SizeI",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "position": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.Position",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Rect I"
-        },
-        "IRacingTools.Models.UI.SizeI": {
+        "IRacingTools.Models.SizeI": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -185,7 +161,7 @@
             ],
             "title": "Size I"
         },
-        "IRacingTools.Models.UI.VRLayout": {
+        "PluginComponentDefinition": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -197,57 +173,10 @@
                         }
                     ]
                 },
-                "scale": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "number"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "VR Layout"
-        },
-        "Screen": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ],
-                    "description": "* Must serve as a hash"
-                },
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "kind": {
+                "type": {
                     "enum": [
-                        "SK_MONITOR",
-                        0,
-                        "SK_VR",
-                        1
+                        "PLUGIN_COMPONENT_TYPE_OVERLAY",
+                        0
                     ],
                     "oneOf": [
                         {
@@ -260,10 +189,68 @@
                             "type": "null"
                         }
                     ],
-                    "title": "Screen Kind"
+                    "title": "Plugin Component Type"
                 },
-                "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.SizeI",
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "description": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "supportedGames": {
+                    "items": {
+                        "enum": [
+                            "SUPPORTED_GAME_IRACING",
+                            0
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "array"
+                        }
+                    ],
+                    "title": "Supported Game"
+                },
+                "commonParameters": {
+                    "additionalProperties": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ],
+                    "description": "* Common parameters irrespective of game or component type"
+                },
+                "overlayCommonSettings": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginComponentDefinition.OverlayCommonSettings",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -272,25 +259,16 @@
                         {}
                     ]
                 },
-                "display": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.DisplayLayout",
+                "overlayIrSettings": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings",
                     "additionalProperties": true,
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {}
-                    ]
-                },
-                "vr": {
-                    "$ref": "#/definitions/IRacingTools.Models.UI.VRLayout",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
+                    ],
+                    "description": "IROverlaySettings, can be omitted"
                 }
             },
             "additionalProperties": true,
@@ -302,8 +280,7 @@
                     "type": "object"
                 }
             ],
-            "title": "Screen",
-            "description": "* Represents a complete screen"
+            "title": "Plugin Component Definition"
         }
     }
 }

@@ -132,12 +132,16 @@ export interface IPluginClient {
   
   getTrackMap(trackLayoutId:string):Promise<TrackMap>
   
-  on<T extends keyof IPluginClientEventArgs, Fn extends IPluginClientEventArgs[T] = IPluginClientEventArgs[T]>(type:T,
-      handler:Fn
+  on<
+    T extends keyof IPluginClientEventArgs
+  >(
+      type:T,
+      handler:IPluginClientEventArgs[T] 
   ):void
   
-  off<T extends keyof IPluginClientEventArgs, Fn extends IPluginClientEventArgs[T] = IPluginClientEventArgs[T]>(type:T,
-      handler?:Fn
+  off<T extends keyof IPluginClientEventArgs>(
+    type:T,
+    handler?:IPluginClientEventArgs[T]
   ):void
 }
 

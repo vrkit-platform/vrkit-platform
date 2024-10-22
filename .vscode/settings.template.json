@@ -1,0 +1,30 @@
+{
+  "cmake.buildDirectory": "${workspaceFolder}/build/debug-vscode",
+  "cmake.allowCommentsInPresetsFile": true,
+  "cmake.automaticReconfigure": false,
+  "cmake.parallelJobs": 20,
+  "cmake.buildToolArgs": [    
+  ],
+  "cmake.configureArgs": [
+    // "-T", "ClangCL", "-A", "x64",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DCMAKE_TOOLCHAIN_FILE=Y:/code/sim-racing/vcpkg/scripts/buildsystems/vcpkg.cmake",
+    "-DCMAKE_BUILD_TYPE=Debug",
+    "-DVCPKG_ROOT=Y:/code/sim-racing/vcpkg",
+    "-DSPDLOG_WCHAR_SUPPORT=ON",
+    "-DVCPKG_CRT_LINKAGE=static",
+    "-DVCPKG_LIBRARY_LINKAGE=static",
+    "-DVCPKG_DEFAULT_TRIPLET=x64-windows-static",
+    "-DVCPKG_TARGET_TRIPLET=x64-windows-static"
+  ],
+  // "cmake.generator": "Ninja",
+  
+  "cmake.buildEnvironment": {
+    "UseMultiToolTask": "true",
+    
+
+  },
+  "C_Cpp.default.compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\Llvm\\bin\\clang-cl.exe",
+  // "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+  // "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json"
+}

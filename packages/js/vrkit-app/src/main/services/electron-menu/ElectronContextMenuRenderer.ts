@@ -6,10 +6,10 @@ import {
 import { asOption } from "@3fv/prelude-ts"
 import { getLogger } from "@3fv/logger-proxy"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
-import { ActionRegistry, ElectronIPCChannel, MenuItem } from "vrkit-app-common/services"
-import { Bind } from "vrkit-app-common/decorators"
+import { ActionRegistry, ElectronIPCChannel, MenuItem } from "vrkit-shared"
+import { Bind } from "vrkit-shared"
 import { Deferred } from "@3fv/deferred"
-import { Pair, pairOf } from "vrkit-app-common/utils"
+import { Pair, pairOf } from "vrkit-shared"
 import { noop } from "lodash"
 
 const log = getLogger(__filename)

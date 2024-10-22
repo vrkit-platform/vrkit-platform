@@ -1,7 +1,7 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from "electron"
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind } from "vrkit-shared"
 import { DashboardConfig } from "vrkit-models"
 import { isDefined } from "@3fv/guard"
 import {
@@ -13,11 +13,11 @@ import {
   Pair,
   removeIfMutation,
   SignalFlag
-} from "vrkit-app-common/utils"
-import { DashboardManagerFnType, DashboardManagerFnTypeToIPCName } from "../../../common/models/dashboards"
+} from "vrkit-shared"
+import { DashboardManagerFnType, DashboardManagerFnTypeToIPCName } from "vrkit-shared"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
-import { AppPaths, FileExtensions } from "vrkit-app-common/constants"
+import { AppPaths, FileExtensions } from "vrkit-shared"
 import { AppSettingsService } from "../app-settings"
 import Fsx from "fs-extra"
 import { endsWith } from "lodash/fp"
@@ -28,7 +28,7 @@ import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { set } from "mobx"
 import { IDisposer } from "mobx-utils"
-import { DashboardsState } from "vrkit-app-common/models"
+import { DashboardsState } from "vrkit-shared"
 import { defaultsDeep, first } from "lodash"
 import { BindAction } from "../../decorators"
 

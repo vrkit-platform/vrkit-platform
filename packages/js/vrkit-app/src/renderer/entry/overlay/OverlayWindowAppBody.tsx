@@ -3,16 +3,17 @@ import GlobalStyles from "@mui/material/GlobalStyles"
 import { styled, useTheme } from "@mui/material/styles"
 import { SizeI } from "vrkit-models"
 import { OverlayWindowLayoutEditor } from "../../components/overlay-window-layout-editor"
-import { createClassNames } from "vrkit-app-renderer/styles/createClasses"
+import { createClassNames } from "vrkit-shared-ui"
 import { getLogger } from "@3fv/logger-proxy"
 import Box from "@mui/material/Box"
-import { Fill, flexAlign, FlexRow, FlexRowCenter, hasCls, OverflowHidden } from "vrkit-app-renderer/styles/ThemedStyles"
+import { Fill, flexAlign, FlexRow, FlexRowCenter, hasCls, OverflowHidden } from "vrkit-shared-ui"
 import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 import clsx from "clsx"
 import { isObject } from "@3fv/guard"
 import { overlayWindowSelectors } from "../../services/store/slices/overlay-window"
-import { EditorInfoScreenOverlayOUID, EditorInfoVROverlayOUID } from "../../../common/models"
+import { EditorInfoScreenOverlayOUID, EditorInfoVROverlayOUID } from "vrkit-shared"
+import { IPluginComponentManager } from "vrkit-plugin-sdk"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -104,6 +105,7 @@ export default function OverlayWindowAppBody() {
           ) : (
             <PluginComponent
               client={getVRKitPluginClient()}
+              manager={null as IPluginComponentManager}
               {...size}
             />
           )}

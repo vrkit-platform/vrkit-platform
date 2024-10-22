@@ -25,11 +25,11 @@ import {
   hasCls, important,
   paddingRem,
   transition
-} from "../../styles/ThemedStyles"
+} from "vrkit-shared-ui"
 
-import { ClassNamesKey, createClassNames } from "../../styles/createClasses"
+import { ClassNamesKey, createClassNames } from "vrkit-shared-ui"
 import clsx from "clsx"
-import { FlexRowCenterBox } from "../box"
+import { FlexRowCenterBox } from "vrkit-shared-ui"
 import { useService } from "../service-container"
 import { OverlayManagerClient } from "../../services/overlay-client"
 import Typography from "@mui/material/Typography"

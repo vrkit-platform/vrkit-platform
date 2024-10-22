@@ -4,6 +4,35 @@ import "Geometry.proto";
 
 package IRacingTools.Models;
 
+enum PluginUserSettingType {
+  PLUGIN_USER_SETTING_TYPE_INT = 0;
+  PLUGIN_USER_SETTING_TYPE_DOUBLE = 1;
+  PLUGIN_USER_SETTING_TYPE_STRING = 2;
+  PLUGIN_USER_SETTING_TYPE_BOOLEAN = 3;
+  PLUGIN_USER_SETTING_TYPE_COLOR = 4;
+}
+
+
+message PluginUserSettingValue {
+  int32 int_value = 1;
+  double double_value = 2;
+  string string_value = 3;
+  bool boolean_value = 4;
+  string color_value = 5;
+}
+
+message PluginUserSetting {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+
+  PluginUserSettingType type = 4;
+
+  PluginUserSettingValue default_value = 10;
+
+  PluginUserSettingValue user_value = 20;
+}
+
 enum PluginComponentType {
   PLUGIN_COMPONENT_TYPE_OVERLAY = 0;
 }
@@ -50,14 +79,15 @@ message PluginComponentDefinition {
   /**
    * IRacing Overlay specific settings
    */
-  message OverlayIRSettings {
+  message OverlayIRacingSettings {
     repeated string data_variables_used = 5;
     map<string, string> parameters = 10;
   }
 
   // IROverlaySettings, can be omitted
-  OverlayIRSettings overlay_ir_settings = 21;
+  OverlayIRacingSettings overlay_iracing_settings = 21;
 
+  repeated PluginUserSetting user_settings = 99;
 
 }
 

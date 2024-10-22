@@ -15,7 +15,7 @@ import type { Theme, TypographyProps } from "@mui/material"
 import type { SxProps } from "@mui/system"
 
 // APP
-import { ClassNamesKey, createClassNames, dimensionConstraints, child, hasCls } from "vrkit-app-renderer/styles"
+import { ClassNamesKey, createClassNames, dimensionConstraints, child, hasCls } from "vrkit-shared-ui"
 import Typography from "@mui/material/Typography"
 
 const log = getLogger(__filename)

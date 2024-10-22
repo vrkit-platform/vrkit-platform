@@ -1,5 +1,5 @@
 import { action } from "mobx"
-import { applyDecorators, Bind } from "vrkit-app-common/decorators"
+import { applyDecorators, Bind } from "vrkit-shared"
 
 export const BindAction = () => applyDecorators(Bind, action)
 

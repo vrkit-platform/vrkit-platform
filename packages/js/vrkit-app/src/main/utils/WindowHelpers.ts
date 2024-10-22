@@ -6,9 +6,9 @@ import {
   type WindowOpenHandlerResponse
 } from "electron"
 import iconPng from "!!url-loader!assets/icons/icon.png"
-import { isDev } from "vrkit-app-common/utils"
+import { isDev } from "vrkit-shared"
 import { isFunction } from "@3fv/guard"
-import { ElectronIPCChannelKind } from "vrkit-app-common/services"
+import { ElectronIPCChannelKind } from "vrkit-shared"
 
 export function windowOptionDefaults(webPreferences: Partial<WebPreferences> = {}): BrowserWindowConstructorOptions {
   return {

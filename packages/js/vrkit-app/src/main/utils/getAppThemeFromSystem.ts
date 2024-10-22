@@ -1,5 +1,5 @@
 import { nativeTheme } from "electron"
-import type { ThemeId } from "vrkit-app-common/models"
+import type { ThemeId } from "vrkit-shared"
 import { ThemeType } from "vrkit-models"
 
 export function getAppThemeFromSystem(): ThemeId {

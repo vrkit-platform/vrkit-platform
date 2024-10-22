@@ -1,0 +1,33 @@
+{
+  "name": "vrkit-shared-ui",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./styles": {
+      "types": "./lib/styles/index.d.ts",
+      "default": "./lib/styles/index.js"
+    }
+  },
+  "scripts": {
+    "build:watch": "tsc -p tsconfig.json -w"
+  },
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@mui/styled-engine": "^5.16.6",
+    "@protobuf-ts/runtime": "^2.9.4",
+    "vrkit-shared": "1.0.0"
+  },
+  "devDependencies": {
+    "cmake-js": "^7.3.0",
+    "@protobuf-ts/plugin": "^2.9.4",
+    "typescript": "^5.5.4",
+    "vrkit-builder-tool": "1.0.0"
+  }
+}

@@ -1,4 +1,4 @@
-import { assign, Pair, RectangleLayoutTool } from "../../../common/utils"
+import { assign, Pair, RectangleLayoutTool } from "vrkit-shared"
 import {
   OverlayAnchor, PositionF, PositionI, RectF, RectI, SizeF, SizeI
 } from "vrkit-models"

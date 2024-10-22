@@ -28,13 +28,13 @@ import {
   OverflowAuto,
   padding,
   transition
-} from "vrkit-app-renderer/styles"
+} from "vrkit-shared-ui"
 import clsx from "clsx"
 import { DashboardConfig } from "vrkit-models"
 import Paper from "@mui/material/Paper"
 import Typography from "@mui/material/Typography"
-import { FlexColumnBox, FlexColumnCenterBox } from "../box/FlexColumnBox"
-import { isEmpty } from "vrkit-app-common/utils"
+import { FlexColumnBox, FlexColumnCenterBox } from "vrkit-shared-ui"
+import { isEmpty } from "vrkit-shared"
 import { asOption } from "@3fv/prelude-ts"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 import { useAppSelector } from "../../services/store"

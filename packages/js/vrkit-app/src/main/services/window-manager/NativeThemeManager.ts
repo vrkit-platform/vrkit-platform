@@ -1,10 +1,10 @@
 import { PostConstruct, Singleton } from '@3fv/ditsy'
 import { getLogger } from "@3fv/logger-proxy"
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind } from "vrkit-shared"
 import { ipcMain, IpcMainEvent, nativeTheme, webContents } from "electron"
 import { getAppThemeFromSystem } from "../../utils/getAppThemeFromSystem"
 // import MainStateStore from "../store"
-import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
+import { ElectronIPCChannel } from "vrkit-shared"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log

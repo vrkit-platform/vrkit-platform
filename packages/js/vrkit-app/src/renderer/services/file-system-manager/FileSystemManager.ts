@@ -1,7 +1,7 @@
 import { getLogger } from "@3fv/logger-proxy"
 import type {MessageType,IMessageType} from "@protobuf-ts/runtime"
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind } from "vrkit-shared"
 import { isDev } from "../../renderer-constants"
 import { getValue } from "@3fv/guard"
 import Fs, { constants as FsConstants } from "node:fs"

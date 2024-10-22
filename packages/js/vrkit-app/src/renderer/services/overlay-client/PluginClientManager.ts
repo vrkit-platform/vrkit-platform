@@ -1,21 +1,21 @@
 import { getLogger } from "@3fv/logger-proxy"
 
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind } from "vrkit-shared"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
-import { OverlayManagerClientEventHandler } from "../../../common/models/overlays"
+import { OverlayManagerClientEventHandler } from "vrkit-shared"
 import type {
-  PluginClient,
-  PluginClientComponentProps,
-  PluginClientEventArgs, SessionInfoMessage
+  IPluginClient,
+  IPluginClientComponentProps,
+  IPluginClientEventArgs, SessionInfoMessage
 } from "vrkit-plugin-sdk"
 import { OverlayConfig, OverlayKind, SessionTiming } from "vrkit-models"
 import OverlayManagerClient from "./OverlayManagerClient"
 import { asOption } from "@3fv/prelude-ts"
 import TrackManager from "../track-manager"
-import { assign, importDefault, isEqual } from "vrkit-app-common/utils"
+import { assign, importDefault, isEqual } from "vrkit-shared"
 import React from "react"
 import { sharedAppSelectors } from "../store/slices/shared-app"
 import { AppStore } from "../store"
@@ -28,28 +28,28 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-type ReactPluginComponent = React.ComponentType<PluginClientComponentProps> | Promise<React.ComponentType<PluginClientComponentProps>>
+type ReactPluginComponent = React.ComponentType<IPluginClientComponentProps> | Promise<React.ComponentType<IPluginClientComponentProps>>
 
 const builtinPluginLoaders: Record<OverlayKind, () => Promise<ReactPluginComponent>> = {
-  [OverlayKind.CUSTOM]: (() => {
+  [OverlayKind.PLUGIN]: (() => {
     throw Error(`NotImplemented yet, will be part of plugin system`)
   }) as any,
   [OverlayKind.EDITOR_INFO]: () => importDefault(import("../../overlays/editor-info/EditorInfoOverlayPlugin")),
-  [OverlayKind.TRACK_MAP]: () => importDefault(import("../../overlays/track-map/TrackMapOverlayPlugin")),
-  [OverlayKind.CLOCK]: () => importDefault(import("../../overlays/clock/ClockOverlayPlugin"))
+  // [OverlayKind.TRACK_MAP]: () => importDefault(import("../../overlays/track-map/TrackMapOverlayPlugin")),
+  // [OverlayKind.CLOCK]: () => importDefault(import("../../overlays/clock/ClockOverlayPlugin"))
 }
 
 @Singleton()
 export class PluginClientManager {
   private builtinPluginCtx: any = null
 
-  private pluginClient: PluginClient
+  private pluginClient: IPluginClient
 
-  private reactComponent_: React.ComponentType<PluginClientComponentProps>
+  private reactComponent_: React.ComponentType<IPluginClientComponentProps>
 
   
   
-  private getPluginClient(): PluginClient {
+  private getPluginClient(): IPluginClient {
     return asOption(this.pluginClient).getOrCall(() => {
       this.pluginClient = {
         inActiveSession: () => {
@@ -72,13 +72,13 @@ export class PluginClientManager {
         getTrackMap: (trackLayoutId: string) => {
           return this.trackManager.getTrackMapFromLapTrajectory(trackLayoutId)
         },
-        on: <T extends keyof PluginClientEventArgs, Fn extends PluginClientEventArgs[T] = PluginClientEventArgs[T]>(
+        on: <T extends keyof IPluginClientEventArgs, Fn extends IPluginClientEventArgs[T] = IPluginClientEventArgs[T]>(
           type: T,
           handler: Fn
         ) => {
           this.on<T>(type, handler as any)
         },
-        off: <T extends keyof PluginClientEventArgs, Fn extends PluginClientEventArgs[T] = PluginClientEventArgs[T]>(
+        off: <T extends keyof IPluginClientEventArgs, Fn extends IPluginClientEventArgs[T] = IPluginClientEventArgs[T]>(
           type: T,
           handler: Fn
         ) => {
@@ -125,7 +125,7 @@ export class PluginClientManager {
       return null
     }
     
-    const kind = config.overlay.kind ?? OverlayKind.TRACK_MAP
+    const kind = config.overlay.kind
     const loaderFn = builtinPluginLoaders[kind]
     if (!loaderFn)
       throw Error(`Kind ${kind} is invalid`)
@@ -176,11 +176,11 @@ export class PluginClientManager {
 
   
 
-  on<Type extends keyof PluginClientEventArgs>(type: Type, handler: OverlayManagerClientEventHandler<Type>) {
+  on<Type extends keyof IPluginClientEventArgs>(type: Type, handler: OverlayManagerClientEventHandler<Type>) {
     this.client.on(type, handler as any)
   }
 
-  off<Type extends keyof PluginClientEventArgs>(type: Type, handler?: OverlayManagerClientEventHandler<Type>) {
+  off<Type extends keyof IPluginClientEventArgs>(type: Type, handler?: OverlayManagerClientEventHandler<Type>) {
     this.client.off(type, handler as any)
   }
 

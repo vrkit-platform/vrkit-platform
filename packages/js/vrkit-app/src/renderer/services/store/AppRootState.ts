@@ -3,7 +3,7 @@
 //import type { RouterState } from "connected-react-router"
 import type { GlobalState } from "./slices/global"
 import type { DataState } from "./slices/data"
-import type { ISharedAppState } from "vrkit-app-common/models/app"
+import type { ISharedAppState } from "vrkit-shared"
 import type { OverlayWindowState } from "./slices/overlay-window"
 
 export interface AppRootState {

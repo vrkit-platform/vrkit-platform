@@ -15,11 +15,11 @@ import {
   padding,
   paddingRem,
   rem
-} from "../../styles/ThemedStyles"
+} from "vrkit-shared-ui"
 import clsx from "clsx"
 import { useAppSelector } from "../../services/store/AppStoreHooks"
 import React, { useCallback } from "react"
-import { FlexAutoBox, FlexRowBox, FlexRowCenterBox, FlexScaleZeroBox } from "../box"
+import { FlexAutoBox, FlexRowBox, FlexRowCenterBox, FlexScaleZeroBox } from "vrkit-shared-ui"
 import { match, P } from "ts-pattern"
 import { getLogger } from "@3fv/logger-proxy"
 import { SessionManagerClient } from "../../services/session-manager-client"
@@ -27,9 +27,9 @@ import { useService } from "../service-container"
 import type { SessionTiming } from "vrkit-models"
 
 import { DurationView, MILLIS_IN_HR } from "../time"
-import type { ActiveSessionType, SessionDetail } from "../../../common/models/sessions"
+import type { ActiveSessionType, SessionDetail } from "vrkit-shared"
 
-import { createClassNames } from "vrkit-app-renderer/styles/createClasses"
+import { createClassNames } from "vrkit-shared-ui"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 
 const log = getLogger(__filename)

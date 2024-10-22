@@ -19,8 +19,8 @@ import {
   dimensionConstraints,
   flexAlign,
   hasCls
-} from "vrkit-app-renderer/styles"
-import { FlexColumnBox } from "../box"
+} from "vrkit-shared-ui"
+import { FlexColumnBox } from "vrkit-shared-ui"
 import ListItemButton from "@mui/material/ListItemButton"
 import ListItemText from "@mui/material/ListItemText"
 import { NavLink, useLocation, useMatch, useNavigate } from "react-router-dom"

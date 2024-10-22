@@ -32,9 +32,9 @@ import {
   OverflowVisible,
   padding,
   transition
-} from "vrkit-app-renderer/styles"
+} from "vrkit-shared-ui"
 import DashboardsViewContext from "../../pages/dashboards/DashboardsViewContext"
-import { isEmpty } from "vrkit-app-common/utils"
+import { isEmpty } from "vrkit-shared"
 import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 import IconButton from "@mui/material/IconButton"
@@ -49,7 +49,7 @@ import { useAsyncCallback } from "../../hooks"
 import { startCase } from "lodash"
 import Checkbox from "@mui/material/Checkbox"
 import Button from "@mui/material/Button"
-import { FlexRowCenterBox } from "../box"
+import { FlexRowCenterBox } from "vrkit-shared-ui"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 // import { faWindowClose } from "@awesome.me/kit-79150a3eed"
 

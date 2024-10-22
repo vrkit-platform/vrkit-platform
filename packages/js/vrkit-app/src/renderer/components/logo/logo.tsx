@@ -5,7 +5,7 @@ import { forwardRef } from "react"
 import { useTheme } from "@mui/material/styles"
 
 import { RouterLink } from "vrkit-app-renderer/routes/components"
-import { rem } from "../../styles"
+import { rem } from "vrkit-shared-ui"
 
 // ----------------------------------------------------------------------
 

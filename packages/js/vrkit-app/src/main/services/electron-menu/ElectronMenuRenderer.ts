@@ -1,9 +1,9 @@
-import type { MenuItem, MenuRenderer } from "vrkit-app-common/services"
+import type { MenuItem, MenuRenderer } from "vrkit-shared"
 import { asOption } from "@3fv/prelude-ts"
 import * as Electron from "electron"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { Menu, MenuClickInterceptor } from "vrkit-app-common/services"
+import { Menu, MenuClickInterceptor } from "vrkit-shared"
 import { ElectronMenuTransform } from "./ElectronMenuTransform"
 
 const log = getLogger(__filename)

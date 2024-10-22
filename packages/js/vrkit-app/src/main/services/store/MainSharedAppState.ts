@@ -1,7 +1,7 @@
 import { Deferred } from "@3fv/deferred"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { Bind, Once } from "vrkit-app-common/decorators"
+import { Bind, Once } from "vrkit-shared"
 import {
   DevSettings,
   ISharedAppState,
@@ -9,22 +9,22 @@ import {
   newOverlaysState,
   OverlaysState,
   ThemeId
-} from "vrkit-app-common/models"
-import { assign, once } from "vrkit-app-common/utils"
+} from "vrkit-shared"
+import { assign, once } from "vrkit-shared"
 import { makeObservable, observable, set, toJS } from "mobx"
 import { deepObserve, IDisposer } from "mobx-utils"
 
 import { broadcastToAllWindows, getAppThemeFromSystem } from "../../utils"
 import { AppSettings } from "vrkit-models"
-import { ElectronIPCChannel } from "vrkit-app-common/services/electron"
+import { ElectronIPCChannel } from "vrkit-shared"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
-import { SharedAppStateSchema } from "vrkit-app-common/models/app"
+import { SharedAppStateSchema } from "vrkit-shared"
 import { serialize } from "serializr"
-import { DashboardsState, newDashboardsState } from "vrkit-app-common/models/dashboards"
-import { newSessionsState, SessionsState } from "vrkit-app-common/models/sessions"
+import { DashboardsState, newDashboardsState } from "vrkit-shared"
+import { newSessionsState, SessionsState } from "vrkit-shared"
 import { BindAction } from "../../decorators"
 import { AutoOpenDevToolsOverride, isDev } from "../../constants"
-import { newActionsState } from "vrkit-app-common/models/actions"
+import { newActionsState } from "vrkit-shared"
 
 const log = getLogger(__filename)
 

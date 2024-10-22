@@ -1,7 +1,7 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { BrowserWindow, BrowserWindowConstructorOptions, IpcMainInvokeEvent, WebPreferences } from "electron"
 import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
-import { isDev } from "vrkit-app-common/utils"
+import { isDev } from "vrkit-shared"
 import { Deferred } from "@3fv/deferred"
 import {
   isEditorInfoOUID,
@@ -13,7 +13,7 @@ import {
   OverlayManagerClientFnTypeToIPCName,
   OverlaySpecialIds,
   OverlayWindowRole
-} from "../../../common/models/overlays"
+} from "vrkit-shared"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
 import type OverlayManager from "./OverlayManager"
 import { asOption, Option } from "@3fv/prelude-ts"
@@ -289,7 +289,7 @@ export class OverlayBrowserWindow {
       if (this.isVR) {
         // CONFIGURE THE `webContents` OF THE NEW WINDOW
         win.webContents.setFrameRate(this.config.overlay.settings?.fps ?? 10)
-        win.webContents.on("paint", this.manager.createOnPaintHandler(this.config.placement, this))
+        win.webContents.on("paint", this.manager.createOnPaintHandler(this))
       }
 
       deferred.resolve(this)

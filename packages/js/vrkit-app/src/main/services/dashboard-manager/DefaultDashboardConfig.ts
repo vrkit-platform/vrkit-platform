@@ -1,5 +1,5 @@
 import { DashboardConfig, OverlayBaseSettings, OverlayInfo, OverlayKind } from "vrkit-models"
-import { defaults, generateUUID } from "vrkit-app-common/utils"
+import { defaults, generateUUID } from "vrkit-shared"
 
 export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardConfig"): DashboardConfig {
   const trackMapOverlay = newTrackMapOverlayInfo(`${name}-overlay-trackmap`),

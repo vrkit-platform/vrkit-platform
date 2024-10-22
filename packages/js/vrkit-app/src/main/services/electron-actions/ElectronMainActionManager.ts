@@ -1,6 +1,6 @@
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { Bind, LazyGetter } from "vrkit-app-common/decorators"
+import { Bind, LazyGetter } from "vrkit-shared"
 import {
   Action,
   ActionDef,
@@ -11,7 +11,7 @@ import {
   ActionRegistry,
   ActionType,
   electronRoleToId
-} from "vrkit-app-common/services"
+} from "vrkit-shared"
 import { app, globalShortcut, IpcMainInvokeEvent } from "electron"
 import { flatten, omit, partition } from "lodash"
 import { isDev, ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin } from "../../constants"
@@ -20,12 +20,12 @@ import { assert, isDefined, isPromise, isString } from "@3fv/guard"
 import { get } from "lodash/fp"
 import { getSharedAppStateStore, MainSharedAppState } from "../store"
 import { IDisposer } from "mobx-utils"
-import { defaults, Disposables, isNotEmpty, removeIfMutation } from "../../../common/utils"
+import { defaults, Disposables, isNotEmpty, removeIfMutation } from "vrkit-shared"
 import { ElectronMainAppActions } from "./ElectronMainAppActions"
 import { ElectronMainGlobalActions } from "./ElectronMainGlobalActions"
 import { BindAction } from "../../decorators"
 import { set } from "mobx"
-import { ActionsState } from "vrkit-app-common/models/actions"
+import { ActionsState } from "vrkit-shared"
 import { editorExecuteAction } from "../overlay-manager/OverlayEditorActionFactory"
 import { asOption } from "@3fv/prelude-ts"
 import Accelerator = Electron.Accelerator

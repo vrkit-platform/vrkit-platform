@@ -3,16 +3,16 @@ import {
   OverlayVREditorPropertyName,
   OverlayVREditorPropertyNames,
   OverlayVREditorState
-} from "../../../common/models"
+} from "vrkit-shared"
 import type OverlayManager from "./OverlayManager"
 import { BindAction } from "../../decorators"
-import { Disposables, isEmpty, isNotEmpty } from "../../../common/utils"
+import { Disposables, isEmpty, isNotEmpty } from "vrkit-shared"
 import { getLogger } from "@3fv/logger-proxy"
 import { deepObserve, IDisposer } from "mobx-utils"
 import { IObserveChange } from "../../utils"
 import { asOption } from "@3fv/prelude-ts"
 import { first, uniq } from "lodash"
-import { GlobalActionId, GlobalActionIdName, OverlayEditorGlobalActionIds } from "../../../common/services"
+import { GlobalActionId, GlobalActionIdName, OverlayEditorGlobalActionIds } from "vrkit-shared"
 import { Container } from "@3fv/ditsy"
 import { isFunction, isNumber, isString } from "@3fv/guard"
 import { get } from "lodash/fp"

@@ -1,8 +1,8 @@
-import { ActionDef, ActionType } from "vrkit-app-common/services"
+import { ActionDef, ActionType } from "vrkit-shared"
 import {
   GlobalActionId,
   GlobalActionIdName
-} from "vrkit-app-common/services/actions"
+} from "vrkit-shared"
 
 export const ElectronMainGlobalActions = Object.fromEntries(Array<ActionDef>({
   id: GlobalActionId.toggleOverlayEditor,

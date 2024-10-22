@@ -3,7 +3,7 @@ import Box from "@mui/material/Box"
 import { useTheme } from "@mui/material/styles"
 
 import { useSettingsContext } from "vrkit-app-renderer/components/settings"
-import { FillHeight, flexAlign, OverflowHidden } from "vrkit-app-renderer/styles"
+import { FillHeight, flexAlign, OverflowHidden } from "vrkit-shared-ui"
 
 
 interface AppContentProps extends BoxProps {}

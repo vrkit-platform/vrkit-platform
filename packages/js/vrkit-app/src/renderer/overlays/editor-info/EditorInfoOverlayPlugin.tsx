@@ -5,10 +5,10 @@ import Box, { BoxProps } from "@mui/material/Box"
 
 import { getLogger } from "@3fv/logger-proxy"
 
-import { createClassNames } from "vrkit-app-renderer/styles/createClasses"
-import { PluginClientComponentProps } from "vrkit-plugin-sdk"
+import { createClassNames } from "vrkit-shared-ui"
+import { IPluginClientComponentProps } from "vrkit-plugin-sdk"
 import React from "react"
-import { EllipsisBox, FlexColumnBox, FlexRowBox, FlexRowCenterBox } from "../../components/box"
+import { EllipsisBox, FlexColumnBox, FlexRowBox, FlexRowCenterBox } from "vrkit-shared-ui"
 import clsx from "clsx"
 import { darken, lighten, styled, useTheme } from "@mui/material/styles"
 import {
@@ -23,14 +23,14 @@ import {
   OverflowHidden,
   padding,
   rem
-} from "../../styles"
+} from "vrkit-shared-ui"
 import { useAppSelector } from "../../services/store"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import Paper, { PaperProps } from "@mui/material/Paper"
 import Typography, { TypographyProps } from "@mui/material/Typography"
 import { isNumber } from "@3fv/guard"
 import { OverlayKind } from "vrkit-models"
-import { OverlayVREditorPropertyName } from "../../../common/models"
+import { OverlayVREditorPropertyName } from "vrkit-shared"
 import { match } from "ts-pattern"
 import Icon from "../../components/icon"
 import {
@@ -38,7 +38,7 @@ import {
   faUpDownLeftRight
 } from "@awesome.me/kit-79150a3eed/icons/sharp/light"
 import { Kbd } from "../../components/keyboard-key"
-import { isNotEmpty } from "../../../common/utils"
+import { isNotEmpty } from "vrkit-shared"
 import { asOption } from "@3fv/prelude-ts"
 
 const log = getLogger(__filename)
@@ -320,14 +320,14 @@ function EditorInfoView({ className, ...other }: EditorInfoViewProps) {
   )
 }
 
-function EditorInfoOverlayPlugin(props: PluginClientComponentProps) {
+function EditorInfoOverlayPlugin(props: IPluginClientComponentProps) {
   const { client, width, height } = props
 
   return <EditorInfoView />
 }
 
 // async function loadEditorInfoPlugin():
-// Promise<React.ComponentType<PluginClientComponentProps>> { // await
+// Promise<React.ComponentType<IPluginClientComponentProps>> { // await
 // createEditorInfoControllerClient() return EditorInfoOverlayPlugin }
 
 export default EditorInfoOverlayPlugin

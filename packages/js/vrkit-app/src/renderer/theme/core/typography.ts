@@ -1,6 +1,6 @@
 import type { TypographyOptions } from "@mui/material/styles/createTypography"
 
-import { pxToRem, responsiveFontSizes, setFont } from "../styles/utils"
+import { pxToRem, responsiveFontSizes, setFont } from "../styles"
 import React from "react"
 
 // ----------------------------------------------------------------------

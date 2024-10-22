@@ -6,7 +6,7 @@ import { match } from "ts-pattern"
 import {
   ActionContainer,
   ActionOptions
-} from "vrkit-app-common/services/actions"
+} from "vrkit-shared"
 
 export class WebActionContainer extends ActionContainer {
 

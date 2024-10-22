@@ -2,7 +2,7 @@ import { ipcRenderer, IpcRendererEvent } from "electron"
 import { getLogger } from "@3fv/logger-proxy"
 
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind } from "vrkit-shared"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
@@ -14,7 +14,7 @@ import type { AppStore } from "../store"
 import {
   DashboardManagerFnType, DashboardManagerFnTypeToIPCName,
   
-} from "vrkit-app-common/models"
+} from "vrkit-shared"
 
 
 // noinspection TypeScriptUnresolvedVariable

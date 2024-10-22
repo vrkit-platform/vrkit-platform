@@ -10,7 +10,7 @@
       "allowJs": true,
       "noEmit": false,
       "declaration": true,
-      "moduleResolution": "node",
+      "moduleResolution": "NodeNext",
       "target": "ESNext",
       "allowSyntheticDefaultImports": true,
       "esModuleInterop": true

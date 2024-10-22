@@ -15,7 +15,7 @@ import {
   FlexRow,
   FlexScaleZero,
   hasCls
-} from "vrkit-app-renderer/styles"
+} from "vrkit-shared-ui"
 import clsx from "clsx"
 import { DashboardsListEditor } from "../../components/dashboards-list-editor"
 import { getLogger } from "@3fv/logger-proxy"

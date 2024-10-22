@@ -17,7 +17,7 @@ import type { DataState } from "./DataState"
 // } from "./DataState"
 
 import { capitalize, upperFirst } from "lodash"
-import { entriesOf } from "vrkit-app-common/utils"
+import { entriesOf } from "vrkit-shared"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

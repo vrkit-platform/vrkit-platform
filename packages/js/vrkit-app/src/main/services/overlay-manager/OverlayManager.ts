@@ -1,7 +1,7 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent, NativeImage, screen } from "electron"
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind } from "vrkit-shared"
 import {
   DashboardConfig,
   OverlayAnchor,
@@ -29,7 +29,7 @@ import {
   SignalFlag,
   Triple,
   tripleOf
-} from "vrkit-app-common/utils"
+} from "vrkit-shared"
 import {
   OverlayClientEventTypeToIPCName,
   OverlayManagerClientEventType,
@@ -39,12 +39,12 @@ import {
   OverlayWindowMainEvents,
   OverlayWindowRendererEvents,
   OverlayWindowRole
-} from "../../../common/models/overlays"
+} from "vrkit-shared"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
-import { ActiveSessionType, SessionDetail, SessionManagerEventType } from "../../../common/models/sessions"
+import { ActiveSessionType, SessionDetail, SessionManagerEventType } from "vrkit-shared"
 import { PluginClientEventType } from "vrkit-plugin-sdk"
-import { AppPaths, FileExtensions } from "vrkit-app-common/constants"
+import { AppPaths, FileExtensions } from "vrkit-shared"
 import { AppSettingsService } from "../app-settings"
 import Fsx from "fs-extra"
 import Path from "path"
@@ -68,7 +68,7 @@ import {
   isValidOverlayUniqueId,
   OverlayBrowserWindowType,
   overlayInfoToUniqueId
-} from "vrkit-app-common/models"
+} from "vrkit-shared"
 
 import { OverlayEditorController } from "./OverlayEditorController"
 import { BindAction } from "../../decorators"
@@ -498,7 +498,8 @@ export class OverlayManager {
    * @param dashManager
    */
   constructor(
-    @InjectContainer() readonly container: Container,
+    @InjectContainer()
+    readonly container: Container,
     // readonly actionRegistry: ActionRegistry,
     readonly mainActionManager: ElectronMainActionManager,
     readonly sessionManager: SessionManager,
@@ -565,90 +566,85 @@ export class OverlayManager {
       removeIfMutation(this.overlayWindows_, overlay => overlay.windowId === windowId)
     }
   }
-
+  
   /**
-   * On paint handler (not used at the moment, but if render model is changed,
-   * it may)
+   * Create a frame processor to be used with `paint` & `frameSubscription`
    *
-   * @param targetPlacement
    * @param win
+   * @param capSuffix
    * @private
    */
-  createOnPaintHandler(targetPlacement: OverlayPlacement, win: OverlayBrowserWindow) {
-    let cap: NativeImageSequenceCapture = asOption(this.mainAppState.devSettings?.imageSequenceCapture)
-      .filter(it => it !== false)
-      .map(
-        ({ format, outputPath }) => new NativeImageSequenceCapture(win.config.overlay.id + "-paint", format, outputPath)
-      )
-      .getOrNull()
-
-    return (_ev: Electron.Event, dirty: Electron.Rectangle, image: NativeImage) => {
+  private createFrameProcessor(win: OverlayBrowserWindow, capSuffix: string) {
+    const cap: NativeImageSequenceCapture = asOption(this.mainAppState.devSettings?.imageSequenceCapture)
+        .filter(it => it !== false)
+        .map(
+            ({ format, outputPath }) => new NativeImageSequenceCapture(`${win.config.overlay.id}-${capSuffix}`, format, outputPath)
+        )
+        .getOrNull()
+    
+    return (image: NativeImage) => {
       const buf = image.getBitmap(),
-        nativeImageSize = image.getSize(),
-        vrLayout = toJS(win.placement.vrLayout), // this.getOverlayVRLayout(win),
-        //vrLayout.screenRect =
-          screenRect = (asOption(win.window)
-          .map(bw => screen.dipToScreenRect(bw, bw.getBounds()))
-          .map(electronRectangleToRectI)
-          .getOrThrow() as RectI), //vrLayout.screenRect
-        imageSize = {
-          width: Math.min(screenRect.size.width, nativeImageSize.width),
-          height: Math.min(screenRect.size.height, nativeImageSize.height)
-        }
-
+          nativeImageSize = image.getSize(),
+          vrLayout = toJS(win.placement.vrLayout),
+          screenRect = asOption(win.window)
+              .map(bw => screen.dipToScreenRect(bw, bw.getBounds()))
+              .map(electronRectangleToRectI)
+              .getOrThrow() as RectI, //vrLayout.screenRect
+          imageSize = {
+            width: Math.min(screenRect.size.width, nativeImageSize.width),
+            height: Math.min(screenRect.size.height, nativeImageSize.height)
+          }
+      
       if (cap) {
         cap.push(image)
       }
-
+      
       if (!isValidOverlayScreenSize(imageSize) || !isEqualSize(imageSize, nativeImageSize)) {
         log.warn(
-          `[${win.uniqueId}]: Invalid imageSize=`,
-          imageSize,
-          `,nativeImageSize=`,
-          nativeImageSize,
-          ` ignoring frame.  Window bounds=`,
-          win.window.getBounds()
+            `[${win.uniqueId}]: Invalid imageSize=`,
+            imageSize,
+            `,nativeImageSize=`,
+            nativeImageSize,
+            ` ignoring frame.  Window bounds=`,
+            win.window.getBounds()
         )
-
+        
         return
       }
-
+      
       this.nativeManager_.createOrUpdateResources(
-        win.uniqueId,
-        win.windowId,
-        { width: imageSize.width, height: imageSize.height },
-        screenRect,
-        vrLayout
+          win.uniqueId,
+          win.windowId,
+          { width: imageSize.width, height: imageSize.height },
+          screenRect,
+          vrLayout
       )
       this.nativeManager_.processFrame(win.uniqueId, buf)
     }
   }
 
-  private createOnFrameHandler(config: DashboardConfig, targetPlacement: OverlayPlacement, win: OverlayBrowserWindow) {
-    let cap: NativeImageSequenceCapture = asOption(this.mainAppState.devSettings?.imageSequenceCapture)
-      .filter(it => it !== false)
-      .map(
-        ({ format, outputPath }) => new NativeImageSequenceCapture(win.config.overlay.id + "-frame", format, outputPath)
-      )
-      .getOrNull()
+  /**
+   * On paint handler (not used at the moment, but if render model is changed,
+   * it may)
+   *
+   * @param win
+   * @private
+   */
+  createOnPaintHandler(win: OverlayBrowserWindow) {
+    const frameProcessor = this.createFrameProcessor(win, "paint")
+    
+    
+    return (_ev: Electron.Event, _dirty: Electron.Rectangle, image: NativeImage) => {
+      frameProcessor(image)
+      
+    }
+  }
 
-    return (image: NativeImage, dirty: Electron.Rectangle) => {
-      // const buf = image.getBitmap(),
-      //   screenRect = this.getOverlayScreenRect(win)
-      //   // vrLayout = this.getOverlayVRLayout(win)
-      // // TODO: Get real screen & VR rectangles
-      // // const win = this.overlays.find(it => it.id === config.id)
-      // this.nativeManager_.createOrUpdateResources(
-      //   win.id,
-      //   win.windowId,
-      //   { width: dirty.width, height: dirty.height },
-      //   screenRect,
-      //   vrLayout
-      // )
-      // this.nativeManager_.processFrame(win.id, buf)
-      if (cap) {
-        cap.push(image)
-      }
+  private createOnFrameHandler(config: DashboardConfig, targetPlacement: OverlayPlacement, win: OverlayBrowserWindow) {
+    const frameProcessor = this.createFrameProcessor(win, "frame")
+    
+    return (image: NativeImage, _dirty: Electron.Rectangle) => {
+      frameProcessor(image)
     }
   }
 

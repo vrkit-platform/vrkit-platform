@@ -3,7 +3,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import Fs from "fs-extra"
 
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind } from "vrkit-shared"
 import {
   AppFiles,
   AppPaths,

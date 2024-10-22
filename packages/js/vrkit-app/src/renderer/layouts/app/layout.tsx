@@ -19,7 +19,7 @@ import {
   FlexScaleZero,
   OverflowHidden,
   widthConstraint
-} from "../../styles"
+} from "vrkit-shared-ui"
 import Drawer from "@mui/material/Drawer"
 import AppDrawerMenu from "vrkit-app-renderer/components/app-drawer-menu"
 

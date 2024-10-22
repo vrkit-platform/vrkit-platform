@@ -3,9 +3,9 @@ import { app, screen } from "electron"
 import { mkdir } from "shelljs"
 import Fs from "fs-extra"
 
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind } from "vrkit-shared"
 import { WindowSizeDefault } from "../../constants"
-import { defaults } from "vrkit-app-common/utils"
+import { defaults } from "vrkit-shared"
 import { getLogger } from "@3fv/logger-proxy"
 import { Singleton } from "@3fv/ditsy"
 

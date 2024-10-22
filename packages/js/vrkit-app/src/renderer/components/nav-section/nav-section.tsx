@@ -7,7 +7,6 @@ import { useTheme } from "@mui/material/styles"
 import { NavList } from "./nav-list"
 import { navSectionClasses } from "./classes"
 import { navSectionCssVars } from "./css-vars"
-import { NavLi, NavUl, Subheader } from "./styles"
 
 
 
@@ -19,6 +18,7 @@ import {
   NavSectionProps
 } from "./types"
 import { NavItem } from "./nav-item"
+import { NavLi, NavUl, Subheader } from "./styles"
 
 // ----------------------------------------------------------------------
 

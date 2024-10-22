@@ -1,10 +1,17 @@
 import type {
   LapTrajectory,
   OverlayInfo,
+  PluginComponentDefinition,
+  PluginComponentDefinition_OverlayCommonSettings,
+  PluginComponentDefinition_OverlayIRSettings,
+  PluginManifest,
   SessionDataVariableValueMap,
-  SessionTiming, TrackMap
+  SessionTiming,
+  TrackMap
 } from "vrkit-models"
 import type { SessionInfoMessage } from "./SessionInfoTypes"
+import React from "react"
+import { Container } from "@3fv/ditsy"
 
 export enum PluginClientEventType {
   SESSION_ID_CHANGED = "SESSION_ID_CHANGED",
@@ -12,7 +19,7 @@ export enum PluginClientEventType {
   DATA_FRAME = "DATA_FRAME"
 }
 
-export interface PluginClientEventArgs {
+export interface IPluginClientEventArgs {
   [PluginClientEventType.DATA_FRAME]: (
     sessionId: string,
     timing: SessionTiming,
@@ -22,10 +29,13 @@ export interface PluginClientEventArgs {
   [PluginClientEventType.SESSION_INFO_CHANGED]: (sessionId: string, info: SessionInfoMessage) => void
 }
 
-export type PluginClientEventHandler<Type extends keyof PluginClientEventArgs> = PluginClientEventArgs[Type]
+export type PluginClientEventHandler<Type extends keyof IPluginClientEventArgs> = IPluginClientEventArgs[Type]
 
-
-export interface PluginClient {
+/**
+ * Provides all the functions required for a renderer side plugin to function.
+ *
+ */
+export interface IPluginClient {
   inActiveSession(): boolean
   getOverlayInfo(): OverlayInfo
   
@@ -37,19 +47,50 @@ export interface PluginClient {
   
   getTrackMap(trackLayoutId: string): Promise<TrackMap>
   
-  on<T extends keyof PluginClientEventArgs, Fn extends PluginClientEventArgs[T] = PluginClientEventArgs[T]>(type: T, handler: Fn): void
+  on<T extends keyof IPluginClientEventArgs>(type: T, handler: IPluginClientEventArgs[T]): void
 
-  off<T extends keyof PluginClientEventArgs, Fn extends PluginClientEventArgs[T] = PluginClientEventArgs[T]>(type: T, handler?: Fn): void
+  off<T extends keyof IPluginClientEventArgs>(type: T, handler?: IPluginClientEventArgs[T]): void
 }
 
-export interface PluginClientComponentProps {
-  client: PluginClient
+export interface IPluginComponentManager {
+  getManifest():PluginManifest
+  
+  
+  
+  getOverlayCommonSettings(componentId: string)
+      :PluginComponentDefinition_OverlayCommonSettings
+  
+  getOverlayIRacingSettings(componentId: string)
+      :PluginComponentDefinition_OverlayIRSettings
+  
+  setOverlayComponent(
+      id: string,
+      ComponentType: React.ComponentType<IPluginClientComponentProps>
+  ):void
+  
+  removeOverlayComponent(
+      id:string
+  ):void
+}
+
+export type IPluginInitFactory = (
+    manifest:PluginManifest,
+    componentManager:IPluginComponentManager,
+    serviceContainer:Container
+) => Promise<void>
+
+export interface IPluginClientComponentProps {
+  client: IPluginClient
+  manager: IPluginComponentManager
+  
   width: number
   height: number
 }
 
+
+
 declare global {
-  function getVRKitPluginClient(): PluginClient
+  function getVRKitPluginClient(): IPluginClient
   
   const isVRKitOverlayWindow: boolean
   const isVRKitEnvVR: boolean

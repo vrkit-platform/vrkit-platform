@@ -1,7 +1,7 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { type ISharedAppState, newSharedAppState, type ThemeId } from "vrkit-app-common/models/app"
-import { assign, Identity, isNotEmpty } from "vrkit-app-common/utils"
+import { type ISharedAppState, newSharedAppState, type ThemeId } from "vrkit-shared"
+import { assign, Identity, isNotEmpty } from "vrkit-shared"
 
 import {
   AppSettings,
@@ -14,15 +14,15 @@ import { asOption } from "@3fv/prelude-ts"
 import type {
   SessionDetail,
   SessionsState
-} from "vrkit-app-common/models/sessions"
+} from "vrkit-shared"
 import type {
   DashboardsState, OverlayVREditorPropertyName
-} from "vrkit-app-common/models"
+} from "vrkit-shared"
 import {
   ActionDef,
   OverlayEditorGlobalActionIds
-} from "../../../../../common/services"
-import { ActionsState } from "../../../../../common/models/actions"
+} from "vrkit-shared"
+import { ActionsState } from "vrkit-shared"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

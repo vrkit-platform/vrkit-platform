@@ -5,7 +5,7 @@ import {
   newFlex,
   OverflowHidden,
   rem
-} from "../../../styles"
+} from "vrkit-shared-ui"
 import clsx from "clsx"
 
 import type { Theme } from "../../../theme/ThemeTypes"

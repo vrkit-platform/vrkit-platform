@@ -17,7 +17,13 @@
       "vrkit-shared":
       [  "./packages/js/vrkit-shared"],
       "vrkit-shared/*":
-      [  "./packages/js/vrkit-shared/src/*"]
+      [  "./packages/js/vrkit-shared/src/*"],
+      "vrkit-shared-ui":
+      [  "./packages/js/vrkit-shared-ui"],
+      "vrkit-shared-ui/styles":
+      [  "./packages/js/vrkit-shared-ui/src/styles"],
+      "vrkit-shared-ui/*":
+      [  "./packages/js/vrkit-shared-ui/src/*"]
     }
   },
   "references": [
@@ -35,6 +41,9 @@
     },
     {
       "path": "./packages/js/vrkit-shared"
+    },
+    {
+      "path": "./packages/js/vrkit-shared-ui"
     },
   ],
   "ts-node": {

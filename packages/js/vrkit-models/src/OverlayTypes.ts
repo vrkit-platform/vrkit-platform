@@ -118,17 +118,12 @@ export enum OverlayAnchor {
  */
 export enum OverlayKind {
     /**
-     * @generated from protobuf enum value: OVERLAY_KIND_TRACK_MAP = 0;
+     *  OVERLAY_KIND_TRACK_MAP = 0;
+     *  OVERLAY_KIND_CLOCK = 1;
+     *
+     * @generated from protobuf enum value: OVERLAY_KIND_PLUGIN = 0;
      */
-    TRACK_MAP = 0,
-    /**
-     * @generated from protobuf enum value: OVERLAY_KIND_CLOCK = 1;
-     */
-    CLOCK = 1,
-    /**
-     * @generated from protobuf enum value: OVERLAY_KIND_CUSTOM = 10;
-     */
-    CUSTOM = 10,
+    PLUGIN = 0,
     /**
      * @generated from protobuf enum value: OVERLAY_KIND_EDITOR_INFO = 99;
      */

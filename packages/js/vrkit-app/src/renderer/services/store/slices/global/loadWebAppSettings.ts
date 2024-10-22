@@ -1,5 +1,5 @@
-// import { THEMES } from "vrkit-app-common/models"
-// import { defaults } from "vrkit-app-common/utils"
+// import { THEMES } from "vrkit-shared"
+// import { defaults } from "vrkit-shared"
 import { AppSettings } from "vrkit-models"
 
 export function loadWebAppSettings(): AppSettings {

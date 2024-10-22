@@ -5,7 +5,7 @@ import Path from "path"
 import { app, BrowserWindow } from "electron"
 import { createWindowOpenHandler, resolveHtmlPath, windowOptionDefaults } from "./utils"
 
-import { assert, defaults, signalFlag } from "vrkit-app-common/utils"
+import { assert, defaults, signalFlag } from "vrkit-shared"
 
 import { getLogger } from "@3fv/logger-proxy"
 import { getService } from "./ServiceContainer"
@@ -14,7 +14,7 @@ import * as ElectronRemote from "@electron/remote/main"
 import { DashboardManager } from "./services/dashboard-manager"
 import { asOption } from "@3fv/prelude-ts"
 import { Deferred } from "@3fv/deferred"
-import { ISharedAppState } from "../common/models"
+import { ISharedAppState } from "vrkit-shared"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log

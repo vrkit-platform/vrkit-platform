@@ -8,8 +8,8 @@ import {
   ActionRegistry,
   AppActionId,
   WebAppActions
-} from "vrkit-app-common/services"
-import { Bind, LazyGetter } from "vrkit-app-common/decorators"
+} from "vrkit-shared"
+import { Bind, LazyGetter } from "vrkit-shared"
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import {

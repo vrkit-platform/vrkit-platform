@@ -3,15 +3,69 @@
 // tslint:disable
 import type { BinaryWriteOptions } from "@protobuf-ts/runtime";
 import type { IBinaryWriter } from "@protobuf-ts/runtime";
+import { WireType } from "@protobuf-ts/runtime";
 import type { BinaryReadOptions } from "@protobuf-ts/runtime";
 import type { IBinaryReader } from "@protobuf-ts/runtime";
 import { UnknownFieldHandler } from "@protobuf-ts/runtime";
-import { WireType } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { SizeI } from "./Geometry";
 import { SupportedGame } from "./AppInterfaceTypes";
+/**
+ * @generated from protobuf message IRacingTools.Models.PluginUserSettingValue
+ */
+export interface PluginUserSettingValue {
+    /**
+     * @generated from protobuf field: int32 int_value = 1;
+     */
+    intValue: number;
+    /**
+     * @generated from protobuf field: double double_value = 2;
+     */
+    doubleValue: number;
+    /**
+     * @generated from protobuf field: string string_value = 3;
+     */
+    stringValue: string;
+    /**
+     * @generated from protobuf field: bool boolean_value = 4;
+     */
+    booleanValue: boolean;
+    /**
+     * @generated from protobuf field: string color_value = 5;
+     */
+    colorValue: string;
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.PluginUserSetting
+ */
+export interface PluginUserSetting {
+    /**
+     * @generated from protobuf field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from protobuf field: string name = 2;
+     */
+    name: string;
+    /**
+     * @generated from protobuf field: string description = 3;
+     */
+    description: string;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.PluginUserSettingType type = 4;
+     */
+    type: PluginUserSettingType;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.PluginUserSettingValue default_value = 10;
+     */
+    defaultValue?: PluginUserSettingValue;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.PluginUserSettingValue user_value = 20;
+     */
+    userValue?: PluginUserSettingValue;
+}
 /**
  * @generated from protobuf message IRacingTools.Models.PluginComponentDefinition
  */
@@ -52,9 +106,13 @@ export interface PluginComponentDefinition {
     /**
      * IROverlaySettings, can be omitted
      *
-     * @generated from protobuf field: IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings overlay_ir_settings = 21;
+     * @generated from protobuf field: IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings overlay_iracing_settings = 21;
      */
-    overlayIrSettings?: PluginComponentDefinition_OverlayIRSettings;
+    overlayIracingSettings?: PluginComponentDefinition_OverlayIRacingSettings;
+    /**
+     * @generated from protobuf field: repeated IRacingTools.Models.PluginUserSetting user_settings = 99;
+     */
+    userSettings: PluginUserSetting[];
 }
 /**
  * *
@@ -101,9 +159,9 @@ export interface PluginComponentDefinition_OverlayCommonSettings {
  * *
  * IRacing Overlay specific settings
  *
- * @generated from protobuf message IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings
+ * @generated from protobuf message IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings
  */
-export interface PluginComponentDefinition_OverlayIRSettings {
+export interface PluginComponentDefinition_OverlayIRacingSettings {
     /**
      * @generated from protobuf field: repeated string data_variables_used = 5;
      */
@@ -158,6 +216,31 @@ export interface PluginManifest_PluginAuthor {
     email: string;
 }
 /**
+ * @generated from protobuf enum IRacingTools.Models.PluginUserSettingType
+ */
+export enum PluginUserSettingType {
+    /**
+     * @generated from protobuf enum value: PLUGIN_USER_SETTING_TYPE_INT = 0;
+     */
+    INT = 0,
+    /**
+     * @generated from protobuf enum value: PLUGIN_USER_SETTING_TYPE_DOUBLE = 1;
+     */
+    DOUBLE = 1,
+    /**
+     * @generated from protobuf enum value: PLUGIN_USER_SETTING_TYPE_STRING = 2;
+     */
+    STRING = 2,
+    /**
+     * @generated from protobuf enum value: PLUGIN_USER_SETTING_TYPE_BOOLEAN = 3;
+     */
+    BOOLEAN = 3,
+    /**
+     * @generated from protobuf enum value: PLUGIN_USER_SETTING_TYPE_COLOR = 4;
+     */
+    COLOR = 4
+}
+/**
  * @generated from protobuf enum IRacingTools.Models.PluginComponentType
  */
 export enum PluginComponentType {
@@ -166,6 +249,170 @@ export enum PluginComponentType {
      */
     OVERLAY = 0
 }
+// @generated message type with reflection information, may provide speed optimized methods
+class PluginUserSettingValue$Type extends MessageType<PluginUserSettingValue> {
+    constructor() {
+        super("IRacingTools.Models.PluginUserSettingValue", [
+            { no: 1, name: "int_value", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 2, name: "double_value", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ },
+            { no: 3, name: "string_value", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "boolean_value", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 5, name: "color_value", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<PluginUserSettingValue>): PluginUserSettingValue {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.intValue = 0;
+        message.doubleValue = 0;
+        message.stringValue = "";
+        message.booleanValue = false;
+        message.colorValue = "";
+        if (value !== undefined)
+            reflectionMergePartial<PluginUserSettingValue>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginUserSettingValue): PluginUserSettingValue {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int32 int_value */ 1:
+                    message.intValue = reader.int32();
+                    break;
+                case /* double double_value */ 2:
+                    message.doubleValue = reader.double();
+                    break;
+                case /* string string_value */ 3:
+                    message.stringValue = reader.string();
+                    break;
+                case /* bool boolean_value */ 4:
+                    message.booleanValue = reader.bool();
+                    break;
+                case /* string color_value */ 5:
+                    message.colorValue = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: PluginUserSettingValue, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int32 int_value = 1; */
+        if (message.intValue !== 0)
+            writer.tag(1, WireType.Varint).int32(message.intValue);
+        /* double double_value = 2; */
+        if (message.doubleValue !== 0)
+            writer.tag(2, WireType.Bit64).double(message.doubleValue);
+        /* string string_value = 3; */
+        if (message.stringValue !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.stringValue);
+        /* bool boolean_value = 4; */
+        if (message.booleanValue !== false)
+            writer.tag(4, WireType.Varint).bool(message.booleanValue);
+        /* string color_value = 5; */
+        if (message.colorValue !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.colorValue);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.PluginUserSettingValue
+ */
+export const PluginUserSettingValue = new PluginUserSettingValue$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class PluginUserSetting$Type extends MessageType<PluginUserSetting> {
+    constructor() {
+        super("IRacingTools.Models.PluginUserSetting", [
+            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "type", kind: "enum", T: () => ["IRacingTools.Models.PluginUserSettingType", PluginUserSettingType, "PLUGIN_USER_SETTING_TYPE_"] },
+            { no: 10, name: "default_value", kind: "message", T: () => PluginUserSettingValue },
+            { no: 20, name: "user_value", kind: "message", T: () => PluginUserSettingValue }
+        ]);
+    }
+    create(value?: PartialMessage<PluginUserSetting>): PluginUserSetting {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.id = "";
+        message.name = "";
+        message.description = "";
+        message.type = 0;
+        if (value !== undefined)
+            reflectionMergePartial<PluginUserSetting>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginUserSetting): PluginUserSetting {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string id */ 1:
+                    message.id = reader.string();
+                    break;
+                case /* string name */ 2:
+                    message.name = reader.string();
+                    break;
+                case /* string description */ 3:
+                    message.description = reader.string();
+                    break;
+                case /* IRacingTools.Models.PluginUserSettingType type */ 4:
+                    message.type = reader.int32();
+                    break;
+                case /* IRacingTools.Models.PluginUserSettingValue default_value */ 10:
+                    message.defaultValue = PluginUserSettingValue.internalBinaryRead(reader, reader.uint32(), options, message.defaultValue);
+                    break;
+                case /* IRacingTools.Models.PluginUserSettingValue user_value */ 20:
+                    message.userValue = PluginUserSettingValue.internalBinaryRead(reader, reader.uint32(), options, message.userValue);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: PluginUserSetting, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string id = 1; */
+        if (message.id !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.id);
+        /* string name = 2; */
+        if (message.name !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.name);
+        /* string description = 3; */
+        if (message.description !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.description);
+        /* IRacingTools.Models.PluginUserSettingType type = 4; */
+        if (message.type !== 0)
+            writer.tag(4, WireType.Varint).int32(message.type);
+        /* IRacingTools.Models.PluginUserSettingValue default_value = 10; */
+        if (message.defaultValue)
+            PluginUserSettingValue.internalBinaryWrite(message.defaultValue, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.PluginUserSettingValue user_value = 20; */
+        if (message.userValue)
+            PluginUserSettingValue.internalBinaryWrite(message.userValue, writer.tag(20, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.PluginUserSetting
+ */
+export const PluginUserSetting = new PluginUserSetting$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class PluginComponentDefinition$Type extends MessageType<PluginComponentDefinition> {
     constructor() {
@@ -177,7 +424,8 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
             { no: 10, name: "supported_games", kind: "enum", repeat: 1 /*RepeatType.PACKED*/, T: () => ["IRacingTools.Models.SupportedGame", SupportedGame, "SUPPORTED_GAME_"] },
             { no: 15, name: "common_parameters", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } },
             { no: 20, name: "overlay_common_settings", kind: "message", T: () => PluginComponentDefinition_OverlayCommonSettings },
-            { no: 21, name: "overlay_ir_settings", kind: "message", T: () => PluginComponentDefinition_OverlayIRSettings }
+            { no: 21, name: "overlay_iracing_settings", kind: "message", T: () => PluginComponentDefinition_OverlayIRacingSettings },
+            { no: 99, name: "user_settings", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => PluginUserSetting }
         ]);
     }
     create(value?: PartialMessage<PluginComponentDefinition>): PluginComponentDefinition {
@@ -188,6 +436,7 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
         message.description = "";
         message.supportedGames = [];
         message.commonParameters = {};
+        message.userSettings = [];
         if (value !== undefined)
             reflectionMergePartial<PluginComponentDefinition>(this, message, value);
         return message;
@@ -222,8 +471,11 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
                 case /* IRacingTools.Models.PluginComponentDefinition.OverlayCommonSettings overlay_common_settings */ 20:
                     message.overlayCommonSettings = PluginComponentDefinition_OverlayCommonSettings.internalBinaryRead(reader, reader.uint32(), options, message.overlayCommonSettings);
                     break;
-                case /* IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings overlay_ir_settings */ 21:
-                    message.overlayIrSettings = PluginComponentDefinition_OverlayIRSettings.internalBinaryRead(reader, reader.uint32(), options, message.overlayIrSettings);
+                case /* IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings overlay_iracing_settings */ 21:
+                    message.overlayIracingSettings = PluginComponentDefinition_OverlayIRacingSettings.internalBinaryRead(reader, reader.uint32(), options, message.overlayIracingSettings);
+                    break;
+                case /* repeated IRacingTools.Models.PluginUserSetting user_settings */ 99:
+                    message.userSettings.push(PluginUserSetting.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -278,9 +530,12 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
         /* IRacingTools.Models.PluginComponentDefinition.OverlayCommonSettings overlay_common_settings = 20; */
         if (message.overlayCommonSettings)
             PluginComponentDefinition_OverlayCommonSettings.internalBinaryWrite(message.overlayCommonSettings, writer.tag(20, WireType.LengthDelimited).fork(), options).join();
-        /* IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings overlay_ir_settings = 21; */
-        if (message.overlayIrSettings)
-            PluginComponentDefinition_OverlayIRSettings.internalBinaryWrite(message.overlayIrSettings, writer.tag(21, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings overlay_iracing_settings = 21; */
+        if (message.overlayIracingSettings)
+            PluginComponentDefinition_OverlayIRacingSettings.internalBinaryWrite(message.overlayIracingSettings, writer.tag(21, WireType.LengthDelimited).fork(), options).join();
+        /* repeated IRacingTools.Models.PluginUserSetting user_settings = 99; */
+        for (let i = 0; i < message.userSettings.length; i++)
+            PluginUserSetting.internalBinaryWrite(message.userSettings[i], writer.tag(99, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -370,22 +625,22 @@ class PluginComponentDefinition_OverlayCommonSettings$Type extends MessageType<P
  */
 export const PluginComponentDefinition_OverlayCommonSettings = new PluginComponentDefinition_OverlayCommonSettings$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class PluginComponentDefinition_OverlayIRSettings$Type extends MessageType<PluginComponentDefinition_OverlayIRSettings> {
+class PluginComponentDefinition_OverlayIRacingSettings$Type extends MessageType<PluginComponentDefinition_OverlayIRacingSettings> {
     constructor() {
-        super("IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings", [
+        super("IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings", [
             { no: 5, name: "data_variables_used", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
             { no: 10, name: "parameters", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } }
         ]);
     }
-    create(value?: PartialMessage<PluginComponentDefinition_OverlayIRSettings>): PluginComponentDefinition_OverlayIRSettings {
+    create(value?: PartialMessage<PluginComponentDefinition_OverlayIRacingSettings>): PluginComponentDefinition_OverlayIRacingSettings {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.dataVariablesUsed = [];
         message.parameters = {};
         if (value !== undefined)
-            reflectionMergePartial<PluginComponentDefinition_OverlayIRSettings>(this, message, value);
+            reflectionMergePartial<PluginComponentDefinition_OverlayIRacingSettings>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginComponentDefinition_OverlayIRSettings): PluginComponentDefinition_OverlayIRSettings {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginComponentDefinition_OverlayIRacingSettings): PluginComponentDefinition_OverlayIRacingSettings {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -407,8 +662,8 @@ class PluginComponentDefinition_OverlayIRSettings$Type extends MessageType<Plugi
         }
         return message;
     }
-    private binaryReadMap10(map: PluginComponentDefinition_OverlayIRSettings["parameters"], reader: IBinaryReader, options: BinaryReadOptions): void {
-        let len = reader.uint32(), end = reader.pos + len, key: keyof PluginComponentDefinition_OverlayIRSettings["parameters"] | undefined, val: PluginComponentDefinition_OverlayIRSettings["parameters"][any] | undefined;
+    private binaryReadMap10(map: PluginComponentDefinition_OverlayIRacingSettings["parameters"], reader: IBinaryReader, options: BinaryReadOptions): void {
+        let len = reader.uint32(), end = reader.pos + len, key: keyof PluginComponentDefinition_OverlayIRacingSettings["parameters"] | undefined, val: PluginComponentDefinition_OverlayIRacingSettings["parameters"][any] | undefined;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
@@ -418,12 +673,12 @@ class PluginComponentDefinition_OverlayIRSettings$Type extends MessageType<Plugi
                 case 2:
                     val = reader.string();
                     break;
-                default: throw new globalThis.Error("unknown map entry field for field IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings.parameters");
+                default: throw new globalThis.Error("unknown map entry field for field IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings.parameters");
             }
         }
         map[key ?? ""] = val ?? "";
     }
-    internalBinaryWrite(message: PluginComponentDefinition_OverlayIRSettings, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: PluginComponentDefinition_OverlayIRacingSettings, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* repeated string data_variables_used = 5; */
         for (let i = 0; i < message.dataVariablesUsed.length; i++)
             writer.tag(5, WireType.LengthDelimited).string(message.dataVariablesUsed[i]);
@@ -437,9 +692,9 @@ class PluginComponentDefinition_OverlayIRSettings$Type extends MessageType<Plugi
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings
+ * @generated MessageType for protobuf message IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings
  */
-export const PluginComponentDefinition_OverlayIRSettings = new PluginComponentDefinition_OverlayIRSettings$Type();
+export const PluginComponentDefinition_OverlayIRacingSettings = new PluginComponentDefinition_OverlayIRacingSettings$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class PluginManifest$Type extends MessageType<PluginManifest> {
     constructor() {

@@ -15,14 +15,14 @@ import {
   ActionRegistry,
   AppActionId,
   electronRoleToId
-} from "vrkit-app-common/services"
+} from "vrkit-shared"
 import { ElectronMainActionManager } from "../electron-actions"
 import { capitalize, first } from "lodash"
 import { assert } from "@3fv/guard"
-import { invokeWith } from "vrkit-app-common/utils"
-import { ThemeId } from "vrkit-app-common/models"
+import { invokeWith } from "vrkit-shared"
+import { ThemeId } from "vrkit-shared"
 // import MainAppState from "../store"
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind } from "vrkit-shared"
 import { inspectSharedWorker } from "../../utils/sharedWorkerHelpers"
 import { ThemeType } from "vrkit-models"
 

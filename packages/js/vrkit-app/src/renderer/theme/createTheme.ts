@@ -13,17 +13,18 @@ import type {} from "@mui/material/themeCssVarsAugmentation"
 import type { Direction, Theme, ThemeOptions } from "@mui/material/styles"
 import { createTheme as muiCreateTheme } from "@mui/material/styles"
 
-import { createPaletteChannel, setFont } from "./styles/utils"
+// import { createPaletteChannel, setFont } from "vrkit-shared-ui"
 import {
   colorSchemes, components, customShadows, shadows, typography
 } from "./core"
 import { updateCoreWithSettings } from "./with-settings/update-theme"
 
 import type { ThemeLocaleComponents } from "./ThemeTypes"
-import { assign } from "vrkit-app-common/utils"
-import { linearGradient, rem } from "../styles"
+import { assign } from "vrkit-shared"
+import { linearGradient, rem } from "vrkit-shared-ui"
 import { lighten, darken } from "@mui/material"
 import { darkPrimaryAndSecondaryPalettes } from "./paletteAndColorHelpers"
+import { createPaletteChannel, setFont } from "./styles"
 
 // ----------------------------------------------------------------------
 

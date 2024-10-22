@@ -6,10 +6,10 @@ import {
   ElectronMainMenuManager,
   ElectronMenuRenderer
 } from "../../services/electron-menu"
-import { ActionRegistry } from "vrkit-app-common/services/actions"
+import { ActionRegistry } from "vrkit-shared"
 import { AppSettingsService } from "../../services/app-settings"
 import ElectronMainActionManager from "../../services/electron-actions"
-import { once } from "vrkit-app-common/utils"
+import { once } from "vrkit-shared"
 import { MainWindowManager, WindowManager } from "../../services/window-manager"
 import SessionManager from "../../services/session-manager"
 import { OverlayManager } from "../../services/overlay-manager"

@@ -1,7 +1,7 @@
 // import { asOption } from "@3fv/prelude-ts"
 // import Path from "path"
 // import Fs from "fs"
-import { assert, isNotEmpty } from "vrkit-app-common/utils"
+import { assert, isNotEmpty } from "vrkit-shared"
 import { getLogger } from "@3fv/logger-proxy"
 
 const log = getLogger(__filename)
@@ -31,4 +31,4 @@ export enum AppDialogType {
 
 export type AppDialogTypeKind = AppDialogType | `${AppDialogType}`
 
-export * from "vrkit-app-common/constants/AppPaths"
+export * from "vrkit-shared"

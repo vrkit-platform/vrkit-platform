@@ -25,9 +25,9 @@ message OverlayBaseSettings {
 message OverlayInfo {
   string id = 1;
   OverlayKind kind = 2;
-
-  string name = 3;
-  string description = 4;
+  string component_id = 3;
+  string name = 5;
+  string description = 6;
 
   repeated string data_var_names = 20;
 

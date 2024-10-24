@@ -1,14 +1,31 @@
 import { asOption } from "@3fv/prelude-ts"
 import Path from "path"
 import Fs from "fs"
-import { assert, isNotEmpty } from "../utils"
+import { assert, FindPackagePath, isNotEmpty } from "../utils"
 import { getLogger } from "@3fv/logger-proxy"
+import { isString } from "@3fv/guard"
+import { isDev } from "./shared-constants"
 
 const log = getLogger(__filename)
 
-assert(process.platform === "win32", `VRKit is only usable on Windows 10/11`)
 
-export const isDev = process.env.NODE_ENV !== "production"
+export interface IDevPaths {
+  root: string
+}
+
+function createDevPaths(): IDevPaths {
+  if (!isDev) {
+    return null
+  } else {
+    const pkgPath = FindPackagePath("vrkit-project")
+    return pkgPath ? {
+      root: pkgPath[0]
+    } : null
+  }
+}
+
+export const DevPaths:IDevPaths = createDevPaths()
+
 export const isElectron =
     typeof process !== "undefined" && process?.versions?.electron?.length > 0
 
@@ -35,6 +52,12 @@ const dashboardsDir = Path.join(appDataLocalDir, "Dashboards")
 
 const appSettingsFile = Path.join(appDataLocalDir, "app-settings.json")
 
+const pluginsDir = Path.join(appDataLocalDir, "Plugins")
+const pluginSearchPaths = [pluginsDir,asOption(DevPaths?.root)
+  .map(root => Path.join(root,"packages","js"))
+  .getOrNull()
+].filter(isString)
+
 const logsDir = Path.join(appDataLocalDir, "Logs")
 const logFile = Path.join(logsDir, "VRKit.log")
 
@@ -46,7 +69,9 @@ export const AppPaths = {
   dashboardsDir,
   
   logsDir,
-  
+
+  pluginsDir,
+  pluginSearchPaths,
   
   iracingUserDir,
   iracingTelemetryDir,
@@ -64,7 +89,10 @@ export const FileExtensions = {
   Dashboard: ".dashboard",
 }
 
-Object.entries(AppPaths).forEach(([key, dir]) => {
+Object.entries(AppPaths)
+.filter(([,dir]) => isString(dir))
+.forEach(([key, dir]: [string,string]) => {
   log.info(`${key} directory:`, dir)
   Fs.mkdirSync(dir, { recursive: true })
 })
+

@@ -10,7 +10,7 @@ import {
   isDev
 } from "../../renderer-constants"
 import EventEmitter3 from "eventemitter3"
-import { FileAccess, FileSystemManager } from "../file-system-manager"
+import { FileObject, FileSystemManager } from "vrkit-shared"
 import { FileInfo, LapTrajectory, TrackMapFile } from "vrkit-models"
 import Path from "path"
 import { Deferred } from "@3fv/deferred"
@@ -82,7 +82,7 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    * @private
    */
   private getDatabaseFileAccess() {
-    return this.fsManager.getFileAccess(AppFiles.trackMapListFile)
+    return this.fsManager.getFileObject(AppFiles.trackMapListFile)
   }
 
   /**
@@ -197,7 +197,7 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     const tmf = this.getTrackMapFile(id)
     if (!tmf) return null
 
-    const fileAccess = new FileAccess(tmf.fileInfo.file)
+    const fileAccess = new FileObject(tmf.fileInfo.file)
     if (!(await fileAccess.exists)) {
       log.error(`Lap trajectory file does not exist (${tmf.fileInfo.file}) for id: ${id}`)
       return null

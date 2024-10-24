@@ -20,17 +20,18 @@ export interface DevSettings {
   alwaysOpenDevTools: boolean
 }
 
+let loadedDevSettings: DevSettings = null
+
 export function newDevSettings(overrideDevSettings: Partial<DevSettings> = {}): DevSettings {
+  if (loadedDevSettings) 
+    return {...loadedDevSettings, ...overrideDevSettings}
+  
   const workingDir = process.cwd(),
     parts = workingDir.split(/\\\//),
     treePaths = Array<string>(),
     devSettings: DevSettings = {
       alwaysOpenDevTools: false,
       imageSequenceCapture: false
-
-      //     {
-      //   format: "raw", outputPath: "y:\\tmp\\cap"
-      // }
     }
 
   while (parts.length) {
@@ -48,5 +49,6 @@ export function newDevSettings(overrideDevSettings: Partial<DevSettings> = {}): 
     parts.shift()
   }
 
+  loadedDevSettings = {...devSettings}
   return Object.assign(devSettings, overrideDevSettings)
 }

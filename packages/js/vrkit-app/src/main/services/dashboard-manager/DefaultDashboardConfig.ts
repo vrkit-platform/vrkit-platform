@@ -86,27 +86,29 @@ export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardC
 export function newOverlayInfo(
   name: string,
   kind: OverlayKind,
+  componentId:string,
   dataVarNames: string[] = [],
-  settings: Partial<OverlayBaseSettings> = { fps: 10 }
+  settings: Partial<OverlayBaseSettings> = {  },
 ) {
   return OverlayInfo.create({
-    id: generateUUID(),
+    id:generateUUID(),
     kind,
+    componentId,
     name,
     description: "Default",
     dataVarNames,
-    settings: defaults(settings, {
+    settings: defaults({...settings}, {
       fps: 10
     })
   })
 }
 
 export function newClockOverlayInfo(name: string = "clock"): OverlayInfo {
-  return newOverlayInfo(name, OverlayKind.CLOCK)
+  return newOverlayInfo(name, OverlayKind.PLUGIN,"vrkit::internal::overlays::clock",[],{})
 }
 
 export function newTrackMapOverlayInfo(name: string = "track-map"): OverlayInfo {
-  return newOverlayInfo(name, OverlayKind.TRACK_MAP, [
+  return newOverlayInfo(name, OverlayKind.PLUGIN,"vrkit::internal::overlays::track-map", [
     "PlayerCarIdx",
     "CarIdxLap",
     "CarIdxLapCompleted",
@@ -114,5 +116,5 @@ export function newTrackMapOverlayInfo(name: string = "track-map"): OverlayInfo 
     "CarIdxClassPosition",
     "CarIdxEstTime",
     "CarIdxLapDistPct"
-  ])
+  ],{})
 }

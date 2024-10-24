@@ -1,7 +1,7 @@
 import { Deferred } from "@3fv/deferred"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { Bind, Once } from "vrkit-shared"
+import { Bind, newPluginsState, Once } from "vrkit-shared"
 import {
   DevSettings,
   ISharedAppState,
@@ -47,6 +47,8 @@ export class MainSharedAppState implements ISharedAppState {
 
   @observable devSettings = newDevSettings(AutoOpenDevToolsOverride ? { alwaysOpenDevTools: true } : {})
 
+  @observable plugins = newPluginsState()
+  
   @observable actions = newActionsState()
 
   @observable sessions = newSessionsState()

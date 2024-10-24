@@ -4,24 +4,20 @@ import { DevSettings, newDevSettings } from "./DevSettings"
 import { DashboardsState, newDashboardsState } from "../dashboards"
 import { newSessionsState, SessionsState } from "../sessions"
 import { ActionsState, newActionsState } from "../actions"
+import { newPluginsState, PluginsState } from "../plugins"
 
 export interface ISharedAppState {
-  // themeType: ThemeType
-  // zoomFactor: number
-  // activeDashboardId?: string
   appSettings: AppSettings
   devSettings: DevSettings
   dashboards: DashboardsState
   sessions: SessionsState
   overlays: OverlaysState
   actions: ActionsState
+  plugins: PluginsState
 }
 
 export function newSharedAppState(): ISharedAppState {
   return {
-    // themeType: ThemeType.AUTO,
-    // zoomFactor: 1.0,
-    // activeDashboardId: null
     devSettings: newDevSettings(),
     appSettings: AppSettings.create(),
     
@@ -29,6 +25,7 @@ export function newSharedAppState(): ISharedAppState {
     dashboards: newDashboardsState(),
     sessions: newSessionsState(),
     overlays: newOverlaysState(),
+    plugins: newPluginsState()
     
     
   }

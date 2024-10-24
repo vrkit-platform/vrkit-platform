@@ -91,6 +91,22 @@ message PluginComponentDefinition {
 
 }
 
+/**
+ * Owner (contact info) of plugin
+ */
+message PluginOwner {
+  string name = 1;
+  string company = 2;
+  string email = 5;
+
+  string url = 10;
+  string support_url = 11;
+}
+
+
+/**
+ * Defines a plugins contents
+ */
 message PluginManifest {
 
   string id = 1;
@@ -99,18 +115,43 @@ message PluginManifest {
 
   string description = 6;
 
-  message PluginAuthor {
-    string name = 1;
-    string company = 2;
 
-    string email = 5;
-  }
-
-  PluginAuthor author = 10;
+  PluginOwner owner = 10;
 
   repeated PluginComponentDefinition components = 20;
 
 }
 
+/**
+ * Status of a plugin installation
+ */
+enum PluginInstallStatus {
+  PLUGIN_STATUS_NONE = 0;
 
+  // FOR A LATER DATE WHEN BROWSE, DOWNLOAD, INSTALL
+  // COULD ALL BE DONE IN APP
+  PLUGIN_STATUS_DOWNLOADING = 1;
+  PLUGIN_STATUS_AVAILABLE = 2;
+  PLUGIN_STATUS_LOADED = 5;
+
+  PLUGIN_STATUS_ERROR = 50;
+  PLUGIN_STATUS_DISABLED = 98;
+  PLUGIN_STATUS_IGNORED = 99;
+}
+
+/**
+ * Installed plugin
+ */
+message PluginInstall {
+  string id = 1;
+
+  PluginInstallStatus status = 2;
+  bool is_internal = 3;
+
+  string path = 5;
+
+  string manifest_file = 10;
+
+  PluginManifest manifest = 11;
+}
 

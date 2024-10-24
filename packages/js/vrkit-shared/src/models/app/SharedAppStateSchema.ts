@@ -13,6 +13,7 @@ import type { SessionDetail, SessionsState } from "../sessions"
 import { toJS } from "mobx"
 import { OverlaysStateSchema } from "../overlays"
 import { ActionsState, ActionsStateSchema } from "../actions"
+import { PluginsStateSchema } from "../plugins"
 
 
 
@@ -51,8 +52,6 @@ export const SessionsStateSchema = createSimpleSchema<SessionsState>({
   activeSessionType: primitive(),
   liveSession: object(SessionDetailSchema),
   diskSession: object(SessionDetailSchema),
-  // componentDataVars: raw()
-  
 })
 
 export const DashboardsStateSchema = createSimpleSchema<DashboardsState>({
@@ -63,7 +62,7 @@ export const DashboardsStateSchema = createSimpleSchema<DashboardsState>({
 export const SharedAppStateSchema = createSimpleSchema<ISharedAppState>({
   appSettings: AppSettingsSchema,
   devSettings: custom(v => toJS(v), Identity),
-  
+  plugins: object(PluginsStateSchema),
   dashboards: object(DashboardsStateSchema),
   sessions: object(SessionsStateSchema),
   overlays: object(OverlaysStateSchema),

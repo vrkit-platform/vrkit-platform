@@ -34,11 +34,15 @@ export interface OverlayInfo {
      */
     kind: OverlayKind;
     /**
-     * @generated from protobuf field: string name = 3;
+     * @generated from protobuf field: string component_id = 3;
+     */
+    componentId: string;
+    /**
+     * @generated from protobuf field: string name = 5;
      */
     name: string;
     /**
-     * @generated from protobuf field: string description = 4;
+     * @generated from protobuf field: string description = 6;
      */
     description: string;
     /**
@@ -182,8 +186,9 @@ class OverlayInfo$Type extends MessageType<OverlayInfo> {
         super("IRacingTools.Models.Dashboard.OverlayInfo", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "kind", kind: "enum", T: () => ["IRacingTools.Models.Dashboard.OverlayKind", OverlayKind, "OVERLAY_KIND_"] },
-            { no: 3, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "component_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 6, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 20, name: "data_var_names", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
             { no: 30, name: "settings", kind: "message", T: () => OverlayBaseSettings }
         ]);
@@ -192,6 +197,7 @@ class OverlayInfo$Type extends MessageType<OverlayInfo> {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
         message.kind = 0;
+        message.componentId = "";
         message.name = "";
         message.description = "";
         message.dataVarNames = [];
@@ -210,10 +216,13 @@ class OverlayInfo$Type extends MessageType<OverlayInfo> {
                 case /* IRacingTools.Models.Dashboard.OverlayKind kind */ 2:
                     message.kind = reader.int32();
                     break;
-                case /* string name */ 3:
+                case /* string component_id */ 3:
+                    message.componentId = reader.string();
+                    break;
+                case /* string name */ 5:
                     message.name = reader.string();
                     break;
-                case /* string description */ 4:
+                case /* string description */ 6:
                     message.description = reader.string();
                     break;
                 case /* repeated string data_var_names */ 20:
@@ -240,12 +249,15 @@ class OverlayInfo$Type extends MessageType<OverlayInfo> {
         /* IRacingTools.Models.Dashboard.OverlayKind kind = 2; */
         if (message.kind !== 0)
             writer.tag(2, WireType.Varint).int32(message.kind);
-        /* string name = 3; */
+        /* string component_id = 3; */
+        if (message.componentId !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.componentId);
+        /* string name = 5; */
         if (message.name !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.name);
-        /* string description = 4; */
+            writer.tag(5, WireType.LengthDelimited).string(message.name);
+        /* string description = 6; */
         if (message.description !== "")
-            writer.tag(4, WireType.LengthDelimited).string(message.description);
+            writer.tag(6, WireType.LengthDelimited).string(message.description);
         /* repeated string data_var_names = 20; */
         for (let i = 0; i < message.dataVarNames.length; i++)
             writer.tag(20, WireType.LengthDelimited).string(message.dataVarNames[i]);

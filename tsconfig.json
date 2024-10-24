@@ -45,6 +45,9 @@
     {
       "path": "./packages/js/vrkit-shared-ui"
     },
+    {
+      "path": "./packages/js/vrkit-plugin-internal"
+    },
   ],
   "ts-node": {
     "compilerOptions": {

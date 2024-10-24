@@ -3,7 +3,7 @@ import type {
   OverlayInfo,
   PluginComponentDefinition,
   PluginComponentDefinition_OverlayCommonSettings,
-  PluginComponentDefinition_OverlayIRSettings,
+  PluginComponentDefinition_OverlayIRacingSettings,
   PluginManifest,
   SessionDataVariableValueMap,
   SessionTiming,
@@ -61,7 +61,7 @@ export interface IPluginComponentManager {
       :PluginComponentDefinition_OverlayCommonSettings
   
   getOverlayIRacingSettings(componentId: string)
-      :PluginComponentDefinition_OverlayIRSettings
+      :PluginComponentDefinition_OverlayIRacingSettings
   
   setOverlayComponent(
       id: string,

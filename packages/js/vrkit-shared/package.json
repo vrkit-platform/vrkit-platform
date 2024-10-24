@@ -17,6 +17,7 @@
     "vrkit-plugin-sdk": "1.0.0"
   },
   "devDependencies": {
+    "type-fest": "^4.26.1",
     "typescript": "^5.5.4",
     "vrkit-builder-tool": "1.0.0",
     "@types/webpack-env": "^1.18.5"

@@ -174,6 +174,37 @@ export interface PluginComponentDefinition_OverlayIRacingSettings {
     };
 }
 /**
+ * *
+ * Owner (contact info) of plugin
+ *
+ * @generated from protobuf message IRacingTools.Models.PluginOwner
+ */
+export interface PluginOwner {
+    /**
+     * @generated from protobuf field: string name = 1;
+     */
+    name: string;
+    /**
+     * @generated from protobuf field: string company = 2;
+     */
+    company: string;
+    /**
+     * @generated from protobuf field: string email = 5;
+     */
+    email: string;
+    /**
+     * @generated from protobuf field: string url = 10;
+     */
+    url: string;
+    /**
+     * @generated from protobuf field: string support_url = 11;
+     */
+    supportUrl: string;
+}
+/**
+ * *
+ * Defines a plugins contents
+ *
  * @generated from protobuf message IRacingTools.Models.PluginManifest
  */
 export interface PluginManifest {
@@ -190,30 +221,45 @@ export interface PluginManifest {
      */
     description: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.PluginManifest.PluginAuthor author = 10;
+     * @generated from protobuf field: IRacingTools.Models.PluginOwner owner = 10;
      */
-    author?: PluginManifest_PluginAuthor;
+    owner?: PluginOwner;
     /**
      * @generated from protobuf field: repeated IRacingTools.Models.PluginComponentDefinition components = 20;
      */
     components: PluginComponentDefinition[];
 }
 /**
- * @generated from protobuf message IRacingTools.Models.PluginManifest.PluginAuthor
+ * *
+ * Installed plugin
+ *
+ * @generated from protobuf message IRacingTools.Models.PluginInstall
  */
-export interface PluginManifest_PluginAuthor {
+export interface PluginInstall {
     /**
-     * @generated from protobuf field: string name = 1;
+     * @generated from protobuf field: string id = 1;
      */
-    name: string;
+    id: string;
     /**
-     * @generated from protobuf field: string company = 2;
+     * @generated from protobuf field: IRacingTools.Models.PluginInstallStatus status = 2;
      */
-    company: string;
+    status: PluginInstallStatus;
     /**
-     * @generated from protobuf field: string email = 5;
+     * @generated from protobuf field: bool is_internal = 3;
      */
-    email: string;
+    isInternal: boolean;
+    /**
+     * @generated from protobuf field: string path = 5;
+     */
+    path: string;
+    /**
+     * @generated from protobuf field: string manifest_file = 10;
+     */
+    manifestFile: string;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.PluginManifest manifest = 11;
+     */
+    manifest?: PluginManifest;
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.PluginUserSettingType
@@ -248,6 +294,45 @@ export enum PluginComponentType {
      * @generated from protobuf enum value: PLUGIN_COMPONENT_TYPE_OVERLAY = 0;
      */
     OVERLAY = 0
+}
+/**
+ * *
+ * Status of a plugin installation
+ *
+ * @generated from protobuf enum IRacingTools.Models.PluginInstallStatus
+ */
+export enum PluginInstallStatus {
+    /**
+     * @generated from protobuf enum value: PLUGIN_STATUS_NONE = 0;
+     */
+    PLUGIN_STATUS_NONE = 0,
+    /**
+     * FOR A LATER DATE WHEN BROWSE, DOWNLOAD, INSTALL
+     * COULD ALL BE DONE IN APP
+     *
+     * @generated from protobuf enum value: PLUGIN_STATUS_DOWNLOADING = 1;
+     */
+    PLUGIN_STATUS_DOWNLOADING = 1,
+    /**
+     * @generated from protobuf enum value: PLUGIN_STATUS_AVAILABLE = 2;
+     */
+    PLUGIN_STATUS_AVAILABLE = 2,
+    /**
+     * @generated from protobuf enum value: PLUGIN_STATUS_LOADED = 5;
+     */
+    PLUGIN_STATUS_LOADED = 5,
+    /**
+     * @generated from protobuf enum value: PLUGIN_STATUS_ERROR = 50;
+     */
+    PLUGIN_STATUS_ERROR = 50,
+    /**
+     * @generated from protobuf enum value: PLUGIN_STATUS_DISABLED = 98;
+     */
+    PLUGIN_STATUS_DISABLED = 98,
+    /**
+     * @generated from protobuf enum value: PLUGIN_STATUS_IGNORED = 99;
+     */
+    PLUGIN_STATUS_IGNORED = 99
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class PluginUserSettingValue$Type extends MessageType<PluginUserSettingValue> {
@@ -696,13 +781,92 @@ class PluginComponentDefinition_OverlayIRacingSettings$Type extends MessageType<
  */
 export const PluginComponentDefinition_OverlayIRacingSettings = new PluginComponentDefinition_OverlayIRacingSettings$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class PluginOwner$Type extends MessageType<PluginOwner> {
+    constructor() {
+        super("IRacingTools.Models.PluginOwner", [
+            { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "company", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "email", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 10, name: "url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 11, name: "support_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<PluginOwner>): PluginOwner {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.name = "";
+        message.company = "";
+        message.email = "";
+        message.url = "";
+        message.supportUrl = "";
+        if (value !== undefined)
+            reflectionMergePartial<PluginOwner>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginOwner): PluginOwner {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string name */ 1:
+                    message.name = reader.string();
+                    break;
+                case /* string company */ 2:
+                    message.company = reader.string();
+                    break;
+                case /* string email */ 5:
+                    message.email = reader.string();
+                    break;
+                case /* string url */ 10:
+                    message.url = reader.string();
+                    break;
+                case /* string support_url */ 11:
+                    message.supportUrl = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: PluginOwner, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string name = 1; */
+        if (message.name !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.name);
+        /* string company = 2; */
+        if (message.company !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.company);
+        /* string email = 5; */
+        if (message.email !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.email);
+        /* string url = 10; */
+        if (message.url !== "")
+            writer.tag(10, WireType.LengthDelimited).string(message.url);
+        /* string support_url = 11; */
+        if (message.supportUrl !== "")
+            writer.tag(11, WireType.LengthDelimited).string(message.supportUrl);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.PluginOwner
+ */
+export const PluginOwner = new PluginOwner$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class PluginManifest$Type extends MessageType<PluginManifest> {
     constructor() {
         super("IRacingTools.Models.PluginManifest", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 10, name: "author", kind: "message", T: () => PluginManifest_PluginAuthor },
+            { no: 10, name: "owner", kind: "message", T: () => PluginOwner },
             { no: 20, name: "components", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => PluginComponentDefinition }
         ]);
     }
@@ -730,8 +894,8 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
                 case /* string description */ 6:
                     message.description = reader.string();
                     break;
-                case /* IRacingTools.Models.PluginManifest.PluginAuthor author */ 10:
-                    message.author = PluginManifest_PluginAuthor.internalBinaryRead(reader, reader.uint32(), options, message.author);
+                case /* IRacingTools.Models.PluginOwner owner */ 10:
+                    message.owner = PluginOwner.internalBinaryRead(reader, reader.uint32(), options, message.owner);
                     break;
                 case /* repeated IRacingTools.Models.PluginComponentDefinition components */ 20:
                     message.components.push(PluginComponentDefinition.internalBinaryRead(reader, reader.uint32(), options));
@@ -757,9 +921,9 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
         /* string description = 6; */
         if (message.description !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.description);
-        /* IRacingTools.Models.PluginManifest.PluginAuthor author = 10; */
-        if (message.author)
-            PluginManifest_PluginAuthor.internalBinaryWrite(message.author, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.PluginOwner owner = 10; */
+        if (message.owner)
+            PluginOwner.internalBinaryWrite(message.owner, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
         /* repeated IRacingTools.Models.PluginComponentDefinition components = 20; */
         for (let i = 0; i < message.components.length; i++)
             PluginComponentDefinition.internalBinaryWrite(message.components[i], writer.tag(20, WireType.LengthDelimited).fork(), options).join();
@@ -774,36 +938,50 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
  */
 export const PluginManifest = new PluginManifest$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class PluginManifest_PluginAuthor$Type extends MessageType<PluginManifest_PluginAuthor> {
+class PluginInstall$Type extends MessageType<PluginInstall> {
     constructor() {
-        super("IRacingTools.Models.PluginManifest.PluginAuthor", [
-            { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "company", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "email", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        super("IRacingTools.Models.PluginInstall", [
+            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "status", kind: "enum", T: () => ["IRacingTools.Models.PluginInstallStatus", PluginInstallStatus] },
+            { no: 3, name: "is_internal", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 5, name: "path", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 10, name: "manifest_file", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 11, name: "manifest", kind: "message", T: () => PluginManifest }
         ]);
     }
-    create(value?: PartialMessage<PluginManifest_PluginAuthor>): PluginManifest_PluginAuthor {
+    create(value?: PartialMessage<PluginInstall>): PluginInstall {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.name = "";
-        message.company = "";
-        message.email = "";
+        message.id = "";
+        message.status = 0;
+        message.isInternal = false;
+        message.path = "";
+        message.manifestFile = "";
         if (value !== undefined)
-            reflectionMergePartial<PluginManifest_PluginAuthor>(this, message, value);
+            reflectionMergePartial<PluginInstall>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginManifest_PluginAuthor): PluginManifest_PluginAuthor {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginInstall): PluginInstall {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string name */ 1:
-                    message.name = reader.string();
+                case /* string id */ 1:
+                    message.id = reader.string();
                     break;
-                case /* string company */ 2:
-                    message.company = reader.string();
+                case /* IRacingTools.Models.PluginInstallStatus status */ 2:
+                    message.status = reader.int32();
                     break;
-                case /* string email */ 5:
-                    message.email = reader.string();
+                case /* bool is_internal */ 3:
+                    message.isInternal = reader.bool();
+                    break;
+                case /* string path */ 5:
+                    message.path = reader.string();
+                    break;
+                case /* string manifest_file */ 10:
+                    message.manifestFile = reader.string();
+                    break;
+                case /* IRacingTools.Models.PluginManifest manifest */ 11:
+                    message.manifest = PluginManifest.internalBinaryRead(reader, reader.uint32(), options, message.manifest);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -816,16 +994,25 @@ class PluginManifest_PluginAuthor$Type extends MessageType<PluginManifest_Plugin
         }
         return message;
     }
-    internalBinaryWrite(message: PluginManifest_PluginAuthor, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string name = 1; */
-        if (message.name !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.name);
-        /* string company = 2; */
-        if (message.company !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.company);
-        /* string email = 5; */
-        if (message.email !== "")
-            writer.tag(5, WireType.LengthDelimited).string(message.email);
+    internalBinaryWrite(message: PluginInstall, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string id = 1; */
+        if (message.id !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.id);
+        /* IRacingTools.Models.PluginInstallStatus status = 2; */
+        if (message.status !== 0)
+            writer.tag(2, WireType.Varint).int32(message.status);
+        /* bool is_internal = 3; */
+        if (message.isInternal !== false)
+            writer.tag(3, WireType.Varint).bool(message.isInternal);
+        /* string path = 5; */
+        if (message.path !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.path);
+        /* string manifest_file = 10; */
+        if (message.manifestFile !== "")
+            writer.tag(10, WireType.LengthDelimited).string(message.manifestFile);
+        /* IRacingTools.Models.PluginManifest manifest = 11; */
+        if (message.manifest)
+            PluginManifest.internalBinaryWrite(message.manifest, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -833,6 +1020,6 @@ class PluginManifest_PluginAuthor$Type extends MessageType<PluginManifest_Plugin
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.PluginManifest.PluginAuthor
+ * @generated MessageType for protobuf message IRacingTools.Models.PluginInstall
  */
-export const PluginManifest_PluginAuthor = new PluginManifest_PluginAuthor$Type();
+export const PluginInstall = new PluginInstall$Type();

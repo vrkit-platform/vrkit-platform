@@ -13,6 +13,7 @@
     "skipDefaultLibCheck": true,
     "noUnusedLocals": false,
     "allowUnusedLabels": true,
+    "verbatimModuleSyntax": false,
     "noUnusedParameters": false,
     "target": "ES2020",
     "lib": [
@@ -30,7 +31,7 @@
     
     "outDir": "lib",
     "inlineSourceMap": true,
-    "preserveConstEnums": true,
+    "preserveConstEnums": true
     
   },
   

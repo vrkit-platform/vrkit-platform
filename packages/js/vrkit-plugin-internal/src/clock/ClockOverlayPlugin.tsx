@@ -1,5 +1,5 @@
 import "vrkit-plugin-sdk"
-import { BoxProps } from "@mui/material/Box"
+import type { BoxProps } from "@mui/material/Box"
 
 import { getLogger } from "@3fv/logger-proxy"
 

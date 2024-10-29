@@ -118,9 +118,11 @@ function defaultWebpackConfig(target, name, projectDir = cwd, options = {}) {
         ),
     optimization = {
       minimize: false,
+      
       moduleIds: "named",
       chunkIds: "named",
       mangleExports: false,
+      
       runtimeChunk: true,
       ...(!isNode && {
         mergeDuplicateChunks: true,

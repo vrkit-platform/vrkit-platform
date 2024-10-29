@@ -27,7 +27,7 @@ export function newDevSettings(overrideDevSettings: Partial<DevSettings> = {}): 
     return {...loadedDevSettings, ...overrideDevSettings}
   
   const workingDir = process.cwd(),
-    parts = workingDir.split(/\\\//),
+    parts = workingDir.split(/[\\\/]/),
     treePaths = Array<string>(),
     devSettings: DevSettings = {
       alwaysOpenDevTools: false,
@@ -46,7 +46,7 @@ export function newDevSettings(overrideDevSettings: Partial<DevSettings> = {}): 
       break
     }
 
-    parts.shift()
+    parts.pop()
   }
 
   loadedDevSettings = {...devSettings}

@@ -1,6 +1,4 @@
 import { PluginManifest, PluginInstall } from "vrkit-models"
-import type { SessionPlayerId } from "vrkit-native-interop"
-import type { SessionInfoMessage } from "vrkit-plugin-sdk"
 import { createSimpleSchema, custom, list, map } from "serializr"
 
 export interface PluginsState {

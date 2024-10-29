@@ -1,4 +1,4 @@
-import type { IPluginComponentProps, IPluginComponentManager, IPluginComponentFactory } from "vrkit-plugin-sdk"
+import type { IPluginComponentProps, IPluginComponentFactory } from "vrkit-plugin-sdk"
 import { Container } from "@3fv/ditsy"
 import {
   PluginComponentDefinition,
@@ -14,28 +14,26 @@ const log = getLogger(__filename)
 const PluginComponentFactory: IPluginComponentFactory = async function PluginComponentFactory(
   manifest: PluginManifest,
   componentDef: PluginComponentDefinition,
-  componentManager: IPluginComponentManager,
   serviceContainer: Container
 ) {
-  const componentsToLoad: Array<PluginComponentDefinition> = (!!componentDef ? [componentDef] :
-      manifest.components).filter(({ type }) => type === PluginComponentType.OVERLAY)
-  for (const comp of componentsToLoad) {
-    const { id } = comp,
+  
+    const { id } = componentDef,
       ComponentTypePromise: Promise<{ default: React.ComponentType<IPluginComponentProps> }> =
-        (id === "track-map"
+        (id === "vrkit::internal::track-map"
           ? import("./track-map/TrackMapOverlayPlugin.js")
-          : id === "clock"
+          : id === "vrkit::internal::clock"
             ? import("./clock/ClockOverlayPlugin.js")
             : null) as any
-
+    
     if (!ComponentTypePromise) {
       throw Error(`Unknown component overlay id (id=${id})`)
     }
-
+    
+    log.info(`Loading plugin component ${id}`)
     const componentType = await importDefault(ComponentTypePromise)
-
-    componentManager.setOverlayComponent(id, componentType)
-  }
+    log.info(`Loaded plugin component ${id}`, componentType)
+    return componentType
+  
 }
 
 export default PluginComponentFactory

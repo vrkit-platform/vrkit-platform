@@ -13,7 +13,7 @@ import clsx from "clsx"
 import { isObject } from "@3fv/guard"
 import { overlayWindowSelectors } from "../../services/store/slices/overlay-window"
 import { EditorInfoScreenOverlayOUID, EditorInfoVROverlayOUID } from "vrkit-shared"
-import { IPluginComponentManager } from "vrkit-plugin-sdk"
+//import { IPluginComponentManager } from "vrkit-plugin-sdk"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -100,15 +100,15 @@ export default function OverlayWindowAppBody() {
           className={clsx(classNames.root)}
           ref={contentRef}
         >
-          {/*{!PluginComponent || size === null ? (*/}
-          {/*  <></>*/}
-          {/*) : (*/}
-          {/*  <PluginComponent*/}
-          {/*    client={getVRKitPluginClient()}*/}
-          {/*    manager={null as IPluginComponentManager}*/}
-          {/*    {...size}*/}
-          {/*  />*/}
-          {/*)}*/}
+          {!PluginComponent || size === null ? (
+            <></>
+          ) : (
+            <PluginComponent
+              client={getVRKitPluginClient()}
+              // manager={null as IPluginComponentManager}
+              {...size}
+            />
+          )}
         </OverlayAppBodyContentRoot>
       }
       {!isEditorInfo && isEditMode && isObject(size) ? (

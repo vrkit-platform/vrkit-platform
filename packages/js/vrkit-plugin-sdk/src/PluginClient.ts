@@ -51,44 +51,41 @@ export interface IPluginClient {
 
   off<T extends keyof IPluginClientEventArgs>(type: T, handler?: IPluginClientEventArgs[T]): void
 }
-
-export interface IPluginComponentManager {
-  getManifest():PluginManifest
-  
-  
-  
-  getOverlayCommonSettings(componentId: string)
-      :PluginComponentDefinition_OverlayCommonSettings
-  
-  getOverlayIRacingSettings(componentId: string)
-      :PluginComponentDefinition_OverlayIRacingSettings
-  
-  setOverlayComponent(
-      id: string,
-      ComponentType: React.ComponentType<IPluginComponentProps>
-  ):void
-  
-  removeOverlayComponent(
-      id:string
-  ):void
-}
+//
+// export interface IPluginComponentManager {
+//   getManifest():PluginManifest
+//
+//   getOverlayCommonSettings(componentId: string)
+//       :PluginComponentDefinition_OverlayCommonSettings
+//
+//   getOverlayIRacingSettings(componentId: string)
+//       :PluginComponentDefinition_OverlayIRacingSettings
+//
+//   setOverlayComponent(
+//       id: string,
+//       ComponentType: React.ComponentType<IPluginComponentProps>
+//   ):void
+//
+//   removeOverlayComponent(
+//       id:string
+//   ):void
+// }
 
 export type IPluginComponentFactory = (
     manifest:PluginManifest,
     componentDef: PluginComponentDefinition,
-    componentManager:IPluginComponentManager,
     serviceContainer:Container
-) => Promise<void>
+) => Promise<TPluginComponentType>
 
 export interface IPluginComponentProps {
   client: IPluginClient
-  manager: IPluginComponentManager
+  // manager: IPluginComponentManager
   
   width: number
   height: number
 }
 
-export type PluginComponentType = React.ComponentType<IPluginComponentProps> | Promise<React.ComponentType<IPluginComponentProps>>
+export type TPluginComponentType = React.ComponentType<IPluginComponentProps> | Promise<React.ComponentType<IPluginComponentProps>>
 
 
 declare global {

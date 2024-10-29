@@ -20,6 +20,7 @@
     "electron-debug": "^4.0.0",
     "electron-log": "^5.1.7",
     "electron-updater": "^6.3.1",
+    "fast-glob": "^3.3.2",
     "node-hid": "^3.1.0",
     "prelude-ts": "^1.0.6",
     "react": "18.3.1",
@@ -43,8 +44,7 @@
     "webpack-dev-server": "^5.0.4",
     "webpack-hot-middleware": "^2.26.1",
     "webpack-merge": "^6.0.1",
-    "vrkit-models": "1.0.0",
-    "vrkit-native-interop": "1.0.0",
+    
     "history": "^4.10.1",
     "cson": "^8.4.0",
     "cron-parser": "^4.9.0",
@@ -152,10 +152,13 @@
     "mobx": "^6.13.1",
     "mobx-utils": "^6.0.8",
     "zod": "^3.23.8",
+    "vrkit-models": "1.0.0",
+    "vrkit-native-interop": "1.0.0",
+    "vrkit-plugin-internal": "1.0.0",
     "vrkit-plugin-sdk": "1.0.0",
     "vrkit-shared": "1.0.0",
     "vrkit-shared-ui": "1.0.0",
-    "two.js": "latest",
+    
     "iohook-raub": "^0.1.1",
     "@hazae41/mutex": "^2.1.0"
   },

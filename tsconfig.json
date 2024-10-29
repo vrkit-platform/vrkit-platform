@@ -14,6 +14,10 @@
       [  "./packages/js/vrkit-plugin-sdk"],
       "vrkit-plugin-sdk/*":
       [  "./packages/js/vrkit-plugin-sdk/src/*"],
+      "vrkit-plugin-internal":
+      [  "./packages/js/vrkit-plugin-internal"],
+      "vrkit-plugin-internal/*":
+      [  "./packages/js/vrkit-plugin-internal/src/*"],
       "vrkit-shared":
       [  "./packages/js/vrkit-shared"],
       "vrkit-shared/*":

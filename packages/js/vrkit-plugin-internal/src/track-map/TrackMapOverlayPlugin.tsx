@@ -1,10 +1,10 @@
-import type { IPluginClientComponentProps } from "vrkit-plugin-sdk"
+import type { IPluginComponentProps } from "vrkit-plugin-sdk"
 import React, { useEffect, useState } from "react"
 import TrackMapOverlayCanvasRenderer from "./TrackMapOverlayCanvasRenderer"
 
 let renderer: TrackMapOverlayCanvasRenderer = null
 
-function TrackMapOverlayPlugin(props: IPluginClientComponentProps) {
+function TrackMapOverlayPlugin(props: IPluginComponentProps) {
   const { client, width, height } = props,
     inActiveSession = client.inActiveSession(),
     weekendInfo = client.getSessionInfo()?.weekendInfo,
@@ -42,8 +42,6 @@ function TrackMapOverlayPlugin(props: IPluginClientComponentProps) {
   }, [])
 
   return inActiveSession && weekendInfo ? <canvas ref={ref => setCanvasRef(ref)} /> : <></>
-  // <FlexRowCenterBox>No Active Session TODO: Make this
-  // pretty</FlexRowCenterBox>
 }
 
-export default TrackMapOverlayPlugin
+export default TrackMapOverlayPlugin as React.ComponentType<IPluginComponentProps>

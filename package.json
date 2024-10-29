@@ -45,8 +45,10 @@
     "yaml": "^2.5.0"
   },
   "devDependencies": {
+    "fast-glob": "^3.3.2",
+    "builtin-modules": "^4.0.0",
     "type-fest": "^4.26.1",
-    
+    "esbuild": "^0.24.0",
     "@electron/rebuild": "^3.6.0",
     "@faker-js/faker": "^9.0.3",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",

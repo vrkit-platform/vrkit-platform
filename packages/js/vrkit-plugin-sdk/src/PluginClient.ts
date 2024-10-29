@@ -65,7 +65,7 @@ export interface IPluginComponentManager {
   
   setOverlayComponent(
       id: string,
-      ComponentType: React.ComponentType<IPluginClientComponentProps>
+      ComponentType: React.ComponentType<IPluginComponentProps>
   ):void
   
   removeOverlayComponent(
@@ -73,13 +73,14 @@ export interface IPluginComponentManager {
   ):void
 }
 
-export type IPluginInitFactory = (
+export type IPluginComponentFactory = (
     manifest:PluginManifest,
+    componentDef: PluginComponentDefinition,
     componentManager:IPluginComponentManager,
     serviceContainer:Container
 ) => Promise<void>
 
-export interface IPluginClientComponentProps {
+export interface IPluginComponentProps {
   client: IPluginClient
   manager: IPluginComponentManager
   
@@ -87,6 +88,7 @@ export interface IPluginClientComponentProps {
   height: number
 }
 
+export type PluginComponentType = React.ComponentType<IPluginComponentProps> | Promise<React.ComponentType<IPluginComponentProps>>
 
 
 declare global {

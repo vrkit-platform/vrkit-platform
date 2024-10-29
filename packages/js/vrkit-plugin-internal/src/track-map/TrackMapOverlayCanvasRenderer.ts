@@ -7,12 +7,12 @@ import Two from "two.js"
 import type { OverlayBaseSettings, OverlayInfo, SessionDataVariableValueMap, TrackMap } from "vrkit-models"
 import { IPluginClient, PluginClientEventType, SessionInfoMessage } from "vrkit-plugin-sdk"
 import { ScaleTrackMapToFit } from "vrkit-shared"
-import { assign, Noop } from "vrkit-app-common/utils"
+import { assign, Noop } from "vrkit-shared"
 import { asOption } from "@3fv/prelude-ts"
 import { get } from "lodash/fp"
 import { isDefined } from "@3fv/guard"
 import { Deferred } from "@3fv/deferred"
-import { Bind } from "vrkit-app-common/decorators"
+import { Bind } from "vrkit-shared"
 
 const TrackMapThrottlingPeriod = 500,
   CarMarkerRadiusPx = 6,
@@ -429,11 +429,11 @@ class TrackMapOverlayCanvasRenderer {
       this.createScene()
 
       // REMOVE LISTENERS ON RELOAD
-      if (import.meta.webpackHot) {
-        import.meta.webpackHot.addDisposeHandler(() => {
-          this.destroy()
-        })
-      }
+      // if (import.meta.webpackHot) {
+      //   import.meta.webpackHot.addDisposeHandler(() => {
+      //     this.destroy()
+      //   })
+      // }
 
       // ATTACH LISTENERS
       client.on(PluginClientEventType.SESSION_INFO_CHANGED, this.onSessionInfo)

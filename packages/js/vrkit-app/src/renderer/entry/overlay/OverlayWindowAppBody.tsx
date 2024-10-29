@@ -100,15 +100,15 @@ export default function OverlayWindowAppBody() {
           className={clsx(classNames.root)}
           ref={contentRef}
         >
-          {!PluginComponent || size === null ? (
-            <></>
-          ) : (
-            <PluginComponent
-              client={getVRKitPluginClient()}
-              manager={null as IPluginComponentManager}
-              {...size}
-            />
-          )}
+          {/*{!PluginComponent || size === null ? (*/}
+          {/*  <></>*/}
+          {/*) : (*/}
+          {/*  <PluginComponent*/}
+          {/*    client={getVRKitPluginClient()}*/}
+          {/*    manager={null as IPluginComponentManager}*/}
+          {/*    {...size}*/}
+          {/*  />*/}
+          {/*)}*/}
         </OverlayAppBodyContentRoot>
       }
       {!isEditorInfo && isEditMode && isObject(size) ? (

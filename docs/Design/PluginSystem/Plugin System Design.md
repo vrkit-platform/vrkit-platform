@@ -20,7 +20,7 @@ it's `vrkit-plugin.json[5]` (regardless of extension, it will be parsed as
 
 Creating a plugin is equivalent to creating NPM package/library (i.e.
 `npm init`) with a `main` attribute in `package.json` pointing to a `.js`
-file with a single `default` export must match the `IPluginInitFactory` below.
+file with a single `default` export must match the `IPluginComponentFactory` below.
 
 > The package name must match `/^vrkit-plugin-{PLUGIN_NAME}$/` in order to be
 > compatible with the `PluginLoader`
@@ -75,7 +75,7 @@ In the root of your package/library, create a file with the name
 }
 ```
 
-### `IPluginInitFactory` Implementation
+### `IPluginComponentFactory` Implementation
 
 ```tsx
 import {
@@ -145,7 +145,7 @@ export interface IPluginClient {
   ):void
 }
 
-export interface IPluginClientComponentProps {
+export interface IPluginComponentProps {
   client:IPluginClient
   
   width:number
@@ -167,7 +167,7 @@ export interface IPluginComponentManager {
   
   setOverlayComponent(
       id: string,
-      ComponentType: React.ComponentType<IPluginClientComponentProps>
+      ComponentType: React.ComponentType<IPluginComponentProps>
   ):void
   
   removeOverlayComponent( 
@@ -175,13 +175,13 @@ export interface IPluginComponentManager {
   ):void
 }
 
-export type IPluginInitFactory = (
+export type IPluginComponentFactory = (
     manifest:PluginManifest,
     componentManager:IPluginComponentManager,
     serviceContainer:Container
 ) => Promise<void>
 
-const PluginInitFactory:IPluginInitFactory = async function PluginInitFactory(
+const PluginInitFactory:IPluginComponentFactory = async function PluginInitFactory(
     manifest:PluginManifest,
     componentManager:IPluginComponentManager,
     serviceContainer:Container
@@ -189,7 +189,7 @@ const PluginInitFactory:IPluginInitFactory = async function PluginInitFactory(
   // ... do all init & setup here, etc
   componentManager.setOverlayComponent(
       "leaderboard-overlay", 
-      function(props: IPluginClientComponentProps) {
+      function(props: IPluginComponentProps) {
         return <>content goes here</>
       })
 }

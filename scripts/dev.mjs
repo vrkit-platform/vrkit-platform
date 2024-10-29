@@ -41,6 +41,7 @@ const devFlow = {
       parallel: true,
       tasks: [
         { name: "compile", command: ["yarn",["run", "compile:all:watch"]] },
+        { name: "bundle-plugin-internal", command: ["yarn", ["workspace", "vrkit-plugin-internal", "run bundle:watch"]]},
         { name: "main", command: ["yarn", ["workspace", "vrkit-app", "run dev:main"]]},
         { name: "renderer", command: ["yarn", ["workspace", "vrkit-app", "run dev:renderer"]]}
       ]

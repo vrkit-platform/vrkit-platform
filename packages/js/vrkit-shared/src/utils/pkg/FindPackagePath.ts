@@ -7,7 +7,7 @@ import { getLogger } from "@3fv/logger-proxy"
 const log = getLogger(__filename)
 export function FindPackagePath(name: string): [path: string, pkgJson:PackageJson] {
   const workingDir = process.cwd(),
-      parts = workingDir.split(/\\\//),
+      parts = workingDir.split(/[\\\/]/),
       treePaths = Array<string>()
 
   while (parts.length) {
@@ -25,7 +25,7 @@ export function FindPackagePath(name: string): [path: string, pkgJson:PackageJso
       
     }
 
-    parts.shift()
+    parts.pop()
   }
 
   return null

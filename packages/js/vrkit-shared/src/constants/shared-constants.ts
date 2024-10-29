@@ -1,4 +1,4 @@
-import { assert } from "../utils"
+import assert from "assert"
 assert(process.platform === "win32", `VRKit is only usable on Windows 10/11`)
 
 export const isDev = process.env.NODE_ENV !== "production"

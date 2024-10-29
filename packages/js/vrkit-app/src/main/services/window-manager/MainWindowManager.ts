@@ -2,6 +2,7 @@ import { PostConstruct, Singleton } from "@3fv/ditsy"
 import WindowManager from "./WindowManagerService"
 import { BrowserWindow } from "electron"
 import EventEmitter3 from "eventemitter3"
+import { isDev } from "../../constants"
 
 export interface MainWindowEventArgs {
   UI_READY: (win: BrowserWindow) => void
@@ -19,8 +20,19 @@ export class MainWindowManager extends EventEmitter3<MainWindowEventArgs> {
     super()
   }
   
+  private unload() {
+    Object.assign(global, {
+      mainWindowManager: null
+    })
+  }
+  
   @PostConstruct() // @ts-ignore
   private async init():Promise<void> {
+    if (isDev) {
+      Object.assign(global, {
+        mainWindowManager: this
+      })
+    }
     if (import.meta.webpackHot) {
       const previousMainWindow = import.meta.webpackHot.data?.["mainWindow"]
       if (previousMainWindow) {

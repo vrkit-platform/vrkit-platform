@@ -23,6 +23,7 @@ import Fs from "fs"
 import Path from "path"
 import { flatten, uniq } from "lodash"
 import { isDefined, isPromise } from "@3fv/guard"
+import FastGlob from "fast-glob"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -156,10 +157,10 @@ export class PluginManager {
       Promise.all(
         uniq(flatten(
           searchPaths.map(path => [
-            ...Fs.globSync("*/plugin.{json,json5,yaml,yml}", {
+            ...FastGlob.globSync("*/plugin.{json,json5,yaml,yml}", {
               cwd: path
             }).map(file => Path.join(path, file)),
-            ...Fs.globSync("plugin.{json,json5,yaml,yml}", {
+            ...FastGlob.globSync("plugin.{json,json5,yaml,yml}", {
               cwd: path
             }).map(file => Path.join(path, file))
           ])

@@ -1,5 +1,9 @@
 import { DashboardConfig, OverlayBaseSettings, OverlayInfo, OverlayKind } from "vrkit-models"
 import { defaults, generateUUID } from "vrkit-shared"
+import {
+  VRKPluginInternalOverlayClockId,
+  VRKPluginInternalOverlayTrackMapId
+} from "vrkit-plugin-sdk"
 
 export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardConfig"): DashboardConfig {
   const trackMapOverlay = newTrackMapOverlayInfo(`${name}-overlay-trackmap`),
@@ -103,12 +107,14 @@ export function newOverlayInfo(
   })
 }
 
+
+
 export function newClockOverlayInfo(name: string = "clock"): OverlayInfo {
-  return newOverlayInfo(name, OverlayKind.PLUGIN,"vrkit::internal::overlays::clock",[],{})
+  return newOverlayInfo(name, OverlayKind.PLUGIN,VRKPluginInternalOverlayClockId,[],{})
 }
 
 export function newTrackMapOverlayInfo(name: string = "track-map"): OverlayInfo {
-  return newOverlayInfo(name, OverlayKind.PLUGIN,"vrkit::internal::overlays::track-map", [
+  return newOverlayInfo(name, OverlayKind.PLUGIN,VRKPluginInternalOverlayTrackMapId, [
     "PlayerCarIdx",
     "CarIdxLap",
     "CarIdxLapCompleted",

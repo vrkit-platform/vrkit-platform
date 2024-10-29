@@ -13,7 +13,6 @@
     "skipDefaultLibCheck": true,
     "noUnusedLocals": false,
     "allowUnusedLabels": true,
-    "verbatimModuleSyntax": false,
     "noUnusedParameters": false,
     "target": "ES2020",
     "lib": [

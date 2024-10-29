@@ -1,0 +1,112 @@
+{
+  "id": "vrkit::internal",
+  "owner": {
+    "company": "3FV",
+    "name": "Jonathan Glanz",
+    "email": "jonathan.glanz@gmail.com"
+  },
+  "name": "VRKitExternalPlugin",
+  "components": [
+    {
+      "id": "clock",
+      "type": "PLUGIN_COMPONENT_TYPE_OVERLAY",
+      "name": "Clock",
+      "description": "A simple real world clock to place anywhere on your dashboard/overlay screen/HMD",
+      "supportedGames": [
+        "SUPPORTED_GAME_IRACING"
+      ],
+      "userSettings": {},
+      "overlayCommonSettings": {
+        "canResize": false,
+        "forceAspectRatio": false,
+        "fps": 0,
+        "initialSize": {
+          width: 260,
+          height: 40
+        }
+      },
+      "overlayIracingSettings": {
+        "dataVariablesUsed": []
+      }
+    },
+    {
+      "id": "track-map",
+      "type": "PLUGIN_COMPONENT_TYPE_OVERLAY",
+      "name": "Track Map",
+      "description": "A track map to place anywhere on your dashboard/overlay screen/HMD",
+      "supportedGames": [
+        "SUPPORTED_GAME_IRACING"
+      ],
+      "userSettings": {},
+      "overlayCommonSettings": {
+        "canResize": false,
+        "forceAspectRatio": false,
+        "fps": 0,
+        "initialSize": {
+          width: 260,
+          height: 40
+        }
+      },
+      "overlayIracingSettings": {
+        "dataVariablesUsed": [
+          "PlayerCarIdx",
+          "CarIdxLap",
+          "CarIdxLapCompleted",
+          "CarIdxPosition",
+          "CarIdxClassPosition",
+          "CarIdxEstTime",
+          "CarIdxLapDistPct"
+        ]
+      }
+    },
+    {
+      "id": "leaderboard",
+      "type": "PLUGIN_COMPONENT_TYPE_OVERLAY",
+      "name": "Leaderboard",
+      "description": "A configurable leaderboard overlay",
+      "supportedGames": [
+        "SUPPORTED_GAME_IRACING"
+      ],
+      "userSettings": {
+        "carClassColor1": {
+          "type": "COLOR",
+          "defaultValue": {
+            colorValue: "#FF0000"
+          }
+        },
+        "carClassColor2": {
+          "type": "COLOR",
+          "defaultValue": {
+            colorValue: "#00FF00"
+          }
+        },
+        "carClassColor3": {
+          "type": "COLOR",
+          "defaultValue": {
+            colorValue: "#0000FF"
+          }
+        }
+      },
+      "overlayCommonSettings": {
+        "canResize": true,
+        "forceAspectRatio": false,
+        "fps": 0,
+        "initialSize": {
+          "height": 300,
+          "width": 400
+        }
+      },
+      "overlayIracingSettings": {
+        "dataVariablesUsed": [
+          "PlayerCarIdx",
+          "CarIdxLap",
+          "CarIdxLapCompleted",
+          "CarIdxPosition",
+          "CarIdxClassPosition",
+          "CarIdxEstTime",
+          "CarIdxLapDistPct"
+        ]
+      }
+    }
+  ]
+}

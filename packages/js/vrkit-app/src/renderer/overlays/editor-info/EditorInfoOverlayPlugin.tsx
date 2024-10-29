@@ -6,7 +6,7 @@ import Box, { BoxProps } from "@mui/material/Box"
 import { getLogger } from "@3fv/logger-proxy"
 
 import { createClassNames } from "vrkit-shared-ui"
-import { IPluginClientComponentProps } from "vrkit-plugin-sdk"
+import { IPluginComponentProps } from "vrkit-plugin-sdk"
 import React from "react"
 import { EllipsisBox, FlexColumnBox, FlexRowBox, FlexRowCenterBox } from "vrkit-shared-ui"
 import clsx from "clsx"
@@ -320,14 +320,14 @@ function EditorInfoView({ className, ...other }: EditorInfoViewProps) {
   )
 }
 
-function EditorInfoOverlayPlugin(props: IPluginClientComponentProps) {
+function EditorInfoOverlayPlugin(props: IPluginComponentProps) {
   const { client, width, height } = props
 
   return <EditorInfoView />
 }
 
 // async function loadEditorInfoPlugin():
-// Promise<React.ComponentType<IPluginClientComponentProps>> { // await
+// Promise<React.ComponentType<IPluginComponentProps>> { // await
 // createEditorInfoControllerClient() return EditorInfoOverlayPlugin }
 
 export default EditorInfoOverlayPlugin

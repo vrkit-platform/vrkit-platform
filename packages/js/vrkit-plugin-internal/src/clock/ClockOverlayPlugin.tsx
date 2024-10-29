@@ -3,8 +3,7 @@ import { BoxProps } from "@mui/material/Box"
 
 import { getLogger } from "@3fv/logger-proxy"
 
-
-import { IPluginClientComponentProps } from "vrkit-plugin-sdk"
+import { IPluginComponentProps } from "vrkit-plugin-sdk"
 import React, { useEffect, useState } from "react"
 import { useInterval } from "usehooks-ts"
 
@@ -69,7 +68,7 @@ function ClockTimeView({ showMillis = false, className, ...other }: ClockTimeVie
   )
 }
 
-function ClockOverlayPlugin(props: IPluginClientComponentProps) {
+function ClockOverlayPlugin(props: IPluginComponentProps) {
   const { client, width, height } = props
 
   return (
@@ -77,4 +76,4 @@ function ClockOverlayPlugin(props: IPluginClientComponentProps) {
   )
 }
 
-export default ClockOverlayPlugin
+export default ClockOverlayPlugin as React.ComponentType<IPluginComponentProps>

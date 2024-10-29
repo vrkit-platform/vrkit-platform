@@ -1,11 +1,18 @@
 import { getLogger } from "@3fv/logger-proxy"
 import Bluebird from "bluebird"
+import { isDev } from "../constants"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
 type BootstrapStep = [description: string, fn: () => Promise<any>]
 type InitScriptModule = { default: () => Promise<void> }
+
+if (isDev) {
+  global["nodeRequire"] = function(modName: string) {
+    return  __non_webpack_require__(modName)
+  }
+}
 
 const bootstrapCtx = require.context("./init-scripts", false, /\.ts$/),
   bootstrapKeys = bootstrapCtx.keys().sort()
@@ -16,7 +23,7 @@ async function bootstrapElectronMain() {
   // timer.start()
   // const bootstrapEnd = timer.time("bootstrap")
   info(`Bootstrap started`)
-
+  
 
 
   info(`Executing init: ${bootstrapKeys.join(",")}`)

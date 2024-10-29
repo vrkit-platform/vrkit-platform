@@ -15,6 +15,20 @@
       "supportedGames": [
         "SUPPORTED_GAME_IRACING"
       ],
+      "userSettings": {
+        "carClassColor1": {
+          "type":"color",
+          "default": "#FF0000"
+        },
+        "carClassColor2": {
+          "type":"color",
+          "default": "#00FF00"
+        },
+        "carClassColor3": {
+          "type":"color",
+          "default": "#0000FF"
+        }
+      },
       "overlayCommonSettings": {
         "canResize": true,
         "forceAspectRatio": false,
@@ -24,7 +38,7 @@
           "width": 400
         }
       },
-      "overlayIrSettings": {
+      "overlayIracingSettings": {
         "dataVariablesUsed": [
           "PlayerCarIdx",
           "CarIdxLap",

@@ -110,9 +110,11 @@ export interface PluginComponentDefinition {
      */
     overlayIracingSettings?: PluginComponentDefinition_OverlayIRacingSettings;
     /**
-     * @generated from protobuf field: repeated IRacingTools.Models.PluginUserSetting user_settings = 99;
+     * @generated from protobuf field: map<string, IRacingTools.Models.PluginUserSetting> user_settings = 99;
      */
-    userSettings: PluginUserSetting[];
+    userSettings: {
+        [key: string]: PluginUserSetting;
+    };
 }
 /**
  * *
@@ -510,7 +512,7 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
             { no: 15, name: "common_parameters", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } },
             { no: 20, name: "overlay_common_settings", kind: "message", T: () => PluginComponentDefinition_OverlayCommonSettings },
             { no: 21, name: "overlay_iracing_settings", kind: "message", T: () => PluginComponentDefinition_OverlayIRacingSettings },
-            { no: 99, name: "user_settings", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => PluginUserSetting }
+            { no: 99, name: "user_settings", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "message", T: () => PluginUserSetting } }
         ]);
     }
     create(value?: PartialMessage<PluginComponentDefinition>): PluginComponentDefinition {
@@ -521,7 +523,7 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
         message.description = "";
         message.supportedGames = [];
         message.commonParameters = {};
-        message.userSettings = [];
+        message.userSettings = {};
         if (value !== undefined)
             reflectionMergePartial<PluginComponentDefinition>(this, message, value);
         return message;
@@ -559,8 +561,8 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
                 case /* IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings overlay_iracing_settings */ 21:
                     message.overlayIracingSettings = PluginComponentDefinition_OverlayIRacingSettings.internalBinaryRead(reader, reader.uint32(), options, message.overlayIracingSettings);
                     break;
-                case /* repeated IRacingTools.Models.PluginUserSetting user_settings */ 99:
-                    message.userSettings.push(PluginUserSetting.internalBinaryRead(reader, reader.uint32(), options));
+                case /* map<string, IRacingTools.Models.PluginUserSetting> user_settings */ 99:
+                    this.binaryReadMap99(message.userSettings, reader, options);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -588,6 +590,22 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
             }
         }
         map[key ?? ""] = val ?? "";
+    }
+    private binaryReadMap99(map: PluginComponentDefinition["userSettings"], reader: IBinaryReader, options: BinaryReadOptions): void {
+        let len = reader.uint32(), end = reader.pos + len, key: keyof PluginComponentDefinition["userSettings"] | undefined, val: PluginComponentDefinition["userSettings"][any] | undefined;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case 1:
+                    key = reader.string();
+                    break;
+                case 2:
+                    val = PluginUserSetting.internalBinaryRead(reader, reader.uint32(), options);
+                    break;
+                default: throw new globalThis.Error("unknown map entry field for field IRacingTools.Models.PluginComponentDefinition.user_settings");
+            }
+        }
+        map[key ?? ""] = val ?? PluginUserSetting.create();
     }
     internalBinaryWrite(message: PluginComponentDefinition, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string id = 1; */
@@ -618,9 +636,13 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
         /* IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings overlay_iracing_settings = 21; */
         if (message.overlayIracingSettings)
             PluginComponentDefinition_OverlayIRacingSettings.internalBinaryWrite(message.overlayIracingSettings, writer.tag(21, WireType.LengthDelimited).fork(), options).join();
-        /* repeated IRacingTools.Models.PluginUserSetting user_settings = 99; */
-        for (let i = 0; i < message.userSettings.length; i++)
-            PluginUserSetting.internalBinaryWrite(message.userSettings[i], writer.tag(99, WireType.LengthDelimited).fork(), options).join();
+        /* map<string, IRacingTools.Models.PluginUserSetting> user_settings = 99; */
+        for (let k of globalThis.Object.keys(message.userSettings)) {
+            writer.tag(99, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k);
+            writer.tag(2, WireType.LengthDelimited).fork();
+            PluginUserSetting.internalBinaryWrite(message.userSettings[k], writer, options);
+            writer.join().join();
+        }
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

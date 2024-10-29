@@ -87,7 +87,7 @@ message PluginComponentDefinition {
   // IROverlaySettings, can be omitted
   OverlayIRacingSettings overlay_iracing_settings = 21;
 
-  repeated PluginUserSetting user_settings = 99;
+  map<string,PluginUserSetting> user_settings = 99;
 
 }
 

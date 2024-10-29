@@ -1,17 +1,24 @@
 import { getLogger } from "@3fv/logger-proxy"
 
-import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
+import { Container, Inject, PostConstruct, Singleton } from "@3fv/ditsy"
 import { Bind } from "vrkit-shared"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import { OverlayManagerClientEventHandler } from "vrkit-shared"
-import type {
-  IPluginClient,
-  IPluginClientComponentProps,
-  IPluginClientEventArgs, SessionInfoMessage
+import {
+  IPluginClient,  
+  IPluginClientEventArgs,
+  IPluginComponentProps,
+  PluginComponentType,
+  SessionInfoMessage
 } from "vrkit-plugin-sdk"
-import { OverlayConfig, OverlayKind, SessionTiming } from "vrkit-models"
+import {
+  OverlayConfig,
+  OverlayKind, PluginComponentDefinition,
+  PluginManifest,
+  SessionTiming
+} from "vrkit-models"
 import OverlayManagerClient from "./OverlayManagerClient"
 import { asOption } from "@3fv/prelude-ts"
 import TrackManager from "../track-manager"
@@ -28,12 +35,45 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-type ReactPluginComponent = React.ComponentType<IPluginClientComponentProps> | Promise<React.ComponentType<IPluginClientComponentProps>>
 
-const builtinPluginLoaders: Record<OverlayKind, () => Promise<ReactPluginComponent>> = {
-  [OverlayKind.PLUGIN]: (() => {
-    throw Error(`NotImplemented yet, will be part of plugin system`)
-  }) as any,
+export type ComponentLoader = (manager: PluginClientManager,serviceContainer: Container, manifest: PluginManifest, componentDef: PluginComponentDefinition) => Promise<PluginComponentType>
+
+export class PluginComponentLoader {
+  
+  private constructor(
+      readonly manager: PluginClientManager,
+      readonly serviceContainer: Container,
+      readonly manifest: PluginManifest,
+      readonly componentDef: PluginComponentDefinition
+  ) {
+  }
+  
+  async execute(): Promise<PluginComponentType> {
+    return null
+  }
+  
+  static create(
+      manager: PluginClientManager,
+      serviceContainer: Container,
+      manifest: PluginManifest,
+      componentDef: PluginComponentDefinition
+  ): PluginComponentLoader {
+    return new PluginComponentLoader(manager, serviceContainer, manifest, componentDef)
+  }
+  
+  static execute(
+      manager: PluginClientManager,
+      serviceContainer: Container,
+      manifest: PluginManifest,
+      componentDef: PluginComponentDefinition
+  ): Promise<PluginComponentType> {
+    const loader = new PluginComponentLoader(manager, serviceContainer, manifest, componentDef)
+    return loader.execute()
+  }
+}
+
+const builtinPluginLoaders: Record<OverlayKind, ComponentLoader> = {
+  [OverlayKind.PLUGIN]: PluginComponentLoader.execute,
   [OverlayKind.EDITOR_INFO]: () => importDefault(import("../../overlays/editor-info/EditorInfoOverlayPlugin")),
   // [OverlayKind.TRACK_MAP]: () => importDefault(import("../../overlays/track-map/TrackMapOverlayPlugin")),
   // [OverlayKind.CLOCK]: () => importDefault(import("../../overlays/clock/ClockOverlayPlugin"))
@@ -45,7 +85,7 @@ export class PluginClientManager {
 
   private pluginClient: IPluginClient
 
-  private reactComponent_: React.ComponentType<IPluginClientComponentProps>
+  private reactComponent_: React.ComponentType<IPluginComponentProps>
 
   
   
@@ -126,14 +166,14 @@ export class PluginClientManager {
     }
     
     const kind = config.overlay.kind
-    const loaderFn = builtinPluginLoaders[kind]
-    if (!loaderFn)
-      throw Error(`Kind ${kind} is invalid`)
-    
-    const componentOrPromise = await loaderFn()
-    
-    this.reactComponent_ = isPromise(componentOrPromise) ? await componentOrPromise : componentOrPromise
-    this.appStore.dispatch(overlayWindowActions.setOverlayComponent(this.reactComponent_))
+    // const loaderFn = builtinPluginLoaders[kind]
+    // if (!loaderFn)
+    //   throw Error(`Kind ${kind} is invalid`)
+    //
+    // const componentOrPromise = await loaderFn()
+    //
+    // this.reactComponent_ = isPromise(componentOrPromise) ? await componentOrPromise : componentOrPromise
+    // this.appStore.dispatch(overlayWindowActions.setOverlayComponent(this.reactComponent_))
   }
 
   /**

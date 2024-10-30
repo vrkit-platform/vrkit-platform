@@ -10,6 +10,7 @@ import Path from "path"
 import Sh from "shelljs"
 import Webpack from "webpack"
 import webpackMerge from "webpack-merge"
+import { BundledModuleIds, BundledModuleMap, BundledModuleNames } from "./generators/webpack.bundled.modules.mjs"
 
 import {
   aliasMap,
@@ -24,6 +25,8 @@ import {
   useCacheLoaderDefault,
   createCacheLoaderConfig
 } from "./util/index.mjs"
+
+
 
 const TargetTypes = [
   "electron-main",
@@ -185,6 +188,22 @@ function defaultWebpackConfig(target, name, projectDir = cwd, options = {}) {
     module: {
       rules: [
         {
+          
+          test: /\.(js|ts|tsx)$/,
+          loader: 'string-replace-loader',
+          enforce: 'pre',
+          options: {
+            multiple: [
+              { search: "VRKIT_BUNDLED_MODULE_NAMES", replace: JSON.stringify(BundledModuleNames), flags: 'g' },
+              { search: "VRKIT_BUNDLED_MODULE_ID_MAP", replace: BundledModuleIds, flags: 'g' },
+              { search: "VRKIT_BUNDLED_MODULE_MAP", replace: BundledModuleMap, flags: 'g' },
+              // VRKIT_BUNDLED_MODULE_NAMES: JSON.stringify(BundledModuleNames),
+              // VRKIT_BUNDLED_MODULE_ID_MAP: BundledModuleIds,
+              // VRKIT_BUNDLED_MODULE_MAP: BundledModuleMap
+            ]
+          }
+        },
+        {
           // We're specifying native_modules in the test because the asset relocator loader generates a
           // "fake" .node file which is really a cjs file.
           test: /out\/.*\.node$/,
@@ -275,7 +294,10 @@ function defaultWebpackConfig(target, name, projectDir = cwd, options = {}) {
     plugins: [
       // DEFINE CONSTANTS MAP FOR VAR REPLACEMENTS
       new Webpack.DefinePlugin({
-        ...envVars
+        ...envVars,
+        // VRKIT_BUNDLED_MODULE_NAMES: JSON.stringify(BundledModuleNames),
+        // VRKIT_BUNDLED_MODULE_ID_MAP: BundledModuleIds,
+        // VRKIT_BUNDLED_MODULE_MAP: BundledModuleMap
       }),
 
       // HMR WHEN IN DEVELOPMENT & HOT CLIENT NOT PROVIDED (i.e. NodeJS Env)

@@ -21,7 +21,12 @@ const { debug, trace, info, error, warn } = log
 
 // let electronRemote: typeof ElectronRemote = null
 
-
+Object.assign(global, {
+  webpackRequire: __webpack_require__,
+  // webpackResolve: (name: string) => require.resolve(name),
+  webpackModules: __webpack_modules__,
+  nodeRequire: __non_webpack_require__,
+})
 
 const BuildPaths = {
   root: app.isPackaged ? __dirname : Path.join(__dirname, "..", "..", "..", "..", "..", "build", "js"),

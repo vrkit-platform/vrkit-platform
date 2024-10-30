@@ -1,4 +1,5 @@
 //import "webpack-env"
+// import "../../../common"
 import { getLogger } from "@3fv/logger-proxy"
 
 import { Container, Inject, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
@@ -35,6 +36,7 @@ import { PackageJson } from "type-fest"
 import { Deferred } from "@3fv/deferred"
 import { overlayWindowActions } from "../store/slices/overlay-window"
 
+
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 
@@ -44,83 +46,15 @@ const { debug, trace, info, error, warn } = log
 
 export interface IPluginRequireFunction extends NodeJS.Require {}
 
-const PluginExternalModuleNames = [
-  "@3fv/guard",
-  "@3fv/deferred",
-  "@3fv/logger-proxy",
-  "@3fv/prelude-ts",
-  "@3fv/ditsy",
-  "@mui/material/styles",
-  "@mui/styled-engine",
-  "@mui/system",
-  "@mui/material",
-  "@mui/lab",
-  "@mui/x-data-grid",
-  "@mui/x-date-pickers",
-  "@mui/x-tree-view",
-  "lodash",
-  "lodash.debounce",
-  "usehooks-ts",
-  "vrkit-plugin-sdk",
-  "vrkit-models",
-  "vrkit-shared",
-  "vrkit-shared-ui",
-  "electron",
-  "react",
-  "react-dom"
-]
+const PluginExternalModuleNames = VRKIT_BUNDLED_MODULE_NAMES
+const PluginExternalModuleIdMap = VRKIT_BUNDLED_MODULE_ID_MAP
+const PluginExternalModuleMap = VRKIT_BUNDLED_MODULE_MAP
 
-let pluginExternalRequire: IPluginRequireFunction = null
-
-async function GetPluginExternalRequire() {
-  const deferred = new Deferred<IPluginRequireFunction>()
-  require([
-    "@3fv/guard",
-    "@3fv/deferred",
-    "@3fv/logger-proxy",
-    "@3fv/prelude-ts",
-    "@3fv/ditsy",
-    "@mui/material/styles",
-    "@mui/styled-engine",
-    "@mui/system",
-    "@mui/material",
-    "@mui/lab",
-    "@mui/x-data-grid",
-    "@mui/x-date-pickers",
-    "@mui/x-tree-view",
-    "lodash",
-    "lodash.debounce",
-    "usehooks-ts",
-    "vrkit-plugin-sdk",
-    "vrkit-models",
-    "vrkit-shared",
-    "vrkit-shared-ui",
-    "electron",
-    "react",
-    "react-dom"
-  ], (...mods: any[]) => {
-    deferred.resolve(((id: string) => {
-      
-      return asOption(PluginExternalModuleNames.indexOf(id))
-          .filter(greaterThan(-1))
-          .map(idx => mods[idx])
-          .getOrThrow(`Unable to find ${id}`)
-    }) as any)
-  })
-  //     , err => {
-  //   log.error(`unable to setup external plugin require`, err)
-  // })
-  
-  pluginExternalRequire = await deferred.promise
-  return pluginExternalRequire
-}
-
-// async function
-// require.ensure()
-    // PluginExternalModuleCache = PluginExternalModuleNames.reduce((map, modName) => ({
-    //   ...map,
-    //   [modName](modName)
-    // }), {} as any)
+Object.assign(window, {
+  PluginExternalModuleNames,
+  PluginExternalModuleIdMap,
+  PluginExternalModuleMap
+})
 
 export class PluginLoader {
   private readonly state_: {
@@ -129,7 +63,6 @@ export class PluginLoader {
     vm: {
       context?: Context
       contextObj: {
-        
         module: {
           exports: any
         }
@@ -158,10 +91,11 @@ export class PluginLoader {
       { nodeRequire, webpackRequire } = state.global,
       errors = Array<[string, Error]>()
 
-    log.debug(`Attempting to load module ${moduleName}`)
+    log.info(`Attempting to load module ${moduleName}`)
     try {
-      if (PluginExternalModuleNames.includes(moduleName)) {
-        return pluginExternalRequire(moduleName)
+      const mod = PluginExternalModuleMap[moduleName]
+      if (mod) {
+        return mod
       }
     } catch (err) {
       log.error(`pluginExternalRequire`, err)
@@ -174,7 +108,7 @@ export class PluginLoader {
     let mod: any = null
     if (!isBuiltin(moduleName)) {
       try {
-        
+
         mod = __webpack_modules__[moduleName]
         // if (!mod) {
         //   const id = __web.resolve(moduleName)
@@ -331,7 +265,7 @@ export class PluginLoader {
       vm: {
         // context: null,
         contextObj: {
-          // ...window,
+          ...window,
           window,
           global,
           module: {
@@ -478,8 +412,8 @@ export class PluginClientManager {
   @PostConstruct() // @ts-ignore
   // tslint:disable-next-line
   private async init(): Promise<void> {
-    await GetPluginExternalRequire()
-    assert(!!pluginExternalRequire, "pluginExternalRequire is not set")
+    // await GetPluginExternalRequire()
+    // assert(!!pluginExternalRequire, "pluginExternalRequire is not set")
     // tslint:disable-next-line
     window.addEventListener("beforeunload", this.unload)
     

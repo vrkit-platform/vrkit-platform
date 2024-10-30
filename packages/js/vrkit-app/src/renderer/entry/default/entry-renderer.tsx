@@ -10,6 +10,13 @@ process.on("unhandledRejection",(...args:any[]) => {
 })
 
 async function start() {
+  // Object.assign(global, {
+  //   webpackRequire: __webpack_require__,
+  //   // webpackResolve: (name: string) => require.resolve(name),
+  //   webpackModules: __webpack_modules__,
+  //   nodeRequire: __non_webpack_require__,
+  // })
+  
   const renderRoot = await import("./renderRoot").then(get("default"))
   
   const

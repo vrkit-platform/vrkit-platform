@@ -23,6 +23,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@hazae41/mutex": "^2.1.0",
+    
     "bindings": "^1.5.0",
     "electron": "^31.3.1",
     "electron-debug": "^4.0.0",
@@ -46,9 +47,11 @@
   },
   "devDependencies": {
     "fast-glob": "^3.3.2",
+    "npm-check": "^6.0.1",
     "builtin-modules": "^4.0.0",
     "type-fest": "^4.26.1",
     "esbuild": "^0.24.0",
+    "string-replace-loader": "^3.1.0",
     "@electron/rebuild": "^3.6.0",
     "@faker-js/faker": "^9.0.3",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",

@@ -1,14 +1,10 @@
 import { useScrollToTop } from "vrkit-app-renderer/hooks/use-scroll-to-top"
-import { LocalizationProvider } from "vrkit-app-renderer/locales"
 import { I18nProvider } from "vrkit-app-renderer/locales/i18n-provider"
 import { ThemeProvider } from "../../theme/ThemeProvider"
 
 import { MotionLazy } from "vrkit-app-renderer/components/animate/motion-lazy"
 import { Provider as ReduxProvider } from "react-redux"
-import {
-  defaultSettings,
-  SettingsProvider
-} from "vrkit-app-renderer/components/settings"
+import { defaultSettings, SettingsProvider } from "vrkit-app-renderer/components/settings"
 import useAppStore from "../../hooks/useAppStore"
 
 import "!!style-loader!css-loader!sass-loader!assets/css/fonts/fonts.global.scss"
@@ -35,15 +31,13 @@ export default function App() {
   return (
     <ReduxProvider store={appStore}>
       <I18nProvider>
-        <LocalizationProvider>
-          <SettingsProvider settings={defaultSettings}>
-            <ThemeProvider>
-              <MotionLazy>
-                <AppBody />
-              </MotionLazy>
-            </ThemeProvider>
-          </SettingsProvider>
-        </LocalizationProvider>
+        <SettingsProvider settings={defaultSettings}>
+          <ThemeProvider>
+            <MotionLazy>
+              <AppBody />
+            </MotionLazy>
+          </ThemeProvider>
+        </SettingsProvider>
       </I18nProvider>
     </ReduxProvider>
   )

@@ -1,41 +1,36 @@
-import { asOption } from "@3fv/prelude-ts"
 import Path from "path"
+import Sh from "shelljs"
 
 // @ts-ignore
 import {
-  toModulePaths,
-  pkgVersion,
-  HtmlWebpackPlugin,
+  assetsDir,
   defaultWebpackConfig,
   electronExternals,
-  webpackDevServerConfig,
-  assetsDir,
+  HtmlWebpackPlugin,
+  isDevEnabled,
+  pkgVersion,
   rendererDir,
-  vrkAppSrcDir,
-  vrkAppDir
+  toModulePaths,
+  webpackDevServerConfig
 } from "vrkit-builder-tool"
-import Sh from "shelljs"
-import Webpack from "webpack"
-import CopyPlugin from "copy-webpack-plugin"
 
 const { __dirname } = toModulePaths(import.meta.url)
 
 const moduleDir = Path.resolve(__dirname, ".."),
-  distDir = Path.join(moduleDir, "dist"),
-  targetDir = Path.join(distDir,"renderer")
+  distDir = Path.join(moduleDir, "dist", isDevEnabled ? "dev" : "prod"),
+  targetDir = Path.join(distDir, "renderer")
 
 Sh.mkdir("-p", targetDir)
 
-const
-  devServer = webpackDevServerConfig(1618, {
-    static: [distDir, targetDir, assetsDir, Path.dirname(assetsDir)],
-    // proxy: [{
-    //   context: ['/api','/public'],
-    //   // target: "http://localhost:7001"
-    //   target: "http://localhost:7272"
-    //
-    // }]
-  })
+const devServer = webpackDevServerConfig(1618, {
+  static: [distDir, targetDir, assetsDir, Path.dirname(assetsDir)]
+  // proxy: [{
+  //   context: ['/api','/public'],
+  //   // target: "http://localhost:7001"
+  //   target: "http://localhost:7272"
+  //
+  // }]
+})
 
 const webConfig = defaultWebpackConfig("electron-renderer", "electron-renderer", moduleDir, {
   distDir: targetDir,
@@ -46,11 +41,11 @@ const webConfig = defaultWebpackConfig("electron-renderer", "electron-renderer",
     }
   },
   output: {
-    devtoolModuleFilenameTemplate: "[absolute-resource-path]",
+    devtoolModuleFilenameTemplate: "[absolute-resource-path]"
   },
   config: {
     externals: [electronExternals],
-    devServer,
+    devServer: isDevEnabled ? devServer : undefined,
     plugins: [
       new HtmlWebpackPlugin({
         title: "vrkit-electron-renderer",
@@ -78,6 +73,4 @@ const webConfig = defaultWebpackConfig("electron-renderer", "electron-renderer",
   }
 })
 
-export default () => [
-  webConfig
-]
+export default () => [webConfig]

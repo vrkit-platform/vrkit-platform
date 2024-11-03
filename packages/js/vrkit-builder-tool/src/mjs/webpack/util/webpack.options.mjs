@@ -7,7 +7,7 @@ import { toModulePaths } from "../../setup-env.mjs"
 const { isEmpty } = _
 const isOpenapiGenerationEnabled = !isEmpty(process.env["OPENAPI_GENERATE"])
 const isDevEnabled = process.env.NODE_ENV !== "production" //true
-
+const isElectronPackaged = process.env.ELECTRON_PACKAGED === "1"
 console.log(`isDevEnabled=${isDevEnabled}`)
 const dirname = typeof __dirname === "undefined" ?  toModulePaths(import.meta.url).__dirname : __dirname
 
@@ -47,6 +47,7 @@ export {
   DevTools,
   isOpenapiGenerationEnabled,
   isDevEnabled,
+  isElectronPackaged,
   builderDir,
   rootDir,
   pkgsDir,

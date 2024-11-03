@@ -29,7 +29,6 @@ export const OverlayEditorGlobalActionIds = Array<GlobalActionIdName>(
     GlobalActionId.switchOverlayScreenEditorInfoAnchor,
     
     GlobalActionId.switchOverlayFocusNext,
-    GlobalActionId.switchOverlayFocusNext,
     GlobalActionId.switchOverlayFocusPrevious,
     
     // TOGGLE X / Y / WIDTH / HEIGHT TARGET PROP

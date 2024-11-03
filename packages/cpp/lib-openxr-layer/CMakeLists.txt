@@ -11,6 +11,14 @@ add_library(${openxrLibTarget} SHARED ${openxrLibSources} ${openxrLibHeaders} ${
 
 VRK_CONFIGURE_TARGET(${openxrLibTarget})
 
+# SET THE ARTIFACT DIRECTORY FOR THIS TARGET
+set(openxrLibArtifactDir "${CMAKE_CURRENT_LIST_DIR}\\out\\${CMAKE_BUILD_TYPE}")
+set_target_properties(
+  ${openxrLibTarget}
+  PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${openxrLibArtifactDir}"
+)
+
 ## INCLUDES
 target_include_directories(${openxrLibTarget} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>

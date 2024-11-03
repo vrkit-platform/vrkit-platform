@@ -30,7 +30,8 @@ class AppUpdater {
         })
         .catch(err => {
           error("Failed to check for updates", err)
-          throw err
+          return null
+          //throw err
         })
         .finally(() => {
           this.state.pendingCheck = null

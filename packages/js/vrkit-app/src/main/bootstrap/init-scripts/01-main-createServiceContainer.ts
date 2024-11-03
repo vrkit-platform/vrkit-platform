@@ -14,11 +14,13 @@ import { DashboardManager } from "../../services/dashboard-manager"
 import { isDefined, isPromise } from "@3fv/guard"
 import { Option } from "@3fv/prelude-ts"
 import { PluginManager } from "../../services/plugin-manager"
+import OpenXRConfigurator from "../../services/openxr-configurator"
 
 const log = getLogger(__filename)
 
 const createServiceContainer = once(async function createServiceContainer() {
   const container = await new Container()
+    .bindClass(OpenXRConfigurator)
     .bindClass(FileSystemManager)
     .bindClass(ActionRegistry)
     .bindClass(ElectronMainActionManager)

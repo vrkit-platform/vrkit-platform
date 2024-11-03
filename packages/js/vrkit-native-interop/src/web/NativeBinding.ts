@@ -38,17 +38,14 @@ function ReleaseNativeExports(): void {
   gNativeLib.exports = null
 
   if (typeof require !== "undefined") {
-    kNativeLibTargets.forEach(target =>
+    kNativeLibTargets.forEach(target => {
+      // const nativeLibPaths = [
+      //
+      //     Path.resolve(__dirname, "..", "out", target, "vrkit_native_interop.node"),
+      //   Path.resolve(__dirname, "..", "native", target, "vrkit_native_interop.node")
+      // ]
       asOption(target)
-        .map(target =>
-          Path.resolve(
-            __dirname,
-            "..",
-            "out",
-            target,
-            "vrkit_native_interop.node"
-          )
-        )
+        .map(target => Path.resolve(__dirname, "..", "out", target, "vrkit_native_interop.node"))
         .filter(Fs.existsSync)
         .flatMap(targetPath => {
           return Option.try(() => require.resolve(targetPath))
@@ -56,6 +53,7 @@ function ReleaseNativeExports(): void {
         .ifSome(resolvedPath => {
           delete require.cache[resolvedPath]
         })
+    }
     )
   }
 }

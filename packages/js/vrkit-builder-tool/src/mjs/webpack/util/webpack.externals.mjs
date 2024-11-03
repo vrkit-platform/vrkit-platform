@@ -1,104 +1,39 @@
 import { isString } from "@3fv/guard"
+import builtinModules from "builtin-modules"
 
 const electronExternalsExclude = [
-  "iohook-raub",
+  // APP
   "vrkit-native-interop",
+  
+  // ELECTRON
   "electron",
   "electron/main",
   "@electron/remote",
   "@electron/remote/main",
+  
+  
+  
+  // CUSTOM
+  "iohook-raub",
   "node-fetch",
   "i18next-locize-backend",
   "node-plugin-require-context",
-  "assert",
-  "async_hooks",
-  "buffer",
-  "child_process",
-  "cluster",
-  "console",
-  "constants",
-  "crypto",
-  "dgram",
-  "dns",
-  "domain",
-  "events",
-  "fs",
-  "http",
-  "http2",
-  "https",
-  "inspector",
-  "module",
   "bluebird",
-  "net",
-  "os",
-  "path",
-  "perf_hooks",
-  "process",
-  "punycode",
-  "querystring",
-  "readline",
-  "repl",
-  "stream",
-  "string_decoder",
-  "timers",
-  "tls",
-  "trace_events",
-  "tty",
-  "url",
-  "util",
-  "v8",
-  "vm",
-  "zlib",
-
-  // CUSTOM
   "image-size",
   "debug",
-  "x-ray",
-  /^(@?aws)/,
-  /dockerode/,
-
-  "csv",
-  "csv-parse",
-  "csv-stringify",
-  "csv-generate",
   "yargs",
-  "class-transformer",
-  "cronosjs",
-  // "uuid",
   "pug",
   "handlebars",
   "crypto-js",
   "moment",
   "lodash",
   "class-validator",
-  "node:net",
-  "node:fs",
-  "node:os",
-  "node:buffer",
-  /\@nestjs/,
-  /express/,
-  /^mz/,
-  "pug",
-  "request",
-  /tunnel-agent/,
   /reflect-metadata/,
-  /@nestcloud/,
-  /@nestjs\//,
-  /puppeteer/,
   /@swc\/helpers/,
-  "cron-parser",
   "shelljs",
-  "any-promise",
-  /@logdna/,
-
-  // TYPEORM
-  /pg-native/,
-  /aurora-data-api-pg/,
-  /typeorm/,
-  /react-native/,
-  /nodemailer/,
-  /mssql/,
-	/firebase-admin/
+  
+  // NODE & OTHER BUILT-INS
+  ...builtinModules.reduce((mods, mod) => [...mods, mod, `node:${mod}`], []),
 ]
 
 const electronExternals = ({ context, request }, callback) => {

@@ -21,10 +21,6 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-interface AppSettingsServiceState {
-  appSettings: AppSettings
-}
-
 @Singleton()
 export class AppSettingsService {
   private readonly disposers_ = new Disposables()

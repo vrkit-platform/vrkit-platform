@@ -1,19 +1,16 @@
 // noinspection WebpackConfigHighlighting
 
 import { mapValues, toPairs, fromPairs } from "lodash-es"
-import { isDevEnabled } from "./webpack.options.mjs"
+import { isDevEnabled, isElectronPackaged } from "./webpack.options.mjs"
 import dot from "dotenv"
 
 // ENV & APP VARIABLES
 const pkgVersion = "1.0.0" // JSON.stringify((await import("../../../package.json").version)
 const envVarsBase = {
   isDev: JSON.stringify(isDevEnabled),
+  ELECTRON_PACKAGED: isElectronPackaged,
   DEBUG: JSON.stringify(isDevEnabled),
   VERSION: pkgVersion,
-  // NODE_ENV: JSON.stringify(isDevEnabled ? "development" : "production"),
-  GITHUB_IN_SHARED_WORKER:
-    ["false",false,"0",0].includes(process.env.GITHUB_IN_SHARED_WORKER) ? "false" : "true"
-  ,
   ...dot.config().parsed
 }
 

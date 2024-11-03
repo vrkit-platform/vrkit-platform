@@ -5,7 +5,6 @@ import "!!style-loader!css-loader!sass-loader!assets/css/global-overlay-window.s
 import globalStyles from "!!raw-loader!sass-loader!assets/css/global-electron.scss"
 
 import React, { useLayoutEffect } from "react"
-import { LocalizationProvider } from "vrkit-app-renderer/locales"
 import { I18nProvider } from "vrkit-app-renderer/locales/i18n-provider"
 import { ThemeProvider } from "../../theme/ThemeProvider"
 import { Provider as ReduxProvider } from "react-redux"
@@ -34,11 +33,11 @@ export default function OverlayWindowApp() {
   return (
     <ReduxProvider store={appStore}>
       <I18nProvider>
-        <LocalizationProvider>
+        
           <ThemeProvider>
             <OverlayWindowAppBody />
           </ThemeProvider>
-        </LocalizationProvider>
+        
       </I18nProvider>
     </ReduxProvider>
   )

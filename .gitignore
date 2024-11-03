@@ -1,5 +1,6 @@
 dist
 .cache
+/packages/cpp/*/out
 /packages/js/*/lib
 /packages/js/vrkit-builder-tool/src/mjs/package.json
 *.tsbuildinfo

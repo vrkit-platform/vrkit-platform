@@ -232,7 +232,7 @@ export class OverlayBrowserWindow {
 
     this.windowOptions = {
       ...windowOptionDefaults({
-        devTools: isDev,
+        devTools: true,// isDev,
         ...extraWebPrefs
       }),
       ...extraWindowOpts,

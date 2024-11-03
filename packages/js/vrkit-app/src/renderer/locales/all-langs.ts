@@ -1,7 +1,4 @@
-// date pickers (MUI)
-import {
-  enUS as enUSDate,
-} from '@mui/x-date-pickers/locales';
+
 // data grid (MUI)
 import {
   enUS as enUSDataGrid,
@@ -13,11 +10,11 @@ export const allLangs = [
   {
     value: 'en',
     label: 'English',
-    countryCode: 'GB',
+    countryCode: 'US',
     adapterLocale: 'en',
     numberFormat: { code: 'en-US', currency: 'USD' },
     systemValue: {
-      components: { ...enUSDate.components, ...enUSDataGrid.components },
+      components: { ...enUSDataGrid.components },
     },
   }
 ];

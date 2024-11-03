@@ -34,10 +34,6 @@ const { debug, trace, info, error, warn } = log
 export class PluginManager {
   private readonly disposers_ = new Disposables()
 
-  private readonly saveQueue_ = new PQueue({
-    concurrency: 1
-  })
-
   get state() {
     return this.sharedAppState.plugins
   }

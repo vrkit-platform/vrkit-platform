@@ -2,11 +2,13 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "../build/scripts-ts",
-    "rootDir": "."
+    "rootDir": ".",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "ts-node": {
     "compilerOptions": {
-      "module": "NodeNext",
+      "module": "CommonJS",
       "allowJs": true,
       "noEmit": false,
       "declaration": true,

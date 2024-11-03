@@ -1,7 +1,7 @@
 import { asOption } from "@3fv/prelude-ts"
 import Path from "path"
 import Fs from "fs"
-import {FindPackagePath} from "../utils/pkg/FindPackagePath"
+import {FindPackagePath,FindPathInTree} from "../utils/pkg/FindPackagePath"
 import { assert, isNotEmpty } from "../utils/ObjectUtil"
 import { getLogger } from "@3fv/logger-proxy"
 import { isString } from "@3fv/guard"
@@ -58,7 +58,12 @@ const pluginsDir = Path.join(appDataLocalDir, "Plugins")
 const devPkgPath = asOption(DevPaths?.root)
     .map(root => Path.join(root,"packages","js"))
     .getOrNull()
-const pluginSearchPaths = [pluginsDir, devPkgPath].filter(isString)
+
+const packagedPkgPathResult = FindPathInTree(["resources", "plugins"], {
+  dir: __dirname
+})
+
+const pluginSearchPaths = [packagedPkgPathResult?.[1], pluginsDir, devPkgPath].filter(isString)
 
 const logsDir = Path.join(appDataLocalDir, "Logs")
 const logFile = Path.join(logsDir, "VRKit.log")

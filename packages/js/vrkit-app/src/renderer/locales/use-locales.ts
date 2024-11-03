@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -31,9 +30,9 @@ export function useTranslate(ns?: string) {
           error: currentMessages.error,
         });
 
-        if (currentLang) {
-          dayjs.locale(currentLang.adapterLocale);
-        }
+        // if (currentLang) {
+        //   dayjs.locale(currentLang.adapterLocale);
+        // }
       } catch (error) {
         console.error(error);
       }

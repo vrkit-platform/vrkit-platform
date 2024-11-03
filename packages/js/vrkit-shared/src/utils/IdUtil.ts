@@ -1,5 +1,4 @@
 import { getLogger } from "@3fv/logger-proxy"
-import * as ID from "shortid"
 import moment from "moment"
 import type { v4 as UUIDV4 } from "uuid"
 import { isString } from "@3fv/guard"
@@ -15,21 +14,14 @@ export function generateIdTimestamp() {
   return moment().format("YYYYMMDDHHmmssSSS")
 }
 
-/**
- * Generates a short id
- *
- * @returns {string}
- */
-export function generateId(): string {
-  return ID.generate()
-}
-
-export const generateShortId = generateId
-
 export function generateUUID(): string {
   const v4: typeof UUIDV4 = require("uuid").v4
   return v4()
 }
+
+export const generateId = generateUUID
+
+export const generateShortId = generateId
 
 export function timestampId() {
   return moment().format("YYYYMMDDHHmmssSSS")

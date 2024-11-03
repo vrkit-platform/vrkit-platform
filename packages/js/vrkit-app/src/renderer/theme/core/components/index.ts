@@ -40,7 +40,6 @@ import { treeView } from './mui-x-tree-view';
 import { buttonGroup } from './button-group';
 import { autocomplete } from './autocomplete';
 import { toggleButton } from './button-toggle';
-import { datePicker } from './mui-x-date-picker';
 
 // ----------------------------------------------------------------------
 
@@ -83,7 +82,6 @@ export const components = {
   ...textfield,
   ...typography,
   ...pagination,
-  ...datePicker,
   ...breadcrumbs,
   ...buttonGroup,
   ...autocomplete,

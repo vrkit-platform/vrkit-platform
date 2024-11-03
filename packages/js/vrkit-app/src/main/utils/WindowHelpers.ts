@@ -24,7 +24,7 @@ export function windowOptionDefaults(webPreferences: Partial<WebPreferences> = {
       nodeIntegrationInWorker: true,
       contextIsolation: false,
       sandbox: false,
-      devTools: isDev,
+      devTools: true,//isDev,
       ...webPreferences
     }
   }

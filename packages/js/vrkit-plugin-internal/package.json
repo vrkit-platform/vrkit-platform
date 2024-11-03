@@ -1,19 +1,22 @@
 {
   "name": "vrkit-plugin-internal",
   "version": "1.0.0",
-  "description": "",
+  "description": "Internal default plugins",
   "license": "ISC",
   "author": "",
   "main": "dist/bundled-plugin.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -p tsconfig.json -w",
-    "bundle": "cross-env BUILD_WATCH=1 node esbuild.config.mjs",
-    "bundle:watch": "node esbuild.config.mjs",
+    "bundle": "node esbuild.config.mjs",
+    "bundle:watch": "cross-env BUILD_WATCH=1 node esbuild.config.mjs",
     "dev": "concurrently npm:build:watch npm:bundle:watch"
   },
   "types": "lib/index.d.ts",
   "dependencies": {
+  
+  },
+  "peerDependencies": {
     "@3fv/ditsy": "^1.0.13",
     "@mui/styled-engine": "^5.16.6",
     "vrkit-models": "1.0.0",
@@ -36,6 +39,10 @@
     "vrkit-models": "1.0.0",
     "vrkit-plugin-sdk": "1.0.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "@mui/styled-engine": "^5.16.6",
+    "vrkit-shared": "1.0.0",
+    "vrkit-shared-ui": "1.0.0",
+    "two.js": "latest"
   }
 }

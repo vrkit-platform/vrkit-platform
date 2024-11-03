@@ -11,7 +11,6 @@ export const BundledModuleNames = [
   "@mui/material",
   "@mui/lab",
   "@mui/x-data-grid",
-  "@mui/x-date-pickers",
   "@mui/x-tree-view",
   "lodash",
   "lodash.debounce",

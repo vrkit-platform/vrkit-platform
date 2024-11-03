@@ -17,6 +17,7 @@ import {
   electronMainEnvVars,
   electronRendererEnvVars,
   isDevEnabled,
+  isElectronPackaged,
   nodeEnvVars,
   DevTools,
   nodeTypescriptLoader,
@@ -112,7 +113,7 @@ function defaultWebpackConfig(target, name, projectDir = cwd, options = {}) {
   const cacheLoaderConfig = createCacheLoaderConfig(name),
     perfConfig = [useCacheLoaderDefault && cacheLoaderConfig].filter(Boolean),
     tsLoader = isNode
-      ? nodeTypescriptLoader(tsConfigFile, perfConfig) //nodeTypescriptLoader(tsConfigFile, perfConfig) // nodeTypescriptTsLoader(tsConfigFile)
+      ? nodeTypescriptLoader(tsConfigFile, perfConfig)
       : webTypescriptLoader(
           tsConfigFile,
           perfConfig,
@@ -197,9 +198,6 @@ function defaultWebpackConfig(target, name, projectDir = cwd, options = {}) {
               { search: "VRKIT_BUNDLED_MODULE_NAMES", replace: JSON.stringify(BundledModuleNames), flags: 'g' },
               { search: "VRKIT_BUNDLED_MODULE_ID_MAP", replace: BundledModuleIds, flags: 'g' },
               { search: "VRKIT_BUNDLED_MODULE_MAP", replace: BundledModuleMap, flags: 'g' },
-              // VRKIT_BUNDLED_MODULE_NAMES: JSON.stringify(BundledModuleNames),
-              // VRKIT_BUNDLED_MODULE_ID_MAP: BundledModuleIds,
-              // VRKIT_BUNDLED_MODULE_MAP: BundledModuleMap
             ]
           }
         },
@@ -258,7 +256,7 @@ function defaultWebpackConfig(target, name, projectDir = cwd, options = {}) {
           type: "asset/resource",
           parser: {
             dataUrlCondition: {
-              maxSize: 1024
+              maxSize: 512000 //1024
             }
           }
         }
@@ -270,7 +268,9 @@ function defaultWebpackConfig(target, name, projectDir = cwd, options = {}) {
       global: !isWeb
     },
     mode: isDevEnabled ? "development" : "production",
-
+    performance: {
+      maxAssetSize: 102400000,
+    },
     // RESOLVE CONFIGURATION & FALLBACKS FOR BROWSER/WEB
     resolve: {
       // FALLBACKS FOR UNAVAILABLE MODULES (PLATFORM SPECIFIC)
@@ -295,13 +295,12 @@ function defaultWebpackConfig(target, name, projectDir = cwd, options = {}) {
       // DEFINE CONSTANTS MAP FOR VAR REPLACEMENTS
       new Webpack.DefinePlugin({
         ...envVars,
-        // VRKIT_BUNDLED_MODULE_NAMES: JSON.stringify(BundledModuleNames),
-        // VRKIT_BUNDLED_MODULE_ID_MAP: BundledModuleIds,
-        // VRKIT_BUNDLED_MODULE_MAP: BundledModuleMap
+        isElectronPackaged: isElectronPackaged,
+        
       }),
 
       // HMR WHEN IN DEVELOPMENT & HOT CLIENT NOT PROVIDED (i.e. NodeJS Env)
-      enableHot && new Webpack.HotModuleReplacementPlugin(),
+      isDevEnabled && enableHot && new Webpack.HotModuleReplacementPlugin(),
 
       // REACT REFRESH FOR DECORATING REACT WITH HMR
       isDevEnabled &&

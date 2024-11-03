@@ -6,8 +6,6 @@ import type {} from "@mui/x-tree-view/themeAugmentation"
 // noinspection ES6UnusedImports
 import type {} from "@mui/x-data-grid/themeAugmentation"
 // noinspection ES6UnusedImports
-import type {} from "@mui/x-date-pickers/themeAugmentation"
-// noinspection ES6UnusedImports
 import type {} from "@mui/material/themeCssVarsAugmentation"
 
 import type { Direction, Theme, ThemeOptions } from "@mui/material/styles"

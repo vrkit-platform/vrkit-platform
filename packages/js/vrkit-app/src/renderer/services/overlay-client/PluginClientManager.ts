@@ -263,7 +263,6 @@ export class PluginLoader {
       moduleIdCache: {},
 
       vm: {
-        // context: null,
         contextObj: {
           ...window,
           window,

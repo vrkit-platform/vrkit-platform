@@ -10,7 +10,7 @@ import {
   electronExternals,
   webpackDevServerConfig,
   vrkAppSrcDir,
-  vrkAppDir
+  vrkAppDir, isDevEnabled
 } from "vrkit-builder-tool"
 import Sh from "shelljs"
 import Webpack from "webpack"
@@ -19,7 +19,7 @@ import CopyPlugin from "copy-webpack-plugin"
 const { __dirname } = toModulePaths(import.meta.url)
 
 const moduleDir = Path.resolve(__dirname, ".."),
-  distDir = Path.join(moduleDir, "dist"),
+  distDir = Path.join(moduleDir, "dist", isDevEnabled ? "dev" : "prod"),
   targetDir = Path.join(distDir,"main")
 
 Sh.mkdir("-p", targetDir)

@@ -365,8 +365,8 @@ export class PluginClientManager {
         getSessionInfo: () => {
           return sharedAppSelectors.selectActiveSessionInfo(this.appStore.getState())
         },
-        getSessionTiming: () => {
-          return sharedAppSelectors.selectActiveSessionTiming(this.appStore.getState())
+        getSessionTimeAndDuration: () => {
+          return sharedAppSelectors.selectActiveSessionTimeAndDuration(this.appStore.getState())
         },
         getLapTrajectory: (trackLayoutId: string) => {
           return this.trackManager.getLapTrajectory(trackLayoutId)

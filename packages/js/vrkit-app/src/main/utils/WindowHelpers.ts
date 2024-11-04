@@ -66,7 +66,9 @@ export function createWindowOpenHandler(fn?: (ev: HandlerDetails, result: Window
  * @returns {number[]} window ids that the message was sent to
  */
 export function broadcastToAllWindows<Channel extends ElectronIPCChannelKind, Args extends unknown[]>(channel: Channel, ...args:Args): number[] {
-  return BrowserWindow.getAllWindows().map(win => {
+  return BrowserWindow.getAllWindows()
+      .filter(win => !win.isDestroyed() && !win.webContents.isDestroyed() && !win.webContents.isCrashed())
+      .map(win => {
     win.webContents.send(channel, ...args)
     return win.id
   })

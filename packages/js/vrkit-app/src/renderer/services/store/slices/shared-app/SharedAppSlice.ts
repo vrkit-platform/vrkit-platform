@@ -1,6 +1,10 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { type ISharedAppState, newSharedAppState, type ThemeId } from "vrkit-shared"
+import {
+  type ISharedAppState, ISharedAppStateLeaf,
+  newSharedAppState,
+  type ThemeId
+} from "vrkit-shared"
 import { assign, Identity, isNotEmpty } from "vrkit-shared"
 
 import {
@@ -82,16 +86,13 @@ const slice = createSlice({
   name: "shared",
   initialState: newSharedAppState(),
   reducers: {
+    patchLeaf: (state: ISharedAppState, action: PayloadAction<[ISharedAppStateLeaf, Partial<ISharedAppState>]>) => {
+      const [leaf, patch] = action.payload
+      return Object.assign(state, {[leaf]:patch})
+    },
     patch: (state: ISharedAppState, action: PayloadAction<Partial<ISharedAppState>>) => {
       return assign(state, action.payload ?? {})
     }
-
-    // setOverlayMode: (state: ISharedAppState, { payload: overlayMode }: PayloadAction<OverlayMode>) => {
-    //   return {
-    //     ...state,
-    //     overlayMode
-    //   }
-    // }
   },
   extraReducers: builder => builder,
   selectors: {
@@ -144,7 +145,7 @@ const slice = createSlice({
     selectActiveSession: createActiveSessionSelector(Identity),
     selectActiveSessionData: createActiveSessionSelector(session => session?.data),
     selectActiveSessionId: createActiveSessionSelector(session => session?.id),
-    selectActiveSessionTiming: createActiveSessionSelector(session => session?.timing),
+    selectActiveSessionTimeAndDuration: createActiveSessionSelector(session => session?.timeAndDuration),
     selectActiveSessionInfo: createActiveSessionSelector(session => session?.info),
     selectActiveSessionWeekendInfo: createActiveSessionSelector(session => session?.info?.weekendInfo),
 
@@ -157,7 +158,7 @@ const slice = createSlice({
     ),
     selectLiveSessionData: createSessionsSelector((state: SessionsState) => state.liveSession?.data),
     selectLiveSessionId: createSessionsSelector((state: SessionsState) => state.liveSession?.id),
-    selectLiveSessionTiming: createSessionsSelector((state: SessionsState) => state.liveSession?.timing),
+    selectLiveSessionTimeAndDuration: createSessionsSelector((state: SessionsState) => state.liveSession?.timeAndDuration),
     selectLiveSessionInfo: createSessionsSelector((state: SessionsState) => state.liveSession?.info),
     selectLiveSessionWeekendInfo: createSessionsSelector((state: SessionsState) => state.liveSession?.info?.weekendInfo)
   }

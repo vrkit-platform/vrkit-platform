@@ -13,6 +13,8 @@ import type { SessionInfoMessage } from "./SessionInfoTypes"
 import React from "react"
 import { Container } from "@3fv/ditsy"
 
+export type ISessionTimeAndDuration = Omit<SessionTiming, "currentTimeMillis" | "sampleIndex">
+
 export enum PluginClientEventType {
   SESSION_ID_CHANGED = "SESSION_ID_CHANGED",
   SESSION_INFO_CHANGED = "SESSION_INFO_CHANGED",
@@ -41,7 +43,7 @@ export interface IPluginClient {
   
   getSessionInfo(): SessionInfoMessage
   
-  getSessionTiming(): SessionTiming
+  getSessionTimeAndDuration(): ISessionTimeAndDuration
   
   getLapTrajectory(trackLayoutId: string): Promise<LapTrajectory>
   

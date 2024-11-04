@@ -24,13 +24,15 @@ import { match, P } from "ts-pattern"
 import { getLogger } from "@3fv/logger-proxy"
 import { SessionManagerClient } from "../../services/session-manager-client"
 import { useService } from "../service-container"
-import type { SessionTiming } from "vrkit-models"
-
 import { DurationView, MILLIS_IN_HR } from "../time"
-import type { ActiveSessionType, SessionDetail } from "vrkit-shared"
+import type {
+  ActiveSessionType,
+  SessionDetail
+} from "vrkit-shared"
 
 import { createClassNames } from "vrkit-shared-ui"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
+import { ISessionTimeAndDuration } from "vrkit-plugin-sdk"
 
 const log = getLogger(__filename)
 
@@ -203,7 +205,7 @@ export function DiskSessionButton({
 }
 
 interface SessionTimingViewProps extends BoxProps {
-  timing: SessionTiming
+  timeAndDuration: ISessionTimeAndDuration
 
   type: ActiveSessionType
 
@@ -215,22 +217,24 @@ interface SessionTimingViewProps extends BoxProps {
 function SessionTimingView({
   type,
   session,
-  timing,
-  showHours = timing.currentTimeMillis >= MILLIS_IN_HR
+  timeAndDuration,
+  showHours = true// timeAndDuration.currentTimeMillis >= MILLIS_IN_HR
 }: SessionTimingViewProps) {
-  const { sampleIndex, sampleCount, isLive } = timing
+  //sampleIndex
+  const { sampleCount, isLive } = timeAndDuration
 
   return (
     <FlexScaleZeroBox>
       <DurationView
-        millis={timing.currentTimeMillis}
+          //timeAndDuration.currentTimeMillis
+        millis={0}
         showHours={showHours}
       />
-      {!isLive && timing.totalTimeMillis > 0 && (
+      {!isLive && timeAndDuration.totalTimeMillis > 0 && (
         <>
           &nbsp;of&nbsp;
           <DurationView
-            millis={timing.totalTimeMillis}
+            millis={timeAndDuration.totalTimeMillis}
             showHours={showHours}
           />
         </>
@@ -253,8 +257,8 @@ export function SessionPlayerControlBar({className,...other}: SessionPlayerContr
     activeSessionType = useAppSelector(
         sharedAppSelectors.selectActiveSessionType
     ),
-    activeSessionTiming = useAppSelector(
-        sharedAppSelectors.selectActiveSessionTiming
+      activeSessionTimeAndDuration = useAppSelector(
+        sharedAppSelectors.selectActiveSessionTimeAndDuration
     )
 
   return (
@@ -284,7 +288,7 @@ export function SessionPlayerControlBar({className,...other}: SessionPlayerContr
               <SessionTimingView
                 type={activeSessionType}
                 session={activeSession}
-                timing={activeSessionTiming}
+                timeAndDuration={activeSessionTimeAndDuration}
               />
             </>
           ) : (

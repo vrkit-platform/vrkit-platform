@@ -1,7 +1,24 @@
+"use strict"
+
 import { Deferred } from "@3fv/deferred"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { Bind, newPluginsState, Once } from "vrkit-shared"
+import {
+  ActionsStateSchema,
+  AppSettingsSchema,
+  Bind,
+  DashboardsStateSchema,
+  Disposables,
+  Identity,
+  ISharedAppStateLeaf,
+  isPropSchema, isValueSchema,
+  newPluginsState,
+  Once,
+  OverlaysStateSchema,
+  PluginsStateSchema,
+  SessionsStateSchema,
+  SharedAppStateLeafSchemas
+} from "vrkit-shared"
 import {
   DevSettings,
   ISharedAppState,
@@ -12,14 +29,15 @@ import {
 } from "vrkit-shared"
 import { assign, once } from "vrkit-shared"
 import {
-  IObjectDidChange,
+  IObjectDidChange, isObservable,
+  keys,
   makeObservable,
   observable,
   observe,
+  reaction,
   set,
   toJS
 } from "mobx"
-import { deepObserve, IDisposer } from "mobx-utils"
 
 import {
   broadcastToAllWindows,
@@ -29,12 +47,13 @@ import { AppSettings } from "vrkit-models"
 import { ElectronIPCChannel } from "vrkit-shared"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
 import { SharedAppStateSchema } from "vrkit-shared"
-import { serialize } from "serializr"
+import { custom, ModelSchema, object, serialize } from "serializr"
 import { DashboardsState, newDashboardsState } from "vrkit-shared"
 import { newSessionsState, SessionsState } from "vrkit-shared"
 import { BindAction } from "../../decorators"
 import { AutoOpenDevToolsOverride, isDev } from "../../constants"
 import { newActionsState } from "vrkit-shared"
+import { isFunction } from "@3fv/guard"
 
 const log = getLogger(__filename)
 
@@ -44,7 +63,9 @@ const { debug, trace, info, error, warn } = log
 export class MainSharedAppState implements ISharedAppState {
   private initDeferred: Deferred<MainSharedAppState>
 
-  private stopObserving: IDisposer
+  private disposers_ = new Disposables()
+  
+  // private stopObserving: IDisposer
 
   private shutdownInProgress: boolean = false
 
@@ -87,18 +108,31 @@ export class MainSharedAppState implements ISharedAppState {
     info(`onChange (path=${path})`)
     //info(`onChange`, change, "other args", other)
 
-    this.broadcast()
+    // this.broadcast()
   }
 
-  private broadcast() {
-    const sharedAppStateJson = this.toJSON()
-    const sharedAppStateObj = toJS(sharedAppStateJson)
-    broadcastToAllWindows(ElectronIPCChannel.sharedAppStateChanged, sharedAppStateObj)
+  private broadcast(leaf: ISharedAppStateLeaf) {
+    try {
+    
+    const schema = SharedAppStateLeafSchemas[leaf],
+        json = isValueSchema(schema) ?
+            schema.serialize(toJS(this[leaf])) :
+            serialize(schema as any, toJS(this[leaf]))
+      // const sharedAppStateJson = this.toJSON()
+      // const sharedAppStateObj = toJS(sharedAppStateJson)
+      // broadcastToAllWindows(ElectronIPCChannel.sharedAppStateChanged, sharedAppStateObj)
+      broadcastToAllWindows(ElectronIPCChannel.sharedAppStateChanged, leaf, toJS(json))
+    } catch (err) {
+      log.error(`Error while serializing`, err)
+      throw err
+    }
+    
   }
 
   private unload() {
     ipcMain.removeHandler(ElectronIPCChannel.fetchSharedAppState)
-    this.stopObserving?.()
+    this.disposers_.dispose();
+    
   }
 
   @Once()
@@ -109,8 +143,25 @@ export class MainSharedAppState implements ISharedAppState {
     this.initDeferred = new Deferred<MainSharedAppState>()
     try {
       makeObservable(this)
-      this.stopObserving = deepObserve(this, this.onChange)
+      for (const leaf of Object.keys(SharedAppStateLeafSchemas) as ISharedAppStateLeaf[]) {
+        if (!isObservable(this[leaf]))
+          continue
+        log.info(`Observing ${leaf} on main state`)
+        // this.disposers_.push(reaction(() => this[key], (value, prevValue) => {
+        //   log.info(`Root change detected on ${key}`)
+        //   // this.broadcast(toJS(json))
+        // }))
+        this.disposers_.push(observe(this[leaf], () => {
+          log.info(`Root change detected on ${leaf}`)
+          this.broadcast(leaf)
+        }))
+      }
+      // this.disposers_.push(deepObserve(this, this.onChange))
       //this.stopObserving = observe(this, this.onChange)
+      // this.disposers_.push(reaction(() => this.toJSON(), (json, prevJson) => {
+      //   log.info("Root change detected")
+      //   this.broadcast(toJS(json))
+      // }))
       ipcMain.handle(ElectronIPCChannel.fetchSharedAppState, this.fetchSharedAppStateHandler)
       if (import.meta.webpackHot) {
         import.meta.webpackHot.addDisposeHandler(() => {
@@ -130,7 +181,7 @@ export class MainSharedAppState implements ISharedAppState {
 
   setShutdownInProgress(shutdownInProgress: boolean = true) {
     this.shutdownInProgress = shutdownInProgress
-    this.stopObserving()
+    this.disposers_.dispose()
   }
 
   @Bind @PostConstruct() whenReady() {
@@ -143,7 +194,7 @@ export class MainSharedAppState implements ISharedAppState {
   }
 
   @BindAction() updateAppSettings(patch: Partial<AppSettings>) {
-    assign(this.appSettings, patch)
+    set(this.appSettings, patch)
     return this.appSettings
   }
 
@@ -153,7 +204,7 @@ export class MainSharedAppState implements ISharedAppState {
   }
 
   @BindAction() updateSessions(patch: Partial<SessionsState>) {
-    assign(this.sessions, patch)
+    set(this.sessions, patch)
     return this.sessions
   }
 
@@ -179,12 +230,13 @@ export class MainSharedAppState implements ISharedAppState {
 
   @Bind
   private async fetchSharedAppStateHandler(_ev: IpcMainInvokeEvent): Promise<ISharedAppState> {
-    return this.toJSON()
+    const stateJson = toJS(this.toJSON())
+    return stateJson
   }
 
   toJSON() {
     try {
-      return serialize(SharedAppStateSchema, this)
+      return serialize(SharedAppStateSchema, toJS(this))
     } catch (err) {
       log.error(`Error while serializing`, err)
       throw err

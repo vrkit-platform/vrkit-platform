@@ -9,7 +9,7 @@ import {
   OverlayKind,
   OverlayPlacement,
   RectI,
-  SessionDataVariableValueMap,
+  SessionDataVariableValueMap, SessionTiming,
   VRLayout,
   VRPose
 } from "vrkit-models"
@@ -327,11 +327,12 @@ export class OverlayManager {
     // activeSession?.id, toJS(activeSession?.info))
   }
 
-  private onSessionDataFrameEvent(sessionId: string, dataVarValues: SessionDataVariableValueMap) {
+  private onSessionDataFrameEvent(sessionId: string, timing: SessionTiming, dataVarValues: SessionDataVariableValueMap) {
     this.broadcastRendererOverlays(
       PluginClientEventType.DATA_FRAME,
       sessionId,
-      this.sessionManager.activeSession?.timing,
+      timing,
+      // this.sessionManager.activeSession?.timeAndDuration,
       dataVarValues
     )
   }

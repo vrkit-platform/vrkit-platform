@@ -20,13 +20,14 @@ const swcLoaderConfig = {
       transform: {
         legacyDecorator: true,
         decoratorMetadata: true,
+        // decoratorVersion: "2022-03",
         react: {
           runtime: "automatic",
           development: isDevEnabled,
           refresh: isDevEnabled
         }
       },
-      target: "es2017",
+      target: "es2022",
       loose: true,
       externalHelpers: true
     }

@@ -1,7 +1,7 @@
 import { getLogger } from "@3fv/logger-proxy"
 
 import { PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-shared"
+import { Bind, isEqual, toSessionTimeAndDuration } from "vrkit-shared"
 
 import {
   GetLiveVRKitSessionPlayer,
@@ -61,7 +61,7 @@ const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
 export interface SessionManagerEventArgs {
-  [SessionManagerEventType.DATA_FRAME]: (sessionId: string, dataVarValues: SessionDataVariableValueMap) => void
+  [SessionManagerEventType.DATA_FRAME]: (sessionId: string, timing: SessionTiming, dataVarValues: SessionDataVariableValueMap) => void
 }
 
 function getWeekendInfo(session: SessionDetail) {
@@ -110,11 +110,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
   private diskPlayerContainer_: SessionPlayerContainer = null
 
-  private get playerContainers_() {
+  private get playerContainers_():SessionPlayerContainer[] {
     return [this.livePlayerContainer_, this.diskPlayerContainer_]
   }
 
-  private getContainerByPlayer(player: SessionPlayer) {
+  private getContainerByPlayer(player: SessionPlayer):SessionPlayerContainer {
     return this.playerContainers_.filter(isDefined).find(({ id }) => id === player.id)
   }
 
@@ -181,16 +181,19 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     asOption(data.payload?.sessionData?.timing).ifSome(timing => {
       container.setDataFrame(timing, dataVarValues)
-      const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession"
-      this.patchState({
-        [stateKey]: {
-          ...this.state[stateKey],
-          timing
-        }
-      })
-
+      const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession",
+          timeAndDuration = toSessionTimeAndDuration(timing)
+      
+      if (!isEqual(timeAndDuration, this.state[stateKey].timeAndDuration)) {
+        this.patchState({
+          [stateKey]: {
+            ...this.state[stateKey],
+            timeAndDuration
+          }
+        })
+      }
       // TODO: Implement value based SessionDataVariable interface & emit
-      this.emit(SessionManagerEventType.DATA_FRAME, player.id, dataVarValues)
+      this.emit(SessionManagerEventType.DATA_FRAME, player.id, timing, dataVarValues)
     })
   }
 
@@ -401,7 +404,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
         isAvailable: player.isAvailable,
         info: player.sessionInfo,
         data: SessionData.create(data as any),
-        timing: SessionTiming.create(data.timing)
+        timeAndDuration: toSessionTimeAndDuration(data.timing)
       }),
       None: (): SessionDetail => ({
         id: player.id,
@@ -413,7 +416,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
         // player.sessionData
         // :
         // SessionData.fromJson(player.sessionData),
-        timing: player.sessionTiming
+        timeAndDuration: toSessionTimeAndDuration(player.sessionTiming)
       })
     })
   }
@@ -630,12 +633,12 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     this.sharedAppState.updateSessions(newStatePatch)
 
-    const newState = this.state,
-      newActiveSessionType = newState?.activeSessionType,
-      newActiveSession = this.getActiveSessionFromState(newState),
-      newActiveSessionId = getWeekendInfo(newActiveSession)?.sessionID,
-      activeSessionChanged =
-        currentActiveSessionType !== newActiveSessionType || currentActiveSessionId !== newActiveSessionId
+    // const newState = this.state,
+    //   newActiveSessionType = newState?.activeSessionType,
+    //   newActiveSession = this.getActiveSessionFromState(newState),
+    //   newActiveSessionId = getWeekendInfo(newActiveSession)?.sessionID,
+    //   activeSessionChanged =
+    //     currentActiveSessionType !== newActiveSessionType || currentActiveSessionId !== newActiveSessionId
 
     //this.state_ = newState
   }

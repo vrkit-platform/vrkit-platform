@@ -11,10 +11,20 @@ import {
   ThemeId
 } from "vrkit-shared"
 import { assign, once } from "vrkit-shared"
-import { makeObservable, observable, set, toJS } from "mobx"
+import {
+  IObjectDidChange,
+  makeObservable,
+  observable,
+  observe,
+  set,
+  toJS
+} from "mobx"
 import { deepObserve, IDisposer } from "mobx-utils"
 
-import { broadcastToAllWindows, getAppThemeFromSystem } from "../../utils"
+import {
+  broadcastToAllWindows,
+  getAppThemeFromSystem, IObserveChange
+} from "../../utils"
 import { AppSettings } from "vrkit-models"
 import { ElectronIPCChannel } from "vrkit-shared"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
@@ -68,11 +78,14 @@ export class MainSharedAppState implements ISharedAppState {
   }
 
   @Bind
-  private onChange() {
+  private onChange(change: IObserveChange, path: string, root: any) {
+  //private onChange(change: IObjectDidChange, ...other:any[]) {
     if (this.shutdownInProgress) {
       warn("Shutdown in progress, ignoring change")
       return
     }
+    info(`onChange (path=${path})`)
+    //info(`onChange`, change, "other args", other)
 
     this.broadcast()
   }
@@ -97,6 +110,7 @@ export class MainSharedAppState implements ISharedAppState {
     try {
       makeObservable(this)
       this.stopObserving = deepObserve(this, this.onChange)
+      //this.stopObserving = observe(this, this.onChange)
       ipcMain.handle(ElectronIPCChannel.fetchSharedAppState, this.fetchSharedAppStateHandler)
       if (import.meta.webpackHot) {
         import.meta.webpackHot.addDisposeHandler(() => {

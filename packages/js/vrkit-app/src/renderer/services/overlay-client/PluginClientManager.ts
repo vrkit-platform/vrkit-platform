@@ -361,7 +361,7 @@ export class PluginClientManager {
         },
         getOverlayInfo: () => {
           return this.getConfig()?.overlay
-        }, // fetchSessionInfo: this.fetchSessionInfo.bind(this),
+        },
         getSessionInfo: () => {
           return sharedAppSelectors.selectActiveSessionInfo(this.appStore.getState())
         },

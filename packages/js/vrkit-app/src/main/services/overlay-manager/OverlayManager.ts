@@ -56,7 +56,7 @@ import { flatten, pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
 import { CreateNativeOverlayManager } from "vrkit-native-interop"
 
-import { IValueDidChange, observe, toJS } from "mobx"
+import { action, IValueDidChange, observe, toJS } from "mobx"
 import { DashboardManager } from "../dashboard-manager"
 import {
   assertIsValidOverlayUniqueId,
@@ -374,13 +374,15 @@ export class OverlayManager {
    *
    * @param enabled
    */
-  @BindAction()
+  @action
+  @Bind
   async setEditorEnabled(enabled: boolean) {
     if (this.editorEnabled === enabled) {
       return enabled
     }
-
-    this.state.editor.enabled = enabled
+    
+    this.mainAppState.updateOverlays({editor:{enabled}})
+    // this.state.editor.enabled = enabled
 
     for (const ow of this.allOverlays) {
       ow.setEditorEnabled(enabled)

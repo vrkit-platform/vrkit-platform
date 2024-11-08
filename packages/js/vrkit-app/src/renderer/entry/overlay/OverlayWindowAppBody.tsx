@@ -13,6 +13,9 @@ import clsx from "clsx"
 import { isObject } from "@3fv/guard"
 import { overlayWindowSelectors } from "../../services/store/slices/overlay-window"
 import { EditorInfoScreenOverlayOUID, EditorInfoVROverlayOUID } from "vrkit-shared"
+import {
+  PluginComponentContainer
+} from "../../components/plugin-component-container"
 //import { IPluginComponentManager } from "vrkit-plugin-sdk"
 
 const log = getLogger(__filename)
@@ -103,9 +106,9 @@ export default function OverlayWindowAppBody() {
           {!PluginComponent || size === null ? (
             <></>
           ) : (
-            <PluginComponent
+            <PluginComponentContainer
+              Component={PluginComponent}
               client={getVRKitPluginClient()}
-              // manager={null as IPluginComponentManager}
               {...size}
             />
           )}

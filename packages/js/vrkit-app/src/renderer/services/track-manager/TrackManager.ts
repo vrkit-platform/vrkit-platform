@@ -17,6 +17,7 @@ import { Deferred } from "@3fv/deferred"
 import { endsWith } from "lodash/fp"
 import { isString } from "@3fv/guard"
 import { LapTrajectoryConverter } from "vrkit-shared"
+import { uniqBy } from "lodash"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -90,12 +91,18 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    */
   async rebuildDatabase(): Promise<TrackMapFile[]> {
     const dataFile = this.getDatabaseFileAccess()
-    const tmDir = AppPaths.trackMapsDir
-    const tmFiles = await Fs.promises
-      .readdir(tmDir)
-      .then(files => files.filter(endsWith(".trackmap")).map(f => Path.join(tmDir, f)))
-
-    const tmfs = await Promise.all(
+    const tmFiles = Array<string>()
+    for (const tmDir of AppPaths.trackMapsSearchPath) {
+      // const tmDir = AppPaths.trackMapsDir
+      const tmDirFiles = await Fs.promises
+          .readdir(tmDir)
+          .then(files => files.filter(endsWith(".trackmap")).map(f => Path.join(
+              tmDir,
+              f
+          )))
+      tmFiles.push(...tmDirFiles)
+    }
+    let tmfs = await Promise.all(
       tmFiles.map(async tmFile => {
         const ltData = await Fs.promises.readFile(tmFile)
         const lt = LapTrajectory.fromBinary(ltData)
@@ -105,6 +112,8 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
         })
       })
     )
+    
+    tmfs = uniqBy(tmfs, tmf => tmf.trackLayoutMetadata?.id)
 
     const jsonL = tmfs.reduce((data: string, tmf) => {
       if (data.length) data += "\n"

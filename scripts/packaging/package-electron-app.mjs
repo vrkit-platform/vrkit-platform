@@ -5,10 +5,11 @@ import Path from "path"
 import { getOrCreateLogger } from "../setup-env/logger-setup.mjs"
 import {
   appDir,
-  electronBuilderOutDir, ElectronBuilderPaths,
+  electronBuilderOutDir,
+  ElectronBuilderPaths,
   ElectronBuilderPaths as BuildPaths,
   nativeDir,
-  pluginDefaultDir,
+  pluginDefaultDir, trackMapsDir,
   xrLayerDir
 } from "../setup-env/workflow-global.mjs"
 
@@ -127,6 +128,11 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
         filter: ["**/*.node"]
       },
       {
+        from: Path.relative(appDir, trackMapsDir),
+        to: "resources/track_maps",
+        filter: ["**/*.trackmap"]
+      },
+      {
         from: Path.relative(appDir, pluginDefaultDir),
         to: "resources/plugins",
         filter: [
@@ -142,10 +148,12 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
     ],
 
     win: {
-      target: "nsis"
+      target: ["nsis", "portable", "zip"],
     },
     nsis: {
-      deleteAppDataOnUninstall: true
+      deleteAppDataOnUninstall: true,
+      oneClick: false,
+      perMachine: true
       // include: "installer/win/nsis-installer.nsh"
     }
   }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import "./prod-env.mjs"
-import Path from "node:path"
+import Path from "path"
 
 import { cd } from "zx"
 

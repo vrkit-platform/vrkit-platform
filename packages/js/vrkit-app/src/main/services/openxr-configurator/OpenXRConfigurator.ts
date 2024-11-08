@@ -7,6 +7,7 @@ import PQueue from "p-queue"
 import { isDev } from "../../constants"
 import { isNumber } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
+import { flow } from "lodash"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -31,6 +32,8 @@ if (openXRSetupEnabled) {
 }
 
 const openXRConfigFile = openXRConfigFileResult?.[1] ?? openXRLayerFilename
+const openXRConfigFileArg = `"${openXRConfigFile}"`
+
 
 export interface OpenXRLayerLibrary {
   file: string
@@ -74,8 +77,9 @@ export class OpenXRConfigurator {
     
     log.info(`OpenXR layer is being created or force enabled`)
     await new Promise<void>((resolve, reject) => {
-      this.layersKey.set(openXRConfigFile, WinReg.REG_DWORD, setEnabled ? "0x0" : "0x1", err => {
+      this.layersKey.set(openXRConfigFileArg, WinReg.REG_DWORD, setEnabled ? "0x0" : "0x1", err => {
         if (err) {
+          log.error("Unable to configure OpenXR Layers in registry", err)
           reject(err)
         } else {
           resolve()

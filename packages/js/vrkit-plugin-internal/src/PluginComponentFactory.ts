@@ -31,7 +31,7 @@ const PluginComponentFactory: IPluginComponentFactory = async function PluginCom
     
     log.info(`Loading plugin component ${id}`)
     const componentType = await importDefault(ComponentTypePromise)
-    log.info(`Loaded plugin component ${id}`, componentType)
+    log.info(`Loaded plugin component ${id}`)
     return componentType
   
 }

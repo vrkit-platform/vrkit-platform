@@ -225,20 +225,20 @@ function SessionTimingView({
 
   return (
     <FlexScaleZeroBox>
-      <DurationView
-          //timeAndDuration.currentTimeMillis
-        millis={0}
-        showHours={showHours}
-      />
-      {!isLive && timeAndDuration.totalTimeMillis > 0 && (
-        <>
-          &nbsp;of&nbsp;
-          <DurationView
-            millis={timeAndDuration.totalTimeMillis}
-            showHours={showHours}
-          />
-        </>
-      )}
+      {/*<DurationView*/}
+      {/*    //timeAndDuration.currentTimeMillis*/}
+      {/*  millis={0}*/}
+      {/*  showHours={showHours}*/}
+      {/*/>*/}
+      {/*{!isLive && timeAndDuration.totalTimeMillis > 0 && (*/}
+      {/*  <>*/}
+      {/*    &nbsp;of&nbsp;*/}
+      {/*    <DurationView*/}
+      {/*      millis={timeAndDuration.totalTimeMillis}*/}
+      {/*      showHours={showHours}*/}
+      {/*    />*/}
+      {/*  </>*/}
+      {/*)}*/}
     </FlexScaleZeroBox>
   )
 }
@@ -284,12 +284,12 @@ export function SessionPlayerControlBar({className,...other}: SessionPlayerContr
         >
           {activeSession ? (
             <>
-              <FlexAutoBox>{activeSessionType}</FlexAutoBox>
-              <SessionTimingView
-                type={activeSessionType}
-                session={activeSession}
-                timeAndDuration={activeSessionTimeAndDuration}
-              />
+              <>Active Session ({activeSessionType})</>
+              {/*<SessionTimingView*/}
+              {/*  type={activeSessionType}*/}
+              {/*  session={activeSession}*/}
+              {/*  timeAndDuration={activeSessionTimeAndDuration}*/}
+              {/*/>*/}
             </>
           ) : (
             <>No Active Session</>

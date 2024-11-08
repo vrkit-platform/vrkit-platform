@@ -31,22 +31,22 @@ if (isDev) {
   const currentName = Path.basename(currentUserData),
       appName = "VRKit"
   
-  asOption(currentName)
-      .tapIf(notEqualTo(appName), () => {
-        const isElectronDefaultDir = currentName.endsWith("Electron")
-        if (isElectronDefaultDir && process.platform === "darwin") {
-          const newUserData = currentUserData + "VRKit"
-          console.debug(`Using user data path: %s`, newUserData)
-          mkdir("-p", newUserData)
-          app.setPath("userData", newUserData)
-        }
-        
-        app.on("window-all-closed", (e?: any) => {
-          console.info(`Received 'window-all-closed`)
-          e?.preventDefault?.()
-        })
-      })
-  
+  // asOption(currentName)
+  //     .tapIf(notEqualTo(appName), () => {
+  //       const isElectronDefaultDir = currentName.endsWith("Electron")
+  //       if (isElectronDefaultDir && process.platform === "darwin") {
+  //       const newUserData = currentUserData + "VRKit"
+  //       console.debug(`Using user data path: %s`, newUserData)
+  //       mkdir("-p", newUserData)
+  //       app.setPath("userData", newUserData)
+  //       }
+  //
+  //       app.on("window-all-closed", (e?: any) => {
+  //         console.info(`Received 'window-all-closed`)
+  //         e?.preventDefault?.()
+  //       })
+  //     })
+  //
   
 }
 

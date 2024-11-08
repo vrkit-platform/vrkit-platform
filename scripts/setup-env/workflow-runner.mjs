@@ -3,7 +3,7 @@ import { guard } from "@3fv/guard"
 import { spawn } from "child_process"
 
 import killAll from "tree-kill"
-import { createLogger } from "./logger-setup.mjs"
+import { getOrCreateLogger } from "./logger-setup.mjs"
 
 const pendingProcs = []
 
@@ -109,7 +109,7 @@ async function runTask(task, step, flow, logger) {
 }
 
 async function runStep(step, flow) {
-  const log = createLogger(flow, step.name)
+  const log = getOrCreateLogger(null, step.name)
   log.info(`STEP(${step.name}): Starting`)
   try {
     const isParallel = step.parallel === true
@@ -130,7 +130,7 @@ async function runStep(step, flow) {
 }
 
 export async function startWorkflow(flow) {
-  const log = createLogger(flow)
+  const log = getOrCreateLogger()
   log.info("Starting")
   try {
     for await (const step of flow.steps) {

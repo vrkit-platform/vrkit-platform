@@ -269,6 +269,7 @@ function defaultWebpackConfig(target, name, projectDir = cwd, options = {}) {
     },
     mode: isDevEnabled ? "development" : "production",
     performance: {
+      maxEntrypointSize: 102400000,
       maxAssetSize: 102400000,
     },
     // RESOLVE CONFIGURATION & FALLBACKS FOR BROWSER/WEB

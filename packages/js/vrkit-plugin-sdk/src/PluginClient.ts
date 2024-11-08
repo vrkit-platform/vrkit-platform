@@ -2,8 +2,6 @@ import type {
   LapTrajectory,
   OverlayInfo,
   PluginComponentDefinition,
-  PluginComponentDefinition_OverlayCommonSettings,
-  PluginComponentDefinition_OverlayIRacingSettings,
   PluginManifest,
   SessionDataVariableValueMap,
   SessionTiming,
@@ -53,25 +51,6 @@ export interface IPluginClient {
 
   off<T extends keyof IPluginClientEventArgs>(type: T, handler?: IPluginClientEventArgs[T]): void
 }
-//
-// export interface IPluginComponentManager {
-//   getManifest():PluginManifest
-//
-//   getOverlayCommonSettings(componentId: string)
-//       :PluginComponentDefinition_OverlayCommonSettings
-//
-//   getOverlayIRacingSettings(componentId: string)
-//       :PluginComponentDefinition_OverlayIRacingSettings
-//
-//   setOverlayComponent(
-//       id: string,
-//       ComponentType: React.ComponentType<IPluginComponentProps>
-//   ):void
-//
-//   removeOverlayComponent(
-//       id:string
-//   ):void
-// }
 
 export type IPluginComponentFactory = (
     manifest:PluginManifest,
@@ -80,8 +59,8 @@ export type IPluginComponentFactory = (
 ) => Promise<TPluginComponentType>
 
 export interface IPluginComponentProps {
+  sessionId?: string
   client: IPluginClient
-  // manager: IPluginComponentManager
   
   width: number
   height: number

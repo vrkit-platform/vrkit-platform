@@ -1,4 +1,4 @@
-import { configureStore, Middleware, Selector } from "@reduxjs/toolkit"
+import { compose, configureStore, Selector } from "@reduxjs/toolkit"
 import { assign } from "lodash"
 import { isDev } from "../../renderer-constants"
 import type { AppRootState } from "./AppRootState"
@@ -14,6 +14,12 @@ import { overlayWindowReducer } from "./slices/overlay-window"
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
+// const composeEnhancers = isDev ? (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose : compose
+
+// const ReduxDevTools = isDev ?
+//     (window.__REDUX_DEVTOOLS_EXTENSION__ &&
+// window.__REDUX_DEVTOOLS_EXTENSION__()) : null
+
 const getDevMiddleware = () => {
   if (isDev) {
     // const logger = asOption(require("redux-logger"))
@@ -27,9 +33,7 @@ const getDevMiddleware = () => {
 }
 
 export const appStore = configureStore<AppRootState>({
-  preloadedState: asOption(
-    import.meta.webpackHot?.data?.state
-  ).getOrUndefined(),
+  preloadedState: asOption(import.meta.webpackHot?.data?.state).getOrUndefined(),
   reducer: {
     overlayWindow: overlayWindowReducer,
     data: dataReducer,
@@ -37,15 +41,21 @@ export const appStore = configureStore<AppRootState>({
     shared: sharedAppReducer
   },
 
+  // enhancers: getDefaultEnhancers => composeEnhancers(getDefaultEnhancers()),
+  // enhancers: () => [offline(offlineConfig)],
+  // enhancers: (getDefaultEnhancers) => [getDefaultEnhancers({})],
+  // ...(isDev ? {
+  //   enhancers: (getDefaultEnhancers) => getDefaultEnhancers().concat((window as any).__REDUX_DEVTOOLS_EXTENSION__),
+  // } as any : {}),
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: false
-    })
-      .prepend(...getDevMiddleware()) as any, //routerMiddleware
-  
-  devTools: {
-    name: "VRKit"
-  }
+    }).prepend(...getDevMiddleware()) as any, //routerMiddleware
+
+  devTools: true
+  //     {
+  //   name: "VRKit"
+  // }
 })
 
 if (import.meta.webpackHot) {

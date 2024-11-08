@@ -5,13 +5,43 @@
   "license": "ISC",
   "author": "",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./utils": {
+      "types": "./lib/utils/index.d.ts",
+      "default": "./lib/utils/index.js"
+    },
+    "./services": {
+      "types": "./lib/services/index.d.ts",
+      "default": "./lib/services/index.js"
+    },
+    "./models": {
+      "types": "./lib/models/index.d.ts",
+      "default": "./lib/models/index.js"
+    },
+    "./decorators": {
+      "types": "./lib/decorators/index.d.ts",
+      "default": "./lib/decorators/index.js"
+    },
+    "./constants": {
+      "types": "./lib/constants/index.d.ts",
+      "default": "./lib/constants/index.js"
+    },
+    "./tools": {
+      "types": "./lib/tools/index.d.ts",
+      "default": "./lib/tools/index.js"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -p tsconfig.json -w",
     "test": "jest --no-cache",
     "test:watch": "jest --no-cache --watchAll"
   },
-  "types": "lib/index.d.ts",
   "dependencies": {
     "vrkit-models": "1.0.0",
     "vrkit-plugin-sdk": "1.0.0"

@@ -11,6 +11,9 @@ export const rootDir = Path.dirname(scriptsDir),
   buildElectronDir = Path.join(buildDir, "electron"),
   buildElectronWinDir = Path.join(buildElectronDir, "windows")
 
+export const dataDir = Path.join(rootDir,"data")
+export const trackMapsDir = Path.join(dataDir,"track_maps")
+
 export const cppDir = Path.join(rootDir,"packages","cpp")
 export const xrLayerDir = Path.join(cppDir, "lib-openxr-layer")
 

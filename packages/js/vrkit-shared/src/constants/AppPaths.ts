@@ -47,6 +47,11 @@ const appDataDir = Path.join(homeDir, "AppData", "Roaming", AppName)
 const appDataLocalDir = Path.join(homeDir, "AppData", "Local", AppName)
 
 const trackMapsDir = Path.join(appDataLocalDir, "TrackMaps")
+const trackMapsBuiltInDirResult = FindPathInTree(["resources", "track_maps"], {
+  dir: __dirname,
+  type: "dir"
+})
+const trackMapsSearchPath = [trackMapsDir, trackMapsBuiltInDirResult?.[1]].filter(isString)
 const trackMapListFile = Path.join(appDataLocalDir, "track-map-file.jsonl")
 
 const dashboardsDir = Path.join(appDataLocalDir, "Dashboards")
@@ -73,6 +78,7 @@ export const AppPaths = {
   appDataLocalDir,
   appDataDir,
   trackMapsDir,
+  trackMapsSearchPath,
   dashboardsDir,
   
   logsDir,

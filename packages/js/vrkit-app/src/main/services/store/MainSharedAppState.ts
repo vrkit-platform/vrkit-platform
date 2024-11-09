@@ -8,6 +8,7 @@ import {
   DevSettings,
   Disposables,
   ElectronIPCChannel,
+  isEqual,
   ISharedAppState,
   ISharedAppStateLeaf,
   isValueSchema,
@@ -21,20 +22,18 @@ import {
   once,
   OverlaysState,
   SessionsState,
+  SharedAppStateLeafNames,
   SharedAppStateLeafSchemas,
   SharedAppStateSchema,
   ThemeId
 } from "vrkit-shared"
-import { isObservable, makeObservable, observable, observe, set, toJS } from "mobx"
-
+import { action, isObservable, makeObservable, observable, reaction, runInAction, set, toJS } from "mobx"
 import { broadcastToAllWindows, getAppThemeFromSystem, IObserveChange } from "../../utils"
 import { AppSettings } from "vrkit-models"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
 import { serialize } from "serializr"
-import { BindAction } from "../../decorators"
 import { AutoOpenDevToolsOverride, isDev } from "../../constants"
 import type { PartialDeep } from "type-fest"
-import { deepObserve } from "mobx-utils"
 
 const log = getLogger(__filename)
 
@@ -98,7 +97,8 @@ export class MainSharedAppState implements ISharedAppState {
         json = isValueSchema(schema) ? schema.serialize(toJS(this[leaf])) : serialize(schema as any, toJS(this[leaf]))
       // const sharedAppStateJson = this.toJSON()
       // const sharedAppStateObj = toJS(sharedAppStateJson)
-      // broadcastToAllWindows(ElectronIPCChannel.sharedAppStateChanged, sharedAppStateObj)
+      // broadcastToAllWindows(ElectronIPCChannel.sharedAppStateChanged,
+      // sharedAppStateObj)
       broadcastToAllWindows(ElectronIPCChannel.sharedAppStateChanged, leaf, toJS(json))
     } catch (err) {
       log.error(`Error while serializing`, err)
@@ -119,30 +119,40 @@ export class MainSharedAppState implements ISharedAppState {
     this.initDeferred = new Deferred<MainSharedAppState>()
     try {
       makeObservable(this)
-      for (const leaf of Object.keys(SharedAppStateLeafSchemas) as ISharedAppStateLeaf[]) {
+      for (const leaf of SharedAppStateLeafNames) {
         if (!isObservable(this[leaf])) continue
-        if (leaf === "sessions") {
-          log.info(`Observing ${leaf} on main state`)
-          
-          this.disposers_.push(observe(this[leaf], () => {
-            log.info(`Root change detected on ${leaf}`)
-            this.broadcast(leaf)
-          }))
-        } else {
-          log.info(`Deep Observing ${leaf} on main state`)
-          
-          this.disposers_.push(deepObserve(this[leaf], (change, path) => {
-            log.info(`Root change detected on ${leaf}: ${path}`)
-            this.broadcast(leaf)
-          }))
-        }
+        this.disposers_.push(
+          reaction(
+            () => toJS(this[leaf]),
+            () => {
+              log.info(`Root change detected on ${leaf}`)
+              this.broadcast(leaf)
+            },
+            {
+              equals: isEqual
+            }
+          )
+        )
+        // if (leaf === "sessions") {
+        //   log.info(`Observing ${leaf} on main state`)
+        //
+        //   this.disposers_.push(observe(this[leaf], () => {
+        //     log.info(`Root change detected on ${leaf}`)
+        //     this.broadcast(leaf)
+        //   }))
+        // } else {
+        //   log.info(`Deep Observing ${leaf} on main state`)
+        //
+        //   this.disposers_.push(deepObserve(this[leaf], (change, path) => {
+        //     log.info(`Root change detected on ${leaf}: ${path}`)
+        //     this.broadcast(leaf)
+        //   }))
+        // }
       }
       // this.disposers_.push(deepObserve(this, this.onChange))
       //this.stopObserving = observe(this, this.onChange)
-      // this.disposers_.push(reaction(() => this.toJSON(), (json, prevJson) => {
-      //   log.info("Root change detected")
-      //   this.broadcast(toJS(json))
-      // }))
+      // this.disposers_.push(reaction(() => this.toJSON(), (json, prevJson) =>
+      // { log.info("Root change detected") this.broadcast(toJS(json)) }))
       ipcMain.handle(ElectronIPCChannel.fetchSharedAppState, this.fetchSharedAppStateHandler)
       if (import.meta.webpackHot) {
         import.meta.webpackHot.addDisposeHandler(() => {
@@ -169,55 +179,81 @@ export class MainSharedAppState implements ISharedAppState {
     return this.initDeferred.promise
   }
 
-  @BindAction() setAppSettings(appSettings: AppSettings) {
-    set(this.appSettings, appSettings)
-    return this.appSettings
+  @Bind
+  setAppSettings(appSettings: AppSettings) {
+    return runInAction(() => {
+      set(this.appSettings, appSettings)
+      return this.appSettings
+    })
   }
 
-  @BindAction() updateAppSettings(patch: Partial<AppSettings>) {
-    set(this.appSettings, patch)
-    return this.appSettings
+  @Bind
+  updateAppSettings(patch: Partial<AppSettings>) {
+    return runInAction(() => {
+      set(this.appSettings, patch)
+      return this.appSettings
+    })
   }
 
-  @BindAction() setSessions(newSessions: SessionsState) {
-    set(this.sessions, newSessions)
-    return this.sessions
+  @Bind
+  setSessions(newSessions: SessionsState) {
+    return runInAction(() => {
+      set(this.sessions, newSessions)
+      return this.sessions
+    })
   }
 
-  @BindAction() updateSessions(patch: Partial<SessionsState>) {
-    set(this.sessions, patch)
-    return this.sessions
+  @Bind
+  updateSessions(patch: Partial<SessionsState>) {
+    return runInAction(() => {
+      set(this.sessions, patch)
+      return this.sessions
+    })
   }
 
-  @BindAction() setDashboards(state: DashboardsState) {
-    set(this.dashboards, state)
-    return this.dashboards
+  @Bind
+  setDashboards(state: DashboardsState) {
+    return runInAction(() => {
+      set(this.dashboards, state)
+      return this.dashboards
+    })
   }
 
-  @BindAction() updateDashboards(patch: Partial<DashboardsState>) {
-    assign(this.dashboards, patch)
-    return this.dashboards
+  @Bind
+  updateDashboards(patch: Partial<DashboardsState>) {
+    return runInAction(() => {
+      assign(this.dashboards, patch)
+      return this.dashboards
+    })
   }
 
-  @BindAction() updateOverlays(patch: PartialDeep<OverlaysState>) {
-    this.overlays = assign({ ...this.overlays }, patch as any)
-    return this.overlays
+  @Bind
+  updateOverlays(patch: PartialDeep<OverlaysState>) {
+    return runInAction(() => {
+      this.overlays = assign({ ...this.overlays }, patch as any)
+      return this.overlays
+    })
   }
 
-  @BindAction() updateDevSettings(patch: Partial<DevSettings>) {
-    assign(this.devSettings, patch)
-    return this.devSettings
+  @Bind
+  updateDevSettings(patch: Partial<DevSettings>) {
+    return runInAction(() => {
+      assign(this.devSettings, patch)
+      return this.devSettings
+    })
   }
 
-  @BindAction() setSystemTheme(theme: ThemeId) {
-    set(this, "systemTheme", theme)
-    return this.systemTheme
+  @Bind
+  setSystemTheme(theme: ThemeId) {
+    return runInAction(() => {
+      set(this, "systemTheme", theme)
+      return this.systemTheme
+    })
   }
 
   @Bind
   private async fetchSharedAppStateHandler(_ev: IpcMainInvokeEvent): Promise<ISharedAppState> {
-    const stateJson = toJS(this.toJSON())
-    return stateJson
+    return toJS(this.toJSON())
   }
 
   toJSON() {

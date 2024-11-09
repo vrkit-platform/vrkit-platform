@@ -9,7 +9,7 @@ import { AppSettings } from "vrkit-models"
 import { AppFiles } from "vrkit-shared"
 import Fs from "fs"
 import PQueue from "p-queue"
-import { IObjectDidChange, set } from "mobx"
+import { action, IObjectDidChange, runInAction, set } from "mobx"
 import SharedAppState from "../store"
 import { BindAction } from "../../decorators"
 import { AppSettingsSchema } from "vrkit-shared"
@@ -35,11 +35,13 @@ export class AppSettingsService {
     return this.sharedAppState.appSettings
   }
 
-  @BindAction()
+  @Bind
   private patchSettings(settings: Partial<AppSettings>): AppSettings {
-    set(this.sharedAppState.appSettings, settings)
-
-    return this.sharedAppState.appSettings
+    return runInAction(() => {
+      set(this.sharedAppState.appSettings, settings)
+  
+      return this.sharedAppState.appSettings
+    })
   }
 
   @Bind
@@ -172,14 +174,6 @@ export class AppSettingsService {
   @Bind
   private onStateChange(change: IObjectDidChange<AppSettings>) {
     this.saveAppSettings(this.appSettings)
-    // const newSettings = change.object.appSettings
-    // if (!isEqual(newSettings, this.state.appSettings)) {
-    //   this.state.appSettings = cloneDeep(newSettings)
-    //
-    //   webContents.getAllWebContents().forEach(webContent => {
-    //     webContent.send(ElectronIPCChannel.settingsChanged, newSettings)
-    //   })
-    // }
   }
 
   constructor(readonly sharedAppState: SharedAppState) {}

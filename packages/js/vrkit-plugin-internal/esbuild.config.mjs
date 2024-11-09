@@ -8,6 +8,8 @@ const prod = process.env.NODE_ENV === "production",
   outdir = Path.resolve(import.meta.dirname, "dist"),
   outfile = Path.join(outdir, "bundled-plugin.js")
 
+console.log(`process.env.BUILD_WATCH=${process.env.BUILD_WATCH}`)
+console.log(`watch=${watch}`)
 //outfile = "bundled-plugin.js"
 
 async function run() {
@@ -53,16 +55,21 @@ async function run() {
     
     if (watch) {
       ctx = await esbuild.context(opts)
-      await ctx.watch()
+      console.log("Starting watch...")
+      ctx.watch()
+        .catch(err => {
+          console.error("Watch error", err)
+        })
     } else {
       await esbuild.build(opts)
     }
   } catch (err) {
     console.error(`Build failed`, err)
     throw err
-  } finally {
-    ctx?.dispose()
   }
+  // finally {
+  //   ctx?.dispose()
+  // }
 }
 
 run()

@@ -26,7 +26,7 @@ import PQueue from "p-queue"
 import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
 import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
-import { set } from "mobx"
+import { action, runInAction, set } from "mobx"
 import { IDisposer } from "mobx-utils"
 import { DashboardsState } from "vrkit-shared"
 import { defaultsDeep, first } from "lodash"
@@ -95,6 +95,8 @@ export class DashboardManager {
    * @param state
    * @private
    */
+  @action
+  @Bind
   private validateState(state: DashboardsState = this.state): DashboardsState {
     // CREATE A DEFAULT CONFIG IF NONE EXIST
     if (isEmpty(state.configs)) {
@@ -137,6 +139,7 @@ export class DashboardManager {
    *
    * @private
    */
+  @Bind
   private async createInitialState(): Promise<DashboardsState> {
     const dashFiles = await Fsx.promises
       .readdir(dashDir)
@@ -157,17 +160,22 @@ export class DashboardManager {
       .filter(isDefined)
       .getOrThrow()
 
-    Object.assign(this.state, {
-      configs,
-      activeConfigId: "" //this.appSettingsService.appSettings?.activeDashboardId
+    return runInAction(() => {
+      this.mainAppState.dashboards = {
+        ...this.state,
+        configs,
+        activeConfigId: ""
+      }
+      
+
+      return this.validateState()
     })
-
-    return this.validateState()
   }
-
-  @BindAction()
+  
+  
+  @Bind
   async deleteDashboardConfig(id: string): Promise<DashboardConfig> {
-    const removedDashConfigs = removeIfMutation(this.dashboardConfigs, dash => dash.id === id)
+    const removedDashConfigs = runInAction(() => removeIfMutation(this.dashboardConfigs, dash => dash.id === id))
 
     await Promise.all(
       removedDashConfigs.map(config => this.persistQueue_.add(this.createDeleteDashboardConfigTask(config.id)))
@@ -186,14 +194,19 @@ export class DashboardManager {
   private saveDashboardConfigTaskFactory(dashConfig: DashboardConfig) {
     return this.persistQueue_.add(this.createSaveDashboardConfigTask(dashConfig))
   }
-
-  @BindAction()
+  
+  @Bind
   async updateDashboardConfig(id: string, patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
-    const dashConfig = this.dashboardConfigs.find(it => it.id === id)
-    if (!dashConfig) {
-      throw Error(`Unable to find dashboard with id(${id})`)
-    }
-    set(dashConfig, patch)
+    const dashConfig = runInAction(() => {
+      const dashConfig = this.dashboardConfigs.find(it => it.id === id)
+      if (!dashConfig) {
+        throw Error(`Unable to find dashboard with id(${id})`)
+      }
+      set(dashConfig, patch)
+      
+      return dashConfig
+    })
+    
     await this.saveDashboardConfigTaskFactory(dashConfig)
     return dashConfig
   }
@@ -205,13 +218,22 @@ export class DashboardManager {
   ): Promise<DashboardConfig> {
     return this.updateDashboardConfig(id, patch)
   }
-
-  @BindAction()
+  
+  
+  @Bind
   async createDashboardConfig(patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
-    const newDashConfig = DashboardConfig.create(defaultsDeep(patch, newDashboardTrackMapMockConfig()))
-    this.dashboardConfigs.push(newDashConfig)
-    await this.saveDashboardConfigTaskFactory(newDashConfig)
-    return newDashConfig
+    const dashConfig = runInAction(() => {
+      const newDashConfig = DashboardConfig.create(defaultsDeep(
+          patch,
+          newDashboardTrackMapMockConfig()
+      ))
+      this.dashboardConfigs.push(newDashConfig)
+      return newDashConfig
+    })
+    
+    await this.saveDashboardConfigTaskFactory(dashConfig)
+    return dashConfig
+    
   }
 
   async createDashboardConfigHandler(
@@ -220,24 +242,28 @@ export class DashboardManager {
   ): Promise<DashboardConfig> {
     return await this.createDashboardConfig(patch).then(dashConfig => DashboardConfig.toJson(dashConfig) as any)
   }
-
-  @BindAction()
+  
+  @Bind
   async closeDashboard() {
-    set(this.state, "activeConfigId", "")
+    runInAction(() => {
+      set(this.state, "activeConfigId", "")
+    })
   }
 
   async closeDashboardHandler(event: IpcMainInvokeEvent): Promise<void> {
     return await this.closeDashboard()
   }
-
-  @BindAction()
+  
+  @Bind
   async openDashboard(id: string) {
-    if (!this.dashboardConfigById(id)) {
-      throw Error(`Unable to find config for id (${id})`)
-    }
-
-    set(this.state, "activeConfigId", id)
-    return id
+    return runInAction(() => {
+      if (!this.dashboardConfigById(id)) {
+        throw Error(`Unable to find config for id (${id})`)
+      }
+      
+      set(this.state, "activeConfigId", id)
+      return id
+    })
   }
 
   async openDashboardHandler(event: IpcMainInvokeEvent, id: string): Promise<string> {

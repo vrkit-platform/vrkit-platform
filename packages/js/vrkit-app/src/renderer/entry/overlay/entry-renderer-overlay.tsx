@@ -3,6 +3,14 @@ import { get } from "lodash/fp"
 
 
 async function start() {
+  window.addEventListener("error", (ev) => {
+    console.error("Unhandled error", ev)
+    ev?.preventDefault?.()
+  })
+  window.addEventListener("unhandledrejection", (ev, ...args) => {
+    console.error("unhandledrejection", ev, ...args)
+    ev?.preventDefault?.()
+  })
   const renderRoot = await import("./renderOverlayRoot").then(get("default"))
   
   const
@@ -11,11 +19,11 @@ async function start() {
   
   renderRoot(root).catch(err => console.error("failed to render root", err))
   
-  if (import.meta.webpackHot) {
-    import.meta.webpackHot.addDisposeHandler(() => {
-      rootEl.innerHTML = ''
-    })
-  }
+  // if (import.meta.webpackHot) {
+  //   import.meta.webpackHot.addDisposeHandler(() => {
+  //     rootEl.innerHTML = ''
+  //   })
+  // }
 }
 
 start()

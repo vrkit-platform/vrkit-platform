@@ -11,7 +11,7 @@ import SessionManager from "../../services/session-manager"
 import { OverlayManager } from "../../services/overlay-manager"
 import SharedAppState, { createSharedAppStateStore } from "../../services/store"
 import { DashboardManager } from "../../services/dashboard-manager"
-import { isDefined, isPromise } from "@3fv/guard"
+import { isDefined, isFunction, isPromise, isString } from "@3fv/guard"
 import { Option } from "@3fv/prelude-ts"
 import { PluginManager } from "../../services/plugin-manager"
 import OpenXRConfigurator from "../../services/openxr-configurator"
@@ -42,20 +42,22 @@ const createServiceContainer = once(async function createServiceContainer() {
     import.meta.webpackHot.dispose(() => {
       setServiceContainer(null)
 
-      const keys = [...container.allKeys]
+      const keys = [...container.allKeys],
+          keyNames = keys.map(key => (isFunction(key) && isString(key.name)) ? key.name : isString(key) ? key : "N/A")
+      
       const services = keys
-        .map(key =>
+        .map((key, idx) =>
           Option.try(() => container.get(key))
-            .map(service => [key, service])
+            .map(service => [key, service, keyNames[idx]])
             .getOrNull()
         )
         .filter(isDefined)
 
       return Promise.all(
-        services.map(([key, service]) => {
+        services.map(([key, service, keyName]) => {
           const disposeFn: Function = service[Symbol.dispose] ?? service["unload"]
           if (disposeFn) {
-            log.info(`Invoking dispose (key=${key})`)
+            log.info(`Invoking dispose (key=${keyName})`)
             const res = disposeFn.call(service)
             if (isPromise(res)) {
               return res

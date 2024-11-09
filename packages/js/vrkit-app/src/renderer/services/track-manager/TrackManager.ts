@@ -168,6 +168,11 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     if (!ignoreCache && this.readyDeferred.isFulfilled()) {
       return this
     }
+    
+    if (ignoreCache) {
+      log.info("Rebuilding track map database")
+      await this.rebuildDatabase()
+    }
 
     const dataFile = this.getDatabaseFileAccess()
     if (!(await dataFile.exists)) {

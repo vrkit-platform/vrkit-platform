@@ -11,7 +11,7 @@ import type { SessionInfoMessage } from "./SessionInfoTypes"
 import React from "react"
 import { Container } from "@3fv/ditsy"
 
-export type ISessionTimeAndDuration = Omit<SessionTiming, "currentTimeMillis" | "sampleIndex">
+export type ISessionTimeAndDuration = Omit<SessionTiming, "currentTimeMillis" | "sampleIndex" | "sampleCount">
 
 export enum PluginClientEventType {
   SESSION_ID_CHANGED = "SESSION_ID_CHANGED",

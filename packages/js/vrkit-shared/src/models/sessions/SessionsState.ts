@@ -14,7 +14,7 @@ export const LiveSessionId: SessionPlayerId = "SESSION_TYPE_LIVE"
 
 
 export function toSessionTimeAndDuration(timing: SessionTiming) {
-  return omit(toJS(timing), ["sampleIndex", "currentTimeMillis"])
+  return omit(toJS(timing), ["sampleIndex", "sampleCount", "currentTimeMillis"])
 }
 
 export interface SessionDetail {

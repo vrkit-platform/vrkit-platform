@@ -40,8 +40,8 @@ export const SessionDetailSchema = createSimpleSchema<SessionDetail>({
     v => (!v ? {} : SessionData.fromJson(v))
   ),
   timeAndDuration: custom(
-    v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex", "currentTimeMillis"])),
-    v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex", "currentTimeMillis"]))
+    v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex", "sampleCount","currentTimeMillis"])),
+    v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex", "sampleCount","currentTimeMillis"]))
   )
 })
 
@@ -102,3 +102,5 @@ export const SharedAppStateLeafSchemas: Record<ISharedAppStateLeaf, ModelSchema<
   overlays: OverlaysStateSchema,
   actions: ActionsStateSchema
 }
+
+export const SharedAppStateLeafNames = Object.keys(SharedAppStateLeafSchemas) as ISharedAppStateLeaf[]

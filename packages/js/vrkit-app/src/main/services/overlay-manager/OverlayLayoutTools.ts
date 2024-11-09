@@ -1,11 +1,10 @@
 import { assign, Pair, RectangleLayoutTool } from "vrkit-shared"
-import {
-  OverlayAnchor, PositionF, PositionI, RectF, RectI, SizeF, SizeI
-} from "vrkit-models"
+import { OverlayAnchor, PositionF, PositionI, RectF, RectI, SizeF, SizeI } from "vrkit-models"
 import { screen } from "electron"
 import { asOption } from "@3fv/prelude-ts"
 import { flow } from "lodash"
 import { match } from "ts-pattern"
+import { runInAction } from "mobx"
 
 const VRPerEyeDefaultDimension = 1
 export const MaxOverlayWindowDimension = 2048
@@ -23,8 +22,8 @@ export function GetAnchorPosition(anchor: OverlayAnchor, rect: RectF | RectI) {
     .run() as Pair<number, number>
 
   return {
-    x: rect.position.x + (widthPercent * rect.size.width),
-    y: rect.position.y + (heightPercent * rect.size.height)
+    x: rect.position.x + widthPercent * rect.size.width,
+    y: rect.position.y + heightPercent * rect.size.height
   }
 }
 
@@ -91,7 +90,7 @@ export function getScreenDisplayAnchorPosition(
     .orElse(asOption(screen.getPrimaryDisplay()))
     .map(display => display.bounds)
     .map(({ x, y, width, height }) =>
-      PositionI.create(GetAnchorPosition(anchor, {position:{x,y},size:{width,height}}))
+      PositionI.create(GetAnchorPosition(anchor, { position: { x, y }, size: { width, height } }))
     )
     .getOrThrow()
 }
@@ -113,12 +112,20 @@ export function isValidOverlayScreenSize(size: Electron.Size | SizeI | SizeF) {
 }
 
 export function adjustScreenRect(rect: RectI | RectF) {
-  return asOption(rect)
+  return runInAction(() =>
+    asOption(rect)
       .ifSome(rect => {
         assign(rect.size, {
-          width: Math.max(Math.min(rect.size.width, MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding), MinOverlayWindowDimension),
-          height: Math.max(Math.min(rect.size.height, MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding), MinOverlayWindowDimension)
+          width: Math.max(
+            Math.min(rect.size.width, MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding),
+            MinOverlayWindowDimension
+          ),
+          height: Math.max(
+            Math.min(rect.size.height, MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding),
+            MinOverlayWindowDimension
+          )
         })
       })
       .getOrThrow()
+  )
 }

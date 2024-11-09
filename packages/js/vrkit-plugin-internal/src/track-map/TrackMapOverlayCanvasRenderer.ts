@@ -128,63 +128,70 @@ class TrackMapOverlayCanvasRenderer {
    * @private
    */
   private get isInitialized() {
-    return this.initializeDeferred.isFulfilled()
+    return this.initializeDeferred?.isFulfilled() ?? false
   }
 
   private makeRenderCars(settings: OverlayBaseSettings = null): RenderCarsFn {
     const fps = settings?.fps ?? 60
     return throttle(
       (carsData: CarData[]) => {
-        if (!this.isInitialized) {
-          log.warn("Not initialized")
-          return
-        }
-
-        const sceneState = this.state
-        log.debug(`Rendering cars (count=${carsData.length})`)
-
-        let { two, trackPath } = sceneState
-        if (!two || !trackPath) {
-          log.warn(`Scene state is not ready to render cars`, sceneState)
-          return
-        }
-
-        const dataIdxList = carsData.map(get("idx")),
-          updatedCarMarkers = sceneState.carMarkers
-            .map(marker => {
-              if (dataIdxList.includes(marker.idx)) {
-                return marker
-              }
-
-              marker.shape?.remove()
-              return null as CarMarker
-            })
-            .filter(isDefined),
-          { carMarkers } = this.patchSceneState({
-            carMarkers: updatedCarMarkers
-          })
-
-        for (let carData of carsData) {
-          const carMarker = asOption(carMarkers.find(marker => marker.idx === carData.idx)).getOrCall(
-            () =>
-              (carMarkers[carMarkers.length] = {
-                idx: carData.idx,
-                data: carData,
-                vector: null,
-                shape: null
-              })
-          )
-
-          carMarker.vector = trackPath.getPointAt(carData.lapPercentComplete)
-
-          if (!carMarker.shape) {
-            two.add((carMarker.shape = new Two.Circle(carMarker.vector.x, carMarker.vector.y, CarMarkerRadiusPx)))
-          } else {
-            carMarker.shape.position = carMarker.vector
+        try {
+          if (!this.isInitialized) {
+            log.warn("Not initialized")
+            return
           }
+          
+          const sceneState = this.state
+          log.debug(`Rendering cars (count=${carsData.length})`)
+          
+          let { two, trackPath } = sceneState
+          if (!two || !trackPath) {
+            log.warn(`Scene state is not ready to render cars`, sceneState)
+            return
+          }
+          
+          const dataIdxList = carsData.map(get("idx")),
+              updatedCarMarkers = sceneState.carMarkers
+                  .map(marker => {
+                    if (dataIdxList.includes(marker.idx)) {
+                      return marker
+                    }
+                    
+                    marker.shape?.remove()
+                    return null as CarMarker
+                  })
+                  .filter(isDefined), { carMarkers } = this.patchSceneState({
+                carMarkers: updatedCarMarkers
+              })
+          
+          for (let carData of carsData) {
+            const carMarker = asOption(carMarkers.find(marker => marker.idx ===
+                carData.idx)).getOrCall(() => (
+                carMarkers[carMarkers.length] = {
+                  idx: carData.idx, data: carData, vector: null, shape: null
+                }
+            ))
+            
+            carMarker.vector = trackPath.getPointAt(carData.lapPercentComplete)
+            
+            if (!carMarker.shape) {
+              two.add((
+                  carMarker.shape =
+                      new Two.Circle(carMarker.vector.x,
+                          carMarker.vector.y,
+                          CarMarkerRadiusPx
+                      )
+              ))
+            } else {
+              carMarker.shape.position = carMarker.vector
+            }
+          }
+          
+          two.update()
+        } catch (err) {
+          log.error("render cars failed", err)
+          
         }
-
-        two.update()
       },
       Math.ceil(1000 / fps)
     )
@@ -198,88 +205,86 @@ class TrackMapOverlayCanvasRenderer {
   //   leading: true
   // })
   private createScene() {
-    if (!this.isInitialized) {
-      log.warn("Not initialized, can not createScene")
-      return
-    }
-
-    const { width, height } = this.state,
-      { trackMap } = this.state
-
-    if (!this.canvasEl || !width || !height || !trackMap) {
-      log.warn(
-        "Unable to render canvas, canvas element, width & height must be positive values",
-        { width, height },
-        "track map",
-        trackMap
-      )
-      return
-    }
-
-    log.info("renderTrack()", width, height)
-
-    // this.canvasEl.width = width
-    // this.canvasEl.height = height
-    Object.assign(this.canvasEl.style, {
-      width: `${width}px`,
-      height: `${height}px`,
-      background: "transparent",
-      objectFit: "contain"
-    })
-
-    if (!this.state.two) {
-      // this.state.two.clear()
-      // this.state.two = null
-      //
-      // this.canvasEl.innerHTML = "";
-    }
-
-    const statePatch: Partial<SceneState> = {
-        width,
-        height,
-        two: asOption(this.state.two)
-          .ifSome(t => {
-            t.width = width
-            t.height = height
-          })
-          .getOrCall(
-            () =>
-              new Two({
-                width,
-                height,
-                domElement: this.canvasEl,
-                autostart: false,
-                smoothing: false,
-                overdraw: false
-              })
-          )
-      },
-      two = statePatch.two,
-      scaledTrackMap = ScaleTrackMapToFit(
-        trackMap,
-        { width, height },
-        {
-          padding: 10
-        }
-      ),
-      trackPathAnchors = scaledTrackMap.path.map(coord => new Two.Anchor(coord.x, coord.y))
-
-    asOption(this.state.trackPath).match({
-      Some: tp => {
-        tp.vertices = trackPathAnchors
-      },
-      None: () => {
-        const tp = (statePatch.trackPath = new Two.Path(trackPathAnchors, true))
-        Object.assign(tp, {
-          stroke: "red",
-          fill: "transparent"
-        })
-
-        two.add(tp)
+    try {
+      if (!this.isInitialized) {
+        log.warn("Not initialized, can not createScene")
+        return
       }
-    })
-
-    this.patchSceneState(statePatch)
+      
+      const { width, height } = this.state, { trackMap } = this.state
+      
+      if (!this.canvasEl || !width || !height || !trackMap) {
+        log.warn(
+            "Unable to render canvas, canvas element, width & height must be positive values",
+            { width, height },
+            "track map",
+            trackMap
+        )
+        return
+      }
+      
+      log.info("renderTrack()", width, height)
+      
+      // this.canvasEl.width = width
+      // this.canvasEl.height = height
+      Object.assign(this.canvasEl.style, {
+        width: `${width}px`,
+        height: `${height}px`,
+        background: "transparent",
+        objectFit: "contain"
+      })
+      
+      if (!this.state.two) {
+        // this.state.two.clear()
+        // this.state.two = null
+        //
+        // this.canvasEl.innerHTML = "";
+      }
+      
+      const statePatch:Partial<SceneState> = {
+            width, height, two: asOption(this.state.two)
+                .ifSome(t => {
+                  t.width = width
+                  t.height = height
+                })
+                .getOrCall(() => new Two({
+                  width,
+                  height,
+                  domElement: this.canvasEl,
+                  autostart: false,
+                  smoothing: false,
+                  overdraw: false
+                }))
+          },
+          two = statePatch.two,
+          scaledTrackMap = ScaleTrackMapToFit(trackMap, { width, height }, {
+            padding: 10
+          }),
+          trackPathAnchors = scaledTrackMap.path.map(coord => new Two.Anchor(
+              coord.x,
+              coord.y
+          ))
+      
+      asOption(this.state.trackPath).match({
+        Some: tp => {
+          tp.vertices = trackPathAnchors
+        }, None: () => {
+          const tp = (
+              statePatch.trackPath = new Two.Path(trackPathAnchors, true)
+          )
+          Object.assign(tp, {
+            stroke: "red", fill: "transparent"
+          })
+          
+          two.add(tp)
+        }
+      })
+      
+      this.patchSceneState(statePatch)
+    } catch (err) {
+      log.error("createScene failed", err)
+      
+    }
   }
 
   /**
@@ -289,36 +294,41 @@ class TrackMapOverlayCanvasRenderer {
    * @private
    */
   private updateSessionInfo(info: SessionInfoMessage) {
-    if (!this.isInitialized) {
-      log.warn("Not initialized")
-      return
-    }
-    const drivers = info?.driverInfo?.drivers
-    // log.info("Drivers info", drivers)
-    if (!drivers) {
-      return
-    }
-    for (let driver of Object.values(drivers)) {
-      const newData: CarData = {
-        id: driver.carID,
-        idx: driver.carIdx,
-        carNumber: driver.carNumber,
-        username: driver.userName,
-        lap: 0,
-        lapCompleted: 0,
-        classPosition: 0,
-        position: 0,
-        lapPercentComplete: 0.0
+    try {
+      if (!this.isInitialized) {
+        log.warn("Not initialized")
+        return
       }
-
-      const { carDataMap } = this.state,
-        existingData = carDataMap.get(driver.carIdx)
-
-      if (existingData) {
-        Object.assign(existingData, newData)
-      } else {
-        carDataMap.set(driver.carIdx, newData)
+      const drivers = info?.driverInfo?.drivers
+      // log.info("Drivers info", drivers)
+      if (!drivers) {
+        return
       }
+      for (let driver of Object.values(drivers)) {
+        const newData:CarData = {
+          id: driver.carID,
+          idx: driver.carIdx,
+          carNumber: driver.carNumber,
+          username: driver.userName,
+          lap: 0,
+          lapCompleted: 0,
+          classPosition: 0,
+          position: 0,
+          lapPercentComplete: 0.0
+        }
+        
+        const { carDataMap } = this.state,
+            existingData = carDataMap.get(driver.carIdx)
+        
+        if (existingData) {
+          Object.assign(existingData, newData)
+        } else {
+          carDataMap.set(driver.carIdx, newData)
+        }
+      }
+    } catch (err) {
+      log.error("updateSessionInfo failed", err)
+      
     }
   }
 
@@ -395,7 +405,11 @@ class TrackMapOverlayCanvasRenderer {
    */
   @Bind
   private onSessionInfo(sessionId, info) {
-    this.updateSessionInfo(info)
+    try {
+      this.updateSessionInfo(info)
+    } catch (err) {
+      log.error(info)
+    }
   }
 
   private async initializeState() {
@@ -460,20 +474,29 @@ class TrackMapOverlayCanvasRenderer {
   }
 
   setSize(width: number, height: number) {
-    if (this.state.width !== width || this.state.height !== height) {
-      this.reset(width, height)
+    try {
+      if (this.state.width !== width || this.state.height !== height) {
+        this.reset(width, height)
+      }
+    } catch (err) {
+      log.error("Failed to set size", err)
     }
   }
 
   clear() {
-    Two.Instances.forEach((t: Two) => {
-      t.clear()
-    })
-
-    this.canvasEl?.replaceChildren()
+    try {
+      Two.Instances.forEach((t:Two) => {
+        t.clear()
+      })
+      
+      this.canvasEl?.replaceChildren()
+    } catch (err) {
+      log.error("Failed to clear", err)
+    }
   }
 
   reset(width: number, height: number) {
+    try {
     this.clear()
 
     const client = getVRKitPluginClient()
@@ -491,9 +514,13 @@ class TrackMapOverlayCanvasRenderer {
       .catch(err => {
         log.error(`failed to initialize state`, err)
       })
+    } catch (err) {
+      log.error("Failed to reset", err)
+    }
   }
 
   destroy() {
+    try {
     const client = getVRKitPluginClient()
     client.off(PluginClientEventType.SESSION_INFO_CHANGED)
     client.off(PluginClientEventType.DATA_FRAME)
@@ -501,6 +528,9 @@ class TrackMapOverlayCanvasRenderer {
     this.clear()
     this.initializeDeferred = null
     this.state = null
+    } catch (err) {
+      log.error("Failed to destroy", err)
+    }
   }
 }
 

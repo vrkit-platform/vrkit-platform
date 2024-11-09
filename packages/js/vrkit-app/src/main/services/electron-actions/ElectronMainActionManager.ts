@@ -1,6 +1,5 @@
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { Bind, LazyGetter } from "vrkit-shared"
 import {
   Action,
   ActionDef,
@@ -9,8 +8,15 @@ import {
   ActionMenuItemDesktopRoleKind,
   ActionOptions,
   ActionRegistry,
+  ActionsState,
   ActionType,
-  electronRoleToId
+  Bind,
+  defaults,
+  Disposables,
+  electronRoleToId,
+  isNotEmpty,
+  LazyGetter,
+  removeIfMutation
 } from "vrkit-shared"
 import { app, globalShortcut, IpcMainInvokeEvent } from "electron"
 import { flatten, omit, partition } from "lodash"
@@ -20,12 +26,9 @@ import { assert, isDefined, isPromise, isString } from "@3fv/guard"
 import { get } from "lodash/fp"
 import { getSharedAppStateStore, MainSharedAppState } from "../store"
 import { IDisposer } from "mobx-utils"
-import { defaults, Disposables, isNotEmpty, removeIfMutation } from "vrkit-shared"
 import { ElectronMainAppActions } from "./ElectronMainAppActions"
 import { ElectronMainGlobalActions } from "./ElectronMainGlobalActions"
-import { BindAction } from "../../decorators"
-import { set } from "mobx"
-import { ActionsState } from "vrkit-shared"
+import { action, runInAction, set } from "mobx"
 import { editorExecuteAction } from "../overlay-manager/OverlayEditorActionFactory"
 import { asOption } from "@3fv/prelude-ts"
 import Accelerator = Electron.Accelerator
@@ -257,10 +260,17 @@ export class ElectronMainActionManager {
    * @param actionMap
    * @private
    */
-  @BindAction()
+  
+  @Bind
   private updateActionsState() {
-    const actionDefs: ActionDef[] = actionOptionsToActionDefs(this.actionRegistry.allActions)
-    set(this.sharedAppState.actions, "actions", Object.fromEntries<ActionDef>(actionDefs.map(it => [it.id, it])))
+    runInAction(() => {
+      const actionDefs:ActionDef[] = actionOptionsToActionDefs(this.actionRegistry.allActions)
+      set(
+          this.sharedAppState.actions,
+          "actions",
+          Object.fromEntries<ActionDef>(actionDefs.map(it => [it.id, it]))
+      )
+    })
   }
 
   @Bind
@@ -324,51 +334,55 @@ export class ElectronMainActionManager {
     this.disableGlobalActions(...actionIds)
   }
 
-  @BindAction() enableGlobalActions(...ids: string[]): IDisposer {
-    const reg = this.actionRegistry,
-      actions = reg.globalActions.filter(it => ids.includes(it.id)),
-      [enableActions, ignoredActions] = partition(actions, it => !this.enabledGlobalActionIds.includes(it.id)),
-      enableActionIds = enableActions.map(get("id")),
-      enabledAccelerators = Array<Accelerator>()
+  @Bind enableGlobalActions(...ids: string[]): IDisposer {
+    return runInAction(() => {
+      const reg = this.actionRegistry,
+        actions = reg.globalActions.filter(it => ids.includes(it.id)),
+        [enableActions, ignoredActions] = partition(actions, it => !this.enabledGlobalActionIds.includes(it.id)),
+        enableActionIds = enableActions.map(get("id")),
+        enabledAccelerators = Array<Accelerator>()
 
-    if (isNotEmpty(ignoredActions)) log.warn("Already active actions", ignoredActions)
+      if (isNotEmpty(ignoredActions)) log.warn("Already active actions", ignoredActions)
 
-    enableActions.forEach(action => {
-      const accelerators = asOption(action.accelerators?.filter(isString))
-        .filter(isNotEmpty)
-        .orCall(() => asOption(action.defaultAccelerators?.filter(isString)))
-        .filter(isNotEmpty)
-        .getOrThrow(`No accelerators found for action id (${action.id})`)
+      enableActions.forEach(action => {
+        const accelerators = asOption(action.accelerators?.filter(isString))
+          .filter(isNotEmpty)
+          .orCall(() => asOption(action.defaultAccelerators?.filter(isString)))
+          .filter(isNotEmpty)
+          .getOrThrow(`No accelerators found for action id (${action.id})`)
 
-      const [accels, registeredAccels] = partition(accelerators, accel => !globalShortcut.isRegistered(accel))
+        const [accels, registeredAccels] = partition(accelerators, accel => !globalShortcut.isRegistered(accel))
 
-      if (registeredAccels.length) log.info(`Already assigned shortcuts`, registeredAccels)
+        if (registeredAccels.length) log.info(`Already assigned shortcuts`, registeredAccels)
 
-      enabledAccelerators.push(...accels)
-      globalShortcut.registerAll(accels, () => action.execute())
-      this.enabledGlobalActionIds.push(action.id)
+        enabledAccelerators.push(...accels)
+        globalShortcut.registerAll(accels, () => action.execute())
+        this.enabledGlobalActionIds.push(action.id)
+      })
+
+      const disposer = () => {
+        this.disableGlobalActions(enableActionIds)
+      }
+
+      this.disposers_.push(disposer)
+
+      return disposer
     })
-
-    const disposer = () => {
-      this.disableGlobalActions(enableActionIds)
-    }
-
-    this.disposers_.push(disposer)
-
-    return disposer
   }
 
-  @BindAction() disableGlobalActions(...enableActionIdArgs: Array<string | string[]>): void {
-    const enableActionIds = flatten(enableActionIdArgs),
-      enabledActionDefs = enableActionIds.map(id => this.actionsState.actions[id]).filter(isDefined<ActionDef>)
+  @Bind disableGlobalActions(...enableActionIdArgs: Array<string | string[]>): void {
+    return runInAction(() => {
+      const enableActionIds = flatten(enableActionIdArgs),
+        enabledActionDefs = enableActionIds.map(id => this.actionsState.actions[id]).filter(isDefined<ActionDef>)
 
-    enabledActionDefs.forEach(actionDef => {
-      actionDef.accelerators.forEach(accel => {
-        globalShortcut.unregister(accel)
+      enabledActionDefs.forEach(actionDef => {
+        actionDef.accelerators.forEach(accel => {
+          globalShortcut.unregister(accel)
+        })
       })
-    })
 
-    removeIfMutation(this.enabledGlobalActionIds, id => enableActionIds.includes(id))
+      removeIfMutation(this.enabledGlobalActionIds, id => enableActionIds.includes(id))
+    })
   }
 }
 

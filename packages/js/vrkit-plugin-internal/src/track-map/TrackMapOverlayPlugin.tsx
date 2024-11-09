@@ -14,7 +14,7 @@ function TrackMapOverlayPlugin(props: IPluginComponentProps) {
     if (!inActiveSession || !weekendInfo) {
       return
     }
-
+    
     if (canvasRef) {
       if (!renderer) {
         renderer = new TrackMapOverlayCanvasRenderer(canvasRef, width, height)
@@ -40,8 +40,8 @@ function TrackMapOverlayPlugin(props: IPluginComponentProps) {
       setCanvasRef(null)
     }
   }, [])
-
-  return inActiveSession && weekendInfo ? <canvas ref={ref => setCanvasRef(ref)} /> : <></>
+//inActiveSession && weekendInfo ?
+  return <canvas ref={ref => setCanvasRef(ref)} />
 }
 
 export default TrackMapOverlayPlugin as React.ComponentType<IPluginComponentProps>

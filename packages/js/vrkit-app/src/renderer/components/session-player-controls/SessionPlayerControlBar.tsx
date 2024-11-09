@@ -221,7 +221,7 @@ function SessionTimingView({
   showHours = true// timeAndDuration.currentTimeMillis >= MILLIS_IN_HR
 }: SessionTimingViewProps) {
   //sampleIndex
-  const { sampleCount, isLive } = timeAndDuration
+  const { isLive } = timeAndDuration
 
   return (
     <FlexScaleZeroBox>

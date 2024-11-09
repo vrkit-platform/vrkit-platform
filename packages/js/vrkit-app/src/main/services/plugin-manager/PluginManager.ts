@@ -1,22 +1,10 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 
-import {
-  AppPaths,
-  Bind,
-  Disposables,
-  FileSystemManager,
-  isNotEmpty,
-  isTrue,
-  PluginsState
-} from "vrkit-shared"
-import PQueue from "p-queue"
-import { IObjectDidChange, remove, set } from "mobx"
+import { AppPaths, Bind, Disposables, FileSystemManager, isNotEmpty, isTrue, PluginsState } from "vrkit-shared"
+import { IObjectDidChange, remove, runInAction, set } from "mobx"
 import SharedAppState from "../store"
-import { BindAction } from "../../decorators"
-import {
-  PluginInstall, PluginInstallStatus, PluginManifest
-} from "vrkit-models"
+import { PluginInstall, PluginInstallStatus, PluginManifest } from "vrkit-models"
 import { asOption, Future } from "@3fv/prelude-ts"
 
 import Fs from "fs"
@@ -38,21 +26,25 @@ export class PluginManager {
     return this.sharedAppState.plugins
   }
 
-  @BindAction()
+  @Bind
   private updatePluginInstalls(...plugins: PluginInstall[]) {
-    for (const plugin of plugins) {
-      set(this.state.plugins, plugin.id, plugin)
-    }
-    return this
+    return runInAction(() => {
+      for (const plugin of plugins) {
+        set(this.state.plugins, plugin.id, plugin)
+      }
+      return this
+    })
   }
 
-  @BindAction()
+  @Bind
   private removePluginInstalls(...ids: string[]) {
-    for (const pluginId of ids) {
-      remove(this.state.plugins, pluginId)
-    }
+    return runInAction(() => {
+      for (const pluginId of ids) {
+        remove(this.state.plugins, pluginId)
+      }
 
-    return this
+      return this
+    })
   }
 
   /**
@@ -91,7 +83,7 @@ export class PluginManager {
     readonly fileManager: FileSystemManager,
     readonly sharedAppState: SharedAppState
   ) {}
-  
+
   /**
    * Load a plugin from the manifest file
    *
@@ -132,6 +124,7 @@ export class PluginManager {
    *
    * @param overrideSearchPaths optionally override the search path defaults
    */
+  @Bind
   async findPlugins(...overrideSearchPaths: string[]) {
     const searchPaths = await Promise.all(
       asOption(overrideSearchPaths)
@@ -145,22 +138,24 @@ export class PluginManager {
           ) => Fs.promises.lstat(path).then(stat => (stat.isDirectory() ? path : null))
         )
     )
-    
+
     info(`Searching (${searchPaths.join(",")}) for plugins`)
     log.assert(isNotEmpty(searchPaths), "Search paths are invalid.  At least one valid directory is required")
-    
+
     const installs = await Future.of(
       Promise.all(
-        uniq(flatten(
-          searchPaths.map(path => [
-            ...FastGlob.globSync("*/plugin.{json,json5,yaml,yml}", {
-              cwd: path
-            }).map(file => Path.join(path, file)),
-            ...FastGlob.globSync("plugin.{json,json5,yaml,yml}", {
-              cwd: path
-            }).map(file => Path.join(path, file))
-          ])
-        )).map(file => {
+        uniq(
+          flatten(
+            searchPaths.map(path => [
+              ...FastGlob.globSync("*/plugin.{json,json5,yaml,yml}", {
+                cwd: path
+              }).map(file => Path.join(path, file)),
+              ...FastGlob.globSync("plugin.{json,json5,yaml,yml}", {
+                cwd: path
+              }).map(file => Path.join(path, file))
+            ])
+          )
+        ).map(file => {
           log.info(`Loading plugin manifest: ${file}`)
           return this.loadPlugin(file)
         })

@@ -51,7 +51,7 @@ import { match } from "ts-pattern"
 import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { BindAction } from "../../decorators"
-import { observe, remove, set } from "mobx"
+import { action, observe, remove, runInAction, set, toJS } from "mobx"
 import { SessionPlayerContainer } from "./SessionPlayerContainer"
 
 // noinspection TypeScriptUnresolvedVariable
@@ -138,12 +138,20 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     this.updateSession(player, data)
   }
 
-  @BindAction() registerComponentDataVars(componentId: string, ...dataVarNameArgs: Array<string | string[]>) {
-    set(this.state.componentDataVars, componentId, uniq(flatten(dataVarNameArgs)))
+  @Bind registerComponentDataVars(componentId: string, ...dataVarNameArgs: Array<string | string[]>) {
+    runInAction(() => {
+      set(
+          this.state.componentDataVars,
+          componentId,
+          uniq(flatten(dataVarNameArgs))
+      )
+    })
   }
 
-  @BindAction() unregisterComponentDataVars(componentId: string) {
-    remove(this.state.componentDataVars, componentId)
+  @Bind unregisterComponentDataVars(componentId: string) {
+    runInAction(() => {
+      remove(this.state.componentDataVars,componentId)
+    })
   }
 
   @Bind onComponentDataVarsChanged() {
@@ -184,7 +192,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession",
           timeAndDuration = toSessionTimeAndDuration(timing)
       
-      if (!isEqual(timeAndDuration, this.state[stateKey].timeAndDuration)) {
+      if (!isEqual(timeAndDuration, toJS(this.state[stateKey].timeAndDuration))) {
         this.patchState({
           [stateKey]: {
             ...this.state[stateKey],
@@ -621,26 +629,22 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    * Merge & patch SessionManagerState slice
    */
 
-  @BindAction()
+  @action
+  @Bind
   private patchState(newStateOrFn: Partial<SessionsState> | SessionManagerStatePatchFn = {}): void {
-    const currentState = this.state,
-      currentActiveSessionType = currentState.activeSessionType,
-      currentActiveSession = this.getActiveSessionFromState(currentState),
-      currentActiveSessionId = getWeekendInfo(currentActiveSession)?.sessionID
-
-    const newStatePatch = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn
-    //  newState: SessionsState = { ...this.state, ...newStatePatch }
-
-    this.sharedAppState.updateSessions(newStatePatch)
-
-    // const newState = this.state,
-    //   newActiveSessionType = newState?.activeSessionType,
-    //   newActiveSession = this.getActiveSessionFromState(newState),
-    //   newActiveSessionId = getWeekendInfo(newActiveSession)?.sessionID,
-    //   activeSessionChanged =
-    //     currentActiveSessionType !== newActiveSessionType || currentActiveSessionId !== newActiveSessionId
-
-    //this.state_ = newState
+    
+      const currentState = this.state,
+          currentActiveSessionType = currentState.activeSessionType,
+          currentActiveSession = this.getActiveSessionFromState(currentState),
+          currentActiveSessionId = getWeekendInfo(currentActiveSession)?.sessionID
+    
+    runInAction(() => {
+      const newStatePatch = isFunction(newStateOrFn) ?
+          newStateOrFn(currentState) :
+          newStateOrFn
+      
+      this.sharedAppState.updateSessions(newStatePatch)
+    })
   }
 
   /**

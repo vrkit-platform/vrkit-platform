@@ -242,7 +242,7 @@ export class PluginLoader {
   }
 
   constructor(
-    readonly manager: PluginClientManager,
+    readonly manager: PluginManagerClient,
     readonly serviceContainer: Container,
     readonly install: PluginInstall
   ) {
@@ -294,12 +294,12 @@ export class PluginLoader {
     return this.state.componentFactory(this.install.manifest, componentDef, this.serviceContainer)
   }
 
-  static create(manager: PluginClientManager, serviceContainer: Container, install: PluginInstall): PluginLoader {
+  static create(manager: PluginManagerClient, serviceContainer: Container, install: PluginInstall): PluginLoader {
     return new PluginLoader(manager, serviceContainer, install)
   }
 
   static async GetComponent(
-    manager: PluginClientManager,
+    manager: PluginManagerClient,
     serviceContainer: Container,
     install: PluginInstall,
     componentDef: PluginComponentDefinition
@@ -315,7 +315,7 @@ type TComponentLoader = (
 ) => Promise<TPluginComponentType>
 
 @Singleton()
-export class PluginClientManager {
+export class PluginManagerClient {
   private readonly state_ = {
     loaders: new Map<string, PluginLoader>()
   }

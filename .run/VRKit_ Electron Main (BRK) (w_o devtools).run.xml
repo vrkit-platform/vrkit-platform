@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="VRKit: Electron Main (BRK) (w/o devtools)" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--inspect-brk=9222 dist\dev\main\electron-main.js -- --no-devtools" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$PROJECT_DIR$/packages/js/vrkit-app" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_native_interop" CONFIG_NAME="DebugClionNinja" RUN_PATH="$PROJECT_DIR$/node_modules/electron/dist/electron.exe">
+  <configuration default="false" name="VRKit: Electron Main (BRK) (w/o devtools)" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--inspect-brk=9222 dist\main\electron-main.js -- --no-devtools" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$PROJECT_DIR$/packages/js/vrkit-app" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_native_interop" CONFIG_NAME="DebugClionNinja" RUN_PATH="$PROJECT_DIR$/node_modules/electron/dist/electron.exe">
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       <option name="CMake.Explicit.Target" predefinedTargetName="vrkit_openxr_lib" />

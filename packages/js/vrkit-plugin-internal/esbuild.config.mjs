@@ -32,7 +32,6 @@ async function run() {
         "@mui/x-data-grid",
         "@mui/x-tree-view",
         "lodash",
-        "lodash.debounce",
         "usehooks-ts",
         "vrkit-plugin-sdk",
         "vrkit-models",

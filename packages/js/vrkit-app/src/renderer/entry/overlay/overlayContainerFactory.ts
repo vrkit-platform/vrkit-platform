@@ -10,7 +10,7 @@ import { APP_STORE_ID, isDev } from "../../renderer-constants"
 import { FileSystemManager } from "vrkit-shared"
 import TrackManager from "../../services/track-manager"
 import OverlayManagerClient, {
-  PluginClientManager
+  PluginManagerClient
 } from "../../services/overlay-client"
 import SharedAppStateClient
   from "vrkit-app-renderer/services/shared-app-state-client"
@@ -46,7 +46,7 @@ async function createContainer(): Promise<Container> {
       .bindClass(TrackManager)
       .bindClass(DashboardManagerClient)
       .bindClass(OverlayManagerClient)
-      .bindClass(PluginClientManager)
+      .bindClass(PluginManagerClient)
       .resolveAll()
 
     // container = await container.resolveAll()

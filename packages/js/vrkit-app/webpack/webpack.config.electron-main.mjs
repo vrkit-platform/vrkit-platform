@@ -1,53 +1,46 @@
-import { asOption } from "@3fv/prelude-ts"
 import Path from "path"
-// @ts-ignore
-import {
-  toModulePaths,
-  assetsDir,
-  pkgVersion,
-  HtmlWebpackPlugin,
-  defaultWebpackConfig,
-  electronExternals,
-  webpackDevServerConfig,
-  vrkAppSrcDir,
-  vrkAppDir, isDevEnabled
-} from "vrkit-builder-tool"
 import Sh from "shelljs"
+// @ts-ignore
+import { defaultWebpackConfig, electronExternals, isDevEnabled, toModulePaths } from "vrkit-builder-tool"
 import Webpack from "webpack"
-import CopyPlugin from "copy-webpack-plugin"
 
 const { __dirname } = toModulePaths(import.meta.url)
 
 const moduleDir = Path.resolve(__dirname, ".."),
   distDir = Path.join(moduleDir, "dist", isDevEnabled ? "dev" : "prod"),
-  targetDir = Path.join(distDir,"main")
+  targetDir = Path.join(distDir, "main"),
+  targetLogServerDir = Path.join(distDir, "main-logserver")
 
 Sh.mkdir("-p", targetDir)
+Sh.mkdir("-p", targetLogServerDir)
 
-export default () => {
-  return defaultWebpackConfig("electron-main", "electron-main", moduleDir, {
-    distDir: targetDir,
-    entryFile: "./src/main/entry-main.ts",
-    
+function newMainWebpackConfig() {
+  return {
     devtool: "source-map",
     config: {
-      externals: [
-        /fast-crc/,
-        electronExternals,
-      ],
+      externals: [/fast-crc/, electronExternals],
       plugins: [
         new Webpack.DefinePlugin({
-          "process.env.DEV_URI_HTTP": JSON.stringify("http://localhost:1618")
+          ...(isDevEnabled && { "process.env.DEV_URI_HTTP": JSON.stringify("http://localhost:1618") })
         })
-        // new CopyPlugin({
-        //   patterns: [
-        //     {
-        //       from: `${dirs.renderer.dist}/`,
-        //       to: rendererTargetDir + "/"
-        //     }
-        //   ]
-        // })
       ]
     }
-  })
+  }
+}
+
+export default () => {
+  return [
+    defaultWebpackConfig("electron-main", "electron-main", moduleDir, {
+      distDir: targetDir,
+      entryFile: "./src/main/entry-main.ts",
+
+      ...newMainWebpackConfig()
+    }),
+    defaultWebpackConfig("node", "electron-main-logserver", moduleDir, {
+      distDir: targetLogServerDir,
+      entryFile: "./src/main/entry-main-logserver.ts",
+
+      ...newMainWebpackConfig()
+    })
+  ]
 }

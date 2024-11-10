@@ -50,7 +50,6 @@ import { Deferred } from "@3fv/deferred"
 import { match } from "ts-pattern"
 import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
-import { BindAction } from "../../decorators"
 import { action, observe, remove, runInAction, set, toJS } from "mobx"
 import { SessionPlayerContainer } from "./SessionPlayerContainer"
 

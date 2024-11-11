@@ -16,6 +16,7 @@ import { app } from "electron"
 import { importDefault } from "vrkit-shared"
 import { getLogger } from "@3fv/logger-proxy"
 import * as ElectronRemote from "@electron/remote/main"
+import { isPromise } from "@3fv/guard"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -31,6 +32,11 @@ process.on("unhandledRejection",(...args:any[]) => {
 async function start() {
   if (!ElectronRemote.isInitialized())
     ElectronRemote.initialize()
+  
+  const logServerInit = await importDefault(import("./log-server/main"))
+  if (isPromise(logServerInit)) {
+    await logServerInit
+  }
   
   await importDefault(import("./bootstrap"))
   await importDefault(import("./launch"))

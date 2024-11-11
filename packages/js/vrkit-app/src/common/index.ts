@@ -1,2 +1,2 @@
 export * from "./BundledTypes"
-export * from "./UtilityProcessManagerTypes"
+export * from "./upm/UPMTypes"

@@ -1,3 +1,4 @@
+export * from "./JSONSerialization"
 export * from "./SignalFlag"
 export * from "./ClassConstructorWithPartial"
 export * from "./filters"

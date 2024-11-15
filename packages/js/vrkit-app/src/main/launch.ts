@@ -1,20 +1,18 @@
-import { isDev, isMac, WindowSizeDefault } from "./constants"
-import SharedAppState, { getSharedAppStateStore } from "./services/store"
+import { isMac, WindowSizeDefault } from "./constants"
+import { getSharedAppStateStore } from "./services/store"
 
 import Path from "path"
 import { app, BrowserWindow } from "electron"
 import { createWindowOpenHandler, resolveHtmlPath, windowOptionDefaults } from "./utils"
 
-import { assert, defaults, signalFlag } from "vrkit-shared"
+import { assert, defaults, ISharedAppState, signalFlag } from "vrkit-shared"
 
 import { getLogger } from "@3fv/logger-proxy"
 import { getService } from "./ServiceContainer"
 import { MainWindowManager, WindowManager } from "./services/window-manager"
 import * as ElectronRemote from "@electron/remote/main"
 import { DashboardManager } from "./services/dashboard-manager"
-import { asOption } from "@3fv/prelude-ts"
 import { Deferred } from "@3fv/deferred"
-import { ISharedAppState } from "vrkit-shared"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -25,7 +23,7 @@ Object.assign(global, {
   webpackRequire: __webpack_require__,
   // webpackResolve: (name: string) => require.resolve(name),
   webpackModules: __webpack_modules__,
-  nodeRequire: __non_webpack_require__,
+  nodeRequire: __non_webpack_require__
 })
 
 const BuildPaths = {
@@ -78,7 +76,9 @@ function prepareWindow(state: ISharedAppState, win: BrowserWindow) {
   win.on("show", () => {
     win.webContents.setWindowOpenHandler(windowOpenHandler)
     if (state.devSettings.alwaysOpenDevTools) {
-      win.webContents.openDevTools()
+      win.webContents.openDevTools({
+          mode: "detach"
+        })
     }
   })
 
@@ -131,8 +131,6 @@ async function launch() {
       // SHOW MAIN WINDOW
       mainWindow.show()
       mainWindowManager.emit("UI_READY", mainWindow)
-      
-      
     })
 
     mainWindow.on("closed", () => {
@@ -141,16 +139,14 @@ async function launch() {
       log.info(`Main window closed, exiting app`)
       app.quit()
       app.exit(0)
-      
+
       Deferred.delay(200).then(() => {
         const pid = process.pid
         console.info(`Exiting process`)
-        
+
         process.kill(pid)
         process.exit(0)
-        
       })
-      
     })
 
     await mainWindow.loadURL(url).catch(err => log.error("Failed to load url", url, err))

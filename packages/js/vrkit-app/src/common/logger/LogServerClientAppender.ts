@@ -4,6 +4,7 @@ import type { LogServerEventData, LogServerRequestMap } from "./LogServerTypes"
 import { assign, defaults } from "lodash"
 import { Future } from "@3fv/prelude-ts"
 import Debug from "debug"
+import { JSONStringifyAny } from "vrkit-shared"
 
 
 
@@ -157,7 +158,7 @@ export class LogServerClientAppender implements Appender {
         return
       }
 
-      const data = this.config.prettyPrint ? JSON.stringify(record, null, 2) : JSON.stringify(record)
+      const data = this.config.prettyPrint ? JSONStringifyAny(record, 2) : JSONStringifyAny(record)
       queue.push(data)
       this.flush()
     } catch (err) {

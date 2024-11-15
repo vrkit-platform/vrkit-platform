@@ -12,6 +12,7 @@ const log = getLogger(__filename)
 
 export interface IDevPaths {
   root: string
+  trackMapsPath: string
 }
 
 function createDevPaths(): IDevPaths {
@@ -20,7 +21,8 @@ function createDevPaths(): IDevPaths {
   } else {
     const pkgPath = FindPackagePath("vrkit-project")
     return pkgPath ? {
-      root: pkgPath[0]
+      root: pkgPath[0],
+      trackMapsPath: Path.join(pkgPath[0], "data", "track_maps")
     } : null
   }
 }
@@ -51,7 +53,8 @@ const trackMapsBuiltInDirResult = FindPathInTree(["resources", "track_maps"], {
   dir: __dirname,
   type: "dir"
 })
-const trackMapsSearchPath = [trackMapsDir, trackMapsBuiltInDirResult?.[1]].filter(isString)
+
+const trackMapsSearchPath = [trackMapsDir, trackMapsBuiltInDirResult?.[1], DevPaths?.trackMapsPath].filter(isString)
 const trackMapListFile = Path.join(appDataLocalDir, "track-map-file.jsonl")
 
 const dashboardsDir = Path.join(appDataLocalDir, "Dashboards")

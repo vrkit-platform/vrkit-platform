@@ -1,0 +1,56 @@
+{
+    "$schema": "https://lnav.org/schemas/format-v1.schema.json",
+    "vrkit_json_log": {
+        "title": "VRKit JSON Log",
+        "description": "VRKit JSON Log",
+        "url": "http://schemas.3form.ventures/VRKit_JSON_Log_Format",
+        "file-type": "json",
+        "hide-extra": true,
+        "ordered-by-time": true,
+        "level-field": "level",
+        "line-format": [
+            {
+                "field": "__timestamp__"
+            },
+            " [",
+            {
+                "field": "level"
+            },
+            "] ",
+            {
+                "prefix": "",
+                "suffix": "",
+                "field": "category",
+                "overflow": "dot-dot",
+                "max-width": 30,
+                "min-width": 30
+            },
+            " >> ",
+            {
+                "field": "message"
+            },
+            " ",
+            {
+                "field": "args"
+            }
+        ],
+        "timestamp-field": "timestamp",
+        "timestamp-divisor": 1000,
+        "value": {
+            "args": {
+                "kind": "json",
+                "hidden": true
+            },
+            "message": {
+                "kind": "string"
+            },
+            "category": {
+                "kind": "string"
+            },
+            "level": {
+                "kind": "string"
+            }
+            
+        }
+    }
+}

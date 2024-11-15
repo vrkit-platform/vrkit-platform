@@ -9,31 +9,52 @@
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
-      "default": "./lib/index.js"
+      "default": "./lib/index.js",
+      "node": "./lib/index.js",
+      "import": "./lib/index.js",
+      "require": "./lib/index.js"
     },
     "./utils": {
       "types": "./lib/utils/index.d.ts",
-      "default": "./lib/utils/index.js"
+      "default": "./lib/utils/index.js",
+      "node": "./lib/utils/index.js",
+      "import": "./lib/utils/index.js",
+      "require": "./lib/utils/index.js"
     },
     "./services": {
       "types": "./lib/services/index.d.ts",
-      "default": "./lib/services/index.js"
+      "default": "./lib/services/index.js",
+      "node": "./lib/services/index.js",
+      "import": "./lib/services/index.js",
+      "require": "./lib/services/index.js"
     },
     "./models": {
       "types": "./lib/models/index.d.ts",
-      "default": "./lib/models/index.js"
+      "default": "./lib/models/index.js",
+      "node": "./lib/models/index.js",
+      "import": "./lib/models/index.js",
+      "require": "./lib/models/index.js"
     },
     "./decorators": {
       "types": "./lib/decorators/index.d.ts",
-      "default": "./lib/decorators/index.js"
+      "default": "./lib/decorators/index.js",
+      "node": "./lib/decorators/index.js",
+      "import": "./lib/decorators/index.js",
+      "require": "./lib/decorators/index.js"
     },
     "./constants": {
       "types": "./lib/constants/index.d.ts",
-      "default": "./lib/constants/index.js"
+      "default": "./lib/constants/index.js",
+      "node": "./lib/constants/index.js",
+      "import": "./lib/constants/index.js",
+      "require": "./lib/constants/index.js"
     },
     "./tools": {
       "types": "./lib/tools/index.d.ts",
-      "default": "./lib/tools/index.js"
+      "default": "./lib/tools/index.js",
+      "node": "./lib/tools/index.js",
+      "import": "./lib/tools/index.js",
+      "require": "./lib/tools/index.js"
     }
   },
   "scripts": {

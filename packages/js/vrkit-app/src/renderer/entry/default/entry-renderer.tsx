@@ -1,5 +1,6 @@
 import ReactDOM from "react-dom/client"
 import { get } from "lodash/fp"
+import LogServerRendererSetup from "../../../common/logger/renderer"
 
 process.on("uncaughtException",(...args:any[]) => {
   console.error("uncaughtException", args)
@@ -16,6 +17,7 @@ async function start() {
   //   webpackModules: __webpack_modules__,
   //   nodeRequire: __non_webpack_require__,
   // })
+  await LogServerRendererSetup()
   
   const renderRoot = await import("./renderRoot").then(get("default"))
   

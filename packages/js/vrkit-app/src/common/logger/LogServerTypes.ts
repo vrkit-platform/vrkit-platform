@@ -1,12 +1,16 @@
 
-
-export enum LogServerMessageType {
-  LogRecords = "LogRecords"
+export interface LogServerEventData {
+  clientId: string
+  records: string[]
 }
 
-export interface LogServerMessageArgs {
-  [LogServerMessageType.LogRecords]: {
-    clientId: string
-    buffers: Buffer[]
-  }
+export interface LogServerRecordCount {
+  count: number
 }
+
+export interface LogServerRequestMap {
+  getLogRecordCount: () => Promise<LogServerRecordCount>
+  getLogFile: () => Promise<string>
+}
+
+export const LogServerServiceName = "logserver"

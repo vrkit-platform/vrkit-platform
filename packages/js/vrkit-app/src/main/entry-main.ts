@@ -33,7 +33,7 @@ async function start() {
   if (!ElectronRemote.isInitialized())
     ElectronRemote.initialize()
   
-  const logServerInit = await importDefault(import("./log-server/main"))
+  const logServerInit = await importDefault(import("../common/logger/main"))
   if (isPromise(logServerInit)) {
     await logServerInit
   }

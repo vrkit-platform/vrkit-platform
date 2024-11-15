@@ -1,40 +1,43 @@
-import { assign, defaults } from "lodash"
 import type { Appender, LogRecord } from "@3fv/logger-proxy"
+import type { UPM } from "@3fv/electron-utility-process-manager"
+import type { LogServerEventData, LogServerRequestMap } from "./LogServerTypes"
+import { assign, defaults } from "lodash"
 import { Future } from "@3fv/prelude-ts"
-import { Buffer } from "buffer"
 import Debug from "debug"
-import { UtilityProcess } from "electron"
-import { match } from "ts-pattern"
-import { UPM } from "../upm/UPMTypes"
+
 
 
 const debug = Debug("vrkit:UPMLogServerClientAppender")
 
-const getDefaultConfig = (): MainLogAppenderConfig => ({
+const getDefaultConfig = (): LogServerClientAppenderConfig => ({
   prettyPrint: false
 })
 
-function applyConfigDefaults(options: MainLogAppenderOptions): MainLogAppenderConfig {
+function applyConfigDefaults(options: LogServerClientAppenderOptions): LogServerClientAppenderConfig {
   return defaults(options, getDefaultConfig())
 }
 
-export interface MainLogAppenderConfig<Record extends LogRecord = any> {
+export interface LogServerClientAppenderConfig {
   prettyPrint: boolean
 }
 
-export type MainLogAppenderOptions<Record extends LogRecord = any> = Partial<MainLogAppenderConfig<Record>>
+export type LogServerClientAppenderOptions = Partial<LogServerClientAppenderConfig>
 
-export class MainLogAppender<Record extends LogRecord> implements Appender<Record> {
-  readonly config: MainLogAppenderConfig<Record>
+export class LogServerClientAppender implements Appender {
+  readonly config: LogServerClientAppenderConfig
 
   private readonly state: {
     flushing: boolean
-    queue: Array<Buffer>
+    flushContinue: boolean
+    queue: Array<string>
     ready: boolean
+    destroyed: boolean
     error?: Error
   } = {
     ready: false,
     flushing: false,
+    flushContinue: false,
+    destroyed: false,
     queue: []
   }
 
@@ -45,9 +48,9 @@ export class MainLogAppender<Record extends LogRecord> implements Appender<Recor
   /**
    * Initialize and setup the appender
    *
-   * @returns {MainLogAppender<Record>}
+   * @returns {LogServerClientAppender<Record>}
    */
-  setup(): MainLogAppender<Record> {
+  setup(): LogServerClientAppender {
     const { state } = this
     if (!!state.ready) {
       return this
@@ -76,7 +79,7 @@ export class MainLogAppender<Record extends LogRecord> implements Appender<Recor
   async close(): Promise<void> {
     await this.flush()
       .onComplete(() => {
-        this.service.close()
+        this.messageClient.close()
       })
       .toPromise()
   }
@@ -93,26 +96,44 @@ export class MainLogAppender<Record extends LogRecord> implements Appender<Recor
    * Appends the log queue records to the file
    */
   private flush(): Future<boolean> {
-    const { state, service } = this
+    const { state, messageClient } = this
 
-    if (!service) {
+    if (!messageClient) {
       console.error("Service must be set in order to flush")
+      return Future.ok(false)
+    }
+
+    if (state.destroyed) {
+      console.error("Appender is destroyed, can not flush")
+      return Future.ok(false)
+    }
+
+    if (state.flushing) {
+      console.error("Flush in progress, only 1 flush runs at a time")
+      state.flushContinue = state.queue.length > 0
       return Future.ok(false)
     }
 
     state.flushing = true
     return Future.do(async () => {
       try {
-        const buffers = [...this.queue]
+        const records = [...this.queue]
         this.queue.splice(0, this.queue.length)
-        
-        service.sendEvent({buffers})
+
+        const msg:LogServerEventData = { clientId: this.messageClient.clientId, records }
+        messageClient.sendEvent(msg)
         return true
       } catch (err) {
         console.error(`Failed to send log records`, err)
         return false
       } finally {
-        this.state.flushing = false
+        state.flushing = false
+        if (state.flushContinue) {
+          state.flushContinue = false
+          queueMicrotask(() => {
+            this.flush()
+          })
+        }
       }
     })
   }
@@ -122,9 +143,14 @@ export class MainLogAppender<Record extends LogRecord> implements Appender<Recor
    *
    * @param record
    */
-  append(record: Record): void {
+  append(record: LogRecord): void {
+    const { destroyed, queue } = this.state
+    if (destroyed || !record) {
+      console.error("Appender is destroyed or record is null, can not append")
+      return
+    }
+
     try {
-      const { queue } = this.state
       const count = queue.length
       if (count > 999) {
         debug(`Too many log records (${count}) are in the queue, skipping %O`, record)
@@ -132,7 +158,7 @@ export class MainLogAppender<Record extends LogRecord> implements Appender<Recor
       }
 
       const data = this.config.prettyPrint ? JSON.stringify(record, null, 2) : JSON.stringify(record)
-      queue.push(Buffer.from(data + "\n", "utf-8"))
+      queue.push(data)
       this.flush()
     } catch (err) {
       console.warn(`Failed to synchronize `, err)
@@ -141,12 +167,12 @@ export class MainLogAppender<Record extends LogRecord> implements Appender<Recor
 
   /**
    *
-   * @param service
-   * @param {Partial<MainLogAppenderOptions<Record>>} options
+   * @param messageClient
+   * @param {Partial<LogServerClientAppenderOptions<Record>>} options
    */
   constructor(
-    readonly service: UPM.ServiceClient<any,any>,
-    options: Partial<MainLogAppenderOptions<Record>> = {}
+    readonly messageClient: UPM.IMessageClient<LogServerRequestMap>,
+    options: LogServerClientAppenderOptions = {}
   ) {
     this.config = applyConfigDefaults(options)
 

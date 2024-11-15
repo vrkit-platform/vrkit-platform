@@ -20,6 +20,7 @@
   "dependencies": {
     "@3fv/deferred": "^1.2.10",
     "@3fv/ditsy": "^1.0.13",
+    "@3fv/electron-utility-process-manager": "^1.0.1",
     "@3fv/guard": "^1.4.35",
     "@3fv/logger-proxy": "^1.0.67",
     "@3fv/prelude-ts": "^0.8.28",

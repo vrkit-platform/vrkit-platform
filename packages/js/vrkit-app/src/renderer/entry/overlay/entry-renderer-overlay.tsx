@@ -1,5 +1,6 @@
 import ReactDOM from "react-dom/client"
 import { get } from "lodash/fp"
+import LogServerRendererSetup from "../../../common/logger/renderer"
 
 
 async function start() {
@@ -11,6 +12,9 @@ async function start() {
     console.error("unhandledrejection", ev, ...args)
     ev?.preventDefault?.()
   })
+  
+  await LogServerRendererSetup()
+  
   const renderRoot = await import("./renderOverlayRoot").then(get("default"))
   
   const

@@ -4,7 +4,7 @@ import { styled, useTheme } from "@mui/material/styles"
 import Grid from "@mui/material/Unstable_Grid2"
 import { AppContent } from "vrkit-app-renderer/layouts/app"
 import React, { useState } from "react"
-import { DashboardsListView } from "../../components/dashboards-list-view"
+import { DashboardsListView } from "../../components/dashboards/list-view"
 import {
   child,
   ClassNamesKey,
@@ -17,7 +17,7 @@ import {
   hasCls
 } from "vrkit-shared-ui"
 import clsx from "clsx"
-import { DashboardsListEditor } from "../../components/dashboards-list-editor"
+import { DashboardsListEditor } from "../../components/dashboards/list-editor"
 import { getLogger } from "@3fv/logger-proxy"
 import DashboardsViewContext from "./DashboardsViewContext"
 

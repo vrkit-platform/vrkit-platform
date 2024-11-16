@@ -36,10 +36,10 @@ import Typography from "@mui/material/Typography"
 import { FlexColumnBox, FlexColumnCenterBox } from "vrkit-shared-ui"
 import { isEmpty } from "vrkit-shared"
 import { asOption } from "@3fv/prelude-ts"
-import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
-import { useAppSelector } from "../../services/store"
+import { sharedAppSelectors } from "../../../services/store/slices/shared-app"
+import { useAppSelector } from "../../../services/store"
 import DashboardsViewContext
-  from "../../pages/dashboards/DashboardsViewContext"
+  from "../../../pages/dashboards/DashboardsViewContext"
 import ButtonBase from "@mui/material/ButtonBase"
 
 const log = getLogger(__filename)

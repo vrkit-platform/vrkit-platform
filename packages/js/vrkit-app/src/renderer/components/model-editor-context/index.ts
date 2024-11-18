@@ -1,4 +1,4 @@
-import { provideModelEditorContext } from "./ModelEditorContext"
+import { useModelEditorContextProvider } from "./ModelEditorContext"
 
 export * from "./ModelEditorContext"
-export default provideModelEditorContext
+export default useModelEditorContextProvider

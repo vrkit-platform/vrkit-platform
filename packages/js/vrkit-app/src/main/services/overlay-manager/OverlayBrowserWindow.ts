@@ -199,6 +199,7 @@ export class OverlayBrowserWindow {
           this.isVR ? placement.vrLayout.screenRect : placement.screenRect :
           this.isScreen ?
               adjustScreenRect(placement.screenRect) :
+              
               asOption(placement.vrLayout.screenRect)
                   .map(adjustScreenRect)
                   .getOrCall(() => {

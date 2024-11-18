@@ -15,15 +15,17 @@
     "dev:main:hot": "cross-env NODE_ENV=development node --experimental-specifier-resolution=node --experimental-detect-module ./webpack/webpack-hot-config.mjs --config=webpack/webpack.config.electron-main.mjs --watch",
     "dev:renderer": "cross-env NODE_ENV=development NODE_OPTIONS='--experimental-specifier-resolution=node --experimental-detect-module' webpack serve --mode=development --config=webpack/webpack.config.electron-renderer.mjs",
     "start": "electron --inspect=9222 --enable-logging dist/main/electron-main.js",
-    "start:brk": "electron --inspect-brk=9222 --enable-logging dist/main/electron-main.js"
+    "start:brk": "electron --inspect-brk=9222 --enable-logging dist/main/electron-main.js",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build"
   },
   "dependencies": {
-    "@3fv/deferred": "^1.2.10",
+    "@3fv/deferred": "^1.2.12",
     "@3fv/ditsy": "^1.0.13",
     "@3fv/electron-utility-process-manager": "^1.0.1",
     "@3fv/guard": "^1.4.35",
     "@3fv/logger-proxy": "^1.0.67",
-    "@3fv/prelude-ts": "^0.8.28",
+    "@3fv/prelude-ts": "^0.8.34",
     "@awesome.me/kit-79150a3eed": "latest",
     "@electron/remote": "^2.1.2",
     "@emotion/cache": "^11.13.1",
@@ -138,7 +140,17 @@
     "webpack-dev-middleware": "^7.3.0",
     "webpack-dev-server": "^5.0.4",
     "webpack-hot-middleware": "^2.26.1",
-    "webpack-merge": "^6.0.1"
+    "webpack-merge": "^6.0.1",
+    "@chromatic-com/storybook": "^3.2.2",
+    "@storybook/addon-essentials": "^8.5.0-alpha.5",
+    "@storybook/addon-interactions": "^8.5.0-alpha.5",
+    "@storybook/addon-onboarding": "^8.5.0-alpha.5",
+    "@storybook/addon-webpack5-compiler-swc": "^1.0.5",
+    "@storybook/blocks": "^8.5.0-alpha.5",
+    "@storybook/react": "^8.5.0-alpha.5",
+    "@storybook/react-webpack5": "^8.5.0-alpha.5",
+    "@storybook/test": "^8.5.0-alpha.5",
+    "storybook": "^8.5.0-alpha.5"
   },
   "resolutions": {
     "electron": "31.3.0"

@@ -8,7 +8,9 @@ import clsx from "clsx"
 import { getLogger } from "@3fv/logger-proxy"
 
 // MUI
-import MuiTextField, { FilledTextFieldProps as MuiFilledTextFieldProps } from "@mui/material/TextField"
+import {filledInputClasses as muiFilledInputClasses} from "@mui/material/FilledInput"
+import MuiTextField, { FilledTextFieldProps as MuiFilledTextFieldProps, BaseTextFieldProps as MuiBaseTextFieldProps } from "@mui/material/TextField"
+import {inputBaseClasses as muiInputBaseClasses} from "@mui/material/InputBase"
 import { styled } from "@mui/material/styles"
 
 // APP
@@ -29,6 +31,7 @@ import { capitalize } from "lodash"
 import { interceptEvent } from "../../utils/dom"
 import { isDefined, isFunction, isString } from "@3fv/guard"
 import { match } from "ts-pattern"
+import { BaseTextFieldProps } from "@mui/material/TextField/TextField"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -50,14 +53,27 @@ const AppTextFieldRoot = styled(MuiTextField)(({ theme }) => ({
     ...FlexColumn,
     ...FlexDefaults.stretch,
     ...FlexDefaults.stretchSelf,
-
+    
+    [`& .${muiInputBaseClasses.input}, & .${muiFilledInputClasses.input}`]: {
+      paddingLeft: rem(1),
+      paddingRight: rem(1)
+    },
+    
     [hasCls(appTextFieldClasses.flex)]: {
       ...FlexScaleZero
     },
+    
     [hasCls(appTextFieldClasses.hasLabel)]: {
-      marginTop: rem(2),
+      marginTop: rem(0.5),
       "& .MuiInputLabel-root.MuiInputLabel-formControl.MuiInputLabel-shrink": {
-        transform: `translate(0,${rem(-2)})`
+        transform: `translate(${rem(0.5)},${rem(0.15)})`,
+        // "&.MuiInputLabel-filled": {
+        //   transform: `translate(${rem(0.5)},${rem(0.15)})`
+        // },
+        "&:not(.MuiInputLabel-filled)": {
+          transform: `translate(${rem(0.5)},${rem(-0.5)})`
+        },
+        
       }
     },
     "& .MuiFormHelperText-root": {
@@ -73,11 +89,10 @@ const AppTextFieldRoot = styled(MuiTextField)(({ theme }) => ({
 /**
  * TextField Component Properties
  */
-export interface AppTextFieldProps extends Omit<MuiFilledTextFieldProps, "variant"> {
+export interface AppTextFieldProps extends MuiBaseTextFieldProps, Pick<MuiFilledTextFieldProps, "InputProps" | "onChange"> {
   onEnterKeyDown?: React.KeyboardEventHandler<any>
 
   selectOnFocus?: boolean
-
   flex?: boolean
 }
 
@@ -87,7 +102,7 @@ export interface AppTextFieldProps extends Omit<MuiFilledTextFieldProps, "varian
  * @param { AppTextFieldProps } props
  * @returns {JSX.Element}
  */
-export function AppTextField(props: AppTextFieldProps) {
+export function AppTextField(props: AppTextFieldProps): JSX.Element {
   const {
       className,
       onEnterKeyDown,
@@ -152,7 +167,7 @@ export interface AppTextFieldFormikProps<T extends {}, P extends keyof T>
   formikContext?: FormikContextType<T>
 
   label?: string
-
+  
   name: P
 }
 

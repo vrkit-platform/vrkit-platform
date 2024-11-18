@@ -61,7 +61,7 @@ import { appTextFieldClasses, AppTextFieldFormik } from "../../app-text-field"
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
-const classPrefix = "dashboardsListEditor"
+const classPrefix = "dashboardEditor"
 export const classNames = createClassNames(
   classPrefix,
   "root",
@@ -78,11 +78,11 @@ export const classNames = createClassNames(
   "widgets",
   "widget"
 )
-export type DashboardsListEditorClassKey = ClassNamesKey<typeof classNames>
+export type DashboardEditorClassKey = ClassNamesKey<typeof classNames>
 
-const DashboardsListEditorRoot = styled(Box, {
-  name: "DashboardsListEditorRoot",
-  label: "DashboardsListEditorRoot"
+const DashboardEditorRoot = styled(Box, {
+  name: "DashboardEditorRoot",
+  label: "DashboardEditorRoot"
 })(({ theme }) => ({
   // root styles here
   [hasCls(classNames.root)]: {
@@ -159,9 +159,9 @@ const DashboardsListEditorRoot = styled(Box, {
 }))
 
 /**
- * DashboardsListEditor Component Properties
+ * DashboardEditor Component Properties
  */
-export interface DashboardsListEditorProps extends BoxProps {}
+export interface DashboardEditorProps extends BoxProps {}
 
 interface LayoutFieldProps {
   vr?: boolean
@@ -369,11 +369,11 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
 })
 
 /**
- * DashboardsListEditor Component
+ * DashboardEditor Component
  *
- * @param { DashboardsListEditorProps } props
+ * @param { DashboardEditorProps } props
  */
-export function DashboardsListEditor(props: DashboardsListEditorProps) {
+export function DashboardEditor(props: DashboardEditorProps) {
   const theme = useTheme(),
     isMounted = useIsMounted(),
     { className, ...other } = props,
@@ -418,7 +418,7 @@ export function DashboardsListEditor(props: DashboardsListEditorProps) {
     )
 
   return (
-    <DashboardsListEditorRoot
+    <DashboardEditorRoot
       className={clsx(
         classNames.root,
         {
@@ -432,8 +432,8 @@ export function DashboardsListEditor(props: DashboardsListEditorProps) {
         dashConfig={dashConfig}
         onSubmit={onSubmit}
       />
-    </DashboardsListEditorRoot>
+    </DashboardEditorRoot>
   )
 }
 
-export default DashboardsListEditor
+export default DashboardEditor

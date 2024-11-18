@@ -38,9 +38,12 @@ import { isEmpty } from "vrkit-shared"
 import { asOption } from "@3fv/prelude-ts"
 import { sharedAppSelectors } from "../../../services/store/slices/shared-app"
 import { useAppSelector } from "../../../services/store"
-import DashboardsViewContext
-  from "../../../pages/dashboards/DashboardsViewContext"
 import ButtonBase from "@mui/material/ButtonBase"
+import {
+  useModelEditorContext,
+  useModelEditorContextProvider
+} from "../../model-editor-context"
+import Alert from "vrkit-app-renderer/services/alerts"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -97,9 +100,11 @@ export interface DashboardsListItemProps extends Omit<BoxProps, "onClick"> {
 export function DashboardsListItem(props: DashboardsListItemProps) {
   const
       theme = useTheme(),
-      {selectedConfigId, setSelectedConfigId} = useContext(DashboardsViewContext),
       { className, config, ...other } = props,
-      selected = selectedConfigId === config?.id
+      editorContext = useModelEditorContext<DashboardConfig>(),
+      { modelById, mutatingModels, setMutatingModel, isModelMutating } = editorContext,
+      model = modelById(config.id),
+      selected = isModelMutating(config.id)
 
   return (
     <Box
@@ -108,8 +113,16 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
     >
       <ButtonBase
           onClick={() => {
-            setSelectedConfigId(config.id)
+            asOption(model).match({
+              None: () => {
+                Alert.onError(`Unable to find config with id (${config.id})`)
+              },
+              Some: model => {
+                setMutatingModel(model)
+              }
+            })
           }}
+          
           component={Paper} elevation={2} className={clsx(dashboardsListViewClasses.itemPaper)}>
         <FlexColumnBox sx={{...FlexScaleZero}}>
           <Typography variant="h6">{config.name}</Typography>
@@ -136,7 +149,11 @@ export interface DashboardsListViewProps extends BoxProps {}
 export function DashboardsListView(props: DashboardsListViewProps) {
   const { className, ...other } = props,
       configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
-      {selectedConfigId, setSelectedConfigId} = useContext(DashboardsViewContext)
+      editorContext = useModelEditorContext<DashboardConfig>(),
+      { mutatingModels, models, modelById, setMutatingModel, resetMutatingModels } = editorContext
+      
+      
+      
   
   return <DashboardsListViewRoot
       className={clsx(dashboardsListViewClasses.root, className)}
@@ -145,8 +162,6 @@ export function DashboardsListView(props: DashboardsListViewProps) {
     {configs.map(config => <DashboardsListItem
         key={config.id}
         config={config}
-        // onClick={() => setSelectedConfigId(config.id)}
-        // selected={config.id === selectedConfigId}
     />)}
     </Box>
     

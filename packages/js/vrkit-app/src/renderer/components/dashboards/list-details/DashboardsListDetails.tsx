@@ -373,7 +373,7 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
  *
  * @param { DashboardsListEditorProps } props
  */
-export function DashboardsListEditor(props: DashboardsListEditorProps) {
+export function DashboardsListDetails(props: DashboardsListEditorProps) {
   const theme = useTheme(),
     isMounted = useIsMounted(),
     { className, ...other } = props,
@@ -436,4 +436,4 @@ export function DashboardsListEditor(props: DashboardsListEditorProps) {
   )
 }
 
-export default DashboardsListEditor
+export default DashboardsListDetails

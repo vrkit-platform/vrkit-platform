@@ -61,7 +61,7 @@ const equalityProps = Array<keyof ModelWithId>("id", "updatedAt")
 
 type ConflictingModel<T extends ModelWithId> = [persistent: T, mutating: T]
 
-export function provideModelEditorContext<T extends ModelWithId>(models: T[]) {
+export function useModelEditorContextProvider<T extends ModelWithId>(models: T[]) {
   // TYPED PROVIDER
   const Provider = ModelEditorContext.Provider as React.Provider<
     ModelEditorContextValue<T>

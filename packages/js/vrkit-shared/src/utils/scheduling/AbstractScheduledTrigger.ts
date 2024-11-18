@@ -1,9 +1,10 @@
 import { Deferred } from "@3fv/deferred"
-import { Bind } from "../../decorators"
+// import { Bind } from "../../decorators"
 import { Future, Option } from "@3fv/prelude-ts"
 import { isPromise } from "@3fv/guard"
 import { assign } from "lodash"
 import { getLogger } from "@3fv/logger-proxy"
+
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -23,7 +24,7 @@ export abstract class AbstractScheduledTrigger {
     return this.state.mode
   }
 
-  @Bind
+  
   private executeWrapper() {
     this.clear()
 
@@ -34,7 +35,7 @@ export abstract class AbstractScheduledTrigger {
     if (this.state.executeDeferred) {
       warn(`Still executing previous trigger`)
       return this.state.executeDeferred.promise.then(
-        this.executeWrapper
+        this.executeWrapper.bind(this)
       )
     }
 

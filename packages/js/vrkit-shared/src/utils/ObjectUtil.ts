@@ -1,6 +1,4 @@
-import {
-  assert as guardAssert, getValue, isArray, isFunction, isNil, isString
-} from "@3fv/guard"
+import { assert as guardAssert, getValue, isArray, isFunction, isNil, isString } from "@3fv/guard"
 
 import { getLogger } from "@3fv/logger-proxy"
 import {
@@ -13,14 +11,18 @@ import {
   isEqual as _isEqual,
   isObject as _isObject,
   mapValues as _mapValues,
-  negate,
+  negate as _negate,
   ObjectIterator,
   pick as _pick
 } from "lodash"
 
 import { asOption } from "@3fv/prelude-ts"
 import { Pair } from "./collections/pairOf"
-import type { ClassConstructorWithPartial } from "./ClassConstructorWithPartial"
+import {
+  ClassConstructorWithPartial,
+  isMessageTypeClassConstructor,
+  MessageTypeClassConstructor
+} from "./ClassConstructorWithPartial"
 
 export type Primitives = number | boolean | string | undefined | null | symbol | bigint
 
@@ -70,8 +72,8 @@ export const mapValuesDeep = <T extends object, TResult = T>(v: T, callback: Obj
   (isArray(v)
     ? v.map(nv => callback(nv, null, v))
     : _isObject(v)
-    ? _mapValues(v, (v, k) => mapValuesDeep(v as any, callback))
-    : callback(v, null, v)) as any
+      ? _mapValues(v, (v, k) => mapValuesDeep(v as any, callback))
+      : callback(v, null, v)) as any
 
 export function clearArray<T>(arr: Array<T>): Array<T> {
   return arr.splice(0, arr.length)
@@ -113,11 +115,13 @@ export function cloneDeep<T extends object>(o: T, ...newSources: Array<Partial<T
 }
 
 export function cloneInstanceOf<T extends {}>(
-  ctor: ClassConstructorWithPartial<T>,
+  ctor: ClassConstructorWithPartial<T> | MessageTypeClassConstructor<T>,
   o: T,
   ...newSources: Array<Partial<T>>
 ): T {
-  return assign(new ctor(), _cloneDeep(o), ...newSources) as T
+  return isMessageTypeClassConstructor(ctor)
+    ? assign(ctor.clone(o), ...newSources)
+    : (assign(new ctor(), _cloneDeep(o), ...newSources) as T)
 }
 
 export function mixin<T extends object, Mixins extends any[]>(
@@ -175,11 +179,8 @@ export function shallowEqualsProp<T extends object = any, P extends KeysOf<T> = 
 const areLengthsEqual = <Items extends any[]>(arr1: Items, arr2: Items) =>
   !!arr1 && !!arr2 && arr1.length === arr2.length
 
-export type ValuesOf<T extends {}> = T extends Map<any, infer V>
-  ? V
-  : T extends { [key in keyof any]: infer V }
-  ? V
-  : never
+export type ValuesOf<T extends {}> =
+  T extends Map<any, infer V> ? V : T extends { [key in keyof any]: infer V } ? V : never
 
 export function valuesOf<
   T extends object,
@@ -280,11 +281,11 @@ export function transformValues(o, fn: IValueTransformer): any {
   return Array.isArray(o)
     ? o.map(aVal => transformValues(aVal, fn))
     : typeof o === "object"
-    ? Object.keys(o).reduce((newObj: any, nextKey: any) => {
-        newObj[nextKey] = fn(nextKey, o[nextKey])
-        return newObj
-      }, {})
-    : o
+      ? Object.keys(o).reduce((newObj: any, nextKey: any) => {
+          newObj[nextKey] = fn(nextKey, o[nextKey])
+          return newObj
+        }, {})
+      : o
 }
 
 export function extractError(error: Error): Error | null {
@@ -298,7 +299,6 @@ export function extractError(error: Error): Error | null {
   return newError
 }
 
-
 export type EnumValueMap<T, K extends keyof T & string = keyof T & string> = {
   [key in K]: T[key] & string
 }
@@ -311,7 +311,7 @@ export function isEmpty(o: any): boolean {
   return isNil(o) || (!Array.isArray(o) && !isString(o)) || !(getValue(() => o.length, 0) > 0)
 }
 
-export const isNotEmpty = negate(isEmpty)
+export const isNotEmpty = _negate(isEmpty)
 
 export const isNotEmptyString = (s: any): s is string => isNotEmpty(s) && isString(s)
 
@@ -361,7 +361,6 @@ export function toLabelString(str: string): string {
 export function getFunctionOrValue<T>(valueOrFn: T | (() => T)): T {
   return isFunction(valueOrFn) ? valueOrFn() : valueOrFn
 }
-
 
 export function findEntry<O extends {}>(o: O, predicate: (value: ValuesOf<O>, key: KeysOf<O>) => boolean) {
   return entriesOf<O>(o).find(([k, v]) => predicate(v, k as KeysOf<O>))

@@ -19,7 +19,12 @@ import {
 import clsx from "clsx"
 import { DashboardsListEditor } from "../../components/dashboards/list-editor"
 import { getLogger } from "@3fv/logger-proxy"
-import DashboardsViewContext from "./DashboardsViewContext"
+import { useAppSelector } from "../../services/store"
+import { sharedAppSelectors } from "../../services/store/slices/shared-app"
+import {
+  useModelEditorContextProvider
+} from "../../components/model-editor-context"
+import { DashboardConfig } from "vrkit-models"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -47,17 +52,22 @@ const DashboardsViewRoot = styled(Box, {
 
 export function DashboardsView() {
   const theme = useTheme(),
-      [selectedConfigId,setSelectedConfigId] = useState(""),
-      Context = DashboardsViewContext
+      configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
+      editorContext = useModelEditorContextProvider<DashboardConfig>(configs),
+      { Provider: ModelEditorProvider, modelById, mutatingModels, setMutatingModel, isModelMutating } = editorContext
+      
+      
 
   return (
     <AppContent>
-      <Context.Provider value={{selectedConfigId, setSelectedConfigId}}>
-        <DashboardsViewRoot className={clsx(dashboardsViewClasses.root)}>
-          <DashboardsListView className={clsx(dashboardsViewClasses.list)} />
-          <DashboardsListEditor className={clsx(dashboardsViewClasses.editor)} />
-        </DashboardsViewRoot>
-      </Context.Provider>
+      <ModelEditorProvider value={editorContext}>
+      
+          <DashboardsViewRoot className={clsx(dashboardsViewClasses.root)}>
+            <DashboardsListView className={clsx(dashboardsViewClasses.list)} />
+            <DashboardsListEditor className={clsx(dashboardsViewClasses.editor)} />
+          </DashboardsViewRoot>
+      
+      </ModelEditorProvider>
     </AppContent>
   )
 }

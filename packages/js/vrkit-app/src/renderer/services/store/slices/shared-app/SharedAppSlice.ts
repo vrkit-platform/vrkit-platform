@@ -2,7 +2,6 @@ import { getLogger } from "@3fv/logger-proxy"
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import {
   type ISharedAppState, ISharedAppStateLeaf,
-  newSharedAppState,
   type ThemeId
 } from "vrkit-shared"
 import { assign, Identity, isNotEmpty } from "vrkit-shared"
@@ -84,7 +83,7 @@ function createActiveSessionSelector<T>(selector: (session: SessionDetail) => T)
 
 const slice = createSlice({
   name: "shared",
-  initialState: newSharedAppState(),
+  initialState: () => ({} as any),// newSharedAppState(),
   reducers: {
     patchLeaf: (state: ISharedAppState, action: PayloadAction<[ISharedAppStateLeaf, Partial<ISharedAppState>]>) => {
       const [leaf, patch] = action.payload

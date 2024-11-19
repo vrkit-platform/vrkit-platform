@@ -14,7 +14,6 @@ import {
   isValueSchema,
   newActionsState,
   newDashboardsState,
-  newDevSettings,
   newOverlaysState,
   newPluginsState,
   newSessionsState,
@@ -34,6 +33,8 @@ import { ipcMain, IpcMainInvokeEvent } from "electron"
 import { serialize } from "serializr"
 import { AutoOpenDevToolsOverride, isDev } from "../../constants"
 import type { PartialDeep } from "type-fest"
+import { AppPaths, AppFiles, FileExtensions, type IAppPaths, type IAppStorage, type IAppFiles, type IFileExtensions } from "vrkit-shared/constants/node"
+import { newDevSettings } from "vrkit-shared/models/node"
 
 const log = getLogger(__filename)
 
@@ -108,6 +109,7 @@ export class MainSharedAppState implements ISharedAppState {
 
   private unload() {
     ipcMain.removeHandler(ElectronIPCChannel.fetchSharedAppState)
+    ipcMain.removeHandler(ElectronIPCChannel.fetchAppStorage)
     this.disposers_.dispose()
   }
 
@@ -133,27 +135,10 @@ export class MainSharedAppState implements ISharedAppState {
             }
           )
         )
-        // if (leaf === "sessions") {
-        //   log.info(`Observing ${leaf} on main state`)
-        //
-        //   this.disposers_.push(observe(this[leaf], () => {
-        //     log.info(`Root change detected on ${leaf}`)
-        //     this.broadcast(leaf)
-        //   }))
-        // } else {
-        //   log.info(`Deep Observing ${leaf} on main state`)
-        //
-        //   this.disposers_.push(deepObserve(this[leaf], (change, path) => {
-        //     log.info(`Root change detected on ${leaf}: ${path}`)
-        //     this.broadcast(leaf)
-        //   }))
-        // }
       }
-      // this.disposers_.push(deepObserve(this, this.onChange))
-      //this.stopObserving = observe(this, this.onChange)
-      // this.disposers_.push(reaction(() => this.toJSON(), (json, prevJson) =>
-      // { log.info("Root change detected") this.broadcast(toJS(json)) }))
+      
       ipcMain.handle(ElectronIPCChannel.fetchSharedAppState, this.fetchSharedAppStateHandler)
+      ipcMain.handle(ElectronIPCChannel.fetchAppStorage, this.fetchAppStorageHandler)
       if (import.meta.webpackHot) {
         import.meta.webpackHot.addDisposeHandler(() => {
           warn(`HMR removing observer`)
@@ -254,6 +239,11 @@ export class MainSharedAppState implements ISharedAppState {
   @Bind
   private async fetchSharedAppStateHandler(_ev: IpcMainInvokeEvent): Promise<ISharedAppState> {
     return toJS(this.toJSON())
+  }
+  
+  @Bind
+  private async fetchAppStorageHandler(_ev: IpcMainInvokeEvent): Promise<IAppStorage> {
+    return {paths:AppPaths, files: AppFiles, fileExtensions: FileExtensions}
   }
 
   toJSON() {

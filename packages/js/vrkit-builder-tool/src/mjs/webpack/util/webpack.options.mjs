@@ -15,6 +15,10 @@ const builderDir = Path.resolve(dirname, "..", "..", "..", "..")
 const rootDir = Path.resolve(builderDir, "..", "..", "..")
 const pkgsDir = Path.join(rootDir, "packages", "js")
 
+const vrkSharedDir = Path.join(pkgsDir, "vrkit-shared")
+const vrkSharedSrcDir = Path.join(vrkSharedDir, "src")
+
+
 const vrkNativeInteropDir = Path.join(pkgsDir, "vrkit-native-interop")
 
 const vrkAppDir = Path.join(pkgsDir, "vrkit-app")
@@ -52,6 +56,8 @@ export {
   rootDir,
   pkgsDir,
   vrkNativeInteropDir,
+  vrkSharedDir,
+  vrkSharedSrcDir,
   vrkAppDir,
   vrkAppSrcDir,
   rendererDir,

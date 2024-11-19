@@ -20,6 +20,7 @@
       [  "./packages/js/vrkit-plugin-internal/src/*"],
       "vrkit-shared":
       [  "./packages/js/vrkit-shared"],
+      
       "vrkit-shared/*":
       [  "./packages/js/vrkit-shared/src/*"],
       "vrkit-shared-ui":

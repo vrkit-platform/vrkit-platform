@@ -3,7 +3,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import { setServiceContainer } from "../../ServiceContainer"
 import { NativeThemeManager } from "../../services/native-theme"
 
-import { ActionRegistry, FileSystemManager, once } from "vrkit-shared"
+import { ActionRegistry, once } from "vrkit-shared"
 import { AppSettingsService } from "../../services/app-settings"
 import ElectronMainActionManager from "../../services/electron-actions"
 import { MainWindowManager, WindowManager } from "../../services/window-manager"
@@ -15,6 +15,7 @@ import { isDefined, isFunction, isPromise, isString } from "@3fv/guard"
 import { Option } from "@3fv/prelude-ts"
 import { PluginManager } from "../../services/plugin-manager"
 import OpenXRConfigurator from "../../services/openxr-configurator"
+import { FileSystemManager } from "vrkit-shared/services/node"
 
 const log = getLogger(__filename)
 

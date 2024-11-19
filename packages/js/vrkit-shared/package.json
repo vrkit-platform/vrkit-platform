@@ -21,6 +21,13 @@
       "import": "./lib/utils/index.js",
       "require": "./lib/utils/index.js"
     },
+    "./utils/node": {
+      "types": "./lib/utils/index-node.d.ts",
+      "default": "./lib/utils/index-node.js",
+      "node": "./lib/utils/index-node.js",
+      "import": "./lib/utils/index-node.js",
+      "require": "./lib/utils/index-node.js"
+    },
     "./services": {
       "types": "./lib/services/index.d.ts",
       "default": "./lib/services/index.js",
@@ -28,12 +35,26 @@
       "import": "./lib/services/index.js",
       "require": "./lib/services/index.js"
     },
+    "./services/node": {
+      "types": "./lib/services/index-node.d.ts",
+      "default": "./lib/services/index-node.js",
+      "node": "./lib/services/index-node.js",
+      "import": "./lib/services/index-node.js",
+      "require": "./lib/services/index-node.js"
+    },
     "./models": {
       "types": "./lib/models/index.d.ts",
       "default": "./lib/models/index.js",
       "node": "./lib/models/index.js",
       "import": "./lib/models/index.js",
       "require": "./lib/models/index.js"
+    },
+    "./models/node": {
+      "types": "./lib/models/index-node.d.ts",
+      "default": "./lib/models/index-node.js",
+      "node": "./lib/models/index-node.js",
+      "import": "./lib/models/index-node.js",
+      "require": "./lib/models/index-node.js"
     },
     "./decorators": {
       "types": "./lib/decorators/index.d.ts",
@@ -48,6 +69,13 @@
       "node": "./lib/constants/index.js",
       "import": "./lib/constants/index.js",
       "require": "./lib/constants/index.js"
+    },
+    "./constants/node": {
+      "types": "./lib/constants/index-node.d.ts",
+      "default": "./lib/constants/index-node.js",
+      "node": "./lib/constants/index-node.js",
+      "import": "./lib/constants/index-node.js",
+      "require": "./lib/constants/index-node.js"
     },
     "./tools": {
       "types": "./lib/tools/index.d.ts",

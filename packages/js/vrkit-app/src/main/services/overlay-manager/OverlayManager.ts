@@ -3,7 +3,7 @@ import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent, NativeImage, screen } 
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import {
   ActiveSessionType,
-  AppPaths,
+  
   assertIsValidOverlayUniqueId,
   assign,
   Bind,
@@ -13,7 +13,7 @@ import {
   EditorInfoScreenOverlayOUID,
   EditorInfoVROverlayOUID,
   electronRectangleToRectI,
-  FileExtensions,
+  
   hasProps,
   isDev,
   isEditorInfoOUID,
@@ -79,6 +79,7 @@ import {
   getVRRectangleLayoutTool,
   isValidOverlayScreenSize
 } from "./OverlayLayoutTools"
+import { AppPaths, FileExtensions } from "vrkit-shared/constants/node"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)

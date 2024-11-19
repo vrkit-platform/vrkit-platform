@@ -1,45 +1,41 @@
 import { asOption } from "@3fv/prelude-ts"
 import Path from "path"
 import Fs from "fs"
-import {FindPackagePath,FindPathInTree} from "../utils/pkg/FindPackagePath"
-import { assert, isNotEmpty } from "../utils/ObjectUtil"
+import { FindPackagePath, FindPathInTree } from "../utils/pkg/FindPackagePath"
+import { isNotEmpty } from "../utils/ObjectUtil"
 import { getLogger } from "@3fv/logger-proxy"
 import { isString } from "@3fv/guard"
-import { isDev } from "./shared-constants"
+import { AppName, isDev } from "./shared-constants"
 
 const log = getLogger(__filename)
 
-
 export interface IDevPaths {
   root: string
+
   trackMapsPath: string
 }
 
 function createDevPaths(): IDevPaths {
-  if (!isDev) {
+  if (!isDev || TARGET_PLATFORM !== "electron-main") {
     return null
   } else {
     const pkgPath = FindPackagePath("vrkit-project")
-    return pkgPath ? {
-      root: pkgPath[0],
-      trackMapsPath: Path.join(pkgPath[0], "data", "track_maps")
-    } : null
+    return pkgPath
+      ? {
+          root: pkgPath[0],
+          trackMapsPath: Path.join(pkgPath[0], "data", "track_maps")
+        }
+      : null
   }
 }
 
-export const DevPaths:IDevPaths = createDevPaths()
-
-export const isElectron =
-    typeof process !== "undefined" && process?.versions?.electron?.length > 0
-
-export const AppName = "VRKit"
+export const DevPaths: IDevPaths = createDevPaths()
 
 const homeDir = asOption(process.env.USERPROFILE as string)
-    .filter(isNotEmpty)
-    .orElse(() => asOption(process.env.HOME as string))
-    .filter(Fs.existsSync)
-    .getOrThrow("Unable to find valid home directory")
-
+  .filter(isNotEmpty)
+  .orElse(() => asOption(process.env.HOME as string))
+  .filter(Fs.existsSync)
+  .getOrThrow("Unable to find valid home directory")
 
 const iracingUserDir = Path.join(homeDir, "Documents", " iRacing")
 const iracingTelemetryDir = Path.join(iracingUserDir, "Telemetry")
@@ -64,8 +60,8 @@ const appSettingsFile = Path.join(appDataLocalDir, "app-settings.json")
 const pluginsDir = Path.join(appDataLocalDir, "Plugins")
 
 const devPkgPath = asOption(DevPaths?.root)
-    .map(root => Path.join(root,"packages","js"))
-    .getOrNull()
+  .map(root => Path.join(root, "packages", "js"))
+  .getOrNull()
 
 const packagedPkgPathResult = FindPathInTree(["resources", "plugins"], {
   dir: __dirname
@@ -83,12 +79,12 @@ export const AppPaths = {
   trackMapsDir,
   trackMapsSearchPath,
   dashboardsDir,
-  
+
   logsDir,
 
   pluginsDir,
   pluginSearchPaths,
-  
+
   iracingUserDir,
   iracingTelemetryDir,
   iracingSetupsDir
@@ -97,18 +93,29 @@ export const AppPaths = {
 export const AppFiles = {
   appSettingsFile,
   trackMapListFile,
-  logFile,
+  logFile
 }
 
 export const FileExtensions = {
   TrackMap: ".trackmap",
-  Dashboard: ".dashboard",
+  Dashboard: ".dashboard"
 }
 
 Object.entries(AppPaths)
-.filter(([,dir]) => isString(dir))
-.forEach(([key, dir]: [string,string]) => {
-  log.info(`${key} directory:`, dir)
-  Fs.mkdirSync(dir, { recursive: true })
-})
+  .filter(([, dir]) => isString(dir))
+  .forEach(([key, dir]: [string, string]) => {
+    log.info(`${key} directory:`, dir)
+    Fs.mkdirSync(dir, { recursive: true })
+  })
 
+export type IAppPaths = typeof AppPaths
+export type IAppFiles = typeof AppFiles
+export type IFileExtensions = typeof FileExtensions
+
+export interface IAppStorage {
+  paths: IAppPaths
+
+  files: IAppFiles
+
+  fileExtensions: IFileExtensions
+}

@@ -6,7 +6,7 @@ import Fs from "fs"
 import { getValue } from "@3fv/guard"
 import Sh from "shelljs"
 import F from "lodash/fp.js"
-import { assetsDir, rootDir, pkgsDir, vrkNativeInteropDir, commonDir, rendererDir } from "./webpack.options.mjs"
+import { assetsDir, rootDir, pkgsDir, vrkNativeInteropDir, vrkSharedSrcDir, commonDir, rendererDir } from "./webpack.options.mjs"
 
 const { map } = F
 
@@ -47,6 +47,10 @@ const aliasMap = {
   "vrkit-app-common": commonDir,
   "vrkit-app-renderer": rendererDir,
   "vrkit-native-interop": vrkNativeInteropDir,
+  "vrkit-shared/constants/node": Path.join(vrkSharedSrcDir, "constants", "index-node.ts"),
+  "vrkit-shared/services/node": Path.join(vrkSharedSrcDir, "services", "index-node.ts"),
+  "vrkit-shared/models/node": Path.join(vrkSharedSrcDir, "models", "index-node.ts"),
+  "vrkit-shared/utils/node": Path.join(vrkSharedSrcDir, "utils", "index-node.ts"),
   ...pkgMappings,
   ...fromPairs(
     ["react", "react-dom", "@swc", "lodash", "@mui", "bluebird"]

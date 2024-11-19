@@ -1,0 +1,20 @@
+{
+  "sourceMaps": "inline",
+  "inlineSourcesContent": true,
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "dynamicImport": true,
+      "decorators": true
+    },
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": true
+    },
+    "target": "es2022",
+    "loose": true,
+    "externalHelpers": true,
+    "keepClassNames": true
+  }
+}

@@ -3,14 +3,14 @@ import { getLogger } from "@3fv/logger-proxy"
 import Fs from "fs-extra"
 
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-shared"
+import { Bind, IAppStorage } from "vrkit-shared"
 import {
-  AppFiles,
-  AppPaths,
+  type IAppFiles,
+  type IAppPaths,
   isDev
 } from "../../renderer-constants"
 import EventEmitter3 from "eventemitter3"
-import { FileObject, FileSystemManager } from "vrkit-shared"
+import { FileObject, FileSystemManager } from "vrkit-shared/services/node"
 import { FileInfo, LapTrajectory, TrackMapFile } from "vrkit-models"
 import Path from "path"
 import { Deferred } from "@3fv/deferred"
@@ -18,6 +18,7 @@ import { endsWith } from "lodash/fp"
 import { isString } from "@3fv/guard"
 import { LapTrajectoryConverter } from "vrkit-shared"
 import { uniqBy } from "lodash"
+import { SharedAppStateClient } from "../shared-app-state-client"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -37,7 +38,7 @@ export interface TrackManagerEventArgs {
 export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
   private trackFileMap: { [id: string]: TrackMapFile } = {}
   private trackFiles: TrackMapFile[] = []
-
+  private appStorage:IAppStorage
   private readyDeferred: Deferred<TrackManager> = null
   /**
    * Cleanup resources on unload
@@ -63,6 +64,7 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     }
 
     this.readyDeferred = new Deferred()
+    this.appStorage = await this.sharedAppStateClient.fetchAppStorage()
     await this.reloadDatabase(true)
     if (typeof window !== "undefined") {
       window.addEventListener("beforeunload", this.unload)
@@ -74,7 +76,7 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    *
    * @param fsManager
    */
-  constructor(@Inject(FileSystemManager) readonly fsManager: FileSystemManager) {
+  constructor(@Inject(FileSystemManager) readonly fsManager: FileSystemManager, readonly sharedAppStateClient: SharedAppStateClient) {
     super()
   }
 
@@ -83,16 +85,21 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    * @private
    */
   private getDatabaseFileAccess() {
-    return this.fsManager.getFileObject(AppFiles.trackMapListFile)
+    
+    return this.fsManager.getFileObject(this.appStorage.files.trackMapListFile)
   }
 
   /**
    * Rebuild the database from disk (EXPENSIVE)
    */
   async rebuildDatabase(): Promise<TrackMapFile[]> {
+    if (TARGET_PLATFORM !== "electron-renderer") {
+      log.warn(`TrackManager only works in renderer`)
+      return []
+    }
     const dataFile = this.getDatabaseFileAccess()
     const tmFiles = Array<string>()
-    for (const tmDir of AppPaths.trackMapsSearchPath) {
+    for (const tmDir of this.appStorage.paths.trackMapsSearchPath) {
       // const tmDir = AppPaths.trackMapsDir
       const tmDirFiles = await Fs.promises
           .readdir(tmDir)

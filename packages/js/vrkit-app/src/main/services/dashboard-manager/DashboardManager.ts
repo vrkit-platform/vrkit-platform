@@ -17,7 +17,7 @@ import {
 import { DashboardManagerFnType, DashboardManagerFnTypeToIPCName } from "vrkit-shared"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
-import { AppPaths, FileExtensions } from "vrkit-shared"
+import { AppPaths, FileExtensions } from "vrkit-shared/constants/node"
 import { AppSettingsService } from "../app-settings"
 import Fsx from "fs-extra"
 import { endsWith } from "lodash/fp"

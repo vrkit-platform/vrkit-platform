@@ -1,10 +1,10 @@
-import { newOverlaysState, OverlaysState } from "../overlays"
-import { AppSettings, ThemeType } from "vrkit-models"
-import { DevSettings, newDevSettings } from "./DevSettings"
-import { DashboardsState, newDashboardsState } from "../dashboards"
-import { newSessionsState, SessionsState } from "../sessions"
-import { ActionsState, newActionsState } from "../actions"
-import { newPluginsState, PluginsState } from "../plugins"
+import { OverlaysState } from "../overlays"
+import { AppSettings } from "vrkit-models"
+import { DevSettings } from "./DevSettings"
+import { DashboardsState } from "../dashboards"
+import { SessionsState } from "../sessions"
+import { ActionsState } from "../actions"
+import { PluginsState } from "../plugins"
 
 export interface ISharedAppState {
   appSettings: AppSettings
@@ -14,19 +14,4 @@ export interface ISharedAppState {
   overlays: OverlaysState
   actions: ActionsState
   plugins: PluginsState
-}
-
-export function newSharedAppState(): ISharedAppState {
-  return {
-    devSettings: newDevSettings(),
-    appSettings: AppSettings.create(),
-    
-    actions: newActionsState(),
-    dashboards: newDashboardsState(),
-    sessions: newSessionsState(),
-    overlays: newOverlaysState(),
-    plugins: newPluginsState()
-    
-    
-  }
 }

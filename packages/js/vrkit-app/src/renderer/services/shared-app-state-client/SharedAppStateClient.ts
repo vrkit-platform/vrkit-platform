@@ -4,7 +4,7 @@ import {
   ISharedAppState, isValueSchema,
   SharedAppStateLeafSchemas
 } from "vrkit-shared"
-import { Bind, ElectronIPCChannel, SharedAppStateSchema } from "vrkit-shared"
+import { Bind, ElectronIPCChannel, type IAppStorage, SharedAppStateSchema } from "vrkit-shared"
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import { ipcRenderer, IpcRendererEvent } from "electron"
@@ -39,6 +39,10 @@ export class SharedAppStateClient {
 
   async fetchSharedAppState(): Promise<ISharedAppState> {
     return deserialize(SharedAppStateSchema, await ipcRenderer.invoke(ElectronIPCChannel.fetchSharedAppState))
+  }
+  
+  async fetchAppStorage(): Promise<IAppStorage> {
+    return await ipcRenderer.invoke(ElectronIPCChannel.fetchAppStorage)
   }
 
   /**

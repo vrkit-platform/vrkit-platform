@@ -10,7 +10,7 @@ import SessionManagerClient from "../../services/session-manager-client"
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import { setContainerResolver } from "../../utils"
-import { FileSystemManager } from "vrkit-shared"
+import { FileSystemManager } from "vrkit-shared/services/node"
 import TrackManager from "../../services/track-manager"
 import SharedAppStateClient from "../../services/shared-app-state-client"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"

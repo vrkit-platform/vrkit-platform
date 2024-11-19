@@ -50,7 +50,7 @@ const windowMap = new Map<number, BrowserWindow>()
  * @param win
  * @param state
  */
-function prepareWindow(state: ISharedAppState, win: BrowserWindow) {
+function prepareWindow(state: ISharedAppState, win: BrowserWindow, isMainWindow: boolean = false) {
   if (windowMap.has(win.id)) {
     info(`Window ${win.id} is already configured`)
     return
@@ -77,15 +77,16 @@ function prepareWindow(state: ISharedAppState, win: BrowserWindow) {
     win.webContents.setWindowOpenHandler(windowOpenHandler)
     if (state.devSettings.alwaysOpenDevTools) {
       win.webContents.openDevTools({
-          mode: "detach"
-        })
+        mode: isMainWindow ? "bottom" : "detach"
+        //mode: "detach"
+      })
     }
   })
 
   win.webContents.setWindowOpenHandler(windowOpenHandler)
   win.webContents.on("did-create-window", (newWin, details) => {
     info(`Preparing new webContents window`)
-    prepareWindow(state, newWin)
+    prepareWindow(state, newWin, newWin?.id === mainWindow?.id)
   })
 }
 
@@ -106,7 +107,7 @@ async function launch() {
     })
 
     //electronRemote = await importDefault(import('@electron/remote/main'))
-    prepareWindow(appState, mainWindow)
+    prepareWindow(appState, mainWindow, true)
 
     app.on("browser-window-created", (_, newWin) => {
       prepareWindow(getSharedAppStateStore(), newWin)

@@ -4,26 +4,19 @@ import * as Fsx from "fs-extra"
 import * as Path from "path"
 
 const config: StorybookConfig = {
-  //"../src/**/*.mdx",
-  //stories: ["../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
-  stories: ["../lib/**/*.stories.@(js|jsx|mjs)"],
+  stories: ["../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   addons: [
-    // "@storybook/addon-webpack5-compiler-swc",
+    "@storybook/addon-webpack5-compiler-swc",
     "@storybook/addon-onboarding",
     "@storybook/addon-essentials",
     "@chromatic-com/storybook",
     "@storybook/addon-interactions"
   ],
-  swc: (config, options) => {
-    
-    return Fsx.readJSONSync(Path.join(__dirname, ".swcrc"))
-  },
   framework: {
     name: "@storybook/react-webpack5",
     options: {}
   },
   webpackFinal: config => {
-  
     if (!config.resolve.fallback)
       config.resolve.fallback = {}
     
@@ -41,7 +34,7 @@ const config: StorybookConfig = {
     config.plugins.unshift(new Webpack.DefinePlugin({
       "TARGET_PLATFORM": JSON.stringify("storybook"),
       "process.env.TARGET_PLATFORM": JSON.stringify("storybook")
-    }))
+    }) as any)
     
     return config
   }

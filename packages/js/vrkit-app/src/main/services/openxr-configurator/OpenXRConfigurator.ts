@@ -2,12 +2,10 @@ import WinReg, { RegistryItem } from "winreg"
 import { getLogger } from "@3fv/logger-proxy"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 
-import { assert, Disposables, FindPathInTree, isArray } from "vrkit-shared"
+import { assert, Disposables,  isArray } from "vrkit-shared"
+import { FindPathInTree } from "vrkit-shared/utils/node"
 import PQueue from "p-queue"
 import { isDev } from "../../constants"
-import { isNumber } from "@3fv/guard"
-import { asOption } from "@3fv/prelude-ts"
-import { flow } from "lodash"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)

@@ -116,6 +116,7 @@
     "@types/node": "^22.7.9",
     "@types/redux-logger": "^3.0.13",
     "@types/shelljs": "^0.8.15",
+    "@types/webpack": "^5.28.5",
     "@types/webpack-env": "^1.18.5",
     "@types/winreg": "^1.2.36",
     "commander": "^12.1.0",

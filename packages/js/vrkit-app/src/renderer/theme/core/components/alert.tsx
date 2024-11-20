@@ -5,7 +5,7 @@ import type { Theme, CSSObject, Components } from '@mui/material/styles';
 import SvgIcon from '@mui/material/SvgIcon';
 import { alertClasses } from '@mui/material/Alert';
 
-import { varAlpha, stylesMode } from '../../styles';
+import { appAlpha, stylesMode } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -103,15 +103,15 @@ const MuiAlert: Components<Theme>['MuiAlert'] = {
     standard: ({ ownerState, theme }) => {
       const styled = {
         colors: styleColors(ownerState, (color) => ({
-          color: theme.vars.palette[color].darker,
-          backgroundColor: theme.vars.palette[color].lighter,
+          color: theme.palette[color].darker,
+          backgroundColor: theme.palette[color].lighter,
           [stylesMode.dark]: {
-            color: theme.vars.palette[color].lighter,
-            backgroundColor: theme.vars.palette[color].darker,
+            color: theme.palette[color].lighter,
+            backgroundColor: theme.palette[color].darker,
           },
           [`& .${alertClasses.icon}`]: {
-            color: theme.vars.palette[color].main,
-            [stylesMode.dark]: { color: theme.vars.palette[color].light },
+            color: theme.palette[color].main,
+            [stylesMode.dark]: { color: theme.palette[color].light },
           },
         })),
       };
@@ -124,7 +124,7 @@ const MuiAlert: Components<Theme>['MuiAlert'] = {
     filled: ({ ownerState, theme }) => {
       const styled = {
         colors: styleColors(ownerState, (color) => ({
-          color: theme.vars.palette[color].contrastText,
+          color: theme.palette[color].contrastText,
         })),
       };
 
@@ -136,11 +136,11 @@ const MuiAlert: Components<Theme>['MuiAlert'] = {
     outlined: ({ ownerState, theme }) => {
       const styled = {
         colors: styleColors(ownerState, (color) => ({
-          backgroundColor: varAlpha(theme.vars.palette[color].mainChannel, 0.08),
-          color: theme.vars.palette[color].dark,
-          border: `solid 1px ${varAlpha(theme.vars.palette[color].mainChannel, 0.16)}`,
-          [stylesMode.dark]: { color: theme.vars.palette[color].light },
-          [`& .${alertClasses.icon}`]: { color: theme.vars.palette[color].main },
+          backgroundColor: appAlpha(theme.palette[color].main, 0.08),
+          color: theme.palette[color].dark,
+          border: `solid 1px ${appAlpha(theme.palette[color].main, 0.16)}`,
+          [stylesMode.dark]: { color: theme.palette[color].light },
+          [`& .${alertClasses.icon}`]: { color: theme.palette[color].main },
         })),
       };
 

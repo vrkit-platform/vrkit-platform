@@ -3,7 +3,7 @@ import type { Theme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import { styled } from '@mui/material/styles';
 
-import { varAlpha, stylesMode } from 'vrkit-app-renderer/theme/styles';
+import { appAlpha, stylesMode } from 'vrkit-app-renderer/theme/styles';
 
 import type { LabelColor, LabelVariant } from './types';
 import { CreateStyledComponent } from "@emotion/styled"
@@ -27,31 +27,31 @@ export const StyledLabel:any = styled(Box)(({
        * @variant filled
        */
       ...(variant === 'filled' && {
-        color: theme.vars.palette.common.white,
-        backgroundColor: theme.vars.palette.text.primary,
-        [stylesMode.dark]: { color: theme.vars.palette.grey[800] },
+        color: theme.palette.common.white,
+        backgroundColor: theme.palette.text.primary,
+        [stylesMode.dark]: { color: theme.palette.grey[800] },
       }),
       /**
        * @variant outlined
        */
       ...(variant === 'outlined' && {
         backgroundColor: 'transparent',
-        color: theme.vars.palette.text.primary,
-        border: `2px solid ${theme.vars.palette.text.primary}`,
+        color: theme.palette.text.primary,
+        border: `2px solid ${theme.palette.text.primary}`,
       }),
       /**
        * @variant soft
        */
       ...(variant === 'soft' && {
-        color: theme.vars.palette.text.secondary,
-        backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.16),
+        color: theme.palette.text.secondary,
+        backgroundColor: appAlpha(theme.palette.grey['500'], 0.16),
       }),
       /**
        * @variant inverted
        */
       ...(variant === 'inverted' && {
-        color: theme.vars.palette.grey[800],
-        backgroundColor: theme.vars.palette.grey[300],
+        color: theme.palette.grey[800],
+        backgroundColor: theme.palette.grey[300],
       }),
     }),
   } as any;
@@ -62,31 +62,31 @@ export const StyledLabel:any = styled(Box)(({
        * @variant filled
        */
       ...(variant === 'filled' && {
-        color: theme.vars.palette[color].contrastText,
-        backgroundColor: theme.vars.palette[color].main,
+        color: theme.palette[color].contrastText,
+        backgroundColor: theme.palette[color].main,
       }),
       /**
        * @variant outlined
        */
       ...(variant === 'outlined' && {
         backgroundColor: 'transparent',
-        color: theme.vars.palette[color].main,
-        border: `2px solid ${theme.vars.palette[color].main}`,
+        color: theme.palette[color].main,
+        border: `2px solid ${theme.palette[color].main}`,
       }),
       /**
        * @variant soft
        */
       ...(variant === 'soft' && {
-        color: theme.vars.palette[color].dark,
-        backgroundColor: varAlpha(theme.vars.palette[color].mainChannel, 0.16),
-        [stylesMode.dark]: { color: theme.vars.palette[color].light },
+        color: theme.palette[color].dark,
+        backgroundColor: appAlpha(theme.palette[color].main, 0.16),
+        [stylesMode.dark]: { color: theme.palette[color].light },
       }),
       /**
        * @variant inverted
        */
       ...(variant === 'inverted' && {
-        color: theme.vars.palette[color].darker,
-        backgroundColor: theme.vars.palette[color].lighter,
+        color: theme.palette[color].darker,
+        backgroundColor: theme.palette[color].lighter,
       }),
     }),
   };

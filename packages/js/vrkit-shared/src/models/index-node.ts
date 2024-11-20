@@ -1,3 +1,4 @@
+export * from "./assets"
 export * from "./actions"
 export * from "./overlays"
 export * from "./dashboards"

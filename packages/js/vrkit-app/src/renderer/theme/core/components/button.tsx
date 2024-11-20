@@ -4,7 +4,7 @@ import type { Theme, CSSObject, Components, ComponentsVariants } from '@mui/mate
 import { buttonClasses } from '@mui/material/Button';
 import { loadingButtonClasses } from '@mui/lab/LoadingButton';
 
-import { varAlpha, stylesMode } from '../../styles';
+import { appAlpha, stylesMode } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -46,20 +46,20 @@ const softVariant: Record<string, ComponentsVariants<Theme>['MuiButton']> = {
     props: ({ ownerState }) =>
       !ownerState.disabled && ownerState.variant === 'soft' && ownerState.color === color,
     style: ({ theme }) => ({
-      color: theme.vars.palette[color].dark,
-      backgroundColor: varAlpha(theme.vars.palette[color].mainChannel, 0.16),
-      '&:hover': { backgroundColor: varAlpha(theme.vars.palette[color].mainChannel, 0.32) },
-      [stylesMode.dark]: { color: theme.vars.palette[color].light },
+      color: theme.palette[color].dark,
+      backgroundColor: appAlpha(theme.palette[color].main, 0.16),
+      '&:hover': { backgroundColor: appAlpha(theme.palette[color].main, 0.32) },
+      [stylesMode.dark]: { color: theme.palette[color].light },
     }),
   })),
   base: [
     {
       props: ({ ownerState }) => ownerState.variant === 'soft',
       style: ({ theme }) => ({
-        backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
-        '&:hover': { backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.24) },
+        backgroundColor: appAlpha(theme.palette.grey['500'], 0.08),
+        '&:hover': { backgroundColor: appAlpha(theme.palette.grey['500'], 0.24) },
         [`&.${buttonClasses.disabled}`]: {
-          backgroundColor: theme.vars.palette.action.disabledBackground,
+          backgroundColor: theme.palette.action.disabledBackground,
         },
         [`& .${loadingButtonClasses.loadingIndicatorStart}`]: { left: 14 },
         [`& .${loadingButtonClasses.loadingIndicatorEnd}`]: { right: 14 },
@@ -103,16 +103,16 @@ const MuiButton: Components<Theme>['MuiButton'] = {
         inheritColor: {
           ...(ownerState.color === 'inherit' &&
             !ownerState.disabled && {
-              color: theme.vars.palette.common.white,
-              backgroundColor: theme.vars.palette.grey[800],
+              color: theme.palette.common.white,
+              backgroundColor: theme.palette.grey[800],
               '&:hover': {
                 boxShadow: theme.customShadows.z8,
-                backgroundColor: theme.vars.palette.grey[700],
+                backgroundColor: theme.palette.grey[700],
               },
               [stylesMode.dark]: {
-                color: theme.vars.palette.grey[800],
-                backgroundColor: theme.vars.palette.common.white,
-                '&:hover': { backgroundColor: theme.vars.palette.grey[400] },
+                color: theme.palette.grey[800],
+                backgroundColor: theme.palette.common.white,
+                '&:hover': { backgroundColor: theme.palette.grey[400] },
               },
             }),
         },
@@ -125,13 +125,13 @@ const MuiButton: Components<Theme>['MuiButton'] = {
     outlined: ({ theme, ownerState }) => {
       const styled = {
         colors: styleColors(ownerState, (color) => ({
-          borderColor: varAlpha(theme.vars.palette[color].mainChannel, 0.48),
+          borderColor: appAlpha(theme.palette[color].main, 0.48),
         })),
         inheritColor: {
           ...(ownerState.color === 'inherit' &&
             !ownerState.disabled && {
-              borderColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.32),
-              '&:hover': { backgroundColor: theme.vars.palette.action.hover },
+              borderColor: appAlpha(theme.palette.grey['500'], 0.32),
+              '&:hover': { backgroundColor: theme.palette.action.hover },
             }),
         },
         base: {
@@ -148,7 +148,7 @@ const MuiButton: Components<Theme>['MuiButton'] = {
         inheritColor: {
           ...(ownerState.color === 'inherit' &&
             !ownerState.disabled && {
-              '&:hover': { backgroundColor: theme.vars.palette.action.hover },
+              '&:hover': { backgroundColor: theme.palette.action.hover },
             }),
         },
       };

@@ -1,6 +1,6 @@
 import type { Theme } from '@mui/material/styles';
 
-import { varAlpha } from 'vrkit-app-renderer/theme/styles';
+import { appAlpha } from 'vrkit-app-renderer/theme/styles';
 
 // ----------------------------------------------------------------------
 
@@ -21,8 +21,8 @@ function colorVars(theme: Theme, variant?: 'vertical' | 'mini' | 'horizontal') {
     // root
     '--nav-item-root-active-color': palette.primary.main,
     '--nav-item-root-active-color-on-dark': palette.primary.light,
-    '--nav-item-root-active-bg': varAlpha(palette.primary.mainChannel, 0.08),
-    '--nav-item-root-active-hover-bg': varAlpha(palette.primary.mainChannel, 0.16),
+    '--nav-item-root-active-bg': appAlpha(palette.primary.main, 0.08),
+    '--nav-item-root-active-hover-bg': appAlpha(palette.primary.main, 0.16),
     '--nav-item-root-open-color': palette.text.primary,
     '--nav-item-root-open-bg': palette.action.hover,
     // sub

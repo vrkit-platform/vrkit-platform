@@ -4,7 +4,7 @@ import { inputBaseClasses } from '@mui/material/InputBase';
 import { filledInputClasses } from '@mui/material/FilledInput';
 import { outlinedInputClasses } from '@mui/material/OutlinedInput';
 
-import { varAlpha } from '../../styles';
+import { appAlpha } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ const MuiInputBase: Components<Theme>['MuiInputBase'] = {
   styleOverrides: {
     root: ({ theme }) => ({
       [`&.${inputBaseClasses.disabled}`]: {
-        '& svg': { color: theme.vars.palette.text.disabled },
+        '& svg': { color: theme.palette.text.disabled },
       },
     }),
     input: ({ theme }) => ({
@@ -26,7 +26,7 @@ const MuiInputBase: Components<Theme>['MuiInputBase'] = {
       },
       '&::placeholder': {
         opacity: 1,
-        color: theme.vars.palette.text.disabled,
+        color: theme.palette.text.disabled,
       },
     }),
   },
@@ -40,8 +40,8 @@ const MuiInput: Components<Theme>['MuiInput'] = {
    *************************************** */
   styleOverrides: {
     underline: ({ theme }) => ({
-      '&::before': { borderBottomColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.32) },
-      '&::after': { borderBottomColor: theme.vars.palette.text.primary },
+      '&::before': { borderBottomColor: appAlpha(theme.palette.grey['500'], 0.32) },
+      '&::after': { borderBottomColor: theme.palette.text.primary },
     }),
   },
 };
@@ -56,22 +56,22 @@ const MuiOutlinedInput: Components<Theme>['MuiOutlinedInput'] = {
     root: ({ theme }) => ({
       [`&.${outlinedInputClasses.focused}`]: {
         [`& .${outlinedInputClasses.notchedOutline}`]: {
-          borderColor: theme.vars.palette.text.primary,
+          borderColor: theme.palette.text.primary,
         },
       },
       [`&.${outlinedInputClasses.error}`]: {
         [`& .${outlinedInputClasses.notchedOutline}`]: {
-          borderColor: theme.vars.palette.error.main,
+          borderColor: theme.palette.error.main,
         },
       },
       [`&.${outlinedInputClasses.disabled}`]: {
         [`& .${outlinedInputClasses.notchedOutline}`]: {
-          borderColor: theme.vars.palette.action.disabledBackground,
+          borderColor: theme.palette.action.disabledBackground,
         },
       },
     }),
     notchedOutline: ({ theme }) => ({
-      borderColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.2),
+      borderColor: appAlpha(theme.palette.grey['500'], 0.2),
       transition: theme.transitions.create(['border-color'], {
         duration: theme.transitions.duration.shortest,
       }),
@@ -93,19 +93,19 @@ const MuiFilledInput: Components<Theme>['MuiFilledInput'] = {
   styleOverrides: {
     root: ({ theme }) => ({
       borderRadius: theme.shape.borderRadius,
-      backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
-      '&:hover': { backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.16) },
+      backgroundColor: appAlpha(theme.palette.grey['500'], 0.08),
+      '&:hover': { backgroundColor: appAlpha(theme.palette.grey['500'], 0.16) },
       [`&.${filledInputClasses.focused}`]: {
-        backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.16),
+        backgroundColor: appAlpha(theme.palette.grey['500'], 0.16),
       },
       [`&.${filledInputClasses.error}`]: {
-        backgroundColor: varAlpha(theme.vars.palette.error.mainChannel, 0.08),
+        backgroundColor: appAlpha(theme.palette.error.main, 0.08),
         [`&.${filledInputClasses.focused}`]: {
-          backgroundColor: varAlpha(theme.vars.palette.error.mainChannel, 0.16),
+          backgroundColor: appAlpha(theme.palette.error.main, 0.16),
         },
       },
       [`&.${filledInputClasses.disabled}`]: {
-        backgroundColor: theme.vars.palette.action.disabledBackground,
+        backgroundColor: theme.palette.action.disabledBackground,
       },
     }),
   },

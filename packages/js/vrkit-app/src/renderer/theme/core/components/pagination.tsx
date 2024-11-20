@@ -2,7 +2,7 @@ import type { Theme, Components, ComponentsVariants } from '@mui/material/styles
 
 import { paginationItemClasses } from '@mui/material/PaginationItem';
 
-import { varAlpha, stylesMode } from '../../styles';
+import { appAlpha, stylesMode } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -32,10 +32,10 @@ const softVariant: Record<string, ComponentsVariants<Theme>['MuiPagination']> = 
       [`& .${paginationItemClasses.root}`]: {
         [`&.${paginationItemClasses.selected}`]: {
           fontWeight: theme.typography.fontWeightSemiBold,
-          color: theme.vars.palette[color].dark,
-          backgroundColor: varAlpha(theme.vars.palette[color].mainChannel, 0.08),
-          '&:hover': { backgroundColor: varAlpha(theme.vars.palette[color].mainChannel, 0.16) },
-          [stylesMode.dark]: { color: theme.vars.palette[color].light },
+          color: theme.palette[color].dark,
+          backgroundColor: appAlpha(theme.palette[color].main, 0.08),
+          '&:hover': { backgroundColor: appAlpha(theme.palette[color].main, 0.16) },
+          [stylesMode.dark]: { color: theme.palette[color].light },
         },
       },
     }),
@@ -47,8 +47,8 @@ const softVariant: Record<string, ComponentsVariants<Theme>['MuiPagination']> = 
         [`& .${paginationItemClasses.root}`]: {
           [`&.${paginationItemClasses.selected}`]: {
             fontWeight: theme.typography.fontWeightSemiBold,
-            backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
-            '&:hover': { backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.16) },
+            backgroundColor: appAlpha(theme.palette.grey['500'], 0.08),
+            '&:hover': { backgroundColor: appAlpha(theme.palette.grey['500'], 0.16) },
           },
         },
       }),
@@ -81,12 +81,12 @@ const MuiPagination: Components<Theme>['MuiPagination'] = {
         [`&.${paginationItemClasses.selected}`]: {
           fontWeight: theme.typography.fontWeightSemiBold,
           ...(ownerState.color === 'standard' && {
-            color: theme.vars.palette.common.white,
-            backgroundColor: theme.vars.palette.text.primary,
-            '&:hover': { backgroundColor: theme.vars.palette.grey[700] },
+            color: theme.palette.common.white,
+            backgroundColor: theme.palette.text.primary,
+            '&:hover': { backgroundColor: theme.palette.grey[700] },
             [stylesMode.dark]: {
-              color: theme.vars.palette.grey[800],
-              '&:hover': { backgroundColor: theme.vars.palette.grey[100] },
+              color: theme.palette.grey[800],
+              '&:hover': { backgroundColor: theme.palette.grey[100] },
             },
           }),
         },
@@ -97,12 +97,12 @@ const MuiPagination: Components<Theme>['MuiPagination'] = {
      */
     outlined: ({ ownerState, theme }) => ({
       [`& .${paginationItemClasses.root}`]: {
-        borderColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.24),
+        borderColor: appAlpha(theme.palette.grey['500'], 0.24),
         [`&.${paginationItemClasses.selected}`]: {
           borderColor: 'currentColor',
           fontWeight: theme.typography.fontWeightSemiBold,
           ...(ownerState.color === 'standard' && {
-            backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
+            backgroundColor: appAlpha(theme.palette.grey['500'], 0.08),
           }),
         },
       },

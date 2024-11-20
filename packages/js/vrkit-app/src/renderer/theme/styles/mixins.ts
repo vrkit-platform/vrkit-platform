@@ -7,7 +7,7 @@ import { autocompleteClasses } from '@mui/material/Autocomplete';
 
 import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 
-import { remToPx, varAlpha, mediaQueries } from './utils';
+import { remToPx, appAlpha, mediaQueries } from './utils';
 
 // ----------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ export const hideScrollY: CSSObject = {
 
 /**
  * Usage:
- * ...textGradient(`to right, ${theme.vars.palette.text.primary}, ${alpha(theme.vars.palette.text.primary, 0.2)}`
+ * ...textGradient(`to right, ${theme.palette.text.primary}, ${alpha(theme.palette.text.primary, 0.2)}`
  */
 export function textGradient(color: string): CSSObject {
   return {
@@ -47,7 +47,7 @@ export function textGradient(color: string): CSSObject {
 
 /**
  * Usage:
- * ...borderGradient({ color: `to right, ${theme.vars.palette.text.primary}, ${alpha(theme.vars.palette.text.primary, 0.2)}`, padding: '4px' }),
+ * ...borderGradient({ color: `to right, ${theme.palette.text.primary}, ${alpha(theme.palette.text.primary, 0.2)}`, padding: '4px' }),
  */
 export type BorderGradientProps = {
   color?: string;
@@ -77,7 +77,7 @@ export function borderGradient(props?: BorderGradientProps): CSSObject {
 
 /**
  * Usage:
- * ...bgGradient({ color: `to right, ${theme.vars.palette.grey[900]} 25%, ${varAlpha(theme.vars.palette.primary.darkerChannel, 0.88)}`, imgUrl: '/assets/background/overlay.png' }),
+ * ...bgGradient({ color: `to right, ${theme.palette.grey[900]} 25%, ${varAlpha(theme.palette.primary.darkerChannel, 0.88)}`, imgUrl: '/assets/background/overlay.png' }),
  */
 export type BgGradientProps = {
   color: string;
@@ -98,7 +98,7 @@ export function bgGradient({ color, imgUrl }: BgGradientProps): CSSObject {
 
 /**
  * Usage:
- * ...bgBlur({ color: `varAlpha(theme.vars.palette.background.paperChannel, 0.8)`, imgUrl: '/assets/background/overlay.png', blur: 6 }),
+ * ...bgBlur({ color: `varAlpha(theme.palette.background.paperChannel, 0.8)`, imgUrl: '/assets/background/overlay.png', blur: 6 }),
  */
 export type BgBlurProps = {
   color: string;
@@ -191,7 +191,7 @@ export function maxLine({ line, persistent }: MaxLineProps): CSSObject {
 
 /**
  * Usage:
- * ...paper({ theme, color: varAlpha(theme.vars.palette.background.paperChannel, 0.9), dropdown: true }),
+ * ...paper({ theme, color: varAlpha(theme.palette.background.paperChannel, 0.9), dropdown: true }),
  */
 type PaperProps = {
   theme: Theme;
@@ -202,7 +202,7 @@ type PaperProps = {
 export function paper({ theme, color, dropdown }: PaperProps) {
   return {
     ...bgBlur({
-      color: color ?? varAlpha(theme.vars.palette.background.paperChannel, 0.9),
+      color: color ?? appAlpha(theme.palette.background.paperChannel, 0.9),
       blur: 20,
     }),
     backgroundImage: `url(${DefaultConfig.app.basePath}/assets/cyan-blur.png), url(${DefaultConfig.app.basePath}/assets/red-blur.png)`,
@@ -230,8 +230,8 @@ export function menuItem(theme: Theme) {
     '&:not(:last-of-type)': { marginBottom: 4 },
     [`&.${menuItemClasses.selected}`]: {
       fontWeight: theme.typography.fontWeightSemiBold,
-      backgroundColor: theme.vars.palette.action.selected,
-      '&:hover': { backgroundColor: theme.vars.palette.action.hover },
+      backgroundColor: theme.palette.action.selected,
+      '&:hover': { backgroundColor: theme.palette.action.hover },
     },
     [`& .${checkboxClasses.root}`]: {
       padding: theme.spacing(0.5),
@@ -239,8 +239,8 @@ export function menuItem(theme: Theme) {
       marginRight: theme.spacing(0.5),
     },
     [`&.${autocompleteClasses.option}[aria-selected="true"]`]: {
-      backgroundColor: theme.vars.palette.action.selected,
-      '&:hover': { backgroundColor: theme.vars.palette.action.hover },
+      backgroundColor: theme.palette.action.selected,
+      '&:hover': { backgroundColor: theme.palette.action.hover },
     },
     [`&+.${dividerClasses.root}`]: { margin: theme.spacing(0.5, 0) },
   };

@@ -16,7 +16,7 @@ const MuiAccordion: Components<Theme>['MuiAccordion'] = {
       [`&.${accordionClasses.expanded}`]: {
         boxShadow: theme.customShadows.z8,
         borderRadius: theme.shape.borderRadius,
-        backgroundColor: theme.vars.palette.background.paper,
+        backgroundColor: theme.palette.background.paper,
       },
       [`&.${accordionClasses.disabled}`]: { backgroundColor: 'transparent' },
     }),
@@ -35,7 +35,7 @@ const MuiAccordionSummary: Components<Theme>['MuiAccordionSummary'] = {
       paddingRight: theme.spacing(1),
       [`&.${accordionSummaryClasses.disabled}`]: {
         opacity: 1,
-        color: theme.vars.palette.action.disabled,
+        color: theme.palette.action.disabled,
         [`& .${typographyClasses.root}`]: { color: 'inherit' },
       },
     }),

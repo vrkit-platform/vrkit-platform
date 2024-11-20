@@ -24,7 +24,7 @@ export function FiltersBlock({ label, children, isShow, sx }: FilterBlockProps) 
         p: 1,
         borderRadius: 1,
         overflow: 'hidden',
-        border: (theme) => `dashed 1px ${theme.vars.palette.divider}`,
+        border: (theme) => `dashed 1px ${theme.palette.divider}`,
         ...sx,
       }}
     >

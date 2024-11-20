@@ -3,7 +3,7 @@ import type { Theme, CSSObject, Components } from '@mui/material/styles';
 
 import { toggleButtonClasses } from '@mui/material/ToggleButton';
 
-import { varAlpha } from '../../styles';
+import { appAlpha } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -33,10 +33,10 @@ const MuiToggleButton: Components<Theme>['MuiToggleButton'] = {
       const styled = {
         colors: styleColors(ownerState, (color) => ({
           '&:hover': {
-            borderColor: varAlpha(theme.vars.palette[color].mainChannel, 0.48),
-            backgroundColor: varAlpha(
-              theme.vars.palette[color].mainChannel,
-              theme.vars.palette.action.hoverOpacity
+            borderColor: appAlpha(theme.palette[color].main, 0.48),
+            backgroundColor: appAlpha(
+              theme.palette[color].main,
+              theme.palette.action.hoverOpacity
             ),
           },
         })),
@@ -49,9 +49,9 @@ const MuiToggleButton: Components<Theme>['MuiToggleButton'] = {
         disabled: {
           ...(ownerState.disabled && {
             [`&.${toggleButtonClasses.selected}`]: {
-              color: theme.vars.palette.action.disabled,
-              backgroundColor: theme.vars.palette.action.selected,
-              borderColor: theme.vars.palette.action.disabledBackground,
+              color: theme.palette.action.disabled,
+              backgroundColor: theme.palette.action.selected,
+              borderColor: theme.palette.action.disabledBackground,
             },
           }),
         },
@@ -72,7 +72,7 @@ const MuiToggleButtonGroup: Components<Theme>['MuiToggleButtonGroup'] = {
     root: ({ theme }) => ({
       gap: 4,
       padding: 4,
-      border: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
+      border: `solid 1px ${appAlpha(theme.palette.grey['500'], 0.08)}`,
     }),
     grouped: {
       [`&.${toggleButtonClasses.root}`]: { border: 'none', borderRadius: 'inherit' },

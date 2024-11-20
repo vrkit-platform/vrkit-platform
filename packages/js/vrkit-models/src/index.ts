@@ -1,6 +1,8 @@
 export * from "./utils"
 export * from "./google"
 export * from "./RPC"
+
+export * from "./AssetTypes"
 export * from "./Session"
 
 export * from "./AppSettings"

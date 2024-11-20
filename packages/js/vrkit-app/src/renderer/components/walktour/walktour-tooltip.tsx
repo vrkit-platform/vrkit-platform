@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 
-import { varAlpha } from 'vrkit-app-renderer/theme/styles';
+import { appAlpha } from 'vrkit-app-renderer/theme/styles';
 
 import { Iconify } from 'vrkit-app-renderer/components/iconify';
 
@@ -70,7 +70,7 @@ export function WalktourTooltip({
         top: 10,
         right: 10,
         position: 'absolute',
-        border: (theme) => `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.12)}`,
+        border: (theme) => `solid 1px ${appAlpha(theme.palette.grey['500'], 0.12)}`,
         ...slotProps?.closeBtn?.sx,
       }}
       {...slotProps?.closeBtn}
@@ -86,10 +86,10 @@ export function WalktourTooltip({
       sx={{
         height: 2,
         borderRadius: 0,
-        bgcolor: (theme) => varAlpha(theme.vars.palette.grey['500Channel'], 0.2),
+        bgcolor: (theme) => appAlpha(theme.palette.grey['500'], 0.2),
         [`& .${linearProgressClasses.bar}`]: {
           background: (theme) =>
-            `linear-gradient(135deg, ${theme.vars.palette.primary.light} 0%, ${theme.vars.palette.primary.main} 100%)`,
+            `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
         },
         ...slotProps?.progress,
       }}
@@ -128,7 +128,7 @@ export function WalktourTooltip({
             gap: 1.5,
             display: 'flex',
             justifyContent: 'flex-end',
-            borderTop: (theme) => `solid 1px ${theme.vars.palette.divider}`,
+            borderTop: (theme) => `solid 1px ${theme.palette.divider}`,
           }}
         >
           {showSkipButton && renderSkipBtn}

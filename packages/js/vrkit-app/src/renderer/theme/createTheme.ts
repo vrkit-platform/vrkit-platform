@@ -15,7 +15,6 @@ import { createTheme as muiCreateTheme } from "@mui/material/styles"
 import {
   colorSchemes, components, customShadows, shadows, typography
 } from "./core"
-import { updateCoreWithSettings } from "./with-settings/update-theme"
 
 import type { ThemeLocaleComponents } from "./ThemeTypes"
 import { assign } from "vrkit-shared"
@@ -123,11 +122,6 @@ export function createTheme(
   }
 
   /**
-   * 1.Update values from settings before creating theme.
-   */
-  const updateTheme = updateCoreWithSettings(initialTheme)
-
-  /**
    * 2.Create theme + add locale + update component with settings.
    */
   const theme = muiCreateTheme(themeOptions)
@@ -138,7 +132,7 @@ export function createTheme(
       appBarHeight: "3rem",
       listActionFooterHeight: rem(2),
       layoutPadding: [4, 2], // spacing unit
-      projectIconSizes: [16, 32, 64, 128]
+      dashboardIconSizes: [16, 32, 64, 128]
     },
     typography: {
       fontFamily: setFont("SanFranciscoDisplay")

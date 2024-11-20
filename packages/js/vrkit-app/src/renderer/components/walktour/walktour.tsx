@@ -2,7 +2,7 @@ import Joyride from 'react-joyride';
 
 import { useTheme } from '@mui/material/styles';
 
-import { varAlpha } from 'vrkit-app-renderer/theme/styles';
+import { appAlpha } from 'vrkit-app-renderer/theme/styles';
 
 import { WalktourTooltip } from './walktour-tooltip';
 
@@ -24,7 +24,7 @@ export function Walktour({
   const arrowStyles = {
     width: 20,
     height: 10,
-    color: theme.vars.palette.background.paper,
+    color: theme.palette.background.paper,
   };
 
   return (
@@ -49,7 +49,7 @@ export function Walktour({
           arrowColor: arrowStyles.color,
         },
         overlay: {
-          backgroundColor: varAlpha(theme.vars.palette.grey['900Channel'], 0.8),
+          backgroundColor: appAlpha(theme.palette.grey['900'], 0.8),
         },
         spotlight: {
           borderRadius: theme.shape.borderRadius * 2,
@@ -58,11 +58,11 @@ export function Walktour({
           outline: 0,
         },
         beaconInner: {
-          backgroundColor: theme.vars.palette.error.main,
+          backgroundColor: theme.palette.error.main,
         },
         beaconOuter: {
-          borderColor: theme.vars.palette.error.main,
-          backgroundColor: varAlpha(theme.vars.palette.error.mainChannel, 0.24),
+          borderColor: theme.palette.error.main,
+          backgroundColor: appAlpha(theme.palette.error.main, 0.24),
         },
       }}
       {...other}

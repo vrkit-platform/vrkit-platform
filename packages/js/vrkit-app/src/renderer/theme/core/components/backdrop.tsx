@@ -1,6 +1,6 @@
 import type { Theme, Components } from '@mui/material/styles';
 
-import { varAlpha } from '../../styles';
+import { appAlpha } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -10,7 +10,7 @@ const MuiBackdrop: Components<Theme>['MuiBackdrop'] = {
    *************************************** */
   styleOverrides: {
     root: ({ theme }) => ({
-      backgroundColor: varAlpha(theme.vars.palette.grey['800Channel'], 0.48),
+      backgroundColor: appAlpha(theme.palette.grey['800'], 0.48),
     }),
     invisible: { background: 'transparent' },
   },

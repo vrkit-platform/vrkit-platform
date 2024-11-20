@@ -44,6 +44,7 @@ import {
   useModelEditorContextProvider
 } from "../../model-editor-context"
 import Alert from "vrkit-app-renderer/services/alerts"
+import Accordion, { AccordionProps } from "@mui/material/Accordion"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -104,25 +105,25 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
       editorContext = useModelEditorContext<DashboardConfig>(),
       { modelById, mutatingModels, setMutatingModel, isModelMutating } = editorContext,
       model = modelById(config.id),
-      selected = isModelMutating(config.id)
-
-  return (
-    <Box
+      selected = isModelMutating(config.id),
+      onSelect = () => {
+        asOption(model).match({
+          None: () => {
+            Alert.onError(`Unable to find config with id (${config.id})`)
+          }, Some: model => {
+            setMutatingModel(model)
+          }
+        })
+      }
+  
+      return (
+      
+      <Box
       className={clsx(dashboardsListViewClasses.item, className)}
       {...other}
     >
       <ButtonBase
-          onClick={() => {
-            asOption(model).match({
-              None: () => {
-                Alert.onError(`Unable to find config with id (${config.id})`)
-              },
-              Some: model => {
-                setMutatingModel(model)
-              }
-            })
-          }}
-          
+          onClick={onSelect}
           component={Paper} elevation={2} className={clsx(dashboardsListViewClasses.itemPaper)}>
         <FlexColumnBox sx={{...FlexScaleZero}}>
           <Typography variant="h6">{config.name}</Typography>

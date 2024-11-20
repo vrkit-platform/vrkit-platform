@@ -39,9 +39,9 @@ export function ScrollProgress({
         width: progressSize,
         height: progressSize,
         transform: 'rotate(-90deg)',
-        color: (theme) => theme.vars.palette.text.primary,
+        color: (theme) => theme.palette.text.primary,
         ...(color !== 'inherit' && {
-          color: (theme) => theme.vars.palette[color].main,
+          color: (theme) => theme.palette[color].main,
         }),
         circle: {
           fill: 'none',
@@ -85,7 +85,7 @@ export function ScrollProgress({
         bgcolor: 'text.primary',
         ...(color !== 'inherit' && {
           background: (theme) =>
-            `linear-gradient(135deg, ${theme.vars.palette[color].light}, ${theme.vars.palette[color].main})`,
+            `linear-gradient(135deg, ${theme.palette[color].light}, ${theme.palette[color].main})`,
         }),
         ...sx,
       }}

@@ -3,7 +3,7 @@ import type { Theme, CSSObject, Components, ComponentsVariants } from '@mui/mate
 
 import { buttonGroupClasses } from '@mui/material/ButtonGroup';
 
-import { varAlpha, stylesMode } from '../../styles';
+import { appAlpha, stylesMode } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -37,14 +37,14 @@ const softVariant: Record<string, ComponentsVariants<Theme>['MuiButtonGroup']> =
       !ownerState.disabled && ownerState.variant === 'soft' && ownerState.color === color,
     style: ({ theme }) => ({
       [buttonClasses]: {
-        borderColor: varAlpha(theme.vars.palette[color].darkChannel, 0.24),
-        [stylesMode.dark]: { borderColor: varAlpha(theme.vars.palette[color].lightChannel, 0.24) },
+        borderColor: appAlpha(theme.palette[color].dark, 0.24),
+        [stylesMode.dark]: { borderColor: appAlpha(theme.palette[color].light, 0.24) },
       },
       [`&.${buttonGroupClasses.vertical}`]: {
         [buttonClasses]: {
-          borderColor: varAlpha(theme.vars.palette[color].darkChannel, 0.24),
+          borderColor: appAlpha(theme.palette[color].dark, 0.24),
           [stylesMode.dark]: {
-            borderColor: varAlpha(theme.vars.palette[color].lightChannel, 0.24),
+            borderColor: appAlpha(theme.palette[color].light, 0.24),
           },
         },
       },
@@ -55,17 +55,17 @@ const softVariant: Record<string, ComponentsVariants<Theme>['MuiButtonGroup']> =
       props: ({ ownerState }) => ownerState.variant === 'soft',
       style: ({ theme }) => ({
         [buttonClasses]: {
-          borderRight: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.32)}`,
+          borderRight: `solid 1px ${appAlpha(theme.palette.grey['500'], 0.32)}`,
           [`&.${buttonGroupClasses.disabled}`]: {
-            borderColor: theme.vars.palette.action.disabledBackground,
+            borderColor: theme.palette.action.disabledBackground,
           },
         },
         [`&.${buttonGroupClasses.vertical}`]: {
           [buttonClasses]: {
             borderRight: 'none',
-            borderBottom: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.32)}`,
+            borderBottom: `solid 1px ${appAlpha(theme.palette.grey['500'], 0.32)}`,
             [`&.${buttonGroupClasses.disabled}`]: {
-              borderColor: theme.vars.palette.action.disabledBackground,
+              borderColor: theme.palette.action.disabledBackground,
             },
           },
         },
@@ -102,18 +102,18 @@ const MuiButtonGroup: Components<Theme>['MuiButtonGroup'] = {
     contained: ({ theme, ownerState }) => {
       const styled = {
         colors: styleColors(ownerState, (color) => ({
-          [buttonClasses]: { borderColor: varAlpha(theme.vars.palette[color].darkChannel, 0.48) },
+          [buttonClasses]: { borderColor: appAlpha(theme.palette[color].dark, 0.48) },
         })),
         inheritColor: {
           ...(ownerState.color === 'inherit' && {
-            [buttonClasses]: { borderColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.32) },
+            [buttonClasses]: { borderColor: appAlpha(theme.palette.grey['500'], 0.32) },
           }),
         },
         disabled: {
           ...(ownerState.disabled && {
             [buttonClasses]: {
               [`&.${buttonGroupClasses.disabled}`]: {
-                borderColor: theme.vars.palette.action.disabledBackground,
+                borderColor: theme.palette.action.disabledBackground,
               },
             },
           }),
@@ -128,18 +128,18 @@ const MuiButtonGroup: Components<Theme>['MuiButtonGroup'] = {
     text: ({ theme, ownerState }) => {
       const styled = {
         colors: styleColors(ownerState, (color) => ({
-          [buttonClasses]: { borderColor: varAlpha(theme.vars.palette[color].mainChannel, 0.48) },
+          [buttonClasses]: { borderColor: appAlpha(theme.palette[color].main, 0.48) },
         })),
         inheritColor: {
           ...(ownerState.color === 'inherit' && {
-            [buttonClasses]: { borderColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.32) },
+            [buttonClasses]: { borderColor: appAlpha(theme.palette.grey['500'], 0.32) },
           }),
         },
         disabled: {
           ...(ownerState.disabled && {
             [buttonClasses]: {
               [`&.${buttonGroupClasses.disabled}`]: {
-                borderColor: theme.vars.palette.action.disabledBackground,
+                borderColor: theme.palette.action.disabledBackground,
               },
             },
           }),

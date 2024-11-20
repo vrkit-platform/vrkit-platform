@@ -1,18 +1,18 @@
 import type { Theme as BaseTheme, Direction, ThemeOptions } from "@mui/material/styles"
 // import "./core/palette"
 
-import type { CssVarsTheme, CssVarsThemeOptions } from '@mui/material/styles';
+//import type { CssVarsTheme, CssVarsThemeOptions } from '@mui/material/styles';
 import type { TypographyOptions } from '@mui/material/styles/createTypography';
 
 // ----------------------------------------------------------------------
 
-export type Theme = Omit<BaseTheme, 'palette' | 'applyStyles'> & CssVarsTheme;
+export type Theme = BaseTheme //Omit<BaseTheme, 'palette' | 'applyStyles'> //& CssVarsTheme;
 
-export type ThemeUpdateOptions = Omit<CssVarsThemeOptions, 'typography'> & {
+export type ThemeUpdateOptions = Omit<ThemeOptions, 'typography'> & {
   typography?: TypographyOptions;
 };
 
-export type ThemeComponents = CssVarsThemeOptions['components'];
+export type ThemeComponents = ThemeOptions['components'];
 
 export type ThemeColorScheme = 'light' | 'dark';
 
@@ -31,7 +31,7 @@ declare global {
     appBarHeight: number | string
     listActionFooterHeight: number | string
     layoutPadding: [number, number?, number?, number?]
-    projectIconSizes: [sm: number, md: number, lg: number, xl: number]
+    dashboardIconSizes: [sm: number, md: number, lg: number, xl: number]
   }
   
   interface StyleUtility {

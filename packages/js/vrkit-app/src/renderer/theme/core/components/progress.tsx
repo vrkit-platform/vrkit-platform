@@ -1,7 +1,7 @@
 import type { LinearProgressProps } from '@mui/material/LinearProgress';
 import type { Theme, CSSObject, Components } from '@mui/material/styles';
 
-import { varAlpha } from '../../styles';
+import { appAlpha } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -30,12 +30,12 @@ const MuiLinearProgress: Components<Theme>['MuiLinearProgress'] = {
     root: ({ theme, ownerState }) => {
       const styled = {
         colors: styleColors(ownerState, (color) => ({
-          backgroundColor: varAlpha(theme.vars.palette[color].mainChannel, 0.24),
+          backgroundColor: appAlpha(theme.palette[color].main, 0.24),
         })),
         inheritColor: {
           ...(ownerState.color === 'inherit' && {
             '&::before': { display: 'none' },
-            backgroundColor: varAlpha(theme.vars.palette.text.primaryChannel, 0.24),
+            backgroundColor: appAlpha(theme.palette.text.primary, 0.24),
           }),
         },
       };

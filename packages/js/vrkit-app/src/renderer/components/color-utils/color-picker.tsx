@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import ButtonBase from '@mui/material/ButtonBase';
 import { alpha as hexAlpha } from '@mui/material/styles';
 
-import { varAlpha } from 'vrkit-app-renderer/theme/styles';
+import { appAlpha } from 'vrkit-app-renderer/theme/styles';
 
 import { Iconify } from '../iconify';
 
@@ -76,7 +76,7 @@ export const ColorPicker = forwardRef<HTMLDivElement, BoxProps & ColorPickerProp
                     bgcolor: color,
                     borderRadius: '50%',
                     border: (theme) =>
-                      `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.16)}`,
+                      `solid 1px ${appAlpha(theme.palette.grey['500'], 0.16)}`,
                     ...(hasSelected && {
                       transform: 'scale(1.3)',
                       boxShadow: `4px 4px 8px 0 ${hexAlpha(color, 0.48)}`,

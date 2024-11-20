@@ -2,7 +2,7 @@ import { Toaster } from 'sonner';
 
 import { styled } from '@mui/material/styles';
 
-import { varAlpha } from 'vrkit-app-renderer/theme/styles';
+import { appAlpha } from 'vrkit-app-renderer/theme/styles';
 
 import { toasterClasses } from './classes';
 
@@ -13,20 +13,20 @@ export const StyledToaster = styled(Toaster)(({ theme }) => {
     toastDefault: {
       padding: theme.spacing(1, 1, 1, 1.5),
       boxShadow: theme.customShadows.z8,
-      color: theme.vars.palette.background.paper,
-      backgroundColor: theme.vars.palette.text.primary,
+      color: theme.palette.background.paper,
+      backgroundColor: theme.palette.text.primary,
     },
     toastColor: {
       padding: theme.spacing(0.5, 1, 0.5, 0.5),
       boxShadow: theme.customShadows.z8,
-      color: theme.vars.palette.text.primary,
-      backgroundColor: theme.vars.palette.background.paper,
+      color: theme.palette.text.primary,
+      backgroundColor: theme.palette.background.paper,
     },
     toastLoader: {
       padding: theme.spacing(0.5, 1, 0.5, 0.5),
       boxShadow: theme.customShadows.z8,
-      color: theme.vars.palette.text.primary,
-      backgroundColor: theme.vars.palette.background.paper,
+      color: theme.palette.text.primary,
+      backgroundColor: theme.palette.background.paper,
     },
   };
 
@@ -42,14 +42,14 @@ export const StyledToaster = styled(Toaster)(({ theme }) => {
     position: 'relative',
     borderRadius: 'inherit',
     justifyContent: 'center',
-    background: theme.vars.palette.background.neutral,
+    background: theme.palette.background.neutral,
     [`& .${toasterClasses.loadingIcon}`]: {
       zIndex: 9,
       width: 24,
       height: 24,
       borderRadius: '50%',
       animation: 'rotate 3s infinite linear',
-      background: `conic-gradient(${varAlpha(theme.vars.palette.text.primaryChannel, 0)}, ${varAlpha(theme.vars.palette.text.disabledChannel, 0.64)})`,
+      background: `conic-gradient(${appAlpha(theme.palette.text.primary, 0)}, ${appAlpha(theme.palette.text.disabledChannel, 0.64)})`,
     },
     [toasterClasses.loaderVisible]: { display: 'flex' },
   };
@@ -90,11 +90,11 @@ export const StyledToaster = styled(Toaster)(({ theme }) => {
       color: 'currentColor',
       backgroundColor: 'transparent',
       transform: 'translate(-6px, 6px)',
-      borderColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.16),
+      borderColor: appAlpha(theme.palette.grey['500'], 0.16),
       transition: theme.transitions.create(['background-color', 'border-color']),
       '&:hover': {
-        borderColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.24),
-        backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
+        borderColor: appAlpha(theme.palette.grey['500'], 0.24),
+        backgroundColor: appAlpha(theme.palette.grey['500'], 0.08),
       },
     },
     /*
@@ -140,8 +140,8 @@ export const StyledToaster = styled(Toaster)(({ theme }) => {
     [`& .${toasterClasses.error}`]: {
       ...baseStyles.toastColor,
       [`& .${toasterClasses.icon}`]: {
-        color: theme.vars.palette.error.main,
-        backgroundColor: varAlpha(theme.vars.palette.error.mainChannel, 0.08),
+        color: theme.palette.error.main,
+        backgroundColor: appAlpha(theme.palette.error.main, 0.08),
       },
     },
     /*
@@ -150,8 +150,8 @@ export const StyledToaster = styled(Toaster)(({ theme }) => {
     [`& .${toasterClasses.success}`]: {
       ...baseStyles.toastColor,
       [`& .${toasterClasses.icon}`]: {
-        color: theme.vars.palette.success.main,
-        backgroundColor: varAlpha(theme.vars.palette.success.mainChannel, 0.08),
+        color: theme.palette.success.main,
+        backgroundColor: appAlpha(theme.palette.success.main, 0.08),
       },
     },
     /*
@@ -160,8 +160,8 @@ export const StyledToaster = styled(Toaster)(({ theme }) => {
     [`& .${toasterClasses.warning}`]: {
       ...baseStyles.toastColor,
       [`& .${toasterClasses.icon}`]: {
-        color: theme.vars.palette.warning.main,
-        backgroundColor: varAlpha(theme.vars.palette.warning.mainChannel, 0.08),
+        color: theme.palette.warning.main,
+        backgroundColor: appAlpha(theme.palette.warning.main, 0.08),
       },
     },
     /*
@@ -170,8 +170,8 @@ export const StyledToaster = styled(Toaster)(({ theme }) => {
     [`& .${toasterClasses.info}`]: {
       ...baseStyles.toastColor,
       [`& .${toasterClasses.icon}`]: {
-        color: theme.vars.palette.info.main,
-        backgroundColor: varAlpha(theme.vars.palette.info.mainChannel, 0.08),
+        color: theme.palette.info.main,
+        backgroundColor: appAlpha(theme.palette.info.main, 0.08),
       },
     },
   };

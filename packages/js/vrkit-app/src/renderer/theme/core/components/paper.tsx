@@ -1,6 +1,6 @@
 import type { Theme, Components } from '@mui/material/styles';
 
-import { varAlpha } from '../../styles';
+import { appAlpha } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -16,7 +16,7 @@ const MuiPaper: Components<Theme>['MuiPaper'] = {
   styleOverrides: {
     root: { backgroundImage: 'none' },
     outlined: ({ theme }) => ({
-      borderColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.16),
+      borderColor: appAlpha(theme.palette.grey['500'], 0.16),
     }),
   },
 };

@@ -21,7 +21,7 @@ export type FAIconProps = BaseIconProps &
     FontAwesomeIconProps,
     "size" | "icon" | "spin" | "rotation" | "transform" | "pull"
   > & {
-    fa: true
+    fa?: true
     className?: string
     style?: CSSProperties
     // size?: FontAwesomeIconProps["size"]
@@ -39,11 +39,9 @@ function isFAIconProps(props: any): props is FAIconProps {
 }
 
 export const Icon = React.forwardRef(function Icon(props: IconProps, ref) {
+  const {size = "sm",...other} = props
   return isFAIconProps(props) ? (
-    <AppFAIcon ref={ref} {...omit(props, ["fa"]) as any} />
+    <AppFAIcon ref={ref} size={size} {...omit(other, ["fa"]) as any} />
   ) : null
 })
 
-Icon.defaultProps = {
-  size: "sm"
-}

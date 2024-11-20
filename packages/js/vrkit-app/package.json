@@ -101,11 +101,14 @@
     "vrkit-plugin-sdk": "1.0.0",
     "vrkit-shared": "1.0.0",
     "vrkit-shared-ui": "1.0.0",
+    
+    "warning": "^4.0.3",
     "winreg": "^1.2.5",
     "yargs": "^17.7.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/warning": "^3.0.3",
     "@electron/notarize": "^2.3.2",
     "@faker-js/faker": "^9.0.3",
     "@protobuf-ts/plugin": "^2.9.4",

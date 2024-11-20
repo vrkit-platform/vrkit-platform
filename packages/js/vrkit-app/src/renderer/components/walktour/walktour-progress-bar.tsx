@@ -2,7 +2,7 @@ import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
 import ButtonBase from '@mui/material/ButtonBase';
 
-import { varAlpha } from 'vrkit-app-renderer/theme/styles';
+import { appAlpha } from 'vrkit-app-renderer/theme/styles';
 
 import type { WalktourProgressBarProps } from './types';
 
@@ -21,7 +21,7 @@ export function WalktourProgressBar({
     content: '""',
     position: 'absolute',
     width: `calc(100% / ${totalSteps} * ${currentStep})`,
-    background: `linear-gradient(135deg, ${theme.vars.palette.primary.light} 0%, ${theme.vars.palette.primary.main} 100%)`,
+    background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
   };
 
   return (
@@ -53,9 +53,9 @@ export function WalktourProgressBar({
               '&:hover': {
                 bgcolor: 'action.hover',
                 ...(currentStep >= stepIndex && {
-                  bgcolor: varAlpha(
-                    theme.vars.palette.primary.mainChannel,
-                    theme.vars.palette.action.hoverOpacity
+                  bgcolor: appAlpha(
+                    theme.palette.primary.main,
+                    theme.palette.action.hoverOpacity
                   ),
                 }),
               },

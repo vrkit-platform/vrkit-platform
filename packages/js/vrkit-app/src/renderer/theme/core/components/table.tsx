@@ -3,7 +3,7 @@ import type { Theme, Components } from '@mui/material/styles';
 import { tableRowClasses } from '@mui/material/TableRow';
 import { tableCellClasses } from '@mui/material/TableCell';
 
-import { varAlpha } from '../../styles';
+import { appAlpha } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ const MuiTableContainer: Components<Theme>['MuiTableContainer'] = {
     root: ({ theme }) => ({
       position: 'relative',
       scrollbarWidth: 'thin',
-      scrollbarColor: `${varAlpha(theme.vars.palette.text.disabledChannel, 0.4)} ${varAlpha(theme.vars.palette.text.disabledChannel, 0.08)}`,
+      scrollbarColor: `${appAlpha(theme.palette.text.disabledChannel, 0.4)} ${appAlpha(theme.palette.text.disabledChannel, 0.08)}`,
     }),
   },
 };
@@ -27,7 +27,7 @@ const MuiTable: Components<Theme>['MuiTable'] = {
    * STYLE
    *************************************** */
   styleOverrides: {
-    root: ({ theme }) => ({ '--palette-TableCell-border': theme.vars.palette.divider }),
+    root: ({ theme }) => ({ '--palette-TableCell-border': theme.palette.divider }),
   },
 };
 
@@ -40,8 +40,8 @@ const MuiTableRow: Components<Theme>['MuiTableRow'] = {
   styleOverrides: {
     root: ({ theme }) => ({
       [`&.${tableRowClasses.selected}`]: {
-        backgroundColor: varAlpha(theme.vars.palette.primary.darkChannel, 0.04),
-        '&:hover': { backgroundColor: varAlpha(theme.vars.palette.primary.darkChannel, 0.08) },
+        backgroundColor: appAlpha(theme.palette.primary.dark, 0.04),
+        '&:hover': { backgroundColor: appAlpha(theme.palette.primary.dark, 0.08) },
       },
       '&:last-of-type': { [`& .${tableCellClasses.root}`]: { borderColor: 'transparent' } },
     }),
@@ -58,13 +58,13 @@ const MuiTableCell: Components<Theme>['MuiTableCell'] = {
     root: { borderBottomStyle: 'dashed' },
     head: ({ theme }) => ({
       fontSize: 14,
-      color: theme.vars.palette.text.secondary,
+      color: theme.palette.text.secondary,
       fontWeight: theme.typography.fontWeightSemiBold,
-      backgroundColor: theme.vars.palette.background.neutral,
+      backgroundColor: theme.palette.background.neutral,
     }),
     stickyHeader: ({ theme }) => ({
-      backgroundColor: theme.vars.palette.background.paper,
-      backgroundImage: `linear-gradient(to bottom, ${theme.vars.palette.background.neutral} 0%, ${theme.vars.palette.background.neutral} 100%)`,
+      backgroundColor: theme.palette.background.paper,
+      backgroundImage: `linear-gradient(to bottom, ${theme.palette.background.neutral} 0%, ${theme.palette.background.neutral} 100%)`,
     }),
     paddingCheckbox: ({ theme }) => ({ paddingLeft: theme.spacing(1) }),
   },

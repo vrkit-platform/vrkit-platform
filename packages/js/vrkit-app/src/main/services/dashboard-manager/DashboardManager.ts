@@ -1,11 +1,12 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from "electron"
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-shared"
-import { DashboardConfig } from "vrkit-models"
-import { isDefined } from "@3fv/guard"
 import {
   assert,
+  Bind,
+  DashboardManagerFnType,
+  DashboardManagerFnTypeToIPCName,
+  DashboardsState,
   Disposables,
   isDev,
   isEmpty,
@@ -14,7 +15,8 @@ import {
   removeIfMutation,
   SignalFlag
 } from "vrkit-shared"
-import { DashboardManagerFnType, DashboardManagerFnTypeToIPCName } from "vrkit-shared"
+import { DashboardConfig } from "vrkit-models"
+import { isDefined } from "@3fv/guard"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
 import { AppPaths, FileExtensions } from "vrkit-shared/constants/node"
@@ -28,9 +30,8 @@ import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { action, runInAction, set } from "mobx"
 import { IDisposer } from "mobx-utils"
-import { DashboardsState } from "vrkit-shared"
-import { defaultsDeep, first } from "lodash"
-import { BindAction } from "../../decorators"
+import { assign, defaultsDeep, first } from "lodash"
+import { FileSystemManager } from "vrkit-shared/services/node"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -150,6 +151,7 @@ export class DashboardManager {
         dashFiles.map(file =>
           Fsx.readJSON(file)
             .then(json => DashboardConfig.fromJson(json))
+            .then(config => this.fsManager.getFileInfo(file).then(fileInfo => assign(config, { fileInfo })))
             .catch(err => {
               error(`Unable to read file ${file}`, err)
               return null
@@ -166,13 +168,11 @@ export class DashboardManager {
         configs,
         activeConfigId: ""
       }
-      
 
       return this.validateState()
     })
   }
-  
-  
+
   @Bind
   async deleteDashboardConfig(id: string): Promise<DashboardConfig> {
     const removedDashConfigs = runInAction(() => removeIfMutation(this.dashboardConfigs, dash => dash.id === id))
@@ -194,7 +194,7 @@ export class DashboardManager {
   private saveDashboardConfigTaskFactory(dashConfig: DashboardConfig) {
     return this.persistQueue_.add(this.createSaveDashboardConfigTask(dashConfig))
   }
-  
+
   @Bind
   async updateDashboardConfig(id: string, patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
     const dashConfig = runInAction(() => {
@@ -203,10 +203,10 @@ export class DashboardManager {
         throw Error(`Unable to find dashboard with id(${id})`)
       }
       set(dashConfig, patch)
-      
+
       return dashConfig
     })
-    
+
     await this.saveDashboardConfigTaskFactory(dashConfig)
     return dashConfig
   }
@@ -218,22 +218,17 @@ export class DashboardManager {
   ): Promise<DashboardConfig> {
     return this.updateDashboardConfig(id, patch)
   }
-  
-  
+
   @Bind
   async createDashboardConfig(patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
     const dashConfig = runInAction(() => {
-      const newDashConfig = DashboardConfig.create(defaultsDeep(
-          patch,
-          newDashboardTrackMapMockConfig()
-      ))
+      const newDashConfig = DashboardConfig.create(defaultsDeep(patch, newDashboardTrackMapMockConfig()))
       this.dashboardConfigs.push(newDashConfig)
       return newDashConfig
     })
-    
+
     await this.saveDashboardConfigTaskFactory(dashConfig)
     return dashConfig
-    
   }
 
   async createDashboardConfigHandler(
@@ -242,7 +237,7 @@ export class DashboardManager {
   ): Promise<DashboardConfig> {
     return await this.createDashboardConfig(patch).then(dashConfig => DashboardConfig.toJson(dashConfig) as any)
   }
-  
+
   @Bind
   async closeDashboard() {
     runInAction(() => {
@@ -253,14 +248,14 @@ export class DashboardManager {
   async closeDashboardHandler(event: IpcMainInvokeEvent): Promise<void> {
     return await this.closeDashboard()
   }
-  
+
   @Bind
   async openDashboard(id: string) {
     return runInAction(() => {
       if (!this.dashboardConfigById(id)) {
         throw Error(`Unable to find config for id (${id})`)
       }
-      
+
       set(this.state, "activeConfigId", id)
       return id
     })
@@ -332,7 +327,7 @@ export class DashboardManager {
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(DashboardManagerFnTypeToIPCName(type), handler))
 
     mainWindowManager.on("UI_READY", this.onUIReady)
-    
+
     if (isDev) {
       Object.assign(global, {
         dashboardsManager: this
@@ -341,7 +336,7 @@ export class DashboardManager {
     // In dev mode, make everything accessible
     this.disposers_.push(() => {
       mainWindowManager.off("UI_READY", this.onUIReady)
-      
+
       if (this.stopObserving) {
         this.stopObserving()
       }
@@ -368,14 +363,15 @@ export class DashboardManager {
    * @param appSettingsService
    * @param mainWindowManager
    * @param mainAppState
+   * @param fsManager
    */
   constructor(
-    @InjectContainer()
-    readonly container: Container,
+    @InjectContainer() readonly container: Container,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
     readonly mainWindowManager: MainWindowManager,
-    readonly mainAppState: MainSharedAppState
+    readonly mainAppState: MainSharedAppState,
+    readonly fsManager: FileSystemManager
   ) {}
 
   /**

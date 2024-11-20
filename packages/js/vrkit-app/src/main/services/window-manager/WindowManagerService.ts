@@ -190,13 +190,14 @@ export class WindowManager {
   }
 
   @Bind closeHandler() {
-    this.updateState()
+    //this.updateState()
+    this.saveState()
   }
 
   @Bind closedHandler() {
     // Unregister listeners and save state
     this.disable()
-    this.saveState()
+    //this.saveState()
   }
 
   enable(win: Electron.BrowserWindow) {

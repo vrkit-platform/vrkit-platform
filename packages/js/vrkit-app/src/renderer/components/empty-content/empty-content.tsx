@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { DefaultConfig } from 'vrkit-app-renderer/config-global';
-import { varAlpha } from 'vrkit-app-renderer/theme/styles';
+import { appAlpha } from 'vrkit-app-renderer/theme/styles';
 
 // ----------------------------------------------------------------------
 
@@ -43,8 +43,8 @@ export function EmptyContent({
         height: 1,
         ...(filled && {
           borderRadius: 2,
-          bgcolor: (theme) => varAlpha(theme.vars.palette.grey['500Channel'], 0.04),
-          border: (theme) => `dashed 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
+          bgcolor: (theme) => appAlpha(theme.palette.grey['500'], 0.04),
+          border: (theme) => `dashed 1px ${appAlpha(theme.palette.grey['500'], 0.08)}`,
         }),
         ...sx,
       }}

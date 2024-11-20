@@ -1,7 +1,7 @@
 import type { ColorSystemOptions } from '@mui/material/styles';
 
 import COLORS from './colors.json';
-import { varAlpha, createPaletteChannel } from '../styles';
+import { appAlpha, createPaletteChannel } from '../styles';
 
 // ----------------------------------------------------------------------
 
@@ -39,16 +39,16 @@ declare module '@mui/material/styles' {
 
 declare module '@mui/material' {
   interface Color {
-    ['50Channel']: string;
-    ['100Channel']: string;
-    ['200Channel']: string;
-    ['300Channel']: string;
-    ['400Channel']: string;
-    ['500Channel']: string;
-    ['600Channel']: string;
-    ['700Channel']: string;
-    ['800Channel']: string;
-    ['900Channel']: string;
+    ['50']: string;
+    ['100']: string;
+    ['200']: string;
+    ['300']: string;
+    ['400']: string;
+    ['500']: string;
+    ['600']: string;
+    ['700']: string;
+    ['800']: string;
+    ['900']: string;
   }
 }
 
@@ -94,11 +94,11 @@ export const background = {
 
 // Action
 export const baseAction = {
-  hover: varAlpha(grey['500Channel'], 0.08),
-  selected: varAlpha(grey['500Channel'], 0.16),
-  focus: varAlpha(grey['500Channel'], 0.24),
-  disabled: varAlpha(grey['500Channel'], 0.8),
-  disabledBackground: varAlpha(grey['500Channel'], 0.24),
+  hover: appAlpha(grey['500'], 0.08),
+  selected: appAlpha(grey['500'], 0.16),
+  focus: appAlpha(grey['500'], 0.24),
+  disabled: appAlpha(grey['500'], 0.8),
+  disabledBackground: appAlpha(grey['500'], 0.24),
   hoverOpacity: 0.08,
   disabledOpacity: 0.48,
 };
@@ -120,7 +120,7 @@ export const basePalette = {
   error,
   grey,
   common,
-  divider: varAlpha(grey['500Channel'], 0.2),
+  divider: appAlpha(grey['500'], 0.2),
   action,
 };
 

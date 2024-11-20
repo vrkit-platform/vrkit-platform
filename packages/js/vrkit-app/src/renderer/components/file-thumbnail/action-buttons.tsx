@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import ButtonBase from '@mui/material/ButtonBase';
 import IconButton from '@mui/material/IconButton';
 
-import { bgBlur, varAlpha } from 'vrkit-app-renderer/theme/styles';
+import { bgBlur, appAlpha } from 'vrkit-app-renderer/theme/styles';
 
 import { Iconify } from '../iconify';
 
@@ -29,7 +29,7 @@ export function DownloadButton({ sx, ...other }: ButtonBaseProps) {
         borderRadius: 'inherit',
         transition: theme.transitions.create(['opacity']),
         '&:hover': {
-          ...bgBlur({ color: varAlpha(theme.vars.palette.grey['900Channel'], 0.64) }),
+          ...bgBlur({ color: appAlpha(theme.palette.grey['900'], 0.64) }),
           opacity: 1,
         },
         ...sx,
@@ -53,8 +53,8 @@ export function RemoveButton({ sx, ...other }: IconButtonProps) {
         right: 4,
         position: 'absolute',
         color: 'common.white',
-        bgcolor: (theme) => varAlpha(theme.vars.palette.grey['900Channel'], 0.48),
-        '&:hover': { bgcolor: (theme) => varAlpha(theme.vars.palette.grey['900Channel'], 0.72) },
+        bgcolor: (theme) => appAlpha(theme.palette.grey['900'], 0.48),
+        '&:hover': { bgcolor: (theme) => appAlpha(theme.palette.grey['900'], 0.72) },
         ...sx,
       }}
       {...other}

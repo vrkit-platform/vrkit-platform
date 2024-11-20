@@ -4,7 +4,7 @@ import { forwardRef } from 'react';
 
 import Box from '@mui/material/Box';
 
-import { varAlpha } from 'vrkit-app-renderer/theme/styles';
+import { appAlpha } from 'vrkit-app-renderer/theme/styles';
 
 import type { ColorPreviewProps } from './types';
 
@@ -37,9 +37,9 @@ export const ColorPreview = forwardRef<HTMLDivElement, BoxProps & ColorPreviewPr
               height: 16,
               bgcolor: color,
               borderRadius: '50%',
-              border: (theme) => `solid 2px ${theme.vars.palette.background.paper}`,
+              border: (theme) => `solid 2px ${theme.palette.background.paper}`,
               boxShadow: (theme) =>
-                `inset -1px 1px 2px ${varAlpha(theme.vars.palette.common.blackChannel, 0.24)}`,
+                `inset -1px 1px 2px ${appAlpha(theme.palette.common.blackChannel, 0.24)}`,
             }}
           />
         ))}

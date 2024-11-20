@@ -2,7 +2,7 @@ import type { Theme, Components, ComponentsVariants } from '@mui/material/styles
 
 import { avatarGroupClasses } from '@mui/material/AvatarGroup';
 
-import { varAlpha } from '../../styles';
+import { appAlpha } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -33,16 +33,16 @@ const avatarColors: Record<string, ComponentsVariants<Theme>['MuiAvatar']> = {
   colors: COLORS.map((color) => ({
     props: ({ ownerState }) => ownerState.color === color,
     style: ({ theme }) => ({
-      color: theme.vars.palette[color].contrastText,
-      backgroundColor: theme.vars.palette[color].main,
+      color: theme.palette[color].contrastText,
+      backgroundColor: theme.palette[color].main,
     }),
   })),
   defaultColor: [
     {
       props: ({ ownerState }) => ownerState.color === 'default',
       style: ({ theme }) => ({
-        color: theme.vars.palette.text.secondary,
-        backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.24),
+        color: theme.palette.text.secondary,
+        backgroundColor: appAlpha(theme.palette.grey['500'], 0.24),
       }),
     },
   ],
@@ -66,12 +66,12 @@ const MuiAvatar: Components<Theme>['MuiAvatar'] = {
         ...(!!ownerState.alt && {
           ...(color !== 'default'
             ? {
-                color: theme.vars.palette[color].contrastText,
-                backgroundColor: theme.vars.palette[color].main,
+                color: theme.palette[color].contrastText,
+                backgroundColor: theme.palette[color].main,
               }
             : {
-                color: theme.vars.palette.text.secondary,
-                backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.24),
+                color: theme.palette.text.secondary,
+                backgroundColor: appAlpha(theme.palette.grey['500'], 0.24),
               }),
         }),
       };
@@ -112,8 +112,8 @@ const MuiAvatarGroup: Components<Theme>['MuiAvatarGroup'] = {
       fontWeight: theme.typography.fontWeightSemiBold,
       '&:first-of-type': {
         fontSize: 12,
-        color: theme.vars.palette.primary.dark,
-        backgroundColor: theme.vars.palette.primary.lighter,
+        color: theme.palette.primary.dark,
+        backgroundColor: theme.palette.primary.lighter,
       },
     }),
   },

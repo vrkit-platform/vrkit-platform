@@ -48,9 +48,9 @@ const MuiRadio: Components<Theme>['MuiRadio'] = {
     root: ({ ownerState, theme }) => ({
       padding: theme.spacing(1),
       ...(ownerState.color === 'default' && {
-        [`&.${radioClasses.checked}`]: { color: theme.vars.palette.text.primary },
+        [`&.${radioClasses.checked}`]: { color: theme.palette.text.primary },
       }),
-      [`&.${radioClasses.disabled}`]: { color: theme.vars.palette.action.disabled },
+      [`&.${radioClasses.disabled}`]: { color: theme.palette.action.disabled },
     }),
   },
 };

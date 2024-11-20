@@ -16,6 +16,7 @@ import SharedAppStateClient from "../../services/shared-app-state-client"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 import AppSettingsClient from "../../services/app-settings-client"
 import { OverlayManagerClient } from "../../services/overlay-client"
+import { Alert, APP_ALERTS_ID } from "../../services/alerts"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log
@@ -41,6 +42,7 @@ async function createContainer(): Promise<Container> {
 
     container = await container
       .bindConstant(APP_STORE_ID, appStore)
+      .bindConstant(APP_ALERTS_ID, Alert)
       .bindClass(SharedAppStateClient)
       .bindClass(DashboardManagerClient)
       .bindClass(ActionRegistry)

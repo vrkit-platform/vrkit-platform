@@ -1,6 +1,7 @@
 import { useScrollToTop } from "vrkit-app-renderer/hooks/use-scroll-to-top"
 import { I18nProvider } from "vrkit-app-renderer/locales/i18n-provider"
 import { ThemeProvider } from "../../theme/ThemeProvider"
+import { AlertCenter } from "../../components/alert-center"
 
 import { MotionLazy } from "vrkit-app-renderer/components/animate/motion-lazy"
 import { Provider as ReduxProvider } from "react-redux"
@@ -35,6 +36,7 @@ export default function App() {
           <ThemeProvider>
             <MotionLazy>
               <AppBody />
+              <AlertCenter />
             </MotionLazy>
           </ThemeProvider>
         </SettingsProvider>

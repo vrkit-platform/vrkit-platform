@@ -2,7 +2,7 @@ import type { Theme, Components, ComponentsVariants } from '@mui/material/styles
 
 import { fabClasses } from '@mui/material/Fab';
 
-import { varAlpha, stylesMode } from '../../styles';
+import { appAlpha, stylesMode } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -46,19 +46,19 @@ const filledVariant: Record<string, ComponentsVariants<Theme>['MuiFab']> = {
         /**
          * @color default
          */
-        color: theme.vars.palette.grey[800],
-        backgroundColor: theme.vars.palette.grey[300],
-        '&:hover': { boxShadow: 'none', backgroundColor: theme.vars.palette.grey[400] },
+        color: theme.palette.grey[800],
+        backgroundColor: theme.palette.grey[300],
+        '&:hover': { boxShadow: 'none', backgroundColor: theme.palette.grey[400] },
         /**
          * @color inherit
          */
         [`&.${fabClasses.colorInherit}`]: {
-          color: theme.vars.palette.common.white,
-          backgroundColor: theme.vars.palette.text.primary,
-          '&:hover': { backgroundColor: theme.vars.palette.grey[700] },
+          color: theme.palette.common.white,
+          backgroundColor: theme.palette.text.primary,
+          '&:hover': { backgroundColor: theme.palette.grey[700] },
           [stylesMode.dark]: {
-            color: theme.vars.palette.grey[800],
-            '&:hover': { backgroundColor: theme.vars.palette.grey[400] },
+            color: theme.palette.grey[800],
+            '&:hover': { backgroundColor: theme.palette.grey[400] },
           },
         },
       }),
@@ -73,9 +73,9 @@ const outlinedVariant: Record<string, ComponentsVariants<Theme>['MuiFab']> = {
       OUTLINED_VARIANT.includes(ownerState.variant!) &&
       ownerState.color === color,
     style: ({ theme }) => ({
-      color: theme.vars.palette[color].main,
-      border: `solid 1px ${varAlpha(theme.vars.palette[color].mainChannel, 0.48)}`,
-      '&:hover': { backgroundColor: varAlpha(theme.vars.palette[color].mainChannel, 0.08) },
+      color: theme.palette[color].main,
+      border: `solid 1px ${appAlpha(theme.palette[color].main, 0.48)}`,
+      '&:hover': { backgroundColor: appAlpha(theme.palette[color].main, 0.08) },
     }),
   })),
   base: [
@@ -84,17 +84,17 @@ const outlinedVariant: Record<string, ComponentsVariants<Theme>['MuiFab']> = {
       style: ({ theme }) => ({
         boxShadow: 'none',
         backgroundColor: 'transparent',
-        color: theme.vars.palette.text.secondary,
-        border: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.32)}`,
+        color: theme.palette.text.secondary,
+        border: `solid 1px ${appAlpha(theme.palette.grey['500'], 0.32)}`,
         '&:hover': {
           borderColor: 'currentColor',
           boxShadow: '0 0 0 0.75px currentColor',
-          backgroundColor: theme.vars.palette.action.hover,
+          backgroundColor: theme.palette.action.hover,
         },
-        [`&.${fabClasses.colorInherit}`]: { color: theme.vars.palette.text.primary },
+        [`&.${fabClasses.colorInherit}`]: { color: theme.palette.text.primary },
         [`&.${fabClasses.disabled}`]: {
           backgroundColor: 'transparent',
-          border: `1px solid ${theme.vars.palette.action.disabledBackground}`,
+          border: `1px solid ${theme.palette.action.disabledBackground}`,
         },
       }),
     },
@@ -109,13 +109,13 @@ const softVariant: Record<string, ComponentsVariants<Theme>['MuiFab']> = {
       ownerState.color === color,
     style: ({ theme }) => ({
       boxShadow: 'none',
-      color: theme.vars.palette[color].dark,
-      backgroundColor: varAlpha(theme.vars.palette[color].mainChannel, 0.16),
+      color: theme.palette[color].dark,
+      backgroundColor: appAlpha(theme.palette[color].main, 0.16),
       '&:hover': {
         boxShadow: 'none',
-        backgroundColor: varAlpha(theme.vars.palette[color].mainChannel, 0.32),
+        backgroundColor: appAlpha(theme.palette[color].main, 0.32),
       },
-      [stylesMode.dark]: { color: theme.vars.palette[color].light },
+      [stylesMode.dark]: { color: theme.palette[color].light },
     }),
   })),
   base: [
@@ -127,16 +127,16 @@ const softVariant: Record<string, ComponentsVariants<Theme>['MuiFab']> = {
          * @color default
          */
         boxShadow: 'none',
-        color: theme.vars.palette.grey[800],
-        backgroundColor: theme.vars.palette.grey[300],
-        '&:hover': { boxShadow: 'none', backgroundColor: theme.vars.palette.grey[400] },
+        color: theme.palette.grey[800],
+        backgroundColor: theme.palette.grey[300],
+        '&:hover': { boxShadow: 'none', backgroundColor: theme.palette.grey[400] },
         /**
          * @color inherit
          */
         [`&.${fabClasses.colorInherit}`]: {
-          color: theme.vars.palette.text.primary,
-          backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
-          '&:hover': { backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.24) },
+          color: theme.palette.text.primary,
+          backgroundColor: appAlpha(theme.palette.grey['500'], 0.08),
+          '&:hover': { backgroundColor: appAlpha(theme.palette.grey['500'], 0.24) },
         },
       }),
     },

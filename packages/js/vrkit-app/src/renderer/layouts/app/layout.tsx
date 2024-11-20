@@ -34,7 +34,7 @@ const StyledDivider = styled("span")(({ theme }) => ({
   marginLeft: theme.spacing(2.5),
   marginRight: theme.spacing(2.5),
   backgroundColor: "currentColor",
-  // color: theme.vars.palette.divider,
+  // color: theme.palette.divider,
   "&::before, &::after": {
     top: -5,
     width: 3,

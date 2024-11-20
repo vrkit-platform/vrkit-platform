@@ -12,7 +12,7 @@ import { listItemIconClasses } from '@mui/material/ListItemIcon';
 import { circularProgressClasses } from '@mui/material/CircularProgress';
 import { formControlLabelClasses } from '@mui/material/FormControlLabel';
 
-import { paper, varAlpha } from '../../styles';
+import { paper, appAlpha } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -80,12 +80,12 @@ const MuiDataGrid: Components<Theme>['MuiDataGrid'] = {
   styleOverrides: {
     root: ({ theme }) => ({
       '--unstable_DataGrid-radius': 0,
-      '--DataGrid-rowBorderColor': theme.vars.palette.divider,
-      '--DataGrid-containerBackground': theme.vars.palette.background.neutral,
+      '--DataGrid-rowBorderColor': theme.palette.divider,
+      '--DataGrid-containerBackground': theme.palette.background.neutral,
       '--unstable_DataGrid-headWeight': theme.typography.fontWeightSemiBold,
       borderWidth: 0,
       scrollbarWidth: 'thin',
-      scrollbarColor: `${varAlpha(theme.vars.palette.text.disabledChannel, 0.4)} ${varAlpha(theme.vars.palette.text.disabledChannel, 0.08)}`,
+      scrollbarColor: `${appAlpha(theme.palette.text.disabledChannel, 0.4)} ${appAlpha(theme.palette.text.disabledChannel, 0.08)}`,
       '& .MuiDataGrid-filler > div': { borderTopStyle: 'dashed' },
       '& .MuiDataGrid-topContainer::after': { height: 0 },
     }),
@@ -95,8 +95,8 @@ const MuiDataGrid: Components<Theme>['MuiDataGrid'] = {
      */
     columnHeader: ({ theme }) => ({
       fontSize: 14,
-      color: theme.vars.palette.text.secondary,
-      '&--sorted': { color: theme.vars.palette.text.primary },
+      color: theme.palette.text.secondary,
+      '&--sorted': { color: theme.palette.text.primary },
     }),
     columnSeparator: { color: 'var(--DataGrid-rowBorderColor)' },
     /**
@@ -106,7 +106,7 @@ const MuiDataGrid: Components<Theme>['MuiDataGrid'] = {
       borderTopStyle: 'dashed',
       '&--editing': {
         boxShadow: 'none',
-        backgroundColor: varAlpha(theme.vars.palette.primary.mainChannel, 0.08),
+        backgroundColor: appAlpha(theme.palette.primary.main, 0.08),
       },
     }),
     /**
@@ -166,7 +166,7 @@ const MuiDataGrid: Components<Theme>['MuiDataGrid'] = {
     footerContainer: { minHeight: 'auto', borderTopStyle: 'dashed' },
     selectedRowCount: { display: 'none', whiteSpace: 'nowrap' },
     overlay: ({ theme }) => ({
-      [`& .${circularProgressClasses.root}`]: { color: theme.vars.palette.text.primary },
+      [`& .${circularProgressClasses.root}`]: { color: theme.palette.text.primary },
     }),
     /**
      * Column panel
@@ -201,7 +201,7 @@ const MuiDataGrid: Components<Theme>['MuiDataGrid'] = {
     filterFormDeleteIcon: ({ theme }) => ({
       [`& .${iconButtonClasses.root}`]: {
         padding: theme.spacing(0.25),
-        backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.16),
+        backgroundColor: appAlpha(theme.palette.grey['500'], 0.16),
         [`& .${svgIconClasses.root}`]: { width: 16, height: 16 },
       },
     }),

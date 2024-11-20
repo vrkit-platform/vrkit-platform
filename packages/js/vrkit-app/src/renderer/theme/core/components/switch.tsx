@@ -2,7 +2,7 @@ import type { Theme, Components } from '@mui/material/styles';
 
 import { switchClasses } from '@mui/material/Switch';
 
-import { varAlpha, stylesMode } from '../../styles';
+import { appAlpha, stylesMode } from '../../styles';
 
 // ----------------------------------------------------------------------
 
@@ -18,13 +18,13 @@ const MuiSwitch: Components<Theme>['MuiSwitch'] = {
       [`&.${switchClasses.checked}`]: {
         [`& .${switchClasses.thumb}`]: {
           ...(ownerState.color === 'default' && {
-            [stylesMode.dark]: { color: theme.vars.palette.grey[800] },
+            [stylesMode.dark]: { color: theme.palette.grey[800] },
           }),
         },
         [`&+.${switchClasses.track}`]: {
           opacity: 1,
           ...(ownerState.color === 'default' && {
-            backgroundColor: theme.vars.palette.text.primary,
+            backgroundColor: theme.palette.text.primary,
           }),
         },
       },
@@ -36,9 +36,9 @@ const MuiSwitch: Components<Theme>['MuiSwitch'] = {
     track: ({ theme }) => ({
       opacity: 1,
       borderRadius: 10,
-      backgroundColor: varAlpha(theme.vars.palette.grey['500Channel'], 0.48),
+      backgroundColor: appAlpha(theme.palette.grey['500'], 0.48),
     }),
-    thumb: ({ theme }) => ({ color: theme.vars.palette.common.white }),
+    thumb: ({ theme }) => ({ color: theme.palette.common.white }),
     sizeMedium: {
       [`& .${switchClasses.track}`]: { height: 20 },
       [`& .${switchClasses.thumb}`]: { width: 14, height: 14 },

@@ -26,7 +26,7 @@ const baseStyles = (theme: Theme) => ({
   '&::before, &::after': {
     content: "''",
     borderRadius: 1,
-    backgroundColor: theme.vars.palette.common.white,
+    backgroundColor: theme.palette.common.white,
   },
   [`&.${badgeClasses.invisible}`]: { transform: 'unset' },
 });
@@ -44,7 +44,7 @@ const MuiBadge: Components<Theme>['MuiBadge'] = {
       style: ({ theme }) => ({
         [`& .${badgeClasses.badge}`]: {
           ...baseStyles(theme),
-          backgroundColor: theme.vars.palette.success.main,
+          backgroundColor: theme.palette.success.main,
         },
       }),
     },
@@ -56,7 +56,7 @@ const MuiBadge: Components<Theme>['MuiBadge'] = {
       style: ({ theme }) => ({
         [`& .${badgeClasses.badge}`]: {
           ...baseStyles(theme),
-          backgroundColor: theme.vars.palette.warning.main,
+          backgroundColor: theme.palette.warning.main,
           '&::before': { width: 2, height: 4, transform: 'translateX(1px) translateY(-1px)' },
           '&::after': { width: 2, height: 4, transform: 'translateY(1px) rotate(125deg)' },
         },
@@ -70,7 +70,7 @@ const MuiBadge: Components<Theme>['MuiBadge'] = {
       style: ({ theme }) => ({
         [`& .${badgeClasses.badge}`]: {
           ...baseStyles(theme),
-          backgroundColor: theme.vars.palette.error.main,
+          backgroundColor: theme.palette.error.main,
           '&::before': { width: 6, height: 2 },
         },
       }),
@@ -83,7 +83,7 @@ const MuiBadge: Components<Theme>['MuiBadge'] = {
       style: ({ theme }) => ({
         [`& .${badgeClasses.badge}`]: {
           ...baseStyles(theme),
-          backgroundColor: theme.vars.palette.text.disabled,
+          backgroundColor: theme.palette.text.disabled,
           '&::before': { width: 6, height: 6, borderRadius: '50%' },
         },
       }),

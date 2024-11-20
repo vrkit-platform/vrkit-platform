@@ -31,7 +31,6 @@ import { capitalize } from "lodash"
 import { interceptEvent } from "../../utils/dom"
 import { isDefined, isFunction, isString } from "@3fv/guard"
 import { match } from "ts-pattern"
-import { BaseTextFieldProps } from "@mui/material/TextField/TextField"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

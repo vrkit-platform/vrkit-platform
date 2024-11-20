@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 
 import { DefaultConfig } from '../../config-global';
-import { varAlpha, bgGradient } from '../../theme/styles';
+import { appAlpha, bgGradient } from '../../theme/styles';
 
 // ----------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ export function AppWelcome({ title, description, action, img, sx, ...other }: Pr
     <Box
       sx={{
         // ...bgGradient({
-        //   color: `to right, ${varAlpha(theme.vars.palette.grey['900Channel'], 0.88)} 0%, ${theme.vars.palette.grey[900]} 75%`,
+        //   color: `to right, ${varAlpha(theme.palette.grey['900'], 0.88)} 0%, ${theme.palette.grey[900]} 75%`,
         //   imgUrl: `${DefaultConfig.app.basePath}/assets/background/background-5.webp`,
         // }),
         pt: 5,
@@ -39,7 +39,7 @@ export function AppWelcome({ title, description, action, img, sx, ...other }: Pr
         color: 'common.white',
         textAlign: { xs: 'center', md: 'left' },
         flexDirection: { xs: 'column', md: 'row' },
-        // border: `solid 1px ${theme.vars.palette.grey[800]}`,
+        // border: `solid 1px ${theme.palette.grey[800]}`,
         ...sx,
       }}
       {...other}

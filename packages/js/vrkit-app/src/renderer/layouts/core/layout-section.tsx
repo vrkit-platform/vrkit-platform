@@ -10,7 +10,6 @@ import React from "react"
 
 export type LayoutSectionProps = {
   sx?: SxProps<Theme>;
-  cssVars?: CSSObject;
   children?: React.ReactNode;
   footerSection?: React.ReactNode;
   headerSection?: React.ReactNode;
@@ -19,21 +18,11 @@ export type LayoutSectionProps = {
 
 export function LayoutSection({
   sx,
-  cssVars,
   children,
   footerSection,
   headerSection,
   sidebarSection,
 }: LayoutSectionProps) {
-  // const inputGlobalStyles = (
-  //   <GlobalStyles
-  //     styles={{
-  //       body: {
-  //         ...cssVars,
-  //       },
-  //     }}
-  //   />
-  // );
 
   return (
     <>

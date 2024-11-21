@@ -23,7 +23,8 @@ import {
   flex,
   flexAlign,
   FlexAuto,
-  FlexColumn, FlexColumnCenter,
+  FlexColumn,
+  FlexColumnCenter,
   FlexRowCenter,
   FlexRowCenterBox,
   FlexScaleZero,
@@ -31,7 +32,7 @@ import {
   OverflowAuto,
   OverflowHidden,
   OverflowVisible,
-  padding,
+  padding, paddingRem,
   transition
 } from "vrkit-shared-ui"
 import { attributesEqual, isEqual } from "vrkit-shared"
@@ -57,7 +58,9 @@ import { useIsMounted } from "usehooks-ts"
 import { FlexRow, rem } from "vrkit-shared-ui/styles"
 import { appTextFieldClasses, AppTextFieldFormik } from "../../app-text-field"
 import { DashboardLayoutSwitch } from "../common/layout-switch"
-// import { faWindowClose } from "@awesome.me/kit-79150a3eed"
+import { useNavigate } from "react-router-dom"
+import { faTimes } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
+import { WebPaths } from "../../../routes/WebPaths"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -87,24 +90,17 @@ const DashboardsListEditorRoot = styled(Box, {
 })(({ theme }) => ({
   // root styles here
   [hasCls(classNames.root)]: {
-    ...transition(["flex-grow", "flex-shrink", "flex-basis", "filter"]),
+    // ...transition(["flex-grow", "flex-shrink", "flex-basis", "filter"]),
     ...FlexColumn,
     ...FillHeight,
     ...OverflowHidden,
-    ...flex(0, 0, 0),
-    filter: `none`,
+    ...FlexScaleZero,
+    ...padding(theme.spacing(0.5),theme.spacing(1)),
     background: darken(theme.palette.background.appBar, 0.4),
-    [hasCls(classNames.visible)]: {
-      ...flex(1, 1, "calc(min(50vw,350px))"),
-      filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`
-    },
 
     [child(classNames.content)]: {
       ...FlexColumn,
-      ...FlexScaleZero,
-      ...OverflowHidden,
 
-      // gap: theme.spacing(1.5),
       [child(classNames.header)]: {
         ...padding(theme.spacing(1)),
         ...FlexColumn,
@@ -117,28 +113,29 @@ const DashboardsListEditorRoot = styled(Box, {
           ...FlexAuto,
         },
         [child(classNames.headerActions)]: {
-          ...flexAlign("center","flex-end"),
+          ...flexAlign("center","flex-start"),
           ...FlexRow,
-          ...FlexAuto
+          ...FlexAuto,
+          background: darken(theme.palette.background.root, 0.2),
         }
       },
       [child(classNames.details)]: {
         ...FlexColumn,
         ...OverflowAuto,
-        ...FlexScaleZero,
+        ...FlexAuto,
 
-        ...flexAlign("center", "stretch"),
+        // ...flexAlign("center", "stretch"),
 
-        background: darken(theme.palette.background.appBar, 0.2),
+        // background: darken(theme.palette.background.appBar, 0.2),
         [child(classNames.detailsContent)]: {
           ...padding(theme.spacing(1)),
-          ...FillWidth,
+          // ...FillWidth,
           ...FlexColumn,
           ...FlexAuto,
-          ...OverflowVisible,
+          // ...OverflowVisible,
           gap: theme.spacing(1),
           [child(classNames.layouts)]: {
-            ...FillWidth,
+            // ...FillWidth,
             ...FlexColumn,
             ...FlexAuto,
             gap: theme.spacing(1),
@@ -163,49 +160,6 @@ const DashboardsListEditorRoot = styled(Box, {
  * DashboardsListEditor Component Properties
  */
 export interface DashboardsListEditorProps extends BoxProps {}
-//
-// interface LayoutFieldProps {
-//   vr?: boolean
-//
-//   label: string
-//
-//   enabled: boolean
-//
-//   dashConfig: DashboardConfig
-//
-//   onChange: (enabled: boolean) => void
-// }
-//
-// function LayoutField({ vr: isVR = false, label, enabled, dashConfig, onChange }: LayoutFieldProps) {
-//   return (
-//     <Box className={clsx(classNames.layout)}>
-//       <Box
-//         sx={{
-//           ...FlexScaleZero,
-//           ...Ellipsis
-//         }}
-//       >
-//         {label}{" "}
-//         <Typography
-//           component="span"
-//           variant="caption"
-//           sx={{ opacity: 0.7, fontStyle: "italic" }}
-//         >
-//           {enabled ? "" : "Not "}Enabled
-//         </Typography>
-//       </Box>
-//       <Checkbox
-//         sx={{
-//           ...FlexAuto
-//         }}
-//         defaultChecked={enabled}
-//         onChange={(event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-//           onChange(checked)
-//         }}
-//       />
-//     </Box>
-//   )
-// }
 
 type DashboardListEditorFormProps = {
   dashConfig: DashboardConfig
@@ -238,6 +192,7 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
       dashConfig,
       handleSubmitRef
     } = props,
+      nav = useNavigate(),
     dashboardClient = useService(DashboardManagerClient),
     patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
     launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
@@ -279,15 +234,15 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
             <Box className={clsx(classNames.header)}>
               <Box className={clsx(classNames.headerActions)}>
                 <IconButton
-                    aria-label="close"
+                    aria-label="cancel"
                     color="inherit"
                     onClick={() => {
-                      canModify && clearMutatingModels()
+                      nav(WebPaths.app.dashboards)
                     }}
                 >
                   <Icon
-                      fa={true}
-                      icon={faClose}
+                      fa
+                      icon={faTimes}
                   />
                 </IconButton>
               </Box>

@@ -28,7 +28,7 @@ import PQueue from "p-queue"
 import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
 import { MainWindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
-import { action, runInAction, set } from "mobx"
+import { action, runInAction, set, toJS } from "mobx"
 import { IDisposer } from "mobx-utils"
 import { assign, defaultsDeep, first } from "lodash"
 import { FileSystemManager } from "vrkit-shared/services/node"
@@ -221,13 +221,13 @@ export class DashboardManager {
 
   @Bind
   async createDashboardConfig(patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
-    const dashConfig = runInAction(() => {
-      const newDashConfig = DashboardConfig.create(defaultsDeep(patch, newDashboardTrackMapMockConfig()))
-      this.dashboardConfigs.push(newDashConfig)
-      return newDashConfig
+    const dashConfig =DashboardConfig.create(defaultsDeep(patch, newDashboardTrackMapMockConfig()))
+    await this.saveDashboardConfigTaskFactory(dashConfig)
+     runInAction(() => {
+      this.dashboardConfigs.push(dashConfig)
     })
 
-    await this.saveDashboardConfigTaskFactory(dashConfig)
+    
     return dashConfig
   }
 
@@ -235,7 +235,11 @@ export class DashboardManager {
     event: IpcMainInvokeEvent,
     patch: Partial<DashboardConfig>
   ): Promise<DashboardConfig> {
-    return await this.createDashboardConfig(patch).then(dashConfig => DashboardConfig.toJson(dashConfig) as any)
+    const dashConfig = await this.createDashboardConfig(patch),
+        dashConfigJson = toJS(DashboardConfig.toJson(dashConfig)) as any
+    
+    log.info(`Created new dash config`, dashConfigJson)
+    return dashConfigJson
   }
 
   @Bind
@@ -400,6 +404,9 @@ export class DashboardManager {
           emitDefaultValues: true
         })
       )
+      
+      await this.fsManager.getFileInfo(dashFile).then(fileInfo => assign(config, { fileInfo }))
+      
     }
   }
 

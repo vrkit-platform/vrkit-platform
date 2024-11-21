@@ -84,7 +84,8 @@ export class DashboardManagerClient {
   }
   
   @Bind
-  createDashboardConfig(patch:Partial<DashboardConfig>):Promise<DashboardConfig> {
+  createDashboardConfig(patch:Partial<DashboardConfig> = {}):Promise<DashboardConfig> {
+    log.info(`Creating new dashboard with patch`, patch)
     return ipcRenderer.invoke(DashboardManagerFnTypeToIPCName(DashboardManagerFnType.CREATE_DASHBOARD_CONFIG), patch)
   }
   

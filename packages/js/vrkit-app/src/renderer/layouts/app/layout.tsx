@@ -85,17 +85,12 @@ export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
       <Box
           component="main"
           sx={{
-            //position: "absolute",
             ...FlexRow,
             ...flexAlign("stretch", "stretch"),
-            // top: theme.dimen.appBarHeight,
-            // left: 0,
-            // right: 0,
-            // bottom: 0,
             ...FlexScaleZero,
-            backgroundColor: "transparent",
             ...widthConstraint("100vw"),
             ...OverflowHidden,
+            backgroundColor: "transparent",
             ...sx
           }}
       >

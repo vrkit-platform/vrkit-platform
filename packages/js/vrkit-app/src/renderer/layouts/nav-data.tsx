@@ -43,7 +43,7 @@ export const navData = [
   {
     title: "Dashboards",
     path: WebPaths.app.dashboards,
-    icon: Icons.dashboard
+    icon: Icons.dashboard,
   },
   
   // {

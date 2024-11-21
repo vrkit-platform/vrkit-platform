@@ -52,11 +52,16 @@ declare module "@mui/material/styles/createPalette" {
     appBar: string
     appBarSearch: string
     appBarGradient: string
+    root: string
+    rootImage: string
     gradient: string
     gradientImage: string
     session: string
     sessionImage: string
+    paperImage: string
     paperFooter: string
+    drawerBgPaper: string
+    drawerBgPaperGradient: string
     actionFooter: string
     filledInput: string
     filledInputDisabled: string

@@ -13,15 +13,20 @@ import { styled, useTheme } from "@mui/material/styles"
 
 // APP
 import {
-  alpha, borderRadius,
+  alpha,
+  borderRadius,
   child,
   ClassNamesKey,
   createClassNames,
+  Ellipsis,
   FillWidth,
   flex,
   flexAlign,
+  FlexAuto,
   FlexAutoGrow,
   FlexColumn,
+  FlexRow,
+  FlexRowBox,
   FlexRowCenter,
   FlexScaleZero,
   hasCls,
@@ -45,6 +50,7 @@ import {
 } from "../../model-editor-context"
 import Alert from "vrkit-app-renderer/services/alerts"
 import Accordion, { AccordionProps } from "@mui/material/Accordion"
+import { AlienIcon, DashboardIcon } from "../common/icon"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -83,10 +89,13 @@ const DashboardsListViewRoot = styled(Box, {
         },
             
             [child(dashboardsListViewClasses.itemPaper)]: {
-              ...FlexRowCenter,
+              ...FlexRow,
               ...FlexAutoGrow,
+              ...flexAlign("stretch", "flex-start"),
               ...borderRadius("0.5rem"),
               ...padding("1rem"),
+              // backgroundColor: theme.palette.background.paper,
+              // backgroundImage: theme.palette.background.paperImage,
               gap: "0.5rem"
 }
       }
@@ -122,16 +131,25 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
       className={clsx(dashboardsListViewClasses.item, className)}
       {...other}
     >
-      <ButtonBase
+      <Paper
           onClick={onSelect}
-          component={Paper} elevation={2} className={clsx(dashboardsListViewClasses.itemPaper)}>
-        <FlexColumnBox sx={{...FlexScaleZero}}>
-          <Typography variant="h6">{config.name}</Typography>
-          <Typography variant="caption" sx={{
-            color: alpha(theme.palette.text.primary,0.5)
-          }}>{asOption(config.description).filter(isEmpty).getOrElse("No description")}</Typography>
-        </FlexColumnBox>
-      </ButtonBase>
+          elevation={4} className={clsx(dashboardsListViewClasses.itemPaper)}>
+        <FlexRowBox sx={{...FlexAuto, gap: theme.spacing(1)}}>
+          <DashboardIcon
+              elevation={4}
+              variant="circle"
+              size="md"
+              icon={"Alien"} />
+          
+          <FlexColumnBox sx={{...FlexScaleZero, ...flexAlign("flex-start","stretch")}}>
+              <Typography sx={{...Ellipsis}} variant="h6">{config.name}</Typography>
+            
+            <Typography variant="caption" sx={{
+              color: alpha(theme.palette.text.primary,0.5)
+            }}>{asOption(config.description).filter(isEmpty).getOrElse("No description")}</Typography>
+          </FlexColumnBox>
+        </FlexRowBox>
+      </Paper>
     </Box>
   )
 }
@@ -152,9 +170,6 @@ export function DashboardsListView(props: DashboardsListViewProps) {
       configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
       editorContext = useModelEditorContext<DashboardConfig>(),
       { mutatingModels, models, modelById, setMutatingModel, resetMutatingModels } = editorContext
-      
-      
-      
   
   return <DashboardsListViewRoot
       className={clsx(dashboardsListViewClasses.root, className)}

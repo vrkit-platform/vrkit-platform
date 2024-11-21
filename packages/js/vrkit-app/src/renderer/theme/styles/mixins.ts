@@ -201,15 +201,15 @@ type PaperProps = {
 
 export function paper({ theme, color, dropdown }: PaperProps) {
   return {
-    ...bgBlur({
-      color: color ?? appAlpha(theme.palette.background.paperChannel, 0.9),
-      blur: 20,
-    }),
-    backgroundImage: `url(${DefaultConfig.app.basePath}/assets/cyan-blur.png), url(${DefaultConfig.app.basePath}/assets/red-blur.png)`,
-    backgroundRepeat: 'no-repeat, no-repeat',
-    backgroundPosition: 'top right, left bottom',
-    backgroundSize: '50%, 50%',
-    ...(theme.direction === 'rtl' && { backgroundPosition: 'top left, right bottom' }),
+    // ...bgBlur({
+    //   color: color ?? appAlpha(theme.palette.background.paper, 0.9),
+    //   blur: 20,
+    // }),
+    // backgroundImage: `url(${DefaultConfig.app.basePath}/assets/cyan-blur.png), url(${DefaultConfig.app.basePath}/assets/red-blur.png)`,
+    // backgroundRepeat: 'no-repeat, no-repeat',
+    // backgroundPosition: 'top right, left bottom',
+    // backgroundSize: '50%, 50%',
+    // ...(theme.direction === 'rtl' && { backgroundPosition: 'top left, right bottom' }),
     ...(dropdown && {
       padding: theme.spacing(0.5),
       boxShadow: theme.customShadows.dropdown,

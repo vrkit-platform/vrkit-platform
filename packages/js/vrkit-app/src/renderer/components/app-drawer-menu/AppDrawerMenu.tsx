@@ -38,7 +38,7 @@ const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const classPrefix = "appDrawerMenu"
-export const appDrawerMenuClasses = createClassNames(classPrefix, "root")
+export const appDrawerMenuClasses = createClassNames(classPrefix, "root", "hidden")
 export type AppDrawerMenuClassKey = ClassNamesKey<typeof appDrawerMenuClasses>
 
 
@@ -47,7 +47,8 @@ const AppDrawerMenuRoot = styled(FlexColumnBox, {
   label: "AppDrawerMenuRoot"
 })(({theme}) => ({
   // root styles here
-  ...flexAlign("stretch", "stretch")
+  ...flexAlign("stretch", "stretch"),
+  
 }))
 
 export const appListItemClasses = createClassNames(classPrefix, "root", "active")
@@ -87,7 +88,7 @@ function NavListItem({path, icon, label}:NavListItemProps) {
       theme = useTheme()
   
   return <AppListItemButton
-      disableGutters
+      // disableGutters
       className={clsx(appListItemClasses.root, {
         [appListItemClasses.active]: isActive
       })}

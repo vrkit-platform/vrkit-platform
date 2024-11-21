@@ -1,7 +1,7 @@
 import * as React from "react"
 import { CSSProperties } from "react"
 import * as CSS from "csstype"
-import { isArray, isFunction, isNumber, isObject, isString } from "@3fv/guard"
+import { isArray, isBoolean, isFunction, isNumber, isObject, isString } from "@3fv/guard"
 import { getLogger } from "@3fv/logger-proxy"
 import * as _ from "lodash"
 import { assign, flow, isEmpty, omit, partition, uniq } from "lodash"
@@ -741,9 +741,25 @@ export function child(
 
 export function hasCls(
     className: string | string[],
+    negate?: boolean
+): string
+export function hasCls<T extends {}, K extends keyof T = keyof T>(
+    classNames: T,
+    names: K | K[], 
+    negate?: boolean
+): string
+export function hasCls(
+    classNameOrNames: {} | string | string[],
+    namesOrNegate: boolean | string | string[] = null,
     negate: boolean = false
-): string {
-  const classNames = arrayOf(className)
+): string{
+  negate = isString(namesOrNegate) || isArray(namesOrNegate) ? negate : !!namesOrNegate 
+  const keyNames:Array<string> = isString(namesOrNegate) ? arrayOf(namesOrNegate) : isArray(namesOrNegate) ? namesOrNegate : Array<string>()
+  const classNames = match(classNameOrNames)
+      .with(P.string, className => arrayOf(className))
+      .with(P.array<string>(), classNames => classNames)
+      .when(isObject, classNameMap => keyNames.map(key => classNameMap[key] as string))
+      .run()
   let criteria = classNames.map(className => `.${className}`).join("")
   if (negate) {
     criteria = `:not(${criteria})`

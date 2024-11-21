@@ -44,8 +44,9 @@ export interface DashboardLayoutSwitchProps {
   vr?: boolean
 
   hiddenLabel?: boolean
+
   hiddenTip?: boolean
-  
+
   label: string
 
   value: boolean
@@ -61,28 +62,32 @@ export function DashboardLayoutSwitch({
   value,
   disabled,
   onChange,
-    hiddenTip = false,
-    hiddenLabel = false
+  hiddenTip = false,
+  hiddenLabel = false
 }: DashboardLayoutSwitchProps) {
   return (
     <DashboardLayoutSwitchRoot className={clsx(classNames.root)}>
-      {!hiddenLabel || !hiddenTip ? <>
-      <Box
-        sx={{
-          ...FlexScaleZero,
-          ...Ellipsis
-        }}
-      >
-        {!hiddenLabel ? <>{label}{" "}</> : null}
-        {!hiddenTip ? <Typography
-          component="span"
-          variant="caption"
-          sx={{ opacity: 0.7, fontStyle: "italic" }}
-        >
-          {value ? "" : "Not "}Enabled
-        </Typography> : null}
-      </Box>
-      </> : null}
+      {!hiddenLabel || !hiddenTip ? (
+        <>
+          <Box
+            sx={{
+              ...FlexScaleZero,
+              ...Ellipsis
+            }}
+          >
+            {!hiddenLabel ? <>{label} </> : null}
+            {!hiddenTip ? (
+              <Typography
+                component="span"
+                variant="caption"
+                sx={{ opacity: 0.7, fontStyle: "italic" }}
+              >
+                {value ? "" : "Not "}Enabled
+              </Typography>
+            ) : null}
+          </Box>
+        </>
+      ) : null}
       <Checkbox
         sx={{
           ...FlexAuto

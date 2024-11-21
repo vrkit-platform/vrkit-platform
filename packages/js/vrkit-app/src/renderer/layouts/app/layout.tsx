@@ -108,8 +108,10 @@ export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
               ...flex(0,1,"calc(min(300px,25vw))"),
               ...FlexColumn,
               ...flexAlign("stretch","stretch"),
+              
               [`& .MuiDrawer-paper`]: {
                 position: "relative",
+                
               },
             }}
         >

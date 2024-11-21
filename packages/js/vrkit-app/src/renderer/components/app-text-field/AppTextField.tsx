@@ -53,11 +53,17 @@ const AppTextFieldRoot = styled(MuiTextField)(({ theme }) => ({
     ...FlexDefaults.stretch,
     ...FlexDefaults.stretchSelf,
     
-    [`& .${muiInputBaseClasses.input}, & .${muiFilledInputClasses.input}`]: {
-      paddingLeft: rem(1),
-      paddingRight: rem(1)
+    [`& input.${muiInputBaseClasses.input}, & input.${muiFilledInputClasses.input}`]: {
+      paddingLeft: rem(0.5),
+      paddingRight: rem(0.5)
     },
     
+    [`& div.${muiInputBaseClasses.root}.${muiFilledInputClasses.root}`]: {
+      paddingLeft: rem(0.5), paddingRight: rem(0.5),
+      [`& textarea.${muiInputBaseClasses.input}, & textarea.${muiFilledInputClasses.input}`]: {
+        paddingLeft: rem(0), paddingRight: rem(0)
+      },
+    },
     [hasCls(appTextFieldClasses.flex)]: {
       ...FlexScaleZero
     },

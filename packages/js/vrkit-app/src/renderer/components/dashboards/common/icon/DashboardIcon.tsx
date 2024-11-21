@@ -1,17 +1,12 @@
 import { isNotEmpty } from "vrkit-shared/utils"
-import { assert, isString } from "@3fv/guard"
+import { assert, isNumber, isString } from "@3fv/guard"
 import React from "react"
 import { SxProps } from "@mui/system"
-import { Theme } from "@mui/material"
+import { Theme, useTheme } from "@mui/material"
 import warning from "warning"
 
 // APP
-import {
-  ClassNamesKey,
-  createClassNames,
-  hasCls,
-  dimensionConstraints
-} from "vrkit-shared-ui/styles"
+import { ClassNamesKey, createClassNames, dimensionConstraints, hasCls, margin } from "vrkit-shared-ui/styles"
 import { getLogger } from "@3fv/logger-proxy"
 import { styled } from "@mui/material/styles"
 // import { Icon } from "@taskx/lib-models"
@@ -32,6 +27,9 @@ export type DashboardIconSize = "sm" | "md" | "lg" | "xl"
 export const classNames = createClassNames(
   dashboardIconClassPrefix,
   "root",
+  "square",
+  "circle",
+  "margin",
   "sm",
   "md",
   "lg",
@@ -39,8 +37,7 @@ export const classNames = createClassNames(
 )
 export type DashboardIconClassKey = ClassNamesKey<typeof classNames>
 
-export interface DashboardIconImgProps
-  extends Omit<React.HTMLAttributes<HTMLImageElement>, "src"> {
+export interface DashboardIconImgProps extends Omit<React.HTMLAttributes<HTMLImageElement>, "src"> {
   sx?: SxProps<Theme>
 }
 
@@ -52,6 +49,7 @@ export const DashboardIconRoot = styled("img", {
     [`&, &.${classNames.root}`]: {
       objectFit: "contain",
       pointerEvents: "none",
+
       [hasCls(classNames.sm)]: {
         ...dimensionConstraints(sm)
       },
@@ -63,39 +61,45 @@ export const DashboardIconRoot = styled("img", {
       },
       [hasCls(classNames.xl)]: {
         ...dimensionConstraints(xl)
+      },
+      [hasCls(classNames.margin)]: {
+        ...margin(theme.spacing(0.5))
+      },
+      [hasCls(classNames.square)]: {
+        borderRadius: theme.shape.borderRadius
+      },
+      [hasCls(classNames.circle)]: {
+        borderRadius: "50%"
       }
     }
   }
 })
 
 const dashboardIconCtx = require.context(
-  "assets/builtin-icons",
+  "vrkit-app-renderer/assets/builtin-icons",
   true,
   /\.png$/
   // "lazy"
 )
 const dashboardIconKeys = dashboardIconCtx.keys()
 
-export type DashboardIconPresetComponent =
-  React.ComponentType<DashboardIconImgProps> & {
-    iconName: string
-    iconUrl: string
-  }
+export type DashboardIconPresetComponent = React.ComponentType<DashboardIconImgProps> & {
+  iconName: string
+  iconUrl: string
+}
 
 function createDashboardIcon(name: string) {
   const key = dashboardIconKeys.find(key => key.includes(name))
   assert(isNotEmpty(key), `unable to find key ${name}`)
   const src = dashboardIconCtx(key)
-  const iconComponent = React.forwardRef<HTMLImageElement, DashboardIconImgProps>(
-    ({ className, ...other }, ref) => (
-      <DashboardIconRoot
-        ref={ref}
-        className={clsx(classNames.root, className)}
-        src={src}
-        {...other}
-      />
-    )
-  )
+  const iconComponent = React.forwardRef<HTMLImageElement, DashboardIconImgProps>(({ className, ...other }, ref) => (
+    <DashboardIconRoot
+      ref={ref}
+      className={clsx(classNames.root, className)}
+      src={src}
+      {...other}
+    />
+  ))
 
   return assign(iconComponent, {
     iconName: name,
@@ -161,57 +165,70 @@ export namespace DashboardIcons {
 
 export type DashboardIconPreset = keyof typeof DashboardIcons
 
-export const DashboardIconPresets = Object.fromEntries(
-  Object.keys(DashboardIcons).map(key => [key, key])
-) as Record<DashboardIconPreset, DashboardIconPreset>
+export const DashboardIconPresets = Object.fromEntries(Object.keys(DashboardIcons).map(key => [key, key])) as Record<
+  DashboardIconPreset,
+  DashboardIconPreset
+>
 
 export type DashboardIconKind = DashboardIconPreset | Image
 
 export interface DashboardIconProps extends DashboardIconImgProps {
   size?: DashboardIconSize
+
   icon: DashboardIconKind
+
+  variant?: "circle" | "square"
+
+  noMargin?: boolean
+
+  elevation?: "none" | number
 }
 
-export const DashboardIcon = React.forwardRef<HTMLImageElement, DashboardIconProps>(
-  function DashboardIcon({ icon, size, className, ...imgProps }, ref) {
-    if (isString(icon) || ImageExt.isPresetUrl(icon.url)) {
-      const presetIcon = capitalize(
-        isString(icon)
-          ? icon
-          : asOption(ImageExt.getPresetUrlPathname(icon.url)).getOrElse(
-              icon?.url ?? DashboardIcons.Code.iconName
-            )
-      )
-
-      let Component = DashboardIcons[presetIcon]
-      if (!Component) {
-        warning(!Component, `Invalid project icon name (${presetIcon})`)
-        Component = DashboardIcons.Code
-      }
-      return (
-        <Component
-          ref={ref}
-          className={clsx(
-            classNames.root,
-            classNames[size],
-            className
-          )}
-          {...imgProps}
-        />
-      )
-    } else {
-      return (
-        <DashboardIconRoot
-          ref={ref}
-          src={icon.url}
-          className={clsx(
-            classNames.root,
-            classNames[size],
-            className
-          )}
-          {...imgProps}
-        />
-      )
-    }
+export const DashboardIcon = React.forwardRef<HTMLImageElement, DashboardIconProps>(function DashboardIcon(
+  { icon, variant = "square", elevation = "none", noMargin = false, size = "sm", className, sx = {}, ...imgProps },
+  ref
+) {
+  const theme = useTheme()
+  if (isNumber(elevation)) {
+    sx = { ...sx, boxShadow: theme.shadows[elevation] ?? "none" }
   }
-)
+  if (isString(icon) || ImageExt.isPresetUrl(icon.url)) {
+    const presetIcon = capitalize(
+      isString(icon)
+        ? icon
+        : asOption(ImageExt.getPresetUrlPathname(icon.url)).getOrElse(icon?.url ?? DashboardIcons.Code.iconName)
+    )
+
+    let Component = DashboardIcons[presetIcon]
+    if (!Component) {
+      warning(!Component, `Invalid project icon name (${presetIcon})`)
+      Component = DashboardIcons.Code
+    }
+    return (
+      <Component
+        ref={ref}
+        className={clsx(classNames.root, classNames[size], className, {
+          [classNames.square]: variant === "square",
+          [classNames.circle]: variant === "circle",
+          [classNames.margin]: !noMargin
+        })}
+        sx={sx}
+        {...imgProps}
+      />
+    )
+  } else {
+    return (
+      <DashboardIconRoot
+        ref={ref}
+        src={icon.url}
+        className={clsx(classNames.root, classNames[size], className, {
+          [classNames.square]: variant === "square",
+          [classNames.circle]: variant === "circle",
+          [classNames.margin]: !noMargin
+        })}
+        sx={sx}
+        {...imgProps}
+      />
+    )
+  }
+})

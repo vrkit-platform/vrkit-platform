@@ -14,7 +14,7 @@ import {
   FlexAuto,
   FlexRow,
   FlexScaleZero,
-  hasCls
+  hasCls, PositionRelative
 } from "vrkit-shared-ui"
 import clsx from "clsx"
 import { DashboardsListEditor } from "../../components/dashboards/list-editor"
@@ -41,6 +41,7 @@ const DashboardsViewRoot = styled(Box, {
     ...FlexRow,
     ...FillHeight,
     ...flexAlign("stretch", "stretch"),
+    ...PositionRelative,
     [child(dashboardsViewClasses.list)]: {
       ...FillHeight
     },

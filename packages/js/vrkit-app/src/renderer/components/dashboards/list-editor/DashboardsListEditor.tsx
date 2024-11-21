@@ -56,6 +56,7 @@ import { Alert } from "../../../services/alerts"
 import { useIsMounted } from "usehooks-ts"
 import { FlexRow, rem } from "vrkit-shared-ui/styles"
 import { appTextFieldClasses, AppTextFieldFormik } from "../../app-text-field"
+import { DashboardLayoutSwitch } from "../common/layout-switch"
 // import { faWindowClose } from "@awesome.me/kit-79150a3eed"
 
 const log = getLogger(__filename)
@@ -94,7 +95,7 @@ const DashboardsListEditorRoot = styled(Box, {
     filter: `none`,
     background: darken(theme.palette.background.appBar, 0.4),
     [hasCls(classNames.visible)]: {
-      ...flex(1, 1, "calc(min(40vw,300px))"),
+      ...flex(1, 1, "calc(min(50vw,350px))"),
       filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`
     },
 
@@ -162,49 +163,49 @@ const DashboardsListEditorRoot = styled(Box, {
  * DashboardsListEditor Component Properties
  */
 export interface DashboardsListEditorProps extends BoxProps {}
-
-interface LayoutFieldProps {
-  vr?: boolean
-
-  label: string
-
-  enabled: boolean
-
-  dashConfig: DashboardConfig
-
-  onChange: (enabled: boolean) => void
-}
-
-function LayoutField({ vr: isVR = false, label, enabled, dashConfig, onChange }: LayoutFieldProps) {
-  return (
-    <Box className={clsx(classNames.layout)}>
-      <Box
-        sx={{
-          ...FlexScaleZero,
-          ...Ellipsis
-        }}
-      >
-        {label}{" "}
-        <Typography
-          component="span"
-          variant="caption"
-          sx={{ opacity: 0.7, fontStyle: "italic" }}
-        >
-          {enabled ? "" : "Not "}Enabled
-        </Typography>
-      </Box>
-      <Checkbox
-        sx={{
-          ...FlexAuto
-        }}
-        defaultChecked={enabled}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-          onChange(checked)
-        }}
-      />
-    </Box>
-  )
-}
+//
+// interface LayoutFieldProps {
+//   vr?: boolean
+//
+//   label: string
+//
+//   enabled: boolean
+//
+//   dashConfig: DashboardConfig
+//
+//   onChange: (enabled: boolean) => void
+// }
+//
+// function LayoutField({ vr: isVR = false, label, enabled, dashConfig, onChange }: LayoutFieldProps) {
+//   return (
+//     <Box className={clsx(classNames.layout)}>
+//       <Box
+//         sx={{
+//           ...FlexScaleZero,
+//           ...Ellipsis
+//         }}
+//       >
+//         {label}{" "}
+//         <Typography
+//           component="span"
+//           variant="caption"
+//           sx={{ opacity: 0.7, fontStyle: "italic" }}
+//         >
+//           {enabled ? "" : "Not "}Enabled
+//         </Typography>
+//       </Box>
+//       <Checkbox
+//         sx={{
+//           ...FlexAuto
+//         }}
+//         defaultChecked={enabled}
+//         onChange={(event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+//           onChange(checked)
+//         }}
+//       />
+//     </Box>
+//   )
+// }
 
 type DashboardListEditorFormProps = {
   dashConfig: DashboardConfig
@@ -294,6 +295,7 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
               <Box className={clsx(classNames.headerField)}>
                 <AppTextFieldFormik<DashboardConfig>
                   variant="standard"
+                  autoFocus
                   selectOnFocus
                   name="name"
                   placeholder="My Dash"
@@ -304,8 +306,9 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
                 <AppTextFieldFormik<DashboardConfig>
                     variant="filled"
                     flex
-                    selectOnFocus
-                    autoFocus
+                    rows={4}
+                    multiline={true}
+                    label={"Notes"}
                     name="description"
                     placeholder="I made it"
                 />
@@ -327,32 +330,30 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
                       >
                         Layouts
                       </Typography>
-                      <Button
-                        sx={{
-                          ...FlexAuto
-                        }}
-                        variant="contained"
-                        disabled={!canModify || (!dashConfig?.vrEnabled && !dashConfig?.screenEnabled)}
-                        onClick={() => {
-                          canModify && launchLayoutEditorAsync.execute(dashConfig.id)
-                        }}
-                      >
-                        Edit Layouts
-                      </Button>
+                      {/*<Button*/}
+                      {/*  sx={{*/}
+                      {/*    ...FlexAuto*/}
+                      {/*  }}*/}
+                      {/*  variant="contained"*/}
+                      {/*  disabled={!canModify || (!dashConfig?.vrEnabled && !dashConfig?.screenEnabled)}*/}
+                      {/*  onClick={() => {*/}
+                      {/*    canModify && launchLayoutEditorAsync.execute(dashConfig.id)*/}
+                      {/*  }}*/}
+                      {/*>*/}
+                      {/*  Edit Layouts*/}
+                      {/*</Button>*/}
                     </FlexRowCenterBox>
-                    <LayoutField
+                    <DashboardLayoutSwitch
                       vr
-                      enabled={dashConfig.vrEnabled}
+                      value={dashConfig.vrEnabled}
                       label="VR"
-                      dashConfig={dashConfig}
                       onChange={vrEnabled => {
                         canModify && patchConfigAsync.execute(dashConfig.id, { vrEnabled })
                       }}
                     />
-                    <LayoutField
+                    <DashboardLayoutSwitch
                       vr={false}
-                      enabled={dashConfig.screenEnabled}
-                      dashConfig={dashConfig}
+                      value={dashConfig.screenEnabled}
                       label="Screen"
                       onChange={screenEnabled => {
                         canModify && patchConfigAsync.execute(dashConfig.id, { screenEnabled })

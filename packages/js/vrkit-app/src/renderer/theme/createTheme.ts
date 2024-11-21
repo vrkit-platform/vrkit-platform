@@ -6,7 +6,7 @@ import type {} from "@mui/x-tree-view/themeAugmentation"
 // noinspection ES6UnusedImports
 import type {} from "@mui/x-data-grid/themeAugmentation"
 // noinspection ES6UnusedImports
-import type {} from "@mui/material/themeCssVarsAugmentation"
+// import type {} from "@mui/material/themeCssVarsAugmentation"
 
 import type { Direction, Theme, ThemeOptions } from "@mui/material/styles"
 import { createTheme as muiCreateTheme } from "@mui/material/styles"
@@ -21,19 +21,45 @@ import { assign } from "vrkit-shared"
 import { linearGradient, rem } from "vrkit-shared-ui"
 import { lighten, darken } from "@mui/material"
 import { darkPrimaryAndSecondaryPalettes } from "./paletteAndColorHelpers"
-import { createPaletteChannel, setFont } from "./styles"
+import { createPaletteChannel, pxToRem, setFont } from "./styles"
 
 // ----------------------------------------------------------------------
 
-const bgPaper = "#1F2025"
 
-const slateBackgroundColor = "rgba(52, 50, 54, 0.999)" //lighten(,0.25)
+const rootBackgroundColor = "rgba(52,50,54,1)" //lighten(,0.25)
+const rootBackgroundGradient = linearGradient(
+    "to bottom",
+    `${rootBackgroundColor} 0%`,
+    `${lighten(rootBackgroundColor, 0.025)} 95%`,
+    `${lighten(rootBackgroundColor, 0.035)} 100%`
+)
+
+
+const slateBackgroundColor = "rgba(42, 40, 44, 0.999)" //lighten(,0.25)
 const slateBackgroundGradient = linearGradient(
   "to bottom",
-  `rgba(52, 50, 54, 0.999) 0%`,
+  `${slateBackgroundColor} 0%`,
   `${darken(slateBackgroundColor, 0.1)} 90%`,
   `${darken(slateBackgroundColor, 0.25)} 100%`
 )
+
+// const bgPaper = "#1F2025"
+const bgPaper = lighten(slateBackgroundColor,0.025)
+const bgPaperGradient = linearGradient(
+    "to bottom",
+    `${darken(bgPaper,0.03)} 0%`,
+    `${darken(bgPaper, 0.05)} 90%`,
+    `${darken(bgPaper, 0.15)} 100%`
+)
+
+const drawerBgPaper = darken(slateBackgroundColor,0.025)
+const drawerBgPaperGradient = linearGradient(
+    "to bottom",
+    `${drawerBgPaper} 0%`,
+    `${darken(drawerBgPaper, 0.05)} 90%`,
+    `${darken(drawerBgPaper, 0.15)} 100%`
+)
+
 
 const sessionBackgroundColor = "rgba(32, 30, 34, 0.999)" //lighten(,0.25)
 const sessionBackgroundGradient = linearGradient(
@@ -53,15 +79,21 @@ const appBarSearchBorderColor = darken(slateBackgroundColor, 0.3)
 const darkDefault = lighten("#1F2025", 0.025)
 
 const themeOptions: ThemeOptions = {
+  
   palette: {
     background: {
       default: darkDefault,
+      root: rootBackgroundColor,
+      rootImage: rootBackgroundGradient,
       gradient: slateBackgroundColor,
       gradientImage: slateBackgroundGradient,
       session: sessionBackgroundColor,
       sessionImage: sessionBackgroundGradient,
       paper: bgPaper,
+      paperImage: bgPaperGradient,
       paperFooter: "#1A151E",
+      drawerBgPaper,
+      drawerBgPaperGradient,
       actionFooter: lighten(bgPaper, 0.1),
       filledInput: "rgba(255, 255, 255, 0.13)",
       filledInputDisabled: "rgba(255, 255, 255, 0.12)",
@@ -117,8 +149,8 @@ export function createTheme(
       
       // fontFamily: setFont(settings.fontFamily)
     },
-    cssVarPrefix: "",
-    shouldSkipGeneratingVar
+    // cssVarPrefix: "",
+    // shouldSkipGeneratingVar
   }
 
   /**
@@ -127,6 +159,20 @@ export function createTheme(
   const theme = muiCreateTheme(themeOptions)
 
   return assign(theme, {
+    //colorSchemes,
+    shadows: shadows(colorScheme),
+    customShadows: customShadows(colorScheme),
+    direction: "ltr" as Direction,
+    shape: { borderRadius: 8 },
+    components,
+    typography: {
+      ...theme.typography,
+      ...typography,
+      // pxToRem,
+      fontFamily: setFont("SanFranciscoDisplay")
+      
+      // fontFamily: setFont(settings.fontFamily)
+    },
     dimen: {
       electronTrafficLightsWidth: 70,
       appBarHeight: "3rem",
@@ -134,48 +180,13 @@ export function createTheme(
       layoutPadding: [4, 2], // spacing unit
       dashboardIconSizes: [16, 32, 64, 128]
     },
-    typography: {
-      fontFamily: setFont("SanFranciscoDisplay")
-    } as any
+    // typography: {
+    //   fontFamily: setFont("SanFranciscoDisplay")
+    // } as any
   })
 }
 
 // ----------------------------------------------------------------------
-
-function shouldSkipGeneratingVar(
-  keys: string[],
-  value: string | number
-): boolean {
-  const skipGlobalKeys = [
-    "mixins",
-    "overlays",
-    "direction",
-    "breakpoints",
-    "cssVarPrefix",
-    "unstable_sxConfig",
-    "typography"
-    // 'transitions',
-  ]
-
-  const skipPaletteKeys: {
-    [key: string]: string[]
-  } = {
-    global: ["tonalOffset", "dividerChannel", "contrastThreshold"],
-    grey: ["A100", "A200", "A400", "A700"],
-    text: ["icon"]
-  }
-
-  const isPaletteKey = keys[0] === "palette"
-
-  if (isPaletteKey) {
-    const paletteType = keys[1]
-    const skipKeys = skipPaletteKeys[paletteType] || skipPaletteKeys.global
-
-    return keys.some(key => skipKeys?.includes(key))
-  }
-
-  return keys.some(key => skipGlobalKeys?.includes(key))
-}
 
 /**
  * createTheme without @settings and @locale components.

@@ -14,7 +14,7 @@ let totalCount = 0
 
 const log = Tracer.colorConsole({
   transport: function (data) {
-    console.log(data.output)
+    // console.log(data.output)
     Fsx.appendFile(logFile, data.rawoutput + "\n", err => {
       if (err) throw err
     })

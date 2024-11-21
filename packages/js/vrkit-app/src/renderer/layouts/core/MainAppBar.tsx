@@ -59,9 +59,13 @@ const mainAppBarClasses = createClassNames(mainAppBarClassPrefix, "root", "top",
 
 const MainAppBarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
   [hasCls(mainAppBarClasses.root)]: {
-    backgroundColor: "transparent !important",
-    backgroundImage: "none",
-    boxShadow: "none",
+    backgroundColor: theme.palette.background.appBar,
+    backgroundImage: theme.palette.background.appBarGradient,
+    // backgroundColor: "transparent !important",
+    // backgroundImage: "none",
+    boxShadow: "0px 3px 5px -1px rgba(0, 0, 0, 0.2), " +
+        "0px 5px 8px 0px rgba(0, 0, 0, 0.14), " +
+        "0px 3px 14px 2px rgba(0,0, 0, 0.22)",
     color: "inherit",
     zIndex: theme.zIndex.drawer + 1,
     filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`,

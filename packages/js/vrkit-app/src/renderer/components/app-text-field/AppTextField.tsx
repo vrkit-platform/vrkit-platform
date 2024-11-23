@@ -168,7 +168,7 @@ export function AppTextField(props: AppTextFieldProps): JSX.Element {
 }
 
 export interface AppTextFieldFormikProps<T extends {}, P extends keyof T>
-  extends Omit<AppTextFieldProps, "error" | "helperText" | "onBlur" | "onChange" | "value" | "name"> {
+  extends Omit<AppTextFieldProps, "error" | "helperText" | "onChange" | "value" | "name"> {
   formikContext?: FormikContextType<T>
 
   label?: string
@@ -178,7 +178,8 @@ export interface AppTextFieldFormikProps<T extends {}, P extends keyof T>
 
 export function AppTextFieldFormik<T extends {}, P extends keyof T = keyof T>(props: AppTextFieldFormikProps<T, P>) {
   const {
-      formikContext: propFormikContext,
+    onBlur: providedOnBlur,
+    formikContext: propFormikContext,
       name,
       selectOnFocus = false,
       label = capitalize(name as string),
@@ -202,7 +203,12 @@ export function AppTextFieldFormik<T extends {}, P extends keyof T = keyof T>(pr
       name={name as string}
       type="text"
       selectOnFocus={selectOnFocus}
-      onBlur={handleBlur}
+      onBlur={(e: React.FocusEvent<any>) => {
+        handleBlur(e)
+        if (providedOnBlur)
+          providedOnBlur(e)
+      }
+      }
       onChange={handleChange}
       value={values[name]}
       disabled={isSubmitting === true || other?.disabled === true}

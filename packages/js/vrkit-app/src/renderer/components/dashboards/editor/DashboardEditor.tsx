@@ -197,7 +197,8 @@ function LayoutField({ vr: isVR = false, label, enabled, dashConfig, onChange }:
 type DashboardListEditorFormProps = {
   dashConfig: DashboardConfig
   handleSubmitRef?: React.MutableRefObject<any>
-  onSubmit: FormikConfig<DashboardConfig>["onSubmit"]
+  // formikConfig?: Partial<FormikConfig<DashboardConfig>>
+  onSubmit?: FormikConfig<DashboardConfig>["onSubmit"]
   //onSubmit: (id: string, patch:Partial<DashboardConfig>) =>
   // Promise<DashboardConfig>
 }
@@ -208,7 +209,7 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
   enableReinitialize: true,
   displayName: "DashboardListEditorFormik",
   handleSubmit: (values: DashboardConfig, formikBag: FormikBag<DashboardListEditorFormProps, DashboardConfig>) =>
-    formikBag.props.onSubmit(values, formikBag)
+    formikBag.props.onSubmit?.(values, formikBag)
 })(function DashboardListEditorForm(props: DashboardListEditorFormProps & FormikProps<DashboardConfig>) {
   const {
       errors,
@@ -287,6 +288,9 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
               <Box className={clsx(classNames.headerField)}>
                 <AppTextFieldFormik<DashboardConfig>
                     variant="standard"
+                    onBlur={(e) => {
+                      log.info(`On blur`, e)
+                    }}
                     autoFocus
                     selectOnFocus
                     label={null}

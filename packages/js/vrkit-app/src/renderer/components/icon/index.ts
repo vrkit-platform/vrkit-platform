@@ -1,4 +1,4 @@
-import { Icon } from "./Icon"
+import { AppIcon } from "./AppIcon"
 
-export * from "./Icon"
-export default Icon
+export * from "./AppIcon"
+export default AppIcon

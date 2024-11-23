@@ -56,6 +56,10 @@ import { Alert } from "../../../services/alerts"
 import { useIsMounted } from "usehooks-ts"
 import { FlexRow, rem } from "vrkit-shared-ui/styles"
 import { appTextFieldClasses, AppTextFieldFormik } from "../../app-text-field"
+import { useNavigate } from "react-router-dom"
+import { WebPaths } from "../../../routes/WebPaths"
+import { faTimes } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
+import { DashboardLayoutSwitch } from "../common/layout-switch"
 // import { faWindowClose } from "@awesome.me/kit-79150a3eed"
 
 const log = getLogger(__filename)
@@ -83,80 +87,64 @@ export type DashboardEditorClassKey = ClassNamesKey<typeof classNames>
 const DashboardEditorRoot = styled(Box, {
   name: "DashboardEditorRoot",
   label: "DashboardEditorRoot"
-})(({ theme }) => ({
-  // root styles here
-  [hasCls(classNames.root)]: {
-    ...transition(["flex-grow", "flex-shrink", "flex-basis", "filter"]),
-    ...FlexColumn,
-    ...FillHeight,
-    ...OverflowHidden,
-    ...flex(0, 0, 0),
-    filter: `none`,
-    background: darken(theme.palette.background.appBar, 0.4),
-    [hasCls(classNames.visible)]: {
-      ...flex(1, 1, "calc(min(40vw,300px))"),
-      filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`
-    },
-
-    [child(classNames.content)]: {
-      ...FlexColumn,
-      ...FlexScaleZero,
-      ...OverflowHidden,
-
-      // gap: theme.spacing(1.5),
-      [child(classNames.header)]: {
-        ...padding(theme.spacing(1)),
-        ...FlexColumn,
-        ...FlexAuto,
-        ...flexAlign("stretch","center"),
-        filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`,
+})(({ theme }) => (
+    {
+      // root styles here
+      [hasCls(classNames.root)]: {
+        // ...transition(["flex-grow", "flex-shrink", "flex-basis",
+        // "filter"]),
+        ...FlexColumn, ...FillHeight, ...OverflowHidden, ...FlexScaleZero, ...padding(
+            theme.spacing(0.5),
+            theme.spacing(1)
+        ), background: darken(theme.palette.background.appBar, 0.4),
         
-        [child(classNames.headerField)]: {
-          // ...FlexScaleZero,
-          ...FlexAuto,
-        },
-        [child(classNames.headerActions)]: {
-          ...flexAlign("center","flex-end"),
-          ...FlexRow,
-          ...FlexAuto
-        }
-      },
-      [child(classNames.details)]: {
-        ...FlexColumn,
-        ...OverflowAuto,
-        ...FlexScaleZero,
-
-        ...flexAlign("center", "stretch"),
-
-        background: darken(theme.palette.background.appBar, 0.2),
-        [child(classNames.detailsContent)]: {
-          ...padding(theme.spacing(1)),
-          ...FillWidth,
+        [child(classNames.content)]: {
           ...FlexColumn,
-          ...FlexAuto,
-          ...OverflowVisible,
-          gap: theme.spacing(1),
-          [child(classNames.layouts)]: {
-            ...FillWidth,
-            ...FlexColumn,
-            ...FlexAuto,
-            gap: theme.spacing(1),
-            [child(classNames.layout)]: {
-              gap: theme.spacing(1),
-              ...FlexRowCenter,
-              ...flexAlign("stretch", "center"),
-              ...FlexAuto,
-
-              [child("checkbox")]: {
-                ...FlexAuto
+          
+          [child(classNames.header)]: {
+            ...padding(theme.spacing(1)), ...FlexColumn, ...FlexAuto, ...flexAlign(
+                "stretch",
+                "center"
+            ),
+            filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`,
+            
+            [child(classNames.headerField)]: {
+              // ...FlexScaleZero,
+              ...FlexAuto
+            },
+            [child(classNames.headerActions)]: {
+              ...flexAlign("center", "flex-start"), ...FlexRow, ...FlexAuto,
+              background: darken(theme.palette.background.root, 0.2)
+            }
+          }, [child(classNames.details)]: {
+            ...FlexColumn, ...OverflowAuto, ...FlexAuto,
+            
+            // ...flexAlign("center", "stretch"),
+            
+            // background: darken(theme.palette.background.appBar, 0.2),
+            [child(classNames.detailsContent)]: {
+              ...padding(theme.spacing(1)), // ...FillWidth,
+              ...FlexColumn, ...FlexAuto, // ...OverflowVisible,
+              gap: theme.spacing(1), [child(classNames.layouts)]: {
+                // ...FillWidth,
+                ...FlexColumn, ...FlexAuto,
+                gap: theme.spacing(1),
+                [child(classNames.layout)]: {
+                  gap: theme.spacing(1), ...FlexRowCenter, ...flexAlign(
+                      "stretch",
+                      "center"
+                  ), ...FlexAuto,
+                  
+                  [child("checkbox")]: {
+                    ...FlexAuto
+                  }
+                }
               }
             }
           }
         }
       }
-    }
-  }
-}))
+    }))
 
 /**
  * DashboardEditor Component Properties
@@ -237,34 +225,39 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
       dashConfig,
       handleSubmitRef
     } = props,
-    dashboardClient = useService(DashboardManagerClient),
-    patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
-    launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
-    canModify = useMemo(() => {
-      return !launchLayoutEditorAsync.loading && !patchConfigAsync.loading
-    }, [launchLayoutEditorAsync.loading, patchConfigAsync.loading]),
-    { updateMutatingModel, clearMutatingModels, resetMutatingModels, isMutatingModelNew, mutatingModels } =
-      useModelEditorContext<DashboardConfig>(),
-    model = first(mutatingModels)
-
+      theme = useTheme(),
+      nav = useNavigate(),
+      dashboardClient = useService(DashboardManagerClient),
+      patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
+      launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
+      canModify = useMemo(() => {
+        return !launchLayoutEditorAsync.loading && !patchConfigAsync.loading
+      }, [launchLayoutEditorAsync.loading, patchConfigAsync.loading]),
+      { updateMutatingModel, clearMutatingModels, resetMutatingModels, isMutatingModelNew, mutatingModels } =
+          useModelEditorContext<DashboardConfig>(),
+      model = first(mutatingModels)
+  
   useEffect(() => {
-    if (!model)
+    if (!model) {
       return
+    }
     
     const updatedModel = cloneInstanceOf(DashboardConfig, model, values)
     if (
-      !isEqual(updatedModel, model) &&
-      !attributesEqual(updatedModel, model, DashboardConfig)
-      // isModelSameOrUpdated(updatedModel, model)
+        !isEqual(updatedModel, model) &&
+        !attributesEqual(updatedModel, model, DashboardConfig)
+        // isModelSameOrUpdated(updatedModel, model)
     ) {
       updateMutatingModel(updatedModel)
     }
   }, [model, values])
-
+  
   // UPDATE THE PROVIDED REF ENABLING OTHER
   // UI COMPONENTS/DIALOGS, ETC TO SUBMIT
-  if (handleSubmitRef) handleSubmitRef.current = handleSubmit
-
+  if (handleSubmitRef) {
+    handleSubmitRef.current = handleSubmit
+  }
+  
   return (
     <FormContainer
       noValidate
@@ -278,25 +271,34 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
             <Box className={clsx(classNames.header)}>
               <Box className={clsx(classNames.headerActions)}>
                 <IconButton
-                    aria-label="close"
+                    aria-label="cancel"
                     color="inherit"
                     onClick={() => {
-                      canModify && clearMutatingModels()
+                      nav(WebPaths.app.dashboards)
                     }}
                 >
                   <Icon
-                      fa={true}
-                      icon={faClose}
+                      fa
+                      icon={faTimes}
                   />
                 </IconButton>
               </Box>
               
               <Box className={clsx(classNames.headerField)}>
                 <AppTextFieldFormik<DashboardConfig>
-                  variant="standard"
-                  selectOnFocus
-                  name="name"
-                  placeholder="My Dash"
+                    variant="standard"
+                    autoFocus
+                    selectOnFocus
+                    label={null}
+                    name="name"
+                    placeholder="My Dash"
+                    InputProps={{
+                      sx: {
+                        "& input": {
+                          fontSize: theme.typography.h3.fontSize
+                        }
+                      }
+                    }}
                 />
               </Box>
               
@@ -304,8 +306,9 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
                 <AppTextFieldFormik<DashboardConfig>
                     variant="filled"
                     flex
-                    selectOnFocus
-                    autoFocus
+                    rows={4}
+                    multiline={true}
+                    label={"Notes"}
                     name="description"
                     placeholder="I made it"
                 />
@@ -327,36 +330,22 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
                       >
                         Layouts
                       </Typography>
-                      <Button
-                        sx={{
-                          ...FlexAuto
-                        }}
-                        variant="contained"
-                        disabled={!canModify || (!dashConfig?.vrEnabled && !dashConfig?.screenEnabled)}
-                        onClick={() => {
-                          canModify && launchLayoutEditorAsync.execute(dashConfig.id)
-                        }}
-                      >
-                        Edit Layouts
-                      </Button>
                     </FlexRowCenterBox>
-                    <LayoutField
-                      vr
-                      enabled={dashConfig.vrEnabled}
-                      label="VR"
-                      dashConfig={dashConfig}
-                      onChange={vrEnabled => {
-                        canModify && patchConfigAsync.execute(dashConfig.id, { vrEnabled })
-                      }}
+                    <DashboardLayoutSwitch
+                        vr
+                        value={dashConfig.vrEnabled}
+                        label="VR"
+                        onChange={vrEnabled => {
+                          canModify && patchConfigAsync.execute(dashConfig.id, { vrEnabled })
+                        }}
                     />
-                    <LayoutField
-                      vr={false}
-                      enabled={dashConfig.screenEnabled}
-                      dashConfig={dashConfig}
-                      label="Screen"
-                      onChange={screenEnabled => {
-                        canModify && patchConfigAsync.execute(dashConfig.id, { screenEnabled })
-                      }}
+                    <DashboardLayoutSwitch
+                        vr={false}
+                        value={dashConfig.screenEnabled}
+                        label="Screen"
+                        onChange={screenEnabled => {
+                          canModify && patchConfigAsync.execute(dashConfig.id, { screenEnabled })
+                        }}
                     />
                   </Box>
                 </Box>

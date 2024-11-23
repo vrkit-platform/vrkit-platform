@@ -30,6 +30,7 @@ import { isNotEmpty } from "vrkit-shared"
 import { asOption } from "@3fv/prelude-ts"
 import { useNavigate } from "react-router-dom"
 import { WebPaths } from "../../routes/WebPaths"
+import { DashboardEditor } from "../../components/dashboards/editor"
 
 
 const log = getLogger(__filename)
@@ -86,7 +87,7 @@ export function DashboardEditPage() {
       <AppContent>
         <ModelEditorProvider value={editorContext}>
           <DashboardEditPageRoot className={clsx(dashboardEditPageClasses.root)}>
-            <DashboardsListEditor className={clsx(dashboardEditPageClasses.editor)} />
+            <DashboardEditor className={clsx(dashboardEditPageClasses.editor)} />
           </DashboardEditPageRoot>
         
         </ModelEditorProvider>

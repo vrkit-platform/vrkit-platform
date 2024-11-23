@@ -1,12 +1,14 @@
 import { lazy, Suspense } from 'react';
 import { getWebPathPart, WebPaths } from "../WebPaths"
 import { Navigate, RouteObject } from "react-router-dom"
+import { DashboardsPage } from "../../pages/dashboards"
+import DashboardEditPage from "../../pages/dashboards/DashboardEditPage"
 
 // ----------------------------------------------------------------------
 
 // Overview
-const DashboardsPage = lazy(() => import('../../pages/dashboards/DashboardsPage'));
-const DashboardEditPage = lazy(() => import('../../pages/dashboards/DashboardEditPage'));
+// const DashboardsPage = lazy(() => import('../../pages/dashboards/DashboardsPage'));
+// const DashboardEditPage = lazy(() => import('../../pages/dashboards/DashboardEditPage'));
 
 
 

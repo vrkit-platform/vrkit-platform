@@ -19,33 +19,25 @@ import {
   createClassNames,
   Ellipsis,
   FillHeight,
-  FillWidth,
-  flex,
   flexAlign,
   FlexAuto,
   FlexColumn,
-  FlexColumnCenter,
   FlexRowCenter,
   FlexRowCenterBox,
   FlexScaleZero,
   hasCls,
   OverflowAuto,
   OverflowHidden,
-  OverflowVisible,
-  padding, paddingRem,
-  transition
+  padding
 } from "vrkit-shared-ui"
 import { attributesEqual, isEqual } from "vrkit-shared"
 import IconButton from "@mui/material/IconButton"
 import Icon from "../../icon"
-import { faClose } from "@awesome.me/kit-79150a3eed/icons/sharp/light"
 import Typography from "@mui/material/Typography"
 import { isDefined } from "@3fv/guard"
 import { DashboardConfig } from "vrkit-models"
 import { useService } from "../../service-container"
 import { useAsyncCallback } from "../../../hooks"
-import Checkbox from "@mui/material/Checkbox"
-import Button from "@mui/material/Button"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { useModelEditorContext } from "../../model-editor-context"
 import { type FormikBag, type FormikConfig, FormikContextType, FormikProps, withFormik } from "formik"
@@ -55,8 +47,8 @@ import { bind, cloneInstanceOf } from "vrkit-shared/utils"
 import { FormContainer } from "../../form"
 import { Alert } from "../../../services/alerts"
 import { useIsMounted } from "usehooks-ts"
-import { FlexRow, rem } from "vrkit-shared-ui/styles"
-import { appTextFieldClasses, AppTextFieldFormik } from "../../app-text-field"
+import { FlexRow } from "vrkit-shared-ui/styles"
+import { AppTextFieldFormik } from "../../app-text-field"
 import { DashboardLayoutSwitch } from "../common/layout-switch"
 import { useNavigate } from "react-router-dom"
 import { faTimes } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
@@ -90,12 +82,13 @@ const DashboardsListEditorRoot = styled(Box, {
 })(({ theme }) => ({
   // root styles here
   [hasCls(classNames.root)]: {
-    // ...transition(["flex-grow", "flex-shrink", "flex-basis", "filter"]),
+    // ...transition(["flex-grow", "flex-shrink", "flex-basis",
+    // "filter"]),
     ...FlexColumn,
     ...FillHeight,
     ...OverflowHidden,
     ...FlexScaleZero,
-    ...padding(theme.spacing(0.5),theme.spacing(1)),
+    ...padding(theme.spacing(0.5), theme.spacing(1)),
     background: darken(theme.palette.background.appBar, 0.4),
 
     [child(classNames.content)]: {
@@ -105,18 +98,18 @@ const DashboardsListEditorRoot = styled(Box, {
         ...padding(theme.spacing(1)),
         ...FlexColumn,
         ...FlexAuto,
-        ...flexAlign("stretch","center"),
+        ...flexAlign("stretch", "center"),
         filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`,
-        
+
         [child(classNames.headerField)]: {
           // ...FlexScaleZero,
-          ...FlexAuto,
+          ...FlexAuto
         },
         [child(classNames.headerActions)]: {
-          ...flexAlign("center","flex-start"),
+          ...flexAlign("center", "flex-start"),
           ...FlexRow,
           ...FlexAuto,
-          background: darken(theme.palette.background.root, 0.2),
+          background: darken(theme.palette.background.root, 0.2)
         }
       },
       [child(classNames.details)]: {
@@ -128,11 +121,9 @@ const DashboardsListEditorRoot = styled(Box, {
 
         // background: darken(theme.palette.background.appBar, 0.2),
         [child(classNames.detailsContent)]: {
-          ...padding(theme.spacing(1)),
-          // ...FillWidth,
+          ...padding(theme.spacing(1)), // ...FillWidth,
           ...FlexColumn,
-          ...FlexAuto,
-          // ...OverflowVisible,
+          ...FlexAuto, // ...OverflowVisible,
           gap: theme.spacing(1),
           [child(classNames.layouts)]: {
             // ...FillWidth,
@@ -192,7 +183,8 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
       dashConfig,
       handleSubmitRef
     } = props,
-      nav = useNavigate(),
+    theme = useTheme(),
+    nav = useNavigate(),
     dashboardClient = useService(DashboardManagerClient),
     patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
     launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
@@ -204,9 +196,10 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
     model = first(mutatingModels)
 
   useEffect(() => {
-    if (!model)
+    if (!model) {
       return
-    
+    }
+
     const updatedModel = cloneInstanceOf(DashboardConfig, model, values)
     if (
       !isEqual(updatedModel, model) &&
@@ -219,7 +212,9 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
 
   // UPDATE THE PROVIDED REF ENABLING OTHER
   // UI COMPONENTS/DIALOGS, ETC TO SUBMIT
-  if (handleSubmitRef) handleSubmitRef.current = handleSubmit
+  if (handleSubmitRef) {
+    handleSubmitRef.current = handleSubmit
+  }
 
   return (
     <FormContainer
@@ -234,88 +229,93 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
             <Box className={clsx(classNames.header)}>
               <Box className={clsx(classNames.headerActions)}>
                 <IconButton
-                    aria-label="cancel"
-                    color="inherit"
-                    onClick={() => {
-                      nav(WebPaths.app.dashboards)
-                    }}
+                  aria-label="cancel"
+                  color="inherit"
+                  onClick={() => {
+                    nav(WebPaths.app.dashboards)
+                  }}
                 >
                   <Icon
-                      fa
-                      icon={faTimes}
+                    fa
+                    icon={faTimes}
                   />
                 </IconButton>
               </Box>
-              
+
               <Box className={clsx(classNames.headerField)}>
                 <AppTextFieldFormik<DashboardConfig>
                   variant="standard"
                   autoFocus
                   selectOnFocus
+                  label={null}
                   name="name"
                   placeholder="My Dash"
+                  InputProps={{
+                    sx: {
+                      "& input": {
+                        fontSize: theme.typography.h3.fontSize
+                      }
+                    }
+                  }}
                 />
               </Box>
-              
+
               <Box className={clsx(classNames.headerField)}>
                 <AppTextFieldFormik<DashboardConfig>
-                    variant="filled"
-                    flex
-                    rows={4}
-                    multiline={true}
-                    label={"Notes"}
-                    name="description"
-                    placeholder="I made it"
+                  variant="filled"
+                  flex
+                  rows={4}
+                  multiline={true}
+                  label={"Notes"}
+                  name="description"
+                  placeholder="I made it"
                 />
               </Box>
-              
             </Box>
             <Box className={clsx(classNames.details)}>
-              
-                <Box className={clsx(classNames.detailsContent)}>
-                  <Box className={clsx(classNames.layouts)}>
-                    
-                    <FlexRowCenterBox>
-                      <Typography
-                        sx={{
-                          ...Ellipsis,
-                          ...FlexScaleZero
-                        }}
-                        variant="h6"
-                      >
-                        Layouts
-                      </Typography>
-                      {/*<Button*/}
-                      {/*  sx={{*/}
-                      {/*    ...FlexAuto*/}
-                      {/*  }}*/}
-                      {/*  variant="contained"*/}
-                      {/*  disabled={!canModify || (!dashConfig?.vrEnabled && !dashConfig?.screenEnabled)}*/}
-                      {/*  onClick={() => {*/}
-                      {/*    canModify && launchLayoutEditorAsync.execute(dashConfig.id)*/}
-                      {/*  }}*/}
-                      {/*>*/}
-                      {/*  Edit Layouts*/}
-                      {/*</Button>*/}
-                    </FlexRowCenterBox>
-                    <DashboardLayoutSwitch
-                      vr
-                      value={dashConfig.vrEnabled}
-                      label="VR"
-                      onChange={vrEnabled => {
-                        canModify && patchConfigAsync.execute(dashConfig.id, { vrEnabled })
+              <Box className={clsx(classNames.detailsContent)}>
+                <Box className={clsx(classNames.layouts)}>
+                  <FlexRowCenterBox>
+                    <Typography
+                      sx={{
+                        ...Ellipsis,
+                        ...FlexScaleZero
                       }}
-                    />
-                    <DashboardLayoutSwitch
-                      vr={false}
-                      value={dashConfig.screenEnabled}
-                      label="Screen"
-                      onChange={screenEnabled => {
-                        canModify && patchConfigAsync.execute(dashConfig.id, { screenEnabled })
-                      }}
-                    />
-                  </Box>
+                      variant="h6"
+                    >
+                      Layouts
+                    </Typography>
+                    {/*<Button*/}
+                    {/*  sx={{*/}
+                    {/*    ...FlexAuto*/}
+                    {/*  }}*/}
+                    {/*  variant="contained"*/}
+                    {/*  disabled={!canModify || (!dashConfig?.vrEnabled && !dashConfig?.screenEnabled)}*/}
+                    {/*  onClick={() => {*/}
+                    {/*    canModify && launchLayoutEditorAsync.execute(dashConfig.id)*/}
+                    {/*  }}*/}
+                    {/*>*/}
+                    {/*  Edit Layouts*/}
+                    {/*</Button>*/}
+                  </FlexRowCenterBox>
+                  <DashboardLayoutSwitch
+                    vr
+                    value={dashConfig.vrEnabled}
+                    label="VR"
+                    onChange={vrEnabled => {
+                      canModify && patchConfigAsync.execute(dashConfig.id, { vrEnabled })
+                    }}
+                  />
+                  <DashboardLayoutSwitch
+                    vr={false}
+                    value={dashConfig.screenEnabled}
+                    label="Screen"
+                    onChange={screenEnabled => {
+                      canModify && patchConfigAsync.execute(dashConfig.id, { screenEnabled })
+                    }}
+                  />
                 </Box>
+              </Box>
             </Box>
           </>
         )}

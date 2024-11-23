@@ -16,7 +16,7 @@ import { useElectronContextMenu } from "../../hooks/useElectronContextMenu"
 import MenuDivider from "../menu/divider"
 import { NestedMenuItem } from "../menu"
 import PopoverMenu from "../menu/popover-menu"
-import { Icon } from "../icon"
+import { AppIcon } from "../icon"
 import { Logo } from "../logo"
 // import {faBars as fasBars} from "@fortawesome/pro-solid-svg-icons"
 import { faBars as falBars } from "@awesome.me/kit-79150a3eed/icons/sharp/light"
@@ -111,7 +111,7 @@ export function AppMainMenu(_props: AppMainMenuProps) {
             }}
           />
         ) : (
-          <Icon
+          <AppIcon
             fa
             icon={falBars}
           />

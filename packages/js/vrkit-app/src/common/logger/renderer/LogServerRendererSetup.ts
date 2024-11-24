@@ -2,7 +2,7 @@ import { UPMRendererClientFactory } from "@3fv/electron-utility-process-manager/
 import { type LogServerRequestMap, LogServerServiceName } from "../LogServerTypes"
 import { generateId } from "vrkit-shared"
 import { LogServerClientAppender } from "../LogServerClientAppender"
-import { getLoggingManager } from "@3fv/logger-proxy"
+import { ConsoleAppender, getLoggingManager } from "@3fv/logger-proxy"
 
 /**
  * Create a new log server for a renderer process
@@ -13,7 +13,7 @@ export async function LogServerRendererSetup(clientId: string = `renderer-${gene
   const messageClient = await UPMRendererClientFactory.createClient<LogServerRequestMap>(LogServerServiceName, clientId)
 
   const appender = new LogServerClientAppender(messageClient)
-  getLoggingManager().addAppenders(appender)
+  getLoggingManager().addAppenders(appender, new ConsoleAppender())
   return appender
 }
 

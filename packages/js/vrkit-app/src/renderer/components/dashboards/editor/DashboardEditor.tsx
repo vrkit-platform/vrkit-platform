@@ -19,47 +19,42 @@ import {
   createClassNames,
   Ellipsis,
   FillHeight,
-  FillWidth,
-  flex,
   flexAlign,
   FlexAuto,
-  FlexColumn, FlexColumnCenter,
+  FlexColumn,
   FlexRowCenter,
   FlexRowCenterBox,
   FlexScaleZero,
   hasCls,
   OverflowAuto,
   OverflowHidden,
-  OverflowVisible,
-  padding,
-  transition
+  padding
 } from "vrkit-shared-ui"
 import { attributesEqual, isEqual } from "vrkit-shared"
 import IconButton from "@mui/material/IconButton"
 import Icon from "../../icon"
-import { faClose } from "@awesome.me/kit-79150a3eed/icons/sharp/light"
 import Typography from "@mui/material/Typography"
 import { isDefined } from "@3fv/guard"
 import { DashboardConfig } from "vrkit-models"
 import { useService } from "../../service-container"
 import { useAsyncCallback } from "../../../hooks"
 import Checkbox from "@mui/material/Checkbox"
-import Button from "@mui/material/Button"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { useModelEditorContext } from "../../model-editor-context"
 import { type FormikBag, type FormikConfig, FormikContextType, FormikProps, withFormik } from "formik"
 import { get } from "lodash/fp"
 import { first } from "lodash"
 import { bind, cloneInstanceOf } from "vrkit-shared/utils"
-import { FormContainer } from "../../form"
+import { FormActionFooterDefault, FormContainer } from "../../form"
 import { Alert } from "../../../services/alerts"
 import { useIsMounted } from "usehooks-ts"
-import { FlexRow, rem } from "vrkit-shared-ui/styles"
-import { appTextFieldClasses, AppTextFieldFormik } from "../../app-text-field"
+import { FlexRow } from "vrkit-shared-ui/styles"
+import { AppTextFieldFormik } from "../../app-text-field"
 import { useNavigate } from "react-router-dom"
 import { WebPaths } from "../../../routes/WebPaths"
 import { faTimes } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
 import { DashboardLayoutSwitch } from "../common/layout-switch"
+import { faArrowLeft } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
 // import { faWindowClose } from "@awesome.me/kit-79150a3eed"
 
 const log = getLogger(__filename)
@@ -87,123 +82,93 @@ export type DashboardEditorClassKey = ClassNamesKey<typeof classNames>
 const DashboardEditorRoot = styled(Box, {
   name: "DashboardEditorRoot",
   label: "DashboardEditorRoot"
-})(({ theme }) => (
-    {
-      // root styles here
-      [hasCls(classNames.root)]: {
-        // ...transition(["flex-grow", "flex-shrink", "flex-basis",
-        // "filter"]),
-        ...FlexColumn, ...FillHeight, ...OverflowHidden, ...FlexScaleZero, ...padding(
-            theme.spacing(0.5),
-            theme.spacing(1)
-        ), background: darken(theme.palette.background.appBar, 0.4),
-        
-        [child(classNames.content)]: {
+})(({ theme }) => ({
+  // root styles here
+  [hasCls(classNames.root)]: {
+    // ...transition(["flex-grow", "flex-shrink", "flex-basis",
+    // "filter"]),
+    ...FlexColumn,
+    ...FillHeight,
+    ...OverflowHidden,
+    ...FlexScaleZero,
+    ...padding(0),//theme.spacing(0.5), theme.spacing(1)),
+    background: darken(theme.palette.background.appBar, 0.4),
+
+    [child(classNames.content)]: {
+      ...FlexColumn,
+      ...FlexScaleZero,
+      ...OverflowAuto,
+      [child(classNames.header)]: {
+        ...padding(theme.spacing(1)),
+        ...FlexColumn,
+        ...FlexAuto,
+        ...flexAlign("stretch", "center"),
+        filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`,
+
+        [child(classNames.headerField)]: {
+          // ...FlexScaleZero,
+          ...FlexAuto
+        },
+        [child(classNames.headerActions)]: {
+          ...flexAlign("center", "flex-start"),
+          ...FlexRow,
+          ...FlexAuto,
+          background: darken(theme.palette.background.root, 0.2)
+        }
+      },
+      [child(classNames.details)]: {
+        ...FlexColumn,
+        ...OverflowAuto,
+        ...FlexAuto,
+
+        // ...flexAlign("center", "stretch"),
+
+        // background: darken(theme.palette.background.appBar, 0.2),
+        [child(classNames.detailsContent)]: {
+          ...padding(theme.spacing(1)), // ...FillWidth,
           ...FlexColumn,
-          
-          [child(classNames.header)]: {
-            ...padding(theme.spacing(1)), ...FlexColumn, ...FlexAuto, ...flexAlign(
-                "stretch",
-                "center"
-            ),
-            filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`,
-            
-            [child(classNames.headerField)]: {
-              // ...FlexScaleZero,
-              ...FlexAuto
-            },
-            [child(classNames.headerActions)]: {
-              ...flexAlign("center", "flex-start"), ...FlexRow, ...FlexAuto,
-              background: darken(theme.palette.background.root, 0.2)
-            }
-          }, [child(classNames.details)]: {
-            ...FlexColumn, ...OverflowAuto, ...FlexAuto,
-            
-            // ...flexAlign("center", "stretch"),
-            
-            // background: darken(theme.palette.background.appBar, 0.2),
-            [child(classNames.detailsContent)]: {
-              ...padding(theme.spacing(1)), // ...FillWidth,
-              ...FlexColumn, ...FlexAuto, // ...OverflowVisible,
-              gap: theme.spacing(1), [child(classNames.layouts)]: {
-                // ...FillWidth,
-                ...FlexColumn, ...FlexAuto,
-                gap: theme.spacing(1),
-                [child(classNames.layout)]: {
-                  gap: theme.spacing(1), ...FlexRowCenter, ...flexAlign(
-                      "stretch",
-                      "center"
-                  ), ...FlexAuto,
-                  
-                  [child("checkbox")]: {
-                    ...FlexAuto
-                  }
-                }
+          ...FlexAuto, // ...OverflowVisible,
+          gap: theme.spacing(1),
+          [child(classNames.layouts)]: {
+            // ...FillWidth,
+            ...FlexColumn,
+            ...FlexAuto,
+            gap: theme.spacing(1),
+            [child(classNames.layout)]: {
+              gap: theme.spacing(1),
+              ...FlexRowCenter,
+              ...flexAlign("stretch", "center"),
+              ...FlexAuto,
+
+              [child("checkbox")]: {
+                ...FlexAuto
               }
             }
           }
         }
       }
-    }))
+    }
+  }
+}))
 
 /**
  * DashboardEditor Component Properties
  */
 export interface DashboardEditorProps extends BoxProps {}
 
-interface LayoutFieldProps {
-  vr?: boolean
-
-  label: string
-
-  enabled: boolean
-
-  dashConfig: DashboardConfig
-
-  onChange: (enabled: boolean) => void
-}
-
-function LayoutField({ vr: isVR = false, label, enabled, dashConfig, onChange }: LayoutFieldProps) {
-  return (
-    <Box className={clsx(classNames.layout)}>
-      <Box
-        sx={{
-          ...FlexScaleZero,
-          ...Ellipsis
-        }}
-      >
-        {label}{" "}
-        <Typography
-          component="span"
-          variant="caption"
-          sx={{ opacity: 0.7, fontStyle: "italic" }}
-        >
-          {enabled ? "" : "Not "}Enabled
-        </Typography>
-      </Box>
-      <Checkbox
-        sx={{
-          ...FlexAuto
-        }}
-        defaultChecked={enabled}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-          onChange(checked)
-        }}
-      />
-    </Box>
-  )
-}
 
 type DashboardListEditorFormProps = {
   dashConfig: DashboardConfig
   handleSubmitRef?: React.MutableRefObject<any>
-  // formikConfig?: Partial<FormikConfig<DashboardConfig>>
   onSubmit?: FormikConfig<DashboardConfig>["onSubmit"]
-  //onSubmit: (id: string, patch:Partial<DashboardConfig>) =>
-  // Promise<DashboardConfig>
+  onBlurField?: (
+    event: React.FocusEvent<any>,
+    values: Partial<DashboardConfig>,
+    formikContext: FormikContextType<DashboardConfig>
+  ) => Promise<any> | any
 }
 
-const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, DashboardConfig>({
+const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardConfig>({
   mapPropsToValues: get("dashConfig"),
   validate: () => ({}), // createValidator(DashboardConfig as any),
   enableReinitialize: true,
@@ -213,7 +178,9 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
 })(function DashboardListEditorForm(props: DashboardListEditorFormProps & FormikProps<DashboardConfig>) {
   const {
       errors,
+      onBlurField,
       handleBlur,
+
       handleChange,
       handleSubmit,
       isSubmitting,
@@ -226,42 +193,57 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
       dashConfig,
       handleSubmitRef
     } = props,
-      theme = useTheme(),
-      nav = useNavigate(),
-      dashboardClient = useService(DashboardManagerClient),
-      patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
-      launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
-      canModify = useMemo(() => {
-        return !launchLayoutEditorAsync.loading && !patchConfigAsync.loading
-      }, [launchLayoutEditorAsync.loading, patchConfigAsync.loading]),
-      { updateMutatingModel, clearMutatingModels, resetMutatingModels, isMutatingModelNew, mutatingModels } =
-          useModelEditorContext<DashboardConfig>(),
-      model = first(mutatingModels)
-  
-  useEffect(() => {
-    if (!model) {
-      return
+    theme = useTheme(),
+    nav = useNavigate(),
+    dashboardClient = useService(DashboardManagerClient),
+    patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
+    launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
+    canModify = useMemo(() => {
+      return !launchLayoutEditorAsync.loading && !patchConfigAsync.loading
+    }, [launchLayoutEditorAsync.loading, patchConfigAsync.loading]),
+    { updateMutatingModel, clearMutatingModels, resetMutatingModels, isMutatingModelNew, mutatingModels } =
+      useModelEditorContext<DashboardConfig>(),
+    model = first(mutatingModels),
+    handleBlurField = (e: React.FocusEvent<any>) => {
+      log.info(`On blur <${e.target?.tagName} name=${e.target?.name}>`, e)
+      if (onBlurField) {
+        onBlurField(e, values, props)
+        if (e.isDefaultPrevented() || e.isPropagationStopped()) {
+          log.info(
+            `e.isDefaultPrevented()=${e.isDefaultPrevented()} || e.isPropagationStopped()=${e.isPropagationStopped()}`
+          )
+          return
+        }
+      }
+
+      // handleBlur(e)
     }
-    
-    const updatedModel = cloneInstanceOf(DashboardConfig, model, values)
-    if (
-        !isEqual(updatedModel, model) &&
-        !attributesEqual(updatedModel, model, DashboardConfig)
-        // isModelSameOrUpdated(updatedModel, model)
-    ) {
-      updateMutatingModel(updatedModel)
-    }
-  }, [model, values])
-  
+
+  // useEffect(() => {
+  //   if (!model) {
+  //     return
+  //   }
+  //
+  //   const updatedModel = cloneInstanceOf(DashboardConfig, model, values)
+  //   if (
+  //     !isEqual(updatedModel, model) &&
+  //     !attributesEqual(updatedModel, model, DashboardConfig)
+  //     // isModelSameOrUpdated(updatedModel, model)
+  //   ) {
+  //     updateMutatingModel(updatedModel)
+  //   }
+  // }, [model, values])
+
   // UPDATE THE PROVIDED REF ENABLING OTHER
   // UI COMPONENTS/DIALOGS, ETC TO SUBMIT
   if (handleSubmitRef) {
     handleSubmitRef.current = handleSubmit
   }
-  
+
   return (
     <FormContainer
       noValidate
+      // onBlur={handleBlur}
       onSubmit={handleSubmit}
     >
       <Box className={clsx(classNames.content)}>
@@ -270,93 +252,86 @@ const DashboardListEditorForm = withFormik<DashboardListEditorFormProps, Dashboa
             {/* HEADER */}
 
             <Box className={clsx(classNames.header)}>
-              <Box className={clsx(classNames.headerActions)}>
-                <IconButton
-                    aria-label="cancel"
-                    color="inherit"
-                    onClick={() => {
-                      nav(WebPaths.app.dashboards)
-                    }}
-                >
-                  <Icon
-                      fa
-                      icon={faTimes}
-                  />
-                </IconButton>
-              </Box>
-              
               <Box className={clsx(classNames.headerField)}>
                 <AppTextFieldFormik<DashboardConfig>
-                    variant="standard"
-                    onBlur={(e) => {
-                      log.info(`On blur`, e)
-                    }}
-                    autoFocus
-                    selectOnFocus
-                    label={null}
-                    name="name"
-                    placeholder="My Dash"
-                    InputProps={{
-                      sx: {
-                        "& input": {
-                          fontSize: theme.typography.h3.fontSize
-                        }
+                  variant="standard"
+                  onBlur={handleBlurField}
+                  autoFocus
+                  // selectOnFocus
+                  label={null}
+                  name="name"
+                  placeholder="My Dash"
+                  InputProps={{
+                    sx: {
+                      "& input": {
+                        fontSize: theme.typography.h3.fontSize
                       }
-                    }}
+                    }
+                  }}
                 />
               </Box>
-              
+
               <Box className={clsx(classNames.headerField)}>
                 <AppTextFieldFormik<DashboardConfig>
-                    variant="filled"
-                    flex
-                    rows={4}
-                    multiline={true}
-                    label={"Notes"}
-                    name="description"
-                    placeholder="I made it"
+                  variant="filled"
+                  flex
+                  rows={4}
+                  autoFocus
+                  // selectOnFocus
+                  onBlur={handleBlurField}
+                  multiline={true}
+                  label={"Notes"}
+                  name="description"
+                  placeholder="I made it"
                 />
               </Box>
-              
             </Box>
             <Box className={clsx(classNames.details)}>
-              
-                <Box className={clsx(classNames.detailsContent)}>
-                  <Box className={clsx(classNames.layouts)}>
-                    
-                    <FlexRowCenterBox>
-                      <Typography
-                        sx={{
-                          ...Ellipsis,
-                          ...FlexScaleZero
-                        }}
-                        variant="h6"
-                      >
-                        Layouts
-                      </Typography>
-                    </FlexRowCenterBox>
-                    <DashboardLayoutSwitch
-                        vr
-                        value={dashConfig.vrEnabled}
-                        label="VR"
-                        onChange={vrEnabled => {
-                          canModify && patchConfigAsync.execute(dashConfig.id, { vrEnabled })
-                        }}
-                    />
-                    <DashboardLayoutSwitch
-                        vr={false}
-                        value={dashConfig.screenEnabled}
-                        label="Screen"
-                        onChange={screenEnabled => {
-                          canModify && patchConfigAsync.execute(dashConfig.id, { screenEnabled })
-                        }}
-                    />
-                  </Box>
+              <Box className={clsx(classNames.detailsContent)}>
+                <Box className={clsx(classNames.layouts)}>
+                  <FlexRowCenterBox>
+                    <Typography
+                      sx={{
+                        ...Ellipsis,
+                        ...FlexScaleZero
+                      }}
+                      variant="h6"
+                    >
+                      Layouts
+                    </Typography>
+                  </FlexRowCenterBox>
+                  <DashboardLayoutSwitch
+                    vr
+                    value={dashConfig.vrEnabled}
+                    label="VR"
+                    onChange={vrEnabled => {
+                      canModify && patchConfigAsync.execute(dashConfig.id, { vrEnabled })
+                    }}
+                  />
+                  <DashboardLayoutSwitch
+                    vr={false}
+                    value={dashConfig.screenEnabled}
+                    label="Screen"
+                    onChange={screenEnabled => {
+                      canModify && patchConfigAsync.execute(dashConfig.id, { screenEnabled })
+                    }}
+                  />
                 </Box>
+              </Box>
             </Box>
           </>
         )}
       </Box>
+      <FormActionFooterDefault<DashboardConfig>
+        item={dashConfig}
+        negativeLabel="Cancel"
+        negativeHandler={e => {
+          e.preventDefault()
+          // resetForm()
+          nav(-1)
+        }}
+        positiveLabel="Save"
+      ></FormActionFooterDefault>
     </FormContainer>
   )
 })
@@ -377,21 +352,39 @@ export function DashboardEditor(props: DashboardEditorProps) {
       editorContext,
     dashConfig = mutatingModels?.[0],
     onReset = useMemo(() => bind(resetMutatingModels, null, [dashConfig?.id]), [dashConfig?.id]),
+    onBlurField = Alert.usePromise(
+      async (
+        e: React.FocusEvent<any>,
+        values: Partial<DashboardConfig>,
+        { setErrors, setStatus, setSubmitting }: FormikContextType<DashboardConfig>
+      ) => {
+        log.info(`onBlurField`, values)
+        e.preventDefault()
+        return values
+      },
+      {
+        loading: "Saving dashboard...",
+        success: ({ result }) => `"Successfully saved dashboard (${result?.name})."`,
+        error: "Unable to save project."
+      },
+      [isMounted, onReset]
+    ),
     onSubmit = Alert.usePromise(
       async (values: DashboardConfig, { setErrors, setStatus, setSubmitting }: FormikContextType<DashboardConfig>) => {
         // DERIVE VALID PROJECT OBJECT
         // const pendingDash = DashboardConfig.create(values)
         try {
           // DISPATCH THE SAVE ACTION
-          const savedDashConfig = await patchConfigAsync.execute(dashConfig?.id, values)
-
+          // debugger
+          const savedDashConfig = await dashboardClient.updateDashboardConfig(dashConfig?.id, values)
           if (isMounted()) {
             setStatus({ success: true })
             setSubmitting(false)
           }
-
-          onReset()
+          // onReset()
           return savedDashConfig
+          // log.info(`onSubmit values=`, values)
+          // return dashConfig
         } catch (err) {
           error(err)
           if (isMounted()) {
@@ -421,9 +414,10 @@ export function DashboardEditor(props: DashboardEditorProps) {
       )}
       {...other}
     >
-      <DashboardListEditorForm
+      <DashboardEditorForm
         dashConfig={dashConfig}
         onSubmit={onSubmit}
+        //onBlurField={onBlurField}
       />
     </DashboardEditorRoot>
   )

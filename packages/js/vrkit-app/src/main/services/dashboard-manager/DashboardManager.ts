@@ -206,9 +206,11 @@ export class DashboardManager {
 
       return dashConfig
     })
-
+    
     await this.saveDashboardConfigTaskFactory(dashConfig)
-    return dashConfig
+    const dashConfigJson = toJS(DashboardConfig.toJson(dashConfig)) as any
+    
+    return dashConfigJson
   }
 
   updateDashboardConfigHandler(
@@ -405,7 +407,7 @@ export class DashboardManager {
         })
       )
       
-      await this.fsManager.getFileInfo(dashFile).then(fileInfo => assign(config, { fileInfo }))
+      await this.fsManager.getFileInfo(dashFile).then(fileInfo => runInAction(() => assign(config, { fileInfo })))
       
     }
   }

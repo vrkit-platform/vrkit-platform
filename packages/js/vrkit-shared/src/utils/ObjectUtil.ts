@@ -278,7 +278,7 @@ export interface IValueTransformer {
 }
 
 export function transformValues(o, fn: IValueTransformer): any {
-  return Array.isArray(o)
+  return !o ? null : Array.isArray(o)
     ? o.map(aVal => transformValues(aVal, fn))
     : typeof o === "object"
       ? Object.keys(o).reduce((newObj: any, nextKey: any) => {

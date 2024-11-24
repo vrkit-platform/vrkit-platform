@@ -47,7 +47,7 @@ function isObject(val) {
   )
 }
 
-function isPrimitive(val) {
+export function isPrimitive(val) {
   return typeof val === "object"
     ? val === null
     : typeof val !== "function"

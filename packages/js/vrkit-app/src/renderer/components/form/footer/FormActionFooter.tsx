@@ -38,9 +38,10 @@ const FormActionFooterRoot = styled(Box)(({ theme }) => ({
   ...FlexAuto,
   ...FlexDefaults.stretchSelf,
   ...flexAlign("center", "flex-end"),
-  ...padding(theme.spacing(4)),
+  ...padding(theme.spacing(0.5)),
   borderTop: footerBorder,
-  backgroundColor: theme.palette.background.actionFooter
+  backgroundColor: theme.palette.background.actionFooter,
+  backgroundImage: theme.palette.background.actionFooterImage
 }))
 
 /**

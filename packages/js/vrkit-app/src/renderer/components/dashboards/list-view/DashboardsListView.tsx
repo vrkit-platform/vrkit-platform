@@ -264,10 +264,8 @@ function DashboardsListItemMenu({
           />
           Delete
         </MenuItem>
-        {!isDefault && (
-          <>
-            <Divider sx={{ my: 0.5 }} />
-            <MenuItem
+        {!isDefault && <Divider sx={{ my: 0.5 }} />}
+        {!isDefault && <MenuItem
               className={clsx(dashboardsListViewClasses.itemAction, "setAsDefault", "menuAction")}
               onClick={newCloseEventHandler(isDefault ? noop : onSetAsDefault)}
             >
@@ -276,9 +274,7 @@ function DashboardsListItemMenu({
                 icon={faGridHorizontal}
               />
               Set as Default
-            </MenuItem>
-          </>
-        )}
+            </MenuItem>}
       </Menu>
     </>
   )

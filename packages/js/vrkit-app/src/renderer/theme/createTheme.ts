@@ -18,7 +18,7 @@ import {
 
 import type { ThemeLocaleComponents } from "./ThemeTypes"
 import { assign } from "vrkit-shared"
-import { linearGradient, rem } from "vrkit-shared-ui"
+import { alpha, linearGradient, rem } from "vrkit-shared-ui"
 import { lighten, darken } from "@mui/material"
 import { darkPrimaryAndSecondaryPalettes } from "./paletteAndColorHelpers"
 import { createPaletteChannel, pxToRem, setFont } from "./styles"
@@ -60,6 +60,13 @@ const drawerBgPaperGradient = linearGradient(
     `${darken(drawerBgPaper, 0.15)} 100%`
 )
 
+const actionFooter = alpha(darken(bgPaper, 0.25), 0.9)
+const actionFooterImage = linearGradient(
+    "to top",
+    `${actionFooter} 0%`,
+    `${darken(actionFooter, 0.05)} 90%`,
+    `${darken(actionFooter, 0.15)} 100%`
+)
 
 const sessionBackgroundColor = "rgba(32, 30, 34, 0.999)" //lighten(,0.25)
 const sessionBackgroundGradient = linearGradient(
@@ -94,7 +101,8 @@ const themeOptions: ThemeOptions = {
       paperFooter: "#1A151E",
       drawerBgPaper,
       drawerBgPaperGradient,
-      actionFooter: lighten(bgPaper, 0.1),
+      actionFooter,
+      actionFooterImage,
       filledInput: "rgba(255, 255, 255, 0.13)",
       filledInputDisabled: "rgba(255, 255, 255, 0.12)",
       appBar: slateBackgroundColor, // "#2E3133",

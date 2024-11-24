@@ -8,9 +8,12 @@ import clsx from "clsx"
 import { getLogger } from "@3fv/logger-proxy"
 
 // MUI
-import {filledInputClasses as muiFilledInputClasses} from "@mui/material/FilledInput"
-import MuiTextField, { FilledTextFieldProps as MuiFilledTextFieldProps, BaseTextFieldProps as MuiBaseTextFieldProps } from "@mui/material/TextField"
-import {inputBaseClasses as muiInputBaseClasses} from "@mui/material/InputBase"
+import { filledInputClasses as muiFilledInputClasses } from "@mui/material/FilledInput"
+import MuiTextField, {
+  BaseTextFieldProps as MuiBaseTextFieldProps,
+  FilledTextFieldProps as MuiFilledTextFieldProps
+} from "@mui/material/TextField"
+import { inputBaseClasses as muiInputBaseClasses } from "@mui/material/InputBase"
 import { styled } from "@mui/material/styles"
 
 // APP
@@ -52,33 +55,34 @@ const AppTextFieldRoot = styled(MuiTextField)(({ theme }) => ({
     ...FlexColumn,
     ...FlexDefaults.stretch,
     ...FlexDefaults.stretchSelf,
-    
+
     [`& input.${muiInputBaseClasses.input}, & input.${muiFilledInputClasses.input}`]: {
       paddingLeft: rem(0.5),
       paddingRight: rem(0.5)
     },
-    
+
     [`& div.${muiInputBaseClasses.root}.${muiFilledInputClasses.root}`]: {
-      paddingLeft: rem(0.5), paddingRight: rem(0.5),
+      paddingLeft: rem(0.5),
+      paddingRight: rem(0.5),
       [`& textarea.${muiInputBaseClasses.input}, & textarea.${muiFilledInputClasses.input}`]: {
-        paddingLeft: rem(0), paddingRight: rem(0)
-      },
+        paddingLeft: rem(0),
+        paddingRight: rem(0)
+      }
     },
     [hasCls(appTextFieldClasses.flex)]: {
       ...FlexScaleZero
     },
-    
+
     [hasCls(appTextFieldClasses.hasLabel)]: {
       marginTop: rem(0.5),
       "& .MuiInputLabel-root.MuiInputLabel-formControl.MuiInputLabel-shrink": {
-        transform: `translate(${rem(0.5)},${rem(0.15)})`,
-        // "&.MuiInputLabel-filled": {
+        transform: `translate(${rem(0.5)},${rem(0.15)})`, // "&.MuiInputLabel-filled":
+        // {
         //   transform: `translate(${rem(0.5)},${rem(0.15)})`
         // },
         "&:not(.MuiInputLabel-filled)": {
           transform: `translate(${rem(0.5)},${rem(-0.5)})`
-        },
-        
+        }
       }
     },
     "& .MuiFormHelperText-root": {
@@ -94,10 +98,13 @@ const AppTextFieldRoot = styled(MuiTextField)(({ theme }) => ({
 /**
  * TextField Component Properties
  */
-export interface AppTextFieldProps extends MuiBaseTextFieldProps, Pick<MuiFilledTextFieldProps, "InputProps" | "onChange"> {
+export interface AppTextFieldProps
+  extends MuiBaseTextFieldProps,
+    Pick<MuiFilledTextFieldProps, "InputProps" | "onChange"> {
   onEnterKeyDown?: React.KeyboardEventHandler<any>
 
   selectOnFocus?: boolean
+
   flex?: boolean
 }
 
@@ -118,6 +125,7 @@ export function AppTextField(props: AppTextFieldProps): JSX.Element {
       autoFocus = false,
       tabIndex = 0,
       selectOnFocus = false,
+      onBlur,
       ...other
     } = props,
     onKeyDown =
@@ -159,6 +167,7 @@ export function AppTextField(props: AppTextFieldProps): JSX.Element {
         disableUnderline: true,
 
         ...InputProps,
+        onBlur: onBlur ?? InputProps?.onBlur,
         onFocus: onInputFocus,
         onKeyDown: interceptEvent(onKeyDown, InputProps?.onKeyDown)
       }}
@@ -172,14 +181,14 @@ export interface AppTextFieldFormikProps<T extends {}, P extends keyof T>
   formikContext?: FormikContextType<T>
 
   label?: string
-  
+
   name: P
 }
 
 export function AppTextFieldFormik<T extends {}, P extends keyof T = keyof T>(props: AppTextFieldFormikProps<T, P>) {
   const {
-    onBlur: providedOnBlur,
-    formikContext: propFormikContext,
+      onBlur: providedOnBlur,
+      formikContext: propFormikContext,
       name,
       selectOnFocus = false,
       label = capitalize(name as string),
@@ -203,12 +212,7 @@ export function AppTextFieldFormik<T extends {}, P extends keyof T = keyof T>(pr
       name={name as string}
       type="text"
       selectOnFocus={selectOnFocus}
-      onBlur={(e: React.FocusEvent<any>) => {
-        handleBlur(e)
-        if (providedOnBlur)
-          providedOnBlur(e)
-      }
-      }
+      onBlur={providedOnBlur ?? handleBlur}
       onChange={handleChange}
       value={values[name]}
       disabled={isSubmitting === true || other?.disabled === true}

@@ -1,7 +1,7 @@
 import type { Appender, LogRecord } from "@3fv/logger-proxy"
 import type { UPM } from "@3fv/electron-utility-process-manager"
 import type { LogServerEventData, LogServerRequestMap } from "./LogServerTypes"
-import { assign, defaults } from "lodash"
+import { assign, defaults, toPlainObject } from "lodash"
 import { Future } from "@3fv/prelude-ts"
 import Debug from "debug"
 import { JSONStringifyAny } from "vrkit-shared"
@@ -157,7 +157,8 @@ export class LogServerClientAppender implements Appender {
         debug(`Too many log records (${count}) are in the queue, skipping %O`, record)
         return
       }
-
+      // const plainObject = toPlainObject(record)
+      // const data = this.config.prettyPrint ? JSONStringifyAny(plainObject, 2) : JSONStringifyAny(plainObject)
       const data = this.config.prettyPrint ? JSONStringifyAny(record, 2) : JSONStringifyAny(record)
       queue.push(data)
       this.flush()

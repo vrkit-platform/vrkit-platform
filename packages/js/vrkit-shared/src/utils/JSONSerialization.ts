@@ -1,3 +1,37 @@
+import { isPrimitive } from "./assignDeep"
+import { isPlainObject, toPlainObject } from "lodash"
+import { transformValues } from "./ObjectUtil"
+import { isFunction } from "@3fv/guard"
+
+export function toPlainObjectDeep(o:any, recordSet:Set<{}> = new Set<{}>(), depth:number = 0): any {
+  if (depth > 3)
+    return null
+  
+  if (recordSet.has(o)) {
+    return null
+  }
+  
+  return transformValues(o, (k, value) => {
+    
+    
+    if (isFunction(value)) {
+      return null
+    }
+    
+    if (typeof value === "bigint") {
+      return value.toString() + "n"
+    }
+    if (!value || isPrimitive(value)) {
+      return value
+    }
+    
+    
+      recordSet.add(value)
+      return toPlainObjectDeep(value, recordSet, depth + 1)
+    
+  })
+}
+
 /**
  * copied from
  * https://github.com/Ivan-Korolenko/json-with-bigint/blob/main/json-with-bigint.js
@@ -11,7 +45,12 @@
  */
 export function JSONStringifyAny(data: any, space: number = undefined): string {
   const bigInts = /([\[:])?"(-?\d+)n"([,\}\]])/g
-  const json = JSON.stringify(data, (_, value) => (typeof value === "bigint" ? value.toString() + "n" : value), space)
+  const plainData = toPlainObjectDeep(data)
+  const json = JSON.stringify(
+      plainData,
+    null,
+    space
+  )
 
   return json.replace(bigInts, "$1$2$3")
 }
@@ -47,8 +86,9 @@ export function JSONParseAny<T = any>(jsonStr: string): T {
   const cleanJsonStr = jsonStr.replace(numbersBiggerThanMaxInt, `"$1n"`)
 
   return JSON.parse(cleanJsonStr, (_, value) => {
-    if (typeof value === "string" && Boolean(value.match(/^-?\d+n$/)))
+    if (typeof value === "string" && Boolean(value.match(/^-?\d+n$/))) {
       return BigInt(value.substring(0, value.length - 1))
+    }
 
     return value
   })

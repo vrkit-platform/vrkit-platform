@@ -63,6 +63,7 @@ declare module "@mui/material/styles/createPalette" {
     drawerBgPaper: string
     drawerBgPaperGradient: string
     actionFooter: string
+    actionFooterImage: string
     filledInput: string
     filledInputDisabled: string
     neutral: string;

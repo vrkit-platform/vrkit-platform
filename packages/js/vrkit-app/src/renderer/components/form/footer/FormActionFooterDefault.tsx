@@ -20,6 +20,8 @@ export function FormActionFooterDefault<T = any>({
   negativeHandler,
   positiveLabel,
   positiveHandler,
+    children,
+    sx,
   ...other
 }: FormActionFooterDefaultProps<T>) {
   const {isSubmitting, submitForm, resetForm} = useFormikContext<T>()
@@ -28,17 +30,24 @@ export function FormActionFooterDefault<T = any>({
       sx={{
         ...FlexRowCenter,
         ...FlexAuto,
-        gap: 2
+        gap: 2,
+        ...sx
       }}
+      {...other}
     >
+      {children}
       <Button
         color="error"
         disabled={isSubmitting}
-        size="large"
+        size="medium"
         variant="outlined"
         onClick={e => {
           e.preventDefault()
-          negativeHandler ? negativeHandler(e) : resetForm()
+          if (negativeHandler) {
+            negativeHandler(e)
+          } else {
+            resetForm()
+          }
         }}
       >
         {negativeLabel}
@@ -47,7 +56,7 @@ export function FormActionFooterDefault<T = any>({
       <Button
         color="primary"
         disabled={isSubmitting}
-        size="large"
+        size="medium"
         variant="contained"
         onClick={e => {
           e.preventDefault()

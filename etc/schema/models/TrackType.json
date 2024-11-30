@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "enum": [
+        "TRACK_TYPE_ROAD",
+        0,
+        "TRACK_TYPE_OVAL",
+        1,
+        "TRACK_TYPE_DIRT",
+        2,
+        "TRACK_TYPE_DIRT_OVAL",
+        3
+    ],
+    "oneOf": [
+        {
+            "type": "string"
+        },
+        {
+            "type": "integer"
+        }
+    ],
+    "title": "Track Type"
+}

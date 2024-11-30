@@ -1,0 +1,60 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/PipelineLog",
+    "definitions": {
+        "PipelineLog": {
+            "properties": {
+                "level": {
+                    "enum": [
+                        "TRACE",
+                        0,
+                        "DEBUG",
+                        1,
+                        "INFO",
+                        2,
+                        "WARN",
+                        3,
+                        "ERR",
+                        4,
+                        "CRITICAL",
+                        5,
+                        "OFF",
+                        6
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Level"
+                },
+                "message": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Pipeline Log"
+        }
+    }
+}

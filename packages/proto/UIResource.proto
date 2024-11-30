@@ -10,6 +10,8 @@ message UIImageResource {
   string url = 2;
   bool is_data_url = 3;
   SizeI size = 5;
+
+  string description = 50;
 }
 
 message UIColorResource {

@@ -53,9 +53,19 @@ foreach(target ${modelsTarget} ${modelsTargetStatic})
 
   add_custom_command(
     TARGET ${target}
+    COMMENT "Generate TypeScript"
     POST_BUILD
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMAND ${pwshExe} ARGS "${CMAKE_SOURCE_DIR}/scripts/protoc-ts.ps1" "${protoCompiler}"
+  )
+
+  add_custom_command(
+    TARGET ${target}
+    COMMENT "Generate JSON Schema"
+    POST_BUILD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${pwshExe} ARGS "${CMAKE_SOURCE_DIR}/scripts/protoc-json-schema.ps1" "${protoCompiler}"
+
   )
   target_compile_options(${target} PRIVATE "/permissive")
 endforeach()

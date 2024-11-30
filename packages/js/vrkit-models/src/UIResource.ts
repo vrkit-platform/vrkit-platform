@@ -33,6 +33,10 @@ export interface UIImageResource {
      * @generated from protobuf field: IRacingTools.Models.SizeI size = 5;
      */
     size?: SizeI;
+    /**
+     * @generated from protobuf field: string description = 50;
+     */
+    description: string;
 }
 /**
  * @generated from protobuf message IRacingTools.Models.UIColorResource
@@ -75,7 +79,8 @@ class UIImageResource$Type extends MessageType<UIImageResource> {
             { no: 1, name: "format", kind: "enum", T: () => ["IRacingTools.Models.ImageFormat", ImageFormat, "IMAGE_FORMAT_"] },
             { no: 2, name: "url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "is_data_url", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 5, name: "size", kind: "message", T: () => SizeI }
+            { no: 5, name: "size", kind: "message", T: () => SizeI },
+            { no: 50, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<UIImageResource>): UIImageResource {
@@ -83,6 +88,7 @@ class UIImageResource$Type extends MessageType<UIImageResource> {
         message.format = 0;
         message.url = "";
         message.isDataUrl = false;
+        message.description = "";
         if (value !== undefined)
             reflectionMergePartial<UIImageResource>(this, message, value);
         return message;
@@ -103,6 +109,9 @@ class UIImageResource$Type extends MessageType<UIImageResource> {
                     break;
                 case /* IRacingTools.Models.SizeI size */ 5:
                     message.size = SizeI.internalBinaryRead(reader, reader.uint32(), options, message.size);
+                    break;
+                case /* string description */ 50:
+                    message.description = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -128,6 +137,9 @@ class UIImageResource$Type extends MessageType<UIImageResource> {
         /* IRacingTools.Models.SizeI size = 5; */
         if (message.size)
             SizeI.internalBinaryWrite(message.size, writer.tag(5, WireType.LengthDelimited).fork(), options).join();
+        /* string description = 50; */
+        if (message.description !== "")
+            writer.tag(50, WireType.LengthDelimited).string(message.description);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

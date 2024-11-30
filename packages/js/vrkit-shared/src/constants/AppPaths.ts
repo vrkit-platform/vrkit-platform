@@ -16,7 +16,7 @@ export interface IDevPaths {
 }
 
 function createDevPaths(): IDevPaths {
-  if (!isDev || TARGET_PLATFORM !== "electron-main") {
+  if (!isDev || TARGET_PLATFORM !== "node") {
     return null
   } else {
     const pkgPath = FindPackagePath("vrkit-project")

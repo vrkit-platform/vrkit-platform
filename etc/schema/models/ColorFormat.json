@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "enum": [
+        "COLOR_FORMAT_UNKNOWN",
+        0,
+        "COLOR_FORMAT_HEX",
+        1,
+        "COLOR_FORMAT_RGB",
+        2,
+        "COLOR_FORMAT_RGBA",
+        3
+    ],
+    "oneOf": [
+        {
+            "type": "string"
+        },
+        {
+            "type": "integer"
+        }
+    ],
+    "title": "Color Format"
+}

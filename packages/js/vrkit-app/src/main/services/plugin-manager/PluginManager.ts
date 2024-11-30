@@ -14,6 +14,7 @@ import Path from "path"
 import { flatten, uniq } from "lodash"
 import { isDefined, isPromise } from "@3fv/guard"
 import FastGlob from "fast-glob"
+import { isDev } from "../../constants"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -79,6 +80,11 @@ export class PluginManager {
   private async init() {
     info(`Finding plugins`)
     await this.findPlugins()
+    if (isDev) {
+      Object.assign(global, {
+        pluginManager: this
+      })
+    }
   }
 
   constructor(

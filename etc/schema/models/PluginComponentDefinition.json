@@ -72,7 +72,7 @@
             "title": "Overlay Common Settings",
             "description": "* Common Overlay specific settings"
         },
-        "IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings": {
+        "IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings": {
             "properties": {
                 "dataVariablesUsed": {
                     "items": {
@@ -124,8 +124,162 @@
                     "type": "object"
                 }
             ],
-            "title": "Overlay IR Settings",
+            "title": "Overlay I Racing Settings",
             "description": "* IRacing Overlay specific settings"
+        },
+        "IRacingTools.Models.PluginUserSetting": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "description": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "type": {
+                    "enum": [
+                        "PLUGIN_USER_SETTING_TYPE_INT",
+                        0,
+                        "PLUGIN_USER_SETTING_TYPE_DOUBLE",
+                        1,
+                        "PLUGIN_USER_SETTING_TYPE_STRING",
+                        2,
+                        "PLUGIN_USER_SETTING_TYPE_BOOLEAN",
+                        3,
+                        "PLUGIN_USER_SETTING_TYPE_COLOR",
+                        4
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Plugin User Setting Type"
+                },
+                "defaultValue": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingValue",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "userValue": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingValue",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Plugin User Setting"
+        },
+        "IRacingTools.Models.PluginUserSettingValue": {
+            "properties": {
+                "intValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "doubleValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "stringValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "booleanValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "colorValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Plugin User Setting Value"
         },
         "IRacingTools.Models.SizeI": {
             "properties": {
@@ -160,6 +314,194 @@
                 }
             ],
             "title": "Size I"
+        },
+        "IRacingTools.Models.UIColorResource": {
+            "properties": {
+                "format": {
+                    "enum": [
+                        "COLOR_FORMAT_UNKNOWN",
+                        0,
+                        "COLOR_FORMAT_HEX",
+                        1,
+                        "COLOR_FORMAT_RGB",
+                        2,
+                        "COLOR_FORMAT_RGBA",
+                        3
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Color Format"
+                },
+                "data": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "dataParts": {
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "array"
+                        }
+                    ]
+                },
+                "label": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "UI Color Resource"
+        },
+        "IRacingTools.Models.UIImageResource": {
+            "properties": {
+                "format": {
+                    "enum": [
+                        "IMAGE_FORMAT_UNKNOWN",
+                        0,
+                        "IMAGE_FORMAT_SVG",
+                        1,
+                        "IMAGE_FORMAT_PNG",
+                        2
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Image Format"
+                },
+                "url": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "isDataUrl": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "size": {
+                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "description": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "UI Image Resource"
+        },
+        "IRacingTools.Models.UIResource": {
+            "properties": {
+                "color": {
+                    "$ref": "#/definitions/IRacingTools.Models.UIColorResource",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "icon": {
+                    "$ref": "#/definitions/IRacingTools.Models.UIImageResource",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "UI Resource"
         },
         "PluginComponentDefinition": {
             "properties": {
@@ -211,6 +553,16 @@
                         }
                     ]
                 },
+                "uiResource": {
+                    "$ref": "#/definitions/IRacingTools.Models.UIResource",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
                 "supportedGames": {
                     "items": {
                         "enum": [
@@ -259,8 +611,8 @@
                         {}
                     ]
                 },
-                "overlayIrSettings": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginComponentDefinition.OverlayIRSettings",
+                "overlayIracingSettings": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -269,6 +621,26 @@
                         {}
                     ],
                     "description": "IROverlaySettings, can be omitted"
+                },
+                "userSettings": {
+                    "additionalProperties": {
+                        "$ref": "#/definitions/IRacingTools.Models.PluginUserSetting",
+                        "additionalProperties": true,
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {}
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
                 }
             },
             "additionalProperties": true,

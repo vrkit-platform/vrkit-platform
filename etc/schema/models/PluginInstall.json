@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "$ref": "#/definitions/PluginManifest",
+    "$ref": "#/definitions/PluginInstall",
     "definitions": {
         "IRacingTools.Models.PluginComponentDefinition": {
             "properties": {
@@ -277,6 +277,74 @@
             ],
             "title": "Overlay I Racing Settings",
             "description": "* IRacing Overlay specific settings"
+        },
+        "IRacingTools.Models.PluginManifest": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "description": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "owner": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginOwner",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "components": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "items": {
+                                "$ref": "#/definitions/IRacingTools.Models.PluginComponentDefinition"
+                            },
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Plugin Manifest",
+            "description": "* Defines a plugins contents"
         },
         "IRacingTools.Models.PluginOwner": {
             "properties": {
@@ -719,7 +787,7 @@
             ],
             "title": "UI Resource"
         },
-        "PluginManifest": {
+        "PluginInstall": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -731,7 +799,48 @@
                         }
                     ]
                 },
-                "name": {
+                "status": {
+                    "enum": [
+                        "PLUGIN_STATUS_NONE",
+                        0,
+                        "PLUGIN_STATUS_DOWNLOADING",
+                        1,
+                        "PLUGIN_STATUS_AVAILABLE",
+                        2,
+                        "PLUGIN_STATUS_LOADED",
+                        5,
+                        "PLUGIN_STATUS_ERROR",
+                        50,
+                        "PLUGIN_STATUS_DISABLED",
+                        98,
+                        "PLUGIN_STATUS_IGNORED",
+                        99
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Plugin Install Status",
+                    "description": "* Status of a plugin installation"
+                },
+                "isInternal": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "path": {
                     "oneOf": [
                         {
                             "type": "null"
@@ -741,7 +850,7 @@
                         }
                     ]
                 },
-                "description": {
+                "manifestFile": {
                     "oneOf": [
                         {
                             "type": "null"
@@ -751,27 +860,14 @@
                         }
                     ]
                 },
-                "owner": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginOwner",
+                "manifest": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginManifest",
                     "additionalProperties": true,
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {}
-                    ]
-                },
-                "components": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.PluginComponentDefinition"
-                            },
-                            "type": "array"
-                        }
                     ]
                 }
             },
@@ -784,8 +880,8 @@
                     "type": "object"
                 }
             ],
-            "title": "Plugin Manifest",
-            "description": "* Defines a plugins contents"
+            "title": "Plugin Install",
+            "description": "* Installed plugin"
         }
     }
 }

@@ -1,0 +1,28 @@
+syntax = "proto3";
+import "GraphicsTypes.proto";
+import "Geometry.proto";
+
+package IRacingTools.Models;
+
+
+message UIImageResource {
+  ImageFormat format = 1;
+  string url = 2;
+  bool is_data_url = 3;
+  SizeI size = 5;
+}
+
+message UIColorResource {
+  ColorFormat format = 1;
+
+  string data = 2;
+  repeated float data_parts = 3;
+
+  string label = 10;
+}
+
+message UIResource {
+
+  UIColorResource color = 1;
+  UIImageResource icon = 5;
+}

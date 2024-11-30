@@ -44,7 +44,7 @@ export interface DashboardIconImgProps extends Omit<React.HTMLAttributes<HTMLIma
 export const DashboardIconRoot = styled("img", {
   label: dashboardIconClassPrefix
 })(({ theme }) => {
-  const [sm, md, lg, xl] = theme.dimen.dashboardIconSizes
+  const [sm, md, lg, xl] = theme.dimen.appIconSizes
   return {
     [`&, &.${classNames.root}`]: {
       objectFit: "contain",

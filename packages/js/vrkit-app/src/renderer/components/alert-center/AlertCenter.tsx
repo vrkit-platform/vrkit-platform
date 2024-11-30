@@ -22,7 +22,7 @@ import {
 import { AlertType } from "../../services/alerts"
 import { styled } from "@mui/material/styles"
 import { Box, Button, IconButton, useTheme } from "@mui/material"
-import { AppIcon } from "../icon"
+import { AppFAIcon, AppIcon } from "../app-icon"
 import {
   faTimes as falTimes,
   faInfoSquare as falInfoSquare,
@@ -219,8 +219,7 @@ export function AlertCenter(props: AlertCenterProps) {
             }}
           >
             <AlertCenterIcon>
-              <AppIcon
-                fa
+              <AppFAIcon
                 spin={alertType === "loading"}
                 icon={
                   alertType === "error"

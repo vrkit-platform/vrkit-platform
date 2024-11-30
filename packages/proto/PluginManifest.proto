@@ -1,6 +1,7 @@
 syntax = "proto3";
 import "AppInterfaceTypes.proto";
 import "Geometry.proto";
+import "UIResource.proto";
 
 package IRacingTools.Models;
 
@@ -43,6 +44,7 @@ message PluginComponentDefinition {
 
   string name = 5;
   string description = 6;
+  UIResource ui_resource = 7;
 
   repeated SupportedGame supported_games = 10;
 

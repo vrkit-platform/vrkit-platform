@@ -32,7 +32,7 @@ import {
 } from "vrkit-shared-ui"
 import { attributesEqual, isEqual } from "vrkit-shared"
 import IconButton from "@mui/material/IconButton"
-import Icon from "../../icon"
+import Icon from "../../app-icon"
 import Typography from "@mui/material/Typography"
 import { isDefined } from "@3fv/guard"
 import { DashboardConfig } from "vrkit-models"

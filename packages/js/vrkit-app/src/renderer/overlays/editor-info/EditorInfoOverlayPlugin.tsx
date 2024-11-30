@@ -32,7 +32,7 @@ import { isNumber } from "@3fv/guard"
 import { OverlayKind } from "vrkit-models"
 import { OverlayVREditorPropertyName } from "vrkit-shared"
 import { match } from "ts-pattern"
-import Icon from "../../components/icon"
+import Icon from "../../components/app-icon"
 import {
   faArrowUpRightAndArrowDownLeftFromCenter,
   faUpDownLeftRight

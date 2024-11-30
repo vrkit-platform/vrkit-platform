@@ -16,7 +16,7 @@ import {
   SignalFlag
 } from "vrkit-shared"
 import { DashboardConfig } from "vrkit-models"
-import { isDefined } from "@3fv/guard"
+import { getValue, isDefined } from "@3fv/guard"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
 import { AppPaths, FileExtensions } from "vrkit-shared/constants/node"
@@ -153,12 +153,18 @@ export class DashboardManager {
             .then(json => DashboardConfig.fromJson(json))
             .then(config => this.fsManager.getFileInfo(file).then(fileInfo => assign(config, { fileInfo })))
             .catch(err => {
-              error(`Unable to read file ${file}`, err)
+              error(`Unable to read/parse file (${file}), deleting`, err)
+              getValue(
+                () => Fsx.unlinkSync(file),
+                null,
+                err => error(`Failed to remove file ${file}`, err)
+              )
               return null
             })
         )
       )
     )
+      .map(configs => configs.filter(isDefined))
       .filter(isDefined)
       .getOrThrow()
 
@@ -206,10 +212,10 @@ export class DashboardManager {
 
       return dashConfig
     })
-    
+
     await this.saveDashboardConfigTaskFactory(dashConfig)
     const dashConfigJson = toJS(DashboardConfig.toJson(dashConfig)) as any
-    
+
     return dashConfigJson
   }
 
@@ -223,13 +229,12 @@ export class DashboardManager {
 
   @Bind
   async createDashboardConfig(patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
-    const dashConfig =DashboardConfig.create(defaultsDeep(patch, newDashboardTrackMapMockConfig()))
+    const dashConfig = DashboardConfig.create(defaultsDeep(patch, newDashboardTrackMapMockConfig()))
     await this.saveDashboardConfigTaskFactory(dashConfig)
-     runInAction(() => {
+    runInAction(() => {
       this.dashboardConfigs.push(dashConfig)
     })
 
-    
     return dashConfig
   }
 
@@ -238,8 +243,8 @@ export class DashboardManager {
     patch: Partial<DashboardConfig>
   ): Promise<DashboardConfig> {
     const dashConfig = await this.createDashboardConfig(patch),
-        dashConfigJson = toJS(DashboardConfig.toJson(dashConfig)) as any
-    
+      dashConfigJson = toJS(DashboardConfig.toJson(dashConfig)) as any
+
     log.info(`Created new dash config`, dashConfigJson)
     return dashConfigJson
   }
@@ -372,7 +377,8 @@ export class DashboardManager {
    * @param fsManager
    */
   constructor(
-    @InjectContainer() readonly container: Container,
+    @InjectContainer()
+    readonly container: Container,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
     readonly mainWindowManager: MainWindowManager,
@@ -406,9 +412,8 @@ export class DashboardManager {
           emitDefaultValues: true
         })
       )
-      
+
       await this.fsManager.getFileInfo(dashFile).then(fileInfo => runInAction(() => assign(config, { fileInfo })))
-      
     }
   }
 

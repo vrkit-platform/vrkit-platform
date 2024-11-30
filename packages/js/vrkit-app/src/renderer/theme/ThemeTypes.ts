@@ -31,7 +31,7 @@ declare global {
     appBarHeight: number | string
     listActionFooterHeight: number | string
     layoutPadding: [number, number?, number?, number?]
-    dashboardIconSizes: [sm: number, md: number, lg: number, xl: number]
+    appIconSizes: [sm: number, md: number, lg: number, xl: number]
   }
   
   interface StyleUtility {

@@ -186,7 +186,7 @@ export function createTheme(
       appBarHeight: "3rem",
       listActionFooterHeight: rem(2),
       layoutPadding: [4, 2], // spacing unit
-      dashboardIconSizes: [16, 32, 64, 128]
+      appIconSizes: [16, 32, 64, 128]
     },
     // typography: {
     //   fontFamily: setFont("SanFranciscoDisplay")

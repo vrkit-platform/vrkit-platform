@@ -14,6 +14,7 @@ import { FileInfo } from "./FileInfo";
 import { OverlayPlacement } from "./OverlayTypes";
 import { OverlayInfo } from "./OverlayTypes";
 import { ScreenConfig } from "./ScreenConfig";
+import { UIResource } from "./UIResource";
 /**
  * @generated from protobuf message IRacingTools.Models.Dashboard.DashboardConfig
  */
@@ -31,9 +32,9 @@ export interface DashboardConfig {
      */
     description: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.Dashboard.DashboardConfig.UI ui = 5;
+     * @generated from protobuf field: IRacingTools.Models.UIResource ui_resource = 5;
      */
-    ui?: DashboardConfig_UI;
+    uiResource?: UIResource;
     /**
      * @generated from protobuf field: bool vr_enabled = 8;
      */
@@ -63,19 +64,6 @@ export interface DashboardConfig {
      */
     fileInfo?: FileInfo;
 }
-/**
- * @generated from protobuf message IRacingTools.Models.Dashboard.DashboardConfig.UI
- */
-export interface DashboardConfig_UI {
-    /**
-     * @generated from protobuf field: string color = 1;
-     */
-    color: string;
-    /**
-     * @generated from protobuf field: string icon_data_url = 5;
-     */
-    iconDataUrl: string;
-}
 // @generated message type with reflection information, may provide speed optimized methods
 class DashboardConfig$Type extends MessageType<DashboardConfig> {
     constructor() {
@@ -83,7 +71,7 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "ui", kind: "message", T: () => DashboardConfig_UI },
+            { no: 5, name: "ui_resource", kind: "message", T: () => UIResource },
             { no: 8, name: "vr_enabled", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 9, name: "screen_enabled", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 10, name: "screen_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
@@ -121,8 +109,8 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
                 case /* string description */ 3:
                     message.description = reader.string();
                     break;
-                case /* IRacingTools.Models.Dashboard.DashboardConfig.UI ui */ 5:
-                    message.ui = DashboardConfig_UI.internalBinaryRead(reader, reader.uint32(), options, message.ui);
+                case /* IRacingTools.Models.UIResource ui_resource */ 5:
+                    message.uiResource = UIResource.internalBinaryRead(reader, reader.uint32(), options, message.uiResource);
                     break;
                 case /* bool vr_enabled */ 8:
                     message.vrEnabled = reader.bool();
@@ -166,9 +154,9 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
         /* string description = 3; */
         if (message.description !== "")
             writer.tag(3, WireType.LengthDelimited).string(message.description);
-        /* IRacingTools.Models.Dashboard.DashboardConfig.UI ui = 5; */
-        if (message.ui)
-            DashboardConfig_UI.internalBinaryWrite(message.ui, writer.tag(5, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.UIResource ui_resource = 5; */
+        if (message.uiResource)
+            UIResource.internalBinaryWrite(message.uiResource, writer.tag(5, WireType.LengthDelimited).fork(), options).join();
         /* bool vr_enabled = 8; */
         if (message.vrEnabled !== false)
             writer.tag(8, WireType.Varint).bool(message.vrEnabled);
@@ -200,58 +188,3 @@ class DashboardConfig$Type extends MessageType<DashboardConfig> {
  * @generated MessageType for protobuf message IRacingTools.Models.Dashboard.DashboardConfig
  */
 export const DashboardConfig = new DashboardConfig$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class DashboardConfig_UI$Type extends MessageType<DashboardConfig_UI> {
-    constructor() {
-        super("IRacingTools.Models.Dashboard.DashboardConfig.UI", [
-            { no: 1, name: "color", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "icon_data_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value?: PartialMessage<DashboardConfig_UI>): DashboardConfig_UI {
-        const message = globalThis.Object.create((this.messagePrototype!));
-        message.color = "";
-        message.iconDataUrl = "";
-        if (value !== undefined)
-            reflectionMergePartial<DashboardConfig_UI>(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: DashboardConfig_UI): DashboardConfig_UI {
-        let message = target ?? this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string color */ 1:
-                    message.color = reader.string();
-                    break;
-                case /* string icon_data_url */ 5:
-                    message.iconDataUrl = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message: DashboardConfig_UI, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string color = 1; */
-        if (message.color !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.color);
-        /* string icon_data_url = 5; */
-        if (message.iconDataUrl !== "")
-            writer.tag(5, WireType.LengthDelimited).string(message.iconDataUrl);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message IRacingTools.Models.Dashboard.DashboardConfig.UI
- */
-export const DashboardConfig_UI = new DashboardConfig_UI$Type();

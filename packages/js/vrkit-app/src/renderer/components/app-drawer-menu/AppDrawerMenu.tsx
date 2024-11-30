@@ -30,7 +30,7 @@ import { useLocation, useMatch, useNavigate } from "react-router-dom"
 import { WebPaths } from "../../routes/WebPaths"
 import type { IconDefinition } from "@fortawesome/fontawesome-common-types"
 import { faGridHorizontal } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
-import Icon from "../icon"
+import {AppFAIcon} from "../app-icon"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -97,8 +97,7 @@ function NavListItem({ path, icon, label, exact = false }: NavListItemProps) {
       }}
     >
       <ListItemIcon sx={{ ...FlexRowCenter }}>
-        <Icon
-          fa
+        <AppFAIcon
           icon={icon}
           size="lg"
         />

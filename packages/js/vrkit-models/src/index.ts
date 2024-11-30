@@ -5,6 +5,8 @@ export * from "./RPC"
 export * from "./AssetTypes"
 export * from "./Session"
 
+export * from "./UIResource"
+
 export * from "./AppSettings"
 export * from "./Track"
 export * from "./FileInfo"

@@ -2,21 +2,18 @@ syntax = "proto3";
 import "OverlayTypes.proto";
 import "ScreenConfig.proto";
 import "FileInfo.proto";
+import "UIResource.proto";
 
 package IRacingTools.Models.Dashboard;
 
 
 message DashboardConfig {
-  message UI {
-    string color = 1;
-    string icon_data_url = 5;
-  }
 
   string id = 1;
   string name = 2;
   string description = 3;
 
-  UI ui = 5;
+  UIResource ui_resource = 5;
 
   bool vr_enabled = 8;
   bool screen_enabled = 9;

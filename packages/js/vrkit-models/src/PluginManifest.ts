@@ -12,6 +12,7 @@ import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { SizeI } from "./Geometry";
 import { SupportedGame } from "./AppInterfaceTypes";
+import { UIResource } from "./UIResource";
 /**
  * @generated from protobuf message IRacingTools.Models.PluginUserSettingValue
  */
@@ -86,6 +87,10 @@ export interface PluginComponentDefinition {
      * @generated from protobuf field: string description = 6;
      */
     description: string;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.UIResource ui_resource = 7;
+     */
+    uiResource?: UIResource;
     /**
      * @generated from protobuf field: repeated IRacingTools.Models.SupportedGame supported_games = 10;
      */
@@ -508,6 +513,7 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
             { no: 2, name: "type", kind: "enum", T: () => ["IRacingTools.Models.PluginComponentType", PluginComponentType, "PLUGIN_COMPONENT_TYPE_"] },
             { no: 5, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "ui_resource", kind: "message", T: () => UIResource },
             { no: 10, name: "supported_games", kind: "enum", repeat: 1 /*RepeatType.PACKED*/, T: () => ["IRacingTools.Models.SupportedGame", SupportedGame, "SUPPORTED_GAME_"] },
             { no: 15, name: "common_parameters", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } },
             { no: 20, name: "overlay_common_settings", kind: "message", T: () => PluginComponentDefinition_OverlayCommonSettings },
@@ -544,6 +550,9 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
                     break;
                 case /* string description */ 6:
                     message.description = reader.string();
+                    break;
+                case /* IRacingTools.Models.UIResource ui_resource */ 7:
+                    message.uiResource = UIResource.internalBinaryRead(reader, reader.uint32(), options, message.uiResource);
                     break;
                 case /* repeated IRacingTools.Models.SupportedGame supported_games */ 10:
                     if (wireType === WireType.LengthDelimited)
@@ -620,6 +629,9 @@ class PluginComponentDefinition$Type extends MessageType<PluginComponentDefiniti
         /* string description = 6; */
         if (message.description !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.description);
+        /* IRacingTools.Models.UIResource ui_resource = 7; */
+        if (message.uiResource)
+            UIResource.internalBinaryWrite(message.uiResource, writer.tag(7, WireType.LengthDelimited).fork(), options).join();
         /* repeated IRacingTools.Models.SupportedGame supported_games = 10; */
         if (message.supportedGames.length) {
             writer.tag(10, WireType.LengthDelimited).fork();

@@ -11,7 +11,10 @@ import Box from "@mui/material/Box"
 import { styled, useTheme } from "@mui/material/styles"
 import clsx from "clsx"
 import { AppFAIcon, AppIcon } from "../../app-icon"
-import { DashboardConfig, Timestamp } from "vrkit-models"
+import {
+  DashboardConfig, PluginComponentDefinition,
+  Timestamp
+} from "vrkit-models"
 import { useService } from "../../service-container"
 import {
   DashboardManagerClient
@@ -19,7 +22,9 @@ import {
 import { AppSettingsClient } from "../../../services/app-settings-client"
 import { useAppSelector } from "../../../services/store"
 import { sharedAppSelectors } from "../../../services/store/slices/shared-app"
-import { isNotEmpty, isNotEmptyString } from "vrkit-shared"
+import {
+  decodeSvgFromUri, hasProp, isNotEmpty, isNotEmptyString, isSvgUri, propEqualTo
+} from "vrkit-shared"
 import Alerts from "../../../services/alerts"
 import {
   alpha,
@@ -54,14 +59,44 @@ import Tooltip from "@mui/material/Tooltip"
 import { Divider, Menu } from "@mui/material"
 import MenuItem from "@mui/material/MenuItem"
 import { faGridHorizontal } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
-import { noop } from "lodash"
+import {get} from "lodash/fp"
+import { noop, range } from "lodash"
 import { Theme } from "../../../theme/ThemeTypes"
 import GlobalStyles from "@mui/material/GlobalStyles"
 import Moment from "react-moment"
 import { dashboardsListViewClasses } from "./DashboardsListView"
+import { isDefined } from "@3fv/guard"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
+
+const ListItemVisiblePluginMaxCount = 3
+
+interface PluginOverlayIconProps extends Omit<BoxProps, "component"> {
+  component: PluginComponentDefinition
+}
+
+function PluginOverlayIcon({component, ...other}:PluginOverlayIconProps) {
+  const uiRes = component?.uiResource,
+      uiIcon = uiRes?.icon,
+      iconHtml = asOption(uiIcon)
+          .filter(hasProp("url"))
+          .filter(propEqualTo("isDataUrl", true))
+          .map(get("url"))
+          .filter(isSvgUri)
+          .map(decodeSvgFromUri)
+          .filter(isNotEmpty)
+          .getOrNull()
+          
+  
+  return <FlexRowCenterBox
+    sx={{...FlexAuto}}
+    {...other}
+  >
+    {iconHtml && <div dangerouslySetInnerHTML={{__html: iconHtml}}/>}
+  </FlexRowCenterBox>
+}
+
 interface DashboardsListItemMenuProps extends Omit<IconButtonProps, "onClick"> {
   config:DashboardConfig
   
@@ -163,6 +198,8 @@ export interface DashboardsListItemProps extends Omit<BoxProps, "onClick"> {
   config:DashboardConfig
 }
 
+
+
 /**
  * Dashboard Config List item
  *
@@ -182,6 +219,16 @@ export function DashboardsListItem(props:DashboardsListItemProps) {
           .getOrNull(),
       isActive = activeId === config?.id,
       hasActive = !!activeId,
+      
+      allOverlayDefMap = useAppSelector(sharedAppSelectors.selectAllPluginComponentOverlayDefsMap),
+      overlayIds = useMemo(() => {
+        return (config?.overlays ?? []).map(get("id"))
+      }, [allOverlayDefMap, config?.overlays]),
+      overlayDefs = useMemo(() => {
+        return overlayIds.map(overlayId => allOverlayDefMap[overlayId]).filter(isDefined) as PluginComponentDefinition[]
+      }, [allOverlayDefMap, overlayIds]),
+      visibleOverlayDefCount = Math.min(ListItemVisiblePluginMaxCount, overlayDefs.length),
+      moreOverlayDefCount = Math.max(0, overlayDefs.length - ListItemVisiblePluginMaxCount),
       handleSetAsDefault = useCallback(() => {
         if (!isNotEmptyString(config?.id)) {
           Alerts.onError(`Can not delete dashboard config, id is invalid`)
@@ -305,7 +352,21 @@ export function DashboardsListItem(props:DashboardsListItemProps) {
               />
             </FlexRowCenterBox>
           </FlexRowBox>
+          <FlexRowBox>
+            {range(0, visibleOverlayDefCount)
+                .map(idx => overlayDefs[idx] as PluginComponentDefinition)
+                .filter(isDefined)
+                .map((component) => {
+                  log.info(`Creating component icon`, component.id)
+                  return <PluginOverlayIcon key={component.id}
+                    component={component}
+                  />
+                })
+            }
+          </FlexRowBox>
+          
           <FlexScaleZeroBox/>
+          
           <FlexRowBox
               sx={{
                 ...padding(theme.spacing(0.25), theme.spacing(0.5))

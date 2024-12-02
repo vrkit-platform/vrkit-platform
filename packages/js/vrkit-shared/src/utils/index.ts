@@ -1,3 +1,4 @@
+export * from "./DataURITransforms"
 export * from "./JSONSerialization"
 export * from "./SignalFlag"
 export * from "./ClassConstructorWithPartial"

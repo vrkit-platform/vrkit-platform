@@ -1,93 +1,116 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
+import type { DashboardsState, OverlayVREditorPropertyName, SessionDetail, SessionsState } from "vrkit-shared"
 import {
-  type ISharedAppState, ISharedAppStateLeaf,
+  ActionDef,
+  ActionsState,
+  assign,
+  Identity,
+  type ISharedAppState,
+  ISharedAppStateLeaf,
+  isNotEmpty,
+  OverlayEditorGlobalActionIds,
+  PluginsState,
+  propEqualTo,
   type ThemeId
 } from "vrkit-shared"
-import { assign, Identity, isNotEmpty } from "vrkit-shared"
 
 import {
   AppSettings,
-  DashboardConfig, OverlayInfo,
+  DashboardConfig,
+  OverlayInfo,
+  PluginComponentDefinition,
+  PluginComponentType,
+  PluginInstall,
+  PluginManifest,
   ThemeType
 } from "vrkit-models"
 import { flow } from "lodash/fp"
 import { isArray, isDefined } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
-import type {
-  SessionDetail,
-  SessionsState
-} from "vrkit-shared"
-import type {
-  DashboardsState, OverlayVREditorPropertyName
-} from "vrkit-shared"
-import {
-  ActionDef,
-  OverlayEditorGlobalActionIds
-} from "vrkit-shared"
-import { ActionsState } from "vrkit-shared"
+import { uniqBy } from "lodash"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
+const selectAppSettings = (state: ISharedAppState) => state.appSettings,
+  selectSessionsState = (state: ISharedAppState) => state.sessions,
+  selectDashboardsState = (state: ISharedAppState) => state.dashboards,
+  selectPluginState = (state: ISharedAppState): PluginsState => state.plugins,
+  selectAllPluginInstallMap = createSelector(
+    selectPluginState,
+    (pluginsState): Record<string, PluginInstall> => pluginsState.plugins ?? {}
+  ),
+  selectAllPluginManifests = createSelector(
+    selectAllPluginInstallMap,
+    pluginsMap =>
+      Object.values(pluginsMap)
+        .map(install => install.manifest)
+        .filter(isDefined) as PluginManifest[]
+  ),
+  selectAllPluginComponentDefs = createSelector(selectAllPluginManifests, (manifests): PluginComponentDefinition[] =>
+    uniqBy(
+        manifests.flatMap(manifest =>
+            (manifest?.components ?? []) as PluginComponentDefinition[]).filter(isDefined),
+        comp => comp.id)
+  ),
+  selectAllPluginComponentOverlayDefs = createSelector(
+    selectAllPluginComponentDefs,
+    (defs: PluginComponentDefinition[]): PluginComponentDefinition[] =>
+      defs.filter(propEqualTo("type", PluginComponentType.OVERLAY))
+  ),
+    selectAllPluginComponentOverlayDefsMap = createSelector(
+        selectAllPluginComponentOverlayDefs,
+        (defs: PluginComponentDefinition[]): Record<string, PluginComponentDefinition> =>
+            defs.reduce((map, def) => ({
+              ...map,
+              [def.id]: def
+            }), {} as Record<string, PluginComponentDefinition>)
+    ),
+  createAppSettingsSelector = <T>(selector: (appSettings: AppSettings) => T) => flow(selectAppSettings, selector),
+  createDashboardsSelector = <T>(selector: (dashboards: DashboardsState) => T) => flow(selectDashboardsState, selector),
+  selectDefaultDashboardConfigId = createAppSettingsSelector(settings => settings.defaultDashboardConfigId),
+  selectActiveDashboardConfigId = createDashboardsSelector(dashboards => dashboards.activeConfigId),
+  createSessionsSelector = <T>(selector: (state: SessionsState) => T) => flow(selectSessionsState, selector),
+  createActiveDashboardConfigSelector = <T>(
+    selector: (state: ISharedAppState, activeDashboardConfig: DashboardConfig) => T
+  ): ((state: ISharedAppState) => T) => {
+    return (state: ISharedAppState) => {
+      const activeDashboardConfig = asOption(state.dashboards.configs)
+        .filter(isArray)
+        .map((configs: DashboardConfig[]) => {
+          const configId = state.dashboards.activeConfigId
+          return configs.find(it => it.id === configId)
+        })
+        .getOrNull()
 
+      return selector(state, activeDashboardConfig)
+    }
+  },
+  selectActionsState = (state: ISharedAppState) => state.actions,
+  createActionsSelector = <T>(selector: (state: ActionsState) => T) => createSelector(selectActionsState, selector)
 
-
-const
-    selectAppSettings = (state: ISharedAppState) => state.appSettings,
-    selectSessionsState = (state: ISharedAppState) => state.sessions,
-    selectDashboardsState = (state: ISharedAppState) => state.dashboards,
-    createAppSettingsSelector = <T>(selector: (appSettings: AppSettings) => T) =>
-      flow(selectAppSettings, selector),
-    
-    createDashboardsSelector = <T>(selector: (dashboards: DashboardsState) => T) =>
-        flow(selectDashboardsState, selector),
-    
-    selectDefaultDashboardConfigId = createAppSettingsSelector(settings => settings.defaultDashboardConfigId),
-    
-    
-    selectActiveDashboardConfigId = createDashboardsSelector(dashboards => dashboards.activeConfigId),
-    
-    createSessionsSelector = <T>(selector: (state: SessionsState) => T) =>
-        flow(selectSessionsState, selector),
-    
-    createActiveDashboardConfigSelector = <T>(selector: (state: ISharedAppState, activeDashboardConfig: DashboardConfig) => T):((state: ISharedAppState) => T) => {
-      return (state: ISharedAppState) => {
-        const activeDashboardConfig = asOption(state.dashboards.configs)
-            .filter(isArray)
-            .map((configs:DashboardConfig[]) => {
-              const configId = state.dashboards.activeConfigId
-              return configs.find(it => it.id === configId)
-            })
-            .getOrNull()
-        
-        return selector(state, activeDashboardConfig)
-      }
-    },
-    
-    selectActionsState = (state: ISharedAppState) => state.actions,
-    createActionsSelector = <T>(selector: (state: ActionsState) => T) =>
-        createSelector(selectActionsState,selector)
-        // flow(selectActionsState, selector)
+// flow(selectActionsState, selector)
 
 function createActiveSessionSelector<T>(selector: (session: SessionDetail) => T) {
   return createSessionsSelector((state: SessionsState) =>
-      selector(
-          state.activeSessionType === "LIVE"
-              ? state.liveSession
-              : state.activeSessionType === "DISK"
-                  ? state.diskSession
-                  : null
-      ))
+    selector(
+      state.activeSessionType === "LIVE"
+        ? state.liveSession
+        : state.activeSessionType === "DISK"
+          ? state.diskSession
+          : null
+    )
+  )
 }
 
 const slice = createSlice({
   name: "shared",
-  initialState: () => ({} as any),// newSharedAppState(),
+  initialState: () => ({}) as any, // newSharedAppState(),
   reducers: {
     patchLeaf: (state: ISharedAppState, action: PayloadAction<[ISharedAppStateLeaf, Partial<ISharedAppState>]>) => {
       const [leaf, patch] = action.payload
-      return Object.assign(state, {[leaf]:patch})
+      return Object.assign(state, { [leaf]: patch })
     },
     patch: (state: ISharedAppState, action: PayloadAction<Partial<ISharedAppState>>) => {
       return assign(state, action.payload ?? {})
@@ -99,7 +122,7 @@ const slice = createSlice({
     selectEditorSelectedOverlayConfigId: (state: ISharedAppState) => state.overlays.editor.selectedOverlayConfigId,
     selectEditorSelectedOverlayConfigProp: (state: ISharedAppState) =>
       state.overlays.editor.selectedOverlayConfigProp as OverlayVREditorPropertyName,
-    
+
     selectEditorSelectedOverlayConfig: createActiveDashboardConfigSelector(
       (state: ISharedAppState, dashConfig: DashboardConfig) =>
         (dashConfig?.overlays ?? Array<OverlayInfo>()).find(
@@ -109,9 +132,16 @@ const slice = createSlice({
     selectOverlayEditorActions: createActionsSelector(({ actions }) =>
       OverlayEditorGlobalActionIds.map(id => actions[id]).filter(isDefined<ActionDef>)
     ),
-    
+
     selectAppSettings,
     selectDefaultDashboardConfigId,
+
+    selectAllPluginManifests,
+    selectPluginState,
+    selectAllPluginInstallMap,
+    selectAllPluginComponentDefs,
+    selectAllPluginComponentOverlayDefs,
+    selectAllPluginComponentOverlayDefsMap,
 
     selectDashboardConfigs: (state: ISharedAppState): DashboardConfig[] => state.dashboards.configs ?? [],
     selectActiveDashboardConfigId,
@@ -157,7 +187,9 @@ const slice = createSlice({
     ),
     selectLiveSessionData: createSessionsSelector((state: SessionsState) => state.liveSession?.data),
     selectLiveSessionId: createSessionsSelector((state: SessionsState) => state.liveSession?.id),
-    selectLiveSessionTimeAndDuration: createSessionsSelector((state: SessionsState) => state.liveSession?.timeAndDuration),
+    selectLiveSessionTimeAndDuration: createSessionsSelector(
+      (state: SessionsState) => state.liveSession?.timeAndDuration
+    ),
     selectLiveSessionInfo: createSessionsSelector((state: SessionsState) => state.liveSession?.info),
     selectLiveSessionWeekendInfo: createSessionsSelector((state: SessionsState) => state.liveSession?.info?.weekendInfo)
   }

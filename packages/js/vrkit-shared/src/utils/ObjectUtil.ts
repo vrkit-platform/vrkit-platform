@@ -315,28 +315,23 @@ export const isNotEmpty = _negate(isEmpty)
 
 export const isNotEmptyString = (s: any): s is string => isNotEmpty(s) && isString(s)
 
+/**
+ * Multi-faceted equality check.
+ * 1st: checks `primitive` equality.
+ * 2nd: checks `.equals`
+ * 3rd: lastly tries a deep equal check
+ *
+ * @param o1
+ * @param o2
+ */
 export function isEqual(o1: any | null | undefined, o2: any | null | undefined): boolean {
   return o1 === o2 || getValue(() => (!isFunction(o1.equals) ? false : o1.equals(o2)), false) || _isEqual(o1, o2)
 }
 
-//export function assertFilter(test)
+/**
+ * Re-export `assert` from `@3fv/guard`
+ */
 export const assert = guardAssert
-// export function assert(
-//   test: (() => boolean) | boolean,
-//   msg?: null | (() => string) | string | undefined
-// ): void | never {
-//   const text = !msg ? "No message" : isFunction(msg) ? msg() : msg
-//   let result: boolean = false
-//   try {
-//     result = isFunction(test) ? test() : test
-//   } catch (err) {
-//     log.error(`Assert failed: "${test}"`, err)
-//   }
-//
-//   if (!result) {
-//     throw Error(text)
-//   }
-// }
 
 export function assertDebug(msg?: null | (() => string) | string | undefined): void | never {
   assert(process.env.NODE_ENV === "development", msg)

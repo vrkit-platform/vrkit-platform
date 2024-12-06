@@ -18,10 +18,11 @@ import {
   ClassNamesKey,
   createClassNames,
   Ellipsis,
-  FillHeight,
+  FillHeight, FillWidth,
   flexAlign,
   FlexAuto,
   FlexColumn,
+  FlexRowBox,
   FlexRowCenter,
   FlexRowCenterBox,
   FlexScaleZero,
@@ -30,7 +31,7 @@ import {
   OverflowHidden,
   padding
 } from "vrkit-shared-ui"
-import { attributesEqual, isEqual } from "vrkit-shared"
+import { attributesEqual, isEmpty, isEqual } from "vrkit-shared"
 import IconButton from "@mui/material/IconButton"
 import Icon from "../../app-icon"
 import Typography from "@mui/material/Typography"
@@ -55,6 +56,7 @@ import { WebPaths } from "../../../routes/WebPaths"
 import { faTimes } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
 import { DashboardLayoutSwitch } from "../common/layout-switch"
 import { faArrowLeft } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
+import AppBreadcrumbs from "../../app-breadcrumbs"
 // import { faWindowClose } from "@awesome.me/kit-79150a3eed"
 
 const log = getLogger(__filename)
@@ -99,21 +101,27 @@ const DashboardEditorRoot = styled(Box, {
       ...FlexScaleZero,
       ...OverflowAuto,
       [child(classNames.header)]: {
-        ...padding(theme.spacing(1)),
+        ...padding(0),
         ...FlexColumn,
         ...FlexAuto,
         ...flexAlign("stretch", "center"),
         filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`,
 
         [child(classNames.headerField)]: {
-          // ...FlexScaleZero,
+          ...padding(theme.spacing(1)),
           ...FlexAuto
         },
         [child(classNames.headerActions)]: {
-          ...flexAlign("center", "flex-start"),
+          ...FillWidth,
+          
           ...FlexRow,
           ...FlexAuto,
-          background: darken(theme.palette.background.root, 0.2)
+          ...padding(theme.spacing(0.5),theme.spacing(2)),
+          ...flexAlign("space-between", "space-between"),
+          borderBottom: `1px solid ${darken(theme.palette.background.actionFooter,0.25)}`,
+          backgroundColor: theme.palette.background.actionFooter,
+          backgroundImage: theme.palette.background.actionFooterImage,
+          filter: "drop-shadow(0px 2px 2px rgba(0,0,0, 0.25))",
         }
       },
       [child(classNames.details)]: {
@@ -215,24 +223,7 @@ const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardCo
           return
         }
       }
-
-      // handleBlur(e)
     }
-
-  // useEffect(() => {
-  //   if (!model) {
-  //     return
-  //   }
-  //
-  //   const updatedModel = cloneInstanceOf(DashboardConfig, model, values)
-  //   if (
-  //     !isEqual(updatedModel, model) &&
-  //     !attributesEqual(updatedModel, model, DashboardConfig)
-  //     // isModelSameOrUpdated(updatedModel, model)
-  //   ) {
-  //     updateMutatingModel(updatedModel)
-  //   }
-  // }, [model, values])
 
   // UPDATE THE PROVIDED REF ENABLING OTHER
   // UI COMPONENTS/DIALOGS, ETC TO SUBMIT
@@ -252,6 +243,24 @@ const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardCo
             {/* HEADER */}
 
             <Box className={clsx(classNames.header)}>
+              <Box className={clsx(classNames.headerActions)}>
+                
+                  <AppBreadcrumbs/>
+                  <FormActionFooterDefault<DashboardConfig>
+                      item={model}
+                      negativeLabel={isEmpty(model.id) ? "Cancel" : "Revert"}
+                      negativeHandler={() => {
+                        resetMutatingModels([model.id])
+                        resetForm()
+                        nav(-1)
+                      }}
+                      positiveLabel={isEmpty(model.id) ? "Create" : "Save"}
+                      positiveHandler={() => {
+                        handleSubmit()
+                      }}
+                  />
+                
+              </Box>
               <Box className={clsx(classNames.headerField)}>
                 <AppTextFieldFormik<DashboardConfig>
                   variant="standard"
@@ -344,6 +353,7 @@ const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardCo
 export function DashboardEditor(props: DashboardEditorProps) {
   const theme = useTheme(),
     isMounted = useIsMounted(),
+    nav = useNavigate(),
     { className, ...other } = props,
     dashboardClient = useService(DashboardManagerClient),
     patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
@@ -352,39 +362,20 @@ export function DashboardEditor(props: DashboardEditorProps) {
       editorContext,
     dashConfig = mutatingModels?.[0],
     onReset = useMemo(() => bind(resetMutatingModels, null, [dashConfig?.id]), [dashConfig?.id]),
-    onBlurField = Alert.usePromise(
-      async (
-        e: React.FocusEvent<any>,
-        values: Partial<DashboardConfig>,
-        { setErrors, setStatus, setSubmitting }: FormikContextType<DashboardConfig>
-      ) => {
-        log.info(`onBlurField`, values)
-        e.preventDefault()
-        return values
-      },
-      {
-        loading: "Saving dashboard...",
-        success: ({ result }) => `"Successfully saved dashboard (${result?.name})."`,
-        error: "Unable to save project."
-      },
-      [isMounted, onReset]
-    ),
+    
     onSubmit = Alert.usePromise(
       async (values: DashboardConfig, { setErrors, setStatus, setSubmitting }: FormikContextType<DashboardConfig>) => {
-        // DERIVE VALID PROJECT OBJECT
-        // const pendingDash = DashboardConfig.create(values)
         try {
           // DISPATCH THE SAVE ACTION
-          // debugger
           const savedDashConfig = await dashboardClient.updateDashboardConfig(dashConfig?.id, values)
           if (isMounted()) {
             setStatus({ success: true })
             setSubmitting(false)
           }
-          // onReset()
+          
+          nav(-1)
           return savedDashConfig
-          // log.info(`onSubmit values=`, values)
-          // return dashConfig
+    
         } catch (err) {
           error(err)
           if (isMounted()) {

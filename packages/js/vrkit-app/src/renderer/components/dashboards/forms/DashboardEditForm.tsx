@@ -3,7 +3,12 @@ import type { SxProps } from "@mui/material"
 import { Box, FormHelperText, Theme } from "@mui/material"
 
 import { DashboardConfig } from "vrkit-models"
-import { child, FlexRow, rem } from "vrkit-shared-ui/styles"
+import {
+  child,
+  flexAlign, FlexAuto,
+  FlexRow,
+  rem
+} from "vrkit-shared-ui/styles"
 
 import { createValidator } from "class-validator-formik"
 import type { FormikBag, FormikConfig } from "formik"
@@ -22,6 +27,8 @@ import { bind, cloneInstanceOf, propEqualTo } from "vrkit-shared/utils"
 // import { attributesEqual } from "vrkit-shared"
 import { useActionContainer } from "../../../hooks"
 import { Alert } from "../../../services/alerts"
+import AppBreadcrumbs from "../../app-breadcrumbs"
+import { FlexRowBox } from "vrkit-shared-ui"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

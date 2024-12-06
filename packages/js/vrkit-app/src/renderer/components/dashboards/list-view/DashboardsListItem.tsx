@@ -23,7 +23,7 @@ import {
   alpha,
   dimensionConstraints,
   Ellipsis,
-  EllipsisBox,
+  EllipsisBox, FillWidth,
   flexAlign,
   FlexAuto,
   FlexAutoBox,
@@ -31,6 +31,7 @@ import {
   FlexColumnCenterBox,
   FlexRow,
   FlexRowBox,
+  FlexRowCenter,
   FlexRowCenterBox,
   FlexScaleZero,
   FlexScaleZeroBox,
@@ -49,7 +50,7 @@ import AddIcon from "@mui/icons-material/Add"
 import IconButton, { IconButtonProps } from "@mui/material/IconButton"
 import { faEdit, faEllipsisVertical, faRocketLaunch, faTrash } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
 import Tooltip from "@mui/material/Tooltip"
-import { Divider, Menu } from "@mui/material"
+import { Button, ButtonProps, Divider, Menu } from "@mui/material"
 import MenuItem from "@mui/material/MenuItem"
 import { faGridHorizontal } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
 import { get } from "lodash/fp"
@@ -413,7 +414,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
 }
 
 export interface DashboardsListItemCreateProps extends Omit<BoxProps, "onClick"> {
-  onClick: ButtonBaseProps["onClick"]
+  onClick: ButtonProps["onClick"]
 }
 
 export function DashboardsListItemCreate(props: DashboardsListItemCreateProps) {
@@ -421,31 +422,42 @@ export function DashboardsListItemCreate(props: DashboardsListItemCreateProps) {
     { className, onClick, ...other } = props
 
   return (
-    <Box className={clsx(dashboardsListViewClasses.item, className)}>
-      <Paper
-        component={ButtonBase}
+    <Box
+        sx={{
+          ...FlexRowCenter,
+          ...padding(theme.spacing(2)),
+        }}
+        className={clsx(dashboardsListViewClasses.item,dashboardsListViewClasses.itemCreateButton, className)}>
+      <Button
+        color="primary"
+        
+        variant="contained"
         onClick={onClick}
-        elevation={4}
-        className={clsx(dashboardsListViewClasses.itemPaper, dashboardsListViewClasses.itemCreateButton)}
+        sx={{
+          ...FlexAuto,
+          ...FlexRowCenter,
+          // ...padding(`0.5rem`),
+          gap: theme.spacing(1)
+        }}
+        
+        className={clsx(dashboardsListViewClasses.itemCreateButton)}
       >
-        <FlexColumnCenterBox
-          sx={{
-            ...padding(`0.5rem`),
-            gap: theme.spacing(1)
-          }}
-        >
+        {/*<FlexRowCenterBox*/}
+        {/*  sx={{*/}
+        {/*    ...padding(`0.5rem`),*/}
+        {/*    gap: theme.spacing(1)*/}
+        {/*  }}*/}
+        {/*>*/}
           <AddIcon />
           <Typography
             variant="body1"
-            sx={{
-              color: alpha(theme.palette.text.primary, 0.5)
-            }}
+            
           >
             Create
           </Typography>
-        </FlexColumnCenterBox>
+        {/*</FlexRowCenterBox>*/}
         {/*</FlexRowBox>*/}
-      </Paper>
+      </Button>
     </Box>
   )
 }

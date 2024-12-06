@@ -12,15 +12,18 @@ import { darken, styled, useTheme } from "@mui/material/styles"
 
 // APP
 import {
+  alpha,
   borderRadius,
   child,
   ClassNamesKey,
   createClassNames,
+  CssSelectors,
   Fill,
   FillWidth,
   flex,
   flexAlign,
   FlexColumn,
+  FlexRowBox,
   FlexRowCenter,
   FlexScaleZero,
   hasCls,
@@ -28,7 +31,8 @@ import {
   linearGradient,
   notHasCls,
   OverflowAuto,
-  OverflowHidden, OverflowVisible,
+  OverflowHidden,
+  OverflowVisible,
   padding,
   PositionRelative,
   rem,
@@ -49,6 +53,7 @@ import { Alert } from "../../../services/alerts"
 import { Theme } from "../../../theme/ThemeTypes"
 import GlobalStyles from "@mui/material/GlobalStyles"
 import { DashboardsListItem, DashboardsListItemCreate } from "./DashboardsListItem"
+import AppBreadcrumbs from "../../app-breadcrumbs"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -152,7 +157,6 @@ const DashboardsListViewRoot = styled(Box, {
               
             },
             "&:not(.first)": {
-              // paddingTop: theme.spacing(1.25)
             },
             "&:not(.last)": {
               
@@ -173,13 +177,10 @@ const DashboardsListViewRoot = styled(Box, {
               
             },
             // boxShadow: customShadows.raisedCard,
-            [hasCls(dashboardsListViewClasses.itemCreateButton)]: {
-              ...flexAlign("center", "center"),
-              background: Transparent
-            },
-            [notHasCls(dashboardsListViewClasses.itemCreateButton)]: {
-              ...flexAlign("stretch", "stretch")
-            },
+            
+            //[notHasCls(dashboardsListViewClasses.itemCreateButton)]: {
+              ...flexAlign("stretch", "stretch"),
+            //},
 
             [child(dashboardsListViewClasses.itemDefaultBadge)]: {
               ...FlexRowCenter,
@@ -191,7 +192,18 @@ const DashboardsListViewRoot = styled(Box, {
               borderStyle: "solid",
               color: palette.success.main
             }
-          }
+          },
+          [`${hasCls(dashboardsListViewClasses.itemCreateButton)}, ${child(dashboardsListViewClasses.itemCreateButton)}`]: {
+            ...flexAlign("center", "flex-end"),
+            ...transition(["color","fill","background"]),
+            color: alpha(theme.palette.text.primary, 0.5),
+            fill: alpha(theme.palette.text.primary, 0.5),
+            [CssSelectors.hover]: {
+              color: theme.palette.text.primary,
+              fill: theme.palette.text.primary
+            }
+            //background: Transparent
+          },
         }
         // }
       }
@@ -250,6 +262,11 @@ export function DashboardsListView(props: DashboardsListViewProps) {
         {...other}
       >
         <Box className={clsx(dashboardsListViewClasses.container, className)}>
+          <FlexRowBox sx={{...flexAlign("space-between")}}>
+          <AppBreadcrumbs/>
+          <DashboardsListItemCreate onClick={createDash} />
+          </FlexRowBox>
+          
           {configs.map((config, idx) => {const posClassName = clsx({
             first: idx === 0,
             last: idx >= configs.length - 1
@@ -265,7 +282,7 @@ export function DashboardsListView(props: DashboardsListViewProps) {
             />
           )
           })}
-          <DashboardsListItemCreate onClick={createDash} />
+          
         </Box>
       </DashboardsListViewRoot>
     </>

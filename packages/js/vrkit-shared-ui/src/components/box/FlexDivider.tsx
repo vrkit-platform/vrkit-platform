@@ -8,20 +8,12 @@ import clsx from "clsx"
 import { getLogger } from "@3fv/logger-proxy"
 
 // MUI
-import Box from "@mui/material/Box"
-import type { BoxProps } from "@mui/material/Box"
 import { styled } from "@mui/material/styles"
-import type { DividerProps, Theme } from "@mui/material"
-import type { SxProps } from "@mui/system"
+import type { DividerProps } from "@mui/material"
+import { Divider } from "@mui/material"
 
 // APP
-import {
-  ClassNamesKey,
-  createClassNames,
-  createClasses,
-  FlexScaleZero
-} from "../../styles"
-import { Divider } from "@mui/material"
+import { ClassNamesKey, createClasses, createClassNames, FlexScaleZero } from "../../styles"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -50,16 +42,17 @@ export interface FlexDividerProps extends DividerProps {}
  * @param { FlexDividerProps } props
  * @returns {JSX.Element}
  */
-export function FlexDivider(props: FlexDividerProps) {
+const FlexDivider = React.forwardRef<HTMLDivElement, FlexDividerProps>(function FlexDivider(props, ref) {
   const { className, ...other } = props
 
   return (
     <FlexDividerRoot
+      ref={ref as any}
       className={clsx(flexDividerClasses.root, className)}
       flexItem
       {...other}
     />
   )
-}
+})
 
 export default FlexDivider

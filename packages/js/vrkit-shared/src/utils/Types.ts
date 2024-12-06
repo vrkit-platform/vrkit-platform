@@ -52,3 +52,7 @@ export type MappedCamelCaseAttributes<T extends {}, Keys extends (keyof T)[]> = 
 export type MapValue<T> = T extends Map<any, infer V> ? V : never
 
 export type MapKey<T> = T extends Map<infer K, any> ? K : never
+
+export type KeysStartingWith<T, Prefix extends string> = {
+  [K in keyof T as K extends `${Prefix}${string}` ? K : never]: T[K];
+};

@@ -10,12 +10,13 @@ import {
   child,
   ClassNamesKey,
   createClassNames,
-  FillHeight,
+  FillHeight, FillMaxHeight,
   flexAlign,
   FlexAuto,
   FlexRow,
   FlexScaleZero,
-  hasCls, PositionRelative
+  hasCls,
+  PositionRelative
 } from "vrkit-shared-ui"
 import clsx from "clsx"
 import { getLogger } from "@3fv/logger-proxy"
@@ -43,7 +44,7 @@ const DashboardsPageRoot = styled(Box, {
     ...flexAlign("stretch", "stretch"),
     ...PositionRelative,
     [child(dashboardsPageClasses.list)]: {
-      ...FillHeight
+      ...FillMaxHeight,
     },
     [child(dashboardsPageClasses.editor)]: {
       ...FillHeight

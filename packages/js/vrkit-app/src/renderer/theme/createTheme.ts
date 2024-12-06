@@ -1,39 +1,32 @@
-
 // noinspection ES6UnusedImports
 import type {} from "@mui/lab/themeAugmentation"
 // noinspection ES6UnusedImports
 import type {} from "@mui/x-tree-view/themeAugmentation"
 // noinspection ES6UnusedImports
 import type {} from "@mui/x-data-grid/themeAugmentation"
-// noinspection ES6UnusedImports
 // import type {} from "@mui/material/themeCssVarsAugmentation"
-
+// noinspection ES6UnusedImports
 import type { Direction, Theme, ThemeOptions } from "@mui/material/styles"
 import { createTheme as muiCreateTheme } from "@mui/material/styles"
 
 // import { createPaletteChannel, setFont } from "vrkit-shared-ui"
-import {
-  colorSchemes, components, customShadows, shadows, typography
-} from "./core"
-
-import type { ThemeLocaleComponents } from "./ThemeTypes"
+import { components, customShadows, shadows, typography } from "./core"
 import { assign } from "vrkit-shared"
-import { alpha, linearGradient, rem } from "vrkit-shared-ui"
-import { lighten, darken } from "@mui/material"
+import { alpha, CssSelectors, linearGradient, rem } from "vrkit-shared-ui"
+import { darken, lighten } from "@mui/material"
 import { darkPrimaryAndSecondaryPalettes } from "./paletteAndColorHelpers"
-import { createPaletteChannel, pxToRem, setFont } from "./styles"
+import { createPaletteChannel, setFont } from "./styles" // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
-
+const colorScheme = "dark"
 
 const rootBackgroundColor = "rgba(52,50,54,1)" //lighten(,0.25)
 const rootBackgroundGradient = linearGradient(
-    "to bottom",
-    `${rootBackgroundColor} 0%`,
-    `${lighten(rootBackgroundColor, 0.025)} 95%`,
-    `${lighten(rootBackgroundColor, 0.035)} 100%`
+  "to bottom",
+  `${rootBackgroundColor} 0%`,
+  `${lighten(rootBackgroundColor, 0.025)} 95%`,
+  `${lighten(rootBackgroundColor, 0.035)} 100%`
 )
-
 
 const slateBackgroundColor = "rgba(42, 40, 44, 0.999)" //lighten(,0.25)
 const slateBackgroundGradient = linearGradient(
@@ -44,49 +37,63 @@ const slateBackgroundGradient = linearGradient(
 )
 
 // const bgPaper = "#1F2025"
-const bgPaper = lighten(slateBackgroundColor,0.025)
+const bgPaper = lighten(slateBackgroundColor, 0.025)
 const bgPaperGradient = linearGradient(
-    "to bottom",
-    `${darken(bgPaper,0.03)} 0%`,
-    `${darken(bgPaper, 0.05)} 90%`,
-    `${darken(bgPaper, 0.15)} 100%`
+  "to bottom",
+  `${darken(bgPaper, 0.03)} 0%`,
+  `${darken(bgPaper, 0.05)} 90%`,
+  `${darken(bgPaper, 0.15)} 100%`
 )
 
-const drawerBgPaper = darken(slateBackgroundColor,0.025)
+const drawerBgPaper = darken(slateBackgroundColor, 0.025)
 const drawerBgPaperGradient = linearGradient(
-    "to bottom",
-    `${drawerBgPaper} 0%`,
-    `${darken(drawerBgPaper, 0.05)} 90%`,
-    `${darken(drawerBgPaper, 0.15)} 100%`
+  "to bottom",
+  `${drawerBgPaper} 0%`,
+  `${darken(drawerBgPaper, 0.05)} 90%`,
+  `${darken(drawerBgPaper, 0.15)} 100%`
 )
 
 const actionFooter = alpha(darken(bgPaper, 0.25), 0.9)
 const actionFooterImage = linearGradient(
-    "to top",
-    `${actionFooter} 0%`,
-    `${darken(actionFooter, 0.05)} 90%`,
-    `${darken(actionFooter, 0.15)} 100%`
+  "to top",
+  `${actionFooter} 0%`,
+  `${darken(actionFooter, 0.05)} 90%`,
+  `${darken(actionFooter, 0.15)} 100%`
 )
 
 const sessionBackgroundColor = "rgba(32, 30, 34, 0.999)" //lighten(,0.25)
 const sessionBackgroundGradient = linearGradient(
-    "to bottom",
-    `${darken(slateBackgroundColor, 0.25)} 0%`,
-    `${sessionBackgroundColor} 3%`,
-    `${darken(sessionBackgroundColor, 0.1)} 90%`,
-    `${darken(sessionBackgroundColor, 0.25)} 90%`,
-        `${slateBackgroundColor} 100%`,
+  "to bottom",
+  `${darken(slateBackgroundColor, 0.25)} 0%`,
+  `${sessionBackgroundColor} 3%`,
+  `${darken(sessionBackgroundColor, 0.1)} 90%`,
+  `${darken(sessionBackgroundColor, 0.25)} 90%`,
+  `${slateBackgroundColor} 100%`
 )
 
-
-
+const appBarBackgroundColor = "rgba(49,46,51,1)"
+const appBarBackgroundGradient = linearGradient(
+  "to bottom",
+  `${appBarBackgroundColor} 0%`,
+  `${darken(appBarBackgroundColor, 0.1)} 90%`,
+  `${darken(appBarBackgroundColor, 0.25)} 95%`,
+  `${darken(appBarBackgroundColor, 0.45)} 100%`
+)
 const appBarSearchBackgroundColor = darken(slateBackgroundColor, 0.15)
 const appBarSearchBorderColor = darken(slateBackgroundColor, 0.3)
 
 const darkDefault = lighten("#1F2025", 0.025)
 
 const themeOptions: ThemeOptions = {
-  
+  shadows: shadows(colorScheme),
+  customShadows: customShadows(colorScheme),
+  direction: "ltr" as Direction,
+  shape: { borderRadius: rem(0.25) },
+
+  typography: {
+    ...typography,
+    fontFamily: setFont("SanFranciscoDisplay")
+  },
   palette: {
     background: {
       default: darkDefault,
@@ -105,9 +112,9 @@ const themeOptions: ThemeOptions = {
       actionFooterImage,
       filledInput: "rgba(255, 255, 255, 0.13)",
       filledInputDisabled: "rgba(255, 255, 255, 0.12)",
-      appBar: slateBackgroundColor, // "#2E3133",
+      appBar: appBarBackgroundColor, // "#2E3133",
       appBarSearch: appBarSearchBackgroundColor,
-      appBarGradient: slateBackgroundGradient
+      appBarGradient: appBarBackgroundGradient
 
       // ...paneBackgrounds("#1F2025", 3, 0.025)
     },
@@ -137,30 +144,36 @@ const themeOptions: ThemeOptions = {
       contrastText: "#ffffff",
       main: "#ff9800"
     })
+  },
+  components: {
+    ...components,
+    AppButton: {
+      defaultProps: {},
+      styles: {},
+      variants: {
+        primary: {
+          color: "#ffffff",
+          backgroundImage: linearGradient("#124ab0", "#093c98"),
+          border: "1px solid #124ab0",
+
+          [CssSelectors.hover]: {
+            backgroundImage: "linear-gradient(#51A9EE, #147BCD)",
+            borderColor: "#1482D0",
+            textDecoration: "none"
+          },
+          [CssSelectors.active]: {
+            backgroundImage: "linear-gradient(#3D94D9, #0067B9)",
+            borderColor: "#006DBC",
+            outline: "none"
+          }
+        },
+        normal: {}
+      }
+    }
   }
 }
 
-export function createTheme(
-  localeComponents: ThemeLocaleComponents
-): Theme {
-  const colorScheme = "dark"
-  const initialTheme = {
-    colorSchemes,
-    shadows: shadows(colorScheme),
-    customShadows: customShadows(colorScheme),
-    direction: "ltr" as Direction,
-    shape: { borderRadius: 8 },
-    components,
-    typography: {
-      ...typography,
-      fontFamily: setFont("SanFranciscoDisplay")
-      
-      // fontFamily: setFont(settings.fontFamily)
-    },
-    // cssVarPrefix: "",
-    // shouldSkipGeneratingVar
-  }
-
+export function createTheme(): Theme {
   /**
    * 2.Create theme + add locale + update component with settings.
    */
@@ -171,50 +184,16 @@ export function createTheme(
     shadows: shadows(colorScheme),
     customShadows: customShadows(colorScheme),
     direction: "ltr" as Direction,
-    shape: { borderRadius: 8 },
-    components,
     typography: {
       ...theme.typography,
-      ...typography,
-      // pxToRem,
-      fontFamily: setFont("SanFranciscoDisplay")
-      
-      // fontFamily: setFont(settings.fontFamily)
+      ...typography
     },
     dimen: {
       electronTrafficLightsWidth: 70,
       appBarHeight: "3rem",
       listActionFooterHeight: rem(2),
-      layoutPadding: [4, 2], // spacing unit
-      appIconSizes: [16, 32, 64, 128]
-    },
-    // typography: {
-    //   fontFamily: setFont("SanFranciscoDisplay")
-    // } as any
+      layoutPadding: [4, 2],
+      appIconSizes: [12, 16, 20, 24]
+    }
   })
 }
-
-// ----------------------------------------------------------------------
-
-/**
- * createTheme without @settings and @locale components.
- *
- ```jsx
- export function createTheme(): Theme {
- const initialTheme = {
- colorSchemes,
- shadows: shadows('light'),
- customShadows: customShadows('light'),
- shape: { borderRadius: 8 },
- components,
- typography,
- cssVarPrefix: '',
- shouldSkipGeneratingVar,
- };
- 
- const theme = extendTheme(initialTheme, overridesTheme);
- 
- return theme;
- }
- ```
- */

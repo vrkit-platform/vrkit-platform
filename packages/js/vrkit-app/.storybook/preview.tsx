@@ -1,4 +1,8 @@
+import "./preview-init"
+
+
 import type { Preview } from "@storybook/react"
+import StoryPreviewContainer from "../src/entry-storybook"
 
 const preview: Preview = {
   parameters: {
@@ -8,7 +12,11 @@ const preview: Preview = {
         date: /Date$/i
       }
     }
-  }
+  },
+  
+  decorators: [
+    StoryPreviewContainer
+  ]
 }
 
 export default preview

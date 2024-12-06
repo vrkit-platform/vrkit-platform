@@ -19,10 +19,16 @@ declare module '*.jpg' {
   export default content;
 }
 
-declare module '*.scss' {
+declare module '!!style-loader!*.scss' {
   const content: Styles;
   export default content;
 }
+
+declare module '!!raw-loader!*.scss' {
+  const content: string;
+  export default content;
+}
+
 
 declare module '*.sass' {
   const content: Styles;

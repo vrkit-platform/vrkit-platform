@@ -1,3 +1,5 @@
 export const CssSelectors = {
-  hover: "&:hover"
+  hover: "&:hover",
+  active: "&:active",
+  focus: "&:focus"
 }

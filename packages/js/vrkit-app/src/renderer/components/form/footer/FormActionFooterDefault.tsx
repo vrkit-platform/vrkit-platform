@@ -1,9 +1,10 @@
-import { Box, Button } from "@mui/material"
-import { FlexAuto, FlexRowCenter } from "vrkit-shared-ui/styles"
+import { Box, Button, useTheme } from "@mui/material"
+import { FlexAuto, FlexRowCenter, padding } from "vrkit-shared-ui/styles"
 import { isEmpty } from "lodash"
 import React from "react"
 import FormActionFooter, { FormActionFooterProps } from "./FormActionFooter"
 import { useFormikContext } from "formik"
+import { AppButton } from "../../app-button"
 
 
 export interface FormActionFooterDefaultProps<T = any> extends FormActionFooterProps {
@@ -24,13 +25,17 @@ export function FormActionFooterDefault<T = any>({
     sx,
   ...other
 }: FormActionFooterDefaultProps<T>) {
-  const {isSubmitting, submitForm, resetForm} = useFormikContext<T>()
+  const
+      theme = useTheme(),
+      {isSubmitting, submitForm, resetForm} = useFormikContext<T>()
+  
   return <FormActionFooter {...other}>
     <Box
       sx={{
         ...FlexRowCenter,
         ...FlexAuto,
-        gap: 2,
+        ...padding(theme.spacing(0.25),theme.spacing(0.5)),
+        gap: theme.spacing(2),
         ...sx
       }}
       {...other}
@@ -56,8 +61,8 @@ export function FormActionFooterDefault<T = any>({
       <Button
         color="primary"
         disabled={isSubmitting}
-        size="medium"
         variant="contained"
+          //variant="primary"
         onClick={e => {
           e.preventDefault()
           positiveHandler ? positiveHandler(e) : submitForm()

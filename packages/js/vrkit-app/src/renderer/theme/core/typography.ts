@@ -2,6 +2,7 @@ import type { TypographyOptions } from "@mui/material/styles/createTypography"
 
 import { pxToRem, responsiveFontSizes, setFont } from "../styles"
 import React from "react"
+import { rem } from "vrkit-shared-ui"
 
 // ----------------------------------------------------------------------
 
@@ -26,6 +27,7 @@ declare module "@mui/material/styles" {
 // ----------------------------------------------------------------------
 
 export const defaultFont = "SanFranciscoDisplay" // 'Public Sans';
+//export const defaultFont = 'Public Sans';
 
 export const primaryFont = setFont(defaultFont)
 
@@ -121,9 +123,14 @@ export const typography: TypographyOptions = {
     textTransform: "uppercase"
   },
   button: {
-    fontWeight: 700,
-    lineHeight: 24 / 14,
-    fontSize: pxToRem(14),
+    fontWeight: 400,
+    verticalAlign: "middle",
+    lineHeight: 1,
+    letterSpacing: 1.1,
+    fontSize: rem(1),
+    fontFamily: defaultFont,
     textTransform: "unset"
+    // textTransform: "uppercase"
+    //textTransform: "uppercase"
   }
 }

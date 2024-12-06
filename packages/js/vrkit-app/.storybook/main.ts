@@ -1,7 +1,11 @@
 import type { StorybookConfig } from "@storybook/react-webpack5"
 import * as Webpack from "webpack"
-import * as Fsx from "fs-extra"
-import * as Path from "path"
+
+import { assetsDir, rootDir, pkgsDir, vrkNativeInteropDir, vrkSharedSrcDir, commonDir, rendererDir } from "./webpack.options"
+// noinspection ES6ConvertRequireIntoImport
+
+
+
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
@@ -17,6 +21,13 @@ const config: StorybookConfig = {
     options: {}
   },
   webpackFinal: config => {
+    Object.assign(config.resolve.alias, {
+      "assets": assetsDir,
+      "vrkit-app-assets": assetsDir,
+      "vrkit-app-common": commonDir,
+      "vrkit-app-renderer": rendererDir,
+      "vrkit-native-interop": vrkNativeInteropDir,
+    })
     if (!config.resolve.fallback)
       config.resolve.fallback = {}
     

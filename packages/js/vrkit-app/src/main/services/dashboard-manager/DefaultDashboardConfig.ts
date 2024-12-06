@@ -1,15 +1,24 @@
 import { DashboardConfig, OverlayBaseSettings, OverlayInfo, OverlayKind } from "vrkit-models"
-import { defaults, generateUUID } from "vrkit-shared"
+import {
+  assignDeep,
+  defaults,
+  generateUUID, isNotEmptyString
+} from "vrkit-shared"
 import {
   VRKPluginInternalOverlayClockId,
   VRKPluginInternalOverlayTrackMapId
 } from "vrkit-plugin-sdk"
+import { getLogger } from "@3fv/logger-proxy"
 
-export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardConfig"): DashboardConfig {
-  const trackMapOverlay = newTrackMapOverlayInfo(`${name}-overlay-trackmap`),
+const log = getLogger(__filename)
+
+export function newDashboardTrackMapMockConfig(patch: Partial<DashboardConfig>): DashboardConfig {
+  log.assert(isNotEmptyString(patch?.name), "A name must be provided")
+  const { name } = patch,
+    trackMapOverlay = newTrackMapOverlayInfo(`${name}-overlay-trackmap`),
     clockOverlay = newClockOverlayInfo(`${name}-overlay-clock`)
 
-  return DashboardConfig.create({
+  return DashboardConfig.create(assignDeep({
     id: generateUUID(),
     name,
     description: "Default",
@@ -62,7 +71,8 @@ export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardC
             height: 32
           },
           position: {
-            x: 2511
+            x: 2511,
+            y: 0
           }
         },
         vrLayout: {
@@ -84,7 +94,7 @@ export function newDashboardTrackMapMockConfig(name: string = "DefaultDashboardC
         }
       }
     ]
-  })
+  },patch))
 }
 
 export function newOverlayInfo(

@@ -1,3 +1,6 @@
+
+import React from "react"
+
 import {
   FlexAuto,
   FlexColumn,
@@ -18,10 +21,21 @@ const FlexColumnCenterBoxRoot = styled<typeof Box>(Box, { name: "FlexColumnBoxRo
   ...FlexAuto
 }))
 
-export function FlexColumnBox(props: BoxProps) {
-  return <FlexColumnBoxRoot {...props} />
-}
+export const FlexColumnBox = React.forwardRef(function FlexColumnBox(props: BoxProps, ref) {
+  return (
+    <FlexColumnBoxRoot
+      ref={ref}
+      {...props}
+    />
+  )
+})
 
-export function FlexColumnCenterBox(props: BoxProps) {
-  return <FlexColumnCenterBoxRoot {...props} />
-}
+export const FlexColumnCenterBox = React.forwardRef(function FlexColumnCenterBox(props: BoxProps, ref) {
+  return (
+    <FlexColumnCenterBoxRoot
+      ref={ref}
+      {...props}
+    />
+  )
+})
+

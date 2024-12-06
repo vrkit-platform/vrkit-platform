@@ -199,6 +199,11 @@ export const FillWidth = widthConstraint(
     "100%"
 ) as CSSProperties
 
+export const FillMaxHeight = {
+  maxHeight: "100%"
+} as CSSProperties
+
+
 export const Fill = {
   ...FillWidth,
   ...FillHeight

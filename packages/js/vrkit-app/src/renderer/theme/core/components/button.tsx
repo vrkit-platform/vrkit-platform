@@ -95,85 +95,85 @@ const MuiButton: Components<Theme>['MuiButton'] = {
     /**
      * @variant contained
      */
-    contained: ({ theme, ownerState }) => {
-      const styled = {
-        colors: styleColors(ownerState, (color) => ({
-          '&:hover': { boxShadow: theme.customShadows[color] },
-        })),
-        inheritColor: {
-          ...(ownerState.color === 'inherit' &&
-            !ownerState.disabled && {
-              color: theme.palette.common.white,
-              backgroundColor: theme.palette.grey[800],
-              '&:hover': {
-                boxShadow: theme.customShadows.z8,
-                backgroundColor: theme.palette.grey[700],
-              },
-              [stylesMode.dark]: {
-                color: theme.palette.grey[800],
-                backgroundColor: theme.palette.common.white,
-                '&:hover': { backgroundColor: theme.palette.grey[400] },
-              },
-            }),
-        },
-      };
-      return { ...styled.inheritColor, ...styled.colors };
-    },
+    // contained: ({ theme, ownerState }) => {
+    //   const styled = {
+    //     colors: styleColors(ownerState, (color) => ({
+    //       '&:hover': { boxShadow: theme.customShadows[color] },
+    //     })),
+    //     inheritColor: {
+    //       ...(ownerState.color === 'inherit' &&
+    //         !ownerState.disabled && {
+    //           color: theme.palette.common.white,
+    //           backgroundColor: theme.palette.grey[800],
+    //           '&:hover': {
+    //             boxShadow: theme.customShadows.z8,
+    //             backgroundColor: theme.palette.grey[700],
+    //           },
+    //           [stylesMode.dark]: {
+    //             color: theme.palette.grey[800],
+    //             backgroundColor: theme.palette.common.white,
+    //             '&:hover': { backgroundColor: theme.palette.grey[400] },
+    //           },
+    //         }),
+    //     },
+    //   };
+    //   return { ...styled.inheritColor, ...styled.colors };
+    // },
     /**
      * @variant outlined
      */
-    outlined: ({ theme, ownerState }) => {
-      const styled = {
-        colors: styleColors(ownerState, (color) => ({
-          borderColor: appAlpha(theme.palette[color].main, 0.48),
-        })),
-        inheritColor: {
-          ...(ownerState.color === 'inherit' &&
-            !ownerState.disabled && {
-              borderColor: appAlpha(theme.palette.grey['500'], 0.32),
-              '&:hover': { backgroundColor: theme.palette.action.hover },
-            }),
-        },
-        base: {
-          '&:hover': { borderColor: 'currentColor', boxShadow: '0 0 0 0.75px currentColor' },
-        },
-      };
-      return { ...styled.base, ...styled.inheritColor, ...styled.colors };
-    },
-    /**
-     * @variant text
-     */
-    text: ({ ownerState, theme }) => {
-      const styled = {
-        inheritColor: {
-          ...(ownerState.color === 'inherit' &&
-            !ownerState.disabled && {
-              '&:hover': { backgroundColor: theme.palette.action.hover },
-            }),
-        },
-      };
-      return { ...styled.inheritColor };
-    },
-    /**
-     * @size
-     */
-    sizeSmall: ({ ownerState }) => ({
-      height: 30,
-      ...(ownerState.variant === 'text'
-        ? { paddingLeft: '4px', paddingRight: '4px' }
-        : { paddingLeft: '8px', paddingRight: '8px' }),
-    }),
-    sizeMedium: ({ ownerState }) => ({
-      ...(ownerState.variant === 'text'
-        ? { paddingLeft: '8px', paddingRight: '8px' }
-        : { paddingLeft: '12px', paddingRight: '12px' }),
-    }),
-    sizeLarge: ({ ownerState }) => ({
-      height: 48,
-      ...(ownerState.variant === 'text'
-        ? { paddingLeft: '10px', paddingRight: '10px' }
-        : { paddingLeft: '16px', paddingRight: '16px' }),
-    }),
+    // outlined: ({ theme, ownerState }) => {
+    //   const styled = {
+    //     colors: styleColors(ownerState, (color) => ({
+    //       borderColor: appAlpha(theme.palette[color].main, 0.48),
+    //     })),
+    //     inheritColor: {
+    //       ...(ownerState.color === 'inherit' &&
+    //         !ownerState.disabled && {
+    //           borderColor: appAlpha(theme.palette.grey['500'], 0.32),
+    //           '&:hover': { backgroundColor: theme.palette.action.hover },
+    //         }),
+    //     },
+    //     base: {
+    //       '&:hover': { borderColor: 'currentColor', boxShadow: '0 0 0 0.75px currentColor' },
+    //     },
+    //   };
+    //   return { ...styled.base, ...styled.inheritColor, ...styled.colors };
+    // },
+    // /**
+    //  * @variant text
+    //  */
+    // text: ({ ownerState, theme }) => {
+    //   const styled = {
+    //     inheritColor: {
+    //       ...(ownerState.color === 'inherit' &&
+    //         !ownerState.disabled && {
+    //           '&:hover': { backgroundColor: theme.palette.action.hover },
+    //         }),
+    //     },
+    //   };
+    //   return { ...styled.inheritColor };
+    // },
+    // /**
+    //  * @size
+    //  */
+    // sizeSmall: ({ ownerState }) => ({
+    //   height: 30,
+    //   ...(ownerState.variant === 'text'
+    //     ? { paddingLeft: '4px', paddingRight: '4px' }
+    //     : { paddingLeft: '8px', paddingRight: '8px' }),
+    // }),
+    // sizeMedium: ({ ownerState }) => ({
+    //   ...(ownerState.variant === 'text'
+    //     ? { paddingLeft: '8px', paddingRight: '8px' }
+    //     : { paddingLeft: '12px', paddingRight: '12px' }),
+    // }),
+    // sizeLarge: ({ ownerState }) => ({
+    //   height: 48,
+    //   ...(ownerState.variant === 'text'
+    //     ? { paddingLeft: '10px', paddingRight: '10px' }
+    //     : { paddingLeft: '16px', paddingRight: '16px' }),
+    // }),
   },
 };
 

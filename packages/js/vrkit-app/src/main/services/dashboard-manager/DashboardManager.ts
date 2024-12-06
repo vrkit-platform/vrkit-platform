@@ -8,9 +8,11 @@ import {
   DashboardManagerFnTypeToIPCName,
   DashboardsState,
   Disposables,
+  inList,
   isDev,
   isEmpty,
-  isNotEmpty,
+  isNotEmpty, isNotEmptyString,
+  notInList,
   Pair,
   removeIfMutation,
   SignalFlag
@@ -22,7 +24,7 @@ import { asOption } from "@3fv/prelude-ts"
 import { AppPaths, FileExtensions } from "vrkit-shared/constants/node"
 import { AppSettingsService } from "../app-settings"
 import Fsx from "fs-extra"
-import { endsWith } from "lodash/fp"
+import { endsWith, get } from "lodash/fp"
 import Path from "path"
 import PQueue from "p-queue"
 import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
@@ -101,7 +103,8 @@ export class DashboardManager {
   private validateState(state: DashboardsState = this.state): DashboardsState {
     // CREATE A DEFAULT CONFIG IF NONE EXIST
     if (isEmpty(state.configs)) {
-      const defaultConfig = DashboardConfig.create(newDashboardTrackMapMockConfig())
+      const defaultConfig = DashboardConfig.create(newDashboardTrackMapMockConfig(
+          { name: this.nextDashboardConfigName() }))
       this.saveDashboardConfigTaskFactory(defaultConfig).catch(err => {
         error("Failed to save default config", err)
       })
@@ -226,10 +229,26 @@ export class DashboardManager {
   ): Promise<DashboardConfig> {
     return this.updateDashboardConfig(id, patch)
   }
-
+  
+  /**
+   * Generate a new dashboard name
+   */
+  nextDashboardConfigName() {
+    const {dashboardConfigs: configs} = this,
+        nameSuffix = configs.length ? ` ${configs.length + 1}` : ""
+    return `My Dashboard${nameSuffix}`
+  }
+  
   @Bind
-  async createDashboardConfig(patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
-    const dashConfig = DashboardConfig.create(defaultsDeep(patch, newDashboardTrackMapMockConfig()))
+  async createDashboardConfig(patch: Partial<DashboardConfig> = {}): Promise<DashboardConfig> {
+    const
+        {dashboardConfigs: configs} = this,
+        nameSuffix = configs.length ? ` ${configs.length + 1}` : ""
+    patch.name = asOption(patch?.name)
+          .filter(isNotEmptyString)
+          .filter(notInList(configs.map(get("name"))))
+          .getOrCall(() => `My Dashboard${nameSuffix}`)
+    const dashConfig = newDashboardTrackMapMockConfig(patch)
     await this.saveDashboardConfigTaskFactory(dashConfig)
     runInAction(() => {
       this.dashboardConfigs.push(dashConfig)

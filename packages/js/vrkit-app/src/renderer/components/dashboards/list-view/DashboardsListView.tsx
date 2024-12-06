@@ -8,7 +8,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import type { BoxProps } from "@mui/material/Box"
 // MUI
 import Box from "@mui/material/Box"
-import { styled, useTheme } from "@mui/material/styles"
+import { darken, styled, useTheme } from "@mui/material/styles"
 
 // APP
 import {
@@ -25,13 +25,15 @@ import {
   FlexScaleZero,
   hasCls,
   heightConstraint,
+  linearGradient,
   notHasCls,
   OverflowAuto,
-  OverflowHidden,
+  OverflowHidden, OverflowVisible,
   padding,
   PositionRelative,
   rem,
-  transition
+  transition,
+  Transparent
 } from "vrkit-shared-ui"
 import clsx from "clsx"
 import { DashboardConfig } from "vrkit-models"
@@ -112,9 +114,11 @@ const DashboardsListViewRoot = styled(Box, {
         // ...FlexRow,
         // ...FlexWrap,
         display: "grid",
-        gridTemplateColumns: `1fr 1fr`,
+        // gridTemplateColumns: `1fr 1fr`,
+        gridTemplateColumns: `1fr`,
         ...FillWidth,
         ...flexAlign("flex-start", "flex-start"), // [child(dashboardsListViewClasses.itemLink)]: {
+        ...padding("1rem"),
         //   textDecoration: "none",
         [child(dashboardsListViewClasses.item)]: {
           ...FlexRowCenter,
@@ -123,8 +127,9 @@ const DashboardsListViewRoot = styled(Box, {
           // 0,
           // "min(33%,
           // 25vw)"),
-          ...padding("1rem"),
-          ...heightConstraint("max(10rem,33%)"),
+          // ...padding(0, "1rem"),
+          filter: "drop-shadow(0px 2px 2px rgba(0,0,0, 0.25))",
+          // ...heightConstraint("8.5rem"),
           ...flex(1, 0, "min(35%, 30vw)"), // ...widthConstraint("min(35%, 30vw)"),
           ...flexAlign("stretch", "flex-start"),
           [hasCls(dashboardsListViewClasses.itemSelected)]: {},
@@ -133,13 +138,44 @@ const DashboardsListViewRoot = styled(Box, {
             ...FlexColumn,
             ...Fill,
             ...OverflowHidden,
-            ...borderRadius(theme.shape.borderRadius / 2),
-            ...padding(spacing(1), spacing(0.5), spacing(0.5), spacing(0.5)),
-            gap: "0.5rem",
+            borderRadius: 0,
+            // ...borderRadius(theme.shape.borderRadius / 4),
+            // ...padding(spacing(1), spacing(1), spacing(1), spacing(1)),
+            padding: 0,
+            gap: spacing(1),
             textDecoration: "none",
-            boxShadow: customShadows.raisedCard,
+            
+            "&.first": {
+              
+                borderTopLeftRadius: theme.shape.borderRadius,
+                borderTopRightRadius: theme.shape.borderRadius,
+              
+            },
+            "&:not(.first)": {
+              // paddingTop: theme.spacing(1.25)
+            },
+            "&:not(.last)": {
+              
+                backgroundImage: linearGradient(
+                    "to bottom",
+                    `${darken(theme.palette.background.paper, 0.03)} 0%`,
+                    `${darken(theme.palette.background.paper, 0.04)} 95%`,
+                    `${darken(theme.palette.background.paper, 0.1)} 100%`
+                ),
+              
+              ...OverflowVisible
+              
+            },
+            "&.last": {
+              
+                borderBottomLeftRadius: theme.shape.borderRadius ,
+                borderBottomRightRadius: theme.shape.borderRadius,
+              
+            },
+            // boxShadow: customShadows.raisedCard,
             [hasCls(dashboardsListViewClasses.itemCreateButton)]: {
-              ...flexAlign("center", "center")
+              ...flexAlign("center", "center"),
+              background: Transparent
             },
             [notHasCls(dashboardsListViewClasses.itemCreateButton)]: {
               ...flexAlign("stretch", "stretch")
@@ -214,12 +250,21 @@ export function DashboardsListView(props: DashboardsListViewProps) {
         {...other}
       >
         <Box className={clsx(dashboardsListViewClasses.container, className)}>
-          {configs.map(config => (
+          {configs.map((config, idx) => {const posClassName = clsx({
+            first: idx === 0,
+            last: idx >= configs.length - 1
+          }); return (
             <DashboardsListItem
               key={config.id}
+              sx={{
+                zIndex: configs.length - idx + 1
+              }}
               config={config}
+              paperClassName={posClassName}
+              className={posClassName}
             />
-          ))}
+          )
+          })}
           <DashboardsListItemCreate onClick={createDash} />
         </Box>
       </DashboardsListViewRoot>

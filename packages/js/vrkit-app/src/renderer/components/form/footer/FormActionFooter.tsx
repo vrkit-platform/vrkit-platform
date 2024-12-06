@@ -38,7 +38,9 @@ const FormActionFooterRoot = styled(Box)(({ theme }) => ({
   ...FlexAuto,
   ...FlexDefaults.stretchSelf,
   ...flexAlign("center", "flex-end"),
-  ...padding(theme.spacing(0.5)),
+  ...padding(theme.spacing(1),theme.spacing(1.5)),
+  
+  gap: theme.spacing(2),
   borderTop: footerBorder,
   backgroundColor: theme.palette.background.actionFooter,
   backgroundImage: theme.palette.background.actionFooterImage
@@ -53,7 +55,6 @@ export interface FormActionFooterProps extends BoxProps {}
  * FormActionFooter Component
  *
  * @param { FormActionFooterProps } props
- * @returns {JSX.Element}
  */
 export function FormActionFooter(props: FormActionFooterProps) {
   return <FormActionFooterRoot {...props} />

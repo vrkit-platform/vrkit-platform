@@ -60,26 +60,28 @@ const mainAppBarClasses = createClassNames(mainAppBarClassPrefix, "root", "top",
 const MainAppBarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
   [hasCls(mainAppBarClasses.root)]: {
     backgroundColor: theme.palette.background.appBar,
-    backgroundImage: theme.palette.background.appBarGradient,
+    
     // backgroundColor: "transparent !important",
     // backgroundImage: "none",
-    boxShadow: "0px 3px 5px -1px rgba(0, 0, 0, 0.2), " +
-        "0px 5px 8px 0px rgba(0, 0, 0, 0.14), " +
-        "0px 3px 14px 2px rgba(0,0, 0, 0.22)",
+    // boxShadow: "0px 3px 5px -1px rgba(0, 0, 0, 0.2), " +
+    //     "0px 5px 8px 0px rgba(0, 0, 0, 0.14), " +
+    //     "0px 3px 14px 2px rgba(0,0, 0, 0.22)",
+    boxShadow: theme.shadows[4],
     color: "inherit",
     zIndex: theme.zIndex.drawer + 1,
     filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`,
-    //...flex(1, 1, 0),
     ...FlexAuto,
     ...FlexColumn,
     ...FlexDefaults.stretch,
-    ...FillWidth, // ...PositionRelative,
+    ...FillWidth,
     ...OverflowHidden,
     ...PositionRelative,
     [child(mainAppBarClasses.top)]: {
       ...FlexRowCenter,
-      ...FillWidth, // ...PositionRelative,
-      ...OverflowHidden, //...PositionAbsolute,
+      ...FillWidth,
+      ...OverflowHidden,
+      backgroundColor: theme.palette.background.appBar,
+      backgroundImage: theme.palette.background.appBarGradient,
       [child([mainAppBarClasses.left, mainAppBarClasses.right])]: {
         ...FillHeight,
         ...FlexAuto,

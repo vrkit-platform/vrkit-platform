@@ -9,9 +9,10 @@ import { defaultSettings, SettingsProvider } from "vrkit-app-renderer/components
 import useAppStore from "../../hooks/useAppStore"
 
 import "!!style-loader!css-loader!sass-loader!assets/css/fonts/fonts.global.scss"
+import globalStyles from "!!raw-loader!sass-loader!assets/css/global-electron.scss"
 import React, { useLayoutEffect } from "react"
 import AppBody from "./AppBody"
-import globalStyles from "!!raw-loader!sass-loader!assets/css/global-electron.scss"
+
 
 export default function App() {
   useScrollToTop()

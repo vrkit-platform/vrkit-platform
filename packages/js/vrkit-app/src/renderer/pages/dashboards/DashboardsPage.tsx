@@ -10,12 +10,14 @@ import {
   child,
   ClassNamesKey,
   createClassNames,
-  FillHeight, FillMaxHeight,
+  FillHeight,
+  FillMaxHeight,
   flexAlign,
-  FlexAuto,
+  FlexAuto, FlexColumn,
   FlexRow,
   FlexScaleZero,
   hasCls,
+  OverflowVisible,
   PositionRelative
 } from "vrkit-shared-ui"
 import clsx from "clsx"
@@ -39,16 +41,17 @@ const DashboardsPageRoot = styled(Box, {
   label: "DashboardsPageRoot"
 })(({ theme }) => ({
   [hasCls(dashboardsPageClasses.root)]: {
-    ...FlexRow,
-    ...FillHeight,
+    ...FlexAuto,
+    ...OverflowVisible,
+    ...FlexColumn,
     ...flexAlign("stretch", "stretch"),
     ...PositionRelative,
-    [child(dashboardsPageClasses.list)]: {
-      ...FillMaxHeight,
-    },
-    [child(dashboardsPageClasses.editor)]: {
-      ...FillHeight
-    }
+    // [child(dashboardsPageClasses.list)]: {
+    //   ...FillMaxHeight,
+    // },
+    // [child(dashboardsPageClasses.editor)]: {
+    //   ...FillHeight
+    // }
   }
 }))
 
@@ -65,7 +68,7 @@ export function DashboardsPage() {
         <ModelEditorProvider value={editorContext}>
           
           <DashboardsPageRoot className={clsx(dashboardsPageClasses.root)}>
-            <DashboardsListView className={clsx(dashboardsPageClasses.list)} />
+            <DashboardsListView />
             {/*<DashboardsListEditor className={clsx(dashboardsPageClasses.editor)} />*/}
           </DashboardsPageRoot>
         

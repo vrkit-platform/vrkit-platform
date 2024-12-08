@@ -21,7 +21,7 @@ import {
   Fill,
   FillWidth,
   flex,
-  flexAlign,
+  flexAlign, FlexAuto,
   FlexColumn,
   FlexRowBox,
   FlexRowCenter,
@@ -54,6 +54,7 @@ import { Theme } from "../../../theme/ThemeTypes"
 import GlobalStyles from "@mui/material/GlobalStyles"
 import { DashboardsListItem, DashboardsListItemCreate } from "./DashboardsListItem"
 import AppBreadcrumbs from "../../app-breadcrumbs"
+import { PageMetadata, PageMetadataProps } from "../../page-metadata"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -112,9 +113,11 @@ const DashboardsListViewRoot = styled(Box, {
     // root styles here
     [hasCls(dashboardsListViewClasses.root)]: {
       // ...flex(1, 1, "30vw"), // ...flexAlign("stretch","stretch"),
-      ...FlexScaleZero,
-      ...OverflowAuto,
+      // ...FlexAuto,
+      ...FillWidth,
+      ...OverflowVisible,
       ...transition(["flex-grow", "flex-shrink"]),
+      
       [child(dashboardsListViewClasses.container)]: {
         // ...FlexRow,
         // ...FlexWrap,
@@ -252,20 +255,27 @@ export function DashboardsListView(props: DashboardsListViewProps) {
       [isMounted]
     ),
     theme = useTheme(),
-    globalStyles = useMemo(() => itemActionStyle(theme), [theme])
+    globalStyles = useMemo(() => itemActionStyle(theme), [theme]),
+    pageMetadata:PageMetadataProps = {
+      appContentBar: {
+        actions: <DashboardsListItemCreate onClick={createDash}/>
+      }
+    }
 
   return (
     <>
+      <PageMetadata {...pageMetadata}/>
       <GlobalStyles styles={globalStyles} />
       <DashboardsListViewRoot
         className={clsx(dashboardsListViewClasses.root, className)}
         {...other}
       >
         <Box className={clsx(dashboardsListViewClasses.container, className)}>
-          <FlexRowBox sx={{...flexAlign("space-between")}}>
-          <AppBreadcrumbs/>
-          <DashboardsListItemCreate onClick={createDash} />
-          </FlexRowBox>
+          
+          {/*<FlexRowBox sx={{...flexAlign("space-between")}}>*/}
+          {/*<AppBreadcrumbs/>*/}
+          {/*<DashboardsListItemCreate onClick={createDash} />*/}
+          {/*</FlexRowBox>*/}
           
           {configs.map((config, idx) => {const posClassName = clsx({
             first: idx === 0,

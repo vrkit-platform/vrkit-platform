@@ -5,6 +5,7 @@ import { buttonClasses } from '@mui/material/Button';
 import { loadingButtonClasses } from '@mui/lab/LoadingButton';
 
 import { appAlpha, stylesMode } from '../../styles';
+import { padding, rem } from "vrkit-shared-ui"
 
 // ----------------------------------------------------------------------
 
@@ -157,23 +158,25 @@ const MuiButton: Components<Theme>['MuiButton'] = {
     // /**
     //  * @size
     //  */
-    // sizeSmall: ({ ownerState }) => ({
-    //   height: 30,
-    //   ...(ownerState.variant === 'text'
-    //     ? { paddingLeft: '4px', paddingRight: '4px' }
-    //     : { paddingLeft: '8px', paddingRight: '8px' }),
-    // }),
-    // sizeMedium: ({ ownerState }) => ({
-    //   ...(ownerState.variant === 'text'
-    //     ? { paddingLeft: '8px', paddingRight: '8px' }
-    //     : { paddingLeft: '12px', paddingRight: '12px' }),
-    // }),
-    // sizeLarge: ({ ownerState }) => ({
-    //   height: 48,
-    //   ...(ownerState.variant === 'text'
-    //     ? { paddingLeft: '10px', paddingRight: '10px' }
-    //     : { paddingLeft: '16px', paddingRight: '16px' }),
-    // }),
+    sizeSmall: ({ ownerState, theme }) => ({
+      height: rem(1),
+      fontSize: rem(0.8),
+      ...(ownerState.variant === 'text'
+          ? padding(theme.spacing(0.5))
+          : padding(theme.spacing(1.5),theme.spacing(1.5)))
+    }),
+    sizeMedium: ({ ownerState, theme }) => ({
+      height: rem(1.2),
+      ...(ownerState.variant === 'text'
+          ? padding(theme.spacing(1))
+          : padding(theme.spacing(2),theme.spacing(3))),
+    }),
+    sizeLarge: ({ ownerState, theme }) => ({
+      height: rem(1.6),
+      ...(ownerState.variant === 'text'
+        ? padding(theme.spacing(1.5))
+        : padding(theme.spacing(2.5),theme.spacing(4)))
+    }),
   },
 };
 

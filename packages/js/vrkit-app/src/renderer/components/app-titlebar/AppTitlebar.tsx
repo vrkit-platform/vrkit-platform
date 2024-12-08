@@ -32,17 +32,17 @@ import { SessionPlayerControlBar } from "../../components/session-player-control
 
 // import { useIsFullScreen } from "../../../hooks"
 
-export interface AppBarContentOverrides {
+export interface AppTitlebarOverrides {
   left?: React.ReactNode
-
+  
   center?: React.ReactNode
-
+  
   right?: React.ReactNode
 }
 
-export interface MainAppBarProps extends AppBarProps {}
+export interface AppTitlebarProps extends AppBarProps {}
 
-const MainToolbarRoot = styled(Toolbar)(({ theme }) => ({
+const AppToolbarRoot = styled(Toolbar)(({ theme }) => ({
   [`&.${toolbarClasses.root}`]: {
     ...Fill,
     ...PositionRelative,
@@ -54,11 +54,11 @@ const MainToolbarRoot = styled(Toolbar)(({ theme }) => ({
   }
 }))
 
-const mainAppBarClassPrefix = "MainAppBar"
-const mainAppBarClasses = createClassNames(mainAppBarClassPrefix, "root", "top", "bottom", "left", "center", "right")
+const appTitlebarClassPrefix = "AppTitlebar"
+const appTitlebarClasses = createClassNames(appTitlebarClassPrefix, "root", "top", "bottom", "left", "center", "right")
 
-const MainAppBarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
-  [hasCls(mainAppBarClasses.root)]: {
+const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
+  [hasCls(appTitlebarClasses.root)]: {
     backgroundColor: theme.palette.background.appBar,
     
     // backgroundColor: "transparent !important",
@@ -76,13 +76,13 @@ const MainAppBarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
     ...FillWidth,
     ...OverflowHidden,
     ...PositionRelative,
-    [child(mainAppBarClasses.top)]: {
+    [child(appTitlebarClasses.top)]: {
       ...FlexRowCenter,
       ...FillWidth,
       ...OverflowHidden,
       backgroundColor: theme.palette.background.appBar,
       backgroundImage: theme.palette.background.appBarGradient,
-      [child([mainAppBarClasses.left, mainAppBarClasses.right])]: {
+      [child([appTitlebarClasses.left, appTitlebarClasses.right])]: {
         ...FillHeight,
         ...FlexAuto,
         ...FlexRow,
@@ -91,15 +91,15 @@ const MainAppBarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         flex: "0 0 auto",
         minWidth: "15%",
         alignItems: "stretch",
-
-        [hasCls(mainAppBarClasses.right)]: {
+        
+        [hasCls(appTitlebarClasses.right)]: {
           ...flexAlign("center", "flex-end")
         },
-        [hasCls(mainAppBarClasses.left)]: {
+        [hasCls(appTitlebarClasses.left)]: {
           ...flexAlign("center", "flex-start")
         }
       },
-      [child([mainAppBarClasses.center])]: {
+      [child([appTitlebarClasses.center])]: {
         ...FlexScaleZero, //...FlexAuto,
         ...FlexRow,
         ...OverflowHidden,
@@ -108,49 +108,49 @@ const MainAppBarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         height: "auto"
       }
     },
-    [child(mainAppBarClasses.bottom)]: {
+    [child(appTitlebarClasses.bottom)]: {
       ...FillWidth, // ...PositionRelative,
       ...OverflowHidden
     }
   }
 }))
 
-function MainAppBar({ className, ...other }: MainAppBarProps) {
+export function AppTitlebar({ className, ...other }: AppTitlebarProps) {
   const pageMetadata = usePageMetadata(),
-    { SectionProps = {}, section, appBar } = pageMetadata,
-    theme = useTheme(),
-    appBarHeight = appBar?.height ?? theme.dimen.appBarHeight,
-    activeDashboardConfig = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
-    isLiveAvailable = useAppSelector(sharedAppSelectors.isLiveSessionAvailable)
-
+      { appTitlebar } = pageMetadata,
+      theme = useTheme(),
+      appBarHeight = theme.dimen.appBarHeight,
+      activeDashboardConfig = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
+      isLiveAvailable = useAppSelector(sharedAppSelectors.isLiveSessionAvailable)
+  
   return (
-    <MainAppBarRoot
-      className={clsx(mainAppBarClasses.root, className)}
-      elevation={0}
-      {...other}
-    >
-      <Box
-        className={mainAppBarClasses.top}
-        sx={{
-          ...heightConstraint(appBarHeight)
-        }}
+      <AppTitlebarRoot
+          className={clsx(appTitlebarClasses.root, className)}
+          elevation={0}
+          {...other}
       >
-        <MainToolbarRoot>
-          <Box className={clsx(mainAppBarClasses.left, GlobalCSSClassNames.electronWindowDraggable)}>
-            <Logo />
-          </Box>
-          <Box className={clsx(mainAppBarClasses.center, GlobalCSSClassNames.electronWindowDraggable)}>
-            {appBar?.content?.center}
-          </Box>
-          <Box className={clsx(mainAppBarClasses.right)}>
-            <ActiveDashboardConfigWidget />
-          </Box>
-        </MainToolbarRoot>
-      </Box>
-
-      <SessionPlayerControlBar className={mainAppBarClasses.bottom} />
-    </MainAppBarRoot>
+        <Box
+            className={appTitlebarClasses.top}
+            sx={{
+              ...heightConstraint(appBarHeight)
+            }}
+        >
+          <AppToolbarRoot>
+            <Box className={clsx(appTitlebarClasses.left, GlobalCSSClassNames.electronWindowDraggable)}>
+              <Logo />
+            </Box>
+            <Box className={clsx(appTitlebarClasses.center, GlobalCSSClassNames.electronWindowDraggable)}>
+              {appTitlebar?.center}
+            </Box>
+            <Box className={clsx(appTitlebarClasses.right)}>
+              {/*<ActiveDashboardConfigWidget />*/}
+            </Box>
+          </AppToolbarRoot>
+        </Box>
+        
+        <SessionPlayerControlBar className={appTitlebarClasses.bottom} />
+      </AppTitlebarRoot>
   )
 }
 
-export default MainAppBar
+export default AppTitlebar

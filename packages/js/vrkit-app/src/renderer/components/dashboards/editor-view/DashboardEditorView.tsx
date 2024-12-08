@@ -1,5 +1,5 @@
 // REACT
-import React, { useEffect, useMemo } from "react"
+import React, { useMemo } from "react"
 
 // CLSX
 import clsx from "clsx"
@@ -18,11 +18,11 @@ import {
   ClassNamesKey,
   createClassNames,
   Ellipsis,
-  FillHeight, FillWidth,
+  FillHeight,
+  FillWidth,
   flexAlign,
   FlexAuto,
   FlexColumn,
-  FlexRowBox,
   FlexRowCenter,
   FlexRowCenterBox,
   FlexScaleZero,
@@ -31,32 +31,30 @@ import {
   OverflowHidden,
   padding
 } from "vrkit-shared-ui"
-import { attributesEqual, isEmpty, isEqual } from "vrkit-shared"
-import IconButton from "@mui/material/IconButton"
-import Icon from "../../app-icon"
+import { isEmpty } from "vrkit-shared"
 import Typography from "@mui/material/Typography"
 import { isDefined } from "@3fv/guard"
 import { DashboardConfig } from "vrkit-models"
 import { useService } from "../../service-container"
 import { useAsyncCallback } from "../../../hooks"
-import Checkbox from "@mui/material/Checkbox"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { useModelEditorContext } from "../../model-editor-context"
 import { type FormikBag, type FormikConfig, FormikContextType, FormikProps, withFormik } from "formik"
 import { get } from "lodash/fp"
 import { first } from "lodash"
-import { bind, cloneInstanceOf } from "vrkit-shared/utils"
+import { bind } from "vrkit-shared/utils"
 import { FormActionFooterDefault, FormContainer } from "../../form"
 import { Alert } from "../../../services/alerts"
 import { useIsMounted } from "usehooks-ts"
 import { FlexRow } from "vrkit-shared-ui/styles"
 import { AppTextFieldFormik } from "../../app-text-field"
 import { useNavigate } from "react-router-dom"
-import { WebPaths } from "../../../routes/WebPaths"
-import { faTimes } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
 import { DashboardLayoutSwitch } from "../common/layout-switch"
-import { faArrowLeft } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
 import AppBreadcrumbs from "../../app-breadcrumbs"
+import { PageMetadata, PageMetadataProps } from "../../page-metadata"
+import {
+  AppButtonGroupFormikPositiveNegative
+} from "../../app-button-group-positive-negative"
 // import { faWindowClose } from "@awesome.me/kit-79150a3eed"
 
 const log = getLogger(__filename)
@@ -93,7 +91,7 @@ const DashboardEditorRoot = styled(Box, {
     ...FillHeight,
     ...OverflowHidden,
     ...FlexScaleZero,
-    ...padding(0),//theme.spacing(0.5), theme.spacing(1)),
+    ...padding(0), //theme.spacing(0.5), theme.spacing(1)),
     background: darken(theme.palette.background.appBar, 0.4),
 
     [child(classNames.content)]: {
@@ -112,16 +110,7 @@ const DashboardEditorRoot = styled(Box, {
           ...FlexAuto
         },
         [child(classNames.headerActions)]: {
-          ...FillWidth,
-          
-          ...FlexRow,
-          ...FlexAuto,
-          ...padding(theme.spacing(0.5),theme.spacing(2)),
-          ...flexAlign("space-between", "space-between"),
-          borderBottom: `1px solid ${darken(theme.palette.background.actionFooter,0.25)}`,
-          backgroundColor: theme.palette.background.actionFooter,
-          backgroundImage: theme.palette.background.actionFooterImage,
-          filter: "drop-shadow(0px 2px 2px rgba(0,0,0, 0.25))",
+        
         }
       },
       [child(classNames.details)]: {
@@ -163,7 +152,6 @@ const DashboardEditorRoot = styled(Box, {
  * DashboardEditor Component Properties
  */
 export interface DashboardEditorProps extends BoxProps {}
-
 
 type DashboardListEditorFormProps = {
   dashConfig: DashboardConfig
@@ -223,7 +211,24 @@ const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardCo
           return
         }
       }
-    }
+    },
+      pageMetadata: PageMetadataProps = {
+        appContentBar: {
+          actions: <AppButtonGroupFormikPositiveNegative<DashboardConfig>
+              item={model}
+              negativeLabel={isEmpty(model.id) ? "Cancel" : "Revert"}
+              negativeHandler={() => {
+                resetMutatingModels([model.id])
+                resetForm()
+                nav(-1)
+              }}
+              positiveLabel={isEmpty(model.id) ? "Create" : "Save"}
+              positiveHandler={() => {
+                handleSubmit()
+              }}
+          />
+        }
+      }
 
   // UPDATE THE PROVIDED REF ENABLING OTHER
   // UI COMPONENTS/DIALOGS, ETC TO SUBMIT
@@ -232,6 +237,7 @@ const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardCo
   }
 
   return (
+      <><PageMetadata {...pageMetadata}/>
     <FormContainer
       noValidate
       // onBlur={handleBlur}
@@ -241,26 +247,9 @@ const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardCo
         {!!model && values && (
           <>
             {/* HEADER */}
-
+          
             <Box className={clsx(classNames.header)}>
-              <Box className={clsx(classNames.headerActions)}>
-                
-                  <AppBreadcrumbs/>
-                  <FormActionFooterDefault<DashboardConfig>
-                      item={model}
-                      negativeLabel={isEmpty(model.id) ? "Cancel" : "Revert"}
-                      negativeHandler={() => {
-                        resetMutatingModels([model.id])
-                        resetForm()
-                        nav(-1)
-                      }}
-                      positiveLabel={isEmpty(model.id) ? "Create" : "Save"}
-                      positiveHandler={() => {
-                        handleSubmit()
-                      }}
-                  />
-                
-              </Box>
+              
               <Box className={clsx(classNames.headerField)}>
                 <AppTextFieldFormik<DashboardConfig>
                   variant="standard"
@@ -331,17 +320,9 @@ const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardCo
           </>
         )}
       </Box>
-      <FormActionFooterDefault<DashboardConfig>
-        item={dashConfig}
-        negativeLabel="Cancel"
-        negativeHandler={e => {
-          e.preventDefault()
-          // resetForm()
-          nav(-1)
-        }}
-        positiveLabel="Save"
-      ></FormActionFooterDefault>
+      
     </FormContainer>
+      </>
   )
 })
 
@@ -350,19 +331,17 @@ const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardCo
  *
  * @param { DashboardEditorProps } props
  */
-export function DashboardEditor(props: DashboardEditorProps) {
-  const theme = useTheme(),
+export function DashboardEditorView(props: DashboardEditorProps) {
+  const
     isMounted = useIsMounted(),
     nav = useNavigate(),
     { className, ...other } = props,
     dashboardClient = useService(DashboardManagerClient),
-    patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
     editorContext = useModelEditorContext<DashboardConfig>(),
     { modelById, mutatingModels, setMutatingModel, isModelMutating, resetMutatingModels, clearMutatingModels } =
       editorContext,
     dashConfig = mutatingModels?.[0],
     onReset = useMemo(() => bind(resetMutatingModels, null, [dashConfig?.id]), [dashConfig?.id]),
-    
     onSubmit = Alert.usePromise(
       async (values: DashboardConfig, { setErrors, setStatus, setSubmitting }: FormikContextType<DashboardConfig>) => {
         try {
@@ -372,10 +351,9 @@ export function DashboardEditor(props: DashboardEditorProps) {
             setStatus({ success: true })
             setSubmitting(false)
           }
-          
+
           nav(-1)
           return savedDashConfig
-    
         } catch (err) {
           error(err)
           if (isMounted()) {
@@ -414,4 +392,4 @@ export function DashboardEditor(props: DashboardEditorProps) {
   )
 }
 
-export default DashboardEditor
+export default DashboardEditorView

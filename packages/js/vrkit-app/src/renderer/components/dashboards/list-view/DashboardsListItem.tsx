@@ -346,7 +346,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
                 tooltip="Edit"
                 className={clsx(dashboardsListViewClasses.itemAction)}
                 component={NavLink}
-                to={WebPaths.app.dashboards + `/${config?.id}/edit`}
+                to={WebPaths.app.dashboards + `/${config?.id}`}
               >
                 <AppFAIcon
                   size="2xs"
@@ -425,12 +425,11 @@ export function DashboardsListItemCreate(props: DashboardsListItemCreateProps) {
     <Box
         sx={{
           ...FlexRowCenter,
-          ...padding(theme.spacing(2)),
         }}
         className={clsx(dashboardsListViewClasses.item,dashboardsListViewClasses.itemCreateButton, className)}>
       <Button
         color="primary"
-        
+        size="small"
         variant="contained"
         onClick={onClick}
         sx={{

@@ -56,7 +56,7 @@ const AppBreadcrumbRoot = styled(Breadcrumbs, {
 /**
  * AppBreadcrumb Component Properties
  */
-export interface AppBreadcrumbProps extends BreadcrumbsProps {
+export interface AppBreadcrumbsProps extends BreadcrumbsProps {
 
 }
 
@@ -64,11 +64,10 @@ export interface AppBreadcrumbProps extends BreadcrumbsProps {
 /**
  * AppBreadcrumb Component
  *
- * @param { AppBreadcrumbProps } props
- * @returns {JSX.Element}
+ * @param { AppBreadcrumbsProps } props
  */
 
-export function AppBreadcrumbs(props:AppBreadcrumbProps) {
+export function AppBreadcrumbs(props:AppBreadcrumbsProps) {
   const { className, ...other } = props
   const location = useLocation();
   const pathParts = location.pathname.split('/').filter(x => x);

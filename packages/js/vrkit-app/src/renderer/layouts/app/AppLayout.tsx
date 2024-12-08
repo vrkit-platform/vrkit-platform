@@ -3,7 +3,6 @@ import { styled, SxProps, Theme, useTheme } from "@mui/material/styles"
 
 import React, { useState } from "react"
 
-import MainAppBar from "../core/MainAppBar"
 import type { BoxProps } from "@mui/material/Box"
 import Box from "@mui/material/Box"
 import {
@@ -11,47 +10,22 @@ import {
   Fill,
   FillHeight,
   FillWidth,
-  FillWindow, flex,
+  FillWindow,
+  flex,
   flexAlign,
   FlexAuto,
   FlexColumn,
   FlexRow,
   FlexScaleZero,
-  OverflowHidden,
+  FlexScaleZeroBox,
+  OverflowAuto,
+  OverflowHidden, padding,
   widthConstraint
 } from "vrkit-shared-ui"
 import Drawer from "@mui/material/Drawer"
 import AppDrawerMenu from "vrkit-app-renderer/components/app-drawer-menu"
-
-const StyledDivider = styled("span")(({ theme }) => ({
-  width: 1,
-  height: 10,
-  flexShrink: 0,
-  display: "none",
-  position: "relative",
-  alignItems: "center",
-  flexDirection: "column",
-  marginLeft: theme.spacing(2.5),
-  marginRight: theme.spacing(2.5),
-  backgroundColor: "currentColor",
-  // color: theme.palette.divider,
-  "&::before, &::after": {
-    top: -5,
-    width: 3,
-    height: 3,
-    content: '""',
-    flexShrink: 0,
-    borderRadius: "50%",
-    position: "absolute",
-    backgroundColor: "currentColor"
-  },
-  "&::after": { bottom: -5, top: "auto" }
-}))
-
-// ----------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------
+import { AppTitlebar } from "../../components/app-titlebar"
+import { AppContentBar } from "../../components/app-content-bar"
 
 export type AppLayoutProps = {
   sx?: SxProps
@@ -64,8 +38,6 @@ export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
      toggleDrawer = (newOpen: boolean) => () => {
         setDrawerOpen(newOpen);
       }
-
-  // const isNavVertical = isNavMini || settings.navLayout === 'vertical';
 
   return (
     <>
@@ -80,7 +52,7 @@ export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
           }
         }}
       />
-      <MainAppBar />
+      <AppTitlebar />
       
       <Box
           component="main"
@@ -116,8 +88,12 @@ export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
           ...FlexScaleZero,
           ...OverflowHidden,
           ...FillHeight,
-          ...FlexColumn}}>
-          {children}
+          ...FlexColumn,
+          ...flexAlign("stretch")
+        }}>
+          <AppContentBar />
+           {children}
+          
         </Box>
       </Box>
 

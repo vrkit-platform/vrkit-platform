@@ -2,36 +2,37 @@ import React, { useCallback, useContext, useEffect, useState } from "react"
 import { Helmet } from "react-helmet-async"
 import { defaults } from "lodash"
 
-
 import { getLogger } from "@3fv/logger-proxy"
 import type { BoxProps } from "@mui/material/Box"
-import { AppBarContentOverrides } from "vrkit-app-renderer/layouts/core/MainAppBar"
-//import type { AppBarContentOverrides } from "../../layouts/main/MainAppBar"
+import type { AppTitlebarOverrides } from "vrkit-app-renderer/components/app-titlebar"
+import type { AppContentBarOverrides } from "vrkit-app-renderer/components/app-content-bar"
+
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 export interface PageMetadata {
-  title: string
-	section?: string
-  SectionProps?: BoxProps
-  appBar?: PageAppBarMetadata
-
-	// controls?: ReactInstanceOrType | Array<ReactInstanceOrType>
+  appTitlebar?: PageAppTitlebarMetadata
+  appContentBar?: PageAppContentBarMetadata
 }
 
 
-export interface PageAppBarMetadata {
-	height?: number
-	content?: AppBarContentOverrides
+export interface PageAppTitlebarMetadata extends  AppTitlebarOverrides {
+
 }
+
+export interface PageAppContentBarMetadata extends AppContentBarOverrides{
+
+}
+
 
 const defaultPageMetadata = (): PageMetadata => ({
-  title: "TaskX",
-	section: "",
-  appBar: {
-		content: {}
-	}
+  appTitlebar: {
+		
+	},
+  appContentBar: {
+  
+  }
 })
 
 export interface PageMetadataContext extends PageMetadata {
@@ -83,7 +84,7 @@ export function PageMetadata({ children, ...patch }: PageMetadataProps) {
 	return (
     <>
       <Helmet>
-        <title>{ctx.title ?? "VRKit"}</title>
+        <title>VRKit</title>
       </Helmet>
       {children}
     </>

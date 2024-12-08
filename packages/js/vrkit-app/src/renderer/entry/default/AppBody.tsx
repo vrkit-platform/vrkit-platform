@@ -1,7 +1,7 @@
 import "!!style-loader!css-loader!sass-loader!assets/css/fonts/fonts.global.scss"
 
 // ----------------------------------------------------------------------
-import { Router } from "vrkit-app-renderer/routes/sections"
+import { AppRouter } from "vrkit-app-renderer/components/app-router"
 import React from "react"
 import GlobalStyles from "@mui/material/GlobalStyles"
 import { useTheme } from "@mui/material/styles"
@@ -20,7 +20,7 @@ export default function AppBody() {
           }
         }}
       />
-      <Router />
+      <AppRouter />
     </>
   )
 }

@@ -74,7 +74,7 @@ const roleAccelerators = Array<ElectronRoleAcceleratorData>(
     ([
       [ActionMenuItemDesktopRole.reload, "CommandOrControl+r"],
       [ActionMenuItemDesktopRole.forceReload, "CommandOrControl+shift+r"],
-      [ActionMenuItemDesktopRole.toggleDevTools, ["CommandOrControl+alt+i", "F12"]]
+      [ActionMenuItemDesktopRole.toggleDevTools, ["Control+j","CommandOrControl+alt+i", "F12"]]
     ] as ElectronRoleAcceleratorData[])),
   [ActionMenuItemDesktopRole.minimize, "CommandOrControl+m"],
   [ActionMenuItemDesktopRole.front, [], { name: "Bring All to Front" }]

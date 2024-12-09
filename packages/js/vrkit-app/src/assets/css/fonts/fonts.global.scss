@@ -94,3 +94,17 @@ $font-weight-map: (
 //*, input, textarea, select {
 //  font-family: 'AvenirNext', NotoColorEmoji, sans-serif;
 //}
+
+@font-face {
+  font-family: 'Segoe';
+  src: url('segoe-ui/segoe-ui-webfont.woff') format('woff'),
+  url('segoe-ui/segoe-ui-webfont.ttf')  format('truetype'),
+  url('segoe-ui/segoe-ui-webfont.svg') format('svg');
+}
+
+@font-face {
+  font-family: 'Metro';
+  src: url('metro/metro.woff') format('woff'),
+  url('metro/metro.ttf')  format('truetype'),
+  url('metro/metro.svg') format('svg');
+}

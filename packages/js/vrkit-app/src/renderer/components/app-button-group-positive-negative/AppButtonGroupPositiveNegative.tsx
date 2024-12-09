@@ -21,7 +21,7 @@ import {
   FlexRowCenter,
   hasCls, padding
 } from "vrkit-shared-ui"
-import { useFormikContext } from "formik"
+import { FormikContextType, useFormikContext } from "formik"
 import Button, { ButtonProps } from "@mui/material/Button"
 
 const log = getLogger(__filename)
@@ -103,10 +103,11 @@ export function AppButtonGroupPositiveNegative(props:AppButtonGroupPositiveNegat
   </AppButtonGroupPositiveNegativeRoot>
 }
 
-export interface AppButtonGroupFormikPositiveNegativeProps<T = any> extends Omit<AppButtonGroupPositiveNegativeProps, "positiveHandler" | "negativeHandler"> {
+export interface AppButtonGroupFormikPositiveNegativeProps<T = any> extends Omit<AppButtonGroupPositiveNegativeProps, "positiveHandler" | "negativeHandler">, Pick<FormikContextType<any>,"isSubmitting" | "resetForm" | "submitForm"> {
   item?: T
   negativeHandler?: React.MouseEventHandler
-  positiveHandler?: React.MouseEventHandler
+  positiveHandler?: React.MouseEventHandler,
+  
 }
 
 
@@ -121,10 +122,11 @@ export function AppButtonGroupFormikPositiveNegative<T = any>(props:AppButtonGro
     item,
       positiveHandler,
       negativeHandler,
+    isSubmitting, submitForm, resetForm,
     ...other
   } = props
   
-  const {isSubmitting, submitForm, resetForm} = useFormikContext<T>()
+  
   
   
   return <AppButtonGroupPositiveNegative

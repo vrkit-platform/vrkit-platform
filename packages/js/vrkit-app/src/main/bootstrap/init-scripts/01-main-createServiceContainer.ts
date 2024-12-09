@@ -16,6 +16,7 @@ import { Option } from "@3fv/prelude-ts"
 import { PluginManager } from "../../services/plugin-manager"
 import OpenXRConfigurator from "../../services/openxr-configurator"
 import { FileSystemManager } from "vrkit-shared/services/node"
+import { ElectronMainMenuManager } from "../../services/electron-menu"
 
 const log = getLogger(__filename)
 
@@ -28,7 +29,7 @@ const createServiceContainer = once(async function createServiceContainer() {
     .bindClass(NativeThemeManager)
     //.bindClass(ElectronMenuRenderer)
     .bindClass(AppSettingsService)
-    //.bindClass(ElectronMainMenuManager)
+    .bindClass(ElectronMainMenuManager)
     .bindClass(WindowManager)
     .bindClass(MainWindowManager)
     .bindClass(SessionManager)

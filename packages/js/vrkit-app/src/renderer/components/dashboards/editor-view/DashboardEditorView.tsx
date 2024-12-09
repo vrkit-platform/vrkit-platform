@@ -186,6 +186,7 @@ const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardCo
       values,
       setFieldValue,
       resetForm,
+      submitForm,
       dashConfig,
       handleSubmitRef
     } = props,
@@ -216,16 +217,19 @@ const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardCo
         appContentBar: {
           actions: <AppButtonGroupFormikPositiveNegative<DashboardConfig>
               item={model}
-              negativeLabel={isEmpty(model.id) ? "Cancel" : "Revert"}
+              negativeLabel={isEmpty(model?.id) ? "Cancel" : "Revert"}
               negativeHandler={() => {
-                resetMutatingModels([model.id])
+                resetMutatingModels([model?.id])
                 resetForm()
                 nav(-1)
               }}
-              positiveLabel={isEmpty(model.id) ? "Create" : "Save"}
+              positiveLabel={isEmpty(model?.id) ? "Create" : "Save"}
               positiveHandler={() => {
                 handleSubmit()
               }}
+              isSubmitting={isSubmitting}
+              submitForm={submitForm}
+              resetForm={resetForm}
           />
         }
       }

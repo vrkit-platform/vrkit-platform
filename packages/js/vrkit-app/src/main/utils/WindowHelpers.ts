@@ -2,19 +2,21 @@ import {
   BrowserWindow,
   type BrowserWindowConstructorOptions,
   type HandlerDetails,
+  nativeImage,
   type WebPreferences,
   type WindowOpenHandlerResponse
 } from "electron"
-import iconPng from "!!url-loader!assets/icons/icon.png"
-import { isDev } from "vrkit-shared"
-import { isFunction } from "@3fv/guard"
+import iconPng from "!!url-loader!assets/images/logo/helmet-logo.png"
 import { ElectronIPCChannelKind } from "vrkit-shared"
+import { isFunction } from "@3fv/guard"
+
+export const AppIconImage = nativeImage.createFromDataURL(iconPng)
 
 export function windowOptionDefaults(webPreferences: Partial<WebPreferences> = {}): BrowserWindowConstructorOptions {
   return {
     fullscreenable: false,
-    icon: iconPng,
-    
+    icon: AppIconImage,
+
     webPreferences: {
       backgroundThrottling: false,
       allowRunningInsecureContent: true,
@@ -24,7 +26,7 @@ export function windowOptionDefaults(webPreferences: Partial<WebPreferences> = {
       nodeIntegrationInWorker: true,
       contextIsolation: false,
       sandbox: false,
-      devTools: true,//isDev,
+      devTools: true, //isDev,
       ...webPreferences
     }
   }
@@ -37,10 +39,11 @@ export type WindowOpenHandler = (ev: HandlerDetails) => WindowOpenHandlerRespons
  *
  * @param fn
  */
-export function createWindowOpenHandler(fn?: (ev: HandlerDetails, result: WindowOpenHandlerResponse) => WindowOpenHandlerResponse): WindowOpenHandler  {
+export function createWindowOpenHandler(
+  fn?: (ev: HandlerDetails, result: WindowOpenHandlerResponse) => WindowOpenHandlerResponse
+): WindowOpenHandler {
   return (ev: HandlerDetails): WindowOpenHandlerResponse => {
-    
-    let result:WindowOpenHandlerResponse = {
+    let result: WindowOpenHandlerResponse = {
       action: "allow",
       overrideBrowserWindowOptions: {
         frame: false,
@@ -49,14 +52,12 @@ export function createWindowOpenHandler(fn?: (ev: HandlerDetails, result: Window
         ...windowOptionDefaults()
       }
     }
-    
-    if (isFunction(fn))
-      result = fn(ev, result)
-    
+
+    if (isFunction(fn)) result = fn(ev, result)
+
     return result
   }
 }
-
 
 /**
  * Broadcast a message to all renderers
@@ -65,11 +66,14 @@ export function createWindowOpenHandler(fn?: (ev: HandlerDetails, result: Window
  * @param args for the event
  * @returns {number[]} window ids that the message was sent to
  */
-export function broadcastToAllWindows<Channel extends ElectronIPCChannelKind, Args extends unknown[]>(channel: Channel, ...args:Args): number[] {
+export function broadcastToAllWindows<Channel extends ElectronIPCChannelKind, Args extends unknown[]>(
+  channel: Channel,
+  ...args: Args
+): number[] {
   return BrowserWindow.getAllWindows()
-      .filter(win => !win.isDestroyed() && !win.webContents.isDestroyed() && !win.webContents.isCrashed())
-      .map(win => {
-    win.webContents.send(channel, ...args)
-    return win.id
-  })
+    .filter(win => !win.isDestroyed() && !win.webContents.isDestroyed() && !win.webContents.isCrashed())
+    .map(win => {
+      win.webContents.send(channel, ...args)
+      return win.id
+    })
 }

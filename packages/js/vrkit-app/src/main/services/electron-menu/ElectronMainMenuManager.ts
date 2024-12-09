@@ -1,28 +1,20 @@
-import {
-  app,
-  BrowserWindow,
-  dialog,
-  Menu,
-  MenuItemConstructorOptions
-} from "electron"
+import { app, BrowserWindow, dialog, Menu, MenuItemConstructorOptions } from "electron"
 import { isDev, isMac } from "../../constants"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { inspect } from "util"
 import {
   ActionAccelerator,
   ActionMenuItemDesktopRoleKind,
   ActionRegistry,
   AppActionId,
-  electronRoleToId
-} from "vrkit-shared"
+  Bind,
+  electronRoleToId,
+  invokeWith,
+  ThemeId
+} from "vrkit-shared" // import MainAppState from "../store"
 import { ElectronMainActionManager } from "../electron-actions"
 import { capitalize, first } from "lodash"
 import { assert } from "@3fv/guard"
-import { invokeWith } from "vrkit-shared"
-import { ThemeId } from "vrkit-shared"
-// import MainAppState from "../store"
-import { Bind } from "vrkit-shared"
 import { inspectSharedWorker } from "../../utils/sharedWorkerHelpers"
 import { ThemeType } from "vrkit-models"
 
@@ -31,36 +23,28 @@ const { debug, trace, info, error, warn } = log
 
 // type MenuItemRole = MenuItemConstructorOptions["role"]
 
-const actionToItemFactory =
-  (actionRegistry: ActionRegistry) => (id: string) => {
-    const action = actionRegistry.get(id)
-    assert(!!action, `Action not found for id (${id})`)
-    return {
-      label: action.name,
-      click: (_, __, event) => {
-        action.execute(action, event)
-      },
-      id,
-      accelerator: ActionAccelerator.create(
-        first(action.accelerators)
-      ).toElectron()
-    } as MenuItemConstructorOptions
-  }
+const actionToItemFactory = (actionRegistry: ActionRegistry) => (id: string) => {
+  const action = actionRegistry.get(id)
+  assert(!!action, `Action not found for id (${id})`)
+  return {
+    label: action.name,
+    click: (_, __, event) => {
+      action.execute(action, event)
+    },
+    id,
+    accelerator: ActionAccelerator.create(first(action.accelerators)).toElectron()
+  } as MenuItemConstructorOptions
+}
 
 const roleItemFactory =
   (actionRegistry: ActionRegistry) =>
-  (
-    role: ActionMenuItemDesktopRoleKind,
-    id: string = electronRoleToId(role)
-  ) => {
+  (role: ActionMenuItemDesktopRoleKind, id: string = electronRoleToId(role)) => {
     const action = actionRegistry.get(id) ?? actionRegistry.find({ role })
     return {
       role,
       ...(action && {
         id: action.id,
-        accelerator: ActionAccelerator.create(
-          first(action.accelerators)
-        ).toElectron(),
+        accelerator: ActionAccelerator.create(first(action.accelerators)).toElectron(),
         label: action.name,
         click: (_, __, event) => {
           action.execute(action, event)
@@ -72,8 +56,8 @@ const roleItemFactory =
 const devOptions = (actionRegistry: ActionRegistry) =>
   isDev
     ? invokeWith(roleItemFactory(actionRegistry), roleItem => [
-      { type: "separator" },
-      roleItem("reload"),
+        { type: "separator" },
+        roleItem("reload"),
         roleItem("forceReload"),
         roleItem("toggleDevTools"),
         {
@@ -81,10 +65,7 @@ const devOptions = (actionRegistry: ActionRegistry) =>
           accelerator: "CommandOrControl+F12",
           click: () => {
             if (!inspectSharedWorker()) {
-              dialog.showErrorBox(
-                "Shared Worker Inspect Error",
-                `Unable to find valid shared worker`
-              )
+              dialog.showErrorBox("Shared Worker Inspect Error", `Unable to find valid shared worker`)
             }
           }
         },
@@ -105,7 +86,6 @@ const devOptions = (actionRegistry: ActionRegistry) =>
 
 @Singleton()
 export class ElectronMainMenuManager {
-
   @Bind
   private changeThemeMenuItem(themeId: ThemeId) {
     return {
@@ -137,16 +117,14 @@ export class ElectronMainMenuManager {
           // { type: "separator" as MenuItemRole },
           actionToItem(AppActionId.quit)
         ] as MenuItemConstructorOptions["submenu"]
-      },
-      // { role: 'fileMenu' }
+      }, // { role: 'fileMenu' }
       {
         label: "File",
         submenu: [
           // actionToItem(AppActionIds.newWindow),
           !isMac && actionToItem(AppActionId.quit)
         ].filter(Boolean)
-      },
-      // { role: 'editMenu' }
+      }, // { role: 'editMenu' }
       {
         label: "Edit",
         submenu: [
@@ -162,12 +140,9 @@ export class ElectronMainMenuManager {
       {
         label: "View",
         submenu: [
-
           {
             label: "Theme",
-            submenu: [
-              ...Object.keys(ThemeType).map(this.changeThemeMenuItem)
-            ]
+            submenu: [...Object.keys(ThemeType).map(this.changeThemeMenuItem)]
           },
 
           actionToItem(AppActionId.zoomDefault),
@@ -177,7 +152,7 @@ export class ElectronMainMenuManager {
           roleItem("togglefullscreen"),
 
           // DEV MENU ITEMS
-          ...devOptions(actionRegistry),
+          ...devOptions(actionRegistry)
         ] as MenuItemConstructorOptions[]
       },
       {
@@ -228,7 +203,7 @@ export class ElectronMainMenuManager {
 
   constructor(
     readonly actionRegistry: ActionRegistry,
-    readonly electronActions: ElectronMainActionManager,
+    readonly electronActions: ElectronMainActionManager
     // readonly mainAppState: MainAppState
   ) {}
 }

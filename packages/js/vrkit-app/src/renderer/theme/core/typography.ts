@@ -28,7 +28,19 @@ declare module "@mui/material/styles" {
 
 // export const defaultFont = "SanFranciscoDisplay" // 'Public Sans';
 //export const defaultFont = 'Public Sans';
-export const defaultFont = "Inter" // 'Public Sans';
+export enum Fonts {
+  Inter = "Inter",
+  PublicSans = "Public Sans",
+  SanFranciscoDisplay = "SanFranciscoDisplay",
+  AvenirNext = "AvenirNext",
+  Roboto = "Roboto",
+  RobotoSlab = "RobotoSlab",
+  RobotoMono = "RobotoMono",
+  Segoe = "Segoe",
+  Metro = "Metro"
+}
+
+export const defaultFont = Fonts.Inter
 
 export const primaryFont = setFont(defaultFont)
 
@@ -127,9 +139,9 @@ export const typography: TypographyOptions = {
     fontWeight: 400,
     verticalAlign: "middle",
     lineHeight: 1,
-    letterSpacing: 1.1,
+    letterSpacing: 0.7,
     fontSize: rem(1),
-    fontFamily: defaultFont,
+    fontFamily: Fonts.Segoe,
     textTransform: "unset"
     // textTransform: "uppercase"
     //textTransform: "uppercase"

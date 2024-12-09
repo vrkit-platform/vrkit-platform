@@ -1,4 +1,4 @@
-import { AppContent } from "../../layouts/app"
+import { AppContent } from "../../components/app"
 
 // ----------------------------------------------------------------------
 

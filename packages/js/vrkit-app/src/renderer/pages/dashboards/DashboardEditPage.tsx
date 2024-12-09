@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box"
 import { styled, useTheme } from "@mui/material/styles"
-import { AppContent } from "vrkit-app-renderer/layouts/app"
+import { AppContent } from "../../components/app"
 import React, { useEffect } from "react"
 import {
   child,

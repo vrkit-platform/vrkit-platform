@@ -8,7 +8,7 @@ import clsx from "clsx"
 import { getLogger } from "@3fv/logger-proxy"
 
 // MUI
-import IconButton, { IconButtonTypeMap, type IconButtonProps } from "@mui/material/IconButton"
+import IconButton, { type IconButtonProps } from "@mui/material/IconButton"
 
 import { styled } from "@mui/material/styles"
 
@@ -47,7 +47,7 @@ export type AppIconButtonProps = IconButtonProps & {
  *
  * @param { AppIconButtonProps } props
  */
-export const AppIconButton = React.forwardRef(function AppIconButton(
+export const AppIconButton = React.forwardRef<typeof AppIconButtonRoot, AppIconButtonProps>(function AppIconButton(
   props: AppIconButtonProps, ref: any
 ) {
   const { tooltipProps: providedTooltipProps = null, tooltip = null, className, ...other } = props,

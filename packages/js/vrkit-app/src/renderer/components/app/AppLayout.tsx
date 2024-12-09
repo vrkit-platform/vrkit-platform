@@ -23,9 +23,12 @@ import {
   widthConstraint
 } from "vrkit-shared-ui"
 import Drawer from "@mui/material/Drawer"
-import AppDrawerMenu from "vrkit-app-renderer/components/app-drawer-menu"
-import { AppTitlebar } from "../../components/app-titlebar"
-import { AppContentBar } from "../../components/app-content-bar"
+import AppDrawerMenu from "../app-drawer-menu"
+import { AppTitlebar } from "../app-titlebar"
+import { AppContentBar } from "../app-content-bar"
+import {
+  AppSessionPlayerControlPanel
+} from "../app-session-player-control-panel"
 
 export type AppLayoutProps = {
   sx?: SxProps
@@ -96,7 +99,7 @@ export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
           
         </Box>
       </Box>
-
+      <AppSessionPlayerControlPanel />
     </>
   )
 }

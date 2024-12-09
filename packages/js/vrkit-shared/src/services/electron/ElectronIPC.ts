@@ -1,6 +1,7 @@
 
 
 export enum ElectronIPCChannel {
+  trafficLightTrigger = "trafficLightTrigger",
   openExternal = "openExternal",
   getNativeThemeSync = "getNativeThemeSync",
   nativeThemeChanged = "nativeThemeChanged",

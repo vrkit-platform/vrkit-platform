@@ -10,9 +10,9 @@ import type { ThemeColorScheme } from '../ThemeTypes';
 export function shadows(colorScheme: ThemeColorScheme): Shadows {
   const colorChannel = colorScheme === 'light' ? grey['500'] : common.blackChannel;
 
-  const color1 = appAlpha(colorChannel, 0.2);
-  const color2 = appAlpha(colorChannel, 0.14);
-  const color3 = appAlpha(colorChannel, 0.12);
+  const color1 = appAlpha(colorChannel, 0.17);
+  const color2 = appAlpha(colorChannel, 0.1);
+  const color3 = appAlpha(colorChannel, 0.08);
 
   return [
     'none',

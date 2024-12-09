@@ -1,8 +1,13 @@
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import WindowManager from "./WindowManagerService"
-import { BrowserWindow } from "electron"
+import { app, BrowserWindow, ipcMain } from "electron"
 import EventEmitter3 from "eventemitter3"
 import { isDev } from "../../constants"
+import { Bind, DesktopWindowTrafficLight, ElectronIPCChannel } from "vrkit-shared"
+import { match } from "ts-pattern"
+import { getLogger } from "@3fv/logger-proxy"
+
+const log = getLogger(__filename)
 
 export interface MainWindowEventArgs {
   UI_READY: (win: BrowserWindow) => void
@@ -21,9 +26,21 @@ export class MainWindowManager extends EventEmitter3<MainWindowEventArgs> {
   }
   
   private unload() {
+    ipcMain.off(ElectronIPCChannel.trafficLightTrigger, this.handleTrafficLightTrigger)
     Object.assign(global, {
       mainWindowManager: null
     })
+  }
+  
+  @Bind
+  private handleTrafficLightTrigger(ev: Electron.IpcMainEvent, trafficLight: DesktopWindowTrafficLight) {
+    const win = BrowserWindow.fromWebContents(ev.sender)
+    log.info(`Traffic light pressed (${trafficLight})`)
+    match(trafficLight)
+        .with(DesktopWindowTrafficLight.close, () => app.quit())
+        .with(DesktopWindowTrafficLight.minimize, () => win.minimize())
+        .with(DesktopWindowTrafficLight.maximize, () => win.isMaximized() ? win.restore() : win.maximize())
+        .run()
   }
   
   @PostConstruct() // @ts-ignore
@@ -33,6 +50,9 @@ export class MainWindowManager extends EventEmitter3<MainWindowEventArgs> {
         mainWindowManager: this
       })
     }
+    
+    ipcMain.on(ElectronIPCChannel.trafficLightTrigger, this.handleTrafficLightTrigger)
+    
     if (import.meta.webpackHot) {
       const previousMainWindow = import.meta.webpackHot.data?.["mainWindow"]
       if (previousMainWindow) {
@@ -46,6 +66,13 @@ export class MainWindowManager extends EventEmitter3<MainWindowEventArgs> {
   }
   
   setMainWindow(newMainWindow:Electron.BrowserWindow = null) {
+    if (this.mainWindow_ === newMainWindow) {
+      return
+    }
+    if (this.mainWindow_) {
+      this.mainWindow_.close()
+    }
+    
     this.mainWindow_ = newMainWindow
     this.windowManager.enable(newMainWindow)
   }

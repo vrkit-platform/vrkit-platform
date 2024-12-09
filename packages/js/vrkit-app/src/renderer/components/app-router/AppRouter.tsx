@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { IndexRouteObject, Navigate, NonIndexRouteObject, Outlet, RouteObject, useRoutes } from "react-router-dom"
 
-import { AppLayout } from "vrkit-app-renderer/layouts/app"
+import { AppLayout } from "../app"
 import { LoadingScreen, SplashScreen } from "vrkit-app-renderer/components/loading-screen"
 
 import { DashboardsPage } from "vrkit-app-renderer/pages/dashboards"

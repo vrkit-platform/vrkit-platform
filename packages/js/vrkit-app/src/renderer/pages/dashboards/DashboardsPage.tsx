@@ -3,7 +3,7 @@ import Box from "@mui/material/Box"
 import Button from "@mui/material/Button"
 import { styled, useTheme } from "@mui/material/styles"
 import Grid from "@mui/material/Unstable_Grid2"
-import { AppContent } from "vrkit-app-renderer/layouts/app"
+import { AppContent } from "../../components/app"
 import React, { useState } from "react"
 import { DashboardsListView } from "../../components/dashboards/list-view"
 import {

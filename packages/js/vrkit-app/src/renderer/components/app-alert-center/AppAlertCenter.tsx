@@ -36,17 +36,17 @@ import {
 import { faSpinner as fadSpinner } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
 const log = getLogger(__filename)
 
-const classPrefix = "AlertCenter"
-export const alertCenterClasses = createClassNames(
+const classPrefix = "AppAlertCenter"
+export const appAlertCenterClasses = createClassNames(
   classPrefix,
   "root",
   "notification",
   ...(Object.keys(AlertType) as (keyof typeof AlertType)[])
 )
 
-export type AlertCenterClassKey = ClassNamesKey<typeof alertCenterClasses>
+export type AppAlertCenterClassKey = ClassNamesKey<typeof appAlertCenterClasses>
 
-const AlertCenterRoot = styled<typeof Box>(Box, {
+const AppAlertCenterRoot = styled<typeof Box>(Box, {
   name: classPrefix
 })(({ theme }) => {
   const { palette, spacing, dimen: dimen, transitions, shape, shadows } = theme
@@ -61,7 +61,7 @@ const AlertCenterRoot = styled<typeof Box>(Box, {
     fgColor = fgColor ?? theme.palette.getContrastText(bgColor)
     iconColor = iconColor ?? fgColor
     return {
-      [`&.${alertCenterClasses[color]}, & .${alertCenterClasses[color]}`]: {
+      [`&.${appAlertCenterClasses[color]}, & .${appAlertCenterClasses[color]}`]: {
         textTransform: "uppercase",
         backgroundColor: bgColor,
         boxShadow: shadows[6],
@@ -89,7 +89,7 @@ const AlertCenterRoot = styled<typeof Box>(Box, {
   }
 
   return {
-    [`&, &.${alertCenterClasses.root}`]: {
+    [`&, &.${appAlertCenterClasses.root}`]: {
       ...FillWindow,
       ...PositionAbsolute,
       top: 0,
@@ -99,7 +99,7 @@ const AlertCenterRoot = styled<typeof Box>(Box, {
       pointerEvents: "none",
       zIndex: 4000,
 
-      [child(alertCenterClasses.notification)]: {
+      [child(appAlertCenterClasses.notification)]: {
         ...OverflowHidden,
         transition: transitions.create(["all"]),
         position: "absolute",
@@ -139,8 +139,8 @@ const AlertCenterRoot = styled<typeof Box>(Box, {
   }
 })
 
-const AlertCenterRow = styled<typeof Box>(Box, {
-  name: "AlertCenterRow"
+const AppAlertCenterRow = styled<typeof Box>(Box, {
+  name: "AppAlertCenterRow"
 })(({ theme }) => ({
   ...FlexRow,
   ...flexAlign("center", "stretch"),
@@ -148,41 +148,41 @@ const AlertCenterRow = styled<typeof Box>(Box, {
   borderRadius: theme.shape.borderRadius
 }))
 
-const AlertCenterIcon = styled<typeof Box>(Box, {
-  name: "AlertCenterIcon"
+const AppAlertCenterIcon = styled<typeof Box>(Box, {
+  name: "AppAlertCenterIcon"
 })(({ theme: { spacing, palette, shape } }) => ({
   ...FlexAuto,
   ...padding(spacing(), 0, spacing(), spacing(2)),
   ...widthConstraint(rem(2.5))
 }))
 
-const AlertCenterMessage = styled<typeof Box>(Box, {
-  name: "AlertCenterMessage"
+const AppAlertCenterMessage = styled<typeof Box>(Box, {
+  name: "AppAlertCenterMessage"
 })(({ theme: { spacing, palette, shape } }) => ({
   ...FlexScaleZero,
   ...Ellipsis,
   ...padding(spacing(), spacing(2))
 }))
 
-const AlertCenterActions = styled<typeof Box>(Box, {
-  name: "AlertCenterActions"
+const AppAlertCenterActions = styled<typeof Box>(Box, {
+  name: "AppAlertCenterActions"
 })(({ theme: { spacing, palette } }) => ({
   ...FlexAuto
 }))
 
-export interface AlertCenterProps {
+export interface AppAlertCenterProps {
   className?: string
 }
 
-export function AlertCenter(props: AlertCenterProps) {
+export function AppAlertCenter(props: AppAlertCenterProps) {
   const { className, ...other } = props
   const { toasts, handlers } = useToaster()
   const { startPause, endPause, calculateOffset, updateHeight } = handlers
   const theme = useTheme()
 
   return (
-    <AlertCenterRoot
-      className={clsx(alertCenterClasses.root, className, {})}
+    <AppAlertCenterRoot
+      className={clsx(appAlertCenterClasses.root, className, {})}
       onMouseEnter={startPause}
       onMouseLeave={endPause}
     >
@@ -199,12 +199,12 @@ export function AlertCenter(props: AlertCenterProps) {
           },
           alertType = (t as any).alertType as AlertType
         return (
-          <AlertCenterRow
+          <AppAlertCenterRow
             key={t.id}
             className={clsx(
-              alertCenterClasses.notification,
-              alertCenterClasses[t.type],
-              alertCenterClasses[alertType],
+              appAlertCenterClasses.notification,
+              appAlertCenterClasses[t.type],
+              appAlertCenterClasses[alertType],
               t.type,
               {
                 visible: t.visible
@@ -218,7 +218,7 @@ export function AlertCenter(props: AlertCenterProps) {
               transform: `translate(-50%, -${offset}px)`
             }}
           >
-            <AlertCenterIcon>
+            <AppAlertCenterIcon>
               <AppFAIcon
                 spin={alertType === "loading"}
                 icon={
@@ -233,10 +233,10 @@ export function AlertCenter(props: AlertCenterProps) {
                     : falInfoSquare
                 }
               />
-            </AlertCenterIcon>
-            <AlertCenterMessage>{(t as any).message}</AlertCenterMessage>
+            </AppAlertCenterIcon>
+            <AppAlertCenterMessage>{(t as any).message}</AppAlertCenterMessage>
             {t.type !== "loading" && t.duration === Infinity && (
-              <AlertCenterActions>
+              <AppAlertCenterActions>
                 <Button
                   variant="text"
                   sx={{}}
@@ -247,13 +247,13 @@ export function AlertCenter(props: AlertCenterProps) {
                 >
                   <AppIcon fa icon={t.type === "error" ? fasTimes : falTimes} />
                 </Button>
-              </AlertCenterActions>
+              </AppAlertCenterActions>
             )}
-          </AlertCenterRow>
+          </AppAlertCenterRow>
         )
       })}
-    </AlertCenterRoot>
+    </AppAlertCenterRoot>
   )
 }
 
-export default AlertCenter
+export default AppAlertCenter

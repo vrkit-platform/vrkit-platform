@@ -102,7 +102,7 @@ async function launch() {
       backgroundColor: "black",
       show: false,
       titleBarStyle: "hidden",
-      titleBarOverlay: false,
+      // ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
       ...windowOptionDefaults()
     })
 

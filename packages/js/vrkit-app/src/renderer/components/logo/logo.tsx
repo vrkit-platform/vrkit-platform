@@ -4,7 +4,7 @@ import Box from "@mui/material/Box"
 import { forwardRef } from "react"
 import { useTheme } from "@mui/material/styles"
 
-import { RouterLink } from "vrkit-app-renderer/routes/components"
+import { RouterLink } from "../app-router-link"
 import { rem } from "vrkit-shared-ui"
 
 // ----------------------------------------------------------------------

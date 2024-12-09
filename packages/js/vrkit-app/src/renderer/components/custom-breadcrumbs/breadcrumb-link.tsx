@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 
-import { RouterLink } from 'vrkit-app-renderer/routes/components';
+import { RouterLink } from '../app-router-link';
 
 import type { BreadcrumbsLinkProps } from './types';
 

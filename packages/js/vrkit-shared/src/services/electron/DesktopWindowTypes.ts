@@ -6,3 +6,9 @@ export enum DesktopWindowStatus {
 }
 
 export type DesktopWindowStatusKind =  DesktopWindowStatus | `${DesktopWindowStatus}`
+
+export enum DesktopWindowTrafficLight {
+  maximize = "maximize",
+  minimize = "minimize",
+  close = "close"
+}

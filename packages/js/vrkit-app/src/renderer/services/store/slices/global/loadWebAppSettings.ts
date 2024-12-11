@@ -4,7 +4,7 @@ import { AppSettings } from "vrkit-models"
 
 export function loadWebAppSettings(): AppSettings {
   // const settings = window.loadAppSettingsSync()
-  //const settings =
+  //const settings
   return AppSettings.create()
   //defaults(settings, {
     // customAccelerators: {},

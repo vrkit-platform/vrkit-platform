@@ -28,9 +28,9 @@ if (isDev) {
   const currentUserData = app.getPath("userData")
   console.debug(`Default userData path: %s`, currentUserData)
   
-  const currentName = Path.basename(currentUserData),
-      appName = "VRKit"
-  
+  // const currentName = Path.basename(currentUserData),
+  //     appName = "VRKit"
+  //
   // asOption(currentName)
   //     .tapIf(notEqualTo(appName), () => {
   //       const isElectronDefaultDir = currentName.endsWith("Electron")

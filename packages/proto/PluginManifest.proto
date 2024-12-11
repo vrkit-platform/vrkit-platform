@@ -105,20 +105,25 @@ message PluginOwner {
   string support_url = 11;
 }
 
+message PluginOverview {
+  // HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES
+  string content = 1;
+  repeated string screenshotURLs = 5;
+}
 
 /**
  * Defines a plugins contents
  */
 message PluginManifest {
-
+  
   string id = 1;
 
   string name = 5;
 
   string description = 6;
 
-
   PluginOwner owner = 10;
+  PluginOverview overview = 11;
 
   repeated PluginComponentDefinition components = 20;
 

@@ -1,33 +1,20 @@
-import { DefaultConfig } from 'vrkit-app-renderer/config-global';
 import Box from "@mui/material/Box"
-import Button from "@mui/material/Button"
-import { styled, useTheme } from "@mui/material/styles"
-import Grid from "@mui/material/Unstable_Grid2"
+import { styled } from "@mui/material/styles"
 import { AppContent } from "../../components/app"
-import React, { useState } from "react"
+import React from "react"
 import { DashboardsListView } from "../../components/dashboards/list-view"
 import {
-  child,
   ClassNamesKey,
   createClassNames,
-  FillHeight,
-  FillMaxHeight,
   flexAlign,
-  FlexAuto, FlexColumn,
-  FlexRow,
-  FlexScaleZero,
+  FlexAuto,
+  FlexColumn,
   hasCls,
   OverflowVisible,
   PositionRelative
 } from "vrkit-shared-ui"
 import clsx from "clsx"
 import { getLogger } from "@3fv/logger-proxy"
-import { useAppSelector } from "../../services/store"
-import { sharedAppSelectors } from "../../services/store/slices/shared-app"
-import {
-  useModelEditorContextProvider
-} from "../../components/model-editor-context"
-import { DashboardConfig } from "vrkit-models"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -45,37 +32,18 @@ const DashboardsPageRoot = styled(Box, {
     ...OverflowVisible,
     ...FlexColumn,
     ...flexAlign("stretch", "stretch"),
-    ...PositionRelative,
-    // [child(dashboardsPageClasses.list)]: {
-    //   ...FillMaxHeight,
-    // },
-    // [child(dashboardsPageClasses.editor)]: {
-    //   ...FillHeight
-    // }
+    ...PositionRelative
   }
 }))
 
 export function DashboardsPage() {
-  const theme = useTheme(),
-      configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
-      editorContext = useModelEditorContextProvider<DashboardConfig>(configs),
-      { Provider: ModelEditorProvider, modelById, mutatingModels, setMutatingModel, isModelMutating } = editorContext
-  
-  
-  
   return (
-      <AppContent>
-        <ModelEditorProvider value={editorContext}>
-          
-          <DashboardsPageRoot className={clsx(dashboardsPageClasses.root)}>
-            <DashboardsListView />
-            {/*<DashboardsListEditor className={clsx(dashboardsPageClasses.editor)} />*/}
-          </DashboardsPageRoot>
-        
-        </ModelEditorProvider>
-      </AppContent>
+    <AppContent>
+      <DashboardsPageRoot className={clsx(dashboardsPageClasses.root)}>
+        <DashboardsListView />
+      </DashboardsPageRoot>
+    </AppContent>
   )
 }
-
 
 export default DashboardsPage

@@ -10,7 +10,7 @@ import { getLogger } from "@3fv/logger-proxy"
 // MUI
 import Box from "@mui/material/Box"
 import type {BoxProps} from "@mui/material/Box"
-import { darken, styled } from "@mui/material/styles"
+import { darken, styled, useTheme } from "@mui/material/styles"
 
 // APP
 import {
@@ -20,16 +20,33 @@ import {
   flexAlign,
   FlexRow,
   FillWidth,
-  FlexAuto, padding
+  FlexAuto,
+  padding,
+  FlexScaleZeroBox,
+  FlexColumnBox,
+  FlexScaleZero,
+  EllipsisBox,
+  FlexProperties, HeightProperties
 } from "vrkit-shared-ui"
 import AppBreadcrumbs from "../app-breadcrumbs"
 import { usePageMetadata } from "../page-metadata"
+import { isEmpty } from "vrkit-shared"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
+export function createAppContentBarLabel(text: string, icon?: React.ReactNode) {
+  return !icon ? text : <>{icon}<EllipsisBox>{text}</EllipsisBox></>
+}
+
+export type AppContentBarLabelArgs = [text: string, icon?: React.ReactNode]
+export function createAppContentBarLabels(labelArgs: AppContentBarLabelArgs[]) {
+  return labelArgs.map(args => createAppContentBarLabel(...args))
+}
+
 
 export interface AppContentBarOverrides {
+  title?: React.ReactNode | string
   actions?: React.ReactNode
 }
 
@@ -46,13 +63,13 @@ const AppContentBarRoot = styled(Box, {
 })(({theme}) => ({
   // root styles here
   [hasCls(appContentBarClasses.root)]: {
-    
     ...FillWidth,
     ...FlexRow,
     ...FlexAuto,
     ...flexAlign("space-between"),
     ...padding(theme.spacing(1.5), theme.spacing(2)),
     // ...flexAlign("space-between", "space-between"),
+    transition: theme.transitions.create([...FlexProperties, ...HeightProperties]),
     borderBottom: `1px solid ${darken(theme.palette.background.actionFooter, 0.25)}`,
     backgroundColor: theme.palette.background.actionFooter,
     backgroundImage: theme.palette.background.actionFooterImage,
@@ -77,16 +94,27 @@ export interface AppContentBarProps extends BoxProps {
  */
 export function AppContentBar(props:AppContentBarProps) {
   const { className, ...other } = props,
-      pm = usePageMetadata()
+      pm = usePageMetadata(),
+      theme = useTheme()
   
 
   return <AppContentBarRoot
     className={clsx(appContentBarClasses.root, {}, className)}
     {...other}
   >
-    {/* BREAD CRUMBS */}
-    <AppBreadcrumbs/>
-    
+    <FlexColumnBox sx={{
+      ...FlexScaleZero,
+      ...flexAlign("stretch", "flex-start"),
+      gap: theme.spacing(0.25),
+    }}>
+      {/* PAGE TITLE */}
+      {pm.appContentBar?.title && <EllipsisBox
+        sx={{...FlexAuto}}
+      >{pm.appContentBar?.title}</EllipsisBox>}
+      
+      {/* BREAD CRUMBS */}
+      <AppBreadcrumbs sx={{...FlexAuto}}/>
+    </FlexColumnBox>
     {/* PAGE SPECIFIC ACTIONS */}
     {pm.appContentBar?.actions ?? <></>}
   </AppContentBarRoot>

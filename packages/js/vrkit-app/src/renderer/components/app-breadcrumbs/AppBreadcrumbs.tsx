@@ -44,7 +44,6 @@ const AppBreadcrumbRoot = styled(Breadcrumbs, {
 })(({theme}) => ({
   // root styles here
   [hasCls(appBreadcrumbClasses.root)]: {
-    ...FlexAuto,
     ...FlexRow,
     [child(appBreadcrumbClasses.link)]: {
       ...FlexAuto

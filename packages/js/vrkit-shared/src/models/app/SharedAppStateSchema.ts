@@ -4,7 +4,11 @@ import type { ISharedAppState } from "./SharedAppState"
 import type { DashboardsState } from "../dashboards"
 import { Identity } from "../../utils"
 
-import { AppSettings, DashboardConfig, SessionData } from "vrkit-models"
+import {
+  AppSettings,
+  DashboardConfig,
+  SessionData, ThemeType
+} from "vrkit-models"
 import type { SessionDetail, SessionsState } from "../sessions"
 import { toJS } from "mobx"
 import { OverlaysStateSchema } from "../overlays"
@@ -20,6 +24,8 @@ import { isFunction } from "@3fv/guard"
 //   openDashboardOnLaunch: primitive(),
 //   customAccelerators: map(primitive())
 // })
+
+
 
 export const AppSettingsSchema = custom(
   v => AppSettings.toJson(v),

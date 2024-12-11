@@ -258,6 +258,7 @@ export function DashboardsListView(props: DashboardsListViewProps) {
     globalStyles = useMemo(() => itemActionStyle(theme), [theme]),
     pageMetadata:PageMetadataProps = {
       appContentBar: {
+        title: "Dashboards",
         actions: <DashboardsListItemCreate onClick={createDash}/>
       }
     }

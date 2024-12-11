@@ -209,6 +209,21 @@ export interface PluginOwner {
     supportUrl: string;
 }
 /**
+ * @generated from protobuf message IRacingTools.Models.PluginOverview
+ */
+export interface PluginOverview {
+    /**
+     * HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES
+     *
+     * @generated from protobuf field: string content = 1;
+     */
+    content: string;
+    /**
+     * @generated from protobuf field: repeated string screenshotURLs = 5;
+     */
+    screenshotURLs: string[];
+}
+/**
  * *
  * Defines a plugins contents
  *
@@ -231,6 +246,10 @@ export interface PluginManifest {
      * @generated from protobuf field: IRacingTools.Models.PluginOwner owner = 10;
      */
     owner?: PluginOwner;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.PluginOverview overview = 11;
+     */
+    overview?: PluginOverview;
     /**
      * @generated from protobuf field: repeated IRacingTools.Models.PluginComponentDefinition components = 20;
      */
@@ -894,6 +913,61 @@ class PluginOwner$Type extends MessageType<PluginOwner> {
  */
 export const PluginOwner = new PluginOwner$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class PluginOverview$Type extends MessageType<PluginOverview> {
+    constructor() {
+        super("IRacingTools.Models.PluginOverview", [
+            { no: 1, name: "content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "screenshotURLs", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<PluginOverview>): PluginOverview {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.content = "";
+        message.screenshotURLs = [];
+        if (value !== undefined)
+            reflectionMergePartial<PluginOverview>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginOverview): PluginOverview {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string content */ 1:
+                    message.content = reader.string();
+                    break;
+                case /* repeated string screenshotURLs */ 5:
+                    message.screenshotURLs.push(reader.string());
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: PluginOverview, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string content = 1; */
+        if (message.content !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.content);
+        /* repeated string screenshotURLs = 5; */
+        for (let i = 0; i < message.screenshotURLs.length; i++)
+            writer.tag(5, WireType.LengthDelimited).string(message.screenshotURLs[i]);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.PluginOverview
+ */
+export const PluginOverview = new PluginOverview$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class PluginManifest$Type extends MessageType<PluginManifest> {
     constructor() {
         super("IRacingTools.Models.PluginManifest", [
@@ -901,6 +975,7 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
             { no: 5, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 10, name: "owner", kind: "message", T: () => PluginOwner },
+            { no: 11, name: "overview", kind: "message", T: () => PluginOverview },
             { no: 20, name: "components", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => PluginComponentDefinition }
         ]);
     }
@@ -931,6 +1006,9 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
                 case /* IRacingTools.Models.PluginOwner owner */ 10:
                     message.owner = PluginOwner.internalBinaryRead(reader, reader.uint32(), options, message.owner);
                     break;
+                case /* IRacingTools.Models.PluginOverview overview */ 11:
+                    message.overview = PluginOverview.internalBinaryRead(reader, reader.uint32(), options, message.overview);
+                    break;
                 case /* repeated IRacingTools.Models.PluginComponentDefinition components */ 20:
                     message.components.push(PluginComponentDefinition.internalBinaryRead(reader, reader.uint32(), options));
                     break;
@@ -958,6 +1036,9 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
         /* IRacingTools.Models.PluginOwner owner = 10; */
         if (message.owner)
             PluginOwner.internalBinaryWrite(message.owner, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.PluginOverview overview = 11; */
+        if (message.overview)
+            PluginOverview.internalBinaryWrite(message.overview, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
         /* repeated IRacingTools.Models.PluginComponentDefinition components = 20; */
         for (let i = 0; i < message.components.length; i++)
             PluginComponentDefinition.internalBinaryWrite(message.components[i], writer.tag(20, WireType.LengthDelimited).fork(), options).join();

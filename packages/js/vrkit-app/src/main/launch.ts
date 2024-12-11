@@ -1,6 +1,6 @@
 import { isMac, WindowSizeDefault } from "./constants"
 import { getSharedAppStateStore } from "./services/store"
-
+import Fsx from "fs-extra"
 import Path from "path"
 import { app, BrowserWindow } from "electron"
 import { createWindowOpenHandler, resolveHtmlPath, windowOptionDefaults } from "./utils"
@@ -13,6 +13,7 @@ import { MainWindowManager, WindowManager } from "./services/window-manager"
 import * as ElectronRemote from "@electron/remote/main"
 import { DashboardManager } from "./services/dashboard-manager"
 import { Deferred } from "@3fv/deferred"
+import { asOption } from "@3fv/prelude-ts"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -21,7 +22,6 @@ const { debug, trace, info, error, warn } = log
 
 Object.assign(global, {
   webpackRequire: __webpack_require__,
-  // webpackResolve: (name: string) => require.resolve(name),
   webpackModules: __webpack_modules__,
   nodeRequire: __non_webpack_require__
 })
@@ -52,42 +52,57 @@ const windowMap = new Map<number, BrowserWindow>()
  */
 function prepareWindow(state: ISharedAppState, win: BrowserWindow, isMainWindow: boolean = false) {
   if (windowMap.has(win.id)) {
-    info(`Window ${win.id} is already configured`)
+    warn(`Window ${win.id} is already configured`)
     return
   }
 
-  const id = win.id
+  const { id } = win
   windowMap.set(id, win)
 
-  win.on("close", () => {
-    windowMap.delete(id)
-  })
-
+  // CREATE A HANDLER FOR WINDOW OPEN REQUESTS
   const windowOpenHandler = createWindowOpenHandler((ev, result) => {
     log.info(`windowOpenHandler`, ev)
     return result
   })
 
+  // ENABLE ACCESS TO ALL ELECTRON RENDERER MODULES
   ElectronRemote.enable(win.webContents)
-  win.webContents.on("render-process-gone", (event, details) => {
-    error(`Renderer process crashed`, details, event)
-  })
 
-  win.on("show", () => {
-    win.webContents.setWindowOpenHandler(windowOpenHandler)
-    if (state.devSettings.alwaysOpenDevTools) {
-      win.webContents.openDevTools(isMainWindow ? undefined : {
-        mode: "detach"
-        //mode: "detach"
-      })
-    }
-  })
-
-  win.webContents.setWindowOpenHandler(windowOpenHandler)
-  win.webContents.on("did-create-window", (newWin, details) => {
-    info(`Preparing new webContents window`)
-    prepareWindow(state, newWin, newWin?.id === mainWindow?.id)
-  })
+  // ATTACH WINDOW EVENT HANDLERS
+  win
+    .on("close", () => {
+      windowMap.delete(id)
+    })
+    .on("show", () => {
+      win.webContents.setWindowOpenHandler(windowOpenHandler)
+      if (state.devSettings.alwaysOpenDevTools) {
+        win.webContents.openDevTools(
+          isMainWindow
+            ? undefined
+            : {
+                mode: "detach"
+              }
+        )
+      }
+    })
+  
+  // ATTACH WEB CONTENT HANDLERS
+  win.webContents
+    .on("render-process-gone", (event, details) => {
+      error(`Renderer process crashed`, details, event)
+    })
+    .on("did-create-window", (newWin, details) => {
+      info(`Preparing new webContents window`)
+      prepareWindow(state, newWin, newWin?.id === mainWindow?.id)
+    })
+    .on("devtools-opened", () => {
+      asOption(BuildPaths.root)
+        .filter(Fsx.existsSync)
+        .ifSome(rootDir => {
+          win.webContents.addWorkSpace(rootDir)
+        })
+    })
+    .setWindowOpenHandler(windowOpenHandler)
 }
 
 async function launch() {
@@ -102,11 +117,9 @@ async function launch() {
       backgroundColor: "black",
       show: false,
       titleBarStyle: "hidden",
-      // ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
       ...windowOptionDefaults()
     })
-
-    //electronRemote = await importDefault(import('@electron/remote/main'))
+    
     prepareWindow(appState, mainWindow, true)
 
     app.on("browser-window-created", (_, newWin) => {

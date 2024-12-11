@@ -51,7 +51,6 @@ async function installDevTools() {
   const reactExtLoaded = await targetSession.loadExtension(reactExt.path)
   log.assert(reactExtLoaded !== null, "React extension not loaded")
 
-  // console.log("Extensions", targetSession.getAllExtensions())
 }
 
 export default installDevTools

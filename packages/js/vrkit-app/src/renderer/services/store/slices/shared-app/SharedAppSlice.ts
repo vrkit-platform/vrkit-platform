@@ -25,7 +25,7 @@ import {
   PluginManifest,
   ThemeType
 } from "vrkit-models"
-import { flow } from "lodash/fp"
+import { flow, get } from "lodash/fp"
 import { isArray, isDefined } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
 import { uniqBy } from "lodash"
@@ -48,25 +48,28 @@ const selectAppSettings = (state: ISharedAppState) => state.appSettings,
         .map(install => install.manifest)
         .filter(isDefined) as PluginManifest[]
   ),
-  selectAllPluginComponentDefs = createSelector(selectAllPluginManifests, (manifests): PluginComponentDefinition[] =>
-    uniqBy(
-        manifests.flatMap(manifest =>
-            (manifest?.components ?? []) as PluginComponentDefinition[]).filter(isDefined),
-        comp => comp.id)
-  ),
+  // ALL PLUGIN PROVIDED COMPONENTS
+  selectAllPluginComponentDefs = createSelector(selectAllPluginManifests, (manifests): PluginComponentDefinition[] => {
+    const allComponents = manifests.flatMap(manifest => (manifest?.components ?? []) as Array<PluginComponentDefinition>).filter(isDefined)
+    return uniqBy(allComponents, get("id"))
+  }),
+  // ALL PLUGIN PROVIDED `PluginComponentType.OVERLAY` COMPONENTS
   selectAllPluginComponentOverlayDefs = createSelector(
     selectAllPluginComponentDefs,
     (defs: PluginComponentDefinition[]): PluginComponentDefinition[] =>
       defs.filter(propEqualTo("type", PluginComponentType.OVERLAY))
   ),
-    selectAllPluginComponentOverlayDefsMap = createSelector(
-        selectAllPluginComponentOverlayDefs,
-        (defs: PluginComponentDefinition[]): Record<string, PluginComponentDefinition> =>
-            defs.reduce((map, def) => ({
-              ...map,
-              [def.id]: def
-            }), {} as Record<string, PluginComponentDefinition>)
-    ),
+  selectAllPluginComponentOverlayDefsMap = createSelector(
+    selectAllPluginComponentOverlayDefs,
+    (defs: PluginComponentDefinition[]): Record<string, PluginComponentDefinition> =>
+      defs.reduce(
+        (map, def) => ({
+          ...map,
+          [def.id]: def
+        }),
+        {} as Record<string, PluginComponentDefinition>
+      )
+  ),
   createAppSettingsSelector = <T>(selector: (appSettings: AppSettings) => T) => flow(selectAppSettings, selector),
   createDashboardsSelector = <T>(selector: (dashboards: DashboardsState) => T) => flow(selectDashboardsState, selector),
   selectDefaultDashboardConfigId = createAppSettingsSelector(settings => settings.defaultDashboardConfigId),

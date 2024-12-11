@@ -15,17 +15,21 @@ export const AppIconImage = nativeImage.createFromDataURL(iconPng)
 export function windowOptionDefaults(webPreferences: Partial<WebPreferences> = {}): BrowserWindowConstructorOptions {
   return {
     fullscreenable: false,
+    acceptFirstMouse: true,
     icon: AppIconImage,
-
+    
+    
     webPreferences: {
       backgroundThrottling: false,
       allowRunningInsecureContent: true,
-      webSecurity: false,
+      
+      // webSecurity: true,
       nodeIntegration: true,
       nodeIntegrationInSubFrames: true,
       nodeIntegrationInWorker: true,
       contextIsolation: false,
       sandbox: false,
+      experimentalFeatures: true,
       devTools: true, //isDev,
       ...webPreferences
     }

@@ -10,7 +10,7 @@
         "level-field": "level",
         "line-format": [
             {
-                "field": "__timestamp__"
+                "timestamp-format": "%i"
             },
             " [",
             {
@@ -37,6 +37,7 @@
         "timestamp-field": "timestamp",
         "timestamp-divisor": 1000,
         "value": {
+            
             "args": {
                 "kind": "json",
                 "hidden": true

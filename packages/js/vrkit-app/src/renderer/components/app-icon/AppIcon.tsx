@@ -1,4 +1,4 @@
-import { isNotEmpty } from "vrkit-shared/utils"
+import { isNotEmpty, isURL } from "vrkit-shared/utils"
 import { assert, isNumber, isString } from "@3fv/guard"
 import React from "react"
 import { SxProps } from "@mui/system"
@@ -175,7 +175,7 @@ export interface AppIconProps extends AppIconImgProps {
   
   fa?: boolean
   
-  icon: AppIconKind | UIImageResource
+  icon: AppIconKind | UIImageResource | string
 
   variant?: "circle" | "square"
 
@@ -192,11 +192,13 @@ export const AppIcon = React.forwardRef<HTMLImageElement, AppIconProps>(function
   if (isNumber(elevation)) {
     sx = { ...sx, boxShadow: theme.shadows[elevation] ?? "none" }
   }
-  if (isString(icon) || (isString(icon.url) &&  ImageExt.isPresetUrl(icon.url))) {
+  const isUrl = isString(icon) && isURL(icon)
+  
+  if (!isUrl && (isString(icon) || (isString(icon?.url) &&  ImageExt.isPresetUrl(icon?.url)))) {
     const presetIcon = capitalize(
       isString(icon)
         ? icon
-        : asOption(ImageExt.getPresetUrlPathname(icon.url)).getOrElse(icon?.url ?? AppBuiltinIcons.Code.iconName)
+        : asOption(ImageExt.getPresetUrlPathname(icon?.url)).getOrElse(icon?.url ?? AppBuiltinIcons.Code.iconName)
     )
 
     let Component = AppBuiltinIcons[presetIcon]
@@ -220,7 +222,7 @@ export const AppIcon = React.forwardRef<HTMLImageElement, AppIconProps>(function
     return (
       <AppIconRoot
         ref={ref}
-        src={icon.url}
+        src={isString(icon) ? icon : icon.url}
         className={clsx(appIconClasses.root, appIconClasses[size], className, {
           [appIconClasses.square]: variant === "square",
           [appIconClasses.circle]: variant === "circle",

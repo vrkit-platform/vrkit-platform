@@ -6,9 +6,10 @@ const { debug, trace, info, error, warn } = log
 
 
 export function isURL(url: string) {
+  ///^[a-z]+:/.test(icon)
   return  getValue(() => Boolean(new URL(url)), false, err => {
     if (isDev) {
-      error(`isURL`, err)
+      debug(`isURL could not parse`, err)
     }
   })
 

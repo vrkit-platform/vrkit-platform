@@ -28,9 +28,11 @@ import { getSharedAppStateStore, MainSharedAppState } from "../store"
 import { IDisposer } from "mobx-utils"
 import { ElectronMainAppActions } from "./ElectronMainAppActions"
 import { ElectronMainGlobalActions } from "./ElectronMainGlobalActions"
-import { action, runInAction, set } from "mobx"
+import { runInAction, set } from "mobx"
 import { editorExecuteAction } from "../overlay-manager/OverlayEditorActionFactory"
 import { asOption } from "@3fv/prelude-ts"
+import { getService } from "../../ServiceContainer"
+import { AppSettingsService } from "../app-settings"
 import Accelerator = Electron.Accelerator
 
 // noinspection TypeScriptUnresolvedVariable
@@ -74,7 +76,7 @@ const roleAccelerators = Array<ElectronRoleAcceleratorData>(
     ([
       [ActionMenuItemDesktopRole.reload, "CommandOrControl+r"],
       [ActionMenuItemDesktopRole.forceReload, "CommandOrControl+shift+r"],
-      [ActionMenuItemDesktopRole.toggleDevTools, ["Control+j","CommandOrControl+alt+i", "F12"]]
+      [ActionMenuItemDesktopRole.toggleDevTools, ["Control+j", "CommandOrControl+alt+i", "F12"]]
     ] as ElectronRoleAcceleratorData[])),
   [ActionMenuItemDesktopRole.minimize, "CommandOrControl+m"],
   [ActionMenuItemDesktopRole.front, [], { name: "Bring All to Front" }]
@@ -150,14 +152,7 @@ export const electronAppActions: Array<ActionOptions> = [
       //   DesktopWindowType.settings
       // )
     }
-  }, // {
-  //   ...ElectronMainAppActions.newWindow,
-  //   execute: () => {
-  //     getService(DesktopElectronWindowManager)?.openWindow(
-  //       DesktopWindowType.normal
-  //     )
-  //   }
-  // },
+  },
   {
     ...ElectronMainAppActions.closeWindow,
     role: "close",
@@ -179,9 +174,7 @@ export const electronAppActions: Array<ActionOptions> = [
   {
     ...ElectronMainAppActions.zoomDefault,
     execute: () => {
-      const store = getSharedAppStateStore()
-      // store.setZoomFactor(1)
-      store.updateAppSettings({ zoomFactor: 1 })
+      getService(AppSettingsService).changeSettings({ zoomFactor: 1 })
     }
   },
   {
@@ -190,8 +183,7 @@ export const electronAppActions: Array<ActionOptions> = [
       info("Zoom In")
       const store = getSharedAppStateStore(),
         newZoomFactor = store.appSettings.zoomFactor + ZoomFactorIncrement
-
-      store.updateAppSettings({
+      getService(AppSettingsService).changeSettings({
         zoomFactor: Math.min(newZoomFactor, ZoomFactorMax)
       })
     }
@@ -203,10 +195,9 @@ export const electronAppActions: Array<ActionOptions> = [
       const store = getSharedAppStateStore(),
         newZoomFactor = store.appSettings.zoomFactor - ZoomFactorIncrement
 
-      store.updateAppSettings({
+      getService(AppSettingsService).changeSettings({
         zoomFactor: Math.max(newZoomFactor, ZoomFactorMin)
       })
-      // store.setZoomFactor(Math.max(newZoomFactor, ZoomFactorMin))
     }
   }
 ]
@@ -260,16 +251,12 @@ export class ElectronMainActionManager {
    * @param actionMap
    * @private
    */
-  
+
   @Bind
   private updateActionsState() {
     runInAction(() => {
-      const actionDefs:ActionDef[] = actionOptionsToActionDefs(this.actionRegistry.allActions)
-      set(
-          this.sharedAppState.actions,
-          "actions",
-          Object.fromEntries<ActionDef>(actionDefs.map(it => [it.id, it]))
-      )
+      const actionDefs: ActionDef[] = actionOptionsToActionDefs(this.actionRegistry.allActions)
+      set(this.sharedAppState.actions, "actions", Object.fromEntries<ActionDef>(actionDefs.map(it => [it.id, it])))
     })
   }
 
@@ -317,7 +304,8 @@ export class ElectronMainActionManager {
   }
 
   constructor(
-    @InjectContainer() readonly container: Container,
+    @InjectContainer()
+    readonly container: Container,
     readonly actionRegistry: ActionRegistry,
     readonly sharedAppState: MainSharedAppState
   ) {}
@@ -334,7 +322,8 @@ export class ElectronMainActionManager {
     this.disableGlobalActions(...actionIds)
   }
 
-  @Bind enableGlobalActions(...ids: string[]): IDisposer {
+  @Bind
+  enableGlobalActions(...ids: string[]): IDisposer {
     return runInAction(() => {
       const reg = this.actionRegistry,
         actions = reg.globalActions.filter(it => ids.includes(it.id)),
@@ -342,7 +331,9 @@ export class ElectronMainActionManager {
         enableActionIds = enableActions.map(get("id")),
         enabledAccelerators = Array<Accelerator>()
 
-      if (isNotEmpty(ignoredActions)) log.warn("Already active actions", ignoredActions)
+      if (isNotEmpty(ignoredActions)) {
+        log.warn("Already active actions", ignoredActions)
+      }
 
       enableActions.forEach(action => {
         const accelerators = asOption(action.accelerators?.filter(isString))
@@ -353,7 +344,9 @@ export class ElectronMainActionManager {
 
         const [accels, registeredAccels] = partition(accelerators, accel => !globalShortcut.isRegistered(accel))
 
-        if (registeredAccels.length) log.info(`Already assigned shortcuts`, registeredAccels)
+        if (registeredAccels.length) {
+          log.info(`Already assigned shortcuts`, registeredAccels)
+        }
 
         enabledAccelerators.push(...accels)
         globalShortcut.registerAll(accels, () => action.execute())
@@ -370,7 +363,8 @@ export class ElectronMainActionManager {
     })
   }
 
-  @Bind disableGlobalActions(...enableActionIdArgs: Array<string | string[]>): void {
+  @Bind
+  disableGlobalActions(...enableActionIdArgs: Array<string | string[]>): void {
     return runInAction(() => {
       const enableActionIds = flatten(enableActionIdArgs),
         enabledActionDefs = enableActionIds.map(id => this.actionsState.actions[id]).filter(isDefined<ActionDef>)

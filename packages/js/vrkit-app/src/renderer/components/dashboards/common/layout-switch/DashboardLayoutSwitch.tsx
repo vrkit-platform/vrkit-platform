@@ -1,15 +1,5 @@
 import { getLogger } from "@3fv/logger-proxy"
-import {
-  child,
-  ClassNamesKey,
-  createClassNames,
-  Ellipsis,
-  flexAlign,
-  FlexAuto,
-  FlexRowCenter,
-  FlexScaleZero,
-  hasCls
-} from "vrkit-shared-ui"
+import { child, ClassNamesKey, createClassNames, flexAlign, FlexAuto, FlexRowCenter, hasCls } from "vrkit-shared-ui"
 import { styled } from "@mui/material/styles"
 import Box from "@mui/material/Box"
 import clsx from "clsx"
@@ -29,9 +19,9 @@ const DashboardLayoutSwitchRoot = styled(Box, {
 })(({ theme }) => ({
   // root styles here
   [hasCls(classNames.root)]: {
-    gap: theme.spacing(1),
+    gap: theme.spacing(0.25),
     ...FlexRowCenter,
-    ...flexAlign("stretch", "center"),
+    ...flexAlign("center", "center"),
     ...FlexAuto,
 
     [child("checkbox")]: {
@@ -43,12 +33,6 @@ const DashboardLayoutSwitchRoot = styled(Box, {
 export interface DashboardLayoutSwitchProps {
   vr?: boolean
 
-  hiddenLabel?: boolean
-
-  hiddenTip?: boolean
-
-  label: string
-
   value: boolean
 
   disabled?: boolean
@@ -58,43 +42,35 @@ export interface DashboardLayoutSwitchProps {
 
 export function DashboardLayoutSwitch({
   vr: isVR = false,
-  label,
   value,
   disabled,
   onChange,
-  hiddenTip = false,
-  hiddenLabel = false
 }: DashboardLayoutSwitchProps) {
   return (
     <DashboardLayoutSwitchRoot className={clsx(classNames.root)}>
-      {!hiddenLabel || !hiddenTip ? (
-        <>
-          <Box
-            sx={{
-              ...FlexScaleZero,
-              ...Ellipsis
-            }}
-          >
-            {!hiddenLabel ? <>{label} </> : null}
-            {!hiddenTip ? (
-              <Typography
-                component="span"
-                variant="caption"
-                sx={{ opacity: 0.7, fontStyle: "italic" }}
-              >
-                {value ? "" : "Not "}Enabled
-              </Typography>
-            ) : null}
-          </Box>
-        </>
-      ) : null}
+      <Typography
+        component="span"
+        variant="inherit"
+        sx={{
+          ...FlexAuto,
+          opacity: 0.7
+        }}
+      >
+        {isVR ? "VR" : "Screen"}
+      </Typography>
+
       <Checkbox
+        id={isVR ? "vrEnabled" : "screenEnabled"}
+        name={isVR ? "vrEnabled" : "screenEnabled"}
         sx={{
           ...FlexAuto
         }}
-        defaultChecked={value}
+        checked={value}
         onChange={(event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+          info(`isVR=${isVR} enabled=${checked}`)
           onChange(checked)
+          event.preventDefault?.()
+          event.stopPropagation?.()
         }}
       />
     </DashboardLayoutSwitchRoot>

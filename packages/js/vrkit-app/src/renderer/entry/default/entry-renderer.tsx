@@ -11,17 +11,19 @@ process.on("unhandledRejection",(...args:any[]) => {
 })
 
 async function start() {
-  // Object.assign(global, {
-  //   webpackRequire: __webpack_require__,
-  //   // webpackResolve: (name: string) => require.resolve(name),
-  //   webpackModules: __webpack_modules__,
-  //   nodeRequire: __non_webpack_require__,
-  // })
+  if (process.env.NODE_ENV !== "production") {
+    Object.assign(global, {
+      webpackRequire: __webpack_require__,
+      // webpackResolve: (name: string) => require.resolve(name),
+      webpackModules: __webpack_modules__,
+      nodeRequire: __non_webpack_require__,
+    })
+  }
+  
   await LogServerRendererSetup()
   
-  const renderRoot = await import("./renderRoot").then(get("default"))
-  
   const
+      renderRoot = await import("./renderRoot").then(get("default")),
       rootEl = document.getElementById("root") as HTMLElement,
       root = ReactDOM.createRoot(rootEl)
   renderRoot(root).catch(err => console.error("failed to render root", err))

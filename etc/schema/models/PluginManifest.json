@@ -278,6 +278,51 @@
             "title": "Overlay I Racing Settings",
             "description": "* IRacing Overlay specific settings"
         },
+        "IRacingTools.Models.PluginOverview": {
+            "properties": {
+                "content": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES"
+                },
+                "screenshotURLs": {
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Plugin Overview"
+        },
         "IRacingTools.Models.PluginOwner": {
             "properties": {
                 "name": {
@@ -753,6 +798,16 @@
                 },
                 "owner": {
                     "$ref": "#/definitions/IRacingTools.Models.PluginOwner",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "overview": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginOverview",
                     "additionalProperties": true,
                     "oneOf": [
                         {

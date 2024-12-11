@@ -23,12 +23,11 @@ import {
   alpha,
   dimensionConstraints,
   Ellipsis,
-  EllipsisBox, FillWidth,
+  EllipsisBox,
   flexAlign,
   FlexAuto,
   FlexAutoBox,
   FlexColumnBox,
-  FlexColumnCenterBox,
   FlexRow,
   FlexRowBox,
   FlexRowCenter,
@@ -45,7 +44,6 @@ import Typography from "@mui/material/Typography"
 import { asOption } from "@3fv/prelude-ts"
 import { NavLink } from "react-router-dom"
 import { WebPaths } from "../../../routes/WebPaths"
-import ButtonBase, { ButtonBaseProps } from "@mui/material/ButtonBase"
 import AddIcon from "@mui/icons-material/Add"
 import IconButton, { IconButtonProps } from "@mui/material/IconButton"
 import { faEdit, faEllipsisVertical, faRocketLaunch, faTrash } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
@@ -310,7 +308,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
             elevation={4}
             variant="circle"
             size="xl"
-            icon={"Alien"}
+            icon={asOption(config?.uiResource?.icon?.url).getOrElse("Alien")}
             sx={{ ...FlexAuto }}
           />
 
@@ -435,27 +433,15 @@ export function DashboardsListItemCreate(props: DashboardsListItemCreateProps) {
         sx={{
           ...FlexAuto,
           ...FlexRowCenter,
-          // ...padding(`0.5rem`),
           gap: theme.spacing(1)
         }}
         
         className={clsx(dashboardsListViewClasses.itemCreateButton)}
       >
-        {/*<FlexRowCenterBox*/}
-        {/*  sx={{*/}
-        {/*    ...padding(`0.5rem`),*/}
-        {/*    gap: theme.spacing(1)*/}
-        {/*  }}*/}
-        {/*>*/}
           <AddIcon />
-          <Typography
-            variant="body1"
-            
-          >
+          <span>
             Create
-          </Typography>
-        {/*</FlexRowCenterBox>*/}
-        {/*</FlexRowBox>*/}
+          </span>
       </Button>
     </Box>
   )

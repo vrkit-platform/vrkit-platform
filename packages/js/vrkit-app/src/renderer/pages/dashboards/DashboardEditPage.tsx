@@ -19,7 +19,7 @@ import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import { useModelEditorContextProvider } from "../../components/model-editor-context"
 import { DashboardConfig } from "vrkit-models"
 import { useParams } from "react-router"
-import { isNotEmpty } from "vrkit-shared"
+import { isNotEmpty, propEqualTo } from "vrkit-shared"
 import { asOption } from "@3fv/prelude-ts"
 import { useNavigate } from "react-router-dom"
 import { WebPaths } from "../../routes/WebPaths"
@@ -53,40 +53,27 @@ const DashboardEditPageRoot = styled(Box, {
 export function DashboardEditPage() {
   const theme = useTheme(),
     configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
-    editorContext = useModelEditorContextProvider<DashboardConfig>(configs),
+    
     { id } = useParams<{
       id: string
     }>(),
-    {
-      Provider: ModelEditorProvider,
-      clearMutatingModels,
-      modelById,
-      mutatingModels,
-      setMutatingModel,
-      isModelMutating
-    } = editorContext,
-    nav = useNavigate()
+    nav = useNavigate(),
+      config = configs.find(propEqualTo("id", id))
 
   useEffect(() => {
-    asOption(id)
-      .filter(isNotEmpty)
-
-      .match({
-        None: () => {
-          clearMutatingModels()
-          nav(WebPaths.app.dashboards)
-        },
-        Some: id => setMutatingModel(id === "0" ? DashboardConfig.create({}) : modelById(id))
-      })
-  }, [id])
+    if (!config)
+      nav(WebPaths.app.dashboards)
+  }, [config])
 
   return (
     <AppContent>
-      <ModelEditorProvider value={editorContext}>
+      
         <DashboardEditPageRoot className={clsx(dashboardEditPageClasses.root)}>
-          <DashboardEditorView className={clsx(dashboardEditPageClasses.editor)} />
+          <DashboardEditorView className={clsx(dashboardEditPageClasses.editor)}
+            config={config}
+          />
         </DashboardEditPageRoot>
-      </ModelEditorProvider>
+      
     </AppContent>
   )
 }

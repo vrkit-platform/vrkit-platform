@@ -40,11 +40,11 @@ export enum Fonts {
   Metro = "Metro"
 }
 
-export const defaultFont = Fonts.Inter
+export const defaultFont = Fonts.Segoe
 
 export const primaryFont = setFont(defaultFont)
 
-export const secondaryFont = setFont("AvenirNext")
+export const secondaryFont = setFont(Fonts.Inter)
 
 // ----------------------------------------------------------------------
 

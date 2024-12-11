@@ -10,51 +10,34 @@ import { getLogger } from "@3fv/logger-proxy"
 import type { BoxProps } from "@mui/material/Box"
 // MUI
 import Box from "@mui/material/Box"
-import { darken, styled, useTheme } from "@mui/material/styles"
+import { darken, styled } from "@mui/material/styles"
 
 // APP
 import {
   child,
   ClassNamesKey,
   createClassNames,
-  Ellipsis,
   FillHeight,
-  FillWidth,
   flexAlign,
   FlexAuto,
   FlexColumn,
   FlexRowCenter,
-  FlexRowCenterBox,
   FlexScaleZero,
   hasCls,
   OverflowAuto,
   OverflowHidden,
   padding
 } from "vrkit-shared-ui"
-import { isEmpty } from "vrkit-shared"
-import Typography from "@mui/material/Typography"
 import { isDefined } from "@3fv/guard"
 import { DashboardConfig } from "vrkit-models"
 import { useService } from "../../service-container"
-import { useAsyncCallback } from "../../../hooks"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
-import { useModelEditorContext } from "../../model-editor-context"
-import { type FormikBag, type FormikConfig, FormikContextType, FormikProps, withFormik } from "formik"
-import { get } from "lodash/fp"
-import { first } from "lodash"
+import { FormikContextType } from "formik"
 import { bind } from "vrkit-shared/utils"
-import { FormActionFooterDefault, FormContainer } from "../../form"
 import { Alert } from "../../../services/alerts"
 import { useIsMounted } from "usehooks-ts"
-import { FlexRow } from "vrkit-shared-ui/styles"
-import { AppTextFieldFormik } from "../../app-text-field"
 import { useNavigate } from "react-router-dom"
-import { DashboardLayoutSwitch } from "../common/layout-switch"
-import AppBreadcrumbs from "../../app-breadcrumbs"
-import { PageMetadata, PageMetadataProps } from "../../page-metadata"
-import {
-  AppButtonGroupFormikPositiveNegative
-} from "../../app-button-group-positive-negative"
+import { DashboardEditorForm } from "./DashboardEditorForm"
 // import { faWindowClose } from "@awesome.me/kit-79150a3eed"
 
 const log = getLogger(__filename)
@@ -74,8 +57,8 @@ export const classNames = createClassNames(
   "detailsContent",
   "layouts",
   "layout",
-  "widgets",
-  "widget"
+  "overlays",
+  "overlay"
 )
 export type DashboardEditorClassKey = ClassNamesKey<typeof classNames>
 
@@ -122,12 +105,12 @@ const DashboardEditorRoot = styled(Box, {
 
         // background: darken(theme.palette.background.appBar, 0.2),
         [child(classNames.detailsContent)]: {
-          ...padding(theme.spacing(1)), // ...FillWidth,
+          ...padding(theme.spacing(1)),
           ...FlexColumn,
           ...FlexAuto, // ...OverflowVisible,
           gap: theme.spacing(1),
           [child(classNames.layouts)]: {
-            // ...FillWidth,
+            ...padding(0,theme.spacing(1),theme.spacing(2)),
             ...FlexColumn,
             ...FlexAuto,
             gap: theme.spacing(1),
@@ -141,6 +124,15 @@ const DashboardEditorRoot = styled(Box, {
                 ...FlexAuto
               }
             }
+          },
+          [child(classNames.overlays)]: {
+            ...padding(theme.spacing(1),theme.spacing(1),theme.spacing(2)),
+            ...FlexColumn,
+            ...FlexAuto,
+            gap: theme.spacing(1),
+            [child(classNames.overlay)]: {
+            
+            }
           }
         }
       }
@@ -151,184 +143,10 @@ const DashboardEditorRoot = styled(Box, {
 /**
  * DashboardEditor Component Properties
  */
-export interface DashboardEditorProps extends BoxProps {}
-
-type DashboardListEditorFormProps = {
-  dashConfig: DashboardConfig
-  handleSubmitRef?: React.MutableRefObject<any>
-  onSubmit?: FormikConfig<DashboardConfig>["onSubmit"]
-  onBlurField?: (
-    event: React.FocusEvent<any>,
-    values: Partial<DashboardConfig>,
-    formikContext: FormikContextType<DashboardConfig>
-  ) => Promise<any> | any
+export interface DashboardEditorProps  {
+  config: DashboardConfig,
+  className?: string
 }
-
-const DashboardEditorForm = withFormik<DashboardListEditorFormProps, DashboardConfig>({
-  mapPropsToValues: get("dashConfig"),
-  validate: () => ({}), // createValidator(DashboardConfig as any),
-  enableReinitialize: true,
-  displayName: "DashboardListEditorFormik",
-  handleSubmit: (values: DashboardConfig, formikBag: FormikBag<DashboardListEditorFormProps, DashboardConfig>) =>
-    formikBag.props.onSubmit?.(values, formikBag)
-})(function DashboardListEditorForm(props: DashboardListEditorFormProps & FormikProps<DashboardConfig>) {
-  const {
-      errors,
-      onBlurField,
-      handleBlur,
-
-      handleChange,
-      handleSubmit,
-      isSubmitting,
-      initialValues,
-      status = {},
-      touched,
-      values,
-      setFieldValue,
-      resetForm,
-      submitForm,
-      dashConfig,
-      handleSubmitRef
-    } = props,
-    theme = useTheme(),
-    nav = useNavigate(),
-    dashboardClient = useService(DashboardManagerClient),
-    patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
-    launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
-    canModify = useMemo(() => {
-      return !launchLayoutEditorAsync.loading && !patchConfigAsync.loading
-    }, [launchLayoutEditorAsync.loading, patchConfigAsync.loading]),
-    { updateMutatingModel, clearMutatingModels, resetMutatingModels, isMutatingModelNew, mutatingModels } =
-      useModelEditorContext<DashboardConfig>(),
-    model = first(mutatingModels),
-    handleBlurField = (e: React.FocusEvent<any>) => {
-      log.info(`On blur <${e.target?.tagName} name=${e.target?.name}>`, e)
-      if (onBlurField) {
-        onBlurField(e, values, props)
-        if (e.isDefaultPrevented() || e.isPropagationStopped()) {
-          log.info(
-            `e.isDefaultPrevented()=${e.isDefaultPrevented()} || e.isPropagationStopped()=${e.isPropagationStopped()}`
-          )
-          return
-        }
-      }
-    },
-      pageMetadata: PageMetadataProps = {
-        appContentBar: {
-          actions: <AppButtonGroupFormikPositiveNegative<DashboardConfig>
-              item={model}
-              negativeLabel={isEmpty(model?.id) ? "Cancel" : "Revert"}
-              negativeHandler={() => {
-                resetMutatingModels([model?.id])
-                resetForm()
-                nav(-1)
-              }}
-              positiveLabel={isEmpty(model?.id) ? "Create" : "Save"}
-              positiveHandler={() => {
-                handleSubmit()
-              }}
-              isSubmitting={isSubmitting}
-              submitForm={submitForm}
-              resetForm={resetForm}
-          />
-        }
-      }
-
-  // UPDATE THE PROVIDED REF ENABLING OTHER
-  // UI COMPONENTS/DIALOGS, ETC TO SUBMIT
-  if (handleSubmitRef) {
-    handleSubmitRef.current = handleSubmit
-  }
-
-  return (
-      <><PageMetadata {...pageMetadata}/>
-    <FormContainer
-      noValidate
-      // onBlur={handleBlur}
-      onSubmit={handleSubmit}
-    >
-      <Box className={clsx(classNames.content)}>
-        {!!model && values && (
-          <>
-            {/* HEADER */}
-          
-            <Box className={clsx(classNames.header)}>
-              
-              <Box className={clsx(classNames.headerField)}>
-                <AppTextFieldFormik<DashboardConfig>
-                  variant="standard"
-                  onBlur={handleBlurField}
-                  autoFocus
-                  // selectOnFocus
-                  label={null}
-                  name="name"
-                  placeholder="My Dash"
-                  InputProps={{
-                    sx: {
-                      "& input": {
-                        fontSize: theme.typography.h3.fontSize
-                      }
-                    }
-                  }}
-                />
-              </Box>
-
-              <Box className={clsx(classNames.headerField)}>
-                <AppTextFieldFormik<DashboardConfig>
-                  variant="filled"
-                  flex
-                  rows={4}
-                  autoFocus
-                  // selectOnFocus
-                  onBlur={handleBlurField}
-                  multiline={true}
-                  label={"Notes"}
-                  name="description"
-                  placeholder="I made it"
-                />
-              </Box>
-            </Box>
-            <Box className={clsx(classNames.details)}>
-              <Box className={clsx(classNames.detailsContent)}>
-                <Box className={clsx(classNames.layouts)}>
-                  <FlexRowCenterBox>
-                    <Typography
-                      sx={{
-                        ...Ellipsis,
-                        ...FlexScaleZero
-                      }}
-                      variant="h6"
-                    >
-                      Layouts
-                    </Typography>
-                  </FlexRowCenterBox>
-                  <DashboardLayoutSwitch
-                    vr
-                    value={dashConfig.vrEnabled}
-                    label="VR"
-                    onChange={vrEnabled => {
-                      canModify && patchConfigAsync.execute(dashConfig.id, { vrEnabled })
-                    }}
-                  />
-                  <DashboardLayoutSwitch
-                    vr={false}
-                    value={dashConfig.screenEnabled}
-                    label="Screen"
-                    onChange={screenEnabled => {
-                      canModify && patchConfigAsync.execute(dashConfig.id, { screenEnabled })
-                    }}
-                  />
-                </Box>
-              </Box>
-            </Box>
-          </>
-        )}
-      </Box>
-      
-    </FormContainer>
-      </>
-  )
-})
 
 /**
  * DashboardEditor Component
@@ -339,18 +157,18 @@ export function DashboardEditorView(props: DashboardEditorProps) {
   const
     isMounted = useIsMounted(),
     nav = useNavigate(),
-    { className, ...other } = props,
+    { className, config, ...other } = props,
     dashboardClient = useService(DashboardManagerClient),
-    editorContext = useModelEditorContext<DashboardConfig>(),
-    { modelById, mutatingModels, setMutatingModel, isModelMutating, resetMutatingModels, clearMutatingModels } =
-      editorContext,
-    dashConfig = mutatingModels?.[0],
-    onReset = useMemo(() => bind(resetMutatingModels, null, [dashConfig?.id]), [dashConfig?.id]),
+    // editorContext = useModelEditorContext<DashboardConfig>(),
+    // { modelById, mutatingModels, setMutatingModel, isModelMutating, resetMutatingModels, clearMutatingModels } =
+    //   editorContext,
+    //config = mutatingModels?.[0],
+    //onReset = useMemo(() => bind(resetMutatingModels, null, [config?.id]), [config?.id]),
     onSubmit = Alert.usePromise(
       async (values: DashboardConfig, { setErrors, setStatus, setSubmitting }: FormikContextType<DashboardConfig>) => {
         try {
           // DISPATCH THE SAVE ACTION
-          const savedDashConfig = await dashboardClient.updateDashboardConfig(dashConfig?.id, values)
+          const savedDashConfig = await dashboardClient.updateDashboardConfig(config?.id, values)
           if (isMounted()) {
             setStatus({ success: true })
             setSubmitting(false)
@@ -373,7 +191,7 @@ export function DashboardEditorView(props: DashboardEditorProps) {
         success: ({ result }) => `"Successfully saved dashboard (${result.name})."`,
         error: "Unable to save project."
       },
-      [isMounted, onReset]
+      [isMounted]
     )
 
   return (
@@ -381,14 +199,14 @@ export function DashboardEditorView(props: DashboardEditorProps) {
       className={clsx(
         classNames.root,
         {
-          [classNames.visible]: isDefined(dashConfig)
+          [classNames.visible]: isDefined(config)
         },
         className
       )}
       {...other}
     >
       <DashboardEditorForm
-        dashConfig={dashConfig}
+        dashConfig={config}
         onSubmit={onSubmit}
         //onBlurField={onBlurField}
       />

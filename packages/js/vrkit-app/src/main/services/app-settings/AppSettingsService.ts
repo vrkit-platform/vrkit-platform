@@ -2,24 +2,26 @@ import { getLogger } from "@3fv/logger-proxy"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { ipcMain } from "electron"
 
-import { Disposables, ErrorKind } from "vrkit-shared"
-import { Bind } from "vrkit-shared"
-import { ElectronIPCChannel } from "vrkit-shared"
-import { AppSettings } from "vrkit-models"
+import {
+  AppSettingsDefaults,
+  Bind, defaults,
+  Disposables,
+  ElectronIPCChannel,
+  ErrorKind
+} from "vrkit-shared"
+import { AppSettings, ThemeType } from "vrkit-models"
 import { AppFiles } from "vrkit-shared/constants/node"
 import Fs from "fs"
 import PQueue from "p-queue"
-import { action, IObjectDidChange, runInAction, set } from "mobx"
+import { IObjectDidChange, runInAction, set } from "mobx"
 import SharedAppState from "../store"
-import { BindAction } from "../../decorators"
-import { AppSettingsSchema } from "vrkit-shared"
-import { serialize } from "serializr"
 import { deepObserve } from "mobx-utils"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
+
 
 @Singleton()
 export class AppSettingsService {
@@ -39,7 +41,7 @@ export class AppSettingsService {
   private patchSettings(settings: Partial<AppSettings>): AppSettings {
     return runInAction(() => {
       set(this.sharedAppState.appSettings, settings)
-  
+
       return this.sharedAppState.appSettings
     })
   }
@@ -84,14 +86,14 @@ export class AppSettingsService {
       emitDefaultValues: true
     })
   }
-  
+
   /**
    * Resource cleanup
    */
   [Symbol.dispose]() {
     this.disposers_.dispose()
   }
-  
+
   /**
    * Simply calls dispose
    * @private
@@ -123,7 +125,6 @@ export class AppSettingsService {
     if (import.meta.webpackHot) {
       import.meta.webpackHot.addDisposeHandler(() => {
         this.unload()
-        
       })
     }
   }
@@ -136,16 +137,12 @@ export class AppSettingsService {
         throw Error(`${settingsFile} is not a normal file`)
       }
       const jsonStr = await Fs.promises.readFile(settingsFile, "utf-8")
-      return AppSettings.fromJsonString(jsonStr, {
+      return defaults(AppSettings.fromJsonString(jsonStr, {
         ignoreUnknownFields: true
-      })
+      }),AppSettingsDefaults)
     } catch (err) {
       warn(`Failed to load app settings, using defaults`, err)
-      return AppSettings.create({
-        defaultDashboardConfigId: null,
-        autoconnect: false,
-        openDashboardOnLaunch: true
-      })
+      return AppSettings.create(AppSettingsDefaults)
     }
   }
 
@@ -169,13 +166,18 @@ export class AppSettingsService {
   /**
    * On state change, emit to renderers
    *
-   * @param change
+   * @param _change
    */
   @Bind
-  private onStateChange(change: IObjectDidChange<AppSettings>) {
+  private onStateChange(_change: IObjectDidChange<AppSettings>) {
     this.saveAppSettings(this.appSettings)
   }
 
+  /**
+   * Constructor for singleton
+   *
+   * @param sharedAppState
+   */
   constructor(readonly sharedAppState: SharedAppState) {}
 
   get appSettings() {

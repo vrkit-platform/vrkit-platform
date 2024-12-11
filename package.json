@@ -94,12 +94,12 @@
     "prettier": "^3.3.3",
     "prettier-plugin-package": "^1.4.0",
     "quicktype": "^23.0.170",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-moment": "^1.1.3",
     "react-refresh": "0.14.2",
     "react-router-dom": "^6.26.0",
-    "react-test-renderer": "18.3.1",
+    "react-test-renderer": "19.0.0",
     "redux": "^5.0.1",
     "rimraf": "^6.0.1",
     "sass": "^1.77.8",
@@ -130,10 +130,10 @@
   },
   "resolutions": {
     "electron": "31.3.0",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "react-refresh": "0.14.2",
-    "react-test-renderer": "18.3.1"
+    "react-test-renderer": "19.0.0"
   },
   "scripts": {
     "compile": "tsc -b tsconfig.json",

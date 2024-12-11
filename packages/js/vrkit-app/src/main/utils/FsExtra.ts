@@ -49,12 +49,12 @@ export function resolveMainFileURL(file:string): string {
 }
 
 export function resolveHtmlPath(htmlFileName:string): string {
-  if (process.env.NODE_ENV === "development") {
-    const port = process.env.PORT || 1618
-    const url = new URL(`http://localhost:${port}`)
-    url.pathname = htmlFileName
-    return url.href
-  }
+  // if (process.env.NODE_ENV === "development") {
+  //   const port = process.env.PORT || 1618
+  //   const url = new URL(`http://localhost:${port}`)
+  //   url.pathname = htmlFileName
+  //   return url.href
+  // }
   
-  return `file://${Path.resolve(__dirname, "..","renderer", htmlFileName)}`
+  return Path.resolve(__dirname, "..","renderer", htmlFileName)//`file://${Path.resolve(__dirname, "..","renderer", htmlFileName)}`
 }

@@ -1,5 +1,5 @@
 import clsx from "clsx"
-import { DashboardConfig, UIImageResource } from "vrkit-models"
+import { DashboardConfig, ImageFormat } from "vrkit-models"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { useAsyncCallback } from "../../../hooks"
@@ -9,9 +9,7 @@ import { AppButtonGroupFormikPositiveNegative } from "../../app-button-group-pos
 import { assignDeep, isEmpty } from "vrkit-shared"
 import { FormContainer } from "../../form"
 import { AppTextFieldFormik } from "../../app-text-field"
-import {
-  Ellipsis, flexAlign, FlexRow, FlexRowBox, FlexRowCenterBox, FlexScaleZero
-} from "vrkit-shared-ui"
+import { Ellipsis, flexAlign, FlexRow, FlexRowBox, FlexScaleZero } from "vrkit-shared-ui"
 import { DashboardLayoutSwitch } from "../common/layout-switch"
 import { classNames } from "./DashboardEditorView"
 import { FormikBag, FormikConfig, FormikContextType, FormikProps, withFormik } from "formik"
@@ -26,15 +24,15 @@ import CloseIcon from "@mui/icons-material/Close"
 import SaveIcon from "@mui/icons-material/Save"
 import { createAppContentBarLabels } from "../../app-content-bar"
 import { AppIconEditor } from "../../app-icon-editor"
-import { ImageFormat } from "vrkit-models"
 import Divider from "@mui/material/Divider"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
+import { AsyncImage } from "../../async-image"
 
 const log = getLogger(__filename)
 
 export type DashboardEditorFormProps = {
-  dashConfig: DashboardConfig
+  config: DashboardConfig
   handleSubmitRef?: React.MutableRefObject<any>
   onSubmit?: FormikConfig<DashboardConfig>["onSubmit"]
   onBlurField?: (
@@ -44,7 +42,7 @@ export type DashboardEditorFormProps = {
   ) => Promise<any> | any
 }
 export const DashboardEditorForm = withFormik<DashboardEditorFormProps, DashboardConfig>({
-  mapPropsToValues: get("dashConfig"),
+  mapPropsToValues: get("config"),
   validate: () => ({}), // createValidator(DashboardConfig as any),
   enableReinitialize: true,
   displayName: "DashboardEditorFormik",
@@ -63,11 +61,11 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
       status = {},
       touched,
       values,
-        setValues,
+      setValues,
       resetForm,
       submitForm,
-      dashConfig,
-      
+      config,
+
       handleSubmitRef
     } = props,
     theme = useTheme(),
@@ -78,13 +76,6 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
     canModify = useMemo(() => {
       return !launchLayoutEditorAsync.loading && !patchConfigAsync.loading
     }, [launchLayoutEditorAsync.loading, patchConfigAsync.loading]), // {
-    //   updateMutatingModel,
-    //   clearMutatingModels,
-    //   resetMutatingModels,
-    //   isMutatingModelNew,
-    //   mutatingModels
-    // } = useModelEditorContext<DashboardConfig>(),
-    // model = first(mutatingModels),
     handleBlurField = (e: React.FocusEvent<any>) => {
       log.info(`On blur <${e.target?.tagName} name=${e.target?.name}>`, e)
       if (onBlurField) {
@@ -97,20 +88,19 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
         }
       }
     },
-    [negLabel, posLabel] =
-        createAppContentBarLabels([
-            [isEmpty(dashConfig?.id) ? "Cancel" : "Revert", <CloseIcon/>],
-          [isEmpty(dashConfig?.id) ? "Create" : "Save", <SaveIcon/>]
-        ]),
+    [negLabel, posLabel] = createAppContentBarLabels([
+      [isEmpty(config?.id) ? "Cancel" : "Revert", <CloseIcon />],
+      [isEmpty(config?.id) ? "Create" : "Save", <SaveIcon />]
+    ]),
     pageMetadata: PageMetadataProps = {
       appContentBar: {
-        title: `${dashConfig?.name}`,
+        title: `${config?.name}`,
         actions: (
           <AppButtonGroupFormikPositiveNegative<DashboardConfig>
-            item={dashConfig}
+            item={config}
             buttonProps={{
               size: "small",
-              sx: {gap: theme.spacing(1)}
+              sx: { gap: theme.spacing(1) }
             }}
             negativeLabel={negLabel}
             negativeHandler={() => {
@@ -135,7 +125,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
     handleSubmitRef.current = handleSubmit
   }
 
-  return !dashConfig || !values ? undefined : (
+  return !config || !values ? undefined : (
     <>
       <PageMetadata {...pageMetadata} />
       <FormContainer
@@ -148,39 +138,64 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
 
           <Box className={clsx(classNames.header)}>
             <Box
-                sx={{...FlexRow,
-                ...flexAlign("center", "stretch")
-                }}
-                className={clsx(classNames.headerField)}>
+              sx={{
+                ...FlexRow,
+                ...flexAlign("center", "stretch"),
+
+                gap: theme.spacing(1)
+              }}
+              className={clsx(classNames.headerField)}
+            >
               <AppIconEditor
-                icon={dashConfig?.uiResource?.icon?.url}
+                icon={config?.uiResource?.icon?.url}
                 onChange={dataUrl => {
-                  setValues((model) => assignDeep(model,{
-                    uiResource: {
-                      icon: {
-                        format: ImageFormat.UNKNOWN,
-                        isDataUrl: true,
-                        url: dataUrl,
-                        description: "icon"
-                      }
-                    }
-                  }), false)
+                  setValues(
+                    model =>
+                      assignDeep(model, {
+                        uiResource: {
+                          icon: {
+                            format: ImageFormat.UNKNOWN,
+                            isDataUrl: true,
+                            url: dataUrl,
+                            description: "icon"
+                          }
+                        }
+                      }),
+                    false
+                  )
                 }}
               />
               <AppTextFieldFormik<DashboardConfig>
                 variant="standard"
-                // onBlur={handleBlurField}
+                onBlur={handleBlurField}
                 autoFocus
-                // selectOnFocus
+                //selectOnFocus
                 label={null}
                 name="name"
                 placeholder="A name for your dashboard"
+                sx={{
+                  ...FlexScaleZero
+                }}
                 InputProps={{
                   sx: {
                     "& input": {
                       fontSize: theme.typography.h3.fontSize
                     }
                   }
+                }}
+              />
+              <DashboardLayoutSwitch
+                vr
+                value={values.vrEnabled}
+                onChange={vrEnabled => {
+                  setValues(model => assignDeep(model, { vrEnabled }))
+                }}
+              />
+              <DashboardLayoutSwitch
+                vr={false}
+                value={values.screenEnabled}
+                onChange={screenEnabled => {
+                  setValues(model => assignDeep(model, { screenEnabled }))
                 }}
               />
             </Box>
@@ -190,9 +205,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
                 variant="filled"
                 flex
                 rows={4}
-                
-                // selectOnFocus
-                // onBlur={handleBlurField}
+                tabIndex={-1}
                 multiline={true}
                 label={"Notes"}
                 name="description"
@@ -202,52 +215,24 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
           </Box>
           <Box className={clsx(classNames.details)}>
             <Box className={clsx(classNames.detailsContent)}>
-              <Box className={clsx(classNames.layouts)}>
-                <FlexRowBox>
-                  <Typography
-                    sx={{
-                      ...Ellipsis,
-                      ...FlexScaleZero
-                    }}
-                    variant="h6"
-                  >
-                    Layouts
-                  </Typography>
-                  
-                  <DashboardLayoutSwitch
-                      vr
-                      value={values.vrEnabled}
-                      onChange={vrEnabled => {
-                        setValues(model => assignDeep(model, {vrEnabled}))
-                      }}
-                  />
-                  <DashboardLayoutSwitch
-                      vr={false}
-                      value={values.screenEnabled}
-                      onChange={screenEnabled => {
-                        setValues(model => assignDeep(model, {screenEnabled}))
-                      }}
-                  />
-                </FlexRowBox>
-                
-              </Box>
               <Divider />
               <Box className={clsx(classNames.overlays)}>
                 <Typography
-                    sx={{
-                      ...Ellipsis
-                    }}
-                    variant="h6"
+                  sx={{
+                    ...Ellipsis
+                  }}
+                  variant="h6"
                 >
                   Overlays
                 </Typography>
+                <AsyncImage src="https://imageio.forbes.com/specials-images/imageserve/647f8116232e9b434557b386/0x0.jpg?format=jpg&crop=5272,2964,x0,y272,safe&height=900&width=1600&fit=bounds" />
                 <FlexRowBox>
                   <List>
-                    {values.overlays.map(o =>
-                    (<ListItem key={o.id}>
-                      {o.name} - {o.componentId}
-                      
-                    </ListItem>))}
+                    {values.overlays.map(o => (
+                      <ListItem key={o.id}>
+                        {o.name} - {o.componentId}
+                      </ListItem>
+                    ))}
                   </List>
                 </FlexRowBox>
               </Box>

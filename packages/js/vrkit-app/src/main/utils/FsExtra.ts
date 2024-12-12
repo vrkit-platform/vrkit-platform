@@ -31,30 +31,26 @@ export async function readJSONFile(file: string) {
  * @param schema
  * @returns
  */
-export async function readObjectFile<T>(
-  file: string,
-  schema: ClazzOrModelSchema<T>
-) {
+export async function readObjectFile<T>(file: string, schema: ClazzOrModelSchema<T>) {
   const json = await readJSONFile(file)
   return deserialize(schema, json) as T
 }
 
-
-export function resolveMainFile(file:string): string {
+export function resolveMainFile(file: string): string {
   return Path.resolve(__dirname, file)
 }
 
-export function resolveMainFileURL(file:string): string {
+export function resolveMainFileURL(file: string): string {
   return pathToFileURL(Path.join(__dirname, file)).href
 }
 
-export function resolveHtmlPath(htmlFileName:string): string {
-  // if (process.env.NODE_ENV === "development") {
-  //   const port = process.env.PORT || 1618
-  //   const url = new URL(`http://localhost:${port}`)
-  //   url.pathname = htmlFileName
-  //   return url.href
-  // }
-  
-  return Path.resolve(__dirname, "..","renderer", htmlFileName)//`file://${Path.resolve(__dirname, "..","renderer", htmlFileName)}`
+export function resolveHtmlPath(htmlFileName: string): string {
+  if (process.env.NODE_ENV === "development") {
+    const port = process.env.PORT || 1618
+    const url = new URL(`http://localhost:${port}`)
+    url.pathname = htmlFileName
+    return url.href
+  }
+
+  return `file://${Path.resolve(__dirname, "..", "renderer", htmlFileName)}`
 }

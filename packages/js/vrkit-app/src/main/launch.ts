@@ -85,7 +85,7 @@ function prepareWindow(state: ISharedAppState, win: BrowserWindow, isMainWindow:
         )
       }
     })
-  
+
   // ATTACH WEB CONTENT HANDLERS
   win.webContents
     .on("render-process-gone", (event, details) => {
@@ -119,7 +119,7 @@ async function launch() {
       titleBarStyle: "hidden",
       ...windowOptionDefaults()
     })
-    
+
     prepareWindow(appState, mainWindow, true)
 
     app.on("browser-window-created", (_, newWin) => {
@@ -164,14 +164,6 @@ async function launch() {
     })
 
     await mainWindow.loadURL(url).catch(err => log.error("Failed to load url", url, err))
-    // const menuBuilder = new MenuBuilder(mainWindow)
-    // menuBuilder.buildMenu()
-    //
-    // Open urls in the user's browser
-    // mainWindow.webContents.setWindowOpenHandler(edata => {
-    //   shell.openExternal(edata.url)
-    //   return { action: "allow" }
-    // })
   }
 
   /**

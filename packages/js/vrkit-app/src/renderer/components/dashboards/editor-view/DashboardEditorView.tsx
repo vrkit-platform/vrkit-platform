@@ -1,5 +1,5 @@
 // REACT
-import React, { useMemo } from "react"
+import React from "react"
 
 // CLSX
 import clsx from "clsx"
@@ -7,7 +7,6 @@ import clsx from "clsx"
 // 3FV
 import { getLogger } from "@3fv/logger-proxy"
 
-import type { BoxProps } from "@mui/material/Box"
 // MUI
 import Box from "@mui/material/Box"
 import { darken, styled } from "@mui/material/styles"
@@ -33,7 +32,6 @@ import { DashboardConfig } from "vrkit-models"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { FormikContextType } from "formik"
-import { bind } from "vrkit-shared/utils"
 import { Alert } from "../../../services/alerts"
 import { useIsMounted } from "usehooks-ts"
 import { useNavigate } from "react-router-dom"
@@ -89,7 +87,7 @@ const DashboardEditorRoot = styled(Box, {
         filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`,
 
         [child(classNames.headerField)]: {
-          ...padding(theme.spacing(1)),
+          ...padding(theme.spacing(1),theme.spacing(2),theme.spacing(0)),
           ...FlexAuto
         },
         [child(classNames.headerActions)]: {
@@ -159,11 +157,6 @@ export function DashboardEditorView(props: DashboardEditorProps) {
     nav = useNavigate(),
     { className, config, ...other } = props,
     dashboardClient = useService(DashboardManagerClient),
-    // editorContext = useModelEditorContext<DashboardConfig>(),
-    // { modelById, mutatingModels, setMutatingModel, isModelMutating, resetMutatingModels, clearMutatingModels } =
-    //   editorContext,
-    //config = mutatingModels?.[0],
-    //onReset = useMemo(() => bind(resetMutatingModels, null, [config?.id]), [config?.id]),
     onSubmit = Alert.usePromise(
       async (values: DashboardConfig, { setErrors, setStatus, setSubmitting }: FormikContextType<DashboardConfig>) => {
         try {
@@ -194,21 +187,17 @@ export function DashboardEditorView(props: DashboardEditorProps) {
       [isMounted]
     )
 
-  return (
+  return isDefined(config) && (
     <DashboardEditorRoot
       className={clsx(
         classNames.root,
-        {
-          [classNames.visible]: isDefined(config)
-        },
         className
       )}
       {...other}
     >
       <DashboardEditorForm
-        dashConfig={config}
+        config={config}
         onSubmit={onSubmit}
-        //onBlurField={onBlurField}
       />
     </DashboardEditorRoot>
   )

@@ -22,8 +22,9 @@
         "SUPPORTED_GAME_IRACING"
       ],
       "overview": {
-        "featureContent": "# Overview",
-        "changeLogContent": "# change log",
+        "featureContent": "- set 12/24hr format\n- set opacity\n",
+        "changeLogContent": "## v1.0.0 \n\n- Initial Release\n",
+        
         "screenshots": [
           {
             "format": "IMAGE_FORMAT_PNG",
@@ -63,8 +64,8 @@
       ],
       
       "overview": {
-        "featureContent": "# Track Map Overview",
-        "changeLogContent": "# track map changes",
+        "featureContent": "- set class car colors\n- set opacity\n- enable/disable legend",
+        "changeLogContent": "## v1.0.0 \n\n- Initial Release",
         "screenshots": [
           {
             "format": "IMAGE_FORMAT_PNG",

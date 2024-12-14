@@ -2,8 +2,10 @@ import clsx from "clsx"
 import { DashboardConfig, ImageFormat } from "vrkit-models"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
-import { useAsyncCallback } from "../../../hooks"
-// import { useModelEditorContext } from "../../model-editor-context"
+import { useAsyncCallback } from "../../../hooks" // import {
+// useModelEditorContext }
+// from
+// "../../model-editor-context"
 import { PageMetadata, PageMetadataProps } from "../../page-metadata"
 import { AppButtonGroupFormikPositiveNegative } from "../../app-button-group-positive-negative"
 import { assignDeep, isEmpty } from "vrkit-shared"
@@ -16,7 +18,7 @@ import { FormikBag, FormikConfig, FormikContextType, FormikProps, withFormik } f
 import { get } from "lodash/fp"
 import useTheme from "@mui/material/styles/useTheme"
 import { useNavigate } from "react-router-dom"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { getLogger } from "@3fv/logger-proxy"
 import Box from "@mui/material/Box"
 import Typography from "@mui/material/Typography"
@@ -25,9 +27,10 @@ import SaveIcon from "@mui/icons-material/Save"
 import { createAppContentBarLabels } from "../../app-content-bar"
 import { AppIconEditor } from "../../app-icon-editor"
 import Divider from "@mui/material/Divider"
-import { PluginOverlayItem } from "../../plugin-overlay-item"
 import { useAppSelector } from "../../../services/store"
 import { sharedAppSelectors } from "../../../services/store/slices/shared-app"
+import DashboardEditorOverlayListItem from "./DashboardEditorOverlayListItem"
+import { isDefined } from "@3fv/guard"
 
 const log = getLogger(__filename)
 
@@ -73,7 +76,8 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
     dashboardClient = useService(DashboardManagerClient),
     patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
     launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
-    plugins = useAppSelector(sharedAppSelectors.selectAllPluginManifests),
+    [selectedOverlayId, setSelectedOverlayId] = useState<string>(null),
+    compEntryMap = useAppSelector(sharedAppSelectors.selectAllPluginComponentOverlayDefsMap),
     canModify = useMemo(() => {
       return !launchLayoutEditorAsync.loading && !patchConfigAsync.loading
     }, [launchLayoutEditorAsync.loading, patchConfigAsync.loading]), // {
@@ -205,7 +209,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
               <AppTextFieldFormik<DashboardConfig>
                 variant="filled"
                 flex
-                rows={4}
+                rows={3}
                 tabIndex={-1}
                 multiline={true}
                 label={"Notes"}
@@ -228,26 +232,41 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
                 </Typography>
                 <Box
                   sx={{
-                    gap: 20,
+                    //gap: 20,
                     display: "grid",
-                    gridTemplateColumns: `1fr 1fr`,
+                    gridTemplateColumns: `1fr`,
                     ...FlexAuto
                   }}
                 >
-                  {plugins[0].components.map((comp, idx) => (
-                    <PluginOverlayItem
-                      key={comp.id}
-                      manifest={plugins[0]}
-                      componentDef={comp}
-                    />
-                  ))}
-                  {/*<List>*/}
-                  {/*  {values.overlays.map(o => (*/}
-                  {/*    <ListItem key={o.id}>*/}
-                  {/*      {o.name} - {o.componentId}*/}
-                  {/*    </ListItem>*/}
-                  {/*  ))}*/}
-                  {/*</List>*/}
+                  {/*{plugins[0].components.map((comp, idx) => (*/}
+                  {/*  <PluginComponentItem*/}
+                  {/*    key={comp.id}*/}
+                  {/*    manifest={plugins[0]}*/}
+                  {/*    componentDef={comp}*/}
+                  {/*  />*/}
+                  {/*))}*/}
+
+                  {values.overlays
+                    .map((o, idx) => {
+                      const posClassName = clsx({
+                          first: idx === 0,
+                          last: idx >= values.overlays.length - 1
+                        }),
+                        entry = compEntryMap[o.componentId]
+                      return !entry ? null : (
+                        <DashboardEditorOverlayListItem
+                          key={o.id}
+                          selected={selectedOverlayId === o.id}
+                          overlayInfo={o}
+                          compEntry={entry}
+                          className={posClassName}
+                          sx={{
+                            zIndex: values.overlays.length - idx + 1
+                          }}
+                        />
+                      )
+                    })
+                    .filter(isDefined)}
                 </Box>
               </Box>
             </Box>

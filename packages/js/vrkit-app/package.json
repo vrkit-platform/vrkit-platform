@@ -49,6 +49,7 @@
     "axios": "^1.7.2",
     "bluebird": "^3.7.2",
     "class-validator-formik": "^1.0.1",
+    "colorthief": "^2.6.0",
     "electron-context-menu": "^4.0.1",
     "electron-updater": "^6.3.1",
     "eventemitter3": "^5.0.1",

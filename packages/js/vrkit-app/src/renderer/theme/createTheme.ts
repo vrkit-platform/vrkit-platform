@@ -1,9 +1,9 @@
 // noinspection ES6UnusedImports
-import type {} from "@mui/lab/themeAugmentation"
+import {} from "@mui/lab/themeAugmentation"
 // noinspection ES6UnusedImports
-import type {} from "@mui/x-tree-view/themeAugmentation"
+import {} from "@mui/x-tree-view/themeAugmentation"
 // noinspection ES6UnusedImports
-import type {} from "@mui/x-data-grid/themeAugmentation"
+import {} from "@mui/x-data-grid/themeAugmentation"
 // import type {} from "@mui/material/themeCssVarsAugmentation"
 // noinspection ES6UnusedImports
 import type { Direction, Theme, ThemeOptions } from "@mui/material/styles"
@@ -15,7 +15,7 @@ import { assign } from "vrkit-shared"
 import { alpha, CssSelectors, linearGradient, rem } from "vrkit-shared-ui"
 import { darken, lighten } from "@mui/material"
 import { darkPrimaryAndSecondaryPalettes } from "./paletteAndColorHelpers"
-import { createPaletteChannel, setFont } from "./styles" // ----------------------------------------------------------------------
+import { createPaletteChannel, remToPx, setFont } from "./styles" // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 const colorScheme = "dark"
@@ -88,7 +88,7 @@ const themeOptions: ThemeOptions = {
   shadows: shadows(colorScheme),
   customShadows: customShadows(colorScheme),
   direction: "ltr" as Direction,
-  shape: { borderRadius: rem(0.25) },
+  shape: { borderRadius: remToPx(0.25) },
 
   typography: {
     ...typography,
@@ -193,7 +193,7 @@ export function createTheme(): Theme {
       appBarHeight: "3rem",
       listActionFooterHeight: rem(2),
       layoutPadding: [4, 2],
-      appIconSizes: [12, 16, 20, 24]
+      appIconSizes: [12, 20, 26, 32]
     }
   })
 }

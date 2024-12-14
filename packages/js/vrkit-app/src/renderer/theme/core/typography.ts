@@ -58,7 +58,7 @@ export const typography: TypographyOptions = {
   fontWeightBold: "700",
   h1: {
     fontWeight: 800,
-    lineHeight: 1.6,
+    lineHeight: 2,
     fontSize: rem(1.4),
     fontFamily: secondaryFont
     // ...responsiveFontSizes({
@@ -69,7 +69,7 @@ export const typography: TypographyOptions = {
   },
   h2: {
     fontWeight: 800,
-    lineHeight: 1.5,
+    lineHeight: 1.6,
     fontSize: rem(1.3),
     fontFamily: secondaryFont
     // ...responsiveFontSizes({
@@ -90,41 +90,44 @@ export const typography: TypographyOptions = {
     // })
   },
   h4: {
-    fontWeight: 700,
-    lineHeight: 1.3,
+    fontWeight: 600,
+    lineHeight: 1.4,
     fontSize: rem(1.15)
     // ...responsiveFontSizes({ sm: 20, md: 24, lg: 24 })
   },
   h5: {
-    fontWeight: 700,
-    lineHeight: 1.1,
+    fontWeight: 500,
+    lineHeight: 1.4,
     fontSize: rem(1.15)
     // ...responsiveFontSizes({ sm: 19, md: 20, lg: 20 })
   },
   h6: {
-    fontWeight: 600,
-    lineHeight: 1.1,
+    fontWeight: 400,
+    lineHeight: 1.4,
     fontSize: rem(1.15)
     // ...responsiveFontSizes({ sm: 18, md: 18, lg: 18 })
   },
   subtitle1: {
-    fontWeight: 500,
-    lineHeight: 1.1,
-    fontSize: rem(0.9)
+    fontWeight: 400,
+    lineHeight: 1.4,
+    letterSpacing: 1,
+    fontSize: rem(0.9),
+    opacity: 0.5
   },
   subtitle2: {
-    fontWeight: 500,
-    lineHeight: 1.1,
-    fontSize: rem(0.9)
+    fontWeight: 400,
+    lineHeight: 1.4,
+    fontSize: rem(0.8),
+    opacity: 0.35
   },
   body1: {
     fontWeight: 400,
-    lineHeight: 1,
+    lineHeight: 1.2,
     fontSize: rem(0.9)
   },
   body2: {
-    lineHeight: 1,
-    fontSize: rem(1)
+    lineHeight: 1.2,
+    fontSize: rem(0.8)
   },
   caption: {
     lineHeight: 1,

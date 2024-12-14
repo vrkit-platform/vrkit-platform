@@ -317,7 +317,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
               ...FlexScaleZero,
               ...OverflowHidden,
               ...flexAlign("stretch", "stretch"),
-              ...padding(0, `0.5rem`, 0, 0)
+              ...padding(0, theme.spacing(1), 0, 0)
             }}
           >
             <Typography
@@ -325,16 +325,13 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
                 ...FlexAuto,
                 ...Ellipsis
               }}
-              variant="body1"
+              variant="h6"
             >
               {config.name}
             </Typography>
 
             <Typography
-              variant="caption"
-              sx={{
-                color: alpha(theme.palette.text.primary, 0.5)
-              }}
+              variant="subtitle2"
             >
               {asOption(config.description).filter(isNotEmpty).getOrElse("No notes")}
             </Typography>

@@ -5,7 +5,6 @@ import type { Theme } from "./ThemeTypes"
 import { linearGradient } from "vrkit-shared-ui"
 import { createPaletteChannel } from "./styles"
 
-
 export const darkPrimaryAndSecondaryPalettes = {
   primary: createPaletteChannel({
     contrastText: "#ffffff",
@@ -27,7 +26,6 @@ export const lightPrimaryAndSecondaryPalettes = {
     main: "#8544da"
   }
 }
-
 
 export function createContainedPrimaryButtonRule(theme: Theme) {
   return {
@@ -68,10 +66,11 @@ export function paneBackgrounds(fromColor: string, count: number, factor: number
     .reduce((map, i) => {
       return {
         ...map,
-        [`pane${padStart("" + i, 2, "0")}`]: (factor < 0 ? darken : lighten)(
-          fromColor,
-          i * Math.abs(factor)
-        )
+        [`pane${padStart("" + i, 2, "0")}`]: (factor < 0 ? darken : lighten)(fromColor, i * Math.abs(factor))
       }
     }, {})
+}
+
+export function rgbToHex([r, g, b]) {
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)
 }

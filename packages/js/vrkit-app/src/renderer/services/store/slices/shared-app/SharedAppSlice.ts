@@ -1,17 +1,21 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit"
-import type { DashboardsState, OverlayVREditorPropertyName, SessionDetail, SessionsState } from "vrkit-shared"
 import {
   ActionDef,
   ActionsState,
   assign,
+  DashboardsState,
   Identity,
   type ISharedAppState,
   ISharedAppStateLeaf,
   isNotEmpty,
   OverlayEditorGlobalActionIds,
+  OverlayVREditorPropertyName,
+  Pair,
+  pairOf,
   PluginsState,
-  propEqualTo,
+  SessionDetail,
+  SessionsState,
   type ThemeId
 } from "vrkit-shared"
 
@@ -25,13 +29,15 @@ import {
   PluginManifest,
   ThemeType
 } from "vrkit-models"
-import { flow, get } from "lodash/fp"
+import { flow } from "lodash/fp"
 import { isArray, isDefined } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
 import { uniqBy } from "lodash"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
+
+export type PluginCompEntry = Pair<PluginManifest, PluginComponentDefinition>
 
 const selectAppSettings = (state: ISharedAppState) => state.appSettings,
   selectSessionsState = (state: ISharedAppState) => state.sessions,
@@ -48,26 +54,35 @@ const selectAppSettings = (state: ISharedAppState) => state.appSettings,
         .map(install => install.manifest)
         .filter(isDefined) as PluginManifest[]
   ),
+  selectAllPluginManifestMap = createSelector(selectAllPluginManifests, plugins =>
+    plugins.reduce((map, plugin) => ({ ...map, [plugin.id]: plugin }), {} as Record<string, PluginManifest>)
+  ),
   // ALL PLUGIN PROVIDED COMPONENTS
-  selectAllPluginComponentDefs = createSelector(selectAllPluginManifests, (manifests): PluginComponentDefinition[] => {
-    const allComponents = manifests.flatMap(manifest => (manifest?.components ?? []) as Array<PluginComponentDefinition>).filter(isDefined)
-    return uniqBy(allComponents, get("id"))
+  selectAllPluginComponentDefs = createSelector(selectAllPluginManifests, (manifests): PluginCompEntry[] => {
+    const allComponents = manifests
+      .flatMap(
+        manifest =>
+          (manifest?.components?.map?.(c => pairOf(manifest, c)) ?? []) as Array<
+            Pair<PluginManifest, PluginComponentDefinition>
+          >
+      )
+      .filter(isDefined)
+    return uniqBy(allComponents, ([, c]) => c.id)
   }),
   // ALL PLUGIN PROVIDED `PluginComponentType.OVERLAY` COMPONENTS
   selectAllPluginComponentOverlayDefs = createSelector(
     selectAllPluginComponentDefs,
-    (defs: PluginComponentDefinition[]): PluginComponentDefinition[] =>
-      defs.filter(propEqualTo("type", PluginComponentType.OVERLAY))
+    (defs: PluginCompEntry[]): PluginCompEntry[] => defs.filter(([, c]) => c.type === PluginComponentType.OVERLAY)
   ),
   selectAllPluginComponentOverlayDefsMap = createSelector(
     selectAllPluginComponentOverlayDefs,
-    (defs: PluginComponentDefinition[]): Record<string, PluginComponentDefinition> =>
+    (defs: PluginCompEntry[]): Record<string, PluginCompEntry> =>
       defs.reduce(
-        (map, def) => ({
+        (map, entry) => ({
           ...map,
-          [def.id]: def
+          [entry[1].id]: entry
         }),
-        {} as Record<string, PluginComponentDefinition>
+        {} as Record<string, PluginCompEntry>
       )
   ),
   createAppSettingsSelector = <T>(selector: (appSettings: AppSettings) => T) => flow(selectAppSettings, selector),
@@ -140,6 +155,7 @@ const slice = createSlice({
     selectDefaultDashboardConfigId,
 
     selectAllPluginManifests,
+    selectAllPluginManifestMap,
     selectPluginState,
     selectAllPluginInstallMap,
     selectAllPluginComponentDefs,

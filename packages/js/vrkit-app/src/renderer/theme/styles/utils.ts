@@ -1,5 +1,6 @@
 // ----------------------------------------------------------------------
 
+import { isString } from "@3fv/guard"
 import { alpha } from "vrkit-shared-ui"
 export const stylesMode = {
   light: '[data-mui-color-scheme="light"] &',
@@ -21,18 +22,22 @@ export function setFont(fontName: string) {
   return `"${fontName}",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"`
 }
 
+export function getComputedFontSize() {
+  return parseFloat(getComputedStyle(document.documentElement).fontSize)
+}
+
 /**
  * Converts rem to px
  */
-export function remToPx(value: string): number {
-  return Math.round(parseFloat(value) * 16)
+export function remToPx(value: string | number): number {
+  return Math.round((isString(value) ? parseFloat(value) : value) * getComputedFontSize())
 }
 
 /**
  * Converts px to rem
  */
 export function pxToRem(value: number): string {
-  return `${value / 16}rem`
+  return `${value / getComputedFontSize()}rem`
 }
 
 /**

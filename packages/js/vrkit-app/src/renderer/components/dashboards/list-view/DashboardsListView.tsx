@@ -13,7 +13,6 @@ import { darken, styled, useTheme } from "@mui/material/styles"
 // APP
 import {
   alpha,
-  borderRadius,
   child,
   ClassNamesKey,
   createClassNames,
@@ -21,23 +20,17 @@ import {
   Fill,
   FillWidth,
   flex,
-  flexAlign, FlexAuto,
+  flexAlign,
   FlexColumn,
-  FlexRowBox,
   FlexRowCenter,
-  FlexScaleZero,
   hasCls,
-  heightConstraint,
   linearGradient,
-  notHasCls,
-  OverflowAuto,
   OverflowHidden,
   OverflowVisible,
   padding,
   PositionRelative,
   rem,
-  transition,
-  Transparent
+  transition
 } from "vrkit-shared-ui"
 import clsx from "clsx"
 import { DashboardConfig } from "vrkit-models"
@@ -53,7 +46,6 @@ import { Alert } from "../../../services/alerts"
 import { Theme } from "../../../theme/ThemeTypes"
 import GlobalStyles from "@mui/material/GlobalStyles"
 import { DashboardsListItem, DashboardsListItemCreate } from "./DashboardsListItem"
-import AppBreadcrumbs from "../../app-breadcrumbs"
 import { PageMetadata, PageMetadataProps } from "../../page-metadata"
 
 const log = getLogger(__filename)
@@ -117,17 +109,15 @@ const DashboardsListViewRoot = styled(Box, {
       ...FillWidth,
       ...OverflowVisible,
       ...transition(["flex-grow", "flex-shrink"]),
-      
+
       [child(dashboardsListViewClasses.container)]: {
         // ...FlexRow,
         // ...FlexWrap,
-        display: "grid",
-        // gridTemplateColumns: `1fr 1fr`,
+        display: "grid", // gridTemplateColumns: `1fr 1fr`,
         gridTemplateColumns: `1fr`,
         ...FillWidth,
         ...flexAlign("flex-start", "flex-start"), // [child(dashboardsListViewClasses.itemLink)]: {
-        ...padding("1rem"),
-        //   textDecoration: "none",
+        ...padding("1rem"), //   textDecoration: "none",
         [child(dashboardsListViewClasses.item)]: {
           ...FlexRowCenter,
           ...OverflowHidden,
@@ -136,9 +126,9 @@ const DashboardsListViewRoot = styled(Box, {
           // "min(33%,
           // 25vw)"),
           // ...padding(0, "1rem"),
-          filter: "drop-shadow(0px 2px 2px rgba(0,0,0, 0.25))",
-          // ...heightConstraint("8.5rem"),
-          ...flex(1, 0, "min(35%, 30vw)"), // ...widthConstraint("min(35%, 30vw)"),
+          filter: "drop-shadow(0px 2px 2px rgba(0,0,0, 0.25))", // ...heightConstraint("8.5rem"),
+          ...flex(1, 0, "min(35%, 30vw)"), // ...widthConstraint("min(35%,
+          // 30vw)"),
           ...flexAlign("stretch", "flex-start"),
           [hasCls(dashboardsListViewClasses.itemSelected)]: {},
 
@@ -146,44 +136,34 @@ const DashboardsListViewRoot = styled(Box, {
             ...FlexColumn,
             ...Fill,
             ...OverflowHidden,
-            borderRadius: 0,
-            // ...borderRadius(theme.shape.borderRadius / 4),
+            borderRadius: 0, // ...borderRadius(theme.shape.borderRadius / 4),
             // ...padding(spacing(1), spacing(1), spacing(1), spacing(1)),
             padding: 0,
             gap: spacing(1),
             textDecoration: "none",
-            
+
             "&.first": {
-              
-                borderTopLeftRadius: theme.shape.borderRadius,
-                borderTopRightRadius: theme.shape.borderRadius,
-              
+              borderTopLeftRadius: theme.shape.borderRadius,
+              borderTopRightRadius: theme.shape.borderRadius
             },
-            "&:not(.first)": {
-            },
+            "&:not(.first)": {},
             "&:not(.last)": {
-              
-                backgroundImage: linearGradient(
-                    "to bottom",
-                    `${darken(theme.palette.background.paper, 0.03)} 0%`,
-                    `${darken(theme.palette.background.paper, 0.04)} 95%`,
-                    `${darken(theme.palette.background.paper, 0.1)} 100%`
-                ),
-              
+              backgroundImage: linearGradient(
+                "to bottom",
+                `${darken(theme.palette.background.paper, 0.03)} 0%`,
+                `${darken(theme.palette.background.paper, 0.04)} 95%`,
+                `${darken(theme.palette.background.paper, 0.1)} 100%`
+              ),
+
               ...OverflowVisible
-              
             },
             "&.last": {
-              
-                borderBottomLeftRadius: theme.shape.borderRadius ,
-                borderBottomRightRadius: theme.shape.borderRadius,
-              
-            },
-            // boxShadow: customShadows.raisedCard,
-            
+              borderBottomLeftRadius: theme.shape.borderRadius,
+              borderBottomRightRadius: theme.shape.borderRadius
+            }, // boxShadow: customShadows.raisedCard,
+
             //[notHasCls(dashboardsListViewClasses.itemCreateButton)]: {
-              ...flexAlign("stretch", "stretch"),
-            //},
+            ...flexAlign("stretch", "stretch"), //},
 
             [child(dashboardsListViewClasses.itemDefaultBadge)]: {
               ...FlexRowCenter,
@@ -196,9 +176,11 @@ const DashboardsListViewRoot = styled(Box, {
               color: palette.success.main
             }
           },
-          [`${hasCls(dashboardsListViewClasses.itemCreateButton)}, ${child(dashboardsListViewClasses.itemCreateButton)}`]: {
+          [`${hasCls(dashboardsListViewClasses.itemCreateButton)}, ${child(
+            dashboardsListViewClasses.itemCreateButton
+          )}`]: {
             ...flexAlign("center", "flex-end"),
-            ...transition(["color","fill","background"]),
+            ...transition(["color", "fill", "background"]),
             color: alpha(theme.palette.text.primary, 0.5),
             fill: alpha(theme.palette.text.primary, 0.5),
             [CssSelectors.hover]: {
@@ -206,7 +188,7 @@ const DashboardsListViewRoot = styled(Box, {
               fill: theme.palette.text.primary
             }
             //background: Transparent
-          },
+          }
         }
         // }
       }
@@ -256,44 +238,44 @@ export function DashboardsListView(props: DashboardsListViewProps) {
     ),
     theme = useTheme(),
     globalStyles = useMemo(() => itemActionStyle(theme), [theme]),
-    pageMetadata:PageMetadataProps = {
+    pageMetadata: PageMetadataProps = {
       appContentBar: {
         title: "Dashboards",
-        actions: <DashboardsListItemCreate onClick={createDash}/>
+        actions: <DashboardsListItemCreate onClick={createDash} />
       }
     }
 
   return (
     <>
-      <PageMetadata {...pageMetadata}/>
+      <PageMetadata {...pageMetadata} />
       <GlobalStyles styles={globalStyles} />
       <DashboardsListViewRoot
         className={clsx(dashboardsListViewClasses.root, className)}
         {...other}
       >
         <Box className={clsx(dashboardsListViewClasses.container, className)}>
-          
           {/*<FlexRowBox sx={{...flexAlign("space-between")}}>*/}
           {/*<AppBreadcrumbs/>*/}
           {/*<DashboardsListItemCreate onClick={createDash} />*/}
           {/*</FlexRowBox>*/}
-          
-          {configs.map((config, idx) => {const posClassName = clsx({
-            first: idx === 0,
-            last: idx >= configs.length - 1
-          }); return (
-            <DashboardsListItem
-              key={config.id}
-              sx={{
-                zIndex: configs.length - idx + 1
-              }}
-              config={config}
-              paperClassName={posClassName}
-              className={posClassName}
-            />
-          )
+
+          {configs.map((config, idx) => {
+            const posClassName = clsx({
+              first: idx === 0,
+              last: idx >= configs.length - 1
+            })
+            return (
+              <DashboardsListItem
+                key={config.id}
+                sx={{
+                  zIndex: configs.length - idx + 1
+                }}
+                config={config}
+                paperClassName={posClassName}
+                className={posClassName}
+              />
+            )
           })}
-          
         </Box>
       </DashboardsListViewRoot>
     </>

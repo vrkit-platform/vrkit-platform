@@ -11,9 +11,7 @@ import { isDefined, isString } from "@3fv/guard"
 import { asOption, Future } from "@3fv/prelude-ts"
 import { get } from "lodash/fp"
 import { isNotEmptyString } from "vrkit-shared"
-
-const kEmptyImageURL =
-  "data:image/svg+xml;base64,PHN2ZwogICAgICAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIK ICAgICAgICB2aWV3Qm94PSIwIDAgMjAgMjAiCiAgICAgICAgZmlsbD0iY3VycmVu dENvbG9yIgo+CiAgICA8cGF0aAogICAgICAgICAgICBmaWxsLXJ1bGU9ImV2ZW5v ZGQiCiAgICAgICAgICAgIGQ9Ik00IDNhMiAyIDAgMDAtMiAydjEwYTIgMiAwIDAw MiAyaDEyYTIgMiAwIDAwMi0yVjVhMiAyIDAgMDAtMi0ySDR6bTEyIDEySDRsNC04 IDMgNiAyLTQgMyA2eiIKICAgICAgICAgICAgY2xpcC1ydWxlPSJldmVub2RkIgog ICAgLz4KPC9zdmc+"
+import EmptyImageURL from "!!url-loader!assets/images/components/async-image-placeholder.svg"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -68,18 +66,25 @@ export const AsyncImage = React.forwardRef<"img", AsyncImageProps>(function Asyn
   }
 
   useEffect(() => {
-    fetchImageWithCache()
+    if (!src)
+      return
+    if (src.startsWith("data:")) {
+      setLocalImageUrl(src)
+    } else {
+      fetchImageWithCache()
+    }
   }, [src, cacheOrName])
 
   const imageUrl = asOption(localImageUrl)
     .filter(isNotEmptyString)
     .orElse(asOption(fallback))
     .getOrElse(
-      kEmptyImageURL
+      EmptyImageURL
     )
 
   return (
     <img
+      className={className}
       ref={ref as any}
       src={imageUrl}
       alt={alt}

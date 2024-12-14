@@ -7,6 +7,12 @@
     "rootDir": "src",
     "outDir": "lib"
   },
+  "references": [{
+      "path": "../vrkit-models"
+    },{
+      "path": "../vrkit-shared"
+    }
+  ],
   "include": ["src/**/*"],
   "exclude": ["**/*.spec.ts"]
 }

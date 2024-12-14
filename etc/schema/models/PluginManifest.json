@@ -62,6 +62,16 @@
                         {}
                     ]
                 },
+                "overview": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginOverview",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
                 "supportedGames": {
                     "items": {
                         "enum": [
@@ -280,7 +290,7 @@
         },
         "IRacingTools.Models.PluginOverview": {
             "properties": {
-                "content": {
+                "featureContent": {
                     "oneOf": [
                         {
                             "type": "null"
@@ -291,22 +301,26 @@
                     ],
                     "description": "HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES"
                 },
-                "screenshotURLs": {
-                    "items": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "string"
-                            }
-                        ]
-                    },
+                "changeLogContent": {
                     "oneOf": [
                         {
                             "type": "null"
                         },
                         {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES"
+                },
+                "screenshots": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "items": {
+                                "$ref": "#/definitions/IRacingTools.Models.UIImageResource"
+                            },
                             "type": "array"
                         }
                     ]
@@ -776,6 +790,26 @@
                         }
                     ]
                 },
+                "version": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "owner": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginOwner",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
                 "name": {
                     "oneOf": [
                         {
@@ -794,16 +828,6 @@
                         {
                             "type": "string"
                         }
-                    ]
-                },
-                "owner": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginOwner",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
                     ]
                 },
                 "overview": {

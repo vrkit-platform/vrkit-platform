@@ -7,13 +7,13 @@ import clsx from "clsx"
 // 3FV
 import { getLogger } from "@3fv/logger-proxy"
 
+import type { BoxProps } from "@mui/material/Box"
 // MUI
 import Box from "@mui/material/Box"
-import type {BoxProps} from "@mui/material/Box"
 import { styled } from "@mui/material/styles"
 
 // APP
-import { ClassNamesKey, createClassNames, dimensionConstraints, child, hasCls } from "vrkit-shared-ui"
+import { child, ClassNamesKey, createClassNames, hasCls } from "vrkit-shared-ui"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -49,7 +49,6 @@ export interface {{name}}Props extends BoxProps {
  * {{name}} Component
  *
  * @param { {{name}}Props } props
- * @returns {JSX.Element}
  */
 export function {{name}}(props:{{name}}Props) {
   const { className, ...other } = props

@@ -1,11 +1,8 @@
 import type { StorybookConfig } from "@storybook/react-webpack5"
 import * as Webpack from "webpack"
 
-import { assetsDir, rootDir, pkgsDir, vrkNativeInteropDir, vrkSharedSrcDir, commonDir, rendererDir } from "./webpack.options"
+import { assetsDir, commonDir, rendererDir, vrkNativeInteropDir } from "./webpack.options"
 // noinspection ES6ConvertRequireIntoImport
-
-
-
 
 const config: StorybookConfig = {
   stories: ["../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
@@ -22,15 +19,16 @@ const config: StorybookConfig = {
   },
   webpackFinal: config => {
     Object.assign(config.resolve.alias, {
-      "assets": assetsDir,
+      assets: assetsDir,
       "vrkit-app-assets": assetsDir,
       "vrkit-app-common": commonDir,
       "vrkit-app-renderer": rendererDir,
-      "vrkit-native-interop": vrkNativeInteropDir,
+      "vrkit-native-interop": vrkNativeInteropDir
     })
-    if (!config.resolve.fallback)
+    if (!config.resolve.fallback) {
       config.resolve.fallback = {}
-    
+    }
+
     config.resolve.fallback = {
       buffer: false,
       stream: false,
@@ -41,12 +39,14 @@ const config: StorybookConfig = {
       crypto: false,
       constants: false
     }
-    
-    config.plugins.unshift(new Webpack.DefinePlugin({
-      "TARGET_PLATFORM": JSON.stringify("storybook"),
-      "process.env.TARGET_PLATFORM": JSON.stringify("storybook")
-    }) as any)
-    
+
+    config.plugins.unshift(
+      new Webpack.DefinePlugin({
+        TARGET_PLATFORM: JSON.stringify("storybook"),
+        "process.env.TARGET_PLATFORM": JSON.stringify("storybook")
+      }) as any
+    )
+
     return config
   }
 }

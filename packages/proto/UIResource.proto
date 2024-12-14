@@ -24,7 +24,6 @@ message UIColorResource {
 }
 
 message UIResource {
-
-  UIColorResource color = 1;
-  UIImageResource icon = 5;
+  UIColorResource color = 10;
+  UIImageResource icon = 20;
 }

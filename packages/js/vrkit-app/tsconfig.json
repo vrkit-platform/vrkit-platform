@@ -19,6 +19,13 @@
       [  "./src/common/*"]
     }
   },
+  "references": [{
+    "path": "../vrkit-models"
+  },{
+    "path": "../vrkit-shared"
+  },{
+    "path": "../vrkit-shared-ui"
+  }],
   "include": ["src/**/*.ts","src/**/*.tsx","src/**/*.json","src/**/*"],
 //  "exclude": ["**/*.spec.ts"]
 }

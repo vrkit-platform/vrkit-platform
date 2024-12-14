@@ -6,19 +6,19 @@
   "cmake.buildToolArgs": [    
   ],
   "cmake.configureArgs": [
-    // "-T", "ClangCL", "-A", "x64",
     "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
-    "-DCMAKE_TOOLCHAIN_FILE=Y:/code/sim-racing/vcpkg/scripts/buildsystems/vcpkg.cmake",
-    "-DCMAKE_BUILD_TYPE=Debug",
+    "-DCMAKE_PREFIX_PATH=\"C:\\Qt\\6.5.0;C:\\Qt\\6.5.0\\lib;C:\\Qt\\6.5.0\\lib\\cmake\"",
+    "-DSPDLOG_WCHAR_SUPPORT=1",
+    "-DSPDLOG_WCHAR_TO_UTF8_SUPPORT=1",
+    "-DCMAKE_TOOLCHAIN_FILE=y:\\code\\sim-racing\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
     "-DVCPKG_ROOT=Y:/code/sim-racing/vcpkg",
-    "-DSPDLOG_WCHAR_SUPPORT=ON",
+    "-DVCPKG_DEFAULT_TRIPLET=x64-windows-static",
+    "-DVCPKG_TARGET_TRIPLET=x64-windows-static",
     "-DVCPKG_CRT_LINKAGE=static",
     "-DVCPKG_LIBRARY_LINKAGE=static",
-    "-DVCPKG_DEFAULT_TRIPLET=x64-windows-static",
-    "-DVCPKG_TARGET_TRIPLET=x64-windows-static"
+    "-DVCPKG_INSTALL_OPTIONS=\"--allow-unsupported\""
   ],
-  // "cmake.generator": "Ninja",
-  
+  "cmake.generator": "Ninja",
   "cmake.buildEnvironment": {
     "UseMultiToolTask": "true",
     

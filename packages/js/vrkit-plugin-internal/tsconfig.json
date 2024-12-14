@@ -1,12 +1,19 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "target": "ES2020",
     "rootDir": "src",
     "outDir": "lib"
   },
+  "references": [{
+    "path": "../vrkit-models"
+  },{
+    "path": "../vrkit-shared"
+  },{
+    "path": "../vrkit-shared-ui"
+  }],
   "include": ["src/**/*"],
   "exclude": ["**/*.spec.ts"]
 }

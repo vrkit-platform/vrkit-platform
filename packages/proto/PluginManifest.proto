@@ -44,7 +44,10 @@ message PluginComponentDefinition {
 
   string name = 5;
   string description = 6;
+
   UIResource ui_resource = 7;
+
+  PluginOverview overview = 8;
 
   repeated SupportedGame supported_games = 10;
 
@@ -106,10 +109,18 @@ message PluginOwner {
 }
 
 message PluginOverview {
+
+
   // HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES
-  string content = 1;
-  repeated string screenshotURLs = 5;
+  string feature_content = 2;
+
+  // HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES
+  string change_log_content = 10;
+
+  repeated UIImageResource screenshots = 20;
 }
+
+
 
 /**
  * Defines a plugins contents
@@ -117,16 +128,16 @@ message PluginOverview {
 message PluginManifest {
   
   string id = 1;
+  string version = 2;
 
+  PluginOwner owner = 3;
   string name = 5;
 
   string description = 6;
 
-  PluginOwner owner = 10;
   PluginOverview overview = 11;
 
   repeated PluginComponentDefinition components = 20;
-
 }
 
 /**

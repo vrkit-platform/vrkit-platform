@@ -16,7 +16,10 @@ import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { AppSettingsClient } from "../../../services/app-settings-client"
 import { useAppSelector } from "../../../services/store"
-import { sharedAppSelectors } from "../../../services/store/slices/shared-app"
+import {
+  PluginCompEntry,
+  sharedAppSelectors
+} from "../../../services/store/slices/shared-app"
 import { decodeSvgFromUri, hasProp, isNotEmpty, isNotEmptyString, isSvgUri, propEqualTo } from "vrkit-shared"
 import Alerts from "../../../services/alerts"
 import {
@@ -227,20 +230,20 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
       .getOrNull(),
     isActive = activeId === config?.id,
     hasActive = !!activeId,
-    allOverlayDefMap = useAppSelector(sharedAppSelectors.selectAllPluginComponentOverlayDefsMap),
-    overlayIds = useMemo(() => {
+    allOverlayCompEntryMap = useAppSelector(sharedAppSelectors.selectAllPluginComponentOverlayDefsMap),
+    compIds = useMemo(() => {
       return (config?.overlays ?? []).map(get("componentId"))
-    }, [allOverlayDefMap, config?.overlays]),
+    }, [config?.overlays]),
     overlayDefs = useMemo(() => {
-      return overlayIds.map(overlayId => allOverlayDefMap[overlayId]).filter(isDefined) as PluginComponentDefinition[]
-    }, [allOverlayDefMap, overlayIds]),
+      return compIds.map(compId => allOverlayCompEntryMap[compId]).filter(isDefined) as PluginCompEntry[]
+    }, [allOverlayCompEntryMap, compIds]),
     visibleOverlayDefCount = Math.min(ListItemVisiblePluginMaxCount, overlayDefs.length),
     moreOverlayDefCount = Math.max(0, overlayDefs.length - ListItemVisiblePluginMaxCount),
     pluginIcons = range(0, visibleOverlayDefCount)
-      .map(idx => overlayDefs[idx] as PluginComponentDefinition)
+      .map(idx => overlayDefs[idx][1])
       .filter(isDefined)
       .map(component => {
-        log.info(`Creating component icon`, component.id)
+        log.info(`Creating component icon`, component.id, component)
         return (
           <PluginOverlayIcon
             key={component.id}

@@ -494,6 +494,42 @@
         },
         "IRacingTools.Models.PluginUserSettingValue": {
             "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "type": {
+                    "enum": [
+                        "PLUGIN_USER_SETTING_TYPE_INT",
+                        0,
+                        "PLUGIN_USER_SETTING_TYPE_DOUBLE",
+                        1,
+                        "PLUGIN_USER_SETTING_TYPE_STRING",
+                        2,
+                        "PLUGIN_USER_SETTING_TYPE_BOOLEAN",
+                        3,
+                        "PLUGIN_USER_SETTING_TYPE_COLOR",
+                        4
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Plugin User Setting Type"
+                },
                 "intValue": {
                     "oneOf": [
                         {

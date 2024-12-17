@@ -59,10 +59,8 @@ const EditorInfoViewRoot = styled(Paper, {
       overflow: "hidden",
       maxWidth: "100vw",
       color: theme.palette.getContrastText(theme.palette.grey.A700),
-      boxShadow:
-        "inset 0px 3px 5px -1px rgba(0, 0, 0, 0.2), " +
-        "inset 0px 5px 8px 0px rgba(0, 0, 0, 0.14), " +
-        "inset 0px 3px 14px 2px rgba(0,0, 0, 0.22)",
+      boxShadow: theme.insetShadows,
+      
       gap: "1rem",
       ...FillWindow,
       ...FlexColumn,

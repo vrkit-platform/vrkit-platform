@@ -153,7 +153,9 @@ export class DashboardManager {
       await Promise.all(
         dashFiles.map(file =>
           Fsx.readJSON(file)
-            .then(json => DashboardConfig.fromJson(json))
+            .then(json => assign(DashboardConfig.fromJson(json), {
+              id: Path.basename(file,FileExtensions.Dashboard)
+            }))
             .then(config => this.fsManager.getFileInfo(file).then(fileInfo => assign(config, { fileInfo })))
             .catch(err => {
               error(`Unable to read/parse file (${file}), deleting`, err)
@@ -170,7 +172,13 @@ export class DashboardManager {
       .map(configs => configs.filter(isDefined))
       .filter(isDefined)
       .getOrThrow()
-
+    
+    const configIds = new Set<string>()
+    configs.forEach(({id}) =>{
+      assert(!configIds.has(id))
+      configIds.add(id)
+    })
+    
     return runInAction(() => {
       this.mainAppState.dashboards = {
         ...this.state,

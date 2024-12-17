@@ -79,6 +79,8 @@ set_target_properties(
 #  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
 )
 
+#target_compile_options(${targetName} PRIVATE "/permissive")
+
 # SET NAPI VERSION & LINK OPTIONS
 target_compile_definitions(
   ${targetName}

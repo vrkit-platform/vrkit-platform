@@ -150,6 +150,8 @@ declare module "@mui/material/styles" {
     
     colors:ThemeColors
     
+    insetShadows: Theme["shadows"]
+    
     styleUtility:StyleUtility,
     
     // components: ThemeComponents
@@ -159,7 +161,7 @@ declare module "@mui/material/styles" {
   // allow configuration using `createTheme`
   interface ThemeOptions {
     dimen?:Partial<Dimensions>
-    
+    insetShadows?: Theme["shadows"]
     colors?:Partial<ThemeColors>
     
     styleUtility?:StyleUtility

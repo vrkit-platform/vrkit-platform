@@ -1,7 +1,9 @@
 // ----------------------------------------------------------------------
 
-import { isString } from "@3fv/guard"
-import { alpha } from "vrkit-shared-ui"
+import { isNumber, isString } from "@3fv/guard"
+import { alpha, px } from "vrkit-shared-ui"
+import { isEmpty, isNotEmpty } from "vrkit-shared"
+import { asOption } from "@3fv/prelude-ts"
 export const stylesMode = {
   light: '[data-mui-color-scheme="light"] &',
   dark: '[data-mui-color-scheme="dark"] &'
@@ -99,4 +101,45 @@ export function appAlpha(color: string, opacity = 1) {
   // }
   //
   // return `rgba(${color} / ${opacity})`
+}
+
+export interface BoxShadowArgs {
+  offsetX:number | string
+  offsetY:number | string
+  blurRadius?:number | string
+  spreadRadius?:number | string
+}
+
+export interface BoxShadowOptions {
+  skipAlphaAdjust?: boolean
+}
+
+export function createShadow(color: string, inset:boolean, shadows: BoxShadowArgs[], {skipAlphaAdjust = false}: BoxShadowOptions = {}) {
+  if (isEmpty(shadows)) {
+    shadows.push({
+      offsetX: 0,
+      offsetY: 2,
+      blurRadius: 1,
+      spreadRadius: -1
+    })
+  }
+  const prefix = inset ? "inset " : ""
+  const alphaIncrement = 0.08
+  const check = (value: string | number) => asOption(value)
+      .orElse(asOption(0))
+      .map(value => isNumber(value) ? px(value) : value)
+      .get()
+  let value = ""
+  let colorAlpha = (alphaIncrement * shadows.length)
+  for (const {offsetX, offsetY, blurRadius = 0, spreadRadius = 0} of shadows) {
+    const colorValue = skipAlphaAdjust ? color : alpha(color, colorAlpha);
+    colorAlpha -= alphaIncrement
+    if (isNotEmpty(value)) {
+      value += ","
+    }
+    
+    value += `${prefix} ${check(offsetX)} ${check(offsetY)} ${check(blurRadius)} ${check(spreadRadius)} ${colorValue}`
+  }
+  
+  return value
 }

@@ -4,7 +4,7 @@ import "ScreenConfig.proto";
 import "FileInfo.proto";
 import "UIResource.proto";
 
-package IRacingTools.Models.Dashboard;
+package IRacingTools.Models;
 
 
 message DashboardConfig {

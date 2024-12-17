@@ -30,7 +30,7 @@ import { useLocation, useMatch, useNavigate } from "react-router-dom"
 import { WebPaths } from "../../routes/WebPaths"
 import type { IconDefinition } from "@fortawesome/fontawesome-common-types"
 import { faGridHorizontal } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
-import {AppFAIcon} from "../app-icon"
+import { AppFAIcon } from "../app-icon"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -101,9 +101,11 @@ function NavListItem({ path, icon, label, exact = false }: NavListItemProps) {
           icon={icon}
           size="lg"
         />
-        {/*  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}*/}
       </ListItemIcon>
-      <ListItemText primary={label} />
+      <ListItemText
+        primary={label}
+        primaryTypographyProps={{ variant: "button" }}
+      />
     </AppListItemButton>
   )
 }

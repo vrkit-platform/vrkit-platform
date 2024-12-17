@@ -23,6 +23,17 @@ declare module '@mui/material/styles/createPalette' {
     lighterChannel: string;
     darkerChannel: string;
   }
+  interface Palette {
+    border: {
+      selected: string
+    }
+  }
+  
+  interface PaletteOptions {
+    border: {
+      selected: string
+    }
+  }
   interface PaletteColor {
     lighter: string;
     darker: string;
@@ -122,6 +133,9 @@ export const basePalette = {
   common,
   divider: appAlpha(grey['500'], 0.2),
   action,
+  border: {
+    selected: "rgba(255,255,255,0.5)"
+  },
 };
 
 export const lightPalette = {

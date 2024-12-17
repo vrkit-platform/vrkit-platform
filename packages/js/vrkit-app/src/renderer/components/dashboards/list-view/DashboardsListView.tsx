@@ -266,7 +266,7 @@ export function DashboardsListView(props: DashboardsListViewProps) {
             })
             return (
               <DashboardsListItem
-                key={config.id}
+                key={idx}
                 sx={{
                   zIndex: configs.length - idx + 1
                 }}

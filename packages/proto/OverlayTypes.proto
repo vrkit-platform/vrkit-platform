@@ -1,7 +1,8 @@
 syntax = "proto3";
 import "Geometry.proto";
+import "PluginManifest.proto";
 
-package IRacingTools.Models.Dashboard;
+package IRacingTools.Models;
 
 enum OverlayAnchor {
   OVERLAY_ANCHOR_CENTER = 0;
@@ -30,8 +31,11 @@ message OverlayInfo {
   string description = 6;
 
   repeated string data_var_names = 20;
+//  repeated PluginUserSettingValue user_setting_values = 30;
+  map<string, PluginUserSettingValue> user_setting_values = 30;
+  OverlayBaseSettings settings = 40;
 
-  OverlayBaseSettings settings = 30;
+
 
 
 }

@@ -24,7 +24,6 @@
       "overview": {
         "featureContent": "- set 12/24hr format\n- set opacity\n",
         "changeLogContent": "## v1.0.0 \n\n- Initial Release\n",
-        
         "screenshots": [
           {
             "format": "IMAGE_FORMAT_PNG",
@@ -33,7 +32,17 @@
           }
         ]
       },
-      "userSettings": {},
+      "userSettings": {
+        "clock.format24": {
+          "id": "clock.format24",
+          "name": "Use 24h format",
+          "description": "Display time in 24hr format",
+          "type": "BOOLEAN",
+          "defaultValue": {
+            "booleanValue": false
+          }
+        }
+      },
       "overlayCommonSettings": {
         "canResize": false,
         "forceAspectRatio": false,
@@ -62,7 +71,6 @@
       "supportedGames": [
         "SUPPORTED_GAME_IRACING"
       ],
-      
       "overview": {
         "featureContent": "- set class car colors\n- set opacity\n- enable/disable legend",
         "changeLogContent": "## v1.0.0 \n\n- Initial Release",
@@ -79,7 +87,44 @@
           }
         ]
       },
-      "userSettings": {},
+      "userSettings": {
+        "car.dot.player": {
+          "id": "car.dot.player",
+          "name": "Player color",
+          "description": "Color of the dot representing you, the player on the map",
+          "type": "COLOR",
+          "defaultValue": {
+            colorValue: "#FF0000"
+          }
+        },
+        "car.dot.class1": {
+          "id": "car.dot.class1",
+          "name": "Class 1 color",
+          "description": "Color the top car class in the race (dots)",
+          "type": "COLOR",
+          "defaultValue": {
+            colorValue: "#00FF00"
+          }
+        },
+        "car.dot.class2": {
+          "id": "car.dot.class2",
+          "name": "Class 2 color",
+          "description": "Color the 2nd car class in the race (dots)",
+          "type": "COLOR",
+          "defaultValue": {
+            colorValue: "#00FFFF"
+          }
+        },
+        "car.dot.class3": {
+          "id": "car.dot.class3",
+          "name": "Class 1 color",
+          "description": "Color the 3rd car class in the race (dots)",
+          "type": "COLOR",
+          "defaultValue": {
+            colorValue: "#0000FF"
+          }
+        },
+      },
       "overlayCommonSettings": {
         "canResize": false,
         "forceAspectRatio": false,
@@ -122,19 +167,37 @@
         screenshots: []
       },
       "userSettings": {
-        "carClassColor1": {
+        "car.player": {
+          "id": "car.player",
+          "name": "Player color",
+          "description": "Color of the dot representing you, the player on the map",
           "type": "COLOR",
           "defaultValue": {
             colorValue: "#FF0000"
           }
         },
-        "carClassColor2": {
+        "car.class1": {
+          "id": "car.class1",
+          "name": "Class 1 color",
+          "description": "Color the top car class in the race (dots)",
           "type": "COLOR",
           "defaultValue": {
             colorValue: "#00FF00"
           }
         },
-        "carClassColor3": {
+        "car.class2": {
+          "id": "car.class2",
+          "name": "Class 2 color",
+          "description": "Color the 2nd car class in the race (dots)",
+          "type": "COLOR",
+          "defaultValue": {
+            colorValue: "#00FFFF"
+          }
+        },
+        "car.class3": {
+          "id": "car.class3",
+          "name": "Class 1 color",
+          "description": "Color the 3rd car class in the race (dots)",
           "type": "COLOR",
           "defaultValue": {
             colorValue: "#0000FF"

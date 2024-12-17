@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/OverlayInfo",
     "definitions": {
-        "IRacingTools.Models.Dashboard.OverlayBaseSettings": {
+        "IRacingTools.Models.OverlayBaseSettings": {
             "properties": {
                 "fps": {
                     "oneOf": [
@@ -25,6 +25,106 @@
                 }
             ],
             "title": "Overlay Base Settings"
+        },
+        "IRacingTools.Models.PluginUserSettingValue": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "type": {
+                    "enum": [
+                        "PLUGIN_USER_SETTING_TYPE_INT",
+                        0,
+                        "PLUGIN_USER_SETTING_TYPE_DOUBLE",
+                        1,
+                        "PLUGIN_USER_SETTING_TYPE_STRING",
+                        2,
+                        "PLUGIN_USER_SETTING_TYPE_BOOLEAN",
+                        3,
+                        "PLUGIN_USER_SETTING_TYPE_COLOR",
+                        4
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Plugin User Setting Type"
+                },
+                "intValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "doubleValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "stringValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "booleanValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "colorValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Plugin User Setting Value"
         },
         "OverlayInfo": {
             "properties": {
@@ -108,8 +208,29 @@
                         }
                     ]
                 },
+                "userSettingValues": {
+                    "additionalProperties": {
+                        "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingValue",
+                        "additionalProperties": true,
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {}
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ],
+                    "description": "repeated PluginUserSettingValue user_setting_values = 30;"
+                },
                 "settings": {
-                    "$ref": "#/definitions/IRacingTools.Models.Dashboard.OverlayBaseSettings",
+                    "$ref": "#/definitions/IRacingTools.Models.OverlayBaseSettings",
                     "additionalProperties": true,
                     "oneOf": [
                         {

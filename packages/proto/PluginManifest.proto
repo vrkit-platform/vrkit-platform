@@ -15,11 +15,13 @@ enum PluginUserSettingType {
 
 
 message PluginUserSettingValue {
-  int32 int_value = 1;
-  double double_value = 2;
-  string string_value = 3;
-  bool boolean_value = 4;
-  string color_value = 5;
+  string id = 1;
+  PluginUserSettingType type = 2;
+  int32 int_value = 10;
+  double double_value = 20;
+  string string_value = 30;
+  bool boolean_value = 40;
+  string color_value = 50;
 }
 
 message PluginUserSetting {

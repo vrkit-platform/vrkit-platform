@@ -13,8 +13,10 @@ import { createTheme as muiCreateTheme } from "@mui/material/styles"
 import { components, customShadows, shadows, typography } from "./core"
 import { assign } from "vrkit-shared"
 import { alpha, CssSelectors, linearGradient, rem } from "vrkit-shared-ui"
-import { darken, lighten } from "@mui/material"
-import { darkPrimaryAndSecondaryPalettes } from "./paletteAndColorHelpers"
+import { darken, lighten } from "@mui/material/styles"
+import {
+  darkPrimaryAndSecondaryPalettes, paneBackgrounds
+} from "./paletteAndColorHelpers"
 import { createPaletteChannel, remToPx, setFont } from "./styles" // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
@@ -82,17 +84,26 @@ const appBarBackgroundGradient = linearGradient(
 const appBarSearchBackgroundColor = darken(slateBackgroundColor, 0.15)
 const appBarSearchBorderColor = darken(slateBackgroundColor, 0.3)
 
+const paneBgColors = {
+  pane00: darken(appBarBackgroundColor, 0.6),
+  pane01: darken(appBarBackgroundColor, 0.5),
+  pane02: darken(appBarBackgroundColor, 0.6)
+}
+
 const darkDefault = lighten("#1F2025", 0.025)
+
+const actionActive = "#0a8af3"
 
 const themeOptions: ThemeOptions = {
   shadows: shadows(colorScheme),
+  insetShadows: shadows(colorScheme, true),
   customShadows: customShadows(colorScheme),
   direction: "ltr" as Direction,
   shape: { borderRadius: remToPx(0.25) },
 
   typography: {
     ...typography,
-    fontFamily: setFont("SanFranciscoDisplay")
+    // fontFamily: setFont("SanFranciscoDisplay")
   },
   palette: {
     background: {
@@ -114,9 +125,8 @@ const themeOptions: ThemeOptions = {
       filledInputDisabled: "rgba(255, 255, 255, 0.12)",
       appBar: appBarBackgroundColor, // "#2E3133",
       appBarSearch: appBarSearchBackgroundColor,
-      appBarGradient: appBarBackgroundGradient
-
-      // ...paneBackgrounds("#1F2025", 3, 0.025)
+      appBarGradient: appBarBackgroundGradient,
+      ...paneBackgrounds("#1F2025", 3, 0.025)
     },
     divider: "rgba(145, 158, 171, 0.24)",
     error: createPaletteChannel({
@@ -134,11 +144,15 @@ const themeOptions: ThemeOptions = {
       contrastText: "#ffffff"
     }),
     action: {
-      active: "#0a8af3"
+      active: actionActive,
+      selected: darken(actionActive,0.3),
     },
     text: {
       primary: "#ffffff",
       secondary: "#919eab"
+    },
+    border: {
+      selected: "rgba(255,255,255,0.5)"
     },
     warning: createPaletteChannel({
       contrastText: "#ffffff",

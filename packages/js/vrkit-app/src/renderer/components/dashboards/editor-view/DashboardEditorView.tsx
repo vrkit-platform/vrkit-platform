@@ -19,7 +19,7 @@ import {
   FillHeight,
   flexAlign,
   FlexAuto,
-  FlexColumn,
+  FlexColumn, FlexRow,
   FlexRowCenter,
   FlexScaleZero,
   hasCls,
@@ -42,22 +42,13 @@ const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const classPrefix = "dashboardEditor"
-export const classNames = createClassNames(
+const classNames = createClassNames(
   classPrefix,
   "root",
   "visible",
-  "content",
-  "header",
-  "headerActions",
-  "headerField",
-
-  "details",
-  "detailsContent",
-  "layouts",
-  "layout",
-  "overlays",
-  "overlay"
 )
+
+export const dashboardEditorViewClasses = classNames
 export type DashboardEditorClassKey = ClassNamesKey<typeof classNames>
 
 const DashboardEditorRoot = styled(Box, {
@@ -73,68 +64,8 @@ const DashboardEditorRoot = styled(Box, {
     ...OverflowHidden,
     ...FlexScaleZero,
     ...padding(0), //theme.spacing(0.5), theme.spacing(1)),
-    background: darken(theme.palette.background.appBar, 0.4),
+    background: theme.palette.background.pane01,
 
-    [child(classNames.content)]: {
-      ...FlexColumn,
-      ...FlexScaleZero,
-      ...OverflowAuto,
-      [child(classNames.header)]: {
-        ...padding(0),
-        ...FlexColumn,
-        ...FlexAuto,
-        ...flexAlign("stretch", "center"),
-        filter: `drop-shadow(0 0 0.75rem ${theme.palette.background.session})`,
-
-        [child(classNames.headerField)]: {
-          ...padding(theme.spacing(1),theme.spacing(2),theme.spacing(0)),
-          ...FlexAuto
-        },
-        [child(classNames.headerActions)]: {
-        
-        }
-      },
-      [child(classNames.details)]: {
-        ...FlexColumn,
-        ...OverflowAuto,
-        ...FlexAuto,
-
-        // ...flexAlign("center", "stretch"),
-
-        // background: darken(theme.palette.background.appBar, 0.2),
-        [child(classNames.detailsContent)]: {
-          ...padding(theme.spacing(1)),
-          ...FlexColumn,
-          ...FlexAuto, // ...OverflowVisible,
-          gap: theme.spacing(1),
-          [child(classNames.layouts)]: {
-            ...padding(0,theme.spacing(1),theme.spacing(2)),
-            ...FlexColumn,
-            ...FlexAuto,
-            gap: theme.spacing(1),
-            [child(classNames.layout)]: {
-              gap: theme.spacing(1),
-              ...FlexRowCenter,
-              ...flexAlign("stretch", "center"),
-              ...FlexAuto,
-
-              [child("checkbox")]: {
-                ...FlexAuto
-              }
-            }
-          },
-          [child(classNames.overlays)]: {
-            ...padding(theme.spacing(1),theme.spacing(1),theme.spacing(2)),
-            ...FlexColumn,
-            ...FlexAuto,
-            gap: theme.spacing(1),
-            [child(classNames.overlay)]: {
-            
-            }
-          }
-        }
-      }
-    }
   }
 }))
 

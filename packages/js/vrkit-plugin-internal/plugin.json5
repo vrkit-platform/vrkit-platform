@@ -112,12 +112,12 @@
           "description": "Color the 2nd car class in the race (dots)",
           "type": "COLOR",
           "defaultValue": {
-            colorValue: "#00FFFF"
+            colorValue: "rgba(255,255,255,1.0)"
           }
         },
         "car.dot.class3": {
           "id": "car.dot.class3",
-          "name": "Class 1 color",
+          "name": "Class 3 color",
           "description": "Color the 3rd car class in the race (dots)",
           "type": "COLOR",
           "defaultValue": {

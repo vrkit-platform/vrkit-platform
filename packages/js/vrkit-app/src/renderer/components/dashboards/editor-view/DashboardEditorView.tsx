@@ -89,16 +89,19 @@ export function DashboardEditorView(props: DashboardEditorProps) {
     { className, config, ...other } = props,
     dashboardClient = useService(DashboardManagerClient),
     onSubmit = Alert.usePromise(
-      async (values: DashboardConfig, { setErrors, setStatus, setSubmitting }: FormikContextType<DashboardConfig>) => {
+      async (values: DashboardConfig, { setErrors, setTouched, setStatus, setSubmitting, resetForm }: FormikContextType<DashboardConfig>) => {
         try {
           // DISPATCH THE SAVE ACTION
           const savedDashConfig = await dashboardClient.updateDashboardConfig(config?.id, values)
           if (isMounted()) {
             setStatus({ success: true })
-            setSubmitting(false)
           }
-
-          nav(-1)
+          // nav(-1)
+          resetForm({
+            values: DashboardConfig.clone(savedDashConfig),
+            touched: {},
+            errors: {}
+          })
           return savedDashConfig
         } catch (err) {
           error(err)
@@ -108,6 +111,8 @@ export function DashboardEditorView(props: DashboardEditorProps) {
           }
 
           return err
+        } finally {
+          setSubmitting(false)
         }
       },
       {

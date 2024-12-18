@@ -13,23 +13,28 @@ import { darken, lighten, styled, useTheme } from "@mui/material/styles"
 
 // APP
 import {
-  alpha, child,
+  alpha,
+  child,
   ClassNamesKey,
   createClassNames,
   CursorPointer,
   dimensionConstraints,
   Ellipsis,
   Fill,
-  FillBounds,
+  FillBounds, FillWidth,
   flex,
   flexAlign,
   FlexAuto,
   FlexColumn,
+  FlexColumnBox,
+  FlexProperties,
   FlexRow,
   FlexRowBox,
   FlexRowCenter,
   FlexScaleZero,
   hasCls,
+  heightConstraint,
+  HeightProperties,
   linearGradient,
   OverflowHidden,
   OverflowVisible,
@@ -43,6 +48,7 @@ import Paper from "@mui/material/Paper"
 import { AsyncImage } from "../../async-image"
 import { OverlayInfo } from "vrkit-models"
 import { createShadow } from "../../../theme/styles"
+import ComponentInstanceForm from "./ComponentInstanceForm"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -60,8 +66,8 @@ export const componentInstanceListItemClasses = createClassNames(
     "headerTitle",
     "headerSubheader",
     "content",
-    "footer",
-    "footerActions"
+    // "footer",
+    // "footerActions"
   ),
   classes = componentInstanceListItemClasses
 export type ComponentInstanceListItemClassKey = ClassNamesKey<typeof componentInstanceListItemClasses>
@@ -75,9 +81,12 @@ const ComponentInstanceListItemRoot = styled(Box, {
     ...FlexRowCenter,
     ...OverflowHidden,
     ...PositionRelative, // ...flex(0,
-    ...flexAlign("stretch", "flex-start"),
+    ...flexAlign("flex-start", "flex-start"),
+    height: 70,
+    maxHeight: "fit-content",
+    transition: transitions.create([...HeightProperties]),
     //filter: "drop-shadow(0px 2px 2px rgba(0,0,0, 0.25))",
-    [`&:nth-child(odd) .${classes.itemPaper}::before`]: {
+    [`&:nth-of-type(odd) .${classes.itemPaper}::before`]: {
       backgroundImage: linearGradient(
           "to bottom",
           `${lighten(palette.background.paper, 0.03)} 0%`,
@@ -85,7 +94,7 @@ const ComponentInstanceListItemRoot = styled(Box, {
           `${lighten(palette.background.paper, 0.1)} 100%`
       ),
     },
-    [`&:nth-child(even) .${classes.itemPaper}::before`]: {
+    [`&:nth-of-type(even) .${classes.itemPaper}::before`]: {
       backgroundImage: linearGradient(
           "to bottom",
           `${darken(palette.background.paper, 0.13)} 0%`,
@@ -95,13 +104,18 @@ const ComponentInstanceListItemRoot = styled(Box, {
     },
     [child(classes.itemPaper)]: {
       ...FlexColumn,
-      ...Fill,
+      // ...Fill,
+      ...FillWidth,
       ...OverflowHidden,
       ...PositionRelative,
+      //...heightConstraint(70),
+      
+      
       borderRadius: 0,
       padding: 0,
       gap: spacing(1),
       textDecoration: "none",
+      
       "&::before": {
         transition: transitions.create(["background-image", "box-shadow"]),
         ...PositionAbsolute,
@@ -115,7 +129,7 @@ const ComponentInstanceListItemRoot = styled(Box, {
       },
       "&:not(.first)": {},
       "&:not(.last)": {
-        ...OverflowVisible
+        // ...OverflowVisible
       },
       "&.last, &.last::before": {
         borderBottomLeftRadius: shape.borderRadius,
@@ -162,7 +176,18 @@ const ComponentInstanceListItemRoot = styled(Box, {
           }
         }
       },
+      [child(classes.content)]: {
+        // transition: transitions.create([...FlexProperties,...HeightProperties]),
+        // ...flex(0, 0, 0),
+        // maxHeight: 0
+      },
       [hasCls(classes.itemSelected)]: {
+        // height: "fit-content",
+        [child(classes.content)]: {
+          // transition: transitions.create([...FlexProperties,...HeightProperties]),
+          // ...FlexAuto
+          
+        },
         "&::before": {
           backgroundImage: linearGradient(
               "to bottom",
@@ -175,14 +200,16 @@ const ComponentInstanceListItemRoot = styled(Box, {
       },
       
     },
-    
+    [hasCls(classes.selected)]: {
+      height: "fit-content",
+    }
   }
 }))
 
 /**
  * ComponentInstanceListItem Component Properties
  */
-export interface ComponentInstanceListItemProps extends BoxProps {
+export interface ComponentInstanceListItemProps extends Omit<BoxProps, "onChange"> {
   overlayInfo: OverlayInfo
 
   compEntry: PluginCompEntry
@@ -190,6 +217,8 @@ export interface ComponentInstanceListItemProps extends BoxProps {
   selected?: boolean
 
   actions?: React.ReactNode
+  
+  onChange: (id: string, patch: Partial<OverlayInfo>) => void
 }
 
 /**
@@ -200,14 +229,16 @@ export interface ComponentInstanceListItemProps extends BoxProps {
 export function ComponentInstanceListItem(props: ComponentInstanceListItemProps) {
   const {
       className,
-      compEntry: [manifest, componentDef],
+      compEntry,
       selected: isSelected = false,
       overlayInfo,
+      onChange,
       actions,
       onClick,
       sx = {},
       ...other
     } = props,
+      [manifest, componentDef] = compEntry,
     theme = useTheme()
 
   return (
@@ -216,7 +247,6 @@ export function ComponentInstanceListItem(props: ComponentInstanceListItemProps)
         [classes.selected]: isSelected
       })}
       sx={{
-        ...(onClick && CursorPointer),
         ...sx
       }}
       onClick={onClick}
@@ -231,7 +261,11 @@ export function ComponentInstanceListItem(props: ComponentInstanceListItemProps)
           className
         )}
       >
-        <FlexRowBox className={classes.header}>
+        <FlexRowBox className={classes.header}
+                    sx={{
+                      ...(onClick && CursorPointer),
+                    }}
+        >
           <Box className={clsx(classes.headerIcon)}>
             <AsyncImage
               src={componentDef?.uiResource?.icon?.url}
@@ -245,6 +279,15 @@ export function ComponentInstanceListItem(props: ComponentInstanceListItemProps)
             </Box>
           </Box>
         </FlexRowBox>
+        
+          <ComponentInstanceForm
+              selected={isSelected}
+              overlayInfo={overlayInfo}
+              compEntry={compEntry}
+              className={classes.content}
+              onChange={onChange}
+          />
+        
       </Paper>
     </ComponentInstanceListItemRoot>
   )

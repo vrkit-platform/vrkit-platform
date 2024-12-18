@@ -1,5 +1,5 @@
 import clsx from "clsx"
-import { DashboardConfig, ImageFormat } from "vrkit-models"
+import { DashboardConfig, ImageFormat, OverlayInfo } from "vrkit-models"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { useAsyncCallback } from "../../../hooks" // import {
@@ -8,7 +8,7 @@ import { useAsyncCallback } from "../../../hooks" // import {
 // "../../model-editor-context"
 import { PageMetadata, PageMetadataProps } from "../../page-metadata"
 import { AppButtonGroupFormikPositiveNegative } from "../../app-button-group-positive-negative"
-import { assignDeep, isEmpty } from "vrkit-shared"
+import { assignDeep, isEmpty, propEqualTo } from "vrkit-shared"
 import { FormContainer } from "../../form"
 import { AppTextFieldFormik } from "../../app-text-field"
 import {
@@ -19,12 +19,11 @@ import {
   flex,
   flexAlign,
   FlexAuto,
-  FlexColumn, FlexProperties,
+  FlexColumn,
+  FlexProperties,
   FlexRow,
-  FlexRowCenter,
   FlexScaleZero,
   hasCls,
-  OverflowAuto,
   OverflowHidden,
   padding
 } from "vrkit-shared-ui"
@@ -33,7 +32,7 @@ import { FormikBag, FormikConfig, FormikContextType, FormikProps, withFormik } f
 import { get } from "lodash/fp"
 import useTheme from "@mui/material/styles/useTheme"
 import { useNavigate } from "react-router-dom"
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { getLogger } from "@3fv/logger-proxy"
 import Box from "@mui/material/Box"
 import Typography from "@mui/material/Typography"
@@ -48,6 +47,7 @@ import ComponentInstanceListItem from "./ComponentInstanceListItem"
 import { isDefined } from "@3fv/guard"
 import { styled } from "@mui/material/styles"
 import ComponentInstanceForm from "./ComponentInstanceForm"
+import Alerts from "../../../services/alerts"
 
 const log = getLogger(__filename)
 
@@ -72,8 +72,7 @@ const classNames = createClassNames(
   "overlayContentListItem",
   "overlayContentListItemSelected",
   "overlayContentListItemForms",
-    "overlayContentListItemForm",
-    
+  "overlayContentListItemForm"
 )
 
 export const dashboardEditorFormClasses = classNames
@@ -87,14 +86,15 @@ const DashboardEditorFormRoot = styled(Box, {
   [hasCls(classNames.root)]: {
     ...FlexColumn,
     ...FlexScaleZero,
-    ...OverflowAuto,
+    ...OverflowHidden,
     [child(classNames.form)]: {
       ...FlexColumn,
-      ...FlexAuto,
-
+      ...FlexScaleZero,
+      ...OverflowHidden,
       [child(classNames.formBody)]: {
         ...FlexColumn,
-        ...FlexAuto,
+        ...FlexScaleZero,
+        ...OverflowHidden,
         [child(classNames.header)]: {
           ...padding(theme.spacing(1)),
           ...FlexColumn,
@@ -110,8 +110,8 @@ const DashboardEditorFormRoot = styled(Box, {
         },
         [child(classNames.details)]: {
           ...FlexColumn,
-          ...OverflowAuto,
-          ...FlexAuto,
+          ...OverflowHidden,
+          ...FlexScaleZero,
 
           // ...flexAlign("center", "stretch"),
 
@@ -119,67 +119,70 @@ const DashboardEditorFormRoot = styled(Box, {
           [child(classNames.detailsContent)]: {
             ...padding(theme.spacing(1)),
             ...FlexColumn,
-            ...FlexAuto, // ...OverflowVisible,
-            gap: theme.spacing(1),
-            [child(classNames.layouts)]: {
-              ...padding(0, theme.spacing(1), theme.spacing(2)),
-              ...FlexColumn,
-              ...FlexAuto,
-              gap: theme.spacing(1),
-              [child(classNames.layout)]: {
-                gap: theme.spacing(1),
-                ...FlexRowCenter,
-                ...flexAlign("stretch", "center"),
-                ...FlexAuto,
+            ...OverflowHidden,
+            ...FlexScaleZero,
 
-                [child("checkbox")]: {
-                  ...FlexAuto
-                }
-              }
-            },
+            gap: theme.spacing(1), // [child(classNames.layouts)]: {
+            //   ...padding(0, theme.spacing(1), theme.spacing(2)),
+            //   ...FlexColumn,
+            //   ...FlexAuto,
+            //   gap: theme.spacing(1),
+            //   [child(classNames.layout)]: {
+            //     gap: theme.spacing(1),
+            //     ...FlexRowCenter,
+            //     ...flexAlign("stretch", "center"),
+            //     ...FlexAuto,
+            //
+            //     [child("checkbox")]: {
+            //       ...FlexAuto
+            //     }
+            //   }
+            // },
             [child(classNames.overlays)]: {
               ...padding(theme.spacing(1), theme.spacing(1), theme.spacing(2)),
               ...FlexColumn,
-              ...FlexAuto,
+              ...FlexScaleZero,
+              ...OverflowHidden,
 
               gap: theme.spacing(1),
               [child(classNames.overlayContent)]: {
-                ...FlexRow,
+                ...FlexScaleZero,
+                ...FlexColumn,
                 ...OverflowHidden,
-                ...flexAlign("stretch", "stretch"),
-                flex: "1 0 300px",
+                ...flexAlign("stretch", "stretch"), // minHeight: 300,
                 gap: theme.spacing(1),
                 maxHeight: "auto",
                 [child(classNames.overlayContentList)]: {
                   transition: theme.transitions.create([...FlexProperties]),
-                  ...OverflowHidden,
-                  ...flex(1,1,"100%"),
-                  
+                  overflowX: "hidden",
+                  overflowY: "auto",
+                  ...flex(1, 1, "100%"),
+
                   [child(classNames.overlayContentListItem)]: {
-                    
                     //border: `1px solid transparent`,
                     [hasCls(classNames.overlayContentListItemSelected)]: {
-                      //border: `1px solid ${theme.palette.border.selected}`,
+                      //border: `1px solid
+                      // ${theme.palette.border.selected}`,
                     }
                   },
                   [hasCls(classNames.overlayContentListItemSelected)]: {
-                    ...flex(1,1,"50%")
-                  },
+                    // ...flex(1, 1, "50%")
+                  }
                 },
                 [child(classNames.overlayContentListItemForms)]: {
-                  ...flex(0,0,0),
-                  ...OverflowHidden,
+                  ...flex(0, 0, 0),
                   ...FlexColumn,
-                  ...flexAlign("stretch","stretch"),
+                  ...flexAlign("stretch", "stretch"),
+                  ...OverflowHidden,
                   transition: theme.transitions.create([...FlexProperties]),
                   [hasCls(classNames.overlayContentListItemSelected)]: {
-                    ...flex(1,1,"50%")
+                    ...flex(1, 1, "50%"),
+                    overflowX: "hidden",
+                    overflowY: "auto"
                   },
                   [child(classNames.overlayContentListItemForm)]: {
-                    ...FlexScaleZero,
-                  
-                  
-                  },
+                    ...FlexAuto
+                  }
                 }
               }
             }
@@ -225,9 +228,11 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
       handleChange,
       handleSubmit,
       isSubmitting,
+      
       initialValues,
       status = {},
       touched,
+      setTouched,
       values,
       setValues,
       resetForm,
@@ -238,10 +243,31 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
     } = props,
     theme = useTheme(),
     nav = useNavigate(),
+    onOverlayInfoChange = useCallback(
+      (id: string, patch: Partial<OverlayInfo>) => {
+        setValues(currentValue => {
+          const overlay = currentValue?.overlays?.find?.(propEqualTo("id", id))
+          if (!overlay) {
+            Alerts.error(`Overlay with id (${id}) could not be found`)
+          } else {
+            log.info(`Patching overlay`, overlay, "patch", patch)
+            assignDeep(overlay, patch)
+          }
+
+          return currentValue
+        })
+        
+        setTouched({
+          ...touched,
+          
+        })
+      },
+      [setValues, values, setTouched]
+    ),
     dashboardClient = useService(DashboardManagerClient),
     patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
     launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
-    [selectedOverlayId, setSelectedOverlayId] = useState<string>(null),
+    [selectedOverlayId, setSelectedOverlayId] = useState<string>(config?.overlays?.[0]?.id ?? null),
     compEntryMap = useAppSelector(sharedAppSelectors.selectAllPluginComponentOverlayDefsMap),
     canModify = useMemo(() => {
       return !launchLayoutEditorAsync.loading && !patchConfigAsync.loading
@@ -275,7 +301,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
             negativeLabel={negLabel}
             negativeHandler={() => {
               resetForm()
-              nav(-1)
+              //nav(-1)
             }}
             positiveLabel={posLabel}
             positiveHandler={() => {
@@ -288,7 +314,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
         )
       }
     }
-
+  
   // UPDATE THE PROVIDED REF ENABLING OTHER
   // UI COMPONENTS/DIALOGS, ETC TO SUBMIT
   if (handleSubmitRef) {
@@ -399,9 +425,11 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
                 Overlays
               </Typography>
               <Box className={clsx(classNames.overlayContent)}>
-                <Box className={clsx(classNames.overlayContentList, {
-                  [classNames.overlayContentListItemSelected]: !!selectedOverlayId
-                })}>
+                <Box
+                  className={clsx(classNames.overlayContentList, {
+                    [classNames.overlayContentListItemSelected]: !!selectedOverlayId
+                  })}
+                >
                   {values.overlays
                     .map((o, idx) => {
                       const classList = clsx(classNames.overlayContentListItem, {
@@ -417,6 +445,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
                           overlayInfo={o}
                           compEntry={entry}
                           className={classList}
+                          onChange={onOverlayInfoChange}
                           onClick={ev => {
                             setSelectedOverlayId(o.id)
                             ev.preventDefault()
@@ -429,27 +458,31 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
                     })
                     .filter(isDefined)}
                 </Box>
-                <Box className={clsx(classNames.overlayContentListItemForms, {
-                  [classNames.overlayContentListItemSelected]: !!selectedOverlayId
-                })}>
-                  {selectedOverlayId && values.overlays
-                      .map((o, idx) => {
-                        const classList = clsx(classNames.overlayContentListItemForm, {
-                              [classNames.overlayContentListItemSelected]: o.id === selectedOverlayId
-                            }),
-                            entry = compEntryMap[o.componentId]
-                        return !entry ? null : (
-                            <ComponentInstanceForm
-                                key={o.id}
-                                selected={selectedOverlayId === o.id}
-                                overlayInfo={o}
-                                compEntry={entry}
-                                className={classList}
-                            />
-                        )
-                      })
-                      .filter(isDefined)}
-                </Box>
+                {/*<Box*/}
+                {/*  className={clsx(classNames.overlayContentListItemForms, {*/}
+                {/*    [classNames.overlayContentListItemSelected]: !!selectedOverlayId*/}
+                {/*  })}*/}
+                {/*>*/}
+                {/*  {selectedOverlayId &&*/}
+                {/*    values.overlays*/}
+                {/*      .map((o, idx) => {*/}
+                {/*        const classList = clsx(classNames.overlayContentListItemForm, {*/}
+                {/*            [classNames.overlayContentListItemSelected]: o.id === selectedOverlayId*/}
+                {/*          }),*/}
+                {/*          entry = compEntryMap[o.componentId]*/}
+                {/*        return !entry ? null : (*/}
+                {/*          <ComponentInstanceForm*/}
+                {/*            key={o.id}*/}
+                {/*            selected={selectedOverlayId === o.id}*/}
+                {/*            overlayInfo={o}*/}
+                {/*            compEntry={entry}*/}
+                {/*            className={classList}*/}
+                {/*            onChange={onOverlayInfoChange}*/}
+                {/*          />*/}
+                {/*        )*/}
+                {/*      })*/}
+                {/*      .filter(isDefined)}*/}
+                {/*</Box>*/}
               </Box>
             </Box>
           </Box>

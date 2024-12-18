@@ -76,13 +76,9 @@ function prepareWindow(state: ISharedAppState, win: BrowserWindow, isMainWindow:
     .on("show", () => {
       win.webContents.setWindowOpenHandler(windowOpenHandler)
       if (state.devSettings.alwaysOpenDevTools) {
-        win.webContents.openDevTools(
-          isMainWindow
-            ? undefined
-            : {
-                mode: "detach"
-              }
-        )
+        win.webContents.openDevTools({
+          mode: isMainWindow ? "right" : "detach"
+        })
       }
     })
 

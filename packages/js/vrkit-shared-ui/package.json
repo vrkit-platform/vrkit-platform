@@ -21,7 +21,7 @@
   },
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@mui/styled-engine": "^5.16.6",
+    "@mui/styled-engine": "^5.16.12",
     "@protobuf-ts/runtime": "^2.9.4",
     "vrkit-shared": "1.0.0"
   },

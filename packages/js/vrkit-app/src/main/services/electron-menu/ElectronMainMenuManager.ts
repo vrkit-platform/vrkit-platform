@@ -58,8 +58,14 @@ const devOptions = (actionRegistry: ActionRegistry) =>
     ? invokeWith(roleItemFactory(actionRegistry), roleItem => [
         { type: "separator" },
         roleItem("reload"),
-        roleItem("forceReload"),
-        roleItem("toggleDevTools"),
+        {
+          ...roleItem("forceReload"),
+          accelerator: "CommandOrControl+F5",
+        },
+        {
+          ...roleItem("toggleDevTools"),
+          accelerator: "CommandOrControl+F10",
+        },
         {
           label: "Inspect Shared Worker",
           accelerator: "CommandOrControl+F12",

@@ -76,30 +76,15 @@ const ComponentInstanceFormRoot = styled(Box, {
 })(({ theme: { palette, spacing, shape, shadows, insetShadows, dimen, typography, transitions, customShadows } }) => ({
   // root styles here
   [hasCls(classes.root)]: {
-    // ...FlexColumn,
     ...OverflowHidden,
     ...PositionRelative, // ...flex(0,
-    // ...flexAlign("stretch", "stretch"), //filter: "drop-shadow(0px 2px
-    // 2px rgba(0,0,0, 0.25))",
-    //filter: `drop-shadow(0 0 0.75rem ${palette.background.session})`,
-    // transition: transitions.create([...FlexProperties,...HeightProperties]),
-    transition: transitions.create([...HeightProperties]),
-    
+    transition: transitions.create(["max-height"]),
+    height: "auto",
+    maxHeight: 9999,
     [`&:not(.${classes.selected})`]: {
-      height: 0
-      //...heightConstraint(0),
-      
+      maxHeight: 0,
     },
-    [`&.${classes.selected}`]: {
-      // ...heightConstraint("auto"),
-      // ...flex(0, 0, "auto"),
-      height: "auto",
-      // maxHeight: "auto",
-      // overflowX: "hidden",
-      // overflowY: "auto",
-      // boxShadow: shadows[4]
-    },
-
+    
     [child(classes.form)]: {
       ...flex(0, 0, "auto"),
       ...FlexColumn,
@@ -126,14 +111,13 @@ const ComponentInstanceFormRoot = styled(Box, {
           ...flexAlign("stretch", "flex-start"),
           [child(classes.fieldLabelTop)]: {
             ...typography.subtitle1,
-            // color: alpha(palette.text.primary, 0.95)
             opacity: 0.9
           },
           [child(classes.fieldLabelBottom)]: {
             ...typography.subtitle2,
             ...Ellipsis,
             whitespace: "normal",
-            "-webkit-line-clamp": "2"
+            "WebkitLineClamp": "2"
           }
         },
         [child(classes.fieldValue)]: {
@@ -142,6 +126,7 @@ const ComponentInstanceFormRoot = styled(Box, {
           ...FlexAuto,
           ...OverflowHidden,
           ...widthConstraint(200),
+          ...flexAlign("center","flex-end"),
           [child(formControlClasses.root)]: {
             ...widthConstraint("100%"),
             [child(inputAdornmentClasses.root)]: {

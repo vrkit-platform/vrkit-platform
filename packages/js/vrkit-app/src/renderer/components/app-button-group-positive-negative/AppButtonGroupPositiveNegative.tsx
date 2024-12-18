@@ -51,6 +51,11 @@ export interface AppButtonGroupPositiveNegativeProps extends BoxProps {
   positiveLabel: string | React.ReactNode
 
   positiveHandler: React.MouseEventHandler
+  
+  disabled?: boolean
+  
+  positiveDisabled?: boolean
+  negativeDisabled?: boolean
 }
 
 /**
@@ -67,7 +72,9 @@ export function AppButtonGroupPositiveNegative(props: AppButtonGroupPositiveNega
     positiveLabel,
     positiveHandler,
     children,
-
+    disabled = false,
+      positiveDisabled = false,
+      negativeDisabled = false,
     ...other
   } = props
 
@@ -81,6 +88,7 @@ export function AppButtonGroupPositiveNegative(props: AppButtonGroupPositiveNega
         color="error"
         size="medium"
         variant="outlined"
+        disabled={disabled || negativeDisabled}
         onClick={negativeHandler}
         {...buttonProps}
       >
@@ -90,6 +98,7 @@ export function AppButtonGroupPositiveNegative(props: AppButtonGroupPositiveNega
       <Button
         color="primary"
         variant="contained"
+        disabled={disabled || positiveDisabled}
         onClick={positiveHandler}
         {...buttonProps}
       >

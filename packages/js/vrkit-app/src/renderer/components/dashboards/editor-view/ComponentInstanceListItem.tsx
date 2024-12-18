@@ -1,5 +1,5 @@
 // REACT
-import React from "react"
+import React, { SyntheticEvent } from "react"
 
 // CLSX
 import clsx from "clsx"
@@ -11,6 +11,8 @@ import { getLogger } from "@3fv/logger-proxy"
 import Box, { BoxProps } from "@mui/material/Box"
 import { darken, lighten, styled, useTheme } from "@mui/material/styles"
 
+import { faEdit, faEllipsisVertical, faRocketLaunch, faTrash } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
+
 // APP
 import {
   alpha,
@@ -21,7 +23,8 @@ import {
   dimensionConstraints,
   Ellipsis,
   Fill,
-  FillBounds, FillWidth,
+  FillBounds,
+  FillWidth,
   flex,
   flexAlign,
   FlexAuto,
@@ -36,12 +39,13 @@ import {
   heightConstraint,
   HeightProperties,
   linearGradient,
+  notHasCls,
   OverflowHidden,
   OverflowVisible,
   padding,
   PositionAbsolute,
   PositionRelative,
-  rem
+  rem, transition
 } from "vrkit-shared-ui"
 import { PluginCompEntry } from "../../../services/store/slices/shared-app"
 import Paper from "@mui/material/Paper"
@@ -49,6 +53,9 @@ import { AsyncImage } from "../../async-image"
 import { OverlayInfo } from "vrkit-models"
 import { createShadow } from "../../../theme/styles"
 import ComponentInstanceForm from "./ComponentInstanceForm"
+import { dashboardsListViewClasses } from "../list-view"
+import { AppFAIcon } from "../../app-icon"
+import AppIconButton from "../../app-icon-button"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -65,9 +72,9 @@ export const componentInstanceListItemClasses = createClassNames(
     "headerIcon",
     "headerTitle",
     "headerSubheader",
-    "content",
-    // "footer",
-    // "footerActions"
+        "headerActions",
+        "headerAction",
+    "content"
   ),
   classes = componentInstanceListItemClasses
 export type ComponentInstanceListItemClassKey = ClassNamesKey<typeof componentInstanceListItemClasses>
@@ -80,12 +87,11 @@ const ComponentInstanceListItemRoot = styled(Box, {
   [hasCls(classes.root)]: {
     ...FlexRowCenter,
     ...OverflowHidden,
-    ...PositionRelative, // ...flex(0,
+    ...PositionRelative,
     ...flexAlign("flex-start", "flex-start"),
-    height: 70,
-    maxHeight: "fit-content",
-    transition: transitions.create([...HeightProperties]),
-    //filter: "drop-shadow(0px 2px 2px rgba(0,0,0, 0.25))",
+    
+    
+    
     [`&:nth-of-type(odd) .${classes.itemPaper}::before`]: {
       backgroundImage: linearGradient(
           "to bottom",
@@ -104,18 +110,18 @@ const ComponentInstanceListItemRoot = styled(Box, {
     },
     [child(classes.itemPaper)]: {
       ...FlexColumn,
-      // ...Fill,
       ...FillWidth,
       ...OverflowHidden,
       ...PositionRelative,
-      //...heightConstraint(70),
-      
-      
+      ...flexAlign("stretch", "stretch"),
+      transition: transitions.create(["max-height"], {duration: "500ms"}),
+      height: "auto",
+      maxHeight: 9999,
       borderRadius: 0,
       padding: 0,
-      gap: spacing(1),
+      // gap: spacing(1),
       textDecoration: "none",
-      
+      // transition: transitions.create([...HeightProperties, ...FlexProperties]),
       "&::before": {
         transition: transitions.create(["background-image", "box-shadow"]),
         ...PositionAbsolute,
@@ -124,19 +130,19 @@ const ComponentInstanceListItemRoot = styled(Box, {
         boxShadow: "none",
       },
       "&.first, &.first::before": {
-        borderTopLeftRadius: shape.borderRadius,
-        borderTopRightRadius: shape.borderRadius
+        borderTopLeftRadius: shape.borderRadius * 2,
+        borderTopRightRadius: shape.borderRadius * 2
       },
       "&:not(.first)": {},
       "&:not(.last)": {
-        // ...OverflowVisible
+      
       },
       "&.last, &.last::before": {
-        borderBottomLeftRadius: shape.borderRadius,
-        borderBottomRightRadius: shape.borderRadius
+        borderBottomLeftRadius: shape.borderRadius * 2,
+        borderBottomRightRadius: shape.borderRadius * 2
       },
 
-      ...flexAlign("stretch", "stretch"),
+      
       [child(classes.header)]: {
         ...padding(spacing(1)),
         ...FlexRow,
@@ -174,19 +180,33 @@ const ComponentInstanceListItemRoot = styled(Box, {
             opacity: 0.25,
             letterSpacing: 0.9
           }
+        },
+        [child(classes.headerActions)]: {
+          ...FlexRowCenter,
+          [child(classes.headerAction)]: {
+            ...transition(["opacity", "color"]),
+            ...FlexAuto,
+            color: palette.primary.contrastText,
+            opacity: 0.5,
+            transform: "scale(0.85) translateY(-4px)",
+            alignSelf: "flex-start",
+            "&:hover": {
+              opacity: 1,
+              "&.delete": {
+                color: palette.error.main
+              },
+            }
+          }
         }
       },
       [child(classes.content)]: {
-        // transition: transitions.create([...FlexProperties,...HeightProperties]),
-        // ...flex(0, 0, 0),
-        // maxHeight: 0
+        ...OverflowHidden
+      },
+      [notHasCls(classes.itemSelected)]: {
+        maxHeight: 70
       },
       [hasCls(classes.itemSelected)]: {
-        // height: "fit-content",
         [child(classes.content)]: {
-          // transition: transitions.create([...FlexProperties,...HeightProperties]),
-          // ...FlexAuto
-          
         },
         "&::before": {
           backgroundImage: linearGradient(
@@ -200,8 +220,8 @@ const ComponentInstanceListItemRoot = styled(Box, {
       },
       
     },
-    [hasCls(classes.selected)]: {
-      height: "fit-content",
+    [notHasCls(classes.selected)]: {
+    
     }
   }
 }))
@@ -218,6 +238,7 @@ export interface ComponentInstanceListItemProps extends Omit<BoxProps, "onChange
 
   actions?: React.ReactNode
   
+  onDelete: (id: string) => void
   onChange: (id: string, patch: Partial<OverlayInfo>) => void
 }
 
@@ -233,6 +254,7 @@ export function ComponentInstanceListItem(props: ComponentInstanceListItemProps)
       selected: isSelected = false,
       overlayInfo,
       onChange,
+      onDelete,
       actions,
       onClick,
       sx = {},
@@ -256,15 +278,16 @@ export function ComponentInstanceListItem(props: ComponentInstanceListItemProps)
         className={clsx(
           classes.itemPaper,
           {
-            [classes.itemSelected]: isSelected,
+            [classes.itemSelected]: isSelected
           },
           className
         )}
       >
-        <FlexRowBox className={classes.header}
-                    sx={{
-                      ...(onClick && CursorPointer),
-                    }}
+        <FlexRowBox
+          className={classes.header}
+          sx={{
+            ...(onClick && CursorPointer)
+          }}
         >
           <Box className={clsx(classes.headerIcon)}>
             <AsyncImage
@@ -278,16 +301,32 @@ export function ComponentInstanceListItem(props: ComponentInstanceListItemProps)
               {componentDef.name} &bull; {manifest.name}
             </Box>
           </Box>
+          <Box className={classes.headerActions}>
+            <AppIconButton
+              tooltip="Delete overlay configuration from this dashboard"
+              className={clsx(classes.headerAction, "delete")}
+              onClick={(ev: SyntheticEvent) => {
+                ev.preventDefault()
+                ev.stopPropagation()
+                onDelete(overlayInfo.id)
+                return false
+              }}
+            >
+              <AppFAIcon
+                size="2xs"
+                icon={faTrash}
+              />
+            </AppIconButton>
+          </Box>
         </FlexRowBox>
-        
-          <ComponentInstanceForm
-              selected={isSelected}
-              overlayInfo={overlayInfo}
-              compEntry={compEntry}
-              className={classes.content}
-              onChange={onChange}
-          />
-        
+
+        <ComponentInstanceForm
+          selected={isSelected}
+          overlayInfo={overlayInfo}
+          compEntry={compEntry}
+          className={classes.content}
+          onChange={onChange}
+        />
       </Paper>
     </ComponentInstanceListItemRoot>
   )

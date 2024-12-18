@@ -49,7 +49,7 @@ const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const classPrefix = "pluginOverlayItem"
-export const pluginOverlayItemClasses = createClassNames(
+export const pluginComponentItemClasses = createClassNames(
   classPrefix,
   "root",
   "header",
@@ -64,21 +64,21 @@ export const pluginOverlayItemClasses = createClassNames(
   "footer",
   "footerActions"
 )
-export type PluginOverlayItemClassKey = ClassNamesKey<typeof pluginOverlayItemClasses>
+export type PluginOverlayItemClassKey = ClassNamesKey<typeof pluginComponentItemClasses>
 
 const PluginOverlayItemRoot = styled(Paper, {
   name: "PluginOverlayItemRoot",
   label: "PluginOverlayItemRoot"
 })(({ theme: { palette, spacing, transitions, typography, shadows, dimen, shape, mixins } }) => ({
   // root styles here
-  [hasCls(pluginOverlayItemClasses.root)]: {
+  [hasCls(pluginComponentItemClasses.root)]: {
     ...FlexColumn,
     ...PositionRelative,
     ...FlexAuto,
     ...OverflowHidden,
     ...flexAlign("stretch", "flex-start"),
     borderRadius: shape.borderRadius * 2,
-    [child(pluginOverlayItemClasses.header)]: {
+    [child(pluginComponentItemClasses.header)]: {
       ...padding(spacing(1)),
       ...FlexRow,
       ...flexAlign("center", "stretch"),
@@ -87,7 +87,7 @@ const PluginOverlayItemRoot = styled(Paper, {
       gap: spacing(1.5),
       boxShadow: shadows[2],
       zIndex: 3,
-      [child(pluginOverlayItemClasses.headerIcon)]: {
+      [child(pluginComponentItemClasses.headerIcon)]: {
         ...dimensionConstraints(rem(2)),
         "& img, & svg ": {
           color: palette.primary.contrastText,
@@ -97,17 +97,17 @@ const PluginOverlayItemRoot = styled(Paper, {
         ...FlexRowCenter,
         ...FlexAuto
       },
-      [child(pluginOverlayItemClasses.headerBox)]: {
+      [child(pluginComponentItemClasses.headerBox)]: {
         ...FlexColumn,
         ...FlexScaleZero,
         ...flexAlign("stretch", "flex-start"),
 
-        [child(pluginOverlayItemClasses.headerTitle)]: {
+        [child(pluginComponentItemClasses.headerTitle)]: {
           ...Ellipsis,
           ...FlexAuto,
           ...typography.h4
         },
-        [child(pluginOverlayItemClasses.headerSubheader)]: {
+        [child(pluginComponentItemClasses.headerSubheader)]: {
           ...Ellipsis,
           ...FlexAuto,
           ...typography.subtitle1,
@@ -118,7 +118,7 @@ const PluginOverlayItemRoot = styled(Paper, {
       }
     },
 
-    [child(pluginOverlayItemClasses.carousel)]: {
+    [child(pluginComponentItemClasses.carousel)]: {
       ...FlexRow,
       ...PositionRelative,
       ...OverflowVisible,
@@ -134,13 +134,13 @@ const PluginOverlayItemRoot = styled(Paper, {
         boxShadow: `inset 0 -5px 5px 2px rgba(0,0,0,0.1), ${shadows[4]}`
       },
       backgroundColor: darken(palette.background.paper, 0.2),
-      [child(pluginOverlayItemClasses.carouselItem)]: {
+      [child(pluginComponentItemClasses.carouselItem)]: {
         ...FlexRowCenter,
         ...PositionRelative,
         ...Fill,
         ...OverflowHidden,
         objectFit: "contain",
-        [child(pluginOverlayItemClasses.carouselItemImage)]: {
+        [child(pluginComponentItemClasses.carouselItemImage)]: {
           ...PositionRelative,
           ...OverflowHidden,
           objectFit: "contain", // maxHeight: "-webkit-fill-available",
@@ -149,7 +149,7 @@ const PluginOverlayItemRoot = styled(Paper, {
         }
       }
     },
-    [child(pluginOverlayItemClasses.content)]: {
+    [child(pluginComponentItemClasses.content)]: {
       ...padding(spacing(1), spacing(2)),
       ...OverflowAuto,
       "&, & *": {
@@ -162,11 +162,11 @@ const PluginOverlayItemRoot = styled(Paper, {
 /**
  * PluginOverlayItem Component Properties
  */
-export interface PluginComponentItemProps extends Omit<PaperProps, "children"> {
+export interface PluginComponentItemProps extends Omit<PaperProps, "children" | "onClick"> {
   manifest: PluginManifest
-
+  
   componentDef: PluginComponentDefinition
-
+  onClick?: (manifest: PluginManifest, comp: PluginComponentDefinition) => any
   actions?: React.ReactNode
 }
 
@@ -176,7 +176,7 @@ export interface PluginComponentItemProps extends Omit<PaperProps, "children"> {
  * @param { PluginComponentItemProps } props
  */
 export function PluginComponentItem(props: PluginComponentItemProps) {
-  const { className, manifest, componentDef, ...other } = props,
+  const { className, onClick: inOnClick, manifest, componentDef, ...other } = props,
     { uiResource: uiRes, overview } = componentDef,
     [screenshotBackgrounds, setScreenshotBackground] = useState<Array<string | number>>(
       Array(overview?.screenshots?.length ?? 0)
@@ -191,6 +191,11 @@ export function PluginComponentItem(props: PluginComponentItemProps) {
       newBgs[idx] = rgbToHex(dominantColor)
       setScreenshotBackground(newBgs)
     },
+      onClick = !inOnClick ? null : (ev: React.SyntheticEvent) => {
+        ev.preventDefault()
+        ev.stopPropagation()
+        inOnClick(manifest, componentDef)
+      },
     text = `# Features
 ${overview.featureContent}
 
@@ -208,20 +213,21 @@ Version ${manifest.version}`.trimStart()
 
   return (
     <PluginOverlayItemRoot
-      className={clsx(pluginOverlayItemClasses.root, {}, className)}
+      className={clsx(pluginComponentItemClasses.root, {}, className)}
       elevation={4}
+      onClick={onClick}
       {...other}
     >
-      <Box className={pluginOverlayItemClasses.header}>
-        <Box className={pluginOverlayItemClasses.headerIcon}>
+      <Box className={pluginComponentItemClasses.header}>
+        <Box className={pluginComponentItemClasses.headerIcon}>
           <AsyncImage src={uiRes?.icon?.url} />
         </Box>
-        <Box className={pluginOverlayItemClasses.headerBox}>
-          <Box className={pluginOverlayItemClasses.headerTitle}>{componentDef.name}</Box>
-          <Box className={pluginOverlayItemClasses.headerSubheader}>{manifest.name}</Box>
+        <Box className={pluginComponentItemClasses.headerBox}>
+          <Box className={pluginComponentItemClasses.headerTitle}>{componentDef.name}</Box>
+          <Box className={pluginComponentItemClasses.headerSubheader}>{manifest.name}</Box>
         </Box>
       </Box>
-      <Box className={pluginOverlayItemClasses.carousel}>
+      <Box className={pluginComponentItemClasses.carousel}>
         <FlexRowBox
           sx={{
             ...OverflowHidden,
@@ -231,7 +237,7 @@ Version ${manifest.version}`.trimStart()
           {overview?.screenshots?.map?.((ss, idx) => (
             <Box
               key={idx}
-              className={pluginOverlayItemClasses.carouselItem}
+              className={pluginComponentItemClasses.carouselItem}
               sx={{
                 backgroundColor: screenshotBackgrounds[idx]
               }}
@@ -239,13 +245,13 @@ Version ${manifest.version}`.trimStart()
               <AsyncImage
                 src={ss.url}
                 onLoad={createScreenshotLoadedHandler(idx)}
-                className={pluginOverlayItemClasses.carouselItemImage}
+                className={pluginComponentItemClasses.carouselItemImage}
               />
             </Box>
           ))}
         </FlexRowBox>
       </Box>
-      <Box className={pluginOverlayItemClasses.content}>
+      <Box className={pluginComponentItemClasses.content}>
         <Markdown>{text}</Markdown>
       </Box>
     </PluginOverlayItemRoot>

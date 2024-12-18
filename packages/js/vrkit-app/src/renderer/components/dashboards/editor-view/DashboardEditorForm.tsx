@@ -1,5 +1,11 @@
 import clsx from "clsx"
-import { DashboardConfig, ImageFormat, OverlayInfo } from "vrkit-models"
+import {
+  DashboardConfig,
+  ImageFormat,
+  OverlayInfo, OverlayKind,
+  PluginComponentDefinition,
+  PluginManifest
+} from "vrkit-models"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { useAsyncCallback } from "../../../hooks" // import {
@@ -8,7 +14,12 @@ import { useAsyncCallback } from "../../../hooks" // import {
 // "../../model-editor-context"
 import { PageMetadata, PageMetadataProps } from "../../page-metadata"
 import { AppButtonGroupFormikPositiveNegative } from "../../app-button-group-positive-negative"
-import { assignDeep, isEmpty, propEqualTo } from "vrkit-shared"
+import {
+  assignDeep, generateUUID,
+  isEmpty,
+  isEqual,
+  propEqualTo
+} from "vrkit-shared"
 import { FormContainer } from "../../form"
 import { AppTextFieldFormik } from "../../app-text-field"
 import {
@@ -20,8 +31,10 @@ import {
   flexAlign,
   FlexAuto,
   FlexColumn,
+  FlexDefaults,
   FlexProperties,
   FlexRow,
+  FlexRowBox, FlexRowCenterBox,
   FlexScaleZero,
   hasCls,
   OverflowHidden,
@@ -38,16 +51,22 @@ import Box from "@mui/material/Box"
 import Typography from "@mui/material/Typography"
 import CloseIcon from "@mui/icons-material/Close"
 import SaveIcon from "@mui/icons-material/Save"
+import AddIcon from "@mui/icons-material/Add"
 import { createAppContentBarLabels } from "../../app-content-bar"
 import { AppIconEditor } from "../../app-icon-editor"
 import Divider from "@mui/material/Divider"
 import { useAppSelector } from "../../../services/store"
-import { sharedAppSelectors } from "../../../services/store/slices/shared-app"
+import {
+  PluginCompEntry,
+  sharedAppSelectors
+} from "../../../services/store/slices/shared-app"
 import ComponentInstanceListItem from "./ComponentInstanceListItem"
 import { isDefined } from "@3fv/guard"
 import { styled } from "@mui/material/styles"
-import ComponentInstanceForm from "./ComponentInstanceForm"
 import Alerts from "../../../services/alerts"
+import AppComponentPickerDialog from "../../app-component-picker-dialog"
+import Button from "@mui/material/Button"
+import { pick } from "lodash"
 
 const log = getLogger(__filename)
 
@@ -112,32 +131,12 @@ const DashboardEditorFormRoot = styled(Box, {
           ...FlexColumn,
           ...OverflowHidden,
           ...FlexScaleZero,
-
-          // ...flexAlign("center", "stretch"),
-
-          // background: darken(theme.palette.background.appBar, 0.2),
           [child(classNames.detailsContent)]: {
             ...padding(theme.spacing(1)),
             ...FlexColumn,
             ...OverflowHidden,
             ...FlexScaleZero,
-
-            gap: theme.spacing(1), // [child(classNames.layouts)]: {
-            //   ...padding(0, theme.spacing(1), theme.spacing(2)),
-            //   ...FlexColumn,
-            //   ...FlexAuto,
-            //   gap: theme.spacing(1),
-            //   [child(classNames.layout)]: {
-            //     gap: theme.spacing(1),
-            //     ...FlexRowCenter,
-            //     ...flexAlign("stretch", "center"),
-            //     ...FlexAuto,
-            //
-            //     [child("checkbox")]: {
-            //       ...FlexAuto
-            //     }
-            //   }
-            // },
+            gap: theme.spacing(1),
             [child(classNames.overlays)]: {
               ...padding(theme.spacing(1), theme.spacing(1), theme.spacing(2)),
               ...FlexColumn,
@@ -149,40 +148,19 @@ const DashboardEditorFormRoot = styled(Box, {
                 ...FlexScaleZero,
                 ...FlexColumn,
                 ...OverflowHidden,
-                ...flexAlign("stretch", "stretch"), // minHeight: 300,
+                ...flexAlign("stretch", "flex-start"), // minHeight: 300,
+                overflowY: "auto",
                 gap: theme.spacing(1),
-                maxHeight: "auto",
                 [child(classNames.overlayContentList)]: {
                   transition: theme.transitions.create([...FlexProperties]),
                   overflowX: "hidden",
                   overflowY: "auto",
-                  ...flex(1, 1, "100%"),
+                  ...flex(0, 0, "100%"),
 
                   [child(classNames.overlayContentListItem)]: {
-                    //border: `1px solid transparent`,
-                    [hasCls(classNames.overlayContentListItemSelected)]: {
-                      //border: `1px solid
-                      // ${theme.palette.border.selected}`,
-                    }
+                    [hasCls(classNames.overlayContentListItemSelected)]: {}
                   },
-                  [hasCls(classNames.overlayContentListItemSelected)]: {
-                    // ...flex(1, 1, "50%")
-                  }
-                },
-                [child(classNames.overlayContentListItemForms)]: {
-                  ...flex(0, 0, 0),
-                  ...FlexColumn,
-                  ...flexAlign("stretch", "stretch"),
-                  ...OverflowHidden,
-                  transition: theme.transitions.create([...FlexProperties]),
-                  [hasCls(classNames.overlayContentListItemSelected)]: {
-                    ...flex(1, 1, "50%"),
-                    overflowX: "hidden",
-                    overflowY: "auto"
-                  },
-                  [child(classNames.overlayContentListItemForm)]: {
-                    ...FlexAuto
-                  }
+                  [hasCls(classNames.overlayContentListItemSelected)]: {}
                 }
               }
             }
@@ -220,15 +198,14 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
   handleSubmit: (values: DashboardConfig, formikBag: FormikBag<DashboardEditorFormProps, DashboardConfig>) =>
     formikBag.props.onSubmit?.(values, formikBag)
 })(function DashboardListEditorForm(props: DashboardEditorFormProps & FormikProps<DashboardConfig>) {
+  // @ts-ignore
   const {
       errors,
       onBlurField,
       handleBlur,
-
       handleChange,
       handleSubmit,
       isSubmitting,
-      
       initialValues,
       status = {},
       touched,
@@ -238,38 +215,77 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
       resetForm,
       submitForm,
       config,
-
       handleSubmitRef
     } = props,
     theme = useTheme(),
     nav = useNavigate(),
+    isTouched = !isEqual(values, config),
+    onOverlayInfoDelete = useCallback(
+      (id: string) => {
+        setValues(currentValue => {
+          const overlays = (currentValue?.overlays ?? []) as OverlayInfo[],
+            idx = overlays.findIndex(o => o.id === id)
+          if (idx < 0) {
+            Alerts.error(`Overlay with id (${id}) could not be found`)
+          } else {
+            log.info(`Removing overlay`, id)
+            overlays.splice(idx, 1)
+          }
+
+          return currentValue
+        })
+      },
+      [setValues, values]
+    ),
     onOverlayInfoChange = useCallback(
       (id: string, patch: Partial<OverlayInfo>) => {
         setValues(currentValue => {
-          const overlay = currentValue?.overlays?.find?.(propEqualTo("id", id))
-          if (!overlay) {
+          const overlays = currentValue?.overlays ?? [],
+            idx = overlays?.findIndex?.(propEqualTo("id", id))
+
+          if (idx < 0) {
             Alerts.error(`Overlay with id (${id}) could not be found`)
           } else {
+            const overlay = overlays[idx]
             log.info(`Patching overlay`, overlay, "patch", patch)
             assignDeep(overlay, patch)
           }
 
           return currentValue
         })
-        
-        setTouched({
-          ...touched,
-          
-        })
       },
-      [setValues, values, setTouched]
+      [setValues, values]
     ),
     dashboardClient = useService(DashboardManagerClient),
     patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
     launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
     [selectedOverlayId, setSelectedOverlayId] = useState<string>(config?.overlays?.[0]?.id ?? null),
     compEntryMap = useAppSelector(sharedAppSelectors.selectAllPluginComponentOverlayDefsMap),
-    canModify = useMemo(() => {
+    [compPickerOpen, setCompPickerOpen] = useState(false),
+      onCompPickerSelect = (compEntries: PluginCompEntry[]) => {
+      
+      setValues(currentValue => {
+          if (!currentValue.overlays) {
+            currentValue.overlays = []
+          }
+          for (const [manifest, comp] of compEntries) {
+            const oi = OverlayInfo.create({
+              id: generateUUID(),
+              componentId: comp.id,
+              kind: OverlayKind.PLUGIN,
+              name: `${currentValue.overlays.length + 1} - ${comp.name}`,
+              ...pick(comp, ["dataVarNames","description"]),
+              userSettingValues: {},
+            })
+            log.info(`Adding overlay component`, oi)
+            currentValue.overlays.push(oi)
+          }
+          return currentValue
+        })
+        
+        setCompPickerOpen(false)
+      },
+      canModify = useMemo(() => {
       return !launchLayoutEditorAsync.loading && !patchConfigAsync.loading
     }, [launchLayoutEditorAsync.loading, patchConfigAsync.loading]), // {
     handleBlurField = (e: React.FocusEvent<any>) => {
@@ -303,6 +319,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
               resetForm()
               //nav(-1)
             }}
+            disabled={!isTouched}
             positiveLabel={posLabel}
             positiveHandler={() => {
               handleSubmit()
@@ -314,7 +331,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
         )
       }
     }
-  
+
   // UPDATE THE PROVIDED REF ENABLING OTHER
   // UI COMPONENTS/DIALOGS, ETC TO SUBMIT
   if (handleSubmitRef) {
@@ -416,14 +433,38 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
           <Box className={clsx(classNames.detailsContent)}>
             <Divider />
             <Box className={clsx(classNames.overlays)}>
+              <FlexRowBox
+                sx={{
+                  ...FlexAuto,
+                  ...flexAlign("flex-start", "stretch")
+                }}
+              >
+              
+              
               <Typography
                 sx={{
-                  ...Ellipsis
+                  ...Ellipsis,
+                  ...FlexScaleZero
                 }}
                 variant="h6"
               >
                 Overlays
               </Typography>
+                <FlexRowCenterBox
+                  sx={{...FlexAuto}}
+                >
+                  <Button
+                      color="primary"
+                      variant="contained"
+                      size="small"
+                      onClick={() => {
+                        setCompPickerOpen(true)
+                      }}
+                  >
+                    <AddIcon/> Overlay
+                  </Button>
+                </FlexRowCenterBox>
+              </FlexRowBox>
               <Box className={clsx(classNames.overlayContent)}>
                 <Box
                   className={clsx(classNames.overlayContentList, {
@@ -446,6 +487,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
                           compEntry={entry}
                           className={classList}
                           onChange={onOverlayInfoChange}
+                          onDelete={onOverlayInfoDelete}
                           onClick={ev => {
                             setSelectedOverlayId(o.id)
                             ev.preventDefault()
@@ -458,36 +500,19 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
                     })
                     .filter(isDefined)}
                 </Box>
-                {/*<Box*/}
-                {/*  className={clsx(classNames.overlayContentListItemForms, {*/}
-                {/*    [classNames.overlayContentListItemSelected]: !!selectedOverlayId*/}
-                {/*  })}*/}
-                {/*>*/}
-                {/*  {selectedOverlayId &&*/}
-                {/*    values.overlays*/}
-                {/*      .map((o, idx) => {*/}
-                {/*        const classList = clsx(classNames.overlayContentListItemForm, {*/}
-                {/*            [classNames.overlayContentListItemSelected]: o.id === selectedOverlayId*/}
-                {/*          }),*/}
-                {/*          entry = compEntryMap[o.componentId]*/}
-                {/*        return !entry ? null : (*/}
-                {/*          <ComponentInstanceForm*/}
-                {/*            key={o.id}*/}
-                {/*            selected={selectedOverlayId === o.id}*/}
-                {/*            overlayInfo={o}*/}
-                {/*            compEntry={entry}*/}
-                {/*            className={classList}*/}
-                {/*            onChange={onOverlayInfoChange}*/}
-                {/*          />*/}
-                {/*        )*/}
-                {/*      })*/}
-                {/*      .filter(isDefined)}*/}
-                {/*</Box>*/}
               </Box>
             </Box>
           </Box>
         </Box>
       </FormContainer>
+      <AppComponentPickerDialog
+          open={compPickerOpen}
+          onSelect={onCompPickerSelect}
+          onClose={(ev, reason) => {
+            log.info(`onClose invoked reason=${reason}`)
+            setCompPickerOpen(false)
+          }}
+      />
     </DashboardEditorFormRoot>
   )
 })

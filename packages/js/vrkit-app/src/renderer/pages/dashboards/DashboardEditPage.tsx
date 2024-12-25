@@ -16,11 +16,8 @@ import clsx from "clsx"
 import { getLogger } from "@3fv/logger-proxy"
 import { useAppSelector } from "../../services/store"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
-import { useModelEditorContextProvider } from "../../components/model-editor-context"
-import { DashboardConfig } from "@vrkit-platform/models"
 import { useParams } from "react-router"
-import { isNotEmpty, propEqualTo } from "@vrkit-platform/shared"
-import { asOption } from "@3fv/prelude-ts"
+import { propEqualTo } from "@vrkit-platform/shared"
 import { useNavigate } from "react-router-dom"
 import { WebPaths } from "../../routes/WebPaths"
 import { DashboardEditorView } from "../../components/dashboards/editor-view"
@@ -53,27 +50,26 @@ const DashboardEditPageRoot = styled(Box, {
 export function DashboardEditPage() {
   const theme = useTheme(),
     configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
-    
     { id } = useParams<{
       id: string
     }>(),
     nav = useNavigate(),
-      config = configs.find(propEqualTo("id", id))
+    config = configs.find(propEqualTo("id", id))
 
   useEffect(() => {
-    if (!config)
+    if (!config) {
       nav(WebPaths.app.dashboards)
+    }
   }, [config])
 
   return (
     <AppContent>
-      
-        <DashboardEditPageRoot className={clsx(dashboardEditPageClasses.root)}>
-          <DashboardEditorView className={clsx(dashboardEditPageClasses.editor)}
-            config={config}
-          />
-        </DashboardEditPageRoot>
-      
+      <DashboardEditPageRoot className={clsx(dashboardEditPageClasses.root)}>
+        <DashboardEditorView
+          className={clsx(dashboardEditPageClasses.editor)}
+          config={config}
+        />
+      </DashboardEditPageRoot>
     </AppContent>
   )
 }

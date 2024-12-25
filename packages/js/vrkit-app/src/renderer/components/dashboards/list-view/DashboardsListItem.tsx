@@ -11,20 +11,15 @@ import Box from "@mui/material/Box"
 import { useTheme } from "@mui/material/styles"
 import clsx from "clsx"
 import { AppFAIcon, AppIcon } from "../../app-icon"
-import { DashboardConfig, PluginComponentDefinition, Timestamp } from "@vrkit-platform/models"
+import { DashboardConfig, Timestamp } from "@vrkit-platform/models"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { AppSettingsClient } from "../../../services/app-settings-client"
 import { useAppSelector } from "../../../services/store"
-import {
-  PluginCompEntry,
-  sharedAppSelectors
-} from "../../../services/store/slices/shared-app"
-import { decodeSvgFromUri, hasProp, isNotEmpty, isNotEmptyString, isSvgUri, propEqualTo } from "@vrkit-platform/shared"
+import { PluginCompEntry, sharedAppSelectors } from "../../../services/store/slices/shared-app"
+import { isNotEmpty, isNotEmptyString } from "@vrkit-platform/shared"
 import Alerts from "../../../services/alerts"
 import {
-  alpha,
-  dimensionConstraints,
   Ellipsis,
   EllipsisBox,
   flexAlign,
@@ -48,161 +43,22 @@ import { asOption } from "@3fv/prelude-ts"
 import { NavLink } from "react-router-dom"
 import { WebPaths } from "../../../routes/WebPaths"
 import AddIcon from "@mui/icons-material/Add"
-import IconButton, { IconButtonProps } from "@mui/material/IconButton"
-import { faEdit, faEllipsisVertical, faRocketLaunch, faTrash } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
+import { faEdit, faRocketLaunch } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
 import Tooltip from "@mui/material/Tooltip"
 import Button, { ButtonProps } from "@mui/material/Button"
-import Divider from "@mui/material/Divider"
-import Menu from "@mui/material/Menu"
-import MenuItem from "@mui/material/MenuItem"
-import { faGridHorizontal } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
 import { get } from "lodash/fp"
-import { noop, range } from "lodash"
+import { range } from "lodash"
 import Moment from "react-moment"
-import { dashboardsListViewClasses } from "./DashboardsListView"
+import { dashboardsListViewClasses as classNames } from "./DashboardsListView"
 import { isDefined } from "@3fv/guard"
 import AppIconButton from "../../app-icon-button"
+import PluginOverlayIcon from "./PluginOverlayIcon"
+import DashboardsListItemMenu from "./DashboardsListItemMenu"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const ListItemVisiblePluginMaxCount = 3
-
-interface PluginOverlayIconProps extends Omit<BoxProps, "component"> {
-  component?: PluginComponentDefinition
-
-  moreCount?: number
-}
-
-function PluginOverlayIcon({ component = null, moreCount = 0, sx: providedSx = {}, ...other }: PluginOverlayIconProps) {
-  const theme = useTheme(),
-    uiRes = component?.uiResource,
-    uiIcon = uiRes?.icon,
-    color = alpha(theme.palette.text.primary, 0.7),
-    iconHtml = asOption(uiIcon)
-      .filter(hasProp("url"))
-      .filter(propEqualTo("isDataUrl", true))
-      .map(get("url"))
-      .filter(isSvgUri)
-      .map(decodeSvgFromUri)
-      .filter(isNotEmpty)
-      .getOrNull(),
-    sx = {
-      ...FlexAuto,
-      ...padding(0, theme.spacing(0.25)),
-      ...dimensionConstraints(theme.dimen.appIconSizes[2]),
-      fill: color,
-      color,
-      ...providedSx
-    } as any
-
-  return moreCount > 0 ? (
-    <FlexRowCenterBox
-      sx={sx}
-      {...other}
-    >
-      +{moreCount}
-    </FlexRowCenterBox>
-  ) : iconHtml ? (
-    <FlexRowCenterBox
-      sx={sx}
-      dangerouslySetInnerHTML={{ __html: iconHtml }}
-      {...other}
-    />
-  ) : (
-    <></>
-  )
-}
-
-interface DashboardsListItemMenuProps extends Omit<IconButtonProps, "onClick"> {
-  config: DashboardConfig
-
-  disabled?: boolean
-
-  isDefault: boolean
-
-  onDelete: () => any
-
-  onSetAsDefault: () => any
-}
-
-function DashboardsListItemMenu({
-  onDelete,
-  onSetAsDefault,
-  isDefault,
-  config,
-  disabled = false,
-  ...other
-}: DashboardsListItemMenuProps) {
-  const id = config.id,
-    menuId = `dashboard-item-menu-${id}`,
-    buttonId = `dashboard-item-menu-button-${id}`,
-    [anchorEl, setAnchorEl] = React.useState<HTMLElement>(null),
-    open = Boolean(anchorEl),
-    handleClick = (event: React.MouseEvent<HTMLElement>) => {
-      setAnchorEl(event.currentTarget)
-    },
-    newCloseEventHandler =
-      (fn: Function = null) =>
-      () => {
-        if (fn) {
-          fn()
-        }
-        setAnchorEl(null)
-      }
-
-  return (
-    <>
-      <IconButton
-        id={buttonId}
-        className={clsx(dashboardsListViewClasses.itemAction)}
-        aria-controls={open ? menuId : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? "true" : undefined}
-        onClick={handleClick}
-        {...other}
-      >
-        <AppFAIcon
-          icon={faEllipsisVertical}
-          size="2xs"
-        />
-      </IconButton>
-      <Menu
-        id={menuId}
-        MenuListProps={{
-          "aria-labelledby": buttonId
-        }}
-        anchorEl={anchorEl}
-        open={open}
-        onClose={newCloseEventHandler()}
-      >
-        <MenuItem
-          className={clsx(dashboardsListViewClasses.itemAction, "delete", "menuAction")}
-          onClick={newCloseEventHandler(onDelete)}
-        >
-          <AppFAIcon
-            size="2xs"
-            icon={faTrash}
-          />
-          Delete
-        </MenuItem>
-        {!isDefault && <Divider sx={{ my: 0.5 }} />}
-        {!isDefault && (
-          <MenuItem
-            className={clsx(dashboardsListViewClasses.itemAction, "setAsDefault", "menuAction")}
-            onClick={newCloseEventHandler(isDefault ? noop : onSetAsDefault)}
-          >
-            <AppFAIcon
-              size="2xs"
-              icon={faGridHorizontal}
-            />
-            Set as Default
-          </MenuItem>
-        )}
-      </Menu>
-    </>
-  )
-}
 
 /**
  * Props for list item
@@ -245,7 +101,8 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
       .map(idx => overlayDefs[idx][1])
       .filter(isDefined)
       .map(component => {
-        log.info(`Creating component icon`, component.id, component)
+        if (log.isDebugEnabled())
+          log.debug(`Creating component icon`, component.id, component)
         return (
           <PluginOverlayIcon
             key={component.id}
@@ -291,13 +148,13 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
 
   return (
     <Box
-      className={clsx(dashboardsListViewClasses.item, className)}
+      className={clsx(classNames.item, className)}
       {...other}
     >
       <Paper
-        className={clsx(dashboardsListViewClasses.itemPaper, {
-          [dashboardsListViewClasses.itemIsDefault]: isDefault,
-          [dashboardsListViewClasses.itemIsOpen]: isActive
+        className={clsx(classNames.itemPaper, {
+          [classNames.itemIsDefault]: isDefault,
+          [classNames.itemIsOpen]: isActive
         },paperClassName)}
       >
         <FlexRowBox
@@ -344,7 +201,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
           <FlexRowCenterBox>
             <AppIconButton
                 tooltip="Edit"
-                className={clsx(dashboardsListViewClasses.itemAction)}
+                className={clsx(classNames.itemAction)}
                 component={NavLink}
                 to={WebPaths.app.dashboards + `/${config?.id}`}
               >
@@ -355,7 +212,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
             </AppIconButton>
             <AppIconButton
               tooltip="Launch dashboard"
-              className={clsx(dashboardsListViewClasses.itemAction)}
+              className={clsx(classNames.itemAction)}
               onClick={toggleOpen}
             >
               <AppFAIcon
@@ -390,12 +247,11 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
           </FlexRowCenterBox>
           </Tooltip>
           <EllipsisBox
-            variant="caption"
+            variant="body2"
             sx={{
               ...FlexRow,
               ...FlexScaleZero,
-              ...flexAlign("center", "flex-end"), // fontStyle: "italic",
-              fontSize: rem(0.5),
+              ...flexAlign("center", "flex-end"),
               opacity: 0.35
             }}
           >
@@ -405,8 +261,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
               date={Timestamp.toDate(config.fileInfo.modifiedAt)}
             />
           </EllipsisBox>
-          {/*<FlexScaleZeroBox />*/}
-          {isDefault && <FlexAutoBox className={clsx(dashboardsListViewClasses.itemDefaultBadge)}>DEFAULT</FlexAutoBox>}
+          {isDefault && <FlexAutoBox className={clsx(classNames.itemDefaultBadge)}>DEFAULT</FlexAutoBox>}
         </FlexRowBox>
       </Paper>
     </Box>
@@ -426,7 +281,7 @@ export function DashboardsListItemCreate(props: DashboardsListItemCreateProps) {
         sx={{
           ...FlexRowCenter,
         }}
-        className={clsx(dashboardsListViewClasses.item,dashboardsListViewClasses.itemCreateButton, className)}>
+        className={clsx(classNames.item,classNames.itemCreateButton, className)}>
       <Button
         color="primary"
         size="small"
@@ -438,7 +293,7 @@ export function DashboardsListItemCreate(props: DashboardsListItemCreateProps) {
           gap: theme.spacing(1)
         }}
         
-        className={clsx(dashboardsListViewClasses.itemCreateButton)}
+        className={clsx(classNames.itemCreateButton)}
       >
           <AddIcon />
           <span>

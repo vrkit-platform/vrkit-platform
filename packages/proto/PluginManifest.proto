@@ -142,9 +142,13 @@ message PluginManifest {
 
   string description = 6;
 
+  string updated_at = 8;
+  string created_at = 9;
+
   PluginOverview overview = 11;
 
   repeated PluginComponentDefinition components = 20;
+
 }
 
 /**

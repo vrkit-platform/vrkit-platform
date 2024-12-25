@@ -286,6 +286,14 @@ export interface PluginManifest {
      */
     description: string;
     /**
+     * @generated from protobuf field: string updated_at = 8;
+     */
+    updatedAt: string;
+    /**
+     * @generated from protobuf field: string created_at = 9;
+     */
+    createdAt: string;
+    /**
      * @generated from protobuf field: IRacingTools.Models.PluginOverview overview = 11;
      */
     overview?: PluginOverview;
@@ -1078,6 +1086,8 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
             { no: 3, name: "author", kind: "message", T: () => PluginAuthor },
             { no: 5, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 8, name: "updated_at", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 9, name: "created_at", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 11, name: "overview", kind: "message", T: () => PluginOverview },
             { no: 20, name: "components", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => PluginComponentDefinition }
         ]);
@@ -1088,6 +1098,8 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
         message.version = "";
         message.name = "";
         message.description = "";
+        message.updatedAt = "";
+        message.createdAt = "";
         message.components = [];
         if (value !== undefined)
             reflectionMergePartial<PluginManifest>(this, message, value);
@@ -1112,6 +1124,12 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
                     break;
                 case /* string description */ 6:
                     message.description = reader.string();
+                    break;
+                case /* string updated_at */ 8:
+                    message.updatedAt = reader.string();
+                    break;
+                case /* string created_at */ 9:
+                    message.createdAt = reader.string();
                     break;
                 case /* IRacingTools.Models.PluginOverview overview */ 11:
                     message.overview = PluginOverview.internalBinaryRead(reader, reader.uint32(), options, message.overview);
@@ -1146,6 +1164,12 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
         /* string description = 6; */
         if (message.description !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.description);
+        /* string updated_at = 8; */
+        if (message.updatedAt !== "")
+            writer.tag(8, WireType.LengthDelimited).string(message.updatedAt);
+        /* string created_at = 9; */
+        if (message.createdAt !== "")
+            writer.tag(9, WireType.LengthDelimited).string(message.createdAt);
         /* IRacingTools.Models.PluginOverview overview = 11; */
         if (message.overview)
             PluginOverview.internalBinaryWrite(message.overview, writer.tag(11, WireType.LengthDelimited).fork(), options).join();

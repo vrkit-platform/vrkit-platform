@@ -9,11 +9,8 @@ const { pkg } = PlopContext,
 
 
 module.exports = plop => {
-
-
-
 	return {
-		description: "Add a new package to the mono-repo",
+		description: "Add a new component to the renderer components folder",
 		prompts: [
 			{
 				type: "list",

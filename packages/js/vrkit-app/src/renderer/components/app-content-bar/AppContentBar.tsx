@@ -26,7 +26,9 @@ import {
   FlexColumnBox,
   FlexScaleZero,
   EllipsisBox,
-  FlexProperties, HeightProperties
+  FlexProperties,
+  HeightProperties,
+  OverflowHidden, PositionRelative
 } from "@vrkit-platform/shared-ui"
 import AppBreadcrumbs from "../app-breadcrumbs"
 import { usePageMetadata } from "../page-metadata"
@@ -103,17 +105,24 @@ export function AppContentBar(props:AppContentBarProps) {
     {...other}
   >
     <FlexColumnBox sx={{
+      ...OverflowHidden,
       ...FlexScaleZero,
       ...flexAlign("stretch", "flex-start"),
-      gap: theme.spacing(0.25),
+      ...PositionRelative,
+      gap: theme.spacing(0.5),
     }}>
       {/* PAGE TITLE */}
       {pm.appContentBar?.title && <EllipsisBox
         sx={{...FlexAuto}}
-      >{pm.appContentBar?.title}</EllipsisBox>}
+        children={pm.appContentBar?.title}
+      />}
       
       {/* BREAD CRUMBS */}
-      <AppBreadcrumbs sx={{...FlexAuto}}/>
+      <AppBreadcrumbs sx={{...FlexAuto,
+        ...OverflowHidden,
+        
+        maxWidth: "100%"
+      }}/>
     </FlexColumnBox>
     {/* PAGE SPECIFIC ACTIONS */}
     {pm.appContentBar?.actions ?? <></>}

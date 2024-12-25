@@ -36,7 +36,6 @@ import { Alert } from "../../../services/alerts"
 import { useIsMounted } from "usehooks-ts"
 import { useNavigate } from "react-router-dom"
 import { DashboardEditorForm } from "./DashboardEditorForm"
-// import { faWindowClose } from "@awesome.me/kit-79150a3eed"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

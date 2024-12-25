@@ -11,12 +11,11 @@ function registerReactHelpers(plop) {
 		return path
 	})
 
-	// plop.setHelper("reactTargetToPagePath", (target) => {
-	// 	const path = reactTargetToPagePath[target]
-	// 	assert(Sh.test("-d", path), `Unable to find valid target (${target}) mapped to ${path}`)
-	// 	return path
-	// })
-
+	plop.setHelper("reactTargetToPagePath", (target) => {
+		const path = reactTargetToPagePath[target]
+		assert(Sh.test("-d", path), `Unable to find valid target (${target}) mapped to ${path}`)
+		return path
+	})
 
 }
 module.exports = registerReactHelpers

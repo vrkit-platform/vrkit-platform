@@ -1,31 +1,75 @@
+// REACT
 import React from "react"
-import { getLogger } from "@3fv/logger-proxy"
+
+// CLSX
 import clsx from "clsx"
-import { StyledComponentProps, usePropsAndStyles, makeUseStyles, Theme } from "vrkit-shared-ui/styles"
 
-const log = getLogger(__filename)
+// 3FV
+import { getLogger } from "@3fv/logger-proxy"
 
-export type {{name}}PageClassKey = "root"
+// MUI
+import Box, {type BoxProps} from "@mui/material/Box"
+import { styled } from "@mui/material/styles"
 
-export const use{{name}}PageStyles = makeUseStyles<{{name}}PageProps>(module, (theme:Theme) => {
+// APP LIBS
+import {
+  child,
+  ClassNamesKey,
+  createClassNames,
+  hasCls,
+  flexAlign,
+  FlexAuto,
+  FlexColumn,
+  OverflowVisible,
+  PositionRelative
+} from "@vrkit-platform/shared-ui"
 
-  return {
-    root: {}
+// APP
+import { AppContent } from "vrkit-app-renderer/components/app"
+
+const log = getLogger(__filename),
+  { info, debug, warn, error } = log
+
+const classPrefix = "{{camelCase name}}"
+export const {{camelCase name}}PageClasses = createClassNames(classPrefix, "root", "content")
+const classes = {{camelCase name}}PageClasses
+
+export type {{name}}PageClassKey = ClassNamesKey<typeof {{camelCase name}}PageClasses>
+
+const {{name}}PageRoot = styled(Box, {
+  name: "{{name}}PageRoot",
+  label: "{{name}}PageRoot"
+})(({theme: {dimen,palette, shape, customShadows, shadows, components, colors, transitions, typography, insetShadows, mixins, zIndex, spacing }}) => ({
+  // root styles here
+  [hasCls(classes.root)]: {
+    ...FlexAuto,
+    ...OverflowVisible,
+    ...FlexColumn,
+    ...flexAlign("stretch", "stretch"),
+    ...PositionRelative,
+
+    [child(classes.content)]: {
+      // child styled here
+    }
   }
-})
+}))
 
-
-export interface {{name}}PageProps extends StyledComponentProps<{{name}}PageClassKey> {
+/**
+ * {{name}}Page Component Properties
+ */
+export interface {{name}}PageProps extends BoxProps {
 
 }
 
 
-
-export function {{name}}Page(props:{{name}}PageProps) {
-  const { classes, className, ...other } = usePropsAndStyles(props, use{{name}}PageStyles)
-
-
-  return <div className={clsx(classes.root, className, {})}/>
+export function {{name}}Page(props: {{name}}PageProps) {
+  return (
+    <AppContent>
+      <{{name}}PageRoot className={clsx(classes.root)}>
+        {{name}}Page content here
+      </{{name}}PageRoot>
+    </AppContent>
+  )
 }
 
 export default {{name}}Page

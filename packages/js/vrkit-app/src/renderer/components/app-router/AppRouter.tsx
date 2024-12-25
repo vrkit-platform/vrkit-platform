@@ -4,8 +4,8 @@ import { IndexRouteObject, Navigate, NonIndexRouteObject, Outlet, RouteObject, u
 import { AppLayout } from "../app"
 import { LoadingScreen, SplashScreen } from "vrkit-app-renderer/components/loading-screen"
 
-import { DashboardsPage } from "vrkit-app-renderer/pages/dashboards"
-import DashboardEditPage from "vrkit-app-renderer/pages/dashboards/DashboardEditPage"
+import { DashboardsPage, DashboardEditPage } from "vrkit-app-renderer/pages/dashboards"
+
 import Page403 from "vrkit-app-renderer/pages/error/403"
 import Page404 from "vrkit-app-renderer/pages/error/404"
 import Page500 from "vrkit-app-renderer/pages/error/500"

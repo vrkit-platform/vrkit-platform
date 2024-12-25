@@ -31,7 +31,7 @@ function generator(plop) {
 				type: "input",
 				name: "name",
 				message: "name",
-				validate: (input) => /^[a-zA-Z0-9]+$/.test(input)
+				validate: (input) => /^[a-zA-Z0-9]+$/.test(input) && !input.toLowerCase().includes("page")
 			},
 			{
 				type: "confirm",
@@ -68,16 +68,16 @@ function generator(plop) {
 				path: `${rootDir}/{{reactTargetToPagePath targetModule}}/{{dashCase name}}/index.ts`
 			},
 			// PRINT FILES
-			{
-				type: "print-files",
-				abortOnFail: true
-			},
-
-			// DUMP FILES
-			{
-				type: "flush-files",
-				abortOnFail: true
-			}
+			// {
+			// 	type: "print-files",
+			// 	abortOnFail: true
+			// },
+			//
+			// // DUMP FILES
+			// {
+			// 	type: "flush-files",
+			// 	abortOnFail: true
+			// }
 
 			// UPDATE PROJECT
 			// {

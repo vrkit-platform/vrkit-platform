@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 // noinspection JSCheckFunctionSignatures
 
-import { $, cd, path as Path, echo, argv } from "zx"
 import Fsx from "fs-extra"
+import * as semver from "semver"
+import { $, argv, cd, echo, path as Path } from "zx"
 import { getOrCreateLogger } from "./setup-env/logger-setup.mjs"
 import { rootDir } from "./setup-env/workflow-global.mjs"
-import * as semver from "semver"
+
 const log = getOrCreateLogger(import.meta.filename)
 
 cd(rootDir)
 
-const
-  versionInc = argv["inc"] ?? "patch",
+const versionInc = argv["inc"] ?? "patch",
   rootPkgFile = Path.join(rootDir, "package.json"),
   rootPkgJson = Fsx.readJSONSync(rootPkgFile),
-  {version: currentVersion} = rootPkgJson,
+  { version: currentVersion } = rootPkgJson,
   newVersion = semver.inc(currentVersion, versionInc),
   pkgFiles = Fsx.globSync(["packages/js/*/package.json"], {
     cwd: rootDir,
@@ -26,20 +26,20 @@ echo`Updating version (${currentVersion} -> ${newVersion}) for vrkit platform: \
 for (const pkgFile of Array(rootPkgFile, ...pkgFiles)) {
   const pkgJson = Fsx.readJSONSync(pkgFile)
   echo`Processing ${pkgFile} (${pkgJson.version} -> ${newVersion})`
-  
+
   pkgJson.version = newVersion
-  
+
   Object.entries(pkgJson)
-    .filter(([k,v]) => k.toLowerCase().includes("depend") && typeof v === "object")
-    .forEach(([depsKey,deps]) => {
+    .filter(([k, v]) => k.toLowerCase().includes("depend") && typeof v === "object")
+    .forEach(([depsKey, deps]) => {
       Object.keys(deps)
         .filter(dep => /^@?vrkit-/.test(dep))
         .forEach(dep => {
           echo`${pkgFile} >> ${depsKey} >> ${dep} -> ${newVersion}`
-          deps[dep] = newVersion
+          deps[dep] = depsKey.includes("peer") ? `>=${newVersion}` : newVersion
         })
     })
-  
+
   Fsx.writeJSONSync(pkgFile, pkgJson, {
     spaces: 2
   })

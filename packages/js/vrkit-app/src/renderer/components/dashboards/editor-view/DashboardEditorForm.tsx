@@ -9,9 +9,6 @@ import {
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { useAsyncCallback } from "../../../hooks" // import {
-// useModelEditorContext }
-// from
-// "../../model-editor-context"
 import { PageMetadata, PageMetadataProps } from "../../page-metadata"
 import { AppButtonGroupFormikPositiveNegative } from "../../app-button-group-positive-negative"
 import {
@@ -148,7 +145,7 @@ const DashboardEditorFormRoot = styled(Box, {
                 ...FlexScaleZero,
                 ...FlexColumn,
                 ...OverflowHidden,
-                ...flexAlign("stretch", "flex-start"), // minHeight: 300,
+                ...flexAlign("stretch", "flex-start"),
                 overflowY: "auto",
                 gap: theme.spacing(1),
                 [child(classNames.overlayContentList)]: {
@@ -455,7 +452,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
                 >
                   <Button
                       color="primary"
-                      variant="contained"
+                      variant="outlined"
                       size="small"
                       onClick={() => {
                         setCompPickerOpen(true)

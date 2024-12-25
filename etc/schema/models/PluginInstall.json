@@ -405,6 +405,26 @@
                         }
                     ]
                 },
+                "updatedAt": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
                 "overview": {
                     "$ref": "#/definitions/IRacingTools.Models.PluginOverview",
                     "additionalProperties": true,

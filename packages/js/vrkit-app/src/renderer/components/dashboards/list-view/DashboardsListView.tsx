@@ -104,31 +104,22 @@ const DashboardsListViewRoot = styled(Box, {
   return {
     // root styles here
     [hasCls(dashboardsListViewClasses.root)]: {
-      // ...flex(1, 1, "30vw"), // ...flexAlign("stretch","stretch"),
-      // ...FlexAuto,
       ...FillWidth,
       ...OverflowVisible,
       ...transition(["flex-grow", "flex-shrink"]),
 
       [child(dashboardsListViewClasses.container)]: {
-        // ...FlexRow,
-        // ...FlexWrap,
-        display: "grid", // gridTemplateColumns: `1fr 1fr`,
+        display: "grid",
         gridTemplateColumns: `1fr`,
         ...FillWidth,
-        ...flexAlign("flex-start", "flex-start"), // [child(dashboardsListViewClasses.itemLink)]: {
-        ...padding("1rem"), //   textDecoration: "none",
+        ...flexAlign("flex-start", "flex-start"),
+        ...padding("1rem"),
         [child(dashboardsListViewClasses.item)]: {
           ...FlexRowCenter,
           ...OverflowHidden,
-          ...PositionRelative, // ...flex(0,
-          // 0,
-          // "min(33%,
-          // 25vw)"),
-          // ...padding(0, "1rem"),
-          filter: "drop-shadow(0px 2px 2px rgba(0,0,0, 0.25))", // ...heightConstraint("8.5rem"),
-          ...flex(1, 0, "min(35%, 30vw)"), // ...widthConstraint("min(35%,
-          // 30vw)"),
+          ...PositionRelative,
+          filter: "drop-shadow(0px 2px 2px rgba(0,0,0, 0.25))",
+          ...flex(1, 0, "min(35%, 30vw)"),
           ...flexAlign("stretch", "flex-start"),
           [hasCls(dashboardsListViewClasses.itemSelected)]: {},
 
@@ -136,11 +127,11 @@ const DashboardsListViewRoot = styled(Box, {
             ...FlexColumn,
             ...Fill,
             ...OverflowHidden,
-            borderRadius: 0, // ...borderRadius(theme.shape.borderRadius / 4),
-            // ...padding(spacing(1), spacing(1), spacing(1), spacing(1)),
+            borderRadius: 0,
             padding: 0,
             gap: spacing(1),
             textDecoration: "none",
+            ...flexAlign("stretch", "stretch"),
 
             "&.first": {
               borderTopLeftRadius: theme.shape.borderRadius,
@@ -160,15 +151,13 @@ const DashboardsListViewRoot = styled(Box, {
             "&.last": {
               borderBottomLeftRadius: theme.shape.borderRadius,
               borderBottomRightRadius: theme.shape.borderRadius
-            }, // boxShadow: customShadows.raisedCard,
-
-            //[notHasCls(dashboardsListViewClasses.itemCreateButton)]: {
-            ...flexAlign("stretch", "stretch"), //},
+            },
 
             [child(dashboardsListViewClasses.itemDefaultBadge)]: {
               ...FlexRowCenter,
               ...padding(spacing(0.25), spacing(0.5)),
-              fontSize: rem(0.6),
+              ...theme.typography.button,
+              fontSize: rem(0.8),
               borderColor: palette.success.main,
               borderRadius: spacing(0.25),
               borderWidth: 0.5,
@@ -187,10 +176,8 @@ const DashboardsListViewRoot = styled(Box, {
               color: theme.palette.text.primary,
               fill: theme.palette.text.primary
             }
-            //background: Transparent
           }
         }
-        // }
       }
     },
     ...itemActionStyle(theme)

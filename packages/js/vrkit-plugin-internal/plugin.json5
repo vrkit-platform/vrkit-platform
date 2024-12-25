@@ -2,7 +2,7 @@
   "id": "vrkit::internal",
   "version": "1.0.0",
   "name": "VRKitExternalPlugin",
-  "owner": {
+  "author": {
     "company": "3FV",
     "name": "Jonathan Glanz",
     "email": "jonathan.glanz@gmail.com"

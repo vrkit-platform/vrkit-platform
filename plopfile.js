@@ -60,5 +60,5 @@ module.exports = function plopfile(plop) {
   // addGenerator("job-runner-module")
   // addGenerator("redux-slice")
   addGenerator("react-component")
-	// addGenerator("react-page")
+	addGenerator("react-page")
 }

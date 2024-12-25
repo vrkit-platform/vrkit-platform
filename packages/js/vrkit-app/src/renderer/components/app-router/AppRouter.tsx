@@ -5,6 +5,7 @@ import { AppLayout } from "../app"
 import { LoadingScreen, SplashScreen } from "vrkit-app-renderer/components/loading-screen"
 
 import { DashboardsPage, DashboardEditPage } from "vrkit-app-renderer/pages/dashboards"
+import { PluginsPage } from "vrkit-app-renderer/pages/plugins"
 
 import Page403 from "vrkit-app-renderer/pages/error/403"
 import Page404 from "vrkit-app-renderer/pages/error/404"
@@ -28,7 +29,9 @@ function makeDefaultRouteConfigs(...routePaths: string[]): (IndexRouteObject | N
   ]
 }
 
-
+/**
+ * App routes
+ */
 export const appRoutes: RouteObject[] = [
   {
     element: (
@@ -48,9 +51,22 @@ export const appRoutes: RouteObject[] = [
         element: <DashboardEditPage />
       }
     ]
+  },
+  {
+    path: getWebPathPart(WebPaths.app.plugins),
+    children: [
+      { element: <PluginsPage />, index: true },
+      // {
+      //   path: ":id",
+      //   element: <DashboardEditPage />
+      // }
+    ]
   }
 ]
 
+/**
+ * Error routes
+ */
 export const errorRoutes = [
   {
     element: (
@@ -79,7 +95,6 @@ export const errorRoutes = [
 export function AppRouter() {
   return useRoutes([
     ...makeDefaultRouteConfigs("", "/", "/index.html"),
-    
     {
       path: WebRootPath.app,
       element: (

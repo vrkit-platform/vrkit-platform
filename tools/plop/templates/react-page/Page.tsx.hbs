@@ -7,67 +7,26 @@ import clsx from "clsx"
 // 3FV
 import { getLogger } from "@3fv/logger-proxy"
 
-// MUI
-import Box, {type BoxProps} from "@mui/material/Box"
-import { styled } from "@mui/material/styles"
-
-// APP LIBS
-import {
-  child,
-  ClassNamesKey,
-  createClassNames,
-  hasCls,
-  flexAlign,
-  FlexAuto,
-  FlexColumn,
-  OverflowVisible,
-  PositionRelative
-} from "@vrkit-platform/shared-ui"
-
 // APP
 import { AppContent } from "vrkit-app-renderer/components/app"
+import AppPageContainer, { type AppPageContainerProps } from "vrkit-app-renderer/components/app-page-container"
 
 const log = getLogger(__filename),
   { info, debug, warn, error } = log
 
-const classPrefix = "{{camelCase name}}"
-export const {{camelCase name}}PageClasses = createClassNames(classPrefix, "root", "content")
-const classes = {{camelCase name}}PageClasses
-
-export type {{name}}PageClassKey = ClassNamesKey<typeof {{camelCase name}}PageClasses>
-
-const {{name}}PageRoot = styled(Box, {
-  name: "{{name}}PageRoot",
-  label: "{{name}}PageRoot"
-})(({theme: {dimen,palette, shape, customShadows, shadows, components, colors, transitions, typography, insetShadows, mixins, zIndex, spacing }}) => ({
-  // root styles here
-  [hasCls(classes.root)]: {
-    ...FlexAuto,
-    ...OverflowVisible,
-    ...FlexColumn,
-    ...flexAlign("stretch", "stretch"),
-    ...PositionRelative,
-
-    [child(classes.content)]: {
-      // child styled here
-    }
-  }
-}))
-
 /**
  * {{name}}Page Component Properties
  */
-export interface {{name}}PageProps extends BoxProps {
+export interface {{name}}PageProps extends AppPageContainerProps {
 
 }
 
-
-export function {{name}}Page(props: {{name}}PageProps) {
+export function {{name}}Page({className, ...other}: {{name}}PageProps) {
   return (
     <AppContent>
-      <{{name}}PageRoot className={clsx(classes.root)}>
+      <AppPageContainer className={clsx(className)} {...other}>
         {{name}}Page content here
-      </{{name}}PageRoot>
+      </AppPageContainer>
     </AppContent>
   )
 }

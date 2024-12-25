@@ -109,18 +109,21 @@ export function AppContentBar(props:AppContentBarProps) {
       ...FlexScaleZero,
       ...flexAlign("stretch", "flex-start"),
       ...PositionRelative,
-      gap: theme.spacing(0.5),
+      gap: theme.spacing(0.75),
     }}>
       {/* PAGE TITLE */}
       {pm.appContentBar?.title && <EllipsisBox
-        sx={{...FlexAuto}}
+        sx={{
+          ...FlexAuto,
+          ...theme.typography.h5
+        }}
         children={pm.appContentBar?.title}
       />}
       
       {/* BREAD CRUMBS */}
       <AppBreadcrumbs sx={{...FlexAuto,
         ...OverflowHidden,
-        
+        opacity: 0.7,
         maxWidth: "100%"
       }}/>
     </FlexColumnBox>

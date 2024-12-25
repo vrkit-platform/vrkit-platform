@@ -1,5 +1,7 @@
+import { isObject } from "@3fv/guard"
 import { getLogger } from "@3fv/logger-proxy"
-import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontawesome"
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core"
+import { FontAwesomeIcon, type FontAwesomeIconProps } from "@fortawesome/react-fontawesome"
 
 import { styled, Theme } from "@mui/material"
 import { SxProps } from "@mui/system"
@@ -29,3 +31,7 @@ export const AppFAIcon = React.forwardRef(function AppFAIcon(props: AppFAIconPro
     />
   )
 })
+
+export function isFAIconDefinition(o: any): o is IconDefinition {
+  return isObject(o) && !!o.icon && !!o.iconName
+}

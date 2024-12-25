@@ -11,7 +11,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import type { BoxProps } from "@mui/material/Box"
 import { styled, useTheme } from "@mui/material/styles"
 import { List, ListItem, ListItemIcon } from "@mui/material"
-
+import ExtensionIcon from "@mui/icons-material/Extension"
 // APP
 import {
   alpha,
@@ -26,11 +26,11 @@ import {
 import ListItemButton from "@mui/material/ListItemButton"
 import ListItemText from "@mui/material/ListItemText"
 import { useLocation, useMatch, useNavigate } from "react-router-dom"
-// import { startsWith } from "lodash/fp"
 import { WebPaths } from "../../routes/WebPaths"
 import type { IconDefinition } from "@fortawesome/fontawesome-common-types"
 import { faGridHorizontal } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
-import { AppFAIcon } from "../app-icon"
+import { AppFAIcon, isFAIconDefinition } from "../app-icon"
+import { isObject } from "@3fv/guard"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -68,18 +68,17 @@ const AppListItemButton = styled(ListItemButton, {
  */
 export interface AppDrawerMenuProps extends BoxProps {}
 
-// type NavPathMatcher = (path: string) => boolean
-// , match: NavPathMatcher
-
 interface NavListItemProps {
   path: string
 
   label: string
 
-  icon: IconDefinition
+  icon: IconDefinition | React.ReactNode
 
   exact?: boolean
 }
+
+
 
 function NavListItem({ path, icon, label, exact = false }: NavListItemProps) {
   const isActive = useMatch({ path, caseSensitive: false, end: exact }),
@@ -88,7 +87,6 @@ function NavListItem({ path, icon, label, exact = false }: NavListItemProps) {
 
   return (
     <AppListItemButton
-      // disableGutters
       className={clsx(appListItemClasses.root, {
         [appListItemClasses.active]: isActive
       })}
@@ -97,10 +95,10 @@ function NavListItem({ path, icon, label, exact = false }: NavListItemProps) {
       }}
     >
       <ListItemIcon sx={{ ...FlexRowCenter }}>
-        <AppFAIcon
+        {isFAIconDefinition(icon) ? (<AppFAIcon
           icon={icon}
           size="lg"
-        />
+        />) : icon}
       </ListItemIcon>
       <ListItemText
         primary={label}
@@ -128,6 +126,13 @@ export function AppDrawerMenu(props: AppDrawerMenuProps) {
             path={WebPaths.app.dashboards}
             label="Dashboards"
             icon={faGridHorizontal}
+          />
+        </ListItem>
+        <ListItem>
+          <NavListItem
+              path={WebPaths.app.plugins}
+              label="Plugins"
+              icon={<ExtensionIcon/>}
           />
         </ListItem>
       </List>

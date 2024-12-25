@@ -3,8 +3,6 @@ export enum WebRootPath {
   app = 'app'
 }
 
-// ----------------------------------------------------------------------
-
 export type WebRootPathKey = keyof typeof WebRootPath
 
 function leaf(rootPath: WebRootPathKey | WebRootPath, ...parts: string[]) {
@@ -15,17 +13,11 @@ export const WebPaths = {
   page403: '/error/403',
   page404: '/error/404',
   page500: '/error/500',
-  //components: '/components',
-  
-  
   
   // APP
   app: {
     dashboards: leaf(WebRootPath.app,"dashboards"),
-    // overview: leaf(WebRootPath.app,"overview"),
-    // tracks: leaf(WebRootPath.app,"tracks"),
-    // laps: leaf(WebRootPath.app,"laps"),
-    // games: leaf(WebRootPath.app,"games"),
+    plugins: leaf(WebRootPath.app,"plugins"),
   },
 };
 

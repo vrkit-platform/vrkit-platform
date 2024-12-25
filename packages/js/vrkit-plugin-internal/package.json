@@ -1,1 +1,46 @@
-{"name":"vrkit-plugin-internal","version":"1.0.2","description":"Internal default plugins","license":"ISC","author":"","main":"dist/bundled-plugin.js","scripts":{"build":"tsc -p tsconfig.json","build:watch":"tsc -p tsconfig.json -w","bundle":"node esbuild.config.mjs","bundle:watch":"cross-env BUILD_WATCH=1 node esbuild.config.mjs","dev":"concurrently npm:build:watch npm:bundle:watch"},"types":"lib/index.d.ts","dependencies":{},"peerDependencies":{"@3fv/ditsy":"^1.0.13","@mui/styled-engine":"^5.16.12","@vrkit-platform/models":"1.0.2","@vrkit-platform/plugin-sdk":"1.0.2","@vrkit-platform/shared":"1.0.2","@vrkit-platform/shared-ui":"1.0.2","react":"18.3.1","react-dom":"18.3.1","moment":"^2.30.1","two.js":"latest"},"devDependencies":{"cross-env":"^7.0.3","esbuild":"^0.24.0","builtin-modules":"^4.0.0","moment":"^2.30.1","typescript":"^5.5.4","vrkit-builder-tool":"1.0.2","@3fv/ditsy":"^1.0.13","@vrkit-platform/models":"1.0.2","@vrkit-platform/plugin-sdk":"1.0.2","react":"18.3.1","react-dom":"18.3.1","@mui/styled-engine":"^5.16.12","@vrkit-platform/shared":"1.0.2","@vrkit-platform/shared-ui":"1.0.2","two.js":"latest"}}
+{
+  "name": "vrkit-plugin-internal",
+  "version": "1.0.3",
+  "description": "Internal default plugins",
+  "license": "ISC",
+  "author": "",
+  "main": "dist/bundled-plugin.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json -w",
+    "bundle": "node esbuild.config.mjs",
+    "bundle:watch": "cross-env BUILD_WATCH=1 node esbuild.config.mjs",
+    "dev": "concurrently npm:build:watch npm:bundle:watch"
+  },
+  "types": "lib/index.d.ts",
+  "dependencies": {},
+  "peerDependencies": {
+    "@3fv/ditsy": "^1.0.13",
+    "@mui/styled-engine": "^5.16.12",
+    "@vrkit-platform/models": "1.0.3",
+    "@vrkit-platform/plugin-sdk": "1.0.3",
+    "@vrkit-platform/shared": "1.0.3",
+    "@vrkit-platform/shared-ui": "1.0.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "moment": "^2.30.1",
+    "two.js": "latest"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "esbuild": "^0.24.0",
+    "builtin-modules": "^4.0.0",
+    "moment": "^2.30.1",
+    "typescript": "^5.5.4",
+    "vrkit-builder-tool": "1.0.3",
+    "@3fv/ditsy": "^1.0.13",
+    "@vrkit-platform/models": "1.0.3",
+    "@vrkit-platform/plugin-sdk": "1.0.3",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "@mui/styled-engine": "^5.16.12",
+    "@vrkit-platform/shared": "1.0.3",
+    "@vrkit-platform/shared-ui": "1.0.3",
+    "two.js": "latest"
+  }
+}

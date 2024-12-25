@@ -40,7 +40,9 @@ for (const pkgFile of Array(rootPkgFile, ...pkgFiles)) {
         })
     })
   
-  Fsx.writeJSONSync(pkgFile, pkgJson)
+  Fsx.writeJSONSync(pkgFile, pkgJson, {
+    spaces: 2
+  })
   await $`git add ${Path.relative(rootDir, pkgFile)}`
 }
 

@@ -1,1 +1,33 @@
-{"name":"@vrkit-platform/models","version":"1.0.2","description":"VRKit Platform Models","license":"ISC","private":false,"publishConfig":{"access":"public"},"author":{"email":"support@3form.ventures","name":"Jonathan Glanz","url":"https://github.com/3fv"},"main":"lib/index.js","files":["lib"],"scripts":{"build":"tsc -p tsconfig.json","build:watch":"tsc -p tsconfig.json -w","preversion":"yarn run build"},"types":"lib/index.d.ts","dependencies":{"@protobuf-ts/runtime":"^2.9.4"},"devDependencies":{"@protobuf-ts/plugin":"^2.9.4","typescript":"^5.5.4","vrkit-builder-tool":"1.0.2"}}
+{
+  "name": "@vrkit-platform/models",
+  "version": "1.0.3",
+  "description": "VRKit Platform Models",
+  "license": "ISC",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "email": "support@3form.ventures",
+    "name": "Jonathan Glanz",
+    "url": "https://github.com/3fv"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json -w",
+    "preversion": "yarn run build"
+  },
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@protobuf-ts/runtime": "^2.9.4"
+  },
+  "devDependencies": {
+    "@protobuf-ts/plugin": "^2.9.4",
+    "typescript": "^5.5.4",
+    "vrkit-builder-tool": "1.0.3"
+  }
+}

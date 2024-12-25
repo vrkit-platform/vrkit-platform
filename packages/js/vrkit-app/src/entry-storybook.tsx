@@ -9,7 +9,7 @@ import { ThemeProvider } from "vrkit-app-renderer/theme/ThemeProvider"
 import { createTheme } from "vrkit-app-renderer/theme/createTheme"
 import { DevSupport } from "@react-buddy/ide-toolbox"
 import ComponentPreviews from "./dev/previews"
-import { important } from "vrkit-shared-ui"
+import { important } from "@vrkit-platform/shared-ui"
 import * as SBTheming from "@storybook/theming"
 import { themes } from "@storybook/theming"
 

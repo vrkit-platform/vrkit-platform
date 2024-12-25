@@ -11,7 +11,7 @@ import {
   invokeProp,
   lessThan,
   pairOf
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import { match } from "ts-pattern"
 import { getLogger } from "@3fv/logger-proxy"
 import SharedAppState from "../store"

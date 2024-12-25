@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client"
 import React from "react"
-import { importDefault } from "vrkit-shared"
+import { importDefault } from "@vrkit-platform/shared"
 import { resolveContainer } from "./containerFactory"
 
 async function renderRoot(root: ReactDOM.Root) {

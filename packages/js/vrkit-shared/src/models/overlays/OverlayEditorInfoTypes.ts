@@ -1,4 +1,4 @@
-import { OverlayInfo, OverlayKind, OverlayPlacement, RectI, SizeF, SizeI, VRPose } from "vrkit-models"
+import { OverlayInfo, OverlayKind, OverlayPlacement, RectI, SizeF, SizeI, VRPose } from "@vrkit-platform/models"
 import { OverlaySpecialIds } from "./OverlayDataTypes"
 import { OverlayBrowserWindowType, overlayInfoToUniqueId } from "./OverlayManagerUtils"
 import { pairOf } from "../../utils"

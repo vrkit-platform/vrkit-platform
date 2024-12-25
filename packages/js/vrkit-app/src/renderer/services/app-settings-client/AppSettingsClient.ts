@@ -2,16 +2,16 @@ import { ipcRenderer, IpcRendererEvent } from "electron"
 import { getLogger } from "@3fv/logger-proxy"
 
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-shared"
+import { Bind } from "@vrkit-platform/shared"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import {
   AppSettings
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 
 import type { AppStore } from "../store"
-import { ElectronIPCChannel } from "vrkit-shared"
+import { ElectronIPCChannel } from "@vrkit-platform/shared"
 
 
 // noinspection TypeScriptUnresolvedVariable

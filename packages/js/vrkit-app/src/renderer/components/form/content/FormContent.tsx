@@ -22,7 +22,7 @@ import {
   flexAlign, padding,
   widthConstraint,
   PositionRelative
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 import { Box } from "@mui/material"
 import { BoxProps } from "@mui/material/Box"
 

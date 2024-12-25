@@ -2,11 +2,11 @@ import { getLogger } from "@3fv/logger-proxy"
 import { Link as RouterLink } from "react-router-dom"
 import { ClickAwayListener, IconButton, ListItemText, MenuItem, MenuList as MuiMenuList } from "@mui/material"
 import { lighten, styled } from "@mui/material/styles"
-import type { ThemeId } from "vrkit-shared/models"
-import { ThemeType } from "vrkit-models"
+import type { ThemeId } from "@vrkit-platform/shared/models"
+import { ThemeType } from "@vrkit-platform/models"
 
 // APP
-import { ClassNamesKey, createClassNames, FlexAuto, FlexRowCenter, PositionRelative, rem } from "vrkit-shared-ui/styles"
+import { ClassNamesKey, createClassNames, FlexAuto, FlexRowCenter, PositionRelative, rem } from "@vrkit-platform/shared-ui/styles"
 import React, { useRef, useState } from "react"
 // import { useAppDispatch } from "@taskx/lib-shared-web/services/store"
 // import { globalActions } from

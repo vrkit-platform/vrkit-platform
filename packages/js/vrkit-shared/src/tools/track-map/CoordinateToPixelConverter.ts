@@ -1,7 +1,7 @@
 
 /**/
 
-import { LapCoordinate } from "vrkit-models"
+import { LapCoordinate } from "@vrkit-platform/models"
 import {
   Coordinate,
   CoordinateZoomLevel,

@@ -1,5 +1,5 @@
 import type { Theme, Components } from '@mui/material/styles';
-import { rem } from "vrkit-shared-ui"
+import { rem } from "@vrkit-platform/shared-ui"
 
 // ----------------------------------------------------------------------
 

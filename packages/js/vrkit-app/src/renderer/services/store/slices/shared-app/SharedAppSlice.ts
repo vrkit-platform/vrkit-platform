@@ -17,7 +17,7 @@ import {
   SessionDetail,
   SessionsState,
   type ThemeId
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 
 import {
   AppSettings,
@@ -28,7 +28,7 @@ import {
   PluginInstall,
   PluginManifest,
   ThemeType
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 import { flow } from "lodash/fp"
 import { isArray, isDefined } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"

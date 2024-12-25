@@ -2,7 +2,7 @@
 // noinspection ES6UnusedImports
 
 import type { IMessageType, MessageType } from "@protobuf-ts/runtime"
-import { ClientEventType, TestEventData } from "vrkit-models"
+import { ClientEventType, TestEventData } from "@vrkit-platform/models"
 
 import { asOption, Option } from "@3fv/prelude-ts"
 import { getLogger } from "@3fv/logger-proxy"

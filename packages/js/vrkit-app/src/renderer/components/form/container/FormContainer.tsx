@@ -21,7 +21,7 @@ import {
   FlexScaleZero, flexAlign,
   margin,
   PositionRelative
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

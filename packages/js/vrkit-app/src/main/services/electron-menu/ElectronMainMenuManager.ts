@@ -11,12 +11,12 @@ import {
   electronRoleToId,
   invokeWith,
   ThemeId
-} from "vrkit-shared" // import MainAppState from "../store"
+} from "@vrkit-platform/shared" // import MainAppState from "../store"
 import { ElectronMainActionManager } from "../electron-actions"
 import { capitalize, first } from "lodash"
 import { assert } from "@3fv/guard"
 import { inspectSharedWorker } from "../../utils/sharedWorkerHelpers"
-import { ThemeType } from "vrkit-models"
+import { ThemeType } from "@vrkit-platform/models"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log

@@ -7,7 +7,7 @@ import {
   SessionDataVariableHeader,
   SessionEventType,
   SessionTiming
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 import { getLogger } from "@3fv/logger-proxy"
 
 const log = getLogger(__filename)

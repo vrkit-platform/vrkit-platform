@@ -2,6 +2,71 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/PluginInstall",
     "definitions": {
+        "IRacingTools.Models.PluginAuthor": {
+            "properties": {
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "company": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "email": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "url": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "supportUrl": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Plugin Author",
+            "description": "* Owner (contact info) of plugin"
+        },
         "IRacingTools.Models.PluginComponentDefinition": {
             "properties": {
                 "id": {
@@ -310,8 +375,8 @@
                         }
                     ]
                 },
-                "owner": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginOwner",
+                "author": {
+                    "$ref": "#/definitions/IRacingTools.Models.PluginAuthor",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -400,6 +465,46 @@
                     ],
                     "description": "HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES"
                 },
+                "websiteUrl": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "iconUrl": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sourceUrl": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "downloadUrl": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
                 "screenshots": {
                     "oneOf": [
                         {
@@ -424,71 +529,6 @@
                 }
             ],
             "title": "Plugin Overview"
-        },
-        "IRacingTools.Models.PluginOwner": {
-            "properties": {
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "company": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "email": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "url": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "supportUrl": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Plugin Owner",
-            "description": "* Owner (contact info) of plugin"
         },
         "IRacingTools.Models.PluginUserSetting": {
             "properties": {

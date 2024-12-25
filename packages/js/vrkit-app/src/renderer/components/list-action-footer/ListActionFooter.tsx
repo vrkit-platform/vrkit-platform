@@ -17,7 +17,7 @@ import {
   heightConstraint,
   padding,
   OverflowHidden
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 import React from "react"
 
 const log = getLogger(__filename)

@@ -1,5 +1,5 @@
 import type { KeysOf, ValuesOf } from "../../../utils"
-import { ThemeType } from "vrkit-models"
+import { ThemeType } from "@vrkit-platform/models"
 // export const THEMES = {
 //   LIGHT: "LIGHT",
 //   DARK: "DARK"

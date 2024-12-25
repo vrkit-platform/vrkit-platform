@@ -1,7 +1,7 @@
 import { asOption } from "@3fv/prelude-ts"
 import Path from "path"
 import Fs from "fs"
-import { assert, isNotEmpty } from "vrkit-shared"
+import { assert, isNotEmpty } from "@vrkit-platform/shared"
 
 assert(process.platform === "win32", `VRKit is only usable on Windows 10/11`);
 

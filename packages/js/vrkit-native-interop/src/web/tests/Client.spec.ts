@@ -3,7 +3,7 @@ import { jest } from "@jest/globals"
 
 import { Client } from "../Client"
 import { Shutdown } from "../NativeBinding"
-import { ClientEventType, SessionEventType } from "vrkit-models"
+import { ClientEventType, SessionEventType } from "@vrkit-platform/models"
 import { GetLiveVRKitSessionPlayer, SessionPlayer } from "../SessionPlayer"
 import Fixtures from "./DataFixtures"
 import { getLogger } from "@3fv/logger-proxy"

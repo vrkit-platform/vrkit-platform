@@ -38,8 +38,8 @@ import {
   PositionAbsolute,
   PositionRelative,
   rem
-} from "vrkit-shared-ui"
-import { PluginComponentDefinition, PluginManifest } from "vrkit-models"
+} from "@vrkit-platform/shared-ui"
+import { PluginComponentDefinition, PluginManifest } from "@vrkit-platform/models"
 import { Markdown } from "../markdown"
 import { AsyncImage } from "../async-image"
 import Paper, { PaperProps } from "@mui/material/Paper"

@@ -1,4 +1,4 @@
-import type { Pair } from "vrkit-shared"
+import type { Pair } from "@vrkit-platform/shared"
 import type { CSSPropertiesWithMultiValues,CSSProperties } from "@mui/styled-engine"
 
 /**

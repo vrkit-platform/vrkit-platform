@@ -7,7 +7,7 @@ import { getLogger } from "@3fv/logger-proxy"
 
 import { setContainerResolver } from "../../utils"
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
-import { FileSystemManager } from "vrkit-shared/services/node"
+import { FileSystemManager } from "@vrkit-platform/shared/services/node"
 import TrackManager from "../../services/track-manager"
 import OverlayManagerClient, {
   PluginManagerClient

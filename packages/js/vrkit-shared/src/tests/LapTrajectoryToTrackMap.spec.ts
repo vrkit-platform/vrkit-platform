@@ -1,4 +1,4 @@
-import { LapTrajectory } from "vrkit-models"
+import { LapTrajectory } from "@vrkit-platform/models"
 import Fixtures, { readMessage } from "./DataFixtures"
 import { getLogger } from "@3fv/logger-proxy"
 import { LapTrajectoryConverter } from "../tools/track-map"

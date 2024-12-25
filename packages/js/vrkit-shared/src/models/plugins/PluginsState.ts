@@ -1,4 +1,4 @@
-import { PluginManifest, PluginInstall } from "vrkit-models"
+import { PluginManifest, PluginInstall } from "@vrkit-platform/models"
 import { createSimpleSchema, custom, list, map } from "serializr"
 
 export interface PluginsState {

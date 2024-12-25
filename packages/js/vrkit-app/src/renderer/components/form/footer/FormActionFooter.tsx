@@ -20,7 +20,7 @@ import {
   FlexRow,
   flexAlign,
   padding
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 // import { footerBorder } from "../../../theme"
 const footerBorder = `1px solid rgba(0, 0, 0, 0.23)`
 

@@ -9,10 +9,10 @@ import type {} from "@mui/x-data-grid/themeAugmentation"
 import type { Direction, Theme, ThemeOptions } from "@mui/material/styles"
 import { createTheme as muiCreateTheme } from "@mui/material/styles"
 
-// import { createPaletteChannel, setFont } from "vrkit-shared-ui"
+// import { createPaletteChannel, setFont } from "@vrkit-platform/shared-ui"
 import { components, customShadows, shadows, typography } from "./core"
-import { assign } from "vrkit-shared"
-import { alpha, CssSelectors, linearGradient, rem } from "vrkit-shared-ui"
+import { assign } from "@vrkit-platform/shared"
+import { alpha, CssSelectors, linearGradient, rem } from "@vrkit-platform/shared-ui"
 import { darken, lighten } from "@mui/material/styles"
 import {
   darkPrimaryAndSecondaryPalettes, paneBackgrounds

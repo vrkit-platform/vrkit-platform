@@ -21,7 +21,7 @@ import {
   createClasses,
   FlexRow,
   widthConstraint
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 import { isFunction } from "@3fv/guard"
 
 const log = getLogger(__filename)

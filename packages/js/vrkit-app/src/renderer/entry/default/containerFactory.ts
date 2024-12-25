@@ -3,14 +3,14 @@
 import { Deferred } from "@3fv/deferred"
 import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { ActionRegistry } from "vrkit-shared"
+import { ActionRegistry } from "@vrkit-platform/shared"
 import WebActionManager from "../../services/web-action-manager"
 import SessionManagerClient from "../../services/session-manager-client"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import { setContainerResolver } from "../../utils"
-import { FileSystemManager } from "vrkit-shared/services/node"
+import { FileSystemManager } from "@vrkit-platform/shared/services/node"
 import TrackManager from "../../services/track-manager"
 import SharedAppStateClient from "../../services/shared-app-state-client"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"

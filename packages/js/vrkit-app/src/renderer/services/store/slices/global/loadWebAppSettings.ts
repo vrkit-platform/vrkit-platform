@@ -1,6 +1,6 @@
-// import { THEMES } from "vrkit-shared"
-// import { defaults } from "vrkit-shared"
-import { AppSettings } from "vrkit-models"
+// import { THEMES } from "@vrkit-platform/shared"
+// import { defaults } from "@vrkit-platform/shared"
+import { AppSettings } from "@vrkit-platform/models"
 
 export function loadWebAppSettings(): AppSettings {
   // const settings = window.loadAppSettingsSync()

@@ -1,7 +1,7 @@
 import { Theme, Components, darken } from "@mui/material/styles"
 
 import { paper, appAlpha, stylesMode } from '../../styles';
-import { alpha } from "vrkit-shared-ui"
+import { alpha } from "@vrkit-platform/shared-ui"
 
 // ----------------------------------------------------------------------
 

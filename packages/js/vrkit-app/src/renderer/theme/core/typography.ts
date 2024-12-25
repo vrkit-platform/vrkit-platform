@@ -2,7 +2,7 @@ import type { TypographyOptions } from "@mui/material/styles/createTypography"
 
 import { setFont } from "../styles"
 import React from "react"
-import { rem } from "vrkit-shared-ui"
+import { rem } from "@vrkit-platform/shared-ui"
 
 // ----------------------------------------------------------------------
 

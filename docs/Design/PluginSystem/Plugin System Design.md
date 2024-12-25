@@ -93,7 +93,7 @@ import {
   SessionInfoMessage,
   SessionTiming,
   SessionDataVariableValueMap
-} from "vrkit-plugin-sdk"
+} from "@vrkit-platform/plugin-sdk"
 
 
 export enum PluginClientEventType {

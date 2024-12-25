@@ -8,9 +8,9 @@ import {
   Disposables,
   ElectronIPCChannel,
   ErrorKind
-} from "vrkit-shared"
-import { AppSettings, ThemeType } from "vrkit-models"
-import { AppFiles } from "vrkit-shared/constants/node"
+} from "@vrkit-platform/shared"
+import { AppSettings, ThemeType } from "@vrkit-platform/models"
+import { AppFiles } from "@vrkit-platform/shared/constants/node"
 import Fs from "fs"
 import PQueue from "p-queue"
 import { IObjectDidChange, runInAction, set } from "mobx"

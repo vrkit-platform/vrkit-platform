@@ -28,7 +28,7 @@ import {
   hasCls,
   FlexRowCenter,
   FlexAuto, FlexRow
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

@@ -21,7 +21,7 @@ import {
   OverflowAuto,
   OverflowHidden, padding,
   widthConstraint
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import Drawer from "@mui/material/Drawer"
 import AppDrawerMenu from "../app-drawer-menu"
 import { AppTitlebar } from "../app-titlebar"

@@ -3,7 +3,12 @@ import * as CSS from "csstype"
 import { isArray, isFunction, isNumber, isObject, isString } from "@3fv/guard"
 import { getLogger } from "@3fv/logger-proxy"
 import { assign, flow, isEmpty, omit, partition, uniq } from "lodash"
-import { arrayOf, digitsOnly, throwError, toDashCase } from "vrkit-shared/utils"
+import {
+  arrayOf, defaults,
+  digitsOnly,
+  throwError,
+  toDashCase
+} from "@vrkit-platform/shared/utils"
 import tinycolor from "tinycolor2"
 import { asOption, Option, Predicate } from "@3fv/prelude-ts"
 import { endsWith, get, replace } from "lodash/fp"
@@ -566,15 +571,54 @@ export function remToPx(rem: number | string): number {
     .get()
 }
 
-export function directChild(className: string, state: string = ""): string {
-  return child(className, state, true)
+export type SelectorFn = (queryOrArgs: string | string[], options?: SelectorOptions | string) => string
+
+export type SelectorConfig = {
+  state: string
+  direct: boolean
+  selectors: SelectorFn[]
 }
 
-export function child(className: string | string[], state: string = "", direct: boolean = false): string {
-  const classNames = arrayOf(className)
+export type SelectorOptions = Partial<SelectorConfig>
+
+export function selectorOptionsToConfig(stateOrOptions: string | SelectorOptions): SelectorConfig {
+  return asOption(stateOrOptions)
+      .map(state => isString(state) ? {state} : state)
+      .map(opts => defaults({...opts}, {
+        state: "",
+        direct: false,
+        selectors: []
+      }) satisfies SelectorConfig)
+      .getOrThrow()
+}
+
+export function directChild(className: string, state: SelectorOptions | string = ""): string {
+  return child(className, asOption(state).map(state => isString(state) ? {state, direct: true} : {...state, direct: true}).getOrThrow())
+}
+
+function applySelectors(selectorQuery:string | string[], config:SelectorConfig):string {
+  return arrayOf(selectorQuery).map(sel =>
+      config.selectors.reduce((current, nextFn) => nextFn(current, config), sel)
+  ).join(", ")
+}
+
+export function child(className: string | string[], stateOrOptions: SelectorOptions | string = ""): string {
+  const classNames = arrayOf(className),
+      config = selectorOptionsToConfig(stateOrOptions),
+      {state, direct, selectors} = config
   return classNames
     .map(className => `&${isEmpty(state) ? "" : `:${state}`} ${direct ? ">" : ""} .${className}`)
+      .map(sel => applySelectors(sel, config))
     .join(",")
+}
+
+export function childSelector(classNames: string | string[], optOverrides:SelectorOptions = {}):SelectorFn {
+  return (query, opts:SelectorOptions = {}) => {
+    const config = selectorOptionsToConfig({...opts,...optOverrides})
+    return `${query} ${config.direct ? "> " : ""}${arrayOf(classNames)
+      .map(it => `.${it}`)
+      .join("")}`
+  }
 }
 
 export function hasCls(className: string | string[], negate?: boolean): string

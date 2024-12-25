@@ -14,10 +14,10 @@ import {
   FlexScaleZero,
   flexAlign,
   PositionRelative
-} from "vrkit-shared-ui/styles"
-import { propEqualTo } from "vrkit-shared/utils"
+} from "@vrkit-platform/shared-ui/styles"
+import { propEqualTo } from "@vrkit-platform/shared/utils"
 import React, { useCallback, useRef } from "react"
-import { ListNavHelper } from "vrkit-shared-ui"
+import { ListNavHelper } from "@vrkit-platform/shared-ui"
 import ListActionFooter from "../list-action-footer"
 import ListActionFooterButton from "../list-action-footer-button"
 import { AppListItemProps } from "./AppListItem"

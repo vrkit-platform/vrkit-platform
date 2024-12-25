@@ -1,5 +1,5 @@
 import { newDevSettings } from "./newDevSettings"
-import { AppSettings } from "vrkit-models"
+import { AppSettings } from "@vrkit-platform/models"
 import { newActionsState } from "../actions"
 import { newDashboardsState } from "../dashboards"
 import { newSessionsState } from "../sessions"

@@ -1,12 +1,19 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "target": "ES2020",
     "rootDir": "src/web",
     "outDir": "lib"
   },
-  "include": ["src/web/**/*.ts"],
+  "references": [{
+    "path": "../vrkit-shared"
+  },{
+    "path": "../vrkit-plugin-sdk"
+  },{
+    "path": "../vrkit-models"
+  }],
+  "include": ["src/web/**/*.ts"]
 //  "exclude": ["**/*.spec.ts"]
 }

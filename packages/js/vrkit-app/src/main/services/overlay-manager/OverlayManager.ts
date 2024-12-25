@@ -39,7 +39,7 @@ import {
   SignalFlag,
   Triple,
   tripleOf
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import {
   DashboardConfig,
   OverlayAnchor,
@@ -51,11 +51,11 @@ import {
   SessionTiming,
   VRLayout,
   VRPose
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 import { isDefined } from "@3fv/guard"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
-import { PluginClientEventType } from "vrkit-plugin-sdk"
+import { PluginClientEventType } from "@vrkit-platform/plugin-sdk"
 import { AppSettingsService } from "../app-settings"
 import Fsx from "fs-extra"
 import Path from "path"
@@ -79,7 +79,7 @@ import {
   getVRRectangleLayoutTool,
   isValidOverlayScreenSize
 } from "./OverlayLayoutTools"
-import { AppPaths, FileExtensions } from "vrkit-shared/constants/node"
+import { AppPaths, FileExtensions } from "@vrkit-platform/shared/constants/node"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)

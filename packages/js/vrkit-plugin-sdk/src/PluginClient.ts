@@ -6,7 +6,7 @@ import type {
   SessionDataVariableValueMap,
   SessionTiming,
   TrackMap
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 import type { SessionInfoMessage } from "./SessionInfoTypes"
 import React from "react"
 import { Container } from "@3fv/ditsy"

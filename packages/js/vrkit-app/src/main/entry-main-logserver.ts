@@ -1,6 +1,6 @@
 import upmNodeProcess from "@3fv/electron-utility-process-manager/node"
 import Tracer from "tracer"
-import { AppPaths } from "vrkit-shared/constants/node"
+import { AppPaths } from "@vrkit-platform/shared/constants/node"
 import Path from "path"
 import type { LogServerEventData, LogServerRecordCount, LogServerRequestMap } from "../common/logger"
 import Fsx from "fs-extra"

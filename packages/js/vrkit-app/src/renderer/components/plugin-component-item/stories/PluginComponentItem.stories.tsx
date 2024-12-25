@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 
 import { PluginComponentItem } from "../PluginComponentItem"
-import type { PluginsState } from "vrkit-shared"
+import type { PluginsState } from "@vrkit-platform/shared"
 import PluginsStateJSON from "./plugins-state-example-01.json"
 import { get } from "lodash/fp"
 import { first } from "lodash"

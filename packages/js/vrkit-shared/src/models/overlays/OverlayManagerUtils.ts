@@ -1,4 +1,4 @@
-import { OverlayInfo, OverlayKind } from "vrkit-models"
+import { OverlayInfo, OverlayKind } from "@vrkit-platform/models"
 import { asOption } from "@3fv/prelude-ts"
 import { isString } from "@3fv/guard"
 import { assert, EnumValueToName } from "../../utils"

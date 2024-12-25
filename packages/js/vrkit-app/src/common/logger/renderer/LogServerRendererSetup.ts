@@ -1,6 +1,6 @@
 import { UPMRendererClientFactory } from "@3fv/electron-utility-process-manager/renderer"
 import { type LogServerRequestMap, LogServerServiceName } from "../LogServerTypes"
-import { generateId } from "vrkit-shared"
+import { generateId } from "@vrkit-platform/shared"
 import { LogServerClientAppender } from "../LogServerClientAppender"
 import { ConsoleAppender, getLoggingManager } from "@3fv/logger-proxy"
 

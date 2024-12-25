@@ -2,13 +2,13 @@ import { ipcRenderer, IpcRendererEvent } from "electron"
 import { getLogger } from "@3fv/logger-proxy"
 
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "vrkit-shared"
+import { Bind } from "@vrkit-platform/shared"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import type { AppStore } from "../store"
 import { SessionPlayer } from "vrkit-native-interop"
-import { SessionDataVariable, SessionTiming } from "vrkit-models"
+import { SessionDataVariable, SessionTiming } from "@vrkit-platform/models"
 import {
   ActiveSessionType,
   SessionManagerEventType,
@@ -17,14 +17,14 @@ import {
   SessionManagerFnTypeToIPCName,
   SessionsState,
   SessionPlayerId
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import EventEmitter3 from "eventemitter3"
 
-import { Disposables, Pair } from "vrkit-shared"
+import { Disposables, Pair } from "@vrkit-platform/shared"
 import {
   OverlayManagerClientEventType,
   OverlayClientEventTypeToIPCName
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)

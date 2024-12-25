@@ -47,10 +47,10 @@ const aliasMap = {
   "vrkit-app-common": commonDir,
   "vrkit-app-renderer": rendererDir,
   "vrkit-native-interop": vrkNativeInteropDir,
-  "vrkit-shared/constants/node": Path.join(vrkSharedSrcDir, "constants", "index-node.ts"),
-  "vrkit-shared/services/node": Path.join(vrkSharedSrcDir, "services", "index-node.ts"),
-  "vrkit-shared/models/node": Path.join(vrkSharedSrcDir, "models", "index-node.ts"),
-  "vrkit-shared/utils/node": Path.join(vrkSharedSrcDir, "utils", "index-node.ts"),
+  "@vrkit-platform/shared/constants/node": Path.join(vrkSharedSrcDir, "constants", "index-node.ts"),
+  "@vrkit-platform/shared/services/node": Path.join(vrkSharedSrcDir, "services", "index-node.ts"),
+  "@vrkit-platform/shared/models/node": Path.join(vrkSharedSrcDir, "models", "index-node.ts"),
+  "@vrkit-platform/shared/utils/node": Path.join(vrkSharedSrcDir, "utils", "index-node.ts"),
   ...pkgMappings,
   ...fromPairs(
     ["react", "react-dom", "@swc", "lodash", "@mui", "bluebird"]

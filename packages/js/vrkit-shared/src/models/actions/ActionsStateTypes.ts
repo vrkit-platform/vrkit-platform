@@ -5,7 +5,7 @@ import { toJS } from "mobx" // ------ OverlayManager events & types
 
 // ------ OverlayManager events & types
 
-// import type { DashboardConfig } from "vrkit-models"
+// import type { DashboardConfig } from "@vrkit-platform/models"
 
 export interface ActionsState {
   actions: Record<string, ActionDef>

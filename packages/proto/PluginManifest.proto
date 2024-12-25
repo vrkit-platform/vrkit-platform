@@ -101,7 +101,7 @@ message PluginComponentDefinition {
 /**
  * Owner (contact info) of plugin
  */
-message PluginOwner {
+message PluginAuthor {
   string name = 1;
   string company = 2;
   string email = 5;
@@ -119,6 +119,11 @@ message PluginOverview {
   // HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES
   string change_log_content = 10;
 
+  string website_url = 15;
+  string icon_url = 16;
+  string source_url = 17;
+  string download_url = 18;
+
   repeated UIImageResource screenshots = 20;
 }
 
@@ -132,7 +137,7 @@ message PluginManifest {
   string id = 1;
   string version = 2;
 
-  PluginOwner owner = 3;
+  PluginAuthor author = 3;
   string name = 5;
 
   string description = 6;

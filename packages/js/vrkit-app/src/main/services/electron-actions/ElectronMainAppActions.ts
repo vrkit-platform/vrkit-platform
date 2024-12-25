@@ -1,4 +1,4 @@
-import { ActionDef, ActionType, AppActionId, AppActionIdName } from "vrkit-shared"
+import { ActionDef, ActionType, AppActionId, AppActionIdName } from "@vrkit-platform/shared"
 
 export const ElectronMainAppActions = Object.fromEntries(
   Array<ActionDef>(

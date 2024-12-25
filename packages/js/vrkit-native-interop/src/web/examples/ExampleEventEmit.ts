@@ -2,7 +2,7 @@
 
 import { Client } from "../Client"
 import { Shutdown } from "../NativeBinding"
-import { ClientEventType } from "vrkit-models"
+import { ClientEventType } from "@vrkit-platform/models"
 
 async function run() {
   // noinspection DuplicatedCode

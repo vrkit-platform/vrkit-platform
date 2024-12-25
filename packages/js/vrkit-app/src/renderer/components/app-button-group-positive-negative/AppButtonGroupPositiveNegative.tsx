@@ -13,7 +13,7 @@ import Box from "@mui/material/Box"
 import { styled } from "@mui/material/styles"
 
 // APP
-import { ClassNamesKey, createClassNames, FlexAuto, FlexRowCenter, hasCls, padding } from "vrkit-shared-ui"
+import { ClassNamesKey, createClassNames, FlexAuto, FlexRowCenter, hasCls, padding } from "@vrkit-platform/shared-ui"
 import { FormikContextType } from "formik"
 import Button, { ButtonProps } from "@mui/material/Button"
 

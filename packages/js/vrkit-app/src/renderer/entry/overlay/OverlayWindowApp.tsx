@@ -12,7 +12,7 @@ import { Provider as ReduxProvider } from "react-redux"
 import OverlayWindowAppBody from "./OverlayWindowAppBody"
 import useAppStore from "vrkit-app-renderer/hooks/useAppStore"
 import { overlayWindowSelectors } from "../../services/store/slices/overlay-window"
-import { OverlayWindowRole } from "vrkit-shared"
+import { OverlayWindowRole } from "@vrkit-platform/shared"
 
 export default function OverlayWindowApp() {
   const appStore = useAppStore(),

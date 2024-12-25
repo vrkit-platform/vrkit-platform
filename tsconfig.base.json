@@ -30,6 +30,39 @@
     "noImplicitAny": false,
     "outDir": "lib",
     "inlineSourceMap": true,
-    "preserveConstEnums": true
+    "preserveConstEnums": true,
+    "paths": {
+      "@vrkit-platform/models":
+      [  "./packages/js/vrkit-models"],
+      "@vrkit-platform/models/*":
+      [  "./packages/js/vrkit-models/src/*"],
+      "vrkit-models":
+      [  "./packages/js/vrkit-models"],
+      "vrkit-models/*":
+      [  "./packages/js/vrkit-models/src/*"],
+      "vrkit-native-interop":
+      [  "./packages/js/vrkit-native-interop"],
+      "vrkit-native-interop/*":
+      [  "./packages/js/vrkit-native-interop/src/web/*"],
+      "@vrkit-platform/plugin-sdk":
+      [  "./packages/js/vrkit-plugin-sdk"],
+      "@vrkit-platform/plugin-sdk/*":
+      [  "./packages/js/vrkit-plugin-sdk/src/*"],
+      "vrkit-plugin-internal":
+      [  "./packages/js/vrkit-plugin-internal"],
+      "vrkit-plugin-internal/*":
+      [  "./packages/js/vrkit-plugin-internal/src/*"],
+      "@vrkit-platform/shared":
+      [  "./packages/js/vrkit-shared"],
+      
+      "@vrkit-platform/shared/*":
+      [  "./packages/js/vrkit-shared/src/*"],
+      "@vrkit-platform/shared-ui":
+      [  "./packages/js/vrkit-shared-ui"],
+      "@vrkit-platform/shared-ui/styles":
+      [  "./packages/js/vrkit-shared-ui/src/styles"],
+      "@vrkit-platform/shared-ui/*":
+      [  "./packages/js/vrkit-shared-ui/src/*"]
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { EnvironmentKind } from "./Environment"
-import { AppSettings, ThemeType } from "vrkit-models"
+import { AppSettings, ThemeType } from "@vrkit-platform/models"
 
 export interface AppConfig {
   env: EnvironmentKind

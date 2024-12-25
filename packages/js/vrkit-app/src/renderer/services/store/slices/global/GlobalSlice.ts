@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import type { GlobalState } from "./GlobalState"
 import type { AppDialogStateValue } from "./AppDialogStateValue"
 import { loadWebAppSettings } from "./loadWebAppSettings"
-import type {ThemeId} from "vrkit-shared"
+import type {ThemeId} from "@vrkit-platform/shared"
 
 const newGlobalState = (): GlobalState => ({
   // settings: loadWebAppSettings(),

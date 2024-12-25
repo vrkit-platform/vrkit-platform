@@ -1,4 +1,4 @@
-import { SizeF } from "vrkit-models"
+import { SizeF } from "@vrkit-platform/models"
 export type CoordinateZoomLevel = number
 export const CoordinateZoomLevelDefault:CoordinateZoomLevel = 20
 

@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client"
 import React, { lazy, Suspense } from "react"
-import { importDefault } from "vrkit-shared"
+import { importDefault } from "@vrkit-platform/shared"
 import { resolveContainer } from "./overlayContainerFactory"
 
 async function renderOverlayRoot(root: ReactDOM.Root) {

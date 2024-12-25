@@ -1,12 +1,12 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 
-import { Bind, Disposables, isNotEmpty, isTrue, PluginsState } from "vrkit-shared"
-import {FileSystemManager} from "vrkit-shared/services/node"
-import {AppPaths} from "vrkit-shared/constants/node"
+import { Bind, Disposables, isNotEmpty, isTrue, PluginsState } from "@vrkit-platform/shared"
+import {FileSystemManager} from "@vrkit-platform/shared/services/node"
+import {AppPaths} from "@vrkit-platform/shared/constants/node"
 import { IObjectDidChange, remove, runInAction, set } from "mobx"
 import SharedAppState from "../store"
-import { PluginInstall, PluginInstallStatus, PluginManifest } from "vrkit-models"
+import { PluginInstall, PluginInstallStatus, PluginManifest } from "@vrkit-platform/models"
 import { asOption, Future } from "@3fv/prelude-ts"
 
 import Fs from "fs"

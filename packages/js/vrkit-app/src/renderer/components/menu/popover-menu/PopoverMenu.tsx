@@ -12,7 +12,7 @@ import type { Theme } from "@mui/material"
 import MuiPopper, { PopperProps as MuiPopperProps } from "@mui/material/Popper"
 
 // APP
-import { ClassNamesKey, createClassNames } from "vrkit-shared-ui/styles"
+import { ClassNamesKey, createClassNames } from "@vrkit-platform/shared-ui/styles"
 import { PopperProps } from "@mui/material/Popper/Popper"
 
 const log = getLogger(__filename)

@@ -5,7 +5,7 @@ import { Menu } from "@mui/material"
 
 // UTILS
 import { nestedMenuItemsFromObject } from "./nestedMenuItemsFromObject"
-import type { ReactChildren } from "vrkit-shared-ui"
+import type { ReactChildren } from "@vrkit-platform/shared-ui"
 import { NestedMenuItemData } from "./NestedMenuItemData"
 
 export interface ContextMenuProps {

@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import type { OverlayWindowState } from "./OverlayWindowState"
-import { OverlayWindowRole } from "vrkit-shared"
+import { OverlayWindowRole } from "@vrkit-platform/shared"
 import React from "react"
-import type { IPluginComponentProps } from "vrkit-plugin-sdk"
+import type { IPluginComponentProps } from "@vrkit-platform/plugin-sdk"
 
 function isVROverlayWindow():boolean {
   return typeof window !== "undefined" ? window.location.hash?.includes("::VR") : false

@@ -13,7 +13,7 @@ import Box from "@mui/material/Box"
 import { styled } from "@mui/material/styles"
 
 // APP
-import { borderRadius, ClassNamesKey, createClassNames, FlexAuto, FlexRowCenter } from "vrkit-shared-ui"
+import { borderRadius, ClassNamesKey, createClassNames, FlexAuto, FlexRowCenter } from "@vrkit-platform/shared-ui"
 import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react"
 // import { useAppDispatch } from "@taskx/lib-shared-web/services/store"
-import { ActionRegistry, AppActionId, Menu } from "vrkit-shared"
+import { ActionRegistry, AppActionId, Menu } from "@vrkit-platform/shared"
 import { useService } from "../service-container"
 import { getValue } from "@3fv/guard"
 import { useAppDispatch } from "../../services/store"

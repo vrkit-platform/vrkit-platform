@@ -25,16 +25,16 @@ import {
   SharedAppStateLeafSchemas,
   SharedAppStateSchema,
   ThemeId
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import { action, isObservable, makeObservable, observable, reaction, runInAction, set, toJS } from "mobx"
 import { broadcastToAllWindows, getAppThemeFromSystem, IObserveChange } from "../../utils"
-import { AppSettings } from "vrkit-models"
+import { AppSettings } from "@vrkit-platform/models"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
 import { serialize } from "serializr"
 import { AutoOpenDevToolsOverride, isDev } from "../../constants"
 import type { PartialDeep } from "type-fest"
-import { AppPaths, AppFiles, FileExtensions, type IAppPaths, type IAppStorage, type IAppFiles, type IFileExtensions } from "vrkit-shared/constants/node"
-import { newDevSettings } from "vrkit-shared/models/node"
+import { AppPaths, AppFiles, FileExtensions, type IAppPaths, type IAppStorage, type IAppFiles, type IFileExtensions } from "@vrkit-platform/shared/constants/node"
+import { newDevSettings } from "@vrkit-platform/shared/models/node"
 
 const log = getLogger(__filename)
 

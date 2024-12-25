@@ -3,7 +3,7 @@
 
 import type { MessageType } from "@protobuf-ts/runtime"
 import EventEmitter3 from "eventemitter3"
-import { Any, ClientEventType, Envelope, Envelope_Kind, SessionEventData, TestEventData } from "vrkit-models"
+import { Any, ClientEventType, Envelope, Envelope_Kind, SessionEventData, TestEventData } from "@vrkit-platform/models"
 
 import { asOption, Option } from "@3fv/prelude-ts"
 import { getLogger } from "@3fv/logger-proxy"

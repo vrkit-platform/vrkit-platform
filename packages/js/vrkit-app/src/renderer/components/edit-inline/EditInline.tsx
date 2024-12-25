@@ -14,7 +14,7 @@ import { styled } from "@mui/material/styles"
 import InputBase, { InputBaseProps } from "@mui/material/InputBase"
 
 // APP
-import { ClassNamesKey, createClassNames, dimensionConstraints, child, hasCls } from "vrkit-shared-ui"
+import { ClassNamesKey, createClassNames, dimensionConstraints, child, hasCls } from "@vrkit-platform/shared-ui"
 import { isDefined } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
 import Typography, { TypographyProps } from "@mui/material/Typography"

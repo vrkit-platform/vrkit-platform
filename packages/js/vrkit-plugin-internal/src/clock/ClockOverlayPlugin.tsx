@@ -1,9 +1,9 @@
-import "vrkit-plugin-sdk"
+import "@vrkit-platform/plugin-sdk"
 import type { BoxProps } from "@mui/material/Box"
 
 import { getLogger } from "@3fv/logger-proxy"
 
-import { IPluginComponentProps } from "vrkit-plugin-sdk"
+import { IPluginComponentProps } from "@vrkit-platform/plugin-sdk"
 import React, { useEffect, useState } from "react"
 import { useInterval } from "usehooks-ts"
 
@@ -20,8 +20,8 @@ import {
   FlexRowCenterBox,
   hasCls,
   rem
-} from "vrkit-shared-ui"
-import { getLocalTimeParts, TimeParts } from "vrkit-shared"
+} from "@vrkit-platform/shared-ui"
+import { getLocalTimeParts, TimeParts } from "@vrkit-platform/shared"
 
 const log = getLogger(__filename)
 

@@ -1,7 +1,7 @@
 import React from "react"
 import { NestedMenuItem } from "./NestedMenuItem"
 import { IconMenuItem } from "./IconMenuItem"
-import { isNotEmpty } from "vrkit-shared/utils"
+import { isNotEmpty } from "@vrkit-platform/shared/utils"
 import { NestedMenuItemData } from "./NestedMenuItemData"
 
 export interface NestedMenuItemsFromObjectOptions {

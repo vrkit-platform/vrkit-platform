@@ -197,9 +197,9 @@ export interface PluginComponentDefinition_OverlayIRacingSettings {
  * *
  * Owner (contact info) of plugin
  *
- * @generated from protobuf message IRacingTools.Models.PluginOwner
+ * @generated from protobuf message IRacingTools.Models.PluginAuthor
  */
-export interface PluginOwner {
+export interface PluginAuthor {
     /**
      * @generated from protobuf field: string name = 1;
      */
@@ -238,6 +238,22 @@ export interface PluginOverview {
      */
     changeLogContent: string;
     /**
+     * @generated from protobuf field: string website_url = 15;
+     */
+    websiteUrl: string;
+    /**
+     * @generated from protobuf field: string icon_url = 16;
+     */
+    iconUrl: string;
+    /**
+     * @generated from protobuf field: string source_url = 17;
+     */
+    sourceUrl: string;
+    /**
+     * @generated from protobuf field: string download_url = 18;
+     */
+    downloadUrl: string;
+    /**
      * @generated from protobuf field: repeated IRacingTools.Models.UIImageResource screenshots = 20;
      */
     screenshots: UIImageResource[];
@@ -258,9 +274,9 @@ export interface PluginManifest {
      */
     version: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.PluginOwner owner = 3;
+     * @generated from protobuf field: IRacingTools.Models.PluginAuthor author = 3;
      */
-    owner?: PluginOwner;
+    author?: PluginAuthor;
     /**
      * @generated from protobuf field: string name = 5;
      */
@@ -880,9 +896,9 @@ class PluginComponentDefinition_OverlayIRacingSettings$Type extends MessageType<
  */
 export const PluginComponentDefinition_OverlayIRacingSettings = new PluginComponentDefinition_OverlayIRacingSettings$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class PluginOwner$Type extends MessageType<PluginOwner> {
+class PluginAuthor$Type extends MessageType<PluginAuthor> {
     constructor() {
-        super("IRacingTools.Models.PluginOwner", [
+        super("IRacingTools.Models.PluginAuthor", [
             { no: 1, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "company", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "email", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
@@ -890,7 +906,7 @@ class PluginOwner$Type extends MessageType<PluginOwner> {
             { no: 11, name: "support_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<PluginOwner>): PluginOwner {
+    create(value?: PartialMessage<PluginAuthor>): PluginAuthor {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.name = "";
         message.company = "";
@@ -898,10 +914,10 @@ class PluginOwner$Type extends MessageType<PluginOwner> {
         message.url = "";
         message.supportUrl = "";
         if (value !== undefined)
-            reflectionMergePartial<PluginOwner>(this, message, value);
+            reflectionMergePartial<PluginAuthor>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginOwner): PluginOwner {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginAuthor): PluginAuthor {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -932,7 +948,7 @@ class PluginOwner$Type extends MessageType<PluginOwner> {
         }
         return message;
     }
-    internalBinaryWrite(message: PluginOwner, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: PluginAuthor, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string name = 1; */
         if (message.name !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.name);
@@ -955,15 +971,19 @@ class PluginOwner$Type extends MessageType<PluginOwner> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.PluginOwner
+ * @generated MessageType for protobuf message IRacingTools.Models.PluginAuthor
  */
-export const PluginOwner = new PluginOwner$Type();
+export const PluginAuthor = new PluginAuthor$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class PluginOverview$Type extends MessageType<PluginOverview> {
     constructor() {
         super("IRacingTools.Models.PluginOverview", [
             { no: 2, name: "feature_content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 10, name: "change_log_content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 15, name: "website_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 16, name: "icon_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 17, name: "source_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 18, name: "download_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 20, name: "screenshots", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => UIImageResource }
         ]);
     }
@@ -971,6 +991,10 @@ class PluginOverview$Type extends MessageType<PluginOverview> {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.featureContent = "";
         message.changeLogContent = "";
+        message.websiteUrl = "";
+        message.iconUrl = "";
+        message.sourceUrl = "";
+        message.downloadUrl = "";
         message.screenshots = [];
         if (value !== undefined)
             reflectionMergePartial<PluginOverview>(this, message, value);
@@ -986,6 +1010,18 @@ class PluginOverview$Type extends MessageType<PluginOverview> {
                     break;
                 case /* string change_log_content */ 10:
                     message.changeLogContent = reader.string();
+                    break;
+                case /* string website_url */ 15:
+                    message.websiteUrl = reader.string();
+                    break;
+                case /* string icon_url */ 16:
+                    message.iconUrl = reader.string();
+                    break;
+                case /* string source_url */ 17:
+                    message.sourceUrl = reader.string();
+                    break;
+                case /* string download_url */ 18:
+                    message.downloadUrl = reader.string();
                     break;
                 case /* repeated IRacingTools.Models.UIImageResource screenshots */ 20:
                     message.screenshots.push(UIImageResource.internalBinaryRead(reader, reader.uint32(), options));
@@ -1008,6 +1044,18 @@ class PluginOverview$Type extends MessageType<PluginOverview> {
         /* string change_log_content = 10; */
         if (message.changeLogContent !== "")
             writer.tag(10, WireType.LengthDelimited).string(message.changeLogContent);
+        /* string website_url = 15; */
+        if (message.websiteUrl !== "")
+            writer.tag(15, WireType.LengthDelimited).string(message.websiteUrl);
+        /* string icon_url = 16; */
+        if (message.iconUrl !== "")
+            writer.tag(16, WireType.LengthDelimited).string(message.iconUrl);
+        /* string source_url = 17; */
+        if (message.sourceUrl !== "")
+            writer.tag(17, WireType.LengthDelimited).string(message.sourceUrl);
+        /* string download_url = 18; */
+        if (message.downloadUrl !== "")
+            writer.tag(18, WireType.LengthDelimited).string(message.downloadUrl);
         /* repeated IRacingTools.Models.UIImageResource screenshots = 20; */
         for (let i = 0; i < message.screenshots.length; i++)
             UIImageResource.internalBinaryWrite(message.screenshots[i], writer.tag(20, WireType.LengthDelimited).fork(), options).join();
@@ -1027,7 +1075,7 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
         super("IRacingTools.Models.PluginManifest", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "version", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "owner", kind: "message", T: () => PluginOwner },
+            { no: 3, name: "author", kind: "message", T: () => PluginAuthor },
             { no: 5, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 6, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 11, name: "overview", kind: "message", T: () => PluginOverview },
@@ -1056,8 +1104,8 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
                 case /* string version */ 2:
                     message.version = reader.string();
                     break;
-                case /* IRacingTools.Models.PluginOwner owner */ 3:
-                    message.owner = PluginOwner.internalBinaryRead(reader, reader.uint32(), options, message.owner);
+                case /* IRacingTools.Models.PluginAuthor author */ 3:
+                    message.author = PluginAuthor.internalBinaryRead(reader, reader.uint32(), options, message.author);
                     break;
                 case /* string name */ 5:
                     message.name = reader.string();
@@ -1089,9 +1137,9 @@ class PluginManifest$Type extends MessageType<PluginManifest> {
         /* string version = 2; */
         if (message.version !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.version);
-        /* IRacingTools.Models.PluginOwner owner = 3; */
-        if (message.owner)
-            PluginOwner.internalBinaryWrite(message.owner, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.PluginAuthor author = 3; */
+        if (message.author)
+            PluginAuthor.internalBinaryWrite(message.author, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
         /* string name = 5; */
         if (message.name !== "")
             writer.tag(5, WireType.LengthDelimited).string(message.name);

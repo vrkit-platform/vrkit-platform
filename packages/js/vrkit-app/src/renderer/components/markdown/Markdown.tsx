@@ -14,7 +14,7 @@ import type { SxProps, Theme } from "@mui/material/styles"
 import { styled } from "@mui/material/styles"
 
 // APP
-import { alpha, ClassNamesKey, createClassNames, FillWidth, rem } from "vrkit-shared-ui"
+import { alpha, ClassNamesKey, createClassNames, FillWidth, rem } from "@vrkit-platform/shared-ui"
 
 import "!style-loader!css-loader!sass-loader!./code-highlight-block.scss"
 import remarkGfm from "remark-gfm"

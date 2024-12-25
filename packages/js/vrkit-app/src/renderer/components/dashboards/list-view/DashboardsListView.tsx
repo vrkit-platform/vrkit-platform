@@ -31,9 +31,9 @@ import {
   PositionRelative,
   rem,
   transition
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import clsx from "clsx"
-import { DashboardConfig } from "vrkit-models"
+import { DashboardConfig } from "@vrkit-platform/models"
 import { sharedAppSelectors } from "../../../services/store/slices/shared-app"
 import { useAppSelector } from "../../../services/store"
 import { useNavigate } from "react-router-dom"

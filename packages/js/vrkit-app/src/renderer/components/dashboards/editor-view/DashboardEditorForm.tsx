@@ -5,7 +5,7 @@ import {
   OverlayInfo, OverlayKind,
   PluginComponentDefinition,
   PluginManifest
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { useAsyncCallback } from "../../../hooks" // import {
@@ -19,7 +19,7 @@ import {
   isEmpty,
   isEqual,
   propEqualTo
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import { FormContainer } from "../../form"
 import { AppTextFieldFormik } from "../../app-text-field"
 import {
@@ -39,7 +39,7 @@ import {
   hasCls,
   OverflowHidden,
   padding
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import { DashboardLayoutSwitch } from "../common/layout-switch"
 import { FormikBag, FormikConfig, FormikContextType, FormikProps, withFormik } from "formik"
 import { get } from "lodash/fp"

@@ -1,10 +1,10 @@
 import type Electron from "electron"
-import { ErrorKind, Pair, pairOf } from "vrkit-shared"
+import { ErrorKind, Pair, pairOf } from "@vrkit-platform/shared"
 import { useEffect, useRef, useState } from "react"
 
 import { getLogger } from "@3fv/logger-proxy"
 import { asOption } from "@3fv/prelude-ts"
-import { Menu } from "vrkit-shared"
+import { Menu } from "@vrkit-platform/shared"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log

@@ -1,4 +1,4 @@
-import { PositionF, PositionI, RectF, RectI } from "vrkit-models"
+import { PositionF, PositionI, RectF, RectI } from "@vrkit-platform/models"
 import type Electron from "electron"
 import { getLogger } from "@3fv/logger-proxy"
 import { asOption } from "@3fv/prelude-ts"

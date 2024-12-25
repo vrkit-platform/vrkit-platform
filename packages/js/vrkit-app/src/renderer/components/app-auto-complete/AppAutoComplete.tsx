@@ -30,7 +30,7 @@ import {
   FlexRow,
   flexAlign,
   FlexScaleZero, FillHeight
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 import type { ChipTypeMap } from "@mui/material/Chip"
 import { isBoolean } from "@3fv/guard"
 import { appTextFieldClasses } from "../app-text-field"

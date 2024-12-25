@@ -4,7 +4,7 @@ import type { LogServerEventData, LogServerRequestMap } from "./LogServerTypes"
 import { assign, defaults, toPlainObject } from "lodash"
 import { Future } from "@3fv/prelude-ts"
 import Debug from "debug"
-import { JSONStringifyAny } from "vrkit-shared"
+import { JSONStringifyAny } from "@vrkit-platform/shared"
 
 
 

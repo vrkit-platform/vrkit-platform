@@ -6,12 +6,12 @@ import React, {
   useMemo,
   useState
 } from "react"
-import { propEqualTo, propNotIn, removeFirstMutation } from "vrkit-shared/utils"
+import { propEqualTo, propNotIn, removeFirstMutation } from "@vrkit-platform/shared/utils"
 import { get } from "lodash/fp"
-import type { Auditable } from "vrkit-shared/models"
+import type { Auditable } from "@vrkit-platform/shared/models"
 import { first } from "lodash"
 import { getLogger } from "@3fv/logger-proxy"
-import { isModelUpdated } from "vrkit-shared/models"
+import { isModelUpdated } from "@vrkit-platform/shared/models"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log

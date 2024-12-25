@@ -11,7 +11,7 @@ const log = Tracer.colorConsole()
 const buildDir = Path.resolve(__dirname)
 const rootDir = Path.resolve(buildDir, ".."),
     jsDir = Path.join(rootDir,"packages","js"),
-    jsSharedDir = Path.join(jsDir,"vrkit-shared"),
+    jsSharedDir = Path.join(jsDir,"@vrkit-platform/shared"),
     jsSharedSrcDir = Path.join(jsSharedDir,"src")
 
 const allPatterns = () => [

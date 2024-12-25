@@ -1,9 +1,9 @@
-import { SessionData, SessionTiming, SessionType } from "vrkit-models"
+import { SessionData, SessionTiming, SessionType } from "@vrkit-platform/models"
 import type { SessionPlayerId } from "vrkit-native-interop"
 import type {
   ISessionTimeAndDuration,
   SessionInfoMessage
-} from "vrkit-plugin-sdk"
+} from "@vrkit-platform/plugin-sdk"
 import { omit } from "lodash"
 import { toJS } from "mobx"
 

@@ -1,4 +1,4 @@
-import { assert, isNotEmpty } from "vrkit-shared"
+import { assert, isNotEmpty } from "@vrkit-platform/shared"
 import { getLogger } from "@3fv/logger-proxy"
 
 const log = getLogger(__filename)
@@ -24,4 +24,4 @@ export enum AppDialogType {
 
 export type AppDialogTypeKind = AppDialogType | `${AppDialogType}`
 
-export * from "vrkit-shared"
+export * from "@vrkit-platform/shared"

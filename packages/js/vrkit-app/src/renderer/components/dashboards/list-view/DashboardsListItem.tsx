@@ -11,7 +11,7 @@ import Box from "@mui/material/Box"
 import { useTheme } from "@mui/material/styles"
 import clsx from "clsx"
 import { AppFAIcon, AppIcon } from "../../app-icon"
-import { DashboardConfig, PluginComponentDefinition, Timestamp } from "vrkit-models"
+import { DashboardConfig, PluginComponentDefinition, Timestamp } from "@vrkit-platform/models"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { AppSettingsClient } from "../../../services/app-settings-client"
@@ -20,7 +20,7 @@ import {
   PluginCompEntry,
   sharedAppSelectors
 } from "../../../services/store/slices/shared-app"
-import { decodeSvgFromUri, hasProp, isNotEmpty, isNotEmptyString, isSvgUri, propEqualTo } from "vrkit-shared"
+import { decodeSvgFromUri, hasProp, isNotEmpty, isNotEmptyString, isSvgUri, propEqualTo } from "@vrkit-platform/shared"
 import Alerts from "../../../services/alerts"
 import {
   alpha,
@@ -40,7 +40,7 @@ import {
   OverflowHidden,
   padding,
   rem
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 
 import Paper from "@mui/material/Paper"
 import Typography from "@mui/material/Typography"

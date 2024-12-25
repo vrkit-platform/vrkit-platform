@@ -10,7 +10,7 @@ import {
   FlexScaleZero, hasCls,
   OverflowAuto,
   OverflowHidden
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 
 const appContentClassPrefix = "AppContent"
 const appContentClasses = createClassNames(appContentClassPrefix, "root", "top", "bottom", "left", "center", "right")

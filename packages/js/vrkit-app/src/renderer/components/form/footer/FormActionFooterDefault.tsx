@@ -1,5 +1,5 @@
 import { Box, Button, useTheme } from "@mui/material"
-import { FlexAuto, FlexRowCenter, padding } from "vrkit-shared-ui/styles"
+import { FlexAuto, FlexRowCenter, padding } from "@vrkit-platform/shared-ui/styles"
 import { isEmpty } from "lodash"
 import React from "react"
 import FormActionFooter, { FormActionFooterProps } from "./FormActionFooter"

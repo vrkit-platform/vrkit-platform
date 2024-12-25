@@ -22,7 +22,7 @@ import {
   FlexColumnBox,
   FlexRowCenter,
   hasCls
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import ListItemButton from "@mui/material/ListItemButton"
 import ListItemText from "@mui/material/ListItemText"
 import { useLocation, useMatch, useNavigate } from "react-router-dom"

@@ -1,8 +1,8 @@
 // ----------------------------------------------------------------------
 
 import { isNumber, isString } from "@3fv/guard"
-import { alpha, px } from "vrkit-shared-ui"
-import { isEmpty, isNotEmpty } from "vrkit-shared"
+import { alpha, px } from "@vrkit-platform/shared-ui"
+import { isEmpty, isNotEmpty } from "@vrkit-platform/shared"
 import { asOption } from "@3fv/prelude-ts"
 export const stylesMode = {
   light: '[data-mui-color-scheme="light"] &',

@@ -27,10 +27,10 @@ import {
   FlexScaleZero,
   EllipsisBox,
   FlexProperties, HeightProperties
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import AppBreadcrumbs from "../app-breadcrumbs"
 import { usePageMetadata } from "../page-metadata"
-import { isEmpty } from "vrkit-shared"
+import { isEmpty } from "@vrkit-platform/shared"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

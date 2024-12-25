@@ -1,6 +1,6 @@
 import { getLogger } from "@3fv/logger-proxy"
-import { Menu, MenuItem } from "vrkit-shared"
-import { Bind } from "vrkit-shared"
+import { Menu, MenuItem } from "@vrkit-platform/shared"
+import { Bind } from "@vrkit-platform/shared"
 import Electron, { nativeImage } from "electron"
 import { P, match } from "ts-pattern"
 import { isFunction } from "@3fv/guard"

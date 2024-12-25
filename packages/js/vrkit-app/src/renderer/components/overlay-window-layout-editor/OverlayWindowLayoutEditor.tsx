@@ -25,16 +25,16 @@ import {
   hasCls, important,
   paddingRem,
   transition
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 
-import { ClassNamesKey, createClassNames } from "vrkit-shared-ui"
+import { ClassNamesKey, createClassNames } from "@vrkit-platform/shared-ui"
 import clsx from "clsx"
-import { FlexRowCenterBox } from "vrkit-shared-ui"
+import { FlexRowCenterBox } from "@vrkit-platform/shared-ui"
 import { useService } from "../service-container"
 import { OverlayManagerClient } from "../../services/overlay-client"
 import Typography from "@mui/material/Typography"
 import SharedAppStateClient from "../../services/shared-app-state-client"
-import { SizeI } from "vrkit-models"
+import { SizeI } from "@vrkit-platform/models"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import { useAppSelector } from "../../services/store"
 import { darken } from "@mui/material"

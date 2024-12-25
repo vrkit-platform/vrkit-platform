@@ -1,4 +1,5 @@
 // REACT
+
 import React from "react"
 
 // CLSX
@@ -19,7 +20,7 @@ const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const classPrefix = "{{camelCase name}}"
-export const {{camelCase name}}Classes = createClassNames(classPrefix, "root", "child1")
+export const {{camelCase name}}Classes = createClassNames(classPrefix, "root", "content")
 const classes = {{camelCase name}}Classes
 
 export type {{name}}ClassKey = ClassNamesKey<typeof {{camelCase name}}Classes>
@@ -28,11 +29,11 @@ export type {{name}}ClassKey = ClassNamesKey<typeof {{camelCase name}}Classes>
 const {{name}}Root = styled(Box, {
   name: "{{name}}Root",
   label: "{{name}}Root"
-})(({theme}) => ({
+})(({theme: {dimen,palette, shape, customShadows, shadows, components, colors, transitions, typography, insetShadows, mixins, zIndex, spacing }}) => ({
   // root styles here
   [hasCls({{camelCase name}}Classes.root)]: {
     // child styled here
-    [child({{camelCase name}}Classes.child1)]: {
+    [child({{camelCase name}}Classes.content)]: {
       // child styled here
     }
   }

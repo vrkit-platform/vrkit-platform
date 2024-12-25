@@ -17,7 +17,7 @@ const vrkAppDir = Path.resolve(dirname, "..")
 const rootDir = Path.resolve(vrkAppDir, "..", "..", "..")
 const pkgsDir = Path.join(rootDir, "packages", "js")
 
-const vrkSharedDir = Path.join(pkgsDir, "vrkit-shared")
+const vrkSharedDir = Path.join(pkgsDir, "@vrkit-platform/shared")
 const vrkSharedSrcDir = Path.join(vrkSharedDir, "src")
 
 

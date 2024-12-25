@@ -13,7 +13,7 @@
 import "./prepareElectronMain"
 
 import { app } from "electron"
-import { importDefault } from "vrkit-shared"
+import { importDefault } from "@vrkit-platform/shared"
 import { getLogger } from "@3fv/logger-proxy"
 import * as ElectronRemote from "@electron/remote/main"
 import { isPromise } from "@3fv/guard"

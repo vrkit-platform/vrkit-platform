@@ -1,4 +1,4 @@
-import type { RectF, RectI, SizeI, VRLayout } from "vrkit-models"
+import type { RectF, RectI, SizeI, VRLayout } from "@vrkit-platform/models"
 import { GetNativeExports } from "./NativeBinding"
 
 export interface NativeOverlayWindowResourceInfo {

@@ -1,5 +1,5 @@
-import { OverlayConfig } from "vrkit-models"
-import type { IPluginClientEventArgs, PluginClientEventType } from "vrkit-plugin-sdk"
+import { OverlayConfig } from "@vrkit-platform/models"
+import type { IPluginClientEventArgs, PluginClientEventType } from "@vrkit-platform/plugin-sdk"
 
 export enum OverlayWindowRole {
   NONE = "NONE",

@@ -21,7 +21,7 @@ import {
   hasCls,
   CssSelectors,
   Transparent, alpha
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import Button from "@mui/material/Button"
 import Tooltip from "@mui/material/Tooltip"
 import { capitalize } from "lodash"
@@ -31,7 +31,7 @@ import MinimizeIcon from "@mui/icons-material/MinimizeSharp"
 import MaximizeIcon from "@mui/icons-material/CropSquareSharp"
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core"
 import { ipcRenderer } from "electron"
-import { DesktopWindowTrafficLight, ElectronIPCChannel } from "vrkit-shared"
+import { DesktopWindowTrafficLight, ElectronIPCChannel } from "@vrkit-platform/shared"
 import { AppIconButton } from "../../app-icon-button"
 import { AppFAIcon } from "../../app-icon"
 

@@ -1,4 +1,4 @@
-import { SizeF, SizeI } from "vrkit-models"
+import { SizeF, SizeI } from "@vrkit-platform/models"
 import { isEqual } from "../ObjectUtil"
 import { pick } from "lodash"
 

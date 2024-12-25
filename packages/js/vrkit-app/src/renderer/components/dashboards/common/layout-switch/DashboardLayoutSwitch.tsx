@@ -1,5 +1,5 @@
 import { getLogger } from "@3fv/logger-proxy"
-import { child, ClassNamesKey, createClassNames, flexAlign, FlexAuto, FlexColumnCenter, hasCls } from "vrkit-shared-ui"
+import { child, ClassNamesKey, createClassNames, flexAlign, FlexAuto, FlexColumnCenter, hasCls } from "@vrkit-platform/shared-ui"
 import { styled } from "@mui/material/styles"
 import { faDesktop, faVrCardboard } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
 import Box from "@mui/material/Box"

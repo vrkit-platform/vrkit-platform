@@ -13,7 +13,7 @@ import type {BoxProps} from "@mui/material/Box"
 import { styled } from "@mui/material/styles"
 
 // APP
-import { ClassNamesKey, createClassNames, child } from "vrkit-shared-ui/styles"
+import { ClassNamesKey, createClassNames, child } from "@vrkit-platform/shared-ui/styles"
 import { Divider, DividerProps } from "@mui/material"
 
 const log = getLogger(__filename)

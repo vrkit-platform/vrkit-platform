@@ -39,13 +39,13 @@ import {
   padding,
   PositionRelative,
   widthConstraint
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import { PluginCompEntry } from "../../../services/store/slices/shared-app"
 
-import { OverlayInfo, PluginUserSetting, PluginUserSettingType, PluginUserSettingValue } from "vrkit-models"
+import { OverlayInfo, PluginUserSetting, PluginUserSettingType, PluginUserSettingValue } from "@vrkit-platform/models"
 import { match } from "ts-pattern"
 
-import { assign, assignDeep, defaults, isEmpty, isNotEmptyString } from "vrkit-shared"
+import { assign, assignDeep, defaults, isEmpty, isNotEmptyString } from "@vrkit-platform/shared"
 import Alerts from "../../../services/alerts"
 import { asOption } from "@3fv/prelude-ts"
 import TextField from "@mui/material/TextField"

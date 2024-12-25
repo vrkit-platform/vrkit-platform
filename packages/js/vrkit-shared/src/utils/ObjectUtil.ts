@@ -33,7 +33,7 @@ export type PrimitiveName = "number" | "boolean" | "string" | "undefined" | "nul
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
-export const defaults = _defaults as <T>(target: T, values: Partial<T>) => T
+export const defaults = _defaults as <T>(target: T, values: Partial<T>) => Required<T>
 
 export type DefaultProducer<T, K> = K extends keyof T ? () => T[K] : never
 

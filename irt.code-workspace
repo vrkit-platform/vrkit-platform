@@ -1,8 +1,15 @@
 {
 	"folders": [
 		{
-			"name": "irt",
-			"path": ".",			
+			"name": "vrkit-platform",
+			"path": "."
+		},
+		{
+			"name": "vrkit-plugin-leaderboard",
+			"path": "../vrkit-plugin-leaderboard"
+		},
+		{
+			"path": "../vrkit-plugin-manifest"
 		}
 	],
 	

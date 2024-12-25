@@ -1,14 +1,14 @@
 // noinspection HtmlUnknownAttribute
 
-import "vrkit-plugin-sdk"
+import "@vrkit-platform/plugin-sdk"
 import Box, { BoxProps } from "@mui/material/Box"
 
 import { getLogger } from "@3fv/logger-proxy"
 
-import { createClassNames } from "vrkit-shared-ui"
-import { IPluginComponentProps } from "vrkit-plugin-sdk"
+import { createClassNames } from "@vrkit-platform/shared-ui"
+import { IPluginComponentProps } from "@vrkit-platform/plugin-sdk"
 import React from "react"
-import { EllipsisBox, FlexColumnBox, FlexRowBox, FlexRowCenterBox } from "vrkit-shared-ui"
+import { EllipsisBox, FlexColumnBox, FlexRowBox, FlexRowCenterBox } from "@vrkit-platform/shared-ui"
 import clsx from "clsx"
 import { darken, lighten, styled, useTheme } from "@mui/material/styles"
 import {
@@ -23,14 +23,14 @@ import {
   OverflowHidden,
   padding,
   rem
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import { useAppSelector } from "../../services/store"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import Paper, { PaperProps } from "@mui/material/Paper"
 import Typography, { TypographyProps } from "@mui/material/Typography"
 import { isNumber } from "@3fv/guard"
-import { OverlayKind } from "vrkit-models"
-import { OverlayVREditorPropertyName } from "vrkit-shared"
+import { OverlayKind } from "@vrkit-platform/models"
+import { OverlayVREditorPropertyName } from "@vrkit-platform/shared"
 import { match } from "ts-pattern"
 import Icon from "../../components/app-icon"
 import {
@@ -38,7 +38,7 @@ import {
   faUpDownLeftRight
 } from "@awesome.me/kit-79150a3eed/icons/sharp/light"
 import { Kbd } from "../../components/keyboard-key"
-import { isNotEmpty } from "vrkit-shared"
+import { isNotEmpty } from "@vrkit-platform/shared"
 import { asOption } from "@3fv/prelude-ts"
 
 const log = getLogger(__filename)

@@ -11,7 +11,7 @@ import {
   FlexScaleZeroBox,
   padding,
   rem
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import HelmetLogoSVGRaw from "!!raw-loader!assets/images/logo/helmet-logo.svg"
 import Typography from "@mui/material/Typography"
 // ----------------------------------------------------------------------

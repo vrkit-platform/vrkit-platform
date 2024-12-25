@@ -9,7 +9,7 @@ import {
   importDefault,
   isNotEmpty,
   OverlayManagerClientEventHandler
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 import {
@@ -18,8 +18,8 @@ import {
   IPluginComponentFactory,
   IPluginComponentProps,
   TPluginComponentType
-} from "vrkit-plugin-sdk"
-import { OverlayConfig, OverlayKind, PluginComponentDefinition, PluginInstall } from "vrkit-models"
+} from "@vrkit-platform/plugin-sdk"
+import { OverlayConfig, OverlayKind, PluginComponentDefinition, PluginInstall } from "@vrkit-platform/models"
 import OverlayManagerClient from "./OverlayManagerClient"
 import { asOption } from "@3fv/prelude-ts"
 import TrackManager from "../track-manager"

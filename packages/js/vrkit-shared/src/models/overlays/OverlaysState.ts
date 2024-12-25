@@ -1,4 +1,4 @@
-import { OverlayConfig } from "vrkit-models"
+import { OverlayConfig } from "@vrkit-platform/models"
 import { Props, createSimpleSchema, custom, list, object, primitive } from "serializr"
 import { valuesOf } from "../../utils"
 import { uniq } from "lodash"

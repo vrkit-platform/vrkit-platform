@@ -16,12 +16,12 @@ import {
   Pair,
   removeIfMutation,
   SignalFlag
-} from "vrkit-shared"
-import { DashboardConfig } from "vrkit-models"
+} from "@vrkit-platform/shared"
+import { DashboardConfig } from "@vrkit-platform/models"
 import { getValue, isDefined } from "@3fv/guard"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
-import { AppPaths, FileExtensions } from "vrkit-shared/constants/node"
+import { AppPaths, FileExtensions } from "@vrkit-platform/shared/constants/node"
 import { AppSettingsService } from "../app-settings"
 import Fsx from "fs-extra"
 import { endsWith, get } from "lodash/fp"
@@ -33,7 +33,7 @@ import { MainSharedAppState } from "../store"
 import { action, runInAction, set, toJS } from "mobx"
 import { IDisposer } from "mobx-utils"
 import { assign, defaultsDeep, first } from "lodash"
-import { FileSystemManager } from "vrkit-shared/services/node"
+import { FileSystemManager } from "@vrkit-platform/shared/services/node"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)

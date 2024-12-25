@@ -1,6 +1,6 @@
-import { OverlayWindowRole } from "vrkit-shared"
+import { OverlayWindowRole } from "@vrkit-platform/shared"
 import React from "react"
-import type { IPluginComponentProps } from "vrkit-plugin-sdk"
+import type { IPluginComponentProps } from "@vrkit-platform/plugin-sdk"
 
 export interface OverlayWindowState {
   windowRole: OverlayWindowRole

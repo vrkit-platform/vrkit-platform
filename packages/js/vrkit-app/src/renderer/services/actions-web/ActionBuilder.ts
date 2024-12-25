@@ -11,12 +11,12 @@ import {
   CommonKeys,
   GlobalKeys,
   isCommonKey
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import { assert, getValue, isFunction, isString } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
 import { assign, first } from "lodash"
 import { isHTMLElement, isInputElement } from "../../utils"
-import { arrayOf, isNotEmpty } from "vrkit-shared"
+import { arrayOf, isNotEmpty } from "@vrkit-platform/shared"
 import { getLogger } from "@3fv/logger-proxy"
 
 const log = getLogger(__filename)

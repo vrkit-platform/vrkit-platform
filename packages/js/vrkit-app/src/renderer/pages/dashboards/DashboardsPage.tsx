@@ -12,7 +12,7 @@ import {
   hasCls,
   OverflowVisible,
   PositionRelative
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import clsx from "clsx"
 import { getLogger } from "@3fv/logger-proxy"
 

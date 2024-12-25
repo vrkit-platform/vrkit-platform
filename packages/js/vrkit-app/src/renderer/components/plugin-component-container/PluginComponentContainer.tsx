@@ -9,9 +9,9 @@ import { getLogger } from "@3fv/logger-proxy"
 // MUI
 
 // APP
-import { ClassNamesKey, createClassNames } from "vrkit-shared-ui"
-import { IPluginComponentProps, PluginClientEventType, type SessionInfoMessage } from "vrkit-plugin-sdk"
-import { Bind } from "vrkit-shared"
+import { ClassNamesKey, createClassNames } from "@vrkit-platform/shared-ui"
+import { IPluginComponentProps, PluginClientEventType, type SessionInfoMessage } from "@vrkit-platform/plugin-sdk"
+import { Bind } from "@vrkit-platform/shared"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

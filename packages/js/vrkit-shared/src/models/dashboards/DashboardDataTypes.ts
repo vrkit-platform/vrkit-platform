@@ -4,13 +4,13 @@ import {
   OverlayConfig,
   SessionDataVariableValueMap,
   SessionTiming
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 
 // ------ OverlayManager events & types
 
 // ------ OverlayManager events & types
 
-// import type { DashboardConfig } from "vrkit-models"
+// import type { DashboardConfig } from "@vrkit-platform/models"
 
 export interface DashboardsState {
   configs: DashboardConfig[]

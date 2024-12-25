@@ -2,7 +2,7 @@ import React from "react"
 import type { MenuItemProps as MuiMenuItemProps } from "@mui/material"
 import { Box, MenuItem, Typography } from "@mui/material"
 import { styled } from "@mui/material/styles"
-import { Ellipsis, flexAlign, FlexRow, FlexScaleZero } from "vrkit-shared-ui/styles"
+import { Ellipsis, flexAlign, FlexRow, FlexScaleZero } from "@vrkit-platform/shared-ui/styles"
 
 const MenuItemContent = styled(Box)(({ theme }) => ({
   ...FlexRow,

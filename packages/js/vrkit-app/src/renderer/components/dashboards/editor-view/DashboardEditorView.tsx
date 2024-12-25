@@ -26,9 +26,9 @@ import {
   OverflowAuto,
   OverflowHidden,
   padding
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import { isDefined } from "@3fv/guard"
-import { DashboardConfig } from "vrkit-models"
+import { DashboardConfig } from "@vrkit-platform/models"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { FormikContextType } from "formik"

@@ -5,7 +5,7 @@ import { buttonClasses } from '@mui/material/Button';
 import { loadingButtonClasses } from '@mui/lab/LoadingButton';
 
 import { appAlpha, stylesMode } from '../../styles';
-import { padding, rem } from "vrkit-shared-ui"
+import { padding, rem } from "@vrkit-platform/shared-ui"
 
 // ----------------------------------------------------------------------
 

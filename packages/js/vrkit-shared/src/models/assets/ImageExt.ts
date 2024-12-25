@@ -1,6 +1,6 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { urlProtocolEquals } from "../../utils"
-import { Image, ImageType } from "vrkit-models"
+import { Image, ImageType } from "@vrkit-platform/models"
 
 import { getValue } from "@3fv/guard"
 

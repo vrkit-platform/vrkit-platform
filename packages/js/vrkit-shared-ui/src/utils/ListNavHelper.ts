@@ -1,4 +1,4 @@
-import { isNotEmpty } from "vrkit-shared/utils"
+import { isNotEmpty } from "@vrkit-platform/shared/utils"
 import { ownerDocument } from "@mui/material"
 import React, { HTMLAttributes, useMemo } from "react"
 import { defaults } from "lodash"

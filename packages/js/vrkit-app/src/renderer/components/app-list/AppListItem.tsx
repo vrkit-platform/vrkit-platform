@@ -19,7 +19,7 @@ import {
   OverflowHidden,
   PositionRelative,
   rem
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 import { getLogger } from "@3fv/logger-proxy"
 import clsx from "clsx"
 

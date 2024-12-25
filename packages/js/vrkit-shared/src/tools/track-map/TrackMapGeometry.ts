@@ -24,7 +24,7 @@ TrackMap ScaleTrackMapToFit(const TrackMap &trackMap, const Size<UINT> &size) {
 }
 */
 
-import { LapCoordinate, SizeF, TrackMap } from "vrkit-models"
+import { LapCoordinate, SizeF, TrackMap } from "@vrkit-platform/models"
 import { Size } from "../CoordinateMathConstants"
 
 export interface ScaleTrackMapToFitConfig {

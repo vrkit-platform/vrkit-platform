@@ -1,4 +1,4 @@
-import type { ErrorKind, Pair } from "vrkit-shared/utils"
+import type { ErrorKind, Pair } from "@vrkit-platform/shared/utils"
 import type { ToastOptions } from "react-hot-toast"
 
 export interface AlertOptions extends ToastOptions {

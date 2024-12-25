@@ -4,7 +4,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import Button, { ButtonProps } from "@mui/material/Button"
 import { styled } from "@mui/material/styles"
 // APP
-import { ClassNamesKey, createClassNames } from "vrkit-shared-ui/styles"
+import { ClassNamesKey, createClassNames } from "@vrkit-platform/shared-ui/styles"
 import React from "react"
 
 const log = getLogger(__filename)

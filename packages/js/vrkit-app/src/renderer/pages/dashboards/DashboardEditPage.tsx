@@ -11,15 +11,15 @@ import {
   FlexRow,
   hasCls,
   PositionRelative
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import clsx from "clsx"
 import { getLogger } from "@3fv/logger-proxy"
 import { useAppSelector } from "../../services/store"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import { useModelEditorContextProvider } from "../../components/model-editor-context"
-import { DashboardConfig } from "vrkit-models"
+import { DashboardConfig } from "@vrkit-platform/models"
 import { useParams } from "react-router"
-import { isNotEmpty, propEqualTo } from "vrkit-shared"
+import { isNotEmpty, propEqualTo } from "@vrkit-platform/shared"
 import { asOption } from "@3fv/prelude-ts"
 import { useNavigate } from "react-router-dom"
 import { WebPaths } from "../../routes/WebPaths"

@@ -8,7 +8,7 @@ import Fs from "node:fs"
 import EventEmitter3 from "eventemitter3"
 
 import Path from "path"
-import { FileInfo, millisToTimestamp } from "vrkit-models"
+import { FileInfo, millisToTimestamp } from "@vrkit-platform/models"
 import { FileObject } from "./FileObject"
 import type { JsonObject } from "type-fest"
 import JSON5 from "json5"

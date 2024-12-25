@@ -28,7 +28,7 @@ import {
   hasCls,
   margin,
   rem
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 import { FormikContextType, useFormikContext } from "formik"
 import { capitalize } from "lodash"
 import { interceptEvent } from "../../utils/dom"

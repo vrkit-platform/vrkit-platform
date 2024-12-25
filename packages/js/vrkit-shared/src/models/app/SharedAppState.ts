@@ -1,5 +1,5 @@
 import { OverlaysState } from "../overlays"
-import { AppSettings } from "vrkit-models"
+import { AppSettings } from "@vrkit-platform/models"
 import { DevSettings } from "./DevSettings"
 import { DashboardsState } from "../dashboards"
 import { SessionsState } from "../sessions"

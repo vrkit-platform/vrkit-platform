@@ -1,5 +1,5 @@
-import { assign, Pair, RectangleLayoutTool } from "vrkit-shared"
-import { OverlayAnchor, PositionF, PositionI, RectF, RectI, SizeF, SizeI } from "vrkit-models"
+import { assign, Pair, RectangleLayoutTool } from "@vrkit-platform/shared"
+import { OverlayAnchor, PositionF, PositionI, RectF, RectI, SizeF, SizeI } from "@vrkit-platform/models"
 import { screen } from "electron"
 import { asOption } from "@3fv/prelude-ts"
 import { flow } from "lodash"

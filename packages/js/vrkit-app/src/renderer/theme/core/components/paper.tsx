@@ -1,7 +1,7 @@
 import type { Theme, Components } from '@mui/material/styles';
 
 import { appAlpha } from '../../styles';
-import { important } from "vrkit-shared-ui"
+import { important } from "@vrkit-platform/shared-ui"
 
 // ----------------------------------------------------------------------
 

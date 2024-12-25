@@ -31,7 +31,7 @@ import {
   rem,
   widthConstraint,
   WidthProperties
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import clsx from "clsx"
 import DownIcon from "@mui/icons-material/ArrowDownwardSharp"
 import CircleIcon from "@mui/icons-material/CircleSharp"
@@ -41,9 +41,9 @@ import { match, P } from "ts-pattern"
 import { getLogger } from "@3fv/logger-proxy"
 import { SessionManagerClient } from "../../services/session-manager-client"
 import { useService } from "../service-container"
-import type { ActiveSessionType, SessionDetail } from "vrkit-shared"
+import type { ActiveSessionType, SessionDetail } from "@vrkit-platform/shared"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
-import { ISessionTimeAndDuration } from "vrkit-plugin-sdk"
+import { ISessionTimeAndDuration } from "@vrkit-platform/plugin-sdk"
 import Typography from "@mui/material/Typography"
 
 const log = getLogger(__filename)

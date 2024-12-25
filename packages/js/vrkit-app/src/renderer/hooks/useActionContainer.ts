@@ -5,7 +5,7 @@ import {
   ActionRegistry,
   ActionOptions,
   Action
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import { get } from "lodash/fp"
 
 import { useEffect, useMemo, useRef, useState } from "react"

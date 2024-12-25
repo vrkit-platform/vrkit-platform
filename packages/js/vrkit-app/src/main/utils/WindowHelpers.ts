@@ -7,7 +7,7 @@ import {
   type WindowOpenHandlerResponse
 } from "electron"
 import iconPng from "!!url-loader!assets/images/logo/helmet-logo.png"
-import { ElectronIPCChannelKind } from "vrkit-shared"
+import { ElectronIPCChannelKind } from "@vrkit-platform/shared"
 import { isFunction } from "@3fv/guard"
 
 export const AppIconImage = nativeImage.createFromDataURL(iconPng)

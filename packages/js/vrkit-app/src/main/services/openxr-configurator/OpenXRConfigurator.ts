@@ -2,8 +2,8 @@ import WinReg, { RegistryItem } from "winreg"
 import { getLogger } from "@3fv/logger-proxy"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 
-import { assert, Disposables,  isArray } from "vrkit-shared"
-import { FindPathInTree } from "vrkit-shared/utils/node"
+import { assert, Disposables,  isArray } from "@vrkit-platform/shared"
+import { FindPathInTree } from "@vrkit-platform/shared/utils/node"
 import PQueue from "p-queue"
 import { isDev } from "../../constants"
 

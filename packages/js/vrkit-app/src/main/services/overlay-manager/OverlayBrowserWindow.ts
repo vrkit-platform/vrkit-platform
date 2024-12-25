@@ -1,7 +1,7 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { BrowserWindow, BrowserWindowConstructorOptions, IpcMainInvokeEvent, WebPreferences } from "electron"
-import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "vrkit-models"
-import { isDev } from "vrkit-shared"
+import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "@vrkit-platform/models"
+import { isDev } from "@vrkit-platform/shared"
 import { Deferred } from "@3fv/deferred"
 import {
   isEditorInfoOUID,
@@ -13,7 +13,7 @@ import {
   OverlayManagerClientFnTypeToIPCName,
   OverlaySpecialIds,
   OverlayWindowRole
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
 import type OverlayManager from "./OverlayManager"
 import { asOption, Option } from "@3fv/prelude-ts"

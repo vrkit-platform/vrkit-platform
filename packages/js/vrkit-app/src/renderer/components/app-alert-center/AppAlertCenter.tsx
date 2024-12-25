@@ -18,7 +18,7 @@ import {
   OverflowHidden,
   PositionAbsolute,
   rem
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 import { AlertType } from "../../services/alerts"
 import { styled } from "@mui/material/styles"
 import { Box, Button, IconButton, useTheme } from "@mui/material"

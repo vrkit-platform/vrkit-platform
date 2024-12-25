@@ -3,20 +3,20 @@ import { getLogger } from "@3fv/logger-proxy"
 import Fs from "fs-extra"
 
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind, IAppStorage } from "vrkit-shared"
+import { Bind, IAppStorage } from "@vrkit-platform/shared"
 import {
   type IAppFiles,
   type IAppPaths,
   isDev
 } from "../../renderer-constants"
 import EventEmitter3 from "eventemitter3"
-import { FileObject, FileSystemManager } from "vrkit-shared/services/node"
-import { FileInfo, LapTrajectory, TrackMapFile } from "vrkit-models"
+import { FileObject, FileSystemManager } from "@vrkit-platform/shared/services/node"
+import { FileInfo, LapTrajectory, TrackMapFile } from "@vrkit-platform/models"
 import Path from "path"
 import { Deferred } from "@3fv/deferred"
 import { endsWith } from "lodash/fp"
 import { isString } from "@3fv/guard"
-import { LapTrajectoryConverter } from "vrkit-shared"
+import { LapTrajectoryConverter } from "@vrkit-platform/shared"
 import { uniqBy } from "lodash"
 import { SharedAppStateClient } from "../shared-app-state-client"
 

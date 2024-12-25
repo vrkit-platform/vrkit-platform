@@ -6,7 +6,7 @@ import { mkdir } from "shelljs"
 import contextMenu from "electron-context-menu"
 
 import { asOption } from "@3fv/prelude-ts"
-import { notEqualTo } from "vrkit-shared"
+import { notEqualTo } from "@vrkit-platform/shared"
 
 if (isProd) {
   const sourceMapSupport = require("source-map-support")

@@ -1,4 +1,4 @@
-import { isNotEmpty } from "vrkit-shared/utils"
+import { isNotEmpty } from "@vrkit-platform/shared/utils"
 import { assert, isNumber, isString } from "@3fv/guard"
 import React from "react"
 import { SxProps } from "@mui/system"
@@ -6,7 +6,7 @@ import { Theme, useTheme } from "@mui/material"
 import warning from "warning"
 
 // APP
-import { ClassNamesKey, createClassNames, dimensionConstraints, hasCls, margin } from "vrkit-shared-ui/styles"
+import { ClassNamesKey, createClassNames, dimensionConstraints, hasCls, margin } from "@vrkit-platform/shared-ui/styles"
 import { getLogger } from "@3fv/logger-proxy"
 import { styled } from "@mui/material/styles"
 // import { Icon } from "@taskx/lib-models"
@@ -14,8 +14,8 @@ import clsx from "clsx"
 import { assign, capitalize } from "lodash"
 //import warning from "warning"
 import { asOption } from "@3fv/prelude-ts"
-import { Image } from "vrkit-models"
-import { ImageExt } from "vrkit-shared"
+import { Image } from "@vrkit-platform/models"
+import { ImageExt } from "@vrkit-platform/shared"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

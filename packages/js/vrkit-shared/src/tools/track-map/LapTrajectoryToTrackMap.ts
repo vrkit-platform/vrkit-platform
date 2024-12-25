@@ -15,7 +15,7 @@ import {
   CalculateDistance,
   CoordinateToPixelConverter
 } from "./CoordinateToPixelConverter"
-import { LapCoordinate, LapTrajectory, TrackMap } from "vrkit-models"
+import { LapCoordinate, LapTrajectory, TrackMap } from "@vrkit-platform/models"
 
 
 export interface LapCoordinateStep {

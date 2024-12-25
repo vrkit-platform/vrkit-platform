@@ -2,7 +2,7 @@ import { padStart, range } from "lodash"
 import { add } from "lodash/fp"
 import { darken, lighten } from "@mui/material/styles"
 import type { Theme } from "./ThemeTypes"
-import { linearGradient } from "vrkit-shared-ui"
+import { linearGradient } from "@vrkit-platform/shared-ui"
 import { createPaletteChannel } from "./styles"
 
 export const darkPrimaryAndSecondaryPalettes = {

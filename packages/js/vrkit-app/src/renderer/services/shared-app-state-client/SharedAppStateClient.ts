@@ -3,8 +3,8 @@ import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
 import {
   ISharedAppState, isValueSchema,
   SharedAppStateLeafSchemas
-} from "vrkit-shared"
-import { Bind, ElectronIPCChannel, type IAppStorage, SharedAppStateSchema } from "vrkit-shared"
+} from "@vrkit-platform/shared"
+import { Bind, ElectronIPCChannel, type IAppStorage, SharedAppStateSchema } from "@vrkit-platform/shared"
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
 import { ipcRenderer, IpcRendererEvent } from "electron"

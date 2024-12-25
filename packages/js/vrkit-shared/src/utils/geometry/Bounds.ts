@@ -1,5 +1,5 @@
 import { asOption } from "@3fv/prelude-ts"
-import { RectF, RectI } from "vrkit-models"
+import { RectF, RectI } from "@vrkit-platform/models"
 import { isDefined, isNumber } from "@3fv/guard"
 import { greaterThan } from "../fp"
 

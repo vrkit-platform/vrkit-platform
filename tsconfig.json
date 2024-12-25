@@ -1,35 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "paths": {
-      "vrkit-models":
-      [  "./packages/js/vrkit-models"],
-      "vrkit-models/*":
-      [  "./packages/js/vrkit-models/src/*"],
-      "vrkit-native-interop":
-      [  "./packages/js/vrkit-native-interop"],
-      "vrkit-native-interop/*":
-      [  "./packages/js/vrkit-native-interop/src/web/*"],
-      "vrkit-plugin-sdk":
-      [  "./packages/js/vrkit-plugin-sdk"],
-      "vrkit-plugin-sdk/*":
-      [  "./packages/js/vrkit-plugin-sdk/src/*"],
-      "vrkit-plugin-internal":
-      [  "./packages/js/vrkit-plugin-internal"],
-      "vrkit-plugin-internal/*":
-      [  "./packages/js/vrkit-plugin-internal/src/*"],
-      "vrkit-shared":
-      [  "./packages/js/vrkit-shared"],
-      
-      "vrkit-shared/*":
-      [  "./packages/js/vrkit-shared/src/*"],
-      "vrkit-shared-ui":
-      [  "./packages/js/vrkit-shared-ui"],
-      "vrkit-shared-ui/styles":
-      [  "./packages/js/vrkit-shared-ui/src/styles"],
-      "vrkit-shared-ui/*":
-      [  "./packages/js/vrkit-shared-ui/src/*"]
-    }
+  
   },
   "references": [
     {

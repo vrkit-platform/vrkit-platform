@@ -19,9 +19,9 @@ import {
   hasCls,
   linearGradient,
   padding
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import ButtonBase, { ButtonBaseProps } from "@mui/material/ButtonBase"
-import { ObjectValuesType, valuesOf } from "vrkit-shared"
+import { ObjectValuesType, valuesOf } from "@vrkit-platform/shared"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

@@ -20,7 +20,7 @@ import {
   heightConstraint,
   OverflowHidden,
   PositionRelative
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import { GlobalCSSClassNames } from "../../renderer-constants"
 import { usePageMetadata } from "../../components/page-metadata"
 

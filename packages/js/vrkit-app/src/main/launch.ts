@@ -5,7 +5,7 @@ import Path from "path"
 import { app, BrowserWindow } from "electron"
 import { createWindowOpenHandler, resolveHtmlPath, windowOptionDefaults } from "./utils"
 
-import { assert, defaults, ISharedAppState, signalFlag } from "vrkit-shared"
+import { assert, defaults, ISharedAppState, signalFlag } from "@vrkit-platform/shared"
 
 import { getLogger } from "@3fv/logger-proxy"
 import { getService } from "./ServiceContainer"

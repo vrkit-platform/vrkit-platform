@@ -10,7 +10,7 @@ import {
   pairOf,
   throwError,
   valuesOf
-} from "vrkit-shared/utils"
+} from "@vrkit-platform/shared/utils"
 // import { printf } from "fast-printf"
 import { AlertType, AlertTypeKind } from "./AlertType"
 import { flow, get, nth } from "lodash/fp"

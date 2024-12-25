@@ -27,7 +27,7 @@ import {
   PositionAbsolute,
   PositionRelative,
   rem
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import {
   AppBuiltinIconComponent,
   AppBuiltinIcons,
@@ -37,12 +37,12 @@ import {
   AppIconProps,
   AppIconRoot
 } from "../app-icon"
-import { UIImageResource } from "vrkit-models"
+import { UIImageResource } from "@vrkit-platform/models"
 import { match } from "ts-pattern"
 import { Predicate } from "@3fv/prelude-ts"
 import { isObject, isString } from "@3fv/guard"
 import { faEdit } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
-import { ImageExt, isEmpty, isURL } from "vrkit-shared"
+import { ImageExt, isEmpty, isURL } from "@vrkit-platform/shared"
 import { capitalize } from "lodash"
 import warning from "warning"
 import { get } from "lodash/fp"

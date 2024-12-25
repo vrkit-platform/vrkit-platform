@@ -46,11 +46,11 @@ import {
   PositionAbsolute,
   PositionRelative,
   rem, transition
-} from "vrkit-shared-ui"
+} from "@vrkit-platform/shared-ui"
 import { PluginCompEntry } from "../../../services/store/slices/shared-app"
 import Paper from "@mui/material/Paper"
 import { AsyncImage } from "../../async-image"
-import { OverlayInfo } from "vrkit-models"
+import { OverlayInfo } from "@vrkit-platform/models"
 import { createShadow } from "../../../theme/styles"
 import ComponentInstanceForm from "./ComponentInstanceForm"
 import { dashboardsListViewClasses } from "../list-view"

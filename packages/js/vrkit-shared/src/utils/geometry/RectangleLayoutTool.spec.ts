@@ -1,5 +1,5 @@
 import "jest"
-import { PositionF, PositionI, RectF, RectI } from "vrkit-models"
+import { PositionF, PositionI, RectF, RectI } from "@vrkit-platform/models"
 import { RectangleLayoutTool } from "./RectangleLayoutTool"
 
 describe("RectangleLayoutTool", () => {

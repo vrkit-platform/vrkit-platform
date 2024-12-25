@@ -15,13 +15,13 @@ import {
   SessionDataVariableValueMap,
   SessionEventData,
   SessionEventType
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 import { getLogger } from "@3fv/logger-proxy"
 import { MessageTypeFromCtor, objectKeysLowerFirstReviver } from "./utils"
 import { GetNativeExports } from "./NativeBinding"
 import { flatten, identity, isEmpty, negate, pick, range } from "lodash"
 
-import type { SessionInfoMessage } from "vrkit-plugin-sdk"
+import type { SessionInfoMessage } from "@vrkit-platform/plugin-sdk"
 import {
   NativeSessionPlayerEventCallback,
   NativeSessionPlayer,

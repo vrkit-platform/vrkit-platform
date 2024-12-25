@@ -1,5 +1,5 @@
-import { SessionDataVariableValueMap, SessionTiming } from "vrkit-models"
-import { SessionPlayerId } from "vrkit-shared"
+import { SessionDataVariableValueMap, SessionTiming } from "@vrkit-platform/models"
+import { SessionPlayerId } from "@vrkit-platform/shared"
 import { SessionPlayer } from "vrkit-native-interop"
 
 export class SessionPlayerContainer {

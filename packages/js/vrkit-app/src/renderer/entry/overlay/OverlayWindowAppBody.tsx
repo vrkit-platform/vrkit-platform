@@ -1,22 +1,22 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import GlobalStyles from "@mui/material/GlobalStyles"
 import { styled, useTheme } from "@mui/material/styles"
-import { SizeI } from "vrkit-models"
+import { SizeI } from "@vrkit-platform/models"
 import { OverlayWindowLayoutEditor } from "../../components/overlay-window-layout-editor"
-import { createClassNames } from "vrkit-shared-ui"
+import { createClassNames } from "@vrkit-platform/shared-ui"
 import { getLogger } from "@3fv/logger-proxy"
 import Box from "@mui/material/Box"
-import { Fill, flexAlign, FlexRow, FlexRowCenter, hasCls, OverflowHidden } from "vrkit-shared-ui"
+import { Fill, flexAlign, FlexRow, FlexRowCenter, hasCls, OverflowHidden } from "@vrkit-platform/shared-ui"
 import { useAppSelector } from "vrkit-app-renderer/services/store"
 import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 import clsx from "clsx"
 import { isObject } from "@3fv/guard"
 import { overlayWindowSelectors } from "../../services/store/slices/overlay-window"
-import { EditorInfoScreenOverlayOUID, EditorInfoVROverlayOUID } from "vrkit-shared"
+import { EditorInfoScreenOverlayOUID, EditorInfoVROverlayOUID } from "@vrkit-platform/shared"
 import {
   PluginComponentContainer
 } from "../../components/plugin-component-container"
-//import { IPluginComponentManager } from "vrkit-plugin-sdk"
+//import { IPluginComponentManager } from "@vrkit-platform/plugin-sdk"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log

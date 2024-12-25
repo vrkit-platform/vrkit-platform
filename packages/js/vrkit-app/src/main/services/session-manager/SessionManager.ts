@@ -1,7 +1,7 @@
 import { getLogger } from "@3fv/logger-proxy"
 
 import { PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind, isEqual, toSessionTimeAndDuration } from "vrkit-shared"
+import { Bind, isEqual, toSessionTimeAndDuration } from "@vrkit-platform/shared"
 
 import {
   GetLiveVRKitSessionPlayer,
@@ -16,7 +16,7 @@ import {
   SessionEventData,
   SessionEventType,
   SessionTiming
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 import {
   ActiveSessionType,
   LiveSessionId,
@@ -30,7 +30,7 @@ import {
   SessionManagerStateSessionKey,
   SessionPlayerId,
   SessionsState
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import { first, flatten, isEmpty, uniq } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
 import EventEmitter3 from "eventemitter3"
@@ -43,7 +43,7 @@ import {
   isNotEmpty, isTrue,
   propEqualTo,
   valuesOf
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import { app, dialog, ipcMain, IpcMainInvokeEvent } from "electron"
 import { get } from "lodash/fp"
 import { Deferred } from "@3fv/deferred"

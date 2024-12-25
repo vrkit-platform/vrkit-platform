@@ -34,9 +34,9 @@ import {
   PositionRelative,
   px,
   rem
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 import { isArray, isBoolean, isString } from "@3fv/guard"
-import { arrayOf, notInList } from "vrkit-shared/utils"
+import { arrayOf, notInList } from "@vrkit-platform/shared/utils"
 import { identity, omit } from "lodash"
 import { AppAutoComplete } from "../app-auto-complete"
 import { SxProps } from "@mui/system"
@@ -45,7 +45,7 @@ import { FormControl, InputLabel, Typography } from "@mui/material"
 import { AutocompleteRenderOptionState } from "@mui/material/Autocomplete/Autocomplete"
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDropDown"
 import { asOption } from "@3fv/prelude-ts"
-import type { ReactChildren } from "vrkit-shared-ui"
+import type { ReactChildren } from "@vrkit-platform/shared-ui"
 import { PopperProps } from "@mui/material/Popper/Popper"
 
 const log = getLogger(__filename)

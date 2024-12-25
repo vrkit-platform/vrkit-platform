@@ -8,7 +8,7 @@ import {
   AppSettings,
   DashboardConfig,
   SessionData, ThemeType
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 import type { SessionDetail, SessionsState } from "../sessions"
 import { toJS } from "mobx"
 import { OverlaysStateSchema } from "../overlays"

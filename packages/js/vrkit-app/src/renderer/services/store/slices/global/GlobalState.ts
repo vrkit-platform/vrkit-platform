@@ -1,4 +1,4 @@
-// import type { AppSettings } from "vrkit-shared"
+// import type { AppSettings } from "@vrkit-platform/shared"
 import type { AppDialogStateValue } from "./AppDialogStateValue"
 
 

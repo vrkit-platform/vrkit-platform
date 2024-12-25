@@ -5,9 +5,9 @@ import * as Path from "path"
 import { getLogger } from "@3fv/logger-proxy"
 import PQueue from "p-queue"
 import * as OS from "node:os"
-import { Identity, isNotEmpty } from "vrkit-shared"
+import { Identity, isNotEmpty } from "@vrkit-platform/shared"
 import { asOption } from "@3fv/prelude-ts"
-import { NativeImageSeqSettings, NativeImageSequenceFormat, NativeImageSequenceFormats } from "vrkit-shared"
+import { NativeImageSeqSettings, NativeImageSequenceFormat, NativeImageSequenceFormats } from "@vrkit-platform/shared"
 
 const log = getLogger(__filename)
 

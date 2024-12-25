@@ -1,12 +1,12 @@
-import type { IPluginComponentProps, IPluginComponentFactory } from "vrkit-plugin-sdk"
+import type { IPluginComponentProps, IPluginComponentFactory } from "@vrkit-platform/plugin-sdk"
 import { Container } from "@3fv/ditsy"
 import {
   PluginComponentDefinition,
   PluginComponentType,
   PluginManifest
-} from "vrkit-models"
+} from "@vrkit-platform/models"
 import { getLogger } from "@3fv/logger-proxy"
-import { importDefault } from "vrkit-shared"
+import { importDefault } from "@vrkit-platform/shared"
 import React from "react"
 
 const log = getLogger(__filename)

@@ -18,7 +18,7 @@ import {
   FlexAuto,
   FlexRow,
   widthConstraint
-} from "vrkit-shared-ui/styles"
+} from "@vrkit-platform/shared-ui/styles"
 import { BoxProps } from "@mui/material/Box"
 
 const log = getLogger(__filename)

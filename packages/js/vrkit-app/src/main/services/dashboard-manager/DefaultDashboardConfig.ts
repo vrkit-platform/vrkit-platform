@@ -1,13 +1,13 @@
-import { DashboardConfig, OverlayBaseSettings, OverlayInfo, OverlayKind } from "vrkit-models"
+import { DashboardConfig, OverlayBaseSettings, OverlayInfo, OverlayKind } from "@vrkit-platform/models"
 import {
   assignDeep,
   defaults,
   generateUUID, isNotEmptyString
-} from "vrkit-shared"
+} from "@vrkit-platform/shared"
 import {
   VRKPluginInternalOverlayClockId,
   VRKPluginInternalOverlayTrackMapId
-} from "vrkit-plugin-sdk"
+} from "@vrkit-platform/plugin-sdk"
 import { getLogger } from "@3fv/logger-proxy"
 
 const log = getLogger(__filename)

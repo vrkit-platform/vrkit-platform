@@ -1,11 +1,22 @@
 {
-  "name": "vrkit-shared-ui",
+  "name": "@vrkit-platform/shared-ui",
   "version": "1.0.0",
-  "description": "",
+  "description": "VRKit Platform Shared UI Library",
   "license": "ISC",
-  "author": "",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "email": "support@3form.ventures",
+    "name": "Jonathan Glanz",
+    "url": "https://github.com/3fv"
+  },
   "type": "module",
   "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "exports": {
     ".": {
       "types": "./lib/index.d.ts",
@@ -23,12 +34,10 @@
   "dependencies": {
     "@mui/styled-engine": "^5.16.12",
     "@protobuf-ts/runtime": "^2.9.4",
-    "vrkit-shared": "1.0.0"
+    "@vrkit-platform/shared": "1.0.0"
   },
   "devDependencies": {
-    "cmake-js": "^7.3.0",
     "@protobuf-ts/plugin": "^2.9.4",
-    "typescript": "^5.5.4",
-    "vrkit-builder-tool": "1.0.0"
+    "typescript": "^5.5.4"
   }
 }

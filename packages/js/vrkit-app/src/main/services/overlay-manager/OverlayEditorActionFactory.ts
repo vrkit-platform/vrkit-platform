@@ -1,6 +1,6 @@
-import { Pair, pairOf } from "vrkit-shared"
+import { Pair, pairOf } from "@vrkit-platform/shared"
 import type { OverlayEditorController } from "./OverlayEditorController"
-import { ActionExecutor } from "vrkit-shared"
+import { ActionExecutor } from "@vrkit-platform/shared"
 import { asOption } from "@3fv/prelude-ts"
 import { getService } from "../../ServiceContainer"
 import type OverlayManager from "./OverlayManager"

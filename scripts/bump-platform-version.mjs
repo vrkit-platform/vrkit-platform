@@ -23,7 +23,7 @@ const
 
 echo`Updating version (${currentVersion} -> ${newVersion}) for vrkit platform: \n${pkgFiles.join("\n")}`
 
-Array(rootPkgFile, ...pkgFiles).forEach(pkgFile => {
+for (const pkgFile of Array(rootPkgFile, ...pkgFiles)) {
   const pkgJson = Fsx.readJSONSync(pkgFile)
   echo`Processing ${pkgFile} (${pkgJson.version} -> ${newVersion})`
   
@@ -40,6 +40,8 @@ Array(rootPkgFile, ...pkgFiles).forEach(pkgFile => {
         })
     })
   
-  // Fsx.writeJSONSync(pkgFile, pkgJson)
-})
+  Fsx.writeJSONSync(pkgFile, pkgJson)
+  await $`git add ${Path.relative(rootDir, pkgFile)}`
+}
 
+await $`git commit -m "bumped version ${currentVersion} -> ${newVersion}"`

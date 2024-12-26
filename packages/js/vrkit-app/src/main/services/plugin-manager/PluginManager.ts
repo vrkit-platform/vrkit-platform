@@ -9,7 +9,10 @@ import {
   PluginsState,
   PluginManagerFnType, PluginManagerFnTypeToIPCName
 } from "@vrkit-platform/shared"
-import {FileSystemManager} from "@vrkit-platform/shared/services/node"
+import {
+  FileSystemManager,
+  unzipFile
+} from "@vrkit-platform/shared/services/node"
 import {AppPaths} from "@vrkit-platform/shared/constants/node"
 import { IObjectDidChange, remove, runInAction, set } from "mobx"
 import SharedAppState from "../store"
@@ -38,7 +41,12 @@ export class PluginManager {
   get state() {
     return this.sharedAppState.plugins
   }
-
+  
+  /**
+   * Update `PluginInstall` in shared state
+   * @param plugins
+   * @private
+   */
   @Bind
   private updatePluginInstalls(...plugins: PluginInstall[]) {
     return runInAction(() => {
@@ -49,8 +57,13 @@ export class PluginManager {
     })
   }
   
+  /**
+   * Download, unzip & install plugin
+   *
+   * @param id
+   */
   @Bind
-  private async installPlugin(id: string): Promise<PluginInstall> {
+  async installPlugin(id: string): Promise<PluginInstall> {
     const manifest = this.state.availablePlugins[id]
     log.assert(!!manifest, `No plugin manifest found for (${id})`)
     
@@ -66,7 +79,6 @@ export class PluginManager {
         downloadDeferred = new Deferred<void>()
     try {
       const downloadReq = net.request(downloadUrl)
-      
       
       downloadReq.on('response', (response) => {
         log.info(`STATUS: ${response.statusCode}, HEADERS: ${JSON.stringify(response.headers)}`)
@@ -99,11 +111,44 @@ export class PluginManager {
     
     log.assert(await Fsx.pathExists(downloadPath), `Downloaded plugin @ ${downloadPath} is missing`)
     
-    return null
+    const
+        pluginDir = Path.join(
+            AppPaths.pluginsDir,
+            Path.basename(downloadPath, ".zip")
+        ),
+        pluginManifestFile = Path.join(pluginDir,"plugin.json5")
+    
+    await Fsx.mkdirp(pluginDir)
+    log.info(`Unziping plugin @ (${downloadPath}) -> (${pluginDir})`)
+    
+    try {
+      await unzipFile(downloadPath, pluginDir)
+      log.assert(await Fsx.pathExists(pluginManifestFile), `Unzip succeeded, but no manifest file found @ ${pluginManifestFile}`)
+    } catch (err) {
+      log.error(`Unzip failed, cleaning up now`, err)
+      await Fsx.rm(pluginDir, {
+        recursive: true,
+        force: true
+      }).catch(cleanupErr => {
+        log.error(`Plugin error cleanup failed`, cleanupErr)
+      })
+      
+      throw err
+    }
+    
+    log.info(`Loading installed plugin ${manifest.name} (${id}) manifest file (${pluginManifestFile})`)
+    const install = await this.loadPlugin(pluginManifestFile)
+    //if (log.isDebugEnabled())
+    log.info(`Loaded PluginInstall ${manifest.name} (${id}) from manifest file (${pluginManifestFile})`, install)
+    
+    log.info(`Registering new PluginInstall ${manifest.name} (${id})`)
+    this.updatePluginInstalls(install)
+    
+    return PluginInstall.toJson(install) as any as PluginInstall
   }
   
   @Bind
-  private async uninstallPlugins(...ids: string[]): Promise<this> {
+  async uninstallPlugins(...ids: string[]): Promise<this> {
     const pluginInstalls = ids.map(id => this.state.plugins[id]).filter(isDefined<PluginInstall>)
     runInAction(() => {
       for (const pluginId of ids) {

@@ -1,12 +1,16 @@
 // noinspection WebpackConfigHighlighting
 
 import { mapValues, toPairs, fromPairs } from "lodash-es"
-import { isDevEnabled, isElectronPackaged } from "./webpack.options.mjs"
+import Path from "path"
+import { isDevEnabled, isElectronPackaged, rootDir } from "./webpack.options.mjs"
+import Fsx from "fs-extra"
 import dot from "dotenv"
 
 // ENV & APP VARIABLES
-const pkgVersion = "1.0.0" // JSON.stringify((await import("../../../package.json").version)
+const pkgVersion = JSON.stringify(Fsx.readJSONSync(Path.join(rootDir,"package.json")).version)
 const envVarsBase = {
+  // NOTE: Webpack automatically defines NODE_ENV
+  // "process.env.NODE_ENV": JSON.stringify(isDevEnabled ? "development" : "production"),
   isDev: JSON.stringify(isDevEnabled),
   ELECTRON_PACKAGED: isElectronPackaged,
   DEBUG: JSON.stringify(isDevEnabled),

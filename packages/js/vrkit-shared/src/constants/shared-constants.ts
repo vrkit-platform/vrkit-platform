@@ -1,7 +1,12 @@
-// import assert from "assert"
-// assert(process.platform === "win32", `VRKit is only usable on Windows 10/11`)
+import { assert } from "../utils"
 
-export const isDev = process.env.NODE_ENV !== "production"
+if (typeof isDev === "undefined") {
+  const g:any = typeof global !== "undefined" ? global : typeof window !== "undefined" ? window : null
+  assert(!!g, "No global found")
+  g["isDev"] = process.env.NODE_ENV !== "production"
+}
+
+export const isDevLocal = isDev
 
 export const isElectron =
     typeof process !== "undefined" && process?.versions?.electron?.length > 0

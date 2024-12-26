@@ -2,18 +2,18 @@ import { Deferred } from "@3fv/deferred"
 import { UPMMainService, upmMainServiceManager } from "@3fv/electron-utility-process-manager/main"
 import Path from "path"
 import type { LogServerRequestMap } from "../LogServerTypes"
-import {
-  LogServerClientAppender
-} from "../LogServerClientAppender"
+import { LogServerClientAppender } from "../LogServerClientAppender"
 import { getLoggingManager } from "@3fv/logger-proxy"
+import { asOption } from "@3fv/prelude-ts"
 
 const log = console,
   entryFile = Path.resolve(__dirname, "..", "main-logserver", "electron-main-logserver.js")
 
 class LogServerMainSetup {
   private readyDeferred_: Deferred<LogServerMainSetup>
-  
+
   private appender_: LogServerClientAppender = null
+
   // private messageClient_: IMessageClient<LogServerRequestMap> = null
   private service_: UPMMainService<LogServerRequestMap> = null
 
@@ -21,7 +21,9 @@ class LogServerMainSetup {
    * Initialize the service & setup the appender for the main process
    */
   private async init() {
-    if (this.readyDeferred_) return this.readyDeferred_.promise
+    if (this.readyDeferred_) {
+      return this.readyDeferred_.promise
+    }
 
     const deferred = (this.readyDeferred_ = new Deferred<LogServerMainSetup>())
     log.info(`Starting LogServerMain utilityProcess`)
@@ -29,7 +31,7 @@ class LogServerMainSetup {
     try {
       this.service_ = await upmMainServiceManager.createService<LogServerRequestMap>("logserver", entryFile)
       this.appender_ = new LogServerClientAppender(this.service_)
-      
+
       log.info(`Adding LogServerClientAppender`, this.appender_)
       getLoggingManager().addAppenders(this.appender_)
       deferred.resolve(this)
@@ -55,6 +57,13 @@ class LogServerMainSetup {
   }
 }
 
-const logServerMain = new LogServerMainSetup()
+const logServerMain = asOption(import.meta?.webpackHot?.data)
+  .map((data: any) => data["logServerMain"] as LogServerMainSetup)
+  .getOrCall(() => new LogServerMainSetup())
 
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.addDisposeHandler(data => {
+    data["logServerMain"] = logServerMain
+  })
+}
 export default logServerMain.whenReady()

@@ -15,7 +15,6 @@ import {
   electronRectangleToRectI,
   
   hasProps,
-  isDev,
   isEditorInfoOUID,
   isEqual,
   isEqualSize,

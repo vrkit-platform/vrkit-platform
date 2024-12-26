@@ -5,7 +5,7 @@ import { FindPackagePath, FindPathInTree } from "../utils/pkg/FindPackagePath"
 import { isNotEmpty } from "../utils/ObjectUtil"
 import { getLogger } from "@3fv/logger-proxy"
 import { isString } from "@3fv/guard"
-import { AppName, isDev } from "./shared-constants"
+import { AppName } from "./shared-constants"
 
 const log = getLogger(__filename)
 

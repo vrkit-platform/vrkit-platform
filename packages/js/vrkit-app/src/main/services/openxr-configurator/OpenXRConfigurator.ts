@@ -5,7 +5,7 @@ import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { assert, Disposables,  isArray } from "@vrkit-platform/shared"
 import { FindPathInTree } from "@vrkit-platform/shared/utils/node"
 import PQueue from "p-queue"
-import { isDev } from "../../constants"
+
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)

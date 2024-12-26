@@ -1,6 +1,7 @@
+import type {} from "@vrkit-platform/shared"
 import { getLogger } from "@3fv/logger-proxy"
 import Bluebird from "bluebird"
-import { isDev } from "../constants"
+
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log

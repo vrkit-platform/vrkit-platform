@@ -20,7 +20,7 @@ import {
 } from "@vrkit-platform/shared"
 import { app, globalShortcut, IpcMainInvokeEvent } from "electron"
 import { flatten, omit, partition } from "lodash"
-import { isDev, ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin } from "../../constants"
+import { ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin } from "../../constants"
 
 import { assert, isDefined, isPromise, isString } from "@3fv/guard"
 import { get } from "lodash/fp"

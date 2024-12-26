@@ -14,7 +14,7 @@ import { ClassConstructorProducer } from "../utils"
 import { match } from "ts-pattern"
 import { asOption } from "@3fv/prelude-ts"
 import { getLogger } from "@3fv/logger-proxy"
-import { kDecoratorDesignType } from "./ReflectConstants"
+import ReflectConstants from "./ReflectConstants"
 
 //import { decorateWithNodeContext } from "./decorateWithNodeContext"
 // import { ModelProperty } from "./ModelProperty"
@@ -211,7 +211,7 @@ export function inferAttributeTypeAndConfig<
 
   const type = asOption(providedType).getOrCall(() => {
     const reflectedType = Reflect.getMetadata(
-      kDecoratorDesignType,
+      ReflectConstants.DesignType,
       target,
       propertyKey
     )

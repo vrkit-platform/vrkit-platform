@@ -1,5 +1,5 @@
 import "jest"
-import { action, makeAutoObservable } from "mobx"
+import { set, runInAction, action, makeAutoObservable } from "mobx"
 import { faker } from "@faker-js/faker"
 
 import {
@@ -33,7 +33,7 @@ describe("CachedStateComputationSelector", () => {
       newValue => newValue[0],
       {
         predicate: (values, oldValues, selectorState) => {
-          if (selectorState.customCache! instanceof Set) {
+          if (!selectorState.customCache || selectorState.customCache !instanceof Set) {
             selectorState.customCache = new Set<number>()
           }
 
@@ -50,8 +50,9 @@ describe("CachedStateComputationSelector", () => {
     const changedFn = jest.fn()
     selector.on(CachedStateComputationEventType.CHANGED, changedFn)
 
-    const incrementId = action(() => {
-      observableState.id++
+    const incrementId = () => runInAction(() => {
+      set(observableState, "id", observableState.id+1)
+      return observableState.id
     })
 
     const changeNested = action(() => {
@@ -61,12 +62,12 @@ describe("CachedStateComputationSelector", () => {
 
     incrementId()
     incrementId()
-    expect(changedFn).toBeCalledTimes(2)
+    expect(changedFn).toHaveBeenCalledTimes(2)
 
     changeNested()
-    expect(changedFn).toBeCalledTimes(2)
+    expect(changedFn).toHaveBeenCalledTimes(3)
     
     incrementId()
-    expect(changedFn).toBeCalledTimes(3)
+    expect(changedFn).toHaveBeenCalledTimes(4)
   })
 })

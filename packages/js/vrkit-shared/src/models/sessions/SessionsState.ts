@@ -87,7 +87,7 @@ export enum SessionManagerFnType {
 }
 
 export type SessionManagerFnIPCName =
-  `SESSION_MANAGER_FN_${SessionManagerEventType}`
+  `SESSION_MANAGER_FN_${SessionManagerFnType}`
 
 export function SessionManagerFnTypeToIPCName(
   type: SessionManagerFnType

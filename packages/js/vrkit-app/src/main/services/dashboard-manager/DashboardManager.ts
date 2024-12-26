@@ -9,7 +9,6 @@ import {
   DashboardsState,
   Disposables,
   inList,
-  isDev,
   isEmpty,
   isNotEmpty, isNotEmptyString,
   notInList,

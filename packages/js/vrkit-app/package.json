@@ -164,7 +164,8 @@
     "webpack-dev-middleware": "^7.3.0",
     "webpack-dev-server": "^5.0.4",
     "webpack-hot-middleware": "^2.26.1",
-    "webpack-merge": "^6.0.1"
+    "webpack-merge": "^6.0.1",
+    "yauzl": "^3.2.0"
   },
   "resolutions": {
     "electron": "31.3.0"

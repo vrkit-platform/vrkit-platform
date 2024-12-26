@@ -31,7 +31,7 @@ import { broadcastToAllWindows, getAppThemeFromSystem, IObserveChange } from "..
 import { AppSettings } from "@vrkit-platform/models"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
 import { serialize } from "serializr"
-import { AutoOpenDevToolsOverride, isDev } from "../../constants"
+import { AutoOpenDevToolsOverride } from "../../constants"
 import type { PartialDeep } from "type-fest"
 import { AppPaths, AppFiles, FileExtensions, type IAppPaths, type IAppStorage, type IAppFiles, type IFileExtensions } from "@vrkit-platform/shared/constants/node"
 import { newDevSettings } from "@vrkit-platform/shared/models/node"

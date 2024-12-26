@@ -1,5 +1,5 @@
 import { app, BrowserWindow, dialog, Menu, MenuItemConstructorOptions } from "electron"
-import { isDev, isMac } from "../../constants"
+import { isMac } from "../../constants"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 import {

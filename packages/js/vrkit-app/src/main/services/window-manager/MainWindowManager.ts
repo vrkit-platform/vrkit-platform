@@ -2,7 +2,6 @@ import { PostConstruct, Singleton } from "@3fv/ditsy"
 import WindowManager from "./WindowManagerService"
 import { app, BrowserWindow, ipcMain } from "electron"
 import EventEmitter3 from "eventemitter3"
-import { isDev } from "../../constants"
 import {
   Bind,
   DesktopWindowTrafficLight,

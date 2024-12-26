@@ -1,5 +1,5 @@
-export const isProd = process.env.NODE_ENV === "production"
-export const isDev = !isProd
+export const isProd = !isDev
+//export const isDev = !isProd
 
 export const isMac = process.platform === "darwin"
 export const isLinux = process.platform === "linux"

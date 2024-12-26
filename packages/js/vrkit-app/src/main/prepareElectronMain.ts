@@ -1,14 +1,9 @@
-import { app, shell } from "electron"
-import { isDev, isProd, RemoteDebugPort } from "./constants"
-import * as Path from "path"
+import type {} from "@vrkit-platform/shared"
+import { app } from "electron"
+import { RemoteDebugPort } from "./constants"
 import { getLogger } from "@3fv/logger-proxy"
-import { mkdir } from "shelljs"
-import contextMenu from "electron-context-menu"
 
-import { asOption } from "@3fv/prelude-ts"
-import { notEqualTo } from "@vrkit-platform/shared"
-
-if (isProd) {
+if (!isDev) {
   const sourceMapSupport = require("source-map-support")
   sourceMapSupport.install()
 }

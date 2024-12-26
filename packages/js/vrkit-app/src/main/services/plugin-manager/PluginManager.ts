@@ -1,7 +1,14 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { PostConstruct, Singleton } from "@3fv/ditsy"
-
-import { Bind, Disposables, isNotEmpty, isTrue, PluginsState } from "@vrkit-platform/shared"
+import Fsx from "fs-extra"
+import {
+  Bind,
+  Disposables,
+  isNotEmpty,
+  isTrue,
+  PluginsState,
+  PluginManagerFnType, PluginManagerFnTypeToIPCName
+} from "@vrkit-platform/shared"
 import {FileSystemManager} from "@vrkit-platform/shared/services/node"
 import {AppPaths} from "@vrkit-platform/shared/constants/node"
 import { IObjectDidChange, remove, runInAction, set } from "mobx"
@@ -14,7 +21,10 @@ import Path from "path"
 import { flatten, uniq } from "lodash"
 import { isDefined, isPromise } from "@3fv/guard"
 import FastGlob from "fast-glob"
-import { isDev } from "../../constants"
+import { app, net, ipcMain, IpcMainInvokeEvent } from "electron"
+import { Deferred } from "@3fv/deferred"
+
+
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -38,16 +48,98 @@ export class PluginManager {
       return this
     })
   }
-
+  
   @Bind
-  private removePluginInstalls(...ids: string[]) {
-    return runInAction(() => {
+  private async installPlugin(id: string): Promise<PluginInstall> {
+    const manifest = this.state.availablePlugins[id]
+    log.assert(!!manifest, `No plugin manifest found for (${id})`)
+    
+    const tmpDir = await Fsx.mkdtemp(`vrkit-plugin-install-${id}-`),
+      {
+        overview: { downloadUrl }
+      } = manifest
+    
+    log.info(`Downloading plugin (${manifest.name}) @ ${downloadUrl}`)
+    const
+        downloadPath = Path.join(tmpDir, `${id}.zip`),
+        downloadFile = await Fs.promises.open(downloadPath,'wb'),
+        downloadDeferred = new Deferred<void>()
+    try {
+      const downloadReq = net.request(downloadUrl)
+      
+      
+      downloadReq.on('response', (response) => {
+        log.info(`STATUS: ${response.statusCode}, HEADERS: ${JSON.stringify(response.headers)}`)
+        response.on('error', (err: Error) => {
+          log.error(`Download (${downloadUrl}) failed`, err)
+          downloadDeferred.reject(err)
+        })
+        response.on('data', (chunk) => {
+          log.debug(`chunk received (${chunk.length}) bytes`)
+          downloadFile.appendFile(chunk)
+        })
+        response.on('end', () => {
+          log.info(`Download completed ${downloadUrl}`)
+          downloadDeferred.resolve()
+        })
+      })
+      downloadReq.end()
+      
+      await downloadDeferred.promise
+    } catch (err) {
+      log.error(`Download (${downloadUrl}) failed to complete`, err)
+      if (!downloadDeferred.isSettled()) {
+        downloadDeferred.reject(err)
+      }
+      
+      throw err
+    } finally {
+      await downloadFile.close()
+    }
+    
+    log.assert(await Fsx.pathExists(downloadPath), `Downloaded plugin @ ${downloadPath} is missing`)
+    
+    return null
+  }
+  
+  @Bind
+  private async uninstallPlugins(...ids: string[]): Promise<this> {
+    const pluginInstalls = ids.map(id => this.state.plugins[id]).filter(isDefined<PluginInstall>)
+    runInAction(() => {
       for (const pluginId of ids) {
         remove(this.state.plugins, pluginId)
       }
-
-      return this
     })
+    
+    await Promise.all(pluginInstalls.map(async install => {
+      log.info(`Uninstalling plugin (${install.id}) @ ${install.path}`)
+      if (!await Fsx.pathExists(install.path)) {
+        log.warn(`Plugin path does not exist ${install.path}`)
+        return
+      }
+      
+      await Fsx.rm(install.path, {
+        retryDelay: 100,
+        recursive: true,
+        force: true
+      })
+      
+      log.info(`Uninstalled plugin (${install.id}) @ ${install.path}`)
+    }))
+    
+    return this
+  }
+  
+  private async refreshAvailablePluginsHandler(event: IpcMainInvokeEvent, id: string): Promise<void> {
+  
+  }
+  
+  private async uninstallPluginHandler(event: IpcMainInvokeEvent, id: string): Promise<void> {
+    this.uninstallPlugins(id)
+  }
+  
+  private async installPluginHandler(event: IpcMainInvokeEvent, id: string): Promise<PluginInstall> {
+    return null
   }
 
   /**
@@ -83,6 +175,26 @@ export class PluginManager {
     if (isDev) {
       Object.assign(global, {
         pluginManager: this
+      })
+    }
+    
+    const ipcFnHandlers = Array<[PluginManagerFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any]>(
+        [PluginManagerFnType.INSTALL_PLUGIN, this.installPluginHandler.bind(this)],
+        [PluginManagerFnType.UNINSTALL_PLUGIN, this.uninstallPluginHandler.bind(this)],
+        [PluginManagerFnType.REFRESH_AVAILABLE_PLUGINS, this.refreshAvailablePluginsHandler.bind(this)]
+    )
+    
+    app.on("quit", this.unload)
+    this.disposers_.push(() => {
+      app.off("quit", this.unload)
+      ipcFnHandlers.forEach(([type]) => ipcMain.removeHandler(PluginManagerFnTypeToIPCName(type)))
+    })
+    
+    ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(PluginManagerFnTypeToIPCName(type), handler))
+    
+    if (import.meta.webpackHot) {
+      import.meta.webpackHot.addDisposeHandler(() => {
+        this[Symbol.dispose]()
       })
     }
   }

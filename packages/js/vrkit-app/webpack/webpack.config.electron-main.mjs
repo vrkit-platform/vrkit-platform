@@ -21,6 +21,8 @@ function newMainWebpackConfig() {
       externals: [/fast-crc/, electronExternals],
       plugins: [
         new Webpack.DefinePlugin({
+          //"process.env.NODE_ENV": JSON.stringify(isDevEnabled ? "development" : "production"),
+          //isDev: JSON.stringify(isDevEnabled),
           ...(isDevEnabled && { "process.env.DEV_URI_HTTP": JSON.stringify("http://localhost:1618") })
         })
       ]

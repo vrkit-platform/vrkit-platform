@@ -48,7 +48,7 @@ import { rgbToHex } from "../../theme/paletteAndColorHelpers"
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
-const classPrefix = "pluginOverlayItem"
+const classPrefix = "pluginComponentItem"
 export const pluginComponentItemClasses = createClassNames(
   classPrefix,
   "root",
@@ -64,11 +64,11 @@ export const pluginComponentItemClasses = createClassNames(
   "footer",
   "footerActions"
 )
-export type PluginOverlayItemClassKey = ClassNamesKey<typeof pluginComponentItemClasses>
+export type PluginComponentItemClassKey = ClassNamesKey<typeof pluginComponentItemClasses>
 
-const PluginOverlayItemRoot = styled(Paper, {
-  name: "PluginOverlayItemRoot",
-  label: "PluginOverlayItemRoot"
+const PluginComponentItemRoot = styled(Paper, {
+  name: "PluginComponentItemRoot",
+  label: "PluginComponentItemRoot"
 })(({ theme: { palette, spacing, transitions, typography, shadows, dimen, shape, mixins } }) => ({
   // root styles here
   [hasCls(pluginComponentItemClasses.root)]: {
@@ -160,7 +160,7 @@ const PluginOverlayItemRoot = styled(Paper, {
 }))
 
 /**
- * PluginOverlayItem Component Properties
+ * PluginComponentItem Component Properties
  */
 export interface PluginComponentItemProps extends Omit<PaperProps, "children" | "onClick"> {
   manifest: PluginManifest
@@ -171,7 +171,7 @@ export interface PluginComponentItemProps extends Omit<PaperProps, "children" | 
 }
 
 /**
- * PluginOverlayItem Component
+ * PluginComponentItem Component
  *
  * @param { PluginComponentItemProps } props
  */
@@ -212,7 +212,7 @@ ${overview.changeLogContent}
 Version ${manifest.version}`.trimStart()
 
   return (
-    <PluginOverlayItemRoot
+    <PluginComponentItemRoot
       className={clsx(pluginComponentItemClasses.root, {}, className)}
       elevation={4}
       onClick={onClick}
@@ -254,7 +254,7 @@ Version ${manifest.version}`.trimStart()
       <Box className={pluginComponentItemClasses.content}>
         <Markdown>{text}</Markdown>
       </Box>
-    </PluginOverlayItemRoot>
+    </PluginComponentItemRoot>
   )
 }
 

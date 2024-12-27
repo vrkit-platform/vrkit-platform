@@ -29,6 +29,8 @@ import { AppContent } from "vrkit-app-renderer/components/app"
 import AppPageContainer, {
   AppPageContainerProps
 } from "../../components/app-page-container"
+import { PageMetadata, PageMetadataProps } from "../../components/page-metadata"
+import PluginsTabView from "../../components/plugins-tab-view"
 
 const log = getLogger(__filename),
   { info, debug, warn, error } = log
@@ -42,10 +44,20 @@ export interface PluginsPageProps extends AppPageContainerProps {
 
 
 export function PluginsPage({className, ...other}: PluginsPageProps) {
+  const pageMetadata: PageMetadataProps = {
+    appContentBar: {
+      title: "Plugins",
+      actions: <></>
+    }
+  }
+  
   return (
     <AppContent>
       <AppPageContainer className={clsx(className)} {...other}>
-        PluginsPage content here
+        <>
+          <PageMetadata {...pageMetadata} />
+          <PluginsTabView/>
+        </>
       </AppPageContainer>
     </AppContent>
   )

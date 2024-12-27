@@ -43,22 +43,32 @@ const selectAppSettings = (state: ISharedAppState) => state.appSettings,
   selectSessionsState = (state: ISharedAppState) => state.sessions,
   selectDashboardsState = (state: ISharedAppState) => state.dashboards,
   selectPluginState = (state: ISharedAppState): PluginsState => state.plugins,
-  selectAllPluginInstallMap = createSelector(
+    selectAvailablePluginMap = createSelector(
+        selectPluginState,
+        (pluginsState): Record<string, PluginManifest> => pluginsState.availablePlugins ?? {}
+    ),
+    selectAvailablePlugins = createSelector(
+        selectAvailablePluginMap,
+        pluginsMap =>
+            Object.values(pluginsMap)
+                .filter(isDefined) as PluginManifest[]
+    ),
+    selectInstalledPluginMap = createSelector(
     selectPluginState,
     (pluginsState): Record<string, PluginInstall> => pluginsState.plugins ?? {}
   ),
-  selectAllPluginManifests = createSelector(
-    selectAllPluginInstallMap,
+  selectInstalledPlugins = createSelector(
+    selectInstalledPluginMap,
     pluginsMap =>
       Object.values(pluginsMap)
         .map(install => install.manifest)
         .filter(isDefined) as PluginManifest[]
   ),
-  selectAllPluginManifestMap = createSelector(selectAllPluginManifests, plugins =>
+  selectInstalledPluginManifestMap = createSelector(selectInstalledPlugins, plugins =>
     plugins.reduce((map, plugin) => ({ ...map, [plugin.id]: plugin }), {} as Record<string, PluginManifest>)
   ),
   // ALL PLUGIN PROVIDED COMPONENTS
-  selectAllPluginComponentDefs = createSelector(selectAllPluginManifests, (manifests): PluginCompEntry[] => {
+  selectPluginComponentDefs = createSelector(selectInstalledPlugins, (manifests): PluginCompEntry[] => {
     const allComponents = manifests
       .flatMap(
         manifest =>
@@ -70,12 +80,12 @@ const selectAppSettings = (state: ISharedAppState) => state.appSettings,
     return uniqBy(allComponents, ([, c]) => c.id)
   }),
   // ALL PLUGIN PROVIDED `PluginComponentType.OVERLAY` COMPONENTS
-  selectAllPluginComponentOverlayDefs = createSelector(
-    selectAllPluginComponentDefs,
+  selectPluginComponentOverlayDefs = createSelector(
+    selectPluginComponentDefs,
     (defs: PluginCompEntry[]): PluginCompEntry[] => defs.filter(([, c]) => c.type === PluginComponentType.OVERLAY)
   ),
-  selectAllPluginComponentOverlayDefsMap = createSelector(
-    selectAllPluginComponentOverlayDefs,
+  selectPluginComponentOverlayDefsMap = createSelector(
+    selectPluginComponentOverlayDefs,
     (defs: PluginCompEntry[]): Record<string, PluginCompEntry> =>
       defs.reduce(
         (map, entry) => ({
@@ -153,14 +163,17 @@ const slice = createSlice({
 
     selectAppSettings,
     selectDefaultDashboardConfigId,
-
-    selectAllPluginManifests,
-    selectAllPluginManifestMap,
+    
     selectPluginState,
-    selectAllPluginInstallMap,
-    selectAllPluginComponentDefs,
-    selectAllPluginComponentOverlayDefs,
-    selectAllPluginComponentOverlayDefsMap,
+    selectAvailablePluginMap,
+    selectAvailablePlugins,
+    
+    selectInstalledPlugins,
+    selectInstalledPluginManifestMap,
+    selectInstalledPluginMap,
+    selectPluginComponentDefs,
+    selectPluginComponentOverlayDefs,
+    selectPluginComponentOverlayDefsMap,
 
     selectDashboardConfigs: (state: ISharedAppState): DashboardConfig[] => state.dashboards.configs ?? [],
     selectActiveDashboardConfigId,

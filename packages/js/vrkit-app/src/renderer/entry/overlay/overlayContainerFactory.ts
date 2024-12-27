@@ -9,12 +9,11 @@ import { setContainerResolver } from "../../utils"
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 import { FileSystemManager } from "@vrkit-platform/shared/services/node"
 import TrackManager from "../../services/track-manager"
-import OverlayManagerClient, {
-  PluginManagerClient
-} from "../../services/overlay-client"
+import OverlayManagerClient from "../../services/overlay-manager-client"
 import SharedAppStateClient
   from "vrkit-app-renderer/services/shared-app-state-client"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
+import { PluginClientLauncher } from "../../services/plugin-client-launcher"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log
@@ -46,7 +45,7 @@ async function createContainer(): Promise<Container> {
       .bindClass(TrackManager)
       .bindClass(DashboardManagerClient)
       .bindClass(OverlayManagerClient)
-      .bindClass(PluginManagerClient)
+      .bindClass(PluginClientLauncher)
       .resolveAll()
 
     // container = await container.resolveAll()

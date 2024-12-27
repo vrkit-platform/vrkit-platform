@@ -20,7 +20,7 @@ import {
   TPluginComponentType
 } from "@vrkit-platform/plugin-sdk"
 import { OverlayConfig, OverlayKind, PluginComponentDefinition, PluginInstall } from "@vrkit-platform/models"
-import OverlayManagerClient from "./OverlayManagerClient"
+import OverlayManagerClient from "../overlay-manager-client"
 import { asOption } from "@3fv/prelude-ts"
 import TrackManager from "../track-manager"
 import React from "react"
@@ -242,7 +242,7 @@ export class PluginLoader {
   }
 
   constructor(
-    readonly manager: PluginManagerClient,
+    readonly manager: PluginClientLauncher,
     readonly serviceContainer: Container,
     readonly install: PluginInstall
   ) {
@@ -294,12 +294,12 @@ export class PluginLoader {
     return this.state.componentFactory(this.install.manifest, componentDef, this.serviceContainer)
   }
 
-  static create(manager: PluginManagerClient, serviceContainer: Container, install: PluginInstall): PluginLoader {
+  static create(manager: PluginClientLauncher, serviceContainer: Container, install: PluginInstall): PluginLoader {
     return new PluginLoader(manager, serviceContainer, install)
   }
 
   static async GetComponent(
-    manager: PluginManagerClient,
+    manager: PluginClientLauncher,
     serviceContainer: Container,
     install: PluginInstall,
     componentDef: PluginComponentDefinition
@@ -315,7 +315,7 @@ type TComponentLoader = (
 ) => Promise<TPluginComponentType>
 
 @Singleton()
-export class PluginManagerClient {
+export class PluginClientLauncher {
   private readonly state_ = {
     loaders: new Map<string, PluginLoader>()
   }
@@ -339,16 +339,17 @@ export class PluginManagerClient {
       return componentType
     },
     [OverlayKind.EDITOR_INFO]: () => importDefault(import("../../overlays/editor-info/EditorInfoOverlayPlugin"))
-    // [OverlayKind.TRACK_MAP]: () =>
-    // importDefault(import("../../overlays/track-map/TrackMapOverlayPlugin")),
-    // [OverlayKind.CLOCK]: () =>
-    // importDefault(import("../../overlays/clock/ClockOverlayPlugin"))
   }
 
   private pluginClient: IPluginClient
 
   private reactComponent_: React.ComponentType<IPluginComponentProps>
-
+  
+  /**
+   * Get/Create an implementation of `IPluginClient`
+   *
+   * @private
+   */
   private getPluginClient(): IPluginClient {
     return asOption(this.pluginClient).getOrCall(() => {
       this.pluginClient = {
@@ -411,18 +412,17 @@ export class PluginManagerClient {
   @PostConstruct() // @ts-ignore
   // tslint:disable-next-line
   private async init(): Promise<void> {
-    // await GetPluginExternalRequire()
-    // assert(!!pluginExternalRequire, "pluginExternalRequire is not set")
-    // tslint:disable-next-line
     window.addEventListener("beforeunload", this.unload)
     
     this.initDev()
 
     window["getVRKitPluginClient"] = this.getPluginClient.bind(this)
-
-    // await this.launch().catch(err => error(`Failed to launch overlay`, err))
+    
   }
-
+  
+  /**
+   * Launch - runs in an overlay window only
+   */
   async launch() {
     const config = this.getConfig()
     if (!config) {

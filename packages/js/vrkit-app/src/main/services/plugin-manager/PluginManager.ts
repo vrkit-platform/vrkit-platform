@@ -79,6 +79,11 @@ export class PluginManager {
   @Bind
   async installPlugin(id: string): Promise<PluginInstall> {
     const install = await this.taskQueue.add(async () => {
+      const existingInstall = this.state.plugins[id]
+      if (!!existingInstall) {
+        log.error(`Plugin ${existingInstall.manifest.name} (${id}) is already installed`)
+        return existingInstall
+      }
       const manifest = this.state.availablePlugins[id]
       log.assert(!!manifest, `No plugin manifest found for (${id})`)
 
@@ -167,7 +172,13 @@ export class PluginManager {
   @Bind
   async uninstallPlugins(...ids: string[]): Promise<this> {
     await this.taskQueue.add(async () => {
+      
       const pluginInstalls = ids.map(id => this.state.plugins[id]).filter(isDefined<PluginInstall>)
+      if (!ids.length || pluginInstalls.length !== ids.length) {
+        log.warn(`# of requested plugin uninstallation ids does not match the # of corresponding PluginInstall records`)
+        return
+      }
+      
       runInAction(() => {
         for (const pluginId of ids) {
           remove(this.state.plugins, pluginId)

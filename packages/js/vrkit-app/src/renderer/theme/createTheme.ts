@@ -150,6 +150,7 @@ const themeOptions: ThemeOptions = {
     text: {
       primary: "#ffffff",
       secondary: "#919eab"
+      // secondary: "#3727B7"
     },
     border: {
       selected: "rgba(255,255,255,0.5)"

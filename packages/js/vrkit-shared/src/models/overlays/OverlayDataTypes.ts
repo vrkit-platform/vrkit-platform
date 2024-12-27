@@ -107,20 +107,6 @@ export function OverlayClientEventTypeToIPCName(
   return `OVERLAY_MANAGER_CLIENT_EVENT_${type.toUpperCase()}` as OverlayManagerClientEventIPCName
 }
 
-// export interface OverlayConfig {
-//   overlay: OverlayInfo
-//
-//   placement: OverlayPlacement
-// }
-
-// export interface OverlaySessionData {
-//   info: SessionInfoMessage
-//
-//   timing: SessionTiming
-//
-//   id: string
-// }
-
 export interface DefaultOverlayManagerClient {
   readonly overlayConfig: OverlayConfig
   readonly windowRole: OverlayWindowRole
@@ -130,11 +116,6 @@ export interface DefaultOverlayManagerClient {
 
   close(): Promise<void>
 }
-//
-// export enum OverlayMode {
-//   NORMAL = "NORMAL",
-//   EDIT = "EDIT"
-// }
 
 export namespace OverlayWindowRendererEvents {
   /**

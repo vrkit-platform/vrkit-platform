@@ -109,7 +109,7 @@ export interface AppComponentPickerDialogProps extends Omit<BoxProps, "onSelect"
 export function AppComponentPickerDialog(props: AppComponentPickerDialogProps) {
   const { className, open, onSelect, onClose, multiple = false, dialogProps: inDialogProps = {}, ...other } = props,
     theme = useTheme(),
-    allCompEntryMap = useAppSelector(sharedAppSelectors.selectAllPluginComponentOverlayDefsMap),
+    allCompEntryMap = useAppSelector(sharedAppSelectors.selectPluginComponentOverlayDefsMap),
     allCompEntries = Object.values(allCompEntryMap)
 
   return (

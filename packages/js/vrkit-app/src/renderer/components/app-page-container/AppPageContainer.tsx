@@ -15,12 +15,14 @@ import { styled } from "@mui/material/styles"
 import {
   child,
   ClassNamesKey,
-  createClassNames,
+  createClassNames, flex,
   flexAlign,
   FlexAuto,
   FlexColumn,
   hasCls,
-  OverflowVisible, PositionRelative
+  OverflowHidden,
+  OverflowVisible,
+  PositionRelative
 } from "@vrkit-platform/shared-ui"
 
 const log = getLogger(__filename)
@@ -40,7 +42,8 @@ const AppPageContainerRoot = styled(Box, {
   // root styles here
   [hasCls(appPageContainerClasses.root)]: {
     ...FlexAuto,
-    ...OverflowVisible,
+    ...flex(1,1,0),
+    ...OverflowHidden,
     ...FlexColumn,
     ...flexAlign("stretch", "stretch"),
     ...PositionRelative,

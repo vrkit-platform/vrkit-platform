@@ -24,7 +24,7 @@ import AppSettingsClient from "../../services/app-settings-client"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 import Button from "@mui/material/Button"
 import SharedAppStateClient from "../../services/shared-app-state-client"
-import { OverlayManagerClient } from "../../services/overlay-client"
+import { OverlayManagerClient } from "../../services/overlay-manager-client"
 import Checkbox from "@mui/material/Checkbox"
 import Typography from "@mui/material/Typography"
 

@@ -15,8 +15,9 @@ import TrackManager from "../../services/track-manager"
 import SharedAppStateClient from "../../services/shared-app-state-client"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 import AppSettingsClient from "../../services/app-settings-client"
-import { OverlayManagerClient } from "../../services/overlay-client"
+import { OverlayManagerClient } from "../../services/overlay-manager-client"
 import { Alert, APP_ALERTS_ID } from "../../services/alerts"
+import { PluginManagerClient } from "../../services/plugin-manager-client"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log
@@ -52,6 +53,7 @@ async function createContainer(): Promise<Container> {
       .bindClass(SessionManagerClient)
       .bindClass(AppSettingsClient)
       .bindClass(OverlayManagerClient)
+      .bindClass(PluginManagerClient)
       .resolveAll()
 
     // container = await container.resolveAll()

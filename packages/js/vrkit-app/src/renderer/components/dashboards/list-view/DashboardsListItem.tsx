@@ -88,7 +88,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
       .getOrNull(),
     isActive = activeId === config?.id,
     hasActive = !!activeId,
-    allOverlayCompEntryMap = useAppSelector(sharedAppSelectors.selectAllPluginComponentOverlayDefsMap),
+    allOverlayCompEntryMap = useAppSelector(sharedAppSelectors.selectPluginComponentOverlayDefsMap),
     compIds = useMemo(() => {
       return (config?.overlays ?? []).map(get("componentId"))
     }, [config?.overlays]),

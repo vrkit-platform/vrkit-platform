@@ -13,22 +13,26 @@ export const newPluginsState = (): PluginsState => ({
 })
 
 export const PluginsStateSchema = createSimpleSchema<PluginsState>({
-  plugins: map(custom(v => PluginInstall.toJson(v, {emitDefaultValues: true}), v => PluginInstall.fromJson(v, {ignoreUnknownFields: true}))),
-  availablePlugins: map(custom(v => PluginManifest.toJson(v, {emitDefaultValues: true}), v => PluginManifest.fromJson(v, {ignoreUnknownFields: true})))
+  plugins: map(custom(v => PluginInstall.toJson(v, {emitDefaultValues: true}), v => PluginInstall.create(v))),
+  availablePlugins: map(custom(v => PluginManifest.toJson(v, {emitDefaultValues: true}), v => PluginManifest.create(v)))
 })
 
-// export enum PluginManagerEventType {
-//
-// }
-//
-// export type PluginManagerEventIPCName =
-//     `PLUGIN_MANAGER_EVENT_${PluginManagerEventType}`
-//
-// export function PluginManagerEventTypeToIPCName(
-//     type: PluginManagerEventType
-// ): PluginManagerEventIPCName {
-//   return `PLUGIN_MANAGER_EVENT_${type.toUpperCase()}` as PluginManagerEventIPCName
-// }
+export enum PluginManagerEventType {
+
+}
+
+export type PluginManagerEventIPCName =
+    `PLUGIN_MANAGER_EVENT_${PluginManagerEventType}`
+
+export function PluginManagerEventTypeToIPCName(
+    type: PluginManagerEventType
+): PluginManagerEventIPCName {
+  return `PLUGIN_MANAGER_EVENT_${type}` as PluginManagerEventIPCName
+}
+
+export interface PluginManagerEventArgs {
+
+}
 
 export enum PluginManagerFnType {
   INSTALL_PLUGIN = "INSTALL_PLUGIN",
@@ -45,3 +49,8 @@ export function PluginManagerFnTypeToIPCName(
   return `PLUGIN_MANAGER_FN_${type}`
 }
 
+export interface IPluginManagerClient {
+  installPlugin(id: string): Promise<PluginInstall>
+  uninstallPlugin(id: string): Promise<void>
+  refreshAvailablePlugins(): Promise<void>
+}

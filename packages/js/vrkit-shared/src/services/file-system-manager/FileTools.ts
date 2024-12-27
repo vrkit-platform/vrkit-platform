@@ -4,6 +4,7 @@ import { Transform } from "stream"
 import Path from "path"
 import { getLogger } from "@3fv/logger-proxy"
 import { Deferred } from "@3fv/deferred"
+import { tmpdir } from "node:os"
 
 const log = getLogger(__filename)
 
@@ -95,4 +96,13 @@ export async function unzipFile(file: string, dest: string, opts: UnzipFileOptio
   }
   
   return deferred.promise
+}
+
+export async function createTempDirectory(prefix: string): Promise<string> {
+  const tmpRoot = tmpdir(),
+      tmpDirPrefix = Path.join(tmpRoot, prefix),
+      tmpDir = await Fsx.mkdtemp(tmpDirPrefix)
+  
+  await Fsx.mkdirp(tmpDir)
+  return tmpDir
 }

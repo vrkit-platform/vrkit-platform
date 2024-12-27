@@ -13,8 +13,8 @@ export const newPluginsState = (): PluginsState => ({
 })
 
 export const PluginsStateSchema = createSimpleSchema<PluginsState>({
-  plugins: map(custom(v => PluginInstall.toJson(v), v => PluginInstall.fromJson(v))),
-  availablePlugins: map(custom(v => PluginManifest.toJson(v), v => PluginManifest.fromJson(v)))
+  plugins: map(custom(v => PluginInstall.toJson(v, {emitDefaultValues: true}), v => PluginInstall.fromJson(v, {ignoreUnknownFields: true}))),
+  availablePlugins: map(custom(v => PluginManifest.toJson(v, {emitDefaultValues: true}), v => PluginManifest.fromJson(v, {ignoreUnknownFields: true})))
 })
 
 // export enum PluginManagerEventType {

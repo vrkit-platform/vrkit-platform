@@ -4,7 +4,7 @@ import { isNumber } from "@3fv/guard"
 import Fsx from "fs-extra"
 import * as Sh from "shelljs"
 import Path from "path"
-import { unzipFile } from "./FileZipTools"
+import { unzipFile } from "./FileTools"
 import { tmpdir } from "node:os"
 
 describe("FileZipTools", () => {

@@ -58,6 +58,7 @@ const dashboardsDir = Path.join(appDataLocalDir, "Dashboards")
 const appSettingsFile = Path.join(appDataLocalDir, "app-settings.json")
 
 const pluginsDir = Path.join(appDataLocalDir, "Plugins")
+const pluginsJSONFile = Path.join(appDataLocalDir, "plugins.json")
 
 const devPkgPath = asOption(DevPaths?.root)
   .map(root => Path.join(root, "packages", "js"))
@@ -84,13 +85,14 @@ export const AppPaths = {
 
   pluginsDir,
   pluginSearchPaths,
-
+  
   iracingUserDir,
   iracingTelemetryDir,
   iracingSetupsDir
 }
 
 export const AppFiles = {
+  pluginsJSONFile,
   appSettingsFile,
   trackMapListFile,
   logFile

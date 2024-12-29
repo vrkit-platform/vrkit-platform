@@ -42,6 +42,7 @@ export type ThemeLocaleComponents = { components: BaseTheme["components"] };
 // "@mui/material/styles"
 
 declare global {
+  
   interface Dimensions {
     electronTrafficLightsWidth:number
     

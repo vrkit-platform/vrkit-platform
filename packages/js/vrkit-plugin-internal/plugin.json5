@@ -2,16 +2,18 @@
   "id": "vrkit::internal",
   "version": "1.0.0",
   "name": "VRKitExternalPlugin",
+  "description": "Clock & Track map overlay components",
   "author": {
     "company": "3FV",
     "name": "Jonathan Glanz",
     "email": "jonathan.glanz@gmail.com",
-    "url": "",
-    "support_url": ""
+    "url": "https://github.com/vrkit-platform/vrkit-platform",
+    "supportUrl": "https://github.com/vrkit-platform/vrkit-platform"
   },
   "overview": {
-    "featureContent": "# Overview",
-    "changeLogContent": "# change log",
+    "content": "Clock & Track map overlay components",
+    "featureContent": "",
+    "changeLogContent": "",
     "screenshots": []
   },
   "components": [

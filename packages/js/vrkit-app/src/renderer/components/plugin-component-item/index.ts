@@ -1,2 +1,2 @@
-export * from "./PluginComponentItem"
-export {default} from "./PluginComponentItem"
+export * from "./PluginComponentView"
+export {default} from "./PluginComponentView"

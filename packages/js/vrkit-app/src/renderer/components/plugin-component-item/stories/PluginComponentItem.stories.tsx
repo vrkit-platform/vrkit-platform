@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 
-import { PluginComponentItem } from "../PluginComponentItem"
+import { PluginComponentView } from "../PluginComponentView"
 import type { PluginsState } from "@vrkit-platform/shared"
 import PluginsStateJSON from "./plugins-state-example-01.json"
 import { get } from "lodash/fp"
@@ -15,7 +15,7 @@ const pluginsState: PluginsState = PluginsStateJSON as any,
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta = {
   title: "PluginComponentItem",
-  component: PluginComponentItem,
+  component: PluginComponentView,
   parameters: {
     // Optional parameter to center the component in the Canvas. More info: https://storybook.js.org/docs/configure/story-layout
     layout: "centered"
@@ -31,7 +31,7 @@ const meta = {
   args: {
     // onClick: fn()
   }
-} satisfies Meta<typeof PluginComponentItem>
+} satisfies Meta<typeof PluginComponentView>
 
 export default meta
 type Story = StoryObj<typeof meta>

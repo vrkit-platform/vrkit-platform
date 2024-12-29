@@ -176,6 +176,13 @@ export const OverflowAuto = {
   overflow: "auto"
 } as CSSProperties
 
+export function overflow(overflowX: CSSProperties["overflowX"], overflowY: CSSProperties["overflowY"]) {
+  return {
+    overflowX,
+    overflowY
+  } as CSSProperties
+}
+
 //region Cursors
 export const CursorPointer = {
   cursor: "pointer"

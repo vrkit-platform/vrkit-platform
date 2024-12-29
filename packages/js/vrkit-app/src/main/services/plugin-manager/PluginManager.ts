@@ -94,7 +94,7 @@ export class PluginManager {
 
       log.info(`Downloading plugin (${manifest.name}) @ ${downloadUrl}`)
       const downloadPath = Path.join(tmpDir, `${id}.zip`),
-        downloadFile = await Fs.promises.open(downloadPath, "wb"),
+        downloadFile = await Fs.promises.open(downloadPath, Fs.constants.O_WRONLY | Fs.constants.O_CREAT),
         downloadDeferred = new Deferred<void>()
       try {
         const downloadReq = net.request(downloadUrl)
@@ -287,8 +287,9 @@ export class PluginManager {
    * Simply calls dispose
    * @private
    */
+  @Bind
   private unload() {
-    this[Symbol.dispose]()
+    this?.[Symbol.dispose]?.()
   }
 
   /**

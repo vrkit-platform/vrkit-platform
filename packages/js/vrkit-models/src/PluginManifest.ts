@@ -228,6 +228,12 @@ export interface PluginOverview {
     /**
      * HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES
      *
+     * @generated from protobuf field: string content = 1;
+     */
+    content: string;
+    /**
+     * HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES
+     *
      * @generated from protobuf field: string feature_content = 2;
      */
     featureContent: string;
@@ -253,6 +259,10 @@ export interface PluginOverview {
      * @generated from protobuf field: string download_url = 18;
      */
     downloadUrl: string;
+    /**
+     * @generated from protobuf field: string manifest_url = 19;
+     */
+    manifestUrl: string;
     /**
      * @generated from protobuf field: repeated IRacingTools.Models.UIImageResource screenshots = 20;
      */
@@ -986,23 +996,27 @@ export const PluginAuthor = new PluginAuthor$Type();
 class PluginOverview$Type extends MessageType<PluginOverview> {
     constructor() {
         super("IRacingTools.Models.PluginOverview", [
+            { no: 1, name: "content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "feature_content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 10, name: "change_log_content", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 15, name: "website_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 16, name: "icon_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 17, name: "source_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 18, name: "download_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 19, name: "manifest_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 20, name: "screenshots", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => UIImageResource }
         ]);
     }
     create(value?: PartialMessage<PluginOverview>): PluginOverview {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.content = "";
         message.featureContent = "";
         message.changeLogContent = "";
         message.websiteUrl = "";
         message.iconUrl = "";
         message.sourceUrl = "";
         message.downloadUrl = "";
+        message.manifestUrl = "";
         message.screenshots = [];
         if (value !== undefined)
             reflectionMergePartial<PluginOverview>(this, message, value);
@@ -1013,6 +1027,9 @@ class PluginOverview$Type extends MessageType<PluginOverview> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
+                case /* string content */ 1:
+                    message.content = reader.string();
+                    break;
                 case /* string feature_content */ 2:
                     message.featureContent = reader.string();
                     break;
@@ -1031,6 +1048,9 @@ class PluginOverview$Type extends MessageType<PluginOverview> {
                 case /* string download_url */ 18:
                     message.downloadUrl = reader.string();
                     break;
+                case /* string manifest_url */ 19:
+                    message.manifestUrl = reader.string();
+                    break;
                 case /* repeated IRacingTools.Models.UIImageResource screenshots */ 20:
                     message.screenshots.push(UIImageResource.internalBinaryRead(reader, reader.uint32(), options));
                     break;
@@ -1046,6 +1066,9 @@ class PluginOverview$Type extends MessageType<PluginOverview> {
         return message;
     }
     internalBinaryWrite(message: PluginOverview, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string content = 1; */
+        if (message.content !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.content);
         /* string feature_content = 2; */
         if (message.featureContent !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.featureContent);
@@ -1064,6 +1087,9 @@ class PluginOverview$Type extends MessageType<PluginOverview> {
         /* string download_url = 18; */
         if (message.downloadUrl !== "")
             writer.tag(18, WireType.LengthDelimited).string(message.downloadUrl);
+        /* string manifest_url = 19; */
+        if (message.manifestUrl !== "")
+            writer.tag(19, WireType.LengthDelimited).string(message.manifestUrl);
         /* repeated IRacingTools.Models.UIImageResource screenshots = 20; */
         for (let i = 0; i < message.screenshots.length; i++)
             UIImageResource.internalBinaryWrite(message.screenshots[i], writer.tag(20, WireType.LengthDelimited).fork(), options).join();

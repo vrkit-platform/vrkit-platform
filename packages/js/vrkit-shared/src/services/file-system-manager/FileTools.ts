@@ -32,9 +32,19 @@ export async function unzipFile(file: string, dest: string, opts: UnzipFileOptio
   incrementHandleCount();
   try {
     yauzl.open(file, { lazyEntries: true }, function(err, zipfile) {
-      if (err) {
-        deferred.reject(err)
-        throw err
+      if (err || deferred.isSettled()) {
+        log.error(`open zip file failed`, err)
+        if (!deferred.isSettled())
+          deferred.reject(err)
+        
+        try {
+          if (zipfile.isOpen) {
+            zipfile.close()
+          }
+        } catch (closeErr) {
+          log.error(`unable to cleanly close zipfile`, closeErr)
+        }
+        return
       }
       
       zipfile.on("close", function() {
@@ -45,6 +55,7 @@ export async function unzipFile(file: string, dest: string, opts: UnzipFileOptio
       zipfile.readEntry();
       zipfile.on("entry", function(entry:Entry) {
         const destFile = `${dest}/${entry.fileName}`
+        try {
         if (/\/$/.test(entry.fileName)) {
           const destFileDir = Path.dirname(destFile)
           Fsx.mkdirp(destFileDir, () => {
@@ -54,36 +65,49 @@ export async function unzipFile(file: string, dest: string, opts: UnzipFileOptio
         } else {
           // file entry
           zipfile.openReadStream(entry, function(err, readStream) {
+            
             if (err) {
               deferred.reject(err)
               throw err;
             }
-            // report progress through large files
-            let byteCount = 0;
-            const totalBytes = entry.uncompressedSize;
-            
-            // report progress at 60Hz
-            const progressInterval = setInterval(function() {
-              opts.onProgress?.(totalBytes, byteCount, entry.fileName);
-            }, 1000 / 60);
-            const filter = new Transform();
-            filter._transform = function(chunk, _encoding, cb) {
-              byteCount += chunk.length;
-              cb(null, chunk);
-            };
-            filter._flush = function(cb) {
-              clearInterval(progressInterval);
-              cb();
-              zipfile.readEntry();
-            };
-            
-            // pump file contents
-            const writeStream = Fsx.createWriteStream(destFile)
-            incrementHandleCount()
-            writeStream.on("close", decrementHandleCount);
-            readStream.pipe(filter).pipe(writeStream);
+            try {
+              // report progress through large files
+              let byteCount = 0;
+              const totalBytes = entry.uncompressedSize;
+              
+              // report progress at 60Hz
+              const progressInterval = setInterval(function() {
+                opts.onProgress?.(totalBytes, byteCount, entry.fileName);
+              }, 1000 / 60);
+              const filter = new Transform();
+              filter._transform = function(chunk, _encoding, cb) {
+                byteCount += chunk.length;
+                cb(null, chunk);
+              };
+              filter._flush = function(cb) {
+                clearInterval(progressInterval);
+                cb();
+                zipfile.readEntry();
+              };
+              
+              // pump file contents
+              Fsx.mkdirpSync(Path.dirname(destFile))
+              const writeStream = Fsx.createWriteStream(destFile)
+              incrementHandleCount()
+              writeStream.on("close", decrementHandleCount);
+              readStream.pipe(filter).pipe(writeStream);
+            } catch (entryErr) {
+              log.error(`Error occurred while processing ${destFile}`, entryErr)
+              if (!deferred.isSettled())
+                deferred.reject(entryErr)
+            }
           });
           
+        }
+        } catch (readErr) {
+          log.error(`Error occurred while opening entry ${destFile}`, readErr)
+          if (!deferred.isSettled())
+            deferred.reject(readErr)
         }
       });
     })

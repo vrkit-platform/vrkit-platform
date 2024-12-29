@@ -22,11 +22,15 @@ const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
 process.on("uncaughtException",(...args:any[]) => {
-  error(`uncaughtException, ${JSON.stringify(args,null,2)}`, args)
+  const msg = `uncaughtException, ${JSON.stringify(args,null,2)}`
+  console.error(msg,...args)
+  error(msg, args)
 })
 
 process.on("unhandledRejection",(...args:any[]) => {
-  error(`unhandledRejection, ${JSON.stringify(args,null,2)}`, args)
+  const msg = `unhandledRejection, ${JSON.stringify(args,null,2)}`
+  console.error(msg,...args)
+  error(msg, args)
 })
 
 async function start() {

@@ -44,6 +44,7 @@ import { Markdown } from "../markdown"
 import { AsyncImage } from "../async-image"
 import Paper, { PaperProps } from "@mui/material/Paper"
 import { rgbToHex } from "../../theme/paletteAndColorHelpers"
+import PluginIconView from "../plugin-icon-view"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -66,7 +67,7 @@ export const pluginComponentItemClasses = createClassNames(
 )
 export type PluginComponentItemClassKey = ClassNamesKey<typeof pluginComponentItemClasses>
 
-const PluginComponentItemRoot = styled(Paper, {
+const PluginComponentViewRoot = styled(Paper, {
   name: "PluginComponentItemRoot",
   label: "PluginComponentItemRoot"
 })(({ theme: { palette, spacing, transitions, typography, shadows, dimen, shape, mixins } }) => ({
@@ -162,21 +163,41 @@ const PluginComponentItemRoot = styled(Paper, {
 /**
  * PluginComponentItem Component Properties
  */
-export interface PluginComponentItemProps extends Omit<PaperProps, "children" | "onClick"> {
+export interface PluginComponentViewProps extends Omit<PaperProps, "children" | "onClick"> {
   manifest: PluginManifest
-  
+
   componentDef: PluginComponentDefinition
+
   onClick?: (manifest: PluginManifest, comp: PluginComponentDefinition) => any
+
   actions?: React.ReactNode
+
+  noFeatures?: boolean
+
+  noChangeLog?: boolean
+
+  noDetails?: boolean
+
+  noScreenshots?: boolean
 }
 
 /**
  * PluginComponentItem Component
  *
- * @param { PluginComponentItemProps } props
+ * @param { PluginComponentViewProps } props
  */
-export function PluginComponentItem(props: PluginComponentItemProps) {
-  const { className, onClick: inOnClick, manifest, componentDef, ...other } = props,
+export function PluginComponentView(props: PluginComponentViewProps) {
+  const {
+      className,
+      noChangeLog = false,
+      noDetails = false,
+      noFeatures = false,
+      noScreenshots = false,
+      onClick: inOnClick,
+      manifest,
+      componentDef,
+      ...other
+    } = props,
     { uiResource: uiRes, overview } = componentDef,
     [screenshotBackgrounds, setScreenshotBackground] = useState<Array<string | number>>(
       Array(overview?.screenshots?.length ?? 0)
@@ -191,28 +212,24 @@ export function PluginComponentItem(props: PluginComponentItemProps) {
       newBgs[idx] = rgbToHex(dominantColor)
       setScreenshotBackground(newBgs)
     },
-      onClick = !inOnClick ? null : (ev: React.SyntheticEvent) => {
-        ev.preventDefault()
-        ev.stopPropagation()
-        inOnClick(manifest, componentDef)
-      },
-    text = `# Features
+    onClick = !inOnClick
+      ? null
+      : (ev: React.SyntheticEvent) => {
+          ev.preventDefault()
+          ev.stopPropagation()
+          inOnClick(manifest, componentDef)
+        },
+    featuresText = `# Features
 ${overview.featureContent}
-
-<hr/>
-
-# Change Log
-
+`.trimStart(),
+    changeLogText = `# Change Log
 ${overview.changeLogContent}
-
-<hr/>
-
-# Details
-
+`.trimStart(),
+    detailsText = `# Details
 Version ${manifest.version}`.trimStart()
 
   return (
-    <PluginComponentItemRoot
+    <PluginComponentViewRoot
       className={clsx(pluginComponentItemClasses.root, {}, className)}
       elevation={4}
       onClick={onClick}
@@ -220,42 +237,61 @@ Version ${manifest.version}`.trimStart()
     >
       <Box className={pluginComponentItemClasses.header}>
         <Box className={pluginComponentItemClasses.headerIcon}>
-          <AsyncImage src={uiRes?.icon?.url} />
+          <PluginIconView
+            unpackIfPossible
+            src={uiRes?.icon?.url}
+            size="md"
+          />
         </Box>
         <Box className={pluginComponentItemClasses.headerBox}>
           <Box className={pluginComponentItemClasses.headerTitle}>{componentDef.name}</Box>
           <Box className={pluginComponentItemClasses.headerSubheader}>{manifest.name}</Box>
         </Box>
       </Box>
-      <Box className={pluginComponentItemClasses.carousel}>
-        <FlexRowBox
-          sx={{
-            ...OverflowHidden,
-            ...FillWidth
-          }}
-        >
-          {overview?.screenshots?.map?.((ss, idx) => (
-            <Box
-              key={idx}
-              className={pluginComponentItemClasses.carouselItem}
-              sx={{
-                backgroundColor: screenshotBackgrounds[idx]
-              }}
-            >
-              <AsyncImage
-                src={ss.url}
-                onLoad={createScreenshotLoadedHandler(idx)}
-                className={pluginComponentItemClasses.carouselItemImage}
-              />
-            </Box>
-          ))}
-        </FlexRowBox>
-      </Box>
-      <Box className={pluginComponentItemClasses.content}>
-        <Markdown>{text}</Markdown>
-      </Box>
-    </PluginComponentItemRoot>
+      {!noScreenshots && (
+        <Box className={pluginComponentItemClasses.carousel}>
+          <FlexRowBox
+            sx={{
+              ...OverflowHidden,
+              ...FillWidth
+            }}
+          >
+            {overview?.screenshots?.map?.((ss, idx) => (
+              <Box
+                key={idx}
+                className={pluginComponentItemClasses.carouselItem}
+                sx={{
+                  backgroundColor: screenshotBackgrounds[idx]
+                }}
+              >
+                <AsyncImage
+                  src={ss.url}
+                  onLoad={createScreenshotLoadedHandler(idx)}
+                  className={pluginComponentItemClasses.carouselItemImage}
+                />
+              </Box>
+            ))}
+          </FlexRowBox>
+        </Box>
+      )}
+
+      {!noFeatures && (
+        <Box className={pluginComponentItemClasses.content}>
+          <Markdown>{featuresText}</Markdown>
+        </Box>
+      )}
+      {!noChangeLog && (
+        <Box className={pluginComponentItemClasses.content}>
+          <Markdown>{changeLogText}</Markdown>
+        </Box>
+      )}
+      {!noDetails && (
+        <Box className={pluginComponentItemClasses.content}>
+          <Markdown>{detailsText}</Markdown>
+        </Box>
+      )}
+    </PluginComponentViewRoot>
   )
 }
 
-export default PluginComponentItem
+export default PluginComponentView

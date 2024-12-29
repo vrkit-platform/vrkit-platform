@@ -463,6 +463,17 @@
         },
         "IRacingTools.Models.PluginOverview": {
             "properties": {
+                "content": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES"
+                },
                 "featureContent": {
                     "oneOf": [
                         {
@@ -516,6 +527,16 @@
                     ]
                 },
                 "downloadUrl": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "manifestUrl": {
                     "oneOf": [
                         {
                             "type": "null"

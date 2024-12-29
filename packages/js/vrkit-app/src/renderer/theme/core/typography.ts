@@ -37,10 +37,11 @@ export enum Fonts {
   RobotoSlab = "RobotoSlab",
   RobotoMono = "RobotoMono",
   Segoe = "Segoe",
+  SegoeUI = "Segoe UI",
   Metro = "Metro"
 }
 
-export const defaultFont = Fonts.Segoe
+export const defaultFont = Fonts.SegoeUI
 
 export const primaryFont = setFont(defaultFont)
 

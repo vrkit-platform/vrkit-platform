@@ -38,7 +38,7 @@ import {
 import { AppDialog, AppDialogProps } from "../app-dialog"
 import { useAppSelector } from "../../services/store"
 import { PluginCompEntry, sharedAppSelectors } from "../../services/store/slices/shared-app"
-import { PluginComponentItem, pluginComponentItemClasses } from "../plugin-component-item"
+import { PluginComponentView, pluginComponentItemClasses } from "../plugin-component-item"
 import { Theme } from "../../theme/ThemeTypes"
 import GlobalStyles from "@mui/material/GlobalStyles"
 
@@ -137,7 +137,7 @@ export function AppComponentPickerDialog(props: AppComponentPickerDialogProps) {
                   ...PositionRelative
                 }}
               >
-                <PluginComponentItem
+                <PluginComponentView
                   sx={{
                     ...FillHeight,
                     ...PositionRelative,

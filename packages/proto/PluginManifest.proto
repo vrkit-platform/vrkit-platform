@@ -112,6 +112,8 @@ message PluginAuthor {
 
 message PluginOverview {
 
+  // HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES
+  string content = 1;
 
   // HTML/MARKDOWN CONTENT FOR BROWSING PURPOSES
   string feature_content = 2;
@@ -123,6 +125,7 @@ message PluginOverview {
   string icon_url = 16;
   string source_url = 17;
   string download_url = 18;
+  string manifest_url = 19;
 
   repeated UIImageResource screenshots = 20;
 }
@@ -139,7 +142,6 @@ message PluginManifest {
 
   PluginAuthor author = 3;
   string name = 5;
-
   string description = 6;
 
   string updated_at = 8;

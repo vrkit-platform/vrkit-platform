@@ -12,27 +12,16 @@ import { styled } from "@mui/material/styles"
 import clsx from "clsx"
 import { assign, capitalize } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
-import { Image, UIImageResource, UIResource } from "@vrkit-platform/models"
+import { Image, UIImageResource } from "@vrkit-platform/models"
 import { ImageExt } from "@vrkit-platform/shared"
+import { IconSizeKind, IconSizes } from "../../theme"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const appIconClassPrefix = "AppIcon"
 
-export type AppIconSize = "sm" | "md" | "lg" | "xl"
-
-export const appIconClasses = createClassNames(
-  appIconClassPrefix,
-  "root",
-  "square",
-  "circle",
-  "margin",
-  "sm",
-  "md",
-  "lg",
-  "xl"
-)
+export const appIconClasses = createClassNames(appIconClassPrefix, "root", "square", "circle", "margin", ...IconSizes)
 export type AppIconClassKey = ClassNamesKey<typeof appIconClasses>
 
 export interface AppIconImgProps extends Omit<React.HTMLAttributes<HTMLImageElement>, "src"> {
@@ -171,10 +160,10 @@ export const AppBuiltinIconKind = Object.fromEntries(Object.keys(AppBuiltinIcons
 export type AppIconKind = AppBuiltinIconName | Image
 
 export interface AppIconProps extends AppIconImgProps {
-  size?: AppIconSize
-  
+  size?: IconSizeKind
+
   fa?: boolean
-  
+
   icon: AppIconKind | UIImageResource | string
 
   variant?: "circle" | "square"
@@ -193,8 +182,8 @@ export const AppIcon = React.forwardRef<HTMLImageElement, AppIconProps>(function
     sx = { ...sx, boxShadow: theme.shadows[elevation] ?? "none" }
   }
   const isUrl = isString(icon) && isURL(icon)
-  
-  if (!isUrl && (isString(icon) || (isString(icon?.url) &&  ImageExt.isPresetUrl(icon?.url)))) {
+
+  if (!isUrl && (isString(icon) || (isString(icon?.url) && ImageExt.isPresetUrl(icon?.url)))) {
     const presetIcon = capitalize(
       isString(icon)
         ? icon

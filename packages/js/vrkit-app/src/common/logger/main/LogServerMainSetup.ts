@@ -3,37 +3,63 @@ import { UPMMainService, upmMainServiceManager } from "@3fv/electron-utility-pro
 import Path from "path"
 import type { LogServerRequestMap } from "../LogServerTypes"
 import { LogServerClientAppender } from "../LogServerClientAppender"
-import { getLoggingManager } from "@3fv/logger-proxy"
+import { Appender, ConsoleAppender, getLoggingManager } from "@3fv/logger-proxy"
 import { asOption } from "@3fv/prelude-ts"
+import { isDefined } from "@3fv/guard"
+import { filter, flow } from "lodash/fp"
 
 const log = console,
   entryFile = Path.resolve(__dirname, "..", "main-logserver", "electron-main-logserver.js")
 
 class LogServerMainSetup {
-  private readyDeferred_: Deferred<LogServerMainSetup>
+  #readyDeferred: Deferred<LogServerMainSetup>
 
-  private appender_: LogServerClientAppender = null
+  #appenders: Appender[] = []
 
-  // private messageClient_: IMessageClient<LogServerRequestMap> = null
-  private service_: UPMMainService<LogServerRequestMap> = null
-
+  #service: UPMMainService<LogServerRequestMap> = null
+  
+  /**
+   * Install the internal appenders
+   *
+   * @param appenders
+   * @private
+   */
+  #installAppenders(appenders: Appender[]) {
+    this.#appenders.length = 0
+    this.#appenders.push(...appenders)
+    log.info(`Adding Appenders`, this.#appenders)
+    getLoggingManager().setAppenders(this.#appenders)
+  }
+  
   /**
    * Initialize the service & setup the appender for the main process
    */
   private async init() {
-    if (this.readyDeferred_) {
-      return this.readyDeferred_.promise
+    if (this.#readyDeferred) {
+      return this.#readyDeferred.promise
     }
 
-    const deferred = (this.readyDeferred_ = new Deferred<LogServerMainSetup>())
+    const deferred = (this.#readyDeferred = new Deferred<LogServerMainSetup>())
     log.info(`Starting LogServerMain utilityProcess`)
 
     try {
-      this.service_ = await upmMainServiceManager.createService<LogServerRequestMap>("logserver", entryFile)
-      this.appender_ = new LogServerClientAppender(this.service_)
+      // Create the UPM service
+      const service = this.#service = await upmMainServiceManager.createService<LogServerRequestMap>("logserver", entryFile)
+      
+      // Setup appenders
+      const logServerClientAppender = new LogServerClientAppender(this.#service)
+      if (import.meta.webpackHot) {
+        import.meta.webpackHot.addDisposeHandler(() => {
+          logServerClientAppender.closeImmediate()
+          service.close()
+        })
+      }
+      flow(filter(isDefined), this.#installAppenders.bind(this))([
+        isDev && new ConsoleAppender(),
+        logServerClientAppender
+      ])
 
-      log.info(`Adding LogServerClientAppender`, this.appender_)
-      getLoggingManager().addAppenders(this.appender_)
+      
       deferred.resolve(this)
       return this
     } catch (err) {

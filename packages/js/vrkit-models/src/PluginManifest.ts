@@ -324,25 +324,41 @@ export interface PluginInstall {
      */
     id: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.PluginInstallStatus status = 2;
-     */
-    status: PluginInstallStatus;
-    /**
-     * @generated from protobuf field: bool is_internal = 3;
+     * @generated from protobuf field: bool is_internal = 2;
      */
     isInternal: boolean;
     /**
-     * @generated from protobuf field: string path = 5;
+     * @generated from protobuf field: string version = 3;
+     */
+    version: string;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.PluginInstallStatus status = 4;
+     */
+    status: PluginInstallStatus;
+    /**
+     * @generated from protobuf field: string path = 10;
      */
     path: string;
     /**
-     * @generated from protobuf field: string manifest_file = 10;
+     * @generated from protobuf field: string real_path = 11;
+     */
+    realPath: string;
+    /**
+     * @generated from protobuf field: bool is_link = 15;
+     */
+    isLink: boolean;
+    /**
+     * @generated from protobuf field: string manifest_file = 20;
      */
     manifestFile: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.PluginManifest manifest = 11;
+     * @generated from protobuf field: IRacingTools.Models.PluginManifest manifest = 21;
      */
     manifest?: PluginManifest;
+    /**
+     * @generated from protobuf field: bool is_dev_enabled = 90;
+     */
+    isDevEnabled: boolean;
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.PluginUserSettingType
@@ -1217,20 +1233,28 @@ class PluginInstall$Type extends MessageType<PluginInstall> {
     constructor() {
         super("IRacingTools.Models.PluginInstall", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "status", kind: "enum", T: () => ["IRacingTools.Models.PluginInstallStatus", PluginInstallStatus] },
-            { no: 3, name: "is_internal", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 5, name: "path", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 10, name: "manifest_file", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 11, name: "manifest", kind: "message", T: () => PluginManifest }
+            { no: 2, name: "is_internal", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 3, name: "version", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "status", kind: "enum", T: () => ["IRacingTools.Models.PluginInstallStatus", PluginInstallStatus] },
+            { no: 10, name: "path", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 11, name: "real_path", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 15, name: "is_link", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 20, name: "manifest_file", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 21, name: "manifest", kind: "message", T: () => PluginManifest },
+            { no: 90, name: "is_dev_enabled", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
     create(value?: PartialMessage<PluginInstall>): PluginInstall {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
-        message.status = 0;
         message.isInternal = false;
+        message.version = "";
+        message.status = 0;
         message.path = "";
+        message.realPath = "";
+        message.isLink = false;
         message.manifestFile = "";
+        message.isDevEnabled = false;
         if (value !== undefined)
             reflectionMergePartial<PluginInstall>(this, message, value);
         return message;
@@ -1243,20 +1267,32 @@ class PluginInstall$Type extends MessageType<PluginInstall> {
                 case /* string id */ 1:
                     message.id = reader.string();
                     break;
-                case /* IRacingTools.Models.PluginInstallStatus status */ 2:
-                    message.status = reader.int32();
-                    break;
-                case /* bool is_internal */ 3:
+                case /* bool is_internal */ 2:
                     message.isInternal = reader.bool();
                     break;
-                case /* string path */ 5:
+                case /* string version */ 3:
+                    message.version = reader.string();
+                    break;
+                case /* IRacingTools.Models.PluginInstallStatus status */ 4:
+                    message.status = reader.int32();
+                    break;
+                case /* string path */ 10:
                     message.path = reader.string();
                     break;
-                case /* string manifest_file */ 10:
+                case /* string real_path */ 11:
+                    message.realPath = reader.string();
+                    break;
+                case /* bool is_link */ 15:
+                    message.isLink = reader.bool();
+                    break;
+                case /* string manifest_file */ 20:
                     message.manifestFile = reader.string();
                     break;
-                case /* IRacingTools.Models.PluginManifest manifest */ 11:
+                case /* IRacingTools.Models.PluginManifest manifest */ 21:
                     message.manifest = PluginManifest.internalBinaryRead(reader, reader.uint32(), options, message.manifest);
+                    break;
+                case /* bool is_dev_enabled */ 90:
+                    message.isDevEnabled = reader.bool();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -1273,21 +1309,33 @@ class PluginInstall$Type extends MessageType<PluginInstall> {
         /* string id = 1; */
         if (message.id !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.id);
-        /* IRacingTools.Models.PluginInstallStatus status = 2; */
-        if (message.status !== 0)
-            writer.tag(2, WireType.Varint).int32(message.status);
-        /* bool is_internal = 3; */
+        /* bool is_internal = 2; */
         if (message.isInternal !== false)
-            writer.tag(3, WireType.Varint).bool(message.isInternal);
-        /* string path = 5; */
+            writer.tag(2, WireType.Varint).bool(message.isInternal);
+        /* string version = 3; */
+        if (message.version !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.version);
+        /* IRacingTools.Models.PluginInstallStatus status = 4; */
+        if (message.status !== 0)
+            writer.tag(4, WireType.Varint).int32(message.status);
+        /* string path = 10; */
         if (message.path !== "")
-            writer.tag(5, WireType.LengthDelimited).string(message.path);
-        /* string manifest_file = 10; */
+            writer.tag(10, WireType.LengthDelimited).string(message.path);
+        /* string real_path = 11; */
+        if (message.realPath !== "")
+            writer.tag(11, WireType.LengthDelimited).string(message.realPath);
+        /* bool is_link = 15; */
+        if (message.isLink !== false)
+            writer.tag(15, WireType.Varint).bool(message.isLink);
+        /* string manifest_file = 20; */
         if (message.manifestFile !== "")
-            writer.tag(10, WireType.LengthDelimited).string(message.manifestFile);
-        /* IRacingTools.Models.PluginManifest manifest = 11; */
+            writer.tag(20, WireType.LengthDelimited).string(message.manifestFile);
+        /* IRacingTools.Models.PluginManifest manifest = 21; */
         if (message.manifest)
-            PluginManifest.internalBinaryWrite(message.manifest, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
+            PluginManifest.internalBinaryWrite(message.manifest, writer.tag(21, WireType.LengthDelimited).fork(), options).join();
+        /* bool is_dev_enabled = 90; */
+        if (message.isDevEnabled !== false)
+            writer.tag(90, WireType.Varint).bool(message.isDevEnabled);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

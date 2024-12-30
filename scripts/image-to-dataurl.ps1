@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory=$true)][string]$File,
-    [Parameter(Mandatory=$true)][string]$Format = "svg+xml"
+    [Parameter()][string]$Format = "svg+xml"
 
 )
 if (-Not (Test-Path $File)) {

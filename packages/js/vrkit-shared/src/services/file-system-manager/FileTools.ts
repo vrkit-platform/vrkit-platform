@@ -5,8 +5,15 @@ import Path from "path"
 import { getLogger } from "@3fv/logger-proxy"
 import { Deferred } from "@3fv/deferred"
 import { tmpdir } from "node:os"
+import Fs from "fs"
 
 const log = getLogger(__filename)
+
+export function directoryChecker<Otherwise>(otherwise: Otherwise = null) {
+  return (
+      path:string // Stat the inode to see if its a directory
+  ) => Fs.promises.lstat(path).then(stat => (stat.isDirectory() ? path : otherwise))
+}
 
 export interface UnzipFileOptions {
   onProgress?: (totalBytes: number, byteCount: number, entry: string) => any

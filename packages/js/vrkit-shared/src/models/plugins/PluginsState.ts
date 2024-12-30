@@ -1,6 +1,10 @@
+import { isString } from "@3fv/guard"
 import { PluginManifest, PluginInstall } from "@vrkit-platform/models"
 import { createSimpleSchema, custom, list, map } from "serializr"
 
+export function isBuiltinPlugin(manifestOrId: PluginManifest | string) {
+  return (isString(manifestOrId) ? manifestOrId : manifestOrId?.id) === "vrkit::internal"
+}
 
 export interface PluginsState {
   plugins: Record<string, PluginInstall>
@@ -13,8 +17,8 @@ export const newPluginsState = (): PluginsState => ({
 })
 
 export const PluginsStateSchema = createSimpleSchema<PluginsState>({
-  plugins: map(custom(v => PluginInstall.toJson(v, {emitDefaultValues: true}), v => PluginInstall.create(v))),
-  availablePlugins: map(custom(v => PluginManifest.toJson(v, {emitDefaultValues: true}), v => PluginManifest.create(v)))
+  plugins: map(custom(v => PluginInstall.toJson(v, {emitDefaultValues: true}), v => PluginInstall.fromJson(v))),
+  availablePlugins: map(custom(v => PluginManifest.toJson(v, {emitDefaultValues: true}), v => PluginManifest.fromJson(v)))
 })
 
 export enum PluginManagerEventType {
@@ -37,6 +41,7 @@ export interface PluginManagerEventArgs {
 export enum PluginManagerFnType {
   INSTALL_PLUGIN = "INSTALL_PLUGIN",
   UNINSTALL_PLUGIN = "UNINSTALL_PLUGIN",
+  UPDATE_PLUGIN = "UPDATE_PLUGIN",
   REFRESH_AVAILABLE_PLUGINS = "REFRESH_AVAILABLE_PLUGINS"
 }
 

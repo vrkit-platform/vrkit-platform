@@ -5,6 +5,7 @@ import { assign, defaults, toPlainObject } from "lodash"
 import { Future } from "@3fv/prelude-ts"
 import Debug from "debug"
 import { JSONStringifyAny } from "@vrkit-platform/shared"
+import { getValue } from "@3fv/guard"
 
 
 
@@ -71,7 +72,16 @@ export class LogServerClientAppender implements Appender {
       throw err
     }
   }
-
+  
+  /**
+   * Close immediately
+   */
+  closeImmediate() {
+    getValue(() => {
+      this.messageClient.close()
+    })
+  }
+  
   /**
    * Close the handler
    *

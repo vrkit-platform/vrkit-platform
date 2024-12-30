@@ -31,7 +31,7 @@ import {
   FlexScaleZero,
   hasCls,
   heightConstraint,
-  margin, notHasCls,
+  margin,
   overflow,
   OverflowAuto,
   OverflowHidden,
@@ -46,7 +46,7 @@ import { Markdown } from "../markdown"
 import { AsyncImage } from "../async-image"
 import Paper, { PaperProps } from "@mui/material/Paper"
 import { rgbToHex } from "../../theme/paletteAndColorHelpers"
-import { isNotEmptyString } from "@vrkit-platform/shared"
+import { arrayOf, isNotEmptyString } from "@vrkit-platform/shared"
 import { PluginComponentView } from "../plugin-component-item"
 import { PluginIconView } from "../plugin-icon-view"
 import Button from "@mui/material/Button"
@@ -55,6 +55,13 @@ import { PluginManagerClient } from "../../services/plugin-manager-client"
 import { useService } from "../service-container"
 import { match } from "ts-pattern"
 import { Alert } from "../../services/alerts"
+import { isString } from "@3fv/guard"
+import { action } from "../../theme/core"
+import { asOption } from "@3fv/prelude-ts"
+import {
+  PluginManifestAction,
+  PluginManifestActionKind, PluginManifestActionsButton
+} from "./PluginManifestAction"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -238,14 +245,6 @@ const PluginManifestViewRoot = styled(Paper, {
   }
 }))
 
-export enum PluginManifestAction {
-  none = "none",
-  install = "install",
-  uninstall = "uninstall"
-}
-
-export type PluginManifestActionKind = `${PluginManifestAction}`
-
 /**
  * PluginManifestView Component Properties
  */
@@ -254,7 +253,7 @@ export interface PluginManifestViewProps extends Omit<PaperProps, "children" | "
 
   onClick?: (manifest: PluginManifest) => any
 
-  action?: PluginManifestActionKind
+  actions?: PluginManifestActionKind | PluginManifestActionKind[]
 }
 
 /**
@@ -263,7 +262,8 @@ export interface PluginManifestViewProps extends Omit<PaperProps, "children" | "
  * @param { PluginManifestViewProps } props
  */
 export function PluginManifestView(props: PluginManifestViewProps) {
-  const { className, onClick: inOnClick, manifest, action = "none", ...other } = props,
+  const { className, onClick: inOnClick, manifest, actions:inActions = ["none"], ...other } = props,
+      actions = arrayOf(inActions),
     { name, author, version, description, overview, components } = manifest,
     { screenshots, iconUrl, websiteUrl, sourceUrl, featureContent, changeLogContent } = overview,
       theme = useTheme(),
@@ -288,12 +288,21 @@ export function PluginManifestView(props: PluginManifestViewProps) {
           ev.stopPropagation()
           inOnClick(manifest)
         }, // @ts-ignore:next-line
+      getActionFromEvent = (ev: React.SyntheticEvent<HTMLButtonElement>) => {
+        const elem = ev.target as HTMLButtonElement
+         return asOption(elem.getAttribute("data-action"))
+                .filter(action => isString(PluginManifestAction[action]))
+                .getOrElse(actions[0])
+        
+      },
     handleAction = Alert.usePromise(
-      (ev: React.SyntheticEvent) => {
+      (ev: React.SyntheticEvent<HTMLButtonElement>) => {
         ev.preventDefault()
         ev.stopPropagation()
+        const action = getActionFromEvent(ev)
         return match(action)
-          .with("install", () => pluginManagerClient.installPlugin(manifest.id))
+            .with("update", () => pluginManagerClient.updatePlugin(manifest.id))
+            .with("install", () => pluginManagerClient.installPlugin(manifest.id))
           .with("uninstall", () => pluginManagerClient.uninstallPlugin(manifest.id))
           .otherwise(() => {
             log.warn(`Unsupported action (${action})`)
@@ -304,7 +313,7 @@ export function PluginManifestView(props: PluginManifestViewProps) {
           })
       },
       {
-        loading: `${capitalize(action)} plugin...`,
+        loading: ({args:[ev]}) => `${capitalize(getActionFromEvent(ev))} plugin...`,
         success: ({ result }) => `"Successfully installed plugin."`,
         error: ({ err }) => `Unable to create dashboard config: ${err.message ?? err}`
       },
@@ -337,13 +346,13 @@ ${overview.changeLogContent}`
           <Box
             className={classes.headerSubheader}
             dangerouslySetInnerHTML={{
-              __html: [action === "none" ? version : null, author?.company, author?.name, author?.email]
+              __html: [actions.includes("none") ? version : null, author?.company, author?.name, author?.email]
                 .filter(isNotEmptyString)
                 .join("&nbsp;&bull;&nbsp;")
             }}
           />
 
-          {action !== "none" && (
+          {!actions.includes("none") && (
             <Box className={clsx(classes.headerSubheader, classes.headerAction)}
               sx={{
                 ...FlexRow,
@@ -352,14 +361,16 @@ ${overview.changeLogContent}`
                 gap: theme.spacing(1)
               }}
             >
-              <Button
-                color="primary"
-                variant="contained"
-                size="small"
-                onClick={handleAction}
-              >
-                {capitalize(action)}
-              </Button>
+              {/* TODO: Add custom secondary actions control */}
+              <PluginManifestActionsButton
+                // color="primary"
+                // variant="contained"
+                // size="small"
+                actions={actions}
+                  onClick={handleAction}
+                // data-action={actions[0]}
+              />
+              
               <EllipsisBox sx={{...FlexScaleZero}}>{version}</EllipsisBox>
             </Box>
           )}

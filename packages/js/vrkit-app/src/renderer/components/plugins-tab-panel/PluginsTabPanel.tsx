@@ -41,9 +41,15 @@ import { isString } from "@3fv/guard"
 import { PluginManifest } from "@vrkit-platform/models"
 import { FilterableList, FilterableListItemProps } from "../filterable-list"
 import ListItem from "@mui/material/ListItem"
-import { isNotEmptyString, propEqualTo } from "@vrkit-platform/shared"
+import {
+  isBuiltinPlugin,
+  isNotEmptyString,
+  propEqualTo
+} from "@vrkit-platform/shared"
 import NoData from "../no-data"
-import PluginManifestView from "../plugin-manifest-view"
+import PluginManifestView, {
+  getPluginActions, getPluginPrimaryAction
+} from "../plugin-manifest-view"
 import ListItemIcon from "@mui/material/ListItemIcon"
 import PluginIconView from "../plugin-icon-view"
 import Typography from "@mui/material/Typography"
@@ -250,6 +256,7 @@ export function PluginsTabPanel(props: PluginsTabPanelProps) {
       },
       [selectedId]
     ),
+    
     selected = useMemo(() => plugins.find(propEqualTo("id", selectedId)), [selectedId, plugins]),
     itemFilter = useCallback(
       (item: PluginManifest, query: string) =>
@@ -285,7 +292,7 @@ export function PluginsTabPanel(props: PluginsTabPanelProps) {
           <NoData className={clsx(classes.detailsNone)}>Select a plugin on the left to view details.</NoData>
         ) : (
           <Box className={clsx(classes.detailsSelected)}>
-            <PluginManifestView manifest={selected} action={!!installedPluginMap[selected?.id] ? "uninstall" : "install"} />
+            <PluginManifestView manifest={selected} actions={getPluginActions(installedPluginMap, selected)} />
           </Box>
         )}
       </Box>

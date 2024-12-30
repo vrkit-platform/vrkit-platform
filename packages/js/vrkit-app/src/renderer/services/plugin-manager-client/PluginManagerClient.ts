@@ -87,7 +87,13 @@ export class PluginManagerClient extends EventEmitter3<PluginManagerEventArgs> i
   async installPlugin(id: string): Promise<PluginInstall> {
     return await ipcRenderer.invoke(PluginManagerFnTypeToIPCName(PluginManagerFnType.INSTALL_PLUGIN), id)
   }
-
+  
+  @Bind
+  async updatePlugin(id: string): Promise<PluginInstall> {
+    return await ipcRenderer.invoke(PluginManagerFnTypeToIPCName(PluginManagerFnType.UPDATE_PLUGIN), id)
+  }
+  
+  
   @Bind
   async uninstallPlugin(id: string): Promise<void> {
     await ipcRenderer.invoke(PluginManagerFnTypeToIPCName(PluginManagerFnType.UNINSTALL_PLUGIN), id)

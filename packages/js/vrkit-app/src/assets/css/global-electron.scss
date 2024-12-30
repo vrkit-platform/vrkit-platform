@@ -4,7 +4,11 @@
 }
 
 *::-webkit-scrollbar {
-	width: 4px;
+	width: 0px;
+	max-width: 0px;
+	height: 0px;
+	max-height: 0px;
+	display: none;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -13,7 +17,7 @@
 }
 
 *::-webkit-scrollbar-track {
-	background-color: auto;
+	background-color: transparent;
 }
 
 .electronWindowDraggable {

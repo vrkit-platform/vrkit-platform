@@ -995,6 +995,26 @@
                         }
                     ]
                 },
+                "isInternal": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "version": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
                 "status": {
                     "enum": [
                         "PLUGIN_STATUS_NONE",
@@ -1026,16 +1046,6 @@
                     "title": "Plugin Install Status",
                     "description": "* Status of a plugin installation"
                 },
-                "isInternal": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "boolean"
-                        }
-                    ]
-                },
                 "path": {
                     "oneOf": [
                         {
@@ -1043,6 +1053,26 @@
                         },
                         {
                             "type": "string"
+                        }
+                    ]
+                },
+                "realPath": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "isLink": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
                         }
                     ]
                 },
@@ -1064,6 +1094,16 @@
                             "type": "null"
                         },
                         {}
+                    ]
+                },
+                "isDevEnabled": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
                     ]
                 }
             },

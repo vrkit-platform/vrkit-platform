@@ -103,9 +103,9 @@ const ComponentInstanceListItemRoot = styled(Box, {
     [`&:nth-of-type(even) .${classes.itemPaper}::before`]: {
       backgroundImage: linearGradient(
           "to bottom",
-          `${darken(palette.background.paper, 0.13)} 0%`,
-          `${darken(palette.background.paper, 0.14)} 98%`,
-          `${darken(palette.background.paper, 0.2)} 100%`
+          `${darken(palette.background.paper, 0.1)} 0%`,
+          `${darken(palette.background.paper, 0.08)} 98%`,
+          `${palette.background.paper} 100%`
       ),
     },
     [child(classes.itemPaper)]: {

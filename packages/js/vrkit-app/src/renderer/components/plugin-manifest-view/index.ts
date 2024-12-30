@@ -1,2 +1,6 @@
 export * from "./PluginManifestView"
 export {default} from "./PluginManifestView"
+export { getPluginPrimaryAction } from "./PluginManifestAction"
+export { getPluginActions } from "./PluginManifestAction"
+export { PluginManifestActionKind } from "./PluginManifestAction"
+export { PluginManifestAction } from "./PluginManifestAction"

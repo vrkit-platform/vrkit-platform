@@ -175,14 +175,20 @@ enum PluginInstallStatus {
  */
 message PluginInstall {
   string id = 1;
+  bool is_internal = 2;
+  string version = 3;
+  PluginInstallStatus status = 4;
 
-  PluginInstallStatus status = 2;
-  bool is_internal = 3;
 
-  string path = 5;
 
-  string manifest_file = 10;
+  string path = 10;
+  string real_path = 11;
+  bool is_link = 15;
 
-  PluginManifest manifest = 11;
+  string manifest_file = 20;
+
+  PluginManifest manifest = 21;
+
+  bool is_dev_enabled = 90;
 }
 

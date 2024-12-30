@@ -49,19 +49,17 @@ import { rgbToHex } from "../../theme/paletteAndColorHelpers"
 import { arrayOf, isNotEmptyString } from "@vrkit-platform/shared"
 import { PluginComponentView } from "../plugin-component-item"
 import { PluginIconView } from "../plugin-icon-view"
-import Button from "@mui/material/Button"
 import { capitalize } from "lodash"
 import { PluginManagerClient } from "../../services/plugin-manager-client"
 import { useService } from "../service-container"
 import { match } from "ts-pattern"
 import { Alert } from "../../services/alerts"
-import { isString } from "@3fv/guard"
 import { action } from "../../theme/core"
-import { asOption } from "@3fv/prelude-ts"
 import {
-  PluginManifestAction,
-  PluginManifestActionKind, PluginManifestActionsButton
-} from "./PluginManifestAction"
+  createPluginManifestActionHandler,
+  PluginManifestActionKind,
+  PluginManifestActionsButton
+} from "./PluginManifestActionsButton"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -151,7 +149,7 @@ const PluginManifestViewRoot = styled(Paper, {
             marginTop: spacing(1),
             opacity: 1,
             "& > p": {
-              opacity: 0.25,
+              opacity: 0.25
             }
           },
           letterSpacing: 0.9
@@ -262,11 +260,11 @@ export interface PluginManifestViewProps extends Omit<PaperProps, "children" | "
  * @param { PluginManifestViewProps } props
  */
 export function PluginManifestView(props: PluginManifestViewProps) {
-  const { className, onClick: inOnClick, manifest, actions:inActions = ["none"], ...other } = props,
-      actions = arrayOf(inActions),
+  const { className, onClick: inOnClick, manifest, actions: inActions = ["none"], ...other } = props,
+    actions = arrayOf(inActions),
     { name, author, version, description, overview, components } = manifest,
     { screenshots, iconUrl, websiteUrl, sourceUrl, featureContent, changeLogContent } = overview,
-      theme = useTheme(),
+    theme = useTheme(),
     pluginManagerClient = useService(PluginManagerClient),
     [screenshotBackgrounds, setScreenshotBackground] = useState<Array<string | number>>(
       Array(overview?.screenshots?.length ?? 0)
@@ -288,32 +286,17 @@ export function PluginManifestView(props: PluginManifestViewProps) {
           ev.stopPropagation()
           inOnClick(manifest)
         }, // @ts-ignore:next-line
-      getActionFromEvent = (ev: React.SyntheticEvent<HTMLButtonElement>) => {
-        const elem = ev.target as HTMLButtonElement
-         return asOption(elem.getAttribute("data-action"))
-                .filter(action => isString(PluginManifestAction[action]))
-                .getOrElse(actions[0])
-        
-      },
+    // getActionFromEvent = (ev: React.SyntheticEvent<HTMLButtonElement>) => {
+    //   const elem = ev.target as HTMLButtonElement
+    //    return asOption(elem.getAttribute("data-action"))
+    //           .filter(action => isString(PluginManifestAction[action]))
+    //           .getOrElse(actions[0])
+    //
+    // },
     handleAction = Alert.usePromise(
-      (ev: React.SyntheticEvent<HTMLButtonElement>) => {
-        ev.preventDefault()
-        ev.stopPropagation()
-        const action = getActionFromEvent(ev)
-        return match(action)
-            .with("update", () => pluginManagerClient.updatePlugin(manifest.id))
-            .with("install", () => pluginManagerClient.installPlugin(manifest.id))
-          .with("uninstall", () => pluginManagerClient.uninstallPlugin(manifest.id))
-          .otherwise(() => {
-            log.warn(`Unsupported action (${action})`)
-            return Promise.resolve()
-          })
-          .then(() => {
-            log.info(`Plugin action finished (${action})`)
-          })
-      },
+      createPluginManifestActionHandler(pluginManagerClient, manifest?.id),
       {
-        loading: ({args:[ev]}) => `${capitalize(getActionFromEvent(ev))} plugin...`,
+        loading: ({ args: [action = "unknown"] }) => `${capitalize(action)} plugin...`,
         success: ({ result }) => `"Successfully installed plugin."`,
         error: ({ err }) => `Unable to create dashboard config: ${err.message ?? err}`
       },
@@ -353,10 +336,11 @@ ${overview.changeLogContent}`
           />
 
           {!actions.includes("none") && (
-            <Box className={clsx(classes.headerSubheader, classes.headerAction)}
+            <Box
+              className={clsx(classes.headerSubheader, classes.headerAction)}
               sx={{
                 ...FlexRow,
-                ...flexAlign("center","stretch"),
+                ...flexAlign("center", "stretch"),
                 opacity: 1,
                 gap: theme.spacing(1)
               }}
@@ -367,11 +351,11 @@ ${overview.changeLogContent}`
                 // variant="contained"
                 // size="small"
                 actions={actions}
-                  onClick={handleAction}
+                onAction={handleAction}
                 // data-action={actions[0]}
               />
-              
-              <EllipsisBox sx={{...FlexScaleZero}}>{version}</EllipsisBox>
+
+              <EllipsisBox sx={{ ...FlexScaleZero }}>{version}</EllipsisBox>
             </Box>
           )}
         </Box>

@@ -1,8 +1,8 @@
-import ButtonGroup, { buttonGroupClasses as muiButtonGroupClasses, ButtonGroupProps } from "@mui/material/ButtonGroup"
+import ButtonGroup, { buttonGroupClasses as muiButtonGroupClasses } from "@mui/material/ButtonGroup"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import { PluginInstall, PluginManifest } from "@vrkit-platform/models"
 import Semver from "semver"
-import { arrayOf } from "@vrkit-platform/shared"
+import { arrayOf, isEmpty, isNotEmptyString } from "@vrkit-platform/shared"
 import Button from "@mui/material/Button"
 import { capitalize } from "lodash"
 import { useLayoutEffect, useRef, useState } from "react"
@@ -15,6 +15,11 @@ import MenuList from "@mui/material/MenuList"
 import MenuItem from "@mui/material/MenuItem"
 import { useTheme } from "@mui/material/styles"
 import { padding } from "@vrkit-platform/shared-ui"
+import { PluginManagerClient } from "../../services/plugin-manager-client"
+import { match } from "ts-pattern"
+import { getLogger } from "@3fv/logger-proxy"
+
+const log = getLogger(__filename)
 
 export enum PluginManifestAction {
   none = "none",
@@ -37,7 +42,7 @@ export function getPluginActions(
 ): PluginManifestActionKind[] {
   const actions = Array<PluginManifestActionKind>(),
     installedPlugin = installedPluginMap[manifest?.id],
-      installedManifest = installedPlugin?.manifest
+    installedManifest = installedPlugin?.manifest
 
   if (!!installedManifest) {
     if (installedPlugin.isInternal || installedPlugin.isLink) {
@@ -66,27 +71,58 @@ export function getPluginPrimaryAction(installedPluginMap: Record<string, Plugin
   return getPluginActions(installedPluginMap, manifest)[0] ?? "none"
 }
 
-export interface PluginManifestActionsButtonProps extends ButtonGroupProps {
-  actions: PluginManifestActionKind | PluginManifestActionKind[]
+export function createPluginManifestActionHandler(pluginManagerClient: PluginManagerClient, id: string = null) {
+  return async (action: PluginManifestActionKind, idOverride: string = null) => {
+    if (isNotEmptyString(idOverride)) {
+      id = idOverride
+    }
+
+    if (!id || isEmpty(id)) {
+      throw Error(`ID (${id}) is invalid, can not complete plugin action (${action})`)
+    }
+
+    await match(action)
+      .with("update", () => pluginManagerClient.updatePlugin(id))
+      .with("install", () => pluginManagerClient.installPlugin(id))
+      .with("uninstall", () => pluginManagerClient.uninstallPlugin(id))
+      .otherwise(() => {
+        throw Error(`Unsupported action (${action})`)
+      })
+
+    log.info(`Plugin action finished (${action})`)
+  }
 }
 
-export function PluginManifestActionsButton({ id:inId = "plugin-manifest-action-button", actions: inActions, ...other }: PluginManifestActionsButtonProps) {
-  const
-      isMounted = useMounted(),
-      idRef = useRef<string>(null)
-  
+export interface PluginManifestActionsButtonProps {
+  className?: string
+
+  actions: PluginManifestActionKind | PluginManifestActionKind[]
+
+  onAction: (action: PluginManifestActionKind) => any
+
+  id?: string
+}
+
+export function PluginManifestActionsButton({
+  className,
+  onAction,
+  actions: inActions,
+  id: inId = "plugin-manifest-action-button",
+  ...other
+}: PluginManifestActionsButtonProps) {
+  const isMounted = useMounted(),
+    idRef = useRef<string>(null)
+
   useLayoutEffect(() => {
     if (!idRef.current) {
       const elems = document.querySelectorAll(`#${inId}`)
       idRef.current = `${inId}-${elems.length + 1}`
     }
   }, [isMounted])
-  
-  
-  const
-      id = idRef.current,
-      theme = useTheme(),
-      actions = arrayOf(inActions),
+
+  const id = idRef.current,
+    theme = useTheme(),
+    actions = arrayOf(inActions),
     [current, setCurrent] = useState<PluginManifestActionKind>(actions[0]),
     [open, setOpen] = useState(false),
     anchorRef = useRef<HTMLDivElement>(null),
@@ -106,76 +142,88 @@ export function PluginManifestActionsButton({ id:inId = "plugin-manifest-action-
     }
 
   // TODO: Add custom secondary actions control
-  return !id ? null : (
+  return (
     <>
       <ButtonGroup
+        className={className}
         variant="contained"
         color="primary"
         ref={anchorRef}
         aria-label="Available plugin actions"
       >
         <Button
-          // color="primary"
           size="small"
           data-action={current}
+          onClick={ev => {
+            ev.preventDefault()
+            ev.stopPropagation()
+            onAction(current)
+          }}
         >
           {capitalize(current)}
         </Button>
-        <Button
-          size="small"
-          aria-controls={open ? id : undefined}
-          aria-expanded={open ? "true" : undefined}
-          aria-label="Select alternative action"
-          aria-haspopup="menu"
-          sx={{
-            ...padding(theme.spacing(1.5),theme.spacing(0.5)),
-            [`&.${muiButtonGroupClasses.grouped}`]: {
-              minWidth: 0, width: "auto"
-            }
-          }}
-          onClick={handleToggle}
-        >
-          <ArrowDropDownIcon />
-        </Button>
+        {actions.length > 1 && (
+          <Button
+            size="small"
+            aria-controls={open ? id : undefined}
+            aria-expanded={open ? "true" : undefined}
+            aria-label="Select alternative action"
+            aria-haspopup="menu"
+            sx={{
+              ...padding(theme.spacing(1.5), theme.spacing(0.5)),
+              [`&.${muiButtonGroupClasses.grouped}`]: {
+                minWidth: 0,
+                width: "auto"
+              }
+            }}
+            onClick={handleToggle}
+          >
+            <ArrowDropDownIcon />
+          </Button>
+        )}
       </ButtonGroup>
-      <Popper
+      {actions.length > 1 && (
+        <Popper
           sx={{
-            zIndex: 1,
+            zIndex: 1
           }}
           open={open}
           anchorEl={anchorRef.current}
           role={undefined}
           transition
           disablePortal
-      >
-        {({ TransitionProps, placement }) => (
+        >
+          {({ TransitionProps, placement }) => (
             <Grow
-                {...TransitionProps}
-                style={{
-                  transformOrigin:
-                      placement === 'bottom' ? 'center top' : 'center bottom',
-                }}
+              {...TransitionProps}
+              style={{
+                transformOrigin: placement === "bottom" ? "center top" : "center bottom"
+              }}
             >
               <Paper>
                 <ClickAwayListener onClickAway={handleClose}>
-                  <MenuList id={id} autoFocusItem>
+                  <MenuList
+                    id={id}
+                    autoFocusItem
+                  >
                     {actions
-                        // .filter(action => action !== current)
-                        .map((action, index) => (
+                      // .filter(action => action !== current)
+                      .map((action, index) => (
                         <MenuItem
-                            key={action}
-                            selected={action === current}
-                            onClick={(event) => handleMenuItemClick(event, index)}
+                          key={action}
+                          selected={action === current}
+                          onClick={event => handleMenuItemClick(event, index)}
                         >
                           {capitalize(action)}
                         </MenuItem>
-                    ))}
+                      ))}
                   </MenuList>
                 </ClickAwayListener>
               </Paper>
             </Grow>
-        )}
-      </Popper>
+          )}
+        </Popper>
+      )}
     </>
   )
 }

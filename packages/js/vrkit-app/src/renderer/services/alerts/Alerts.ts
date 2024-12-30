@@ -1,9 +1,9 @@
 import { getLogger } from "@3fv/logger-proxy"
-import toast, { Toast, ToastOptions } from "react-hot-toast"
+import type { Renderable } from "react-hot-toast"
+import toast, { ToastOptions } from "react-hot-toast"
 import {
   ErrorKind,
   invoke,
-  invokeWith,
   isErrorKind,
   isNotEmpty,
   isNotEmptyString,
@@ -11,14 +11,12 @@ import {
   throwError,
   valuesOf
 } from "@vrkit-platform/shared/utils"
-// import { printf } from "fast-printf"
 import { AlertType, AlertTypeKind } from "./AlertType"
-import { flow, get, nth } from "lodash/fp"
+import { get } from "lodash/fp"
 import { AlertErrorConfig, AlertOptions } from "./AlertErrorConfigTypes"
 import { asOption } from "@3fv/prelude-ts"
-import type { Renderable } from "react-hot-toast"
 import { isAlertRenderable } from "./isAlertRenderable"
-import { assert, isDefined, isFunction, isString } from "@3fv/guard"
+import { isFunction, isString } from "@3fv/guard"
 
 import { isEmpty, omit } from "lodash"
 import { useMemo } from "react"
@@ -42,7 +40,6 @@ export function alertErrorFormatter(err: ErrorKind, opts: AlertOptions) {
 }
 
 type ToHotToast = (msg: Renderable, opts?: ToastOptions) => string
-// type ToastHandler = (message: Renderable, options?: ToastOptions) => string;
 
 const makeHotToast =
   (type: AlertTypeKind): ToHotToast =>
@@ -61,20 +58,12 @@ const alertToastMapping = Object.fromEntries(
   valuesOf(AlertType).map(type => pairOf(type, makeHotToast(type)))
 ) as Record<AlertTypeKind, ToHotToast>
 
-function Alert(
-  type: AlertType,
-  errorOrMessage: ErrorKind | Renderable,
-  opts: AlertOptions = {}
-): string {
+function Alert(type: AlertType, errorOrMessage: ErrorKind | Renderable, opts: AlertOptions = {}): string {
   const msg = isErrorKind(errorOrMessage)
     ? alertErrorFormatter(errorOrMessage, opts)
     : isAlertRenderable(errorOrMessage)
-    ? errorOrMessage
-    : throwError(
-        `Message is not renderable or error kind: ${(
-          errorOrMessage as any
-        )?.toString()}`
-      )
+      ? errorOrMessage
+      : throwError(`Message is not renderable or error kind: ${(errorOrMessage as any)?.toString()}`)
 
   if (isDev) {
     const msgStr = isFunction(msg?.toString) && msg.toString()
@@ -84,34 +73,26 @@ function Alert(
     }
   }
 
-  // if (type === "loading" && !opts.duration) {
-  //   opts.duration = Infinity
-  // }
-
   // GET THE TOASTER BASED ON MESSAGE TYPE
   return asOption(alertToastMapping[type])
     .filter(isFunction)
     .map(invoke(msg, omit(opts, "formatPrefix")))
-    .tapIf(() => isDev, toast => info(`Created hot toast`, toast))
+    .tapIf(
+      () => isDev,
+      toast => info(`Created hot toast`, toast)
+    )
     .getOrThrow(`unknown toast type ${type}`)
-
-  // const toast = toHotToast(msg,omit(opts,"formatPrefix"))
-  // if (isDev) {
-  //   info(`Created hot toast`, toast)
-  // }
-  // return toast
 }
 
 export interface Alerter {
   type: AlertType
+
   (errorOrMessage: ErrorKind | Renderable, opts?: AlertOptions): string
 }
 
 function createAlertFactory(type: AlertType): Alerter {
-  const alerter = ((
-    errorOrMessage: ErrorKind | Renderable,
-    opts: AlertOptions = {}
-  ) => Alert(type, errorOrMessage, opts)) as Alerter
+  const alerter = ((errorOrMessage: ErrorKind | Renderable, opts: AlertOptions = {}) =>
+    Alert(type, errorOrMessage, opts)) as Alerter
 
   alerter.type = type
 
@@ -132,20 +113,11 @@ namespace Alert {
   /**
    * Alert event handlers
    */
-  export const [onInfo, onError, onSuccess, onWarning] = Array<AlertTypeKind>(
-    "info",
-    "error",
-    "success",
-    "warning"
-  )
+  export const [onInfo, onError, onSuccess, onWarning] = Array<AlertTypeKind>("info", "error", "success", "warning")
     .map(createAlertFactory)
     .map(
       createAlert =>
-        (
-          msgFormat: Renderable = undefined,
-          options: AlertOptions = {},
-          ...args: any[]
-        ) =>
+        (msgFormat: Renderable = undefined, options: AlertOptions = {}, ...args: any[]) =>
         (...eventArgs: any[]) => {
           let firstEventArg = eventArgs[0]
           if (isErrorKind(firstEventArg)) {
@@ -156,8 +128,8 @@ namespace Alert {
             return createAlert(firstEventArg, options)
           } else {
             const message = isString(msgFormat) ? msgFormat : (msgFormat as any)?.toString()
-              // ? printf(msgFormat, ...[...args, ...eventArgs].filter(isDefined))
-              // : msgFormat
+            // ? printf(msgFormat, ...[...args, ...eventArgs].filter(isDefined))
+            // : msgFormat
             return createAlert(message, options)
           }
         }
@@ -165,26 +137,25 @@ namespace Alert {
 
   interface AlertPromiseContext<Args extends any[], Res = any> {
     err: ErrorKind
+
     args: Args
+
     result: Res
   }
 
-  type AlertPromiseMessageFactory<Args extends any[], Res = any> = (
-    ctx: AlertPromiseContext<Args, Res>
-  ) => Renderable
+  type AlertPromiseMessageFactory<Args extends any[], Res = any> = (ctx: AlertPromiseContext<Args, Res>) => Renderable
 
-  type AlertPromiseMessageKind<Args extends any[], Res = any> =
-    | AlertPromiseMessageFactory<Args, Res>
-    | Renderable
+  type AlertPromiseMessageKind<Args extends any[], Res = any> = AlertPromiseMessageFactory<Args, Res> | Renderable
 
   interface AlertPromiseOptions<Args extends any[] = any[], Res = any> {
     loading: AlertPromiseMessageKind<Args, Res>
+
     success?: AlertPromiseMessageKind<Args, Res>
+
     error?: AlertPromiseMessageKind<Args, Res>
   }
 
-  interface AlertUsePromiseOptions<Args extends any[] = any[], Res = any>
-    extends AlertPromiseOptions<Args, Res> {
+  interface AlertUsePromiseOptions<Args extends any[] = any[], Res = any> extends AlertPromiseOptions<Args, Res> {
     canExecute?: () => boolean
   }
 
@@ -198,8 +169,7 @@ namespace Alert {
         err: null,
         result: null
       },
-      toMessage = (message: AlertPromiseMessageKind<Args, T>) =>
-        isFunction(message) ? message(ctx) : message
+      toMessage = (message: AlertPromiseMessageKind<Args, T>) => (isFunction(message) ? message(ctx) : message)
 
     const toastId = Alert.loading(toMessage(loading)),
       handleError = (err: ErrorKind) => {
@@ -232,11 +202,7 @@ namespace Alert {
     Fn extends (...args: any[]) => Promise<any>,
     Args extends Parameters<Fn> = Parameters<Fn>,
     T extends Awaited<ReturnType<Fn>> = Awaited<ReturnType<Fn>>
-  >(
-    fn: (...args: Args) => Promise<T>,
-    options: AlertUsePromiseOptions<Args, T>,
-    deps: any[] = []
-  ): Fn {
+  >(fn: (...args: Args) => Promise<T>, options: AlertUsePromiseOptions<Args, T>, deps: any[] = []): Fn {
     return useMemo(
       () =>
         match(isFunction(options?.canExecute) ? options.canExecute() : true)

@@ -1,6 +1,6 @@
 
 
-export function removeIfMutation<T>(list: Array<T>, predicate: (item: T) => boolean) {
+export function removeIfMutation<T>(list: Array<T>, predicate: (item: T) => boolean): T[] {
   const removeIndexes = []
   for (let i = 0; i < list.length;i++) {
     if (predicate(list[i])) {

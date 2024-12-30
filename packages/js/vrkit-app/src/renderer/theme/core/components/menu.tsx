@@ -11,6 +11,16 @@ const MuiMenuItem: Components<Theme>['MuiMenuItem'] = {
   styleOverrides: { root: ({ theme }) => ({ ...menuItem(theme) }) },
 };
 
+const MuiMenu: Components<Theme>['MuiMenu'] = {
+  /** **************************************
+   * STYLE
+   *************************************** */
+  defaultProps: {
+  
+  },
+  styleOverrides: { root: ({ theme }) => ({  }) },
+};
+
 // ----------------------------------------------------------------------
 
 export const menu = { MuiMenuItem };

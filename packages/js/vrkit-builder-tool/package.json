@@ -61,6 +61,7 @@
     "source-map-loader": "^5.0.0",
     "style-loader": "^4.0.0",
     "swc-loader": "0.2.6",
+    "swc-plugin-jsx-control-statements": "0.6.0",
     "ts-loader": "^9.5.1",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "typescript": "^5.5.4",

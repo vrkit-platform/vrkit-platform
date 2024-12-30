@@ -277,11 +277,6 @@ export function DashboardsListItemCreate(props: DashboardsListItemCreateProps) {
     { className, onClick, ...other } = props
 
   return (
-    <Box
-        sx={{
-          ...FlexRowCenter,
-        }}
-        className={clsx(classNames.item,classNames.itemCreateButton, className)}>
       <Button
         color="primary"
         size="small"
@@ -292,14 +287,12 @@ export function DashboardsListItemCreate(props: DashboardsListItemCreateProps) {
           ...FlexRowCenter,
           gap: theme.spacing(1)
         }}
-        
-        className={clsx(classNames.itemCreateButton)}
       >
           <AddIcon />
           <span>
             Create
           </span>
       </Button>
-    </Box>
+    // </Box>
   )
 }

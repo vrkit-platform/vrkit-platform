@@ -32,6 +32,8 @@
     "@protobuf-ts/plugin": "^2.9.4",
     "@svgr/webpack": "^8.1.0",
     "@swc/jest": "^0.2.36",
+    "swc-loader": "0.2.6",
+    "swc-plugin-jsx-control-statements": "0.6.0",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.0",

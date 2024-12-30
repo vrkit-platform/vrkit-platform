@@ -1,60 +1,51 @@
 // import {dialog} from "@electron/remote"
+// import "swc-plugin-jsx-control-statements"
 import Box, { BoxProps } from "@mui/material/Box"
-import Button, { ButtonProps } from "@mui/material/Button"
+import Button from "@mui/material/Button"
 import { darken, styled, useTheme } from "@mui/material/styles"
 import {
-  alpha,
   child,
   createClassNames,
+  Ellipsis,
   EllipsisBox,
-  flex,
   flexAlign,
   FlexAuto,
   FlexColumn,
-  FlexColumnCenter,
   FlexProperties,
   FlexRow,
   FlexRowBox,
-  FlexRowCenter,
-  FlexRowCenterBox,
   FlexScaleZero,
   FlexScaleZeroBox,
   hasCls,
   heightConstraint,
   HeightProperties,
-  notHasCls, OverflowAuto,
+  notHasCls,
+  OverflowAuto,
   OverflowHidden,
   padding,
-  paddingRem,
   PositionAbsolute,
-  PositionRelative,
   rem,
   widthConstraint,
   WidthProperties
 } from "@vrkit-platform/shared-ui"
 import clsx from "clsx"
 import DownIcon from "@mui/icons-material/ArrowDownwardSharp"
-import CircleIcon from "@mui/icons-material/CircleSharp"
 import { useAppSelector } from "../../services/store/AppStoreHooks"
-import React, { useCallback, useState } from "react"
-import { match, P } from "ts-pattern"
+import React, { useState } from "react"
 import { getLogger } from "@3fv/logger-proxy"
-import { SessionManagerClient } from "../../services/session-manager-client"
-import { useService } from "../service-container"
 import type { ActiveSessionType, SessionDetail } from "@vrkit-platform/shared"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
-import { ISessionTimeAndDuration } from "@vrkit-platform/plugin-sdk"
 import Typography from "@mui/material/Typography"
+import { SessionActiveIndicator } from "./SessionActiveIndicator"
+import { DiskSessionView } from "./DiskSessionView"
 
 const log = getLogger(__filename)
 
-const classNamePrefix = "sessionPlayerControlBar"
+const classNamePrefix = "appSessionPlayerControlPanel"
 
 const classNames = createClassNames(classNamePrefix, "root", "inactive", "active", "expanded", "top", "content")
 
-export interface AppSessionPlayerControlBarProps extends BoxProps {}
-
-const SPCRoot = styled(Box, { name: "SessionPlayerControlBar" })(
+const SPCRoot = styled(Box, { name: "AppSessionPlayerControlPanelRoot" })(
   ({ theme: { palette, zIndex, transitions, spacing, shape, dimen, typography } }) => ({
     [hasCls(classNames.root)]: {
       ...PositionAbsolute,
@@ -69,8 +60,8 @@ const SPCRoot = styled(Box, { name: "SessionPlayerControlBar" })(
       borderTopRightRadius: `calc(${shape.borderRadius} * 2)`,
       minHeight: dimen.appBarHeight,
       maxHeight: dimen.appBarHeight,
+      ...widthConstraint(300),
       [notHasCls(classNames.expanded)]: {
-        ...widthConstraint("max(30vw,100px)"),
         [child(classNames.content)]: {
           ...OverflowHidden,
           maxHeight: 0
@@ -78,13 +69,13 @@ const SPCRoot = styled(Box, { name: "SessionPlayerControlBar" })(
       },
       [hasCls(classNames.expanded)]: {
         maxHeight: "max(50vh,400px)",
-        ...widthConstraint("max(30vw,200px)"),
         [child(classNames.content)]: {
           ...OverflowAuto,
           maxHeight: `calc(max(50vh,400px) - ${dimen.appBarHeight})`,
         }
       },
       [hasCls(classNames.active)]: {
+        ...widthConstraint("min(70vw,500px)"),
         border: `1px solid ${palette.success.main}`,
         boxShadow: `0 0 4px ${palette.success.main}`,
         [child(classNames.top)]: {
@@ -95,8 +86,6 @@ const SPCRoot = styled(Box, { name: "SessionPlayerControlBar" })(
             fill: palette.error.main
           }
         }
-        // ...heightConstraint(rem(6)) // backgroundColor:
-        // theme.palette.background.session,
       },
       [hasCls(classNames.inactive)]: {
         border: `1px solid ${palette.action.disabled}`,
@@ -131,235 +120,8 @@ const SPCRoot = styled(Box, { name: "SessionPlayerControlBar" })(
   })
 )
 
-interface SessionDetailBoxProps {
-  detail: SessionDetail
-}
 
-const SessionDetailTable = styled("table", { name: "SessionDetailTable" })(({ theme }) => ({}))
 
-function SessionDetailBox({ detail }: SessionDetailBoxProps) {
-  const winfo = detail?.info?.weekendInfo
-  if (!winfo) {
-    return <></>
-  }
-
-  return (
-    <SessionDetailTable>
-      <tbody>
-        <tr>
-          <td>Track</td>
-          <td>{winfo.trackDisplayName}</td>
-        </tr>
-        <tr>
-          <td>Length</td>
-          <td>{winfo.trackLength}</td>
-        </tr>
-      </tbody>
-    </SessionDetailTable>
-  )
-}
-
-const LiveSessionBox = styled(FlexRowCenterBox, { name: "LiveSessionBox" })(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.action.active, 0.6), // ...widthConstraint(rem(6)),
-  ...flex(0, 0, "auto"),
-  ...paddingRem(0, 1),
-  gap: rem(1)
-}))
-
-export interface LiveSessionButtonProps extends ButtonProps {
-  activeSessionType: ActiveSessionType
-}
-
-export function LiveSessionButton({ sx, activeSessionType, ...other }: LiveSessionButtonProps) {
-  const isAvailable = useAppSelector(sharedAppSelectors.isLiveSessionAvailable),
-    isActive = activeSessionType === "LIVE",
-    sessionManagerClient = useService(SessionManagerClient),
-    text = match([isAvailable, isActive])
-      .with([false, P.any], () => "Not Running")
-      .with([true, false], () => "Connect")
-      .with([true, true], () => "Disconnect")
-      .otherwise(() => "unknown"),
-    onClick = useCallback(() => {
-      sessionManagerClient.setLiveSessionActive(isActive || !isAvailable ? false : true)
-    }, [isActive, isAvailable])
-
-  return (
-    <Button
-      disabled={!isAvailable}
-      sx={{
-        ...FlexRowCenter,
-        ...sx
-      }}
-      onClick={onClick}
-      variant={isAvailable ? "contained" : "text"}
-      {...other}
-    >
-      <Box
-        sx={{
-          ...FlexColumnCenter
-        }}
-      >
-        <Box sx={{}}>{text}</Box>
-      </Box>
-    </Button>
-  )
-}
-
-const DiskSessionBox = styled(FlexRowCenterBox, { name: "DiskSessionBox" })(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.secondary.main, 0.2), // ...widthConstraint(rem(6)),
-  ...flex(0, 0, "auto"),
-  ...paddingRem(0, 1),
-  gap: rem(1)
-}))
-
-export interface DiskSessionButtonProps extends ButtonProps {
-  activeSessionType: ActiveSessionType
-}
-
-export function DiskSessionButton({ sx, activeSessionType, ...other }: DiskSessionButtonProps) {
-  const diskSession = useAppSelector(sharedAppSelectors.selectDiskSession),
-    isActive = activeSessionType === "DISK",
-    isAvailable = diskSession?.isAvailable === true,
-    sessionManagerClient = useService(SessionManagerClient),
-    onCloseClick = useCallback(() => {
-      sessionManagerClient.closeDiskSession()
-    }, [sessionManagerClient]),
-    onOpenClick = useCallback(() => {
-      sessionManagerClient.showOpenDiskSession().catch(err => log.error("Failed to create disk player", err))
-    }, [sessionManagerClient])
-
-  return (
-    <Button
-      sx={{
-        ...FlexRowCenter,
-        ...sx
-      }}
-      variant={"text"}
-      color={"secondary"}
-      onClick={isAvailable ? onCloseClick : onOpenClick}
-      {...other}
-    >
-      <Box
-        sx={{
-          ...FlexColumnCenter
-        }}
-      >
-        {!isAvailable ? `Open Session File` : `Close Session File`}
-      </Box>
-    </Button>
-  )
-}
-
-interface SessionTimingViewProps extends BoxProps {
-  timeAndDuration: ISessionTimeAndDuration
-
-  type: ActiveSessionType
-
-  session: SessionDetail
-
-  showHours?: boolean
-}
-
-function SessionTimingView({
-  type,
-  session,
-  timeAndDuration,
-  showHours = true // timeAndDuration.currentTimeMillis
-  // >= MILLIS_IN_HR
-}: SessionTimingViewProps) {
-  //sampleIndex
-  const { isLive } = timeAndDuration
-
-  return (
-    <FlexScaleZeroBox>
-      {/*<DurationView*/}
-      {/*    //timeAndDuration.currentTimeMillis*/}
-      {/*  millis={0}*/}
-      {/*  showHours={showHours}*/}
-      {/*/>*/}
-      {/*{!isLive && timeAndDuration.totalTimeMillis > 0 && (*/}
-      {/*  <>*/}
-      {/*    &nbsp;of&nbsp;*/}
-      {/*    <DurationView*/}
-      {/*      millis={timeAndDuration.totalTimeMillis}*/}
-      {/*      showHours={showHours}*/}
-      {/*    />*/}
-      {/*  </>*/}
-      {/*)}*/}
-    </FlexScaleZeroBox>
-  )
-}
-
-function SessionActiveIndicatorCircle({
-  sx = {},
-  color,
-  className,
-  ...other
-}: Omit<React.ComponentProps<typeof CircleIcon>, "color"> & { color: string }) {
-  return (
-    <CircleIcon
-      className={clsx("indicator", className)}
-      sx={{
-        ...PositionAbsolute,
-        display: "block",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        animationIterationCount: "infinite",
-        fill: color,
-
-        width: "100%",
-        height: "100%", // "@keyframes progress": {
-        //   "0%": {
-        //     transform: "scale(1.0)"
-        //   },
-        //   "100%": {
-        //     transform: "scale(1.3)"
-        //   }
-        // },
-        ...sx
-      }}
-    />
-  )
-}
-
-function SessionActiveIndicator({ color, active }: { color: string; active: boolean }) {
-  return (
-    <Box
-      sx={{
-        ...FlexAuto,
-        ...PositionRelative,
-        width: 12,
-        height: 12
-      }}
-    >
-      <SessionActiveIndicatorCircle color={color} />
-      <SessionActiveIndicatorCircle
-        color={darken(color, 0.05)}
-        sx={{
-          animation: active ? "progress 1s ease-in infinite" : "progress 2s ease-in infinite",
-          zIndex: 1, // opacity: 0.5,
-          "@keyframes progress": {
-            "0%": {
-              transform: "scale(0)",
-              opacity: 0.3
-            },
-            "60%": {
-              transform: "scale(1.3)",
-              opacity: 0.8
-            },
-            "100%": {
-              transform: "scale(1.5)",
-              opacity: 0
-            }
-          },
-          fontSize: rem(0.5) as string
-        }}
-      />
-    </Box>
-  )
-}
 
 function SessionActiveTop({ session, sessionType }: { session: SessionDetail; sessionType: ActiveSessionType }) {
   const theme = useTheme(),
@@ -412,6 +174,8 @@ function SessionActiveTop({ session, sessionType }: { session: SessionDetail; se
   )
 }
 
+export interface AppSessionPlayerControlBarProps extends BoxProps {}
+
 export function AppSessionPlayerControlPanel({ className, ...other }: AppSessionPlayerControlBarProps) {
   const theme = useTheme(),
     [expanded, setExpanded] = useState(false),
@@ -440,6 +204,7 @@ export function AppSessionPlayerControlPanel({ className, ...other }: AppSession
         className={clsx(classNames.top)}
         onClick={e => {
           e.preventDefault()
+          e.stopPropagation()
           setExpanded(!expanded)
         }}
       >
@@ -463,7 +228,7 @@ export function AppSessionPlayerControlPanel({ className, ...other }: AppSession
           ) : (
             <Typography
               color="action.disabled"
-              sx={{ opacity: 0.65 }}
+              sx={{ opacity: 0.65, ...Ellipsis }}
               fontStyle="italic"
             >
               No active game session
@@ -479,18 +244,13 @@ export function AppSessionPlayerControlPanel({ className, ...other }: AppSession
           }}
         />
 
-        {/*<DiskSessionBox>*/}
-        {/*  <DiskSessionButton activeSessionType={activeSessionType} />*/}
-        {/*  {diskSession?.isAvailable && (*/}
-        {/*    <SessionDetailBox detail={diskSession} />*/}
-        {/*  )}*/}
-        {/*</DiskSessionBox>*/}
-        {/*<LiveSessionBox>*/}
-        {/*  <LiveSessionButton activeSessionType={activeSessionType} />*/}
-        {/*  {isLiveSessionAvailable && <SessionDetailBox detail={liveSession} />}*/}
-        {/*</LiveSessionBox>*/}
       </Button>
-      <Box className={clsx(classNames.content)}>content<br/></Box>
+      <Box className={clsx(classNames.content)}>
+        <If condition={activeSessionType !== "LIVE"}>
+          <DiskSessionView />
+        </If>
+      
+      </Box>
     </SPCRoot>
   )
 }

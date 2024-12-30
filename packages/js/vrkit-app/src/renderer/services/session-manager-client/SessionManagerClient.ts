@@ -171,19 +171,15 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
     )
   }
 
-  // @Bind
-  // async getMainSessionManagerState(): Promise<SessionsState> {
-  //   return deserialize(SessionsStateSchema, await ipcRenderer.invoke(
-  //     SessionManagerFnTypeToIPCName(SessionManagerFnType.GET_STATE)
-  //   ))
-  // }
-
   @Bind closeDiskSession(): Promise<boolean> {
     return ipcRenderer.invoke(
       SessionManagerFnTypeToIPCName(SessionManagerFnType.CLOSE_DISK_SESSION)
     )
   }
-
+  
+  /**
+   * Open a disk session
+   */
   @Bind showOpenDiskSession(): Promise<string> {
     return ipcRenderer.invoke(
       SessionManagerFnTypeToIPCName(SessionManagerFnType.SHOW_OPEN_DISK_SESSION)

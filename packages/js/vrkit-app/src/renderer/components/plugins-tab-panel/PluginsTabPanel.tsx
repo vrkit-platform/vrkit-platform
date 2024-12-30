@@ -10,7 +10,6 @@ import { getLogger } from "@3fv/logger-proxy"
 // MUI
 import Box from "@mui/material/Box"
 import { lighten, styled, useTheme } from "@mui/material/styles"
-import ListItemButton from "@mui/material/ListItemButton"
 
 // APP
 import {
@@ -18,7 +17,6 @@ import {
   child,
   ClassNamesKey,
   createClassNames,
-  CursorPointer,
   Ellipsis,
   EllipsisBox,
   FillWidth,
@@ -31,7 +29,8 @@ import {
   hasCls,
   OverflowHidden,
   OverflowVisible,
-  padding, Transparent
+  padding,
+  Transparent
 } from "@vrkit-platform/shared-ui"
 import TabPanel, { type TabPanelProps } from "@mui/lab/TabPanel"
 import { PluginViewModeKind } from "../plugins-tab-view/PluginsTabViewTypes"
@@ -41,22 +40,21 @@ import { isString } from "@3fv/guard"
 import { PluginManifest } from "@vrkit-platform/models"
 import { FilterableList, FilterableListItemProps } from "../filterable-list"
 import ListItem from "@mui/material/ListItem"
-import {
-  isBuiltinPlugin,
-  isNotEmptyString,
-  propEqualTo
-} from "@vrkit-platform/shared"
+import { isNotEmptyString, propEqualTo } from "@vrkit-platform/shared"
 import NoData from "../no-data"
-import PluginManifestView, {
-  getPluginActions, getPluginPrimaryAction
-} from "../plugin-manifest-view"
+import PluginManifestView, { getPluginActions, PluginManifestActionKind } from "../plugin-manifest-view"
 import ListItemIcon from "@mui/material/ListItemIcon"
 import PluginIconView from "../plugin-icon-view"
 import Typography from "@mui/material/Typography"
 import { asOption } from "@3fv/prelude-ts"
-import TouchRipple from "@mui/material/ButtonBase/TouchRipple"
 import ButtonBase from "@mui/material/ButtonBase"
-import Button from "@mui/material/Button"
+import PluginManifestActionsButton, {
+  createPluginManifestActionHandler
+} from "../plugin-manifest-view/PluginManifestActionsButton"
+import { useService } from "../service-container"
+import { PluginManagerClient } from "../../services/plugin-manager-client"
+import { Alert } from "../../services/alerts"
+import { capitalize } from "lodash"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -120,13 +118,13 @@ const PluginsTabPanelRoot = styled(TabPanel, {
           ...FlexColumn,
           borderBottom: `1px solid ${alpha(palette.border.selected, 0.15)}`,
           ...padding(spacing(1), spacing(2), spacing(2), spacing(1.5)),
-          ...flexAlign("flex-start","stretch"),
+          ...flexAlign("flex-start", "stretch"),
           transition: transitions.create("background-color"),
           backgroundColor: Transparent,
           [hasCls(classes.listItemSelected)]: {
             backgroundColor: alpha(palette.primary.main, palette.action.selectedOpacity),
             [child(classes.listItemAction)]: {
-              opacity: 1,
+              opacity: 1
             }
           },
           "& > .top": {
@@ -172,17 +170,21 @@ export interface PluginsTabPanelProps extends Omit<TabPanelProps, "value"> {
 export function PluginsTabPanel(props: PluginsTabPanelProps) {
   const { className, mode, ...other } = props,
     theme = useTheme(),
-      installedPluginMap = useAppSelector(sharedAppSelectors.selectInstalledPluginMap),
-      installedPlugins = useAppSelector(sharedAppSelectors.selectInstalledPlugins),
-      availablePlugins = useAppSelector(sharedAppSelectors.selectAvailablePlugins),
+    installedPluginMap = useAppSelector(sharedAppSelectors.selectInstalledPluginMap),
+    installedPlugins = useAppSelector(sharedAppSelectors.selectInstalledPlugins),
+    availablePlugins = useAppSelector(sharedAppSelectors.selectAvailablePlugins),
+    pluginManagerClient = useService(PluginManagerClient),
     plugins = mode === "plugins" ? installedPlugins : availablePlugins,
-      useInstallHandler = useCallback((id: string) => {
-        return (ev: React.SyntheticEvent) => {
-          ev.preventDefault()
-          ev.stopPropagation()
-          info(`install plugin ${id}`)
-        }
-      }, [installedPluginMap, availablePlugins]),
+    handleAction = Alert.usePromise(
+      createPluginManifestActionHandler(pluginManagerClient, null),
+      {
+        loading: ({ args: [action = "unknown"] }) => `${capitalize(action)} plugin...`,
+        success: ({ result }) => `Successfully installed plugin.`,
+        error: ({ err }) => `Unable to create dashboard config: ${err.message ?? err}`
+      },
+      [pluginManagerClient]
+    ),
+    useInstallHandler = useCallback((id: string) => (action: PluginManifestActionKind) => handleAction(action, id), []),
     [selectedId, setSelectedId] = useState<string>(""),
     itemRenderer = useCallback(
       (plugin: PluginManifest, { className, ...otherItemProps }: FilterableListItemProps) => {
@@ -225,14 +227,11 @@ export function PluginsTabPanel(props: PluginsTabPanelProps) {
                 </EllipsisBox>
               </FlexColumnBox>
               {!installedPluginMap[plugin.id] && (
-                <Button
-                  variant="outlined"
+                <PluginManifestActionsButton
                   className={classes.listItemAction}
-                  size="small"
-                  onClick={useInstallHandler(plugin.id)}
-                >
-                  Install
-                </Button>
+                  actions={getPluginActions(installedPluginMap, plugin)}
+                  onAction={useInstallHandler(plugin.id)}
+                />
               )}
             </Box>
             {isNotEmptyString(plugin.description) && (
@@ -256,7 +255,6 @@ export function PluginsTabPanel(props: PluginsTabPanelProps) {
       },
       [selectedId]
     ),
-    
     selected = useMemo(() => plugins.find(propEqualTo("id", selectedId)), [selectedId, plugins]),
     itemFilter = useCallback(
       (item: PluginManifest, query: string) =>
@@ -292,7 +290,10 @@ export function PluginsTabPanel(props: PluginsTabPanelProps) {
           <NoData className={clsx(classes.detailsNone)}>Select a plugin on the left to view details.</NoData>
         ) : (
           <Box className={clsx(classes.detailsSelected)}>
-            <PluginManifestView manifest={selected} actions={getPluginActions(installedPluginMap, selected)} />
+            <PluginManifestView
+              manifest={selected}
+              actions={getPluginActions(installedPluginMap, selected)}
+            />
           </Box>
         )}
       </Box>

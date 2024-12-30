@@ -40,6 +40,7 @@ async function run() {
         "electron",
         "react",
         "react-dom",
+        "react/jsx-runtime",
         ...builtins
       ],
       

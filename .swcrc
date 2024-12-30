@@ -15,6 +15,11 @@
     "target": "es2022",
     "loose": true,
     "externalHelpers": true,
-    "keepClassNames": true
+    "keepClassNames": true,
+    "experimental": {
+        "plugins": [
+            ["swc-plugin-jsx-control-statements", {}],
+        ],
+    }
   }
 }

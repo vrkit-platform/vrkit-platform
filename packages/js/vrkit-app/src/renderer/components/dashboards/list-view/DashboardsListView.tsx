@@ -5,8 +5,10 @@ import React, { useMemo } from "react"
 // 3FV
 import { getLogger } from "@3fv/logger-proxy"
 
-import type { BoxProps } from "@mui/material/Box"
 // MUI
+import CloseIcon from "@mui/icons-material/Close"
+import Button from "@mui/material/Button"
+import type { BoxProps } from "@mui/material/Box"
 import Box from "@mui/material/Box"
 import { darken, styled, useTheme } from "@mui/material/styles"
 
@@ -17,12 +19,15 @@ import {
   ClassNamesKey,
   createClassNames,
   CssSelectors,
+  EllipsisBox,
   Fill,
   FillWidth,
   flex,
   flexAlign,
+  FlexAuto,
   FlexColumn,
   FlexRowCenter,
+  FlexRowCenterBox, FlexScaleZero,
   hasCls,
   linearGradient,
   OverflowHidden,
@@ -47,6 +52,9 @@ import { Theme } from "../../../theme/ThemeTypes"
 import GlobalStyles from "@mui/material/GlobalStyles"
 import { DashboardsListItem, DashboardsListItemCreate } from "./DashboardsListItem"
 import { PageMetadata, PageMetadataProps } from "../../page-metadata"
+import { isNotEmptyString, newOnClickHandler } from "@vrkit-platform/shared"
+import { asOption } from "@3fv/prelude-ts"
+
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -198,6 +206,8 @@ export function DashboardsListView(props: DashboardsListViewProps) {
   const { className, ...other } = props,
     isMounted = useIsMounted(),
     configs = useAppSelector(sharedAppSelectors.selectDashboardConfigs),
+    activeDashboardConfig = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
+      activeDashboardConfigId = activeDashboardConfig?.id,
     dashboardClient = useService(DashboardManagerClient),
     nav = useNavigate(),
     createDashAsync = useAsyncCallback(dashboardClient.createDashboardConfig),
@@ -208,7 +218,7 @@ export function DashboardsListView(props: DashboardsListViewProps) {
           const newDashConfig = await createDashAsync.execute()
           log.info(`Created new dashboard config (${newDashConfig.id}`)
           if (isMounted) {
-            nav(WebPaths.app.dashboards + `/${newDashConfig.id}/edit`)
+            nav(WebPaths.app.dashboards + `/${newDashConfig.id}`)
           }
           return newDashConfig
         } catch (err) {
@@ -225,10 +235,40 @@ export function DashboardsListView(props: DashboardsListViewProps) {
     ),
     theme = useTheme(),
     globalStyles = useMemo(() => itemActionStyle(theme), [theme]),
+    hasActiveDash = isNotEmptyString(activeDashboardConfigId),
     pageMetadata: PageMetadataProps = {
       appContentBar: {
         title: "Dashboards",
-        actions: <DashboardsListItemCreate onClick={createDash} />
+        actions: (
+          <FlexRowCenterBox
+            sx={{
+              gap: theme.spacing(1)
+            }}
+          >
+            <Button
+              color={"error"}
+              size="small"
+              disabled={!hasActiveDash}
+              variant={hasActiveDash ? "contained" : "outlined"}
+              onClick={newOnClickHandler<any>(() => {
+                dashboardClient.closeDashboard().catch(err => {
+                  log.error(`Failed to close dashboard`, err)
+                  Alert.onError(`Failed to close dashboard`)
+                })
+              })}
+              sx={{
+                ...FlexAuto,
+                ...FlexRowCenter,
+                maxWidth: 350,
+                gap: theme.spacing(1)
+              }}
+            >
+              <CloseIcon />
+              <EllipsisBox sx={{...FlexScaleZero}}>Close Dash {asOption(activeDashboardConfig?.name).filter(isNotEmptyString).map(it => `(${it})`).getOrElse("")}</EllipsisBox>
+            </Button>
+            <DashboardsListItemCreate onClick={createDash} />
+          </FlexRowCenterBox>
+        )
       }
     }
 

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="VRKit: Electron Main" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--inspect=9222 dist\dev\main\electron-main.js" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$PROJECT_DIR$/packages/js/vrkit-app" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_native_interop" CONFIG_NAME="DebugClionNinja" RUN_PATH="$PROJECT_DIR$/node_modules/electron/dist/electron.exe">
+  <configuration default="false" name="VRKit: Electron Main" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--enable-logging --inspect=9222 dist\dev\main\electron-main.js" REDIRECT_INPUT="false" ELEVATE="true" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$PROJECT_DIR$/packages/js/vrkit-app" PASS_PARENT_ENVS_2="true" PROJECT_NAME="vrkit" TARGET_NAME="vrkit_native_interop" CONFIG_NAME="DebugClionNinja" RUN_PATH="$PROJECT_DIR$/node_modules/electron/dist/electron.exe">
     <envs>
       <env name="ELECTRON_OVERRIDE_DIST_PATH" value="Y:\code\sim-racing\irsdk-interop\node_modules\electron" />
     </envs>

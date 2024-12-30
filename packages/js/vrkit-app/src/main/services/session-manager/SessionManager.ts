@@ -677,7 +677,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       return this.pendingOpenDiskPlayerDeferred_.promise
     }
 
-    const deferred = (this.pendingOpenDiskPlayerDeferred_ = new Deferred())
+    const deferred = (this.pendingOpenDiskPlayerDeferred_ = new Deferred<string>())
 
     try {
       const res = await dialog.showOpenDialog({

@@ -2,21 +2,18 @@ import clsx from "clsx"
 import {
   DashboardConfig,
   ImageFormat,
-  OverlayInfo, OverlayKind,
-  PluginComponentDefinition,
-  PluginManifest
+  OverlayInfo,
+  OverlayKind,
+  OverlayPlacement,
+  SizeF,
+  SizeI
 } from "@vrkit-platform/models"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { useAsyncCallback } from "../../../hooks" // import {
 import { PageMetadata, PageMetadataProps } from "../../page-metadata"
 import { AppButtonGroupFormikPositiveNegative } from "../../app-button-group-positive-negative"
-import {
-  assignDeep, generateUUID,
-  isEmpty,
-  isEqual,
-  propEqualTo
-} from "@vrkit-platform/shared"
+import { assignDeep, generateUUID, isEmpty, isEqual, propEqualTo, removeIfMutation } from "@vrkit-platform/shared"
 import { FormContainer } from "../../form"
 import { AppTextFieldFormik } from "../../app-text-field"
 import {
@@ -28,10 +25,10 @@ import {
   flexAlign,
   FlexAuto,
   FlexColumn,
-  FlexDefaults,
   FlexProperties,
   FlexRow,
-  FlexRowBox, FlexRowCenterBox,
+  FlexRowBox,
+  FlexRowCenterBox,
   FlexScaleZero,
   hasCls,
   OverflowHidden,
@@ -53,10 +50,7 @@ import { createAppContentBarLabels } from "../../app-content-bar"
 import { AppIconEditor } from "../../app-icon-editor"
 import Divider from "@mui/material/Divider"
 import { useAppSelector } from "../../../services/store"
-import {
-  PluginCompEntry,
-  sharedAppSelectors
-} from "../../../services/store/slices/shared-app"
+import { PluginCompEntry, sharedAppSelectors } from "../../../services/store/slices/shared-app"
 import ComponentInstanceListItem from "./ComponentInstanceListItem"
 import { isDefined } from "@3fv/guard"
 import { styled } from "@mui/material/styles"
@@ -221,12 +215,15 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
       (id: string) => {
         setValues(currentValue => {
           const overlays = (currentValue?.overlays ?? []) as OverlayInfo[],
+            placements = (currentValue?.placements ?? []) as OverlayPlacement[],
             idx = overlays.findIndex(o => o.id === id)
           if (idx < 0) {
             Alerts.error(`Overlay with id (${id}) could not be found`)
           } else {
             log.info(`Removing overlay`, id)
             overlays.splice(idx, 1)
+
+            removeIfMutation(placements, placement => placement.overlayId === id)
           }
 
           return currentValue
@@ -259,30 +256,67 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
     [selectedOverlayId, setSelectedOverlayId] = useState<string>(config?.overlays?.[0]?.id ?? null),
     compEntryMap = useAppSelector(sharedAppSelectors.selectPluginComponentOverlayDefsMap),
     [compPickerOpen, setCompPickerOpen] = useState(false),
-      onCompPickerSelect = (compEntries: PluginCompEntry[]) => {
-      
+    onCompPickerSelect = (compEntries: PluginCompEntry[]) => {
       setValues(currentValue => {
-          if (!currentValue.overlays) {
-            currentValue.overlays = []
-          }
-          for (const [manifest, comp] of compEntries) {
-            const oi = OverlayInfo.create({
-              id: generateUUID(),
-              componentId: comp.id,
-              kind: OverlayKind.PLUGIN,
-              name: `${currentValue.overlays.length + 1} - ${comp.name}`,
-              ...pick(comp, ["dataVarNames","description"]),
-              userSettingValues: {},
+        if (!currentValue.overlays) {
+          currentValue.overlays = []
+        }
+        for (const [manifest, comp] of compEntries) {
+          const oi = OverlayInfo.create({
+            id: generateUUID(),
+            componentId: comp.id,
+            kind: OverlayKind.PLUGIN,
+            name: `${currentValue.overlays.length + 1} - ${comp.name}`,
+            ...pick(comp, ["dataVarNames", "description"]),
+            userSettingValues: {}
+          })
+          log.info(`Adding overlay component`, oi)
+          const initScreenPos = {
+              x: 0,
+              y: 0
+            },
+            initSize = SizeI.create(
+              comp.overlayCommonSettings?.initialSize ?? {
+                width: 400,
+                height: 400
+              }
+            ),
+            vrInitSize = SizeF.create({
+              // 2048 should be replace with a standardization
+              // of a single eye dimension/resolution for VR headsets
+              width: 2.0 * (Math.min(initSize.width, 1024) / 2048),
+              height: 2.0 * (Math.min(initSize.height, 1024) / 2048)
             })
-            log.info(`Adding overlay component`, oi)
-            currentValue.overlays.push(oi)
-          }
-          return currentValue
-        })
-        
-        setCompPickerOpen(false)
-      },
-      canModify = useMemo(() => {
+
+          const op = OverlayPlacement.create({
+            id: generateUUID(),
+            overlayId: oi.id,
+            screenRect: {
+              size: initSize,
+              position: initScreenPos
+            },
+            vrLayout: {
+              pose: {
+                x: 0.0 - vrInitSize.width / 2.0,
+                eyeY: 0,
+                z: 0.0 - vrInitSize.height / 2.0
+              },
+              size: vrInitSize,
+              screenRect: {
+                size: initSize,
+                position: initScreenPos
+              }
+            }
+          })
+          currentValue.placements.push(op)
+          currentValue.overlays.push(oi)
+        }
+        return currentValue
+      })
+
+      setCompPickerOpen(false)
+    },
+    canModify = useMemo(() => {
       return !launchLayoutEditorAsync.loading && !patchConfigAsync.loading
     }, [launchLayoutEditorAsync.loading, patchConfigAsync.loading]), // {
     handleBlurField = (e: React.FocusEvent<any>) => {
@@ -436,29 +470,25 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
                   ...flexAlign("flex-start", "stretch")
                 }}
               >
-              
-              
-              <Typography
-                sx={{
-                  ...Ellipsis,
-                  ...FlexScaleZero
-                }}
-                variant="h6"
-              >
-                Overlays
-              </Typography>
-                <FlexRowCenterBox
-                  sx={{...FlexAuto}}
+                <Typography
+                  sx={{
+                    ...Ellipsis,
+                    ...FlexScaleZero
+                  }}
+                  variant="h6"
                 >
+                  Overlays
+                </Typography>
+                <FlexRowCenterBox sx={{ ...FlexAuto }}>
                   <Button
-                      color="primary"
-                      variant="outlined"
-                      size="small"
-                      onClick={() => {
-                        setCompPickerOpen(true)
-                      }}
+                    color="primary"
+                    variant="outlined"
+                    size="small"
+                    onClick={() => {
+                      setCompPickerOpen(true)
+                    }}
                   >
-                    <AddIcon/> Overlay
+                    <AddIcon /> Overlay
                   </Button>
                 </FlexRowCenterBox>
               </FlexRowBox>
@@ -503,12 +533,12 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
         </Box>
       </FormContainer>
       <AppComponentPickerDialog
-          open={compPickerOpen}
-          onSelect={onCompPickerSelect}
-          onClose={(ev, reason) => {
-            log.info(`onClose invoked reason=${reason}`)
-            setCompPickerOpen(false)
-          }}
+        open={compPickerOpen}
+        onSelect={onCompPickerSelect}
+        onClose={(ev, reason) => {
+          log.info(`onClose invoked reason=${reason}`)
+          setCompPickerOpen(false)
+        }}
       />
     </DashboardEditorFormRoot>
   )

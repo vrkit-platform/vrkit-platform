@@ -26,11 +26,13 @@
     "alwaysStrict": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-//    "useDefineForClassFields": true,
+    "diagnostics": false,
+    //    "useDefineForClassFields": true,
     "noImplicitAny": false,
     "outDir": "lib",
     "inlineSourceMap": true,
     "preserveConstEnums": true,
+    "types": ["swc-plugin-jsx-control-statements",  "jest",  "webpack-env"],
     "paths": {
       "@vrkit-platform/models":
       [  "./packages/js/vrkit-models"],

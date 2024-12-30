@@ -97,7 +97,7 @@ export default function OverlayWindowAppBody() {
           }
         }}
       />
-      {
+      
         <OverlayAppBodyContentRoot
           id="content"
           className={clsx(classNames.root)}
@@ -113,7 +113,7 @@ export default function OverlayWindowAppBody() {
             />
           )}
         </OverlayAppBodyContentRoot>
-      }
+      
       {!isEditorInfo && isEditMode && isObject(size) ? (
         <OverlayWindowLayoutEditor
           editorEnabled={editorEnabled}

@@ -12,6 +12,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import { ClassNamesKey, createClassNames } from "@vrkit-platform/shared-ui"
 import { IPluginComponentProps, PluginClientEventType, type SessionInfoMessage } from "@vrkit-platform/plugin-sdk"
 import { Bind } from "@vrkit-platform/shared"
+import { Theme } from "../../theme"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -25,6 +26,7 @@ export type PluginComponentContainerClassKey = ClassNamesKey<typeof pluginCompon
  */
 export interface PluginComponentContainerProps extends IPluginComponentProps {
   Component: React.ComponentType<IPluginComponentProps>
+  // theme: Theme
 }
 
 export interface PluginComponentContainerState {

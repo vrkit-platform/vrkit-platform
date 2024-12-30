@@ -5,10 +5,15 @@ export const BundledModuleNames = [
   "@3fv/logger-proxy",
   "@3fv/prelude-ts",
   "@3fv/ditsy",
-  "@mui/material/styles",
-  "@mui/styled-engine",
-  "@mui/system",
   "@mui/material",
+  "@mui/material/Box",
+  "@mui/material/styles",
+  // "@mui/styled-engine",
+  "@emotion/cache",
+  "@emotion/react",
+  "@emotion/styled",
+  // "@mui/styled-engine",
+  "@mui/system",
   "@mui/lab",
   "@mui/x-data-grid",
   "@mui/x-tree-view",
@@ -20,6 +25,7 @@ export const BundledModuleNames = [
   "@vrkit-platform/shared-ui",
   "electron",
   "react",
+  "react/jsx-runtime",
   "react-dom"
 ]
 

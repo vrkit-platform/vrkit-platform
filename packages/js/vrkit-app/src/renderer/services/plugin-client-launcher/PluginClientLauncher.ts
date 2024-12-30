@@ -95,6 +95,7 @@ export class PluginLoader {
     try {
       const mod = PluginExternalModuleMap[moduleName]
       if (mod) {
+        log.info(`Resolved ${moduleName} via PluginExternalModuleMap`)
         return mod
       }
     } catch (err) {
@@ -102,13 +103,14 @@ export class PluginLoader {
     }
     
     if (moduleIdCache[moduleName]) {
+      log.info(`Resolved ${moduleName} in moduleIdCache`)
       return moduleIdCache[moduleName]
     }
 
     let mod: any = null
     if (!isBuiltin(moduleName)) {
       try {
-
+        
         mod = __webpack_modules__[moduleName]
         // if (!mod) {
         //   const id = __web.resolve(moduleName)
@@ -116,9 +118,9 @@ export class PluginLoader {
         //
         // }
         assert(!!mod, "Mod has no valid exports and is null or undefined")
-        if (moduleIdCache[moduleName]) {
-          return moduleIdCache[moduleName]
-        }
+        // if (moduleIdCache[moduleName]) {
+        //   return moduleIdCache[moduleName]
+        // }
 
         moduleIdCache[moduleName] = mod
         return mod
@@ -135,7 +137,8 @@ export class PluginLoader {
       if (moduleIdCache[id]) {
         return moduleIdCache[id]
       }
-
+      
+      log.info(`Resolved ${moduleName} in moduleIdCache via nodeRequire`)
       moduleIdCache[id] = mod
       return mod
     } catch (err) {

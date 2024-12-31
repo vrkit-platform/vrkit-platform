@@ -3,7 +3,6 @@ import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent, NativeImage, screen } 
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import {
   ActiveSessionType,
-  
   assertIsValidOverlayUniqueId,
   assign,
   Bind,
@@ -13,7 +12,6 @@ import {
   EditorInfoScreenOverlayOUID,
   EditorInfoVROverlayOUID,
   electronRectangleToRectI,
-  
   hasProps,
   isEditorInfoOUID,
   isEqual,
@@ -32,6 +30,7 @@ import {
   OverlayWindowRole,
   Pair,
   pairOf,
+  PluginsState,
   removeIfMutation,
   SessionDetail,
   SessionManagerEventType,
@@ -66,7 +65,7 @@ import { flatten, pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
 import { CreateNativeOverlayManager } from "vrkit-native-interop"
 
-import { IValueDidChange, observe, runInAction, toJS } from "mobx"
+import { IValueDidChange, observe, reaction, runInAction, toJS } from "mobx"
 import { DashboardManager } from "../dashboard-manager"
 
 import { OverlayEditorController } from "./OverlayEditorController"
@@ -210,7 +209,8 @@ export class OverlayManager {
       })
       .getOrCall(() => {
         // CREATE NEW WINDOW
-        this.sessionManager.registerComponentDataVars(ouid, overlayInfo.dataVarNames)
+        this.updateDataVars(ouid, overlayInfo)
+
         const newWin = OverlayBrowserWindow.create(this, windowKind, overlayInfo, placement)
 
         // ATTACH LISTENERS
@@ -465,6 +465,7 @@ export class OverlayManager {
     this.disposers_.push(
       observe(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged),
       observe(this.mainAppState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged),
+      reaction(() => toJS(this.mainAppState.plugins.plugins), () => this.onPluginInstallsChanged(), {equals: isEqual}),
       () => {
         ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayManagerClientFnTypeToIPCName(type)))
         ipcEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
@@ -492,11 +493,16 @@ export class OverlayManager {
     ipcEventHandlers.forEach(([type, handler]) => sessionManager.on(type, handler))
   }
 
+  @Bind
+  private onPluginInstallsChanged() {
+    log.info("Plugin change detected, updating all overlay window data vars")
+    this.updateAllDataVars()
+  }
+
   /**
    * Service constructor
    *
    * @param container
-   * @param actionRegistry
    * @param mainActionManager
    * @param sessionManager
    * @param appSettingsService
@@ -506,7 +512,6 @@ export class OverlayManager {
    */
   constructor(
     @InjectContainer() readonly container: Container,
-    // readonly actionRegistry: ActionRegistry,
     readonly mainActionManager: ElectronMainActionManager,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
@@ -530,8 +535,8 @@ export class OverlayManager {
     this.allOverlays.forEach(overlay => {
       if (overlay.ready) {
         asOption(overlay.window)
-            .filter(win => !win.isDestroyed() && !win.webContents.isDestroyed() && !win.webContents.isCrashed())
-            .tap(win => win.webContents?.send(ipcEventName, ...jsArgs))
+          .filter(win => !win.isDestroyed() && !win.webContents.isDestroyed() && !win.webContents.isCrashed())
+          .tap(win => win.webContents?.send(ipcEventName, ...jsArgs))
       }
     })
   }
@@ -675,30 +680,30 @@ export class OverlayManager {
       this.autoLayoutEditorInfoWindows()
     }
   }
-
-  /**
-   * Create a delete dashboard config task
-   *
-   * @param id
-   * @private
-   */
-  private createDeleteDashboardConfigTask(id: string) {
-    return async () => {
-      const dashFile = Path.join(AppPaths.dashboardsDir, id + FileExtensions.Dashboard)
-      info(`Deleting dashboard ${dashFile}`)
-
-      await Fsx.unlink(dashFile)
-    }
-  }
-
-  private createSaveDashboardConfigTask(config: DashboardConfig) {
-    return async () => {
-      const dashFile = Path.join(AppPaths.dashboardsDir, config.id + FileExtensions.Dashboard)
-      info(`Saving dashboard ${dashFile}`)
-
-      await Fsx.writeJSON(dashFile, DashboardConfig.toJson(config))
-    }
-  }
+  //
+  // /**
+  //  * Create a delete dashboard config task
+  //  *
+  //  * @param id
+  //  * @private
+  //  */
+  // private createDeleteDashboardConfigTask(id: string) {
+  //   return async () => {
+  //     const dashFile = Path.join(AppPaths.dashboardsDir, id + FileExtensions.Dashboard)
+  //     info(`Deleting dashboard ${dashFile}`)
+  //
+  //     await Fsx.unlink(dashFile)
+  //   }
+  // }
+  //
+  // private createSaveDashboardConfigTask(config: DashboardConfig) {
+  //   return async () => {
+  //     const dashFile = Path.join(AppPaths.dashboardsDir, config.id + FileExtensions.Dashboard)
+  //     info(`Saving dashboard ${dashFile}`)
+  //
+  //     await Fsx.writeJSON(dashFile, DashboardConfig.toJson(config))
+  //   }
+  // }
 
   updateOverlayPlacement(
     win: OverlayBrowserWindow,
@@ -808,11 +813,6 @@ export class OverlayManager {
         match(kind === OverlayBrowserWindowType.VR)
           .with(true, () => {
             const tool = getVRRectangleLayoutTool({ anchor })
-            // this.vrOverlays
-            //   .map(it => it.placement.vrLayout)
-            //   .map(vrl => new RectangleLayoutTool.Rectangle(vrl.pose.x,
-            // vrl.pose.eyeY, vrl.size.width, vrl.size.height))
-            // .forEach(rect => { tool.push(rect) })
 
             const { placement } = win,
               size = placement.vrLayout.size,
@@ -890,6 +890,24 @@ export class OverlayManager {
 
         this.autoLayoutEditorInfoWindows()
       })
+  }
+
+  private updateAllDataVars() {
+    for (const ow of this.overlayWindows_) {
+      if (ow.config?.overlay) this.updateDataVars(ow.uniqueId, ow.config.overlay)
+    }
+  }
+
+  private updateDataVars(ouid: string, overlayInfo: OverlayInfo): void {
+    const dataVarNames = overlayInfo.dataVarNames ?? []
+    for (const [id, install] of Object.entries(this.mainAppState.plugins.plugins)) {
+      for (const comp of install.manifest.components) {
+        if (comp.id === overlayInfo.componentId) {
+          dataVarNames.push(...(comp.overlayIracingSettings?.dataVariablesUsed ?? []))
+        }
+      }
+    }
+    this.sessionManager.registerComponentDataVars(ouid, dataVarNames)
   }
 }
 

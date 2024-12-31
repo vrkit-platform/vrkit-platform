@@ -11,9 +11,7 @@ async function renderOverlayRoot(root: ReactDOM.Root) {
   function Root() {
     return (
       <AppInitializationContainer resolveContainer={resolveContainer}>
-      
         <AppContainer />
-      
       </AppInitializationContainer>
     )
   }

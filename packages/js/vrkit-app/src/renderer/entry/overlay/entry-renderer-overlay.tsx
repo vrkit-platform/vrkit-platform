@@ -4,13 +4,15 @@ import LogServerRendererSetup from "../../../common/logger/renderer"
 
 
 async function start() {
-  window.addEventListener("error", (ev) => {
-    console.error("Unhandled error", ev)
+  window.addEventListener("error", (ev, ...args) => {
+    console.error("Unhandled error", ev, args)
     ev?.preventDefault?.()
+    ev?.stopPropagation?.()
   })
   window.addEventListener("unhandledrejection", (ev, ...args) => {
     console.error("unhandledrejection", ev, ...args)
     ev?.preventDefault?.()
+    ev?.stopPropagation?.()
   })
   
   await LogServerRendererSetup()

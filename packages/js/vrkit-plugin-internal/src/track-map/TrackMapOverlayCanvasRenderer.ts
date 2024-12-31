@@ -129,7 +129,13 @@ class TrackMapOverlayCanvasRenderer {
   private get isInitialized() {
     return this.initializeDeferred?.isFulfilled() ?? false
   }
-
+  
+  /**
+   * Create car records for rendering
+   *
+   * @param settings
+   * @private
+   */
   private makeRenderCars(settings: OverlayBaseSettings = null): RenderCarsFn {
     const fps = settings?.fps ?? 60
     return throttle(
@@ -196,10 +202,6 @@ class TrackMapOverlayCanvasRenderer {
   /**
    * Render the track map
    */
-  // @Throttle(TrackMapThrottlingPeriod, {
-  //   trailing: true,
-  //   leading: true
-  // })
   private createScene() {
     try {
       if (!this.isInitialized) {
@@ -222,21 +224,12 @@ class TrackMapOverlayCanvasRenderer {
 
       log.info("renderTrack()", width, height)
 
-      // this.canvasEl.width = width
-      // this.canvasEl.height = height
       Object.assign(this.canvasEl.style, {
         width: `${width}px`,
         height: `${height}px`,
         background: "transparent",
         objectFit: "contain"
       })
-
-      if (!this.state.two) {
-        // this.state.two.clear()
-        // this.state.two = null
-        //
-        // this.canvasEl.innerHTML = "";
-      }
 
       const statePatch: Partial<SceneState> = {
           width,
@@ -302,24 +295,23 @@ class TrackMapOverlayCanvasRenderer {
         return
       }
       const drivers = info?.driverInfo?.drivers
-      // log.info("Drivers info", drivers)
       if (!drivers) {
         return
       }
+
       for (let driver of Object.values(drivers)) {
         const newData: CarData = {
-          id: driver.carID,
-          idx: driver.carIdx,
-          carNumber: driver.carNumber,
-          username: driver.userName,
-          lap: 0,
-          lapCompleted: 0,
-          classPosition: 0,
-          position: 0,
-          lapPercentComplete: 0.0
-        }
-
-        const { carDataMap } = this.state,
+            id: driver.carID,
+            idx: driver.carIdx,
+            carNumber: driver.carNumber,
+            username: driver.userName,
+            lap: 0,
+            lapCompleted: 0,
+            classPosition: 0,
+            position: 0,
+            lapPercentComplete: 0.0
+          },
+          { carDataMap } = this.state,
           existingData = carDataMap.get(driver.carIdx)
 
         if (existingData) {
@@ -386,10 +378,12 @@ class TrackMapOverlayCanvasRenderer {
    */
   @Bind
   private onDataFrame(sessionId, timing, dataVarValues) {
-    if (!this.isInitialized || !dataVarValues) return
+    if (!this.isInitialized || !dataVarValues) {
+      return
+    }
     try {
-      // log.debug("DATA_FRAME EVENT", sessionId, timing.currentTimeMillis, "DATA
-      // VAR VALUE COUNT = ", dataVarValues.length)
+      // log.debug("DATA_FRAME EVENT", sessionId, timing.currentTimeMillis,
+      // "DATA VAR VALUE COUNT = ", dataVarValues.length)
       this.updateCars(dataVarValues)
     } catch (err) {
       log.error(`Unable to process data frame`, err)
@@ -433,7 +427,9 @@ class TrackMapOverlayCanvasRenderer {
         }),
         weekendInfo = sessionInfo.weekendInfo,
         { trackID: trackId, trackName, trackConfigName } = pick(weekendInfo, "trackID", "trackName", "trackConfigName"),
-        trackLayoutId = `${trackId}::${trackName}::${!trackConfigName || trackConfigName === "null" ? "NO_CONFIG_NAME" : trackConfigName}`
+        trackLayoutId = `${trackId}::${trackName}::${
+          !trackConfigName || trackConfigName === "null" ? "NO_CONFIG_NAME" : trackConfigName
+        }`
 
       state.trackMap = await client.getTrackMap(trackLayoutId)
 
@@ -441,13 +437,6 @@ class TrackMapOverlayCanvasRenderer {
 
       deferred.resolve()
       this.createScene()
-
-      // REMOVE LISTENERS ON RELOAD
-      // if (import.meta.webpackHot) {
-      //   import.meta.webpackHot.addDisposeHandler(() => {
-      //     this.destroy()
-      //   })
-      // }
 
       // ATTACH LISTENERS
       client.on(PluginClientEventType.SESSION_INFO_CHANGED, this.onSessionInfo)
@@ -461,7 +450,6 @@ class TrackMapOverlayCanvasRenderer {
     }
 
     return deferred.promise
-    // this.renderSetup()
   }
 
   constructor(

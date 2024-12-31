@@ -28,6 +28,7 @@ import type { AppStore } from "../store"
 import { sharedAppSelectors } from "../store/slices/shared-app"
 import { overlayWindowActions } from "../store/slices/overlay-window"
 import "@vrkit-platform/plugin-sdk"
+import { match } from "ts-pattern"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -114,23 +115,20 @@ export class OverlayManagerClient
         sharedAppSelectors.selectActiveSessionId(rootState),
         sharedAppSelectors.selectActiveSessionInfo(rootState)
       ],
-      cache = this.cache_
+      cache = this.cache_,
 
-    let evType: PluginClientEventType = null
-    if (sessionId !== cache.sessionId) {
-      evType = PluginClientEventType.SESSION_ID_CHANGED
-    } else if (!isEqual(sessionInfo, cache.sessionInfo)) {
-      evType = PluginClientEventType.SESSION_INFO_CHANGED
-    }
+      evType: PluginClientEventType = match(sessionId)
+        .with(cache.sessionId, () => PluginClientEventType.SESSION_INFO_CHANGED)
+        .otherwise(() => PluginClientEventType.SESSION_ID_CHANGED)
+    
+    
+    Object.assign(cache, {
+      sessionId,
+      sessionInfo
+    })
 
-    if (evType) {
-      Object.assign(cache, {
-        sessionId,
-        sessionInfo
-      })
-
-      this.emit(evType, sessionId, sessionInfo)
-    }
+    this.emit(evType, sessionId, sessionInfo)
+  
   }
   
   [Symbol.dispose]() {
@@ -142,11 +140,11 @@ export class OverlayManagerClient
   /**
    * Cleanup resources on unload
    *
-   * @param event
+   * @param _event
    * @private
    */
   @Bind
-  private unload(event?: Event) {
+  private unload(_event?: Event) {
     debug(`Unloading overlay manager client`)
 
     this[Symbol.dispose]()

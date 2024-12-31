@@ -6,13 +6,14 @@ import { getLogger } from "@3fv/logger-proxy"
 import CircularProgress from "@mui/material/CircularProgress"
 import { ServiceContainerContext } from "../service-container"
 import { Deferred } from "@3fv/deferred"
+import { isFunction } from "@3fv/guard"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 export interface AppInitializationContainerProps {
   children: (typeof Children) | React.ReactNode | React.ReactNode[]
-  resolveContainer: () => Deferred<Container>
+  resolveContainer: (() => Deferred<Container>) | Deferred<Container> | Promise<Container>
 }
 export interface AppInitializationContainerState {
   containerPromise: Promise<Container>
@@ -27,10 +28,13 @@ export class AppInitializationContainer extends React.Component<
   constructor(props: AppInitializationContainerProps) {
     super(props)
     
-    const {resolveContainer} = props
+    const {resolveContainer} = props,
+        containerPromise = isFunction(resolveContainer) ? resolveContainer().promise :
+            resolveContainer instanceof Deferred ? resolveContainer.promise :
+                resolveContainer
     
     this.state = {
-      containerPromise: Future.of(resolveContainer().promise)
+      containerPromise: Future.of(containerPromise)
         .onSuccess(container => this.setState({ container }))
         .toPromise()
     }

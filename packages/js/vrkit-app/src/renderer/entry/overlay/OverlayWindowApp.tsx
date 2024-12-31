@@ -12,14 +12,13 @@ import { Provider as ReduxProvider } from "react-redux"
 import OverlayWindowAppBody from "./OverlayWindowAppBody"
 import useAppStore from "vrkit-app-renderer/hooks/useAppStore"
 import { overlayWindowSelectors } from "../../services/store/slices/overlay-window"
-import { OverlayWindowRole } from "@vrkit-platform/shared"
 
 export default function OverlayWindowApp() {
   const appStore = useAppStore(),
     windowRole = overlayWindowSelectors.selectWindowRole(appStore.getState())
 
   useLayoutEffect(() => {
-    const headEl = document.head || document.getElementsByTagName("head")[0],
+    const headEl = document.head || document.querySelector("head"),
       styleEl = document.createElement("style")
 
     headEl.appendChild(styleEl)
@@ -33,11 +32,9 @@ export default function OverlayWindowApp() {
   return (
     <ReduxProvider store={appStore}>
       <I18nProvider>
-        
-          <ThemeProvider>
-            <OverlayWindowAppBody />
-          </ThemeProvider>
-        
+        <ThemeProvider>
+          <OverlayWindowAppBody />
+        </ThemeProvider>
       </I18nProvider>
     </ReduxProvider>
   )

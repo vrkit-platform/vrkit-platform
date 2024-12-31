@@ -1,14 +1,14 @@
-//import "webpack-env"
-// import "../../../common"
 import { getLogger } from "@3fv/logger-proxy"
-
-import { Container, Inject, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
+import Chokidar, {FSWatcher} from "chokidar"
+import {
+  Container, Inject, InjectContainer, PostConstruct, Singleton
+} from "@3fv/ditsy"
 import {
   assert,
-  Bind, greaterThan,
+  Bind,
   importDefault,
   isNotEmpty,
-  OverlayManagerClientEventHandler
+  OverlayManagerClientEventHandler, propEqualTo
 } from "@vrkit-platform/shared"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
@@ -19,7 +19,9 @@ import {
   IPluginComponentProps,
   TPluginComponentType
 } from "@vrkit-platform/plugin-sdk"
-import { OverlayConfig, OverlayKind, PluginComponentDefinition, PluginInstall } from "@vrkit-platform/models"
+import {
+  OverlayConfig, OverlayKind, PluginComponentDefinition, PluginInstall
+} from "@vrkit-platform/models"
 import OverlayManagerClient from "../overlay-manager-client"
 import { asOption } from "@3fv/prelude-ts"
 import TrackManager from "../track-manager"
@@ -36,13 +38,11 @@ import { PackageJson } from "type-fest"
 import { Deferred } from "@3fv/deferred"
 import { overlayWindowActions } from "../store/slices/overlay-window"
 
-
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
 
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
-
 
 export interface IPluginRequireFunction extends NodeJS.Require {}
 
@@ -58,6 +58,7 @@ Object.assign(window, {
 
 export class PluginLoader {
   private readonly state_: {
+    fileWatcher: FSWatcher,
     moduleIdCache: Record<string, any>
     componentFactory?: IPluginComponentFactory
     vm: {
@@ -82,8 +83,11 @@ export class PluginLoader {
 
   private pluginRequire(target: NodeJS.Require, _thisArg: any, ...args: any[]) {
     const moduleName = asOption(args[0])
-            .mapIf(it => isArray(it) && !isString(it), (it:any[]) => it[0])
-            .filter(isString)
+        .mapIf(
+          it => isArray(it) && !isString(it),
+          (it: any[]) => it[0]
+        )
+        .filter(isString)
         .filter(isNotEmpty)
         .getOrThrow("This first argument to require must be a string with at least 1 character"),
       { state } = this,
@@ -101,7 +105,7 @@ export class PluginLoader {
     } catch (err) {
       log.error(`pluginExternalRequire`, err)
     }
-    
+
     if (moduleIdCache[moduleName]) {
       log.info(`Resolved ${moduleName} in moduleIdCache`)
       return moduleIdCache[moduleName]
@@ -110,13 +114,11 @@ export class PluginLoader {
     let mod: any = null
     if (!isBuiltin(moduleName)) {
       try {
-        
         mod = __webpack_modules__[moduleName]
         // if (!mod) {
         //   const id = __web.resolve(moduleName)
-        //   assert(isNotEmpty(id), `Unable to resolve ${moduleName} inside webpack require`)
-        //
-        // }
+        //   assert(isNotEmpty(id), `Unable to resolve ${moduleName} inside
+        // webpack require`)  }
         assert(!!mod, "Mod has no valid exports and is null or undefined")
         // if (moduleIdCache[moduleName]) {
         //   return moduleIdCache[moduleName]
@@ -137,7 +139,7 @@ export class PluginLoader {
       if (moduleIdCache[id]) {
         return moduleIdCache[id]
       }
-      
+
       log.info(`Resolved ${moduleName} in moduleIdCache via nodeRequire`)
       moduleIdCache[id] = mod
       return mod
@@ -171,22 +173,32 @@ export class PluginLoader {
 
       log.info(`Reading plugin installation bundle @ ${pkgMainFile}`)
       const code = await Fsx.readFile(pkgMainFile, "utf-8"),
-        
-          vmScript = (this.state_.vm.script = new VM.Script(code, {
+        vmScript = (this.state_.vm.script = new VM.Script(code, {
           filename: pkgMainFile,
           importModuleDynamically: VM.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER
         })),
         vmCtxObj = this.state.vm.contextObj
       
+      // IF A `PluginInstall` IS MARKED AS DEV ENABLED
+      // THEN WATCH FOR CHANGES
+      if (install.isDevEnabled) {
+        log.info(`Plugin DEV MODE setting up file watcher`, install)
+        const watcher = Chokidar.watch(pkgMainFile, {
+          awaitWriteFinish: true
+        })
+        watcher.on("change", this.onFileWatcherChanged.bind(this))
+            .on("error", this.onFileWatcherError.bind(this))
+        state.fileWatcher = watcher
+      }
       Object.assign(vmCtxObj, {
         __dirname: pkgPath,
         __filename: pkgMainFile
       })
-      
+
       const
-        //vmCtxProxy = this.createProxyGlobal(),
         vmCtx = (this.state_.vm.context = VM.createContext(vmCtxObj, {
-          name: manifestName,codeGeneration: {
+          name: manifestName,
+          codeGeneration: {
             strings: true
           }
 
@@ -215,33 +227,14 @@ export class PluginLoader {
       throw err
     }
   }
-
-  private createProxyGlobal(): Window {
-    const {
-      state: { global: g }
-    } = this
-    return new Proxy(window, {
-      get: (target: any, prop: string | symbol, _receiver: any) => {
-        const { contextObj } = this.state.vm
-        return asOption(g[prop])
-          .orCall(() => asOption(contextObj[prop]))
-          .getOrCall(() => target[prop])
-      },
-      //
-      // set: (_target: any, prop: string | symbol, newValue: any, _receiver: any): boolean => {
-      //   const { global: g } = this.state
-      //
-      //   if (g[prop]) {
-      //     log.error(`Can not set property (${prop?.toString()}), it exists on the global proxy`)
-      //     return false
-      //   }
-      //
-      //   const { contextObj } = this.state.vm
-      //
-      //   contextObj[prop] = newValue
-      //   return true
-      // }
-    })
+  
+  private onFileWatcherError(err: Error) {
+    log.error(`File watcher error occurred`, err)
+  }
+  
+  private onFileWatcherChanged(file: string) {
+    log.info(`File watcher change event: ${file}`)
+    window.location.reload()
   }
 
   constructor(
@@ -249,20 +242,20 @@ export class PluginLoader {
     readonly serviceContainer: Container,
     readonly install: PluginInstall
   ) {
-    //import.meta.url
     const customRequire = Module.createRequire(install.path),
       requireProxy = new Proxy(customRequire, {
         apply: this.pluginRequire.bind(this)
       }),
-        globalRequire = {
-          require: requireProxy,
-          requireProxy,
-          customRequire,
-          nodeRequire: __non_webpack_require__,
-          webpackRequire: __webpack_require__
-        }
+      globalRequire = {
+        require: requireProxy,
+        requireProxy,
+        customRequire,
+        nodeRequire: __non_webpack_require__,
+        webpackRequire: __webpack_require__
+      }
 
     this.state_ = {
+      fileWatcher: null,
       moduleIdCache: {},
 
       vm: {
@@ -313,8 +306,8 @@ export class PluginLoader {
 }
 
 type TComponentLoader = (
-    install: PluginInstall,
-    componentDef: PluginComponentDefinition
+  install: PluginInstall,
+  componentDef: PluginComponentDefinition
 ) => Promise<TPluginComponentType>
 
 @Singleton()
@@ -324,20 +317,16 @@ export class PluginClientLauncher {
   }
 
   private readonly builtinPluginLoaders_: Record<OverlayKind, TComponentLoader> = {
-    [OverlayKind.PLUGIN]: async (
-      install: PluginInstall,
-      componentDef: PluginComponentDefinition
-    ) => {
+    [OverlayKind.PLUGIN]: async (install: PluginInstall, componentDef: PluginComponentDefinition) => {
       const { loaders } = this.state_
       if (!loaders.has(install.id)) {
         loaders.set(install.id, PluginLoader.create(this, this.serviceContainer, install))
       }
-      
+
       log.info(`Loading component (${componentDef?.id})`)
-      const
-          loader = loaders.get(install.id),
-          componentType = await loader.getComponent(componentDef)
-      
+      const loader = loaders.get(install.id),
+        componentType = await loader.getComponent(componentDef)
+
       log.info(`Loaded component (${componentDef?.id})`, componentType)
       return componentType
     },
@@ -347,7 +336,7 @@ export class PluginClientLauncher {
   private pluginClient: IPluginClient
 
   private reactComponent_: React.ComponentType<IPluginComponentProps>
-  
+
   /**
    * Get/Create an implementation of `IPluginClient`
    *
@@ -416,13 +405,12 @@ export class PluginClientLauncher {
   // tslint:disable-next-line
   private async init(): Promise<void> {
     window.addEventListener("beforeunload", this.unload)
-    
+
     this.initDev()
 
     window["getVRKitPluginClient"] = this.getPluginClient.bind(this)
-    
   }
-  
+
   /**
    * Launch - runs in an overlay window only
    */
@@ -434,17 +422,24 @@ export class PluginClientLauncher {
     }
 
     const { kind, componentId } = config.overlay,
-        pluginsState = this.appStore.getState().shared?.plugins,
-        pluginInstall = kind !== OverlayKind.PLUGIN ? null :
-            asOption(pluginsState)
-                .map(state => Object.values(state.plugins).find(pluginInstall => componentId.startsWith(pluginInstall.id)) as PluginInstall)
-                .getOrThrow(`Unable to find PluginInstall for componentId ${componentId}`),
-        componentDef = kind !== OverlayKind.PLUGIN ? null :
-            pluginInstall?.manifest?.components?.find(({id}) => id === componentId)
-    
+      pluginsState = this.appStore.getState().shared?.plugins,
+      pluginInstall =
+        kind !== OverlayKind.PLUGIN
+          ? null
+          : asOption(pluginsState)
+              .map(
+                state =>
+                  Object.values(state.plugins).find(pluginInstall =>
+                    componentId.startsWith(pluginInstall.id)
+                  ) as PluginInstall
+              )
+              .getOrThrow(`Unable to find PluginInstall for componentId ${componentId}`),
+      componentDef =
+        kind !== OverlayKind.PLUGIN ? null : pluginInstall?.manifest?.components?.find(({ id }) => id === componentId)
+
     const loaderFn = this.builtinPluginLoaders_[kind]
     assert(!!loaderFn, `Loader for kind ${kind} is unknown`)
-    
+
     const componentOrPromise = await loaderFn(pluginInstall, componentDef)
 
     this.reactComponent_ = isPromise(componentOrPromise) ? await componentOrPromise : componentOrPromise

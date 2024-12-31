@@ -126,7 +126,7 @@
           "description": "Color the 3rd car class in the race (dots)",
           "type": "COLOR",
           "defaultValue": {
-            "colorValue": "#0000FF"
+            "colorValue": "#0000FA"
           }
         }
       },

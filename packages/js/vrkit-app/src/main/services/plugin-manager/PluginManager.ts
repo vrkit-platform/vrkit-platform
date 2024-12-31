@@ -23,7 +23,7 @@ import {
   unzipFile
 } from "@vrkit-platform/shared/services/node"
 import { AppFiles, AppPaths } from "@vrkit-platform/shared/constants/node"
-import { IObjectDidChange, remove, runInAction, set } from "mobx"
+import { remove, runInAction, set } from "mobx"
 import SharedAppState from "../store"
 import { PluginInstall, PluginInstallStatus, PluginManifest } from "@vrkit-platform/models"
 import { asOption, Future } from "@3fv/prelude-ts"
@@ -37,6 +37,7 @@ import { app, ipcMain, IpcMainInvokeEvent, net } from "electron"
 import { Deferred } from "@3fv/deferred"
 import { PluginManifestsURL } from "../../constants"
 import PQueue from "p-queue"
+import Chokidar, { FSWatcher } from "chokidar"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -60,11 +61,13 @@ export class PluginManager {
   private readonly taskQueue = new PQueue({
     concurrency: 1
   })
-  
+
+  readonly #fileWatchers: Record<string, FSWatcher> = {}
+
   /**
    * State accessor
    */
-  get state():PluginsState {
+  get state(): PluginsState {
     return this.sharedAppState.plugins
   }
 
@@ -126,6 +129,10 @@ export class PluginManager {
     return this
   }
 
+  /**
+   * Load the list of available plugins (from the VRKit plugin manifest
+   * directory)
+   */
   async loadAvailablePlugins(): Promise<Record<string, PluginManifest>> {
     return (await this.taskQueue.add(async (): Promise<Record<string, PluginManifest>> => {
       if (!(await Fsx.pathExists(AppFiles.pluginsJSONFile))) {
@@ -143,6 +150,9 @@ export class PluginManager {
     })) as Record<string, PluginManifest>
   }
 
+  /**
+   * Download updated available plugins list
+   */
   async refreshAvailablePlugins(): Promise<void> {
     await this.taskQueue.add(this.refreshAvailablePluginTask())
   }
@@ -163,6 +173,11 @@ export class PluginManager {
    * Resource cleanup
    */
   [Symbol.dispose]() {
+    Object.entries(this.#fileWatchers).forEach(([id, watcher]) => {
+      delete this.#fileWatchers[id]
+      watcher.close()
+    })
+
     this.disposers_.dispose()
   }
 
@@ -240,22 +255,45 @@ export class PluginManager {
 
     log.assert(checks.every(isTrue), `Plugin & manifest paths are invalid: ${[manifestFile, pluginDir].join(", ")}`)
 
-    const manifestObj = await asOption(manifestFile)
-        .map(file =>
-          /\.json5?$/.test(file)
-            ? this.fileManager.readJSON(file)
-            : /\.ya?ml$/.test(file)
-              ? this.fileManager.readYaml(file)
-              : null
-        )
-        .filter(isPromise)
-        .getOrThrow(`Unable to load ${manifestFile}`),
-      manifest = PluginManifest.fromJson(manifestObj, { ignoreUnknownFields: true })
+    const internalLoadManifest = async (manifestFile: string) => {
+        return await asOption(manifestFile)
+          .map(file =>
+            /\.json5?$/.test(file)
+              ? this.fileManager.readJSON(file)
+              : /\.ya?ml$/.test(file)
+                ? this.fileManager.readYaml(file)
+                : null
+          )
+          .filter(isPromise)
+          .getOrThrow(`Unable to load ${manifestFile}`)
+      },
+      manifestObj = await internalLoadManifest(manifestFile),
+      manifest = PluginManifest.fromJson(manifestObj, { ignoreUnknownFields: true }), // TODO: in the future, add additional methods of activating
+      // `isDevEnabled`
+      isDevEnabled = isLink
+
+    if ((isDevEnabled || isDev) && !this.#fileWatchers[manifest.id]) {
+      const watcher = (this.#fileWatchers[manifest.id] = Chokidar.watch(manifestFile, {
+        awaitWriteFinish: true
+      }))
+
+      watcher.on("change", file => {
+        log.info(`Manifest file changed (${file})`)
+        internalLoadManifest(file)
+          .then(newManifest => {
+            log.info("Reloaded manifest", newManifest)
+            this.updatePluginManifestState(newManifest)
+          })
+          .catch(err => {
+            log.error(`Manifest reload/update failed`, err)
+          })
+      })
+    }
 
     return PluginInstall.create({
       id: manifest.id,
       isLink,
-      isDevEnabled: isLink,
+      isDevEnabled,
       isInternal: isBuiltinPlugin(manifest.id),
       status: PluginInstallStatus.PLUGIN_STATUS_AVAILABLE,
       path: pluginDir,
@@ -481,6 +519,29 @@ export class PluginManager {
         log.error("Unable to refresh available plugins", err)
       }
     }
+  }
+
+  private updatePluginManifestState(newManifest: PluginManifest) {
+    const install = this.state.plugins[newManifest.id]
+    if (!install) {
+      log.error(`PluginInstall (${newManifest.id}) is not in state`, newManifest)
+      return
+    }
+
+    runInAction(() => {
+        log.info("Updating manifest install in shared state", install)
+        // const newPlugins = {
+        //     ...this.state.plugins.plugins
+        //   },
+        //   newInstall = PluginInstall.clone(install)
+        //
+        // newInstall.manifest = newManifest
+        // newPlugins[newManifest.id] = newInstall
+        // set(this.state.plugins, "plugins", newPlugins)
+        // set(this.sharedAppState.plugins.plugins[newManifest.id], "manifest", newManifest)
+      this.sharedAppState.plugins.plugins[newManifest.id].manifest = newManifest
+      
+    })
   }
 }
 

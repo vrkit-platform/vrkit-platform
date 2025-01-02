@@ -87,7 +87,7 @@ export class SessionDataAccess<VarNames extends string> {
    */
   get<Type extends SessionDataAccessValueKind, R extends SessionDataAccessValueMappedType[Type] = SessionDataAccessValueMappedType[Type]>(
       type: Type,
-      name: string,
+      name: VarNames,
       idx: number = 0,
       defaultValue: R = SessionDataAccess.DefaultValues[type] as R
   ): R {
@@ -112,7 +112,7 @@ export class SessionDataAccess<VarNames extends string> {
    * @param idx
    * @param defaultValue
    */
-  getNumber(name: string, idx: number = 0, defaultValue: number = SessionDataAccess.DefaultValues.Number): number {
+  getNumber(name: VarNames, idx: number = 0, defaultValue: number = SessionDataAccess.DefaultValues.Number): number {
     return this.get("Number", name, idx, defaultValue)
   }
   
@@ -123,7 +123,7 @@ export class SessionDataAccess<VarNames extends string> {
    * @param idx
    * @param defaultValue
    */
-  getBool(name: string, idx: number = 0, defaultValue: boolean = SessionDataAccess.DefaultValues.Bool): boolean {
+  getBool(name: VarNames, idx: number = 0, defaultValue: boolean = SessionDataAccess.DefaultValues.Bool): boolean {
     return this.get("Bool", name, idx, defaultValue)
   }
 }

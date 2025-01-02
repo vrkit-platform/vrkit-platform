@@ -292,7 +292,7 @@ export class SessionPlayer extends EventEmitter3<
     const names = flatten(argNames)
     return names.map(name =>
       asOption(this.dataVariableMap[name]).getOrCall(() =>
-        asOption<SessionDataVariable>(this.nativePlayer.getDataVariable(name))
+        asOption<SessionDataVariable>(this.nativePlayer?.getDataVariable?.(name))
           .ifSome(dataVar => {
             this.dataVariableMap[name] = dataVar
           })

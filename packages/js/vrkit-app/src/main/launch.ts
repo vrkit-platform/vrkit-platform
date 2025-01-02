@@ -112,7 +112,7 @@ function prepareWindow(state: ISharedAppState, win: BrowserWindow, isMainWindow:
       asOption(BuildPaths.root)
         .filter(Fsx.existsSync)
         .ifSome(rootDir => {
-          win.webContents.addWorkSpace(rootDir)
+          win.webContents.addWorkSpace(Path.resolve(rootDir))
         })
     })
     .setWindowOpenHandler(windowOpenHandler)

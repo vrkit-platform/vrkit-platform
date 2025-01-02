@@ -262,6 +262,7 @@ export class PluginLoader {
         contextObj: {
           ...window,
           window,
+          console: window.console,
           global,
           module: {
             exports: {}

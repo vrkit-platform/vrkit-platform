@@ -1,0 +1,23 @@
+@startuml
+actor Client
+
+participant "TrackMapOverlayPlugin" as Plugin
+participant "TrackMapOverlayCanvasRenderer" as Renderer
+
+Client -> Plugin: Sends data frame event
+Plugin -> Renderer: onDataFrame(sessionId, timing, dataVarValues)
+
+alt Initialized and dataVarValues provided
+    Renderer -> Renderer: Check isInitialized
+    Renderer -> Renderer: updateCars(dataVarValues)
+    alt Car data map is populated
+        Renderer -> Renderer: Update car data with lap\nand position info
+        Renderer -> Renderer: renderCars(pendingCarData)
+    else Car data map is empty
+        Renderer -> Renderer: Log warning: "Car info not set"
+    end
+else Not initialized or no dataVarValues
+    Renderer -> Renderer: Log warning or return
+end
+
+@enduml

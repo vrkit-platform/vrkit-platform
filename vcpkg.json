@@ -1,5 +1,5 @@
 {
-  "name": "irsdk-cpp",
+  "name": "vrkit-platform",
   "version": "0.0.1",
   "builtin-baseline": "47bf3d1ac192b3fa0feb6e6ac9c845de179eebe9",
   "dependencies": [

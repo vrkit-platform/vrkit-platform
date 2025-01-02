@@ -18,6 +18,7 @@ export const BundledModuleNames = [
   "@mui/x-data-grid",
   "@mui/x-tree-view",
   "lodash",
+  "lodash/fp",
   "usehooks-ts",
   "@vrkit-platform/plugin-sdk",
   "@vrkit-platform/models",

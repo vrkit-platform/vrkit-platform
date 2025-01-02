@@ -240,8 +240,8 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
           }}
         >
           <Tooltip title="Dashboard includes these plugins">
-          <FlexRowCenterBox sx={{ ...FlexAuto }}>
-            <Typography variant="caption">&nbsp;</Typography>
+          <FlexRowCenterBox sx={{ ...FlexAuto, paddingLeft: theme.spacing(0.5), gap: theme.spacing(1) }}>
+            {/*<Typography variant="caption">&nbsp;</Typography>*/}
             {pluginIcons}
             <PluginOverlayIcon moreCount={moreOverlayDefCount} />
           </FlexRowCenterBox>

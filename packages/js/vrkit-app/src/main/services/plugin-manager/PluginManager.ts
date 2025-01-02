@@ -100,31 +100,7 @@ export class PluginManager {
 
   @Bind
   async uninstallPlugin(id: string): Promise<this> {
-    await this.taskQueue.add(async () => {
-      const install = this.state.plugins[id]
-      if (!install) {
-        log.warn(`Unable to find installed plugin ${id}`)
-        return
-      }
-
-      runInAction(() => {
-        remove(this.state.plugins, id)
-      })
-
-      log.info(`Uninstalling plugin (${install.id}) @ ${install.path}`)
-      if (!(await Fsx.pathExists(install.path))) {
-        log.warn(`Plugin path does not exist ${install.path}`)
-        return
-      }
-
-      await Fsx.rm(install.path, {
-        retryDelay: 100,
-        recursive: true,
-        force: true
-      })
-
-      log.info(`Uninstalled plugin (${install.id}) @ ${install.path}`)
-    })
+    await this.taskQueue.add(this.uninstallPluginTask(id))
 
     return this
   }
@@ -487,16 +463,34 @@ export class PluginManager {
   }
 
   private uninstallPluginTask(id: string): () => Promise<void> {
-    return async () => {}
-  }
-
-  private updatePluginTask(id: string): () => Promise<void> {
     return async () => {
-      const uninstallTask = this.uninstallPluginTask(id),
-        installTask = this.installPluginTask(id)
+      const install = this.state.plugins[id]
+      if (!install) {
+        log.warn(`Unable to find installed plugin ${id}`)
+        return
+      }
+      
+      runInAction(() => {
+        remove(this.state.plugins, id)
+      })
+      
+      log.info(`Uninstalling plugin (${install.id}) @ ${install.path}`)
+      if (!(await Fsx.pathExists(install.path))) {
+        log.warn(`Plugin path does not exist ${install.path}`)
+        return
+      }
+      
+      await Fsx.rm(install.path, {
+        retryDelay: 100,
+        recursive: true,
+        force: true
+      })
+      
+      log.info(`Uninstalled plugin (${install.id}) @ ${install.path}`)
     }
   }
 
+  
   private refreshAvailablePluginTask(): () => Promise<void> {
     return async () => {
       try {
@@ -529,18 +523,8 @@ export class PluginManager {
     }
 
     runInAction(() => {
-        log.info("Updating manifest install in shared state", install)
-        // const newPlugins = {
-        //     ...this.state.plugins.plugins
-        //   },
-        //   newInstall = PluginInstall.clone(install)
-        //
-        // newInstall.manifest = newManifest
-        // newPlugins[newManifest.id] = newInstall
-        // set(this.state.plugins, "plugins", newPlugins)
-        // set(this.sharedAppState.plugins.plugins[newManifest.id], "manifest", newManifest)
+      log.info("Updating manifest install in shared state", install)
       this.sharedAppState.plugins.plugins[newManifest.id].manifest = newManifest
-      
     })
   }
 }

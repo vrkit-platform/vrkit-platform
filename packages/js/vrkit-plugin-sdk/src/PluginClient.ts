@@ -19,6 +19,8 @@ export enum PluginClientEventType {
   DATA_FRAME = "DATA_FRAME"
 }
 
+export type PluginClientEventKind = `${PluginClientEventType}`
+
 export interface IPluginClientEventArgs {
   [PluginClientEventType.DATA_FRAME]: (
     sessionId: string,

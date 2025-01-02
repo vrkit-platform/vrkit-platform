@@ -63,8 +63,8 @@ export class SessionDataAccess<VarNames extends string> {
    * @param dataVarValues
    * @param varNames
    */
-  static create<VarNames extends string>(dataVarValues: SessionDataVariableValueMap, ...varNames: VarNames[]) {
-    return new SessionDataAccess<VarNames>(dataVarValues, ...varNames)
+  static create<VarNames extends string>(dataVarValues: SessionDataVariableValueMap, varNames: SessionDataVarNames<VarNames>) {
+    return new SessionDataAccess<VarNames>(dataVarValues, varNames)
   }
   
   /**
@@ -73,8 +73,8 @@ export class SessionDataAccess<VarNames extends string> {
    * @param dataVarValues
    * @param varNames
    */
-  constructor(readonly dataVarValues: SessionDataVariableValueMap, ...varNames: VarNames[]) {
-    this.dataVarNames = toSessionDataVarNames<VarNames>(...varNames)
+  constructor(readonly dataVarValues: SessionDataVariableValueMap, varNames: SessionDataVarNames<VarNames>) {
+    this.dataVarNames = varNames
   }
   
   /**

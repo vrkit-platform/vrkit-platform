@@ -25,8 +25,13 @@
   "dependencies": {
     "@protobuf-ts/runtime": "^2.9.4"
   },
+  "peerDependencies": {
+    "@3fv/logger-proxy": ">=1"
+  },
   "devDependencies": {
+    "@types/node": "^22",
     "@protobuf-ts/plugin": "^2.9.4",
+    "@3fv/logger-proxy": "^1.0.71",
     "typescript": "^5.5.4",
     "vrkit-builder-tool": "1.0.3"
   }

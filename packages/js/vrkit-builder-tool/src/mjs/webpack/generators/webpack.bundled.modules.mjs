@@ -27,6 +27,7 @@ export const BundledModuleNames = [
   "electron",
   "react",
   "react/jsx-runtime",
+  "react/jsx-dev-runtime",
   "react-dom"
 ]
 

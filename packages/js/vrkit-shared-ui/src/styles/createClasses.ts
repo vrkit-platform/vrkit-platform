@@ -21,9 +21,9 @@ export function createClassNames<Names extends string>(
   return Object.fromEntries(
     classNames.map(
       className =>
-        [className, [prefix, className].join("-")] as Pair<keyof Names, string>
+        [className, [prefix, className].join("-")] as Pair<Names, string>
     )
-  ) as unknown as ClassNames<Names>
+  ) as ClassNames<Names>
 }
 
 /**

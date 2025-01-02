@@ -30,7 +30,7 @@ import { sharedAppSelectors } from "../store/slices/shared-app"
 import { AppStore } from "../store"
 import { isArray, isFunction, isPromise, isString } from "@3fv/guard"
 import Module, { isBuiltin } from "module"
-import VM, { Context } from "vm"
+// import VM, { Context } from "vm"
 import Fsx from "fs-extra"
 import Path from "path"
 import JSON5 from "json5"
@@ -61,19 +61,10 @@ export class PluginLoader {
     fileWatcher: FSWatcher,
     moduleIdCache: Record<string, any>
     componentFactory?: IPluginComponentFactory
-    vm: {
-      context?: Context
-      contextObj: {
-        module: {
-          exports: any
-        }
-      } & any
-      script?: VM.Script
-    }
     global: {
       require: IPluginRequireFunction
       requireProxy: IPluginRequireFunction
-      customRequire: IPluginRequireFunction
+    //  customRequire: IPluginRequireFunction
       nodeRequire: IPluginRequireFunction
       webpackRequire: IPluginRequireFunction
     }
@@ -115,43 +106,31 @@ export class PluginLoader {
     if (!isBuiltin(moduleName)) {
       try {
         mod = __webpack_modules__[moduleName]
+        if (!!mod) {
+          log.info("Mod is not available through webpack")
+          moduleIdCache[moduleName] = mod
+          return mod
+        }
         // if (!mod) {
         //   const id = __web.resolve(moduleName)
         //   assert(isNotEmpty(id), `Unable to resolve ${moduleName} inside
         // webpack require`)  }
-        assert(!!mod, "Mod has no valid exports and is null or undefined")
+        
         // if (moduleIdCache[moduleName]) {
         //   return moduleIdCache[moduleName]
         // }
 
-        moduleIdCache[moduleName] = mod
-        return mod
+        
       } catch (err) {
         errors.push([`Unable to load module (${moduleName}) via webpack`, err])
       }
     }
-
-    try {
-      const id = nodeRequire.resolve(moduleName)
-      assert(isNotEmpty(id), `Unable to resolve ${moduleName} inside node require`)
-      mod = nodeRequire(id)
-      assert(!!mod, "Mod has no valid exports and is null or undefined")
-      if (moduleIdCache[id]) {
-        return moduleIdCache[id]
-      }
-
-      log.info(`Resolved ${moduleName} in moduleIdCache via nodeRequire`)
-      moduleIdCache[id] = mod
-      return mod
-    } catch (err) {
-      errors.push([`Unable to load module (${moduleName}) via node`, err])
-    }
-
+    
     for (const [msg, err] of errors) {
       log.error(msg, err)
     }
 
-    log.error(`Unable to resolve ${moduleName} in any context`)
+    log.info(`Unable to resolve ${moduleName} with internal mappings, probably an external dep`)
     return target(moduleName)
   }
 
@@ -172,13 +151,13 @@ export class PluginLoader {
       assert(await Fsx.pathExists(pkgMainFile), `Main file specified in ${pkgJsonFile} does not exist @ ${pkgMainFile}`)
 
       log.info(`Reading plugin installation bundle @ ${pkgMainFile}`)
-      const code = await Fsx.readFile(pkgMainFile, "utf-8"),
-        vmScript = (this.state_.vm.script = new VM.Script(code, {
-          filename: pkgMainFile,
-          importModuleDynamically: VM.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER
-        })),
-        vmCtxObj = this.state.vm.contextObj
-      
+      // const code = await Fsx.readFile(pkgMainFile, "utf-8"),
+      //   vmScript = (this.state_.vm.script = new VM.Script(code, {
+      //     filename: pkgMainFile,
+      //     importModuleDynamically: VM.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER
+      //   })),
+      //   vmCtxObj = this.state.vm.contextObj
+      //
       // IF A `PluginInstall` IS MARKED AS DEV ENABLED
       // THEN WATCH FOR CHANGES
       if (install.isDevEnabled) {
@@ -190,32 +169,32 @@ export class PluginLoader {
             .on("error", this.onFileWatcherError.bind(this))
         state.fileWatcher = watcher
       }
-      Object.assign(vmCtxObj, {
-        __dirname: pkgPath,
-        __filename: pkgMainFile
-      })
+      // Object.assign(vmCtxObj, {
+      //   __dirname: pkgPath,
+      //   __filename: pkgMainFile
+      // })
 
-      const
-        vmCtx = (this.state_.vm.context = VM.createContext(vmCtxObj, {
-          name: manifestName,
-          codeGeneration: {
-            strings: true
-          }
+      // const
+      //   vmCtx = (this.state_.vm.context = VM.createContext(vmCtxObj, {
+      //     name: manifestName,
+      //     codeGeneration: {
+      //       strings: true
+      //     }
+      //
+      //     // TODO: Enable in future version as Node v22+ is required
+      //     //importModuleDynamically:
+      //     // VM.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER
+      //   }))
 
-          // TODO: Enable in future version as Node v22+ is required
-          //importModuleDynamically:
-          // VM.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER
-        }))
-
-      let res = vmScript.runInContext(vmCtx, {
-        displayErrors: true
-      })
-
+      // let res = vmScript.runInContext(vmCtx, {
+      //   displayErrors: true
+      // })
+      let res = this.state.global.requireProxy(pkgMainFile)
       if (isPromise(res)) {
         res = await res
       }
 
-      const modExports = vmCtxObj?.module?.exports,
+      const modExports = res?.exports ?? res,
         factory: IPluginComponentFactory = (this.state.componentFactory = modExports?.default)
 
       assert(isFunction(factory), `Exported factory for ${manifestName} is not a function`)
@@ -242,34 +221,52 @@ export class PluginLoader {
     readonly serviceContainer: Container,
     readonly install: PluginInstall
   ) {
-    const customRequire = Module.createRequire(install.path),
-      requireProxy = new Proxy(customRequire, {
+    const //customRequire = Module.createRequire(install.path),
+      requireProxy = new Proxy(Module.prototype.require.bind(module), {
         apply: this.pluginRequire.bind(this)
       }),
       globalRequire = {
         require: requireProxy,
         requireProxy,
-        customRequire,
         nodeRequire: __non_webpack_require__,
         webpackRequire: __webpack_require__
       }
-
+    
+    // ASSIGN ALL REQUIRE FNs TO WINDOW/GLOBAL OBJECT
+    const defaultRequire = Module.prototype.require
+    function newRequire(id:string) {
+      try {
+        return requireProxy(id)
+      } catch (err) {
+        console.warn(`Require proxy failed (${id}), falling back`, err)
+        return defaultRequire(id)
+      }
+    }
+    
+    newRequire.cache = defaultRequire.cache
+    newRequire.resolve = defaultRequire.resolve
+    newRequire.extensions = defaultRequire.extensions
+    newRequire.main = defaultRequire.main
+    Module.prototype.require = newRequire as any
+    Object.assign(global, globalRequire)
+    Object.assign(window, globalRequire)
+    
     this.state_ = {
       fileWatcher: null,
       moduleIdCache: {},
 
-      vm: {
-        contextObj: {
-          ...window,
-          window,
-          console: window.console,
-          global,
-          module: {
-            exports: {}
-          },
-          ...globalRequire
-        }
-      },
+      // vm: {
+      //   contextObj: {
+      //     ...window,
+      //     window,
+      //     console: window.console,
+      //     global,
+      //     module: {
+      //       exports: {}
+      //     },
+      //     ...globalRequire
+      //   }
+      // },
       global: globalRequire
     }
 

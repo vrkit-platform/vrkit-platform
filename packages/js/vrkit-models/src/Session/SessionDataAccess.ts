@@ -31,7 +31,7 @@ export function toSessionDataVarNames<VarNames extends string>(...dataVarNames: 
   return dataVarNames.reduce((map, varName) => ({
     ...map,
     [varName]: varName
-  }), {} as any)
+  }), {} as SessionDataVarNames<VarNames>)
 }
 export type SessionDataVarNamesKey<VarNames> = VarNames extends SessionDataVarNames<infer K> ? K : never
 /**

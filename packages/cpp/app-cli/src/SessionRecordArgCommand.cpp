@@ -444,7 +444,8 @@ namespace IRacingTools::App::Commands {
       g_nData = 0;
       //auto &client = LiveClient::GetInstance();
       auto &conn = LiveConnection::GetInstance();
-
+      //std::shared_ptr<Client::WeakSessionInfoWithUpdateCount> prevSessionInfo{nullptr};
+      std::atomic_int prevSessionInfoUpdateCount = -1;
       while (!_kbhit()) {
         // wait for new data and copy it into the g_data buffer, if g_data is not null
         if (conn.waitForDataReady(TIMEOUT, g_data)) {
@@ -476,6 +477,26 @@ namespace IRacingTools::App::Commands {
                   logDataToDisplay(pHeader, g_data);
                 }
               }
+            }
+          }
+
+          auto newSessionInfoUpdateCount = conn.getSessionUpdateCount();
+          if (newSessionInfoUpdateCount > prevSessionInfoUpdateCount) {
+            prevSessionInfoUpdateCount = newSessionInfoUpdateCount;
+            auto sessionInfoStr = conn.getSessionInfoStr();
+            auto sessionInfoLen = strlen(sessionInfoStr);
+            auto sessionInfo = conn.getSessionInfo();
+
+            auto t_time = time(nullptr);
+            std::string prefix = fmt::format("ir_session_track_{}", sessionInfo->weekendInfo.trackName);
+            auto fileRes = openUniqueFile(prefix.c_str(), "yaml", t_time, true);
+            auto [filename, tmpFile] = fileRes.value();
+            if (!tmpFile) {
+              fmt::println("ERROR creating file for session info dump #{}", newSessionInfoUpdateCount);
+            } else {
+              fmt::println("Session info updated #{}, dumping {} ", newSessionInfoUpdateCount, filename);
+              fwrite(sessionInfoStr, 1, sessionInfoLen, tmpFile);
+              fclose(tmpFile);
             }
           }
         }

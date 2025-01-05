@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { PluginClientEventType } from "../../../PluginClient"
 import type { SessionInfoMessage } from "../../../SessionInfoTypes"
 import { useVRKitPluginClient } from "./useVRKitPluginClient"
@@ -25,6 +25,12 @@ export function useVRKitPluginClientSessionInfo() {
     PluginClientEventType.SESSION_INFO_CHANGED,
     PluginClientEventType.SESSION_ID_CHANGED
   ).map(type => useVRKitPluginClientEvent(type, handleSessionChange))
-
+  
+  useEffect(() => {
+      if (!sessionInfo) {
+        setSessionInfo(client.getSessionInfo())
+      }
+  }, [])
+  
   return sessionInfo
 }

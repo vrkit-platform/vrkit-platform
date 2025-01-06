@@ -88,11 +88,11 @@ namespace IRacingTools::App::Commands {
 
         tm tm_time;
         localtime_s(&tm_time, &t_time);
-        strftime(tstr + strlen(tstr), MAX_PATH - strlen(tstr), "_%Y-%m-%d-%H-%M-%S", &tm_time);
+        strftime(tstr + strlen(tstr), MAX_PATH - strlen(tstr), " %Y-%m-%d %H-%M-%S", &tm_time);
         tstr[MAX_PATH - 1] = '\0';
 
         if (i > 0) {
-          _snprintf(tstr + strlen(tstr), MAX_PATH - strlen(tstr), "_%02d", i);
+          _snprintf(tstr + strlen(tstr), MAX_PATH - strlen(tstr), " %02d", i, ext);
           tstr[MAX_PATH - 1] = '\0';
         }
 
@@ -323,7 +323,6 @@ namespace IRacingTools::App::Commands {
 
       // grab the memory offset to the playerInCar flag
       g_playerInCarOffset = LiveConnection::GetInstance().varNameToOffset(g_playerInCarString);
-      g_sessionUniqueIdOffset = LiveConnection::GetInstance().varNameToOffset(g_sessionUniqueIdString);
       g_sessionTimeOffset = LiveConnection::GetInstance().varNameToOffset(g_sessionTimeString);
       g_lapIndexOffset = LiveConnection::GetInstance().varNameToOffset(g_lapIndexString);
 
@@ -348,7 +347,7 @@ namespace IRacingTools::App::Commands {
 #endif
     }
 
-    bool open_file(const int sessionId, FILE *&file, time_t &t_time) {
+    bool open_file(FILE *&file, time_t &t_time) {
       // get current time
       t_time = time(nullptr);
 
@@ -375,7 +374,7 @@ namespace IRacingTools::App::Commands {
       #define LOG_FILE_ARGS "ibt", t_time, true
       #endif
 
-      std::string prefix = fmt::format("{}_ir_session_track_{}", sessionId, trackName);
+      std::string prefix = fmt::format("ir_session_track_{}", trackName);
       auto fileRes = openUniqueFile(prefix.c_str(), LOG_FILE_ARGS);
       auto [filename, tmpFile] = fileRes.value();
       file = tmpFile;
@@ -464,12 +463,10 @@ namespace IRacingTools::App::Commands {
               if (printHeader)
                 logHeaderToDisplay(pHeader);
 
-            }
+            } else if (g_data) {
 
-            if (g_data) {
-              const int sessionId = *((int *) (g_data + g_sessionUniqueIdOffset));
               // open file if first time
-              if (!g_file && open_file(sessionId, g_file, g_ttime)) {
+              if (!g_file && open_file(g_file, g_ttime)) {
                 logHeaderToIBT(pHeader, g_file, g_ttime);
               }
 
@@ -484,18 +481,19 @@ namespace IRacingTools::App::Commands {
                   logDataToDisplay(pHeader, g_data);
                 }
               }
+            }
+          }
 
-              auto newSessionInfoUpdateCount = conn.getSessionUpdateCount();
-              if (newSessionInfoUpdateCount > prevSessionInfoUpdateCount) {
-                prevSessionInfoUpdateCount = newSessionInfoUpdateCount;
-                auto sessionInfoStr = conn.getSessionInfoStr();
-                if (sessionInfoStr) {
-                  auto sessionInfoLen = strlen(sessionInfoStr);
-                  auto sessionInfo = conn.getSessionInfo();
+          auto newSessionInfoUpdateCount = conn.getSessionUpdateCount();
+          if (newSessionInfoUpdateCount > prevSessionInfoUpdateCount) {
+            prevSessionInfoUpdateCount = newSessionInfoUpdateCount;
+            auto sessionInfoStr = conn.getSessionInfoStr();
+            auto sessionInfoLen = strlen(sessionInfoStr);
+            auto sessionInfo = conn.getSessionInfo();
 
                   auto t_time = time(nullptr);
                   std::string prefix = fmt::format("{}_ir_session_info_update-{}_track-{}", sessionId, newSessionInfoUpdateCount, sessionInfo->weekendInfo.trackName);
-                  auto fileRes = openUniqueFile(prefix.c_str(), "yaml", t_time, false);
+                  auto fileRes = openUniqueFile(prefix.c_str(), "yaml", t_time, true);
                   auto [filename, tmpFile] = fileRes.value();
                   if (!tmpFile) {
                     fmt::println("ERROR creating file for session info dump #{}", newSessionInfoUpdateCount);
@@ -507,11 +505,7 @@ namespace IRacingTools::App::Commands {
                 }
               }
             }
-
-
-
           }
-
         }
         // session ended
         else if (!conn.isConnected())

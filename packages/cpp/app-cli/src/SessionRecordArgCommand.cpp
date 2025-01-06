@@ -450,7 +450,7 @@ namespace IRacingTools::App::Commands {
       //auto &client = LiveClient::GetInstance();
       auto &conn = LiveConnection::GetInstance();
       //std::shared_ptr<Client::WeakSessionInfoWithUpdateCount> prevSessionInfo{nullptr};
-      std::atomic_int prevSessionInfoUpdateCount = -1;
+      std::atomic_uint32_t prevSessionInfoUpdateCount = 0;
       while (!_kbhit()) {
         // wait for new data and copy it into the g_data buffer, if g_data is not null
         if (conn.waitForDataReady(TIMEOUT, g_data)) {
@@ -481,7 +481,8 @@ namespace IRacingTools::App::Commands {
               if (printData) {
                 static int ct = 0;
                 if (ct++ % 100 == 0) {
-                  logDataToDisplay(pHeader, g_data);
+                  printf("Index %d session info updates %u\n", ct, prevSessionInfoUpdateCount.load());
+                  //logDataToDisplay(pHeader, g_data);
                 }
               }
 

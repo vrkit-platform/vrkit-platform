@@ -32,3 +32,4 @@ node_modules
 /*.lock
 /logs
 *.backup.json
+yarn-error.log

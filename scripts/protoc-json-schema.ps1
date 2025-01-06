@@ -14,7 +14,7 @@ Write-Output "Using root: $rootDir"
 #set rootDir=%CD%
 #cd $rootDir
 
-
+$env:PATH = $env:USERPROFILE + "\go\bin;" + $env:PATH
 Write-Output "Building json-schema protos in $rootDir"
 $protoFiles = (Get-ChildItem -r -File $rootDir/packages/proto  -Filter '*.proto').FullName
 

@@ -323,6 +323,7 @@ namespace IRacingTools::App::Commands {
 
       // grab the memory offset to the playerInCar flag
       g_playerInCarOffset = LiveConnection::GetInstance().varNameToOffset(g_playerInCarString);
+      g_sessionUniqueIdOffset = LiveConnection::GetInstance().varNameToOffset(g_sessionUniqueIdString);
       g_sessionTimeOffset = LiveConnection::GetInstance().varNameToOffset(g_sessionTimeString);
       g_lapIndexOffset = LiveConnection::GetInstance().varNameToOffset(g_lapIndexString);
 
@@ -347,7 +348,7 @@ namespace IRacingTools::App::Commands {
 #endif
     }
 
-    bool open_file(FILE *&file, time_t &t_time) {
+    bool open_file(const int sessionId, FILE *&file, time_t &t_time) {
       // get current time
       t_time = time(nullptr);
 
@@ -374,7 +375,7 @@ namespace IRacingTools::App::Commands {
       #define LOG_FILE_ARGS "ibt", t_time, true
       #endif
 
-      std::string prefix = fmt::format("ir_session_track_{}", trackName);
+      std::string prefix = fmt::format("{}_ir_session_track_{}", sessionId, trackName);
       auto fileRes = openUniqueFile(prefix.c_str(), LOG_FILE_ARGS);
       auto [filename, tmpFile] = fileRes.value();
       file = tmpFile;
@@ -463,10 +464,12 @@ namespace IRacingTools::App::Commands {
               if (printHeader)
                 logHeaderToDisplay(pHeader);
 
-            } else if (g_data) {
+            }
 
+            if (g_data) {
+              const int sessionId = *((int *) (g_data + g_sessionUniqueIdOffset));
               // open file if first time
-              if (!g_file && open_file(g_file, g_ttime)) {
+              if (!g_file && open_file(sessionId, g_file, g_ttime)) {
                 logHeaderToIBT(pHeader, g_file, g_ttime);
               }
 
@@ -481,19 +484,18 @@ namespace IRacingTools::App::Commands {
                   logDataToDisplay(pHeader, g_data);
                 }
               }
-            }
-          }
 
-          auto newSessionInfoUpdateCount = conn.getSessionUpdateCount();
-          if (newSessionInfoUpdateCount > prevSessionInfoUpdateCount) {
-            prevSessionInfoUpdateCount = newSessionInfoUpdateCount;
-            auto sessionInfoStr = conn.getSessionInfoStr();
-            auto sessionInfoLen = strlen(sessionInfoStr);
-            auto sessionInfo = conn.getSessionInfo();
+              auto newSessionInfoUpdateCount = conn.getSessionUpdateCount();
+              if (newSessionInfoUpdateCount > prevSessionInfoUpdateCount) {
+                prevSessionInfoUpdateCount = newSessionInfoUpdateCount;
+                auto sessionInfoStr = conn.getSessionInfoStr();
+                if (sessionInfoStr) {
+                  auto sessionInfoLen = strlen(sessionInfoStr);
+                  auto sessionInfo = conn.getSessionInfo();
 
                   auto t_time = time(nullptr);
                   std::string prefix = fmt::format("{}_ir_session_info_update-{}_track-{}", sessionId, newSessionInfoUpdateCount, sessionInfo->weekendInfo.trackName);
-                  auto fileRes = openUniqueFile(prefix.c_str(), "yaml", t_time, true);
+                  auto fileRes = openUniqueFile(prefix.c_str(), "yaml", t_time, false);
                   auto [filename, tmpFile] = fileRes.value();
                   if (!tmpFile) {
                     fmt::println("ERROR creating file for session info dump #{}", newSessionInfoUpdateCount);

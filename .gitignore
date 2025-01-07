@@ -33,3 +33,4 @@ node_modules
 /logs
 *.backup.json
 .vrkit-dev.local.json
+yarn-error.log

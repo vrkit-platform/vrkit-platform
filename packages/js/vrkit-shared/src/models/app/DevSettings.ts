@@ -13,5 +13,7 @@ export interface DevSettings {
   imageSequenceCapture: NativeImageSeqSettings | false
 
   alwaysOpenDevTools: boolean
+  
+  workspaceSourcePaths: string[]
 }
 

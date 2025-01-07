@@ -70,6 +70,8 @@ namespace IRacingTools::SDK {
 
     bool seek(std::size_t sampleIndex, bool skipRead = false);
 
+    bool seekToSessionNum(std::int32_t sessionNum);
+
     std::size_t getSampleCount();
     std::size_t getSampleIndex();
 

@@ -206,9 +206,9 @@ function EditorInfoView({ className, ...other }: EditorInfoViewProps) {
           {/*<Kbd>Ctrl</Kbd>+<Kbd>Enter</Kbd>*/}
         </EditorInfoRowLabel>
         <EditorInfoRowContent>
-          <EditorInfoRowContentText>{selectedInfo.name}</EditorInfoRowContentText>
+          <EditorInfoRowContentText>{selectedInfo?.name ?? "No overlay selected"}</EditorInfoRowContentText>
           <EditorInfoRowContentTextAccessory>
-            {(isNumber(selectedInfo.kind) ? OverlayKind[selectedInfo.kind] : selectedInfo.kind) as string}
+            {!selectedInfo ? "N/A" : (isNumber(selectedInfo.kind) ? OverlayKind[selectedInfo.kind] : selectedInfo.kind) as string}
           </EditorInfoRowContentTextAccessory>
         </EditorInfoRowContent>
       </EditorInfoRow>

@@ -28,7 +28,10 @@ authors = [
 #  "Programming Language :: Python :: Implementation :: PyPy",
 #]
 dependencies = [
-  'PyYAML >= 5.3',
+  'itables',
+  'polars',
+  'pyarrow',
+  'PyYAML >= 6.0.2',
   'folium >= 0.15',
   'matplotlib >= 3.8.2',
   'numpy',

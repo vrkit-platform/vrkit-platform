@@ -58,24 +58,21 @@ function prepareWindow(state: ISharedAppState, win: BrowserWindow, isMainWindow:
 
   const { id } = win
   windowMap.set(id, win)
-  
-  win.webContents.session.webRequest.onBeforeSendHeaders(
-      (details, callback) => {
-        callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } });
-      },
-  )
+
+  win.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
+    callback({ requestHeaders: { Origin: "*", ...details.requestHeaders } })
+  })
   win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
         ...details.responseHeaders,
         "Content-Security-Policy": [
           "default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';"
-        ],
-        
+        ]
       }
     })
   })
-  
+
   // CREATE A HANDLER FOR WINDOW OPEN REQUESTS
   const windowOpenHandler = createWindowOpenHandler((ev, result) => {
     log.info(`windowOpenHandler`, ev)
@@ -93,9 +90,10 @@ function prepareWindow(state: ISharedAppState, win: BrowserWindow, isMainWindow:
     .on("show", () => {
       win.webContents.setWindowOpenHandler(windowOpenHandler)
       if (state.devSettings.alwaysOpenDevTools) {
-        win.webContents.openDevTools({
-          mode: isMainWindow ? "right" : "detach"
-        })
+        win.webContents.openDevTools()
+        // win.webContents.openDevTools({
+        //   mode: isMainWindow ? "right" : "detach"
+        // })
       }
     })
 
@@ -113,6 +111,9 @@ function prepareWindow(state: ISharedAppState, win: BrowserWindow, isMainWindow:
         .filter(Fsx.existsSync)
         .ifSome(rootDir => {
           win.webContents.addWorkSpace(Path.resolve(rootDir))
+          state.devSettings.workspaceSourcePaths
+            .filter(dir => Fsx.pathExistsSync(dir))
+            .forEach(dir => win.webContents.addWorkSpace(dir))
         })
     })
     .setWindowOpenHandler(windowOpenHandler)

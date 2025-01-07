@@ -240,6 +240,34 @@ namespace IRacingTools::SDK {
         return skipRead ? true : next();
     }
 
+    bool DiskClient::seekToSessionNum(std::int32_t sessionNum) {
+        std::scoped_lock lock(ibtFileMutex_);
+        while (true) {
+            auto sessionNumRes = getVarInt("SessionNum");
+            if (!sessionNumRes) {
+                L->error("Seek to SessionNum {} failed; SessionNum is invalid or not available", sessionNum);
+                return false;
+            }
+
+            if (sessionNumRes.value() == sessionNum) {
+                L->info("Seek to SessionNum ({}) succeeded at sample index ({})", sessionNum, sampleIndex_.load());
+                auto sessionTimeRemainRes = getVarDouble("SessionTimeRemain");
+                if (sessionTimeRemainRes) {
+                    auto sessionTimeRemain = sessionTimeRemainRes.value();
+                    L->info("SessionTimeRemain={}", sessionTimeRemain);
+                    if (sessionTimeRemain > 0.0)
+                        return true;
+                }
+            }
+
+            if (!next()) {
+                L->error("Seek to SessionNum {} failed; no more records available", sessionNum);
+                return false;
+            }
+        }
+        return false;
+    }
+
     bool DiskClient::next() {
         std::scoped_lock lock(ibtFileMutex_);
         if (hasNext()) {

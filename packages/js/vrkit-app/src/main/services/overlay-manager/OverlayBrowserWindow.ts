@@ -10,6 +10,7 @@ import {
   OverlayManagerClientEventType,
   OverlayManagerClientFnType,
   OverlayManagerClientFnTypeToIPCName,
+  overlayPlacementToJson,
   OverlaySpecialIds,
   OverlayWindowRole
 } from "@vrkit-platform/shared"
@@ -18,7 +19,7 @@ import type OverlayManager from "./OverlayManager"
 import { asOption, Option } from "@3fv/prelude-ts"
 
 import { adjustScreenRect, MaxOverlayWindowDimension, MaxOverlayWindowDimensionPadding } from "./OverlayLayoutTools"
-import { runInAction } from "mobx"
+import { runInAction } from "mobx" // TypeScriptUnresolvedVariable
 
 // TypeScriptUnresolvedVariable
 
@@ -172,7 +173,7 @@ export class OverlayBrowserWindow {
     log.info(`FETCH_CONFIG_HANDLER`, this.config)
     return {
       overlay: OverlayInfo.toJson(this.config.overlay),
-      placement: OverlayPlacement.toJson(this.config.placement)
+      placement: overlayPlacementToJson(this.config.placement)
     }
   }
 
@@ -187,68 +188,79 @@ export class OverlayBrowserWindow {
       overlay,
       placement
     }
-    
+
     this.uniqueId_ = overlayInfoToUniqueId(this.config.overlay, this.kind)
     this.invalidateInterval_ = setInterval(() => {
       this.invalidate()
     }, MaxFPSIntervalMillis)
-    
+
     this.windowOptions = runInAction(() => {
-      const screenRect:RectI = this.isEditorInfo ?
-          this.isVR ? placement.vrLayout.screenRect : placement.screenRect :
-          this.isScreen ?
-              adjustScreenRect(placement.screenRect) :
-              
-              asOption(placement.vrLayout.screenRect)
-                  .map(adjustScreenRect)
-                  .getOrCall(() => {
-                    const size = placement.vrLayout.size,
-                        aspectRatio = size.height / size.width,
-                        defaultWidth = 200
-                    
-                    placement.vrLayout.screenRect = {
-                      size: {
-                        width: defaultWidth, height: defaultWidth * aspectRatio
-                      }, position: { x: 0, y: 0 }
-                    }
-                    
-                    return adjustScreenRect(placement.vrLayout.screenRect)
-                  })
-      
-      const extraWebPrefs:Partial<WebPreferences> = this.isVR ? {
-        offscreen: true
-      } : {
-        transparent: true
-      }
-      
-      const extraWindowOpts = this.isVR ? {} : {
-        transparent: true, alwaysOnTop: true
-      }
-      
+      const screenRect: RectI = this.isEditorInfo
+        ? this.isVR
+          ? placement.vrLayout.screenRect
+          : placement.screenRect
+        : this.isScreen
+          ? adjustScreenRect(placement.screenRect)
+          : asOption(placement.vrLayout.screenRect)
+              .map(adjustScreenRect)
+              .getOrCall(() => {
+                const size = placement.vrLayout.size,
+                  aspectRatio = size.height / size.width,
+                  defaultWidth = 200
+
+                placement.vrLayout.screenRect = {
+                  size: {
+                    width: defaultWidth,
+                    height: defaultWidth * aspectRatio
+                  },
+                  position: { x: 0, y: 0 }
+                }
+
+                return adjustScreenRect(placement.vrLayout.screenRect)
+              })
+
+      const extraWebPrefs: Partial<WebPreferences> = this.isVR
+        ? {
+            offscreen: true
+          }
+        : {
+            transparent: true
+          }
+
+      const extraWindowOpts = this.isVR
+        ? {}
+        : {
+            transparent: true,
+            alwaysOnTop: true
+          }
+
       return {
         ...windowOptionDefaults({
-          devTools: true,// isDev,
+          devTools: true, // isDev,
           ...extraWebPrefs
-        }), ...extraWindowOpts,
+        }),
+        ...extraWindowOpts,
         show: false,
         frame: false,
-        backgroundColor: "#00000000", ...screenRect.position, ...screenRect.size,
+        backgroundColor: "#00000000",
+        ...screenRect.position,
+        ...screenRect.size,
         maxWidth: MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding,
         maxHeight: MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding
       }
     })
-    
+
     this.window_ = new BrowserWindow(this.windowOptions)
     this.window_.setTitle(this.uniqueId)
-    
+
     this.window_.webContents.ipc.handle(
-        OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG),
-        this.fetchConfigHandler.bind(this)
+      OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG),
+      this.fetchConfigHandler.bind(this)
     )
-    
+
     runInAction(() => {
       this.setEditorEnabled(manager.editorEnabled)
-  
+
       // The returned promise is tracked via `readyDeferred`
       this.initialize().catch(err => {
         log.error(`failed to initialize overlay window`, err)
@@ -330,7 +342,9 @@ export class OverlayBrowserWindow {
    */
   invalidate(): void {
     const now = Date.now()
-    if (now - this.previousInvalidateTime_ < MaxFPSIntervalMillis) return
+    if (now - this.previousInvalidateTime_ < MaxFPSIntervalMillis) {
+      return
+    }
 
     this.previousInvalidateTime_ = now
     Option.try(() => this.window_?.webContents?.invalidate())

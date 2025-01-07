@@ -1,4 +1,5 @@
 {
   "alwaysOpenDevTools": true,
-  "imageSequenceCapture": false
+  "imageSequenceCapture": false,
+  "workspaceSourcePaths": []
 }

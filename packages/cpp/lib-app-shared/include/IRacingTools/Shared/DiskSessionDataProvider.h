@@ -68,6 +68,13 @@ namespace IRacingTools::Shared {
          */
         void stop() override;
 
+        /**
+         * @brief
+         * @param sessionNum SessionInfo["SessionNum"] described in YAML to skip stream to
+         * @return success or failure true/false
+         */
+        bool seekToSessionNum(std::int32_t sessionNum);
+
         virtual bool isControllable() const override {
             return true;
         };

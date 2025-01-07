@@ -1,5 +1,12 @@
-import { OverlayConfig } from "@vrkit-platform/models"
+import {
+  OverlayConfig,
+  OverlayPlacement
+} from "@vrkit-platform/models"
 import type { IPluginClientEventArgs, PluginClientEventType } from "@vrkit-platform/plugin-sdk"
+import {
+  toPositionI,
+  toSizeI
+} from "../../utils/geometry/SizeTools"
 
 export enum OverlayWindowRole {
   NONE = "NONE",
@@ -154,4 +161,11 @@ export namespace OverlayWindowMainEvents {
   export function EventTypeToIPCName(type: EventType): EventIPCName {
     return `OVERLAY_WINDOW_MAIN_EVENT_${type.toUpperCase()}` as EventIPCName
   }
+}
+
+export function overlayPlacementToJson(placement: OverlayPlacement) {
+  const newPlacement = OverlayPlacement.clone(placement)
+  newPlacement.screenRect.size = toSizeI(newPlacement.screenRect.size)
+  newPlacement.screenRect.position = toPositionI(newPlacement.screenRect.position)
+  return OverlayPlacement.toJson(newPlacement)
 }

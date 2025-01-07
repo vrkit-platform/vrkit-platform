@@ -32,6 +32,8 @@
   },
   "types": "lib/index.d.ts",
   "dependencies": {
+    "moment": "^2.30.1",
+    "lodash": "^4.17.21",
     "@mui/styled-engine": "^5.16.12",
     "@protobuf-ts/runtime": "^2.9.4",
     "@vrkit-platform/shared": "1.0.3"

@@ -83,6 +83,11 @@ namespace IRacingTools::Shared {
             "Unable to populate track layout metadata for {}",
             file.string()
         );
+
+        L->warn("HACK: Skipping to SessionNum == 2 (RACE)");
+        if (!seekToSessionNum(2)) {
+            L->error("HACK: ERROR: Failed Skipping to SessionNum == 2 (RACE)");
+        }
     }
 
 
@@ -367,6 +372,10 @@ namespace IRacingTools::Shared {
         }
 
         // thread_.reset();
+    }
+
+    bool DiskSessionDataProvider::seekToSessionNum(std::int32_t sessionNum) {
+        return isAvailable() && diskClient_->seekToSessionNum(sessionNum);
     }
 
     bool DiskSessionDataProvider::isAvailable() {

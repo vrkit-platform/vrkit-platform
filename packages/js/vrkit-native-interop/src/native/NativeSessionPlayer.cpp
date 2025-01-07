@@ -106,6 +106,9 @@ namespace IRacingTools::App::Node {
             );
 
             dataProvider_ = std::make_shared<DiskSessionDataProvider>(filePath, filePath.filename().string());
+            //auto diskDataProvider = std::static_pointer_cast<DiskSessionDataProvider>(dataProvider_);
+
+
             sessionData_ = dataProvider_->sessionData();
         } else {
             // Live player

@@ -42,13 +42,22 @@ import {
 } from "@vrkit-platform/shared-ui"
 import { PluginCompEntry } from "../../../services/store/slices/shared-app"
 
-import { OverlayInfo, PluginUserSetting, PluginUserSettingType, PluginUserSettingValue } from "@vrkit-platform/models"
+import {
+  OverlayInfo,
+  PluginUserSetting, PluginUserSettingChoice,
+  PluginUserSettingType,
+  PluginUserSettingValue
+} from "@vrkit-platform/models"
 import { match } from "ts-pattern"
 
-import { assign, assignDeep, defaults, isEmpty, isNotEmptyString } from "@vrkit-platform/shared"
+import {
+  arrayOf, assign, assignDeep, defaults, isEmpty, isNotEmpty, isNotEmptyString
+} from "@vrkit-platform/shared"
 import Alerts from "../../../services/alerts"
 import { asOption } from "@3fv/prelude-ts"
 import TextField from "@mui/material/TextField"
+import Select, { SelectChangeEvent } from "@mui/material/Select"
+import MenuItem from "@mui/material/MenuItem"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -155,6 +164,17 @@ export interface ComponentInstanceFormProps extends Omit<BoxProps, "onChange"> {
   selected?: boolean
 }
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
 /**
  * ComponentInstanceForm Component
  *
@@ -254,6 +274,49 @@ export function ComponentInstanceForm(props: ComponentInstanceFormProps) {
               }}
             />
           ))
+            .with(PluginUserSettingType.CHOICE, () => (
+                <Select
+                    value={asOption(currentValue.choiceValues)
+                        .filter(isNotEmpty).getOrCall(() => setting.defaultValue?.choiceValues ?? [])}
+                    // variant="filled"
+                    multiple={(setting.choiceLimit ?? 1) > 1}
+                    onChange={(ev: SelectChangeEvent<string | string[]>) => {
+                      const
+                          newValues = asOption(arrayOf(ev.target.value))
+                              .map(newValue => newValue.filter(isNotEmptyString))
+                              .getOrNull()
+                      log.info(`new value`, ev.target.value)
+                      if (!newValues.length) {
+                        Alerts.onError(`Unable to select choice ${newValues.join(", ")}`)
+                        return
+                      }
+                      
+                      
+                      
+                      const
+                          //choiceValues = [...(currentValue.choiceValues ?? [])],
+                          choiceLimit = Math.max(1, setting.choiceLimit ?? 1)
+                      
+                      if (newValues.length > choiceLimit) {
+                        newValues.length = choiceLimit
+                      }
+                      
+                      onSettingChange({
+                        choiceValues: newValues
+                      })
+                    }}
+                >
+                  {(setting.choices ?? Array<PluginUserSettingChoice>()).map(choice => <MenuItem
+                    key={choice.value}
+                    value={choice.value}
+                    style={{
+                      fontWeight: (currentValue.choiceValues ?? []).includes(choice.value) ? 800 : 400
+                    }}
+                  >
+                    {choice.label}
+                  </MenuItem>)}
+                </Select>
+            ))
           .otherwise(() => (
             <TextField
               hiddenLabel

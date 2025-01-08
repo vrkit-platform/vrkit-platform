@@ -46,6 +46,27 @@ export interface PluginUserSettingValue {
      * @generated from protobuf field: string color_value = 50;
      */
     colorValue: string;
+    /**
+     * @generated from protobuf field: repeated string choice_values = 60;
+     */
+    choiceValues: string[];
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.PluginUserSettingChoice
+ */
+export interface PluginUserSettingChoice {
+    /**
+     * @generated from protobuf field: string value = 1;
+     */
+    value: string;
+    /**
+     * @generated from protobuf field: string label = 10;
+     */
+    label: string;
+    /**
+     * @generated from protobuf field: string description = 20;
+     */
+    description: string;
 }
 /**
  * @generated from protobuf message IRacingTools.Models.PluginUserSetting
@@ -75,6 +96,14 @@ export interface PluginUserSetting {
      * @generated from protobuf field: IRacingTools.Models.PluginUserSettingValue user_value = 20;
      */
     userValue?: PluginUserSettingValue;
+    /**
+     * @generated from protobuf field: uint32 choice_limit = 50;
+     */
+    choiceLimit: number;
+    /**
+     * @generated from protobuf field: repeated IRacingTools.Models.PluginUserSettingChoice choices = 51;
+     */
+    choices: PluginUserSettingChoice[];
 }
 /**
  * @generated from protobuf message IRacingTools.Models.PluginComponentDefinition
@@ -383,7 +412,11 @@ export enum PluginUserSettingType {
     /**
      * @generated from protobuf enum value: PLUGIN_USER_SETTING_TYPE_COLOR = 4;
      */
-    COLOR = 4
+    COLOR = 4,
+    /**
+     * @generated from protobuf enum value: PLUGIN_USER_SETTING_TYPE_CHOICE = 5;
+     */
+    CHOICE = 5
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.PluginComponentType
@@ -443,7 +476,8 @@ class PluginUserSettingValue$Type extends MessageType<PluginUserSettingValue> {
             { no: 20, name: "double_value", kind: "scalar", T: 1 /*ScalarType.DOUBLE*/ },
             { no: 30, name: "string_value", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 40, name: "boolean_value", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 50, name: "color_value", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 50, name: "color_value", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 60, name: "choice_values", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<PluginUserSettingValue>): PluginUserSettingValue {
@@ -455,6 +489,7 @@ class PluginUserSettingValue$Type extends MessageType<PluginUserSettingValue> {
         message.stringValue = "";
         message.booleanValue = false;
         message.colorValue = "";
+        message.choiceValues = [];
         if (value !== undefined)
             reflectionMergePartial<PluginUserSettingValue>(this, message, value);
         return message;
@@ -484,6 +519,9 @@ class PluginUserSettingValue$Type extends MessageType<PluginUserSettingValue> {
                     break;
                 case /* string color_value */ 50:
                     message.colorValue = reader.string();
+                    break;
+                case /* repeated string choice_values */ 60:
+                    message.choiceValues.push(reader.string());
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -518,6 +556,9 @@ class PluginUserSettingValue$Type extends MessageType<PluginUserSettingValue> {
         /* string color_value = 50; */
         if (message.colorValue !== "")
             writer.tag(50, WireType.LengthDelimited).string(message.colorValue);
+        /* repeated string choice_values = 60; */
+        for (let i = 0; i < message.choiceValues.length; i++)
+            writer.tag(60, WireType.LengthDelimited).string(message.choiceValues[i]);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -529,6 +570,69 @@ class PluginUserSettingValue$Type extends MessageType<PluginUserSettingValue> {
  */
 export const PluginUserSettingValue = new PluginUserSettingValue$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class PluginUserSettingChoice$Type extends MessageType<PluginUserSettingChoice> {
+    constructor() {
+        super("IRacingTools.Models.PluginUserSettingChoice", [
+            { no: 1, name: "value", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 10, name: "label", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 20, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<PluginUserSettingChoice>): PluginUserSettingChoice {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.value = "";
+        message.label = "";
+        message.description = "";
+        if (value !== undefined)
+            reflectionMergePartial<PluginUserSettingChoice>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PluginUserSettingChoice): PluginUserSettingChoice {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string value */ 1:
+                    message.value = reader.string();
+                    break;
+                case /* string label */ 10:
+                    message.label = reader.string();
+                    break;
+                case /* string description */ 20:
+                    message.description = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: PluginUserSettingChoice, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string value = 1; */
+        if (message.value !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.value);
+        /* string label = 10; */
+        if (message.label !== "")
+            writer.tag(10, WireType.LengthDelimited).string(message.label);
+        /* string description = 20; */
+        if (message.description !== "")
+            writer.tag(20, WireType.LengthDelimited).string(message.description);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.PluginUserSettingChoice
+ */
+export const PluginUserSettingChoice = new PluginUserSettingChoice$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class PluginUserSetting$Type extends MessageType<PluginUserSetting> {
     constructor() {
         super("IRacingTools.Models.PluginUserSetting", [
@@ -537,7 +641,9 @@ class PluginUserSetting$Type extends MessageType<PluginUserSetting> {
             { no: 3, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 4, name: "type", kind: "enum", T: () => ["IRacingTools.Models.PluginUserSettingType", PluginUserSettingType, "PLUGIN_USER_SETTING_TYPE_"] },
             { no: 10, name: "default_value", kind: "message", T: () => PluginUserSettingValue },
-            { no: 20, name: "user_value", kind: "message", T: () => PluginUserSettingValue }
+            { no: 20, name: "user_value", kind: "message", T: () => PluginUserSettingValue },
+            { no: 50, name: "choice_limit", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
+            { no: 51, name: "choices", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => PluginUserSettingChoice }
         ]);
     }
     create(value?: PartialMessage<PluginUserSetting>): PluginUserSetting {
@@ -546,6 +652,8 @@ class PluginUserSetting$Type extends MessageType<PluginUserSetting> {
         message.name = "";
         message.description = "";
         message.type = 0;
+        message.choiceLimit = 0;
+        message.choices = [];
         if (value !== undefined)
             reflectionMergePartial<PluginUserSetting>(this, message, value);
         return message;
@@ -572,6 +680,12 @@ class PluginUserSetting$Type extends MessageType<PluginUserSetting> {
                     break;
                 case /* IRacingTools.Models.PluginUserSettingValue user_value */ 20:
                     message.userValue = PluginUserSettingValue.internalBinaryRead(reader, reader.uint32(), options, message.userValue);
+                    break;
+                case /* uint32 choice_limit */ 50:
+                    message.choiceLimit = reader.uint32();
+                    break;
+                case /* repeated IRacingTools.Models.PluginUserSettingChoice choices */ 51:
+                    message.choices.push(PluginUserSettingChoice.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -603,6 +717,12 @@ class PluginUserSetting$Type extends MessageType<PluginUserSetting> {
         /* IRacingTools.Models.PluginUserSettingValue user_value = 20; */
         if (message.userValue)
             PluginUserSettingValue.internalBinaryWrite(message.userValue, writer.tag(20, WireType.LengthDelimited).fork(), options).join();
+        /* uint32 choice_limit = 50; */
+        if (message.choiceLimit !== 0)
+            writer.tag(50, WireType.Varint).uint32(message.choiceLimit);
+        /* repeated IRacingTools.Models.PluginUserSettingChoice choices = 51; */
+        for (let i = 0; i < message.choices.length; i++)
+            PluginUserSettingChoice.internalBinaryWrite(message.choices[i], writer.tag(51, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

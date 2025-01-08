@@ -551,7 +551,9 @@
                         "PLUGIN_USER_SETTING_TYPE_BOOLEAN",
                         3,
                         "PLUGIN_USER_SETTING_TYPE_COLOR",
-                        4
+                        4,
+                        "PLUGIN_USER_SETTING_TYPE_CHOICE",
+                        5
                     ],
                     "oneOf": [
                         {
@@ -613,6 +615,26 @@
                         },
                         {
                             "type": "string"
+                        }
+                    ]
+                },
+                "choiceValues": {
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "array"
                         }
                     ]
                 }

@@ -506,7 +506,9 @@
                         "PLUGIN_USER_SETTING_TYPE_BOOLEAN",
                         3,
                         "PLUGIN_USER_SETTING_TYPE_COLOR",
-                        4
+                        4,
+                        "PLUGIN_USER_SETTING_TYPE_CHOICE",
+                        5
                     ],
                     "oneOf": [
                         {
@@ -540,6 +542,29 @@
                         },
                         {}
                     ]
+                },
+                "choiceLimit": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "choices": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "items": {
+                                "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingChoice"
+                            },
+                            "type": "array"
+                        }
+                    ]
                 }
             },
             "additionalProperties": true,
@@ -552,6 +577,50 @@
                 }
             ],
             "title": "Plugin User Setting"
+        },
+        "IRacingTools.Models.PluginUserSettingChoice": {
+            "properties": {
+                "value": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "label": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "description": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Plugin User Setting Choice"
         },
         "IRacingTools.Models.PluginUserSettingValue": {
             "properties": {
@@ -576,7 +645,9 @@
                         "PLUGIN_USER_SETTING_TYPE_BOOLEAN",
                         3,
                         "PLUGIN_USER_SETTING_TYPE_COLOR",
-                        4
+                        4,
+                        "PLUGIN_USER_SETTING_TYPE_CHOICE",
+                        5
                     ],
                     "oneOf": [
                         {
@@ -638,6 +709,26 @@
                         },
                         {
                             "type": "string"
+                        }
+                    ]
+                },
+                "choiceValues": {
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "array"
                         }
                     ]
                 }

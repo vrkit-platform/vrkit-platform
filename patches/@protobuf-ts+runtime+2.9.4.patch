@@ -1,5 +1,5 @@
 diff --git a/node_modules/@protobuf-ts/runtime/build/commonjs/reflection-json-writer.js b/node_modules/@protobuf-ts/runtime/build/commonjs/reflection-json-writer.js
-index 14a0aed..4648fc2 100644
+index 14a0aed..e7c102c 100644
 --- a/node_modules/@protobuf-ts/runtime/build/commonjs/reflection-json-writer.js
 +++ b/node_modules/@protobuf-ts/runtime/build/commonjs/reflection-json-writer.js
 @@ -44,6 +44,13 @@ class ReflectionJsonWriter {
@@ -25,7 +25,16 @@ index 14a0aed..4648fc2 100644
                          const val = this.enum(enumInfo, entryValue, field.name, false, true, options.enumAsInteger);
                          assert_1.assert(val !== undefined);
                          jsonObj[entryKey.toString()] = val; // JSON standard allows only (double quoted) string as property key
-@@ -130,12 +137,21 @@ class ReflectionJsonWriter {
+@@ -76,6 +83,8 @@ class ReflectionJsonWriter {
+                 jsonValue = jsonObj;
+         }
+         else if (field.repeat) {
++            if (!value)
++                value = []
+             assert_1.assert(Array.isArray(value));
+             const jsonArr = [];
+             switch (field.kind) {
+@@ -130,12 +139,21 @@ class ReflectionJsonWriter {
          if (type[0] == 'google.protobuf.NullValue')
              return !emitDefaultValues && !optional ? undefined : null;
          if (value === undefined) {
@@ -48,7 +57,7 @@ index 14a0aed..4648fc2 100644
          assert_1.assert(typeof value == 'number');
          assert_1.assert(Number.isInteger(value));
          if (enumAsInteger || !type[1].hasOwnProperty(value))
-@@ -153,7 +169,7 @@ class ReflectionJsonWriter {
+@@ -153,7 +171,7 @@ class ReflectionJsonWriter {
      }
      scalar(type, value, fieldName, optional, emitDefaultValues) {
          if (value === undefined) {
@@ -58,7 +67,7 @@ index 14a0aed..4648fc2 100644
          }
          const ed = emitDefaultValues || optional;
 diff --git a/node_modules/@protobuf-ts/runtime/build/es2015/reflection-json-writer.js b/node_modules/@protobuf-ts/runtime/build/es2015/reflection-json-writer.js
-index 5837343..a937087 100644
+index 5837343..c7dd01b 100644
 --- a/node_modules/@protobuf-ts/runtime/build/es2015/reflection-json-writer.js
 +++ b/node_modules/@protobuf-ts/runtime/build/es2015/reflection-json-writer.js
 @@ -41,7 +41,13 @@ export class ReflectionJsonWriter {
@@ -76,7 +85,16 @@ index 5837343..a937087 100644
              const jsonObj = {};
              switch (field.V.kind) {
                  case "scalar":
-@@ -86,7 +92,7 @@ export class ReflectionJsonWriter {
+@@ -73,6 +79,8 @@ export class ReflectionJsonWriter {
+                 jsonValue = jsonObj;
+         }
+         else if (field.repeat) {
++            if (!value)
++                value = []
+             assert(Array.isArray(value));
+             const jsonArr = [];
+             switch (field.kind) {
+@@ -86,7 +94,7 @@ export class ReflectionJsonWriter {
                  case "enum":
                      const enumInfo = field.T();
                      for (let i = 0; i < value.length; i++) {
@@ -85,7 +103,7 @@ index 5837343..a937087 100644
                          const val = this.enum(enumInfo, value[i], field.name, field.opt, true, options.enumAsInteger);
                          assert(val !== undefined);
                          jsonArr.push(val);
-@@ -127,12 +133,22 @@ export class ReflectionJsonWriter {
+@@ -127,12 +135,22 @@ export class ReflectionJsonWriter {
          if (type[0] == 'google.protobuf.NullValue')
              return !emitDefaultValues && !optional ? undefined : null;
          if (value === undefined) {
@@ -109,7 +127,7 @@ index 5837343..a937087 100644
          assert(typeof value == 'number');
          assert(Number.isInteger(value));
          if (enumAsInteger || !type[1].hasOwnProperty(value))
-@@ -150,7 +166,7 @@ export class ReflectionJsonWriter {
+@@ -150,7 +168,7 @@ export class ReflectionJsonWriter {
      }
      scalar(type, value, fieldName, optional, emitDefaultValues) {
          if (value === undefined) {

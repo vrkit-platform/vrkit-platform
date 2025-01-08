@@ -11,6 +11,7 @@ enum PluginUserSettingType {
   PLUGIN_USER_SETTING_TYPE_STRING = 2;
   PLUGIN_USER_SETTING_TYPE_BOOLEAN = 3;
   PLUGIN_USER_SETTING_TYPE_COLOR = 4;
+  PLUGIN_USER_SETTING_TYPE_CHOICE = 5;
 }
 
 
@@ -22,6 +23,13 @@ message PluginUserSettingValue {
   string string_value = 30;
   bool boolean_value = 40;
   string color_value = 50;
+  repeated string choice_values = 60;
+}
+
+message PluginUserSettingChoice {
+  string value = 1;
+  string label = 10;
+  string description = 20;
 }
 
 message PluginUserSetting {
@@ -34,6 +42,11 @@ message PluginUserSetting {
   PluginUserSettingValue default_value = 10;
 
   PluginUserSettingValue user_value = 20;
+
+
+  uint32 choice_limit = 50;
+
+  repeated PluginUserSettingChoice choices = 51;
 }
 
 enum PluginComponentType {

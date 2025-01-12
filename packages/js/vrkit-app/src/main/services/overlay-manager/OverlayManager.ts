@@ -170,7 +170,7 @@ export class OverlayManager {
   }
 
   getOverlayByWindowId(windowId: number) {
-    return this.allOverlays.find(overlay => overlay.windowId === windowId)
+    return this.allOverlays.find(overlay => overlay.browserWindowId === windowId)
   }
 
   async closeAllOverlays(): Promise<void> {
@@ -216,10 +216,10 @@ export class OverlayManager {
         
         // ATTACH LISTENERS
         newWin.on(OverlayBrowserWindowEvent.Created, win => {
-          win.window.on("closed", this.createOnCloseHandler(ouid, newWin.windowId))
+          win.browserWindow.on("closed", this.createOnCloseHandler(ouid, newWin.browserWindowId))
           if (win.isScreen) {
             const onBoundsChanged = this.createOnBoundsChangedHandler(placement, newWin)
-            win.window.on("moved", onBoundsChanged).on("resized", onBoundsChanged)
+            win.browserWindow.on("moved", onBoundsChanged).on("resized", onBoundsChanged)
           }
         })
         
@@ -348,14 +348,14 @@ export class OverlayManager {
   async fetchOverlayConfigIdHandler(event: IpcMainInvokeEvent): Promise<string> {
     const window = BrowserWindow.fromWebContents(event.sender),
       windowId = window.id,
-      overlayWindow = this.allOverlays.find(it => it.window?.id === windowId)
+      overlayWindow = this.allOverlays.find(it => it.browserWindow?.id === windowId)
 
     return overlayWindow?.config?.overlay?.id
   }
 
   async fetchOverlayWindowRoleHandler(event: IpcMainInvokeEvent): Promise<OverlayWindowRole> {
     const window = BrowserWindow.fromWebContents(event.sender),
-      overlayWindow = this.allOverlays.find(it => it.window?.id === window.id)
+      overlayWindow = this.allOverlays.find(it => it.browserWindow?.id === window.id)
 
     return overlayWindow?.role
   }
@@ -368,7 +368,7 @@ export class OverlayManager {
   private async closeHandler(event: IpcMainInvokeEvent): Promise<void> {
     const window = BrowserWindow.fromWebContents(event.sender),
       windowId = window.id,
-      overlayWindow = this.allOverlays.find(it => it.window?.id === windowId)
+      overlayWindow = this.allOverlays.find(it => it.browserWindow?.id === windowId)
 
     if (overlayWindow) {
       await overlayWindow.close()
@@ -428,7 +428,7 @@ export class OverlayManager {
 
     await Promise.all(
       overlays.map(o => {
-        o.window?.webContents?.endFrameSubscription()
+        o.browserWindow?.webContents?.endFrameSubscription()
         return o.close()
       })
     )
@@ -541,7 +541,7 @@ export class OverlayManager {
     const jsArgs = args.map(arg => toJS(arg))
     this.allOverlays.forEach(overlay => {
       if (overlay.ready) {
-        asOption(overlay.window)
+        asOption(overlay.browserWindow)
           .filter(win => !win.isDestroyed() && !win.webContents.isDestroyed() && !win.webContents.isCrashed())
           .tap(win => win.webContents?.send(ipcEventName, ...jsArgs))
       }
@@ -570,7 +570,7 @@ export class OverlayManager {
    * @private
    */
   private isValidOverlayWindowId(windowId: number): boolean {
-    return this.allOverlays.some(it => it.window?.id === windowId)
+    return this.allOverlays.some(it => it.browserWindow?.id === windowId)
   }
 
   /**
@@ -583,7 +583,7 @@ export class OverlayManager {
     return (event: Electron.Event) => {
       this.sessionManager.unregisterComponentDataVars(overlayUniqueId)
       this.nativeManager_.releaseResources(overlayUniqueId, windowId)
-      removeIfMutation(this.overlayWindows_, overlay => overlay.windowId === windowId)
+      removeIfMutation(this.overlayWindows_, overlay => overlay.browserWindowId === windowId)
     }
   }
 
@@ -607,7 +607,7 @@ export class OverlayManager {
       const buf = image.getBitmap(),
         nativeImageSize = image.getSize(),
         vrLayout = toJS(win.placement.vrLayout),
-        screenRect = asOption(win.window)
+        screenRect = asOption(win.browserWindow)
           .map(bw => screen.dipToScreenRect(bw, bw.getBounds()))
           .map(electronRectangleToRectI)
           .getOrThrow() as RectI, //vrLayout.screenRect
@@ -627,7 +627,7 @@ export class OverlayManager {
           `,nativeImageSize=`,
           nativeImageSize,
           ` ignoring frame.  Window bounds=`,
-          win.window.getBounds()
+          win.browserWindow.getBounds()
         )
 
         return
@@ -635,7 +635,7 @@ export class OverlayManager {
 
       this.nativeManager_.createOrUpdateResources(
         win.uniqueId,
-        win.windowId,
+        win.browserWindowId,
         { width: imageSize.width, height: imageSize.height },
         screenRect,
         vrLayout
@@ -744,7 +744,7 @@ export class OverlayManager {
   }
 
   getOverlayWindowScreenRect(win: OverlayBrowserWindow): RectI {
-    const bounds = win.window.getBounds()
+    const bounds = win.browserWindow.getBounds()
     return RectI.create({
       size: pick(bounds, "width", "height"),
       position: pick(bounds, "x", "y")

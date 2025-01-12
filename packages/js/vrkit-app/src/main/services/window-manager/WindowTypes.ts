@@ -77,7 +77,7 @@ export interface WindowInstance<
 
 function newBaseWindowConfig<Role extends WindowRole>(
   role: Role,
-  config: Partial<Omit<WindowConfig<Role>, "role">> = {}
+  config: Partial<WindowConfig<Role>> = {}
 ): WindowConfig<Role> {
   return defaults(
     {
@@ -109,7 +109,7 @@ function newNormalWindowConfig() {
 function newFloatingWindowConfig(optConfig: Partial<WindowConfig> = {}) {
   const baseConfig = {
     type: "Floating",
-    manageState: true,
+    manageState: false,
     browserWindowOptions: {
       show: false,
       frame: false,

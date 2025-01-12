@@ -249,7 +249,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     configOrRole: WindowConfig | WindowRole,
     configOpt: Partial<WindowConfig> = {}
   ): Promise<WindowInstance<WindowConfig<any>>> {
-    const winInstance = {} as WindowInstance,
+    const
       config: WindowConfig = assign(cloneDeep(
         isWindowRole(configOrRole) ? BaseWindowConfigs[configOrRole] : configOrRole),
         configOpt
@@ -259,7 +259,10 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         ? config.id
         : config.multiple
           ? `${config.role}-${generateShortId()}`
-          : config.role
+          : config.role,
+        winInstance = {
+          id: winId
+        } as WindowInstance
     
     
     log.assert(!this.has(winId),`A window with ID=${winId} already exists`)
@@ -276,19 +279,17 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
           ...config.browserWindowOptions,
           ...wsmWinOpts
         },
-        bw = new BrowserWindow(bwOpts)
-
-      assign(winInstance, {
+        bw = assign(winInstance, {
         type: config.type,
         role,
         config,
         stateManager: wsm,
-        browserWindow: bw,
+        browserWindow: new BrowserWindow(bwOpts),
         browserWindowClosed: false,
         browserWindowOptions: bwOpts,
         onBrowserWindowCreated: config.onBrowserWindowCreated,
         onBrowserWindowReady: config.onBrowserWindowReady
-      })
+      }).browserWindow
       
       
       log.assert(
@@ -310,7 +311,8 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       this.prepareBrowserWindow(bw)
 
       // ENABLE WINDOW STATE MANAGER
-      wsm.enable(winInstance)
+      if (wsm)
+        wsm.enable(winInstance)
 
 
       const firstLoadSignal = signalFlag()

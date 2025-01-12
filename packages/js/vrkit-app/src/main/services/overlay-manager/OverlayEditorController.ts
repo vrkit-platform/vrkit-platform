@@ -78,7 +78,7 @@ export class OverlayEditorController {
 
       placement.vrLayout = vrLayoutMutator(placement.vrLayout)
       Object.assign(win.placement.vrLayout, toJS(placement.vrLayout))
-      win.window.webContents.invalidate()
+      win.browserWindow.webContents.invalidate()
       log.debug(`Saving updated dashboard config updated vrLayout`, placement.vrLayout)
       return placement
     })

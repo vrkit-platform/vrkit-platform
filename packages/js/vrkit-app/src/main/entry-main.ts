@@ -13,7 +13,6 @@
 import "./prepareElectronMain"
 
 import { app } from "electron"
-import { importDefault } from "@vrkit-platform/shared"
 import { getLogger } from "@3fv/logger-proxy"
 import * as ElectronRemote from "@electron/remote/main"
 import { isPromise } from "@3fv/guard"
@@ -21,29 +20,34 @@ import { isPromise } from "@3fv/guard"
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
-process.on("uncaughtException",(...args:any[]) => {
-  const msg = `uncaughtException, ${JSON.stringify(args,null,2)}`
+function reportError(type: "uncaughtException" | "unhandledRejection", ...args: any[]) {
+  const msg = `${type}, ${JSON.stringify(args,null,2)}`
   console.error(msg,...args)
   error(msg, args)
+  import("./utils/DialogHelpers")
+      .then(Helpers => Helpers.reportMainError(type, ...args))
+}
+
+process.on("uncaughtException",(...args:any[]) => {
+  reportError("uncaughtException", ...args)
+  
 })
 
 process.on("unhandledRejection",(...args:any[]) => {
-  const msg = `unhandledRejection, ${JSON.stringify(args,null,2)}`
-  console.error(msg,...args)
-  error(msg, args)
+  reportError("unhandledRejection", ...args)
 })
 
 async function start() {
   if (!ElectronRemote.isInitialized())
     ElectronRemote.initialize()
   
-  const logServerInit = await importDefault(import("../common/logger/main"))
+  const logServerInit = await import("../common/logger/main").then(mod => mod.default)
   if (isPromise(logServerInit)) {
     await logServerInit
   }
   
-  await importDefault(import("./bootstrap"))
-  await importDefault(import("./launch"))
+  await import("./bootstrap").then(mod => mod.default)
+  await import("./launch").then(mod => mod.default)
 }
 
 // SETUP PROCESS & APP EVENT HANDLERS
@@ -56,8 +60,12 @@ if (app.requestSingleInstanceLock()) {
 
 // HMR
 if (import.meta.webpackHot) {
-  import.meta.webpackHot.accept(() => {
-    log.warn("HMR updates")
+  import.meta.webpackHot.accept((err) => {
+    if (err) {
+      log.error(`HMR ERROR`, err)
+    } else {
+      log.warn("HMR updates")
+    }
   })
 }
 

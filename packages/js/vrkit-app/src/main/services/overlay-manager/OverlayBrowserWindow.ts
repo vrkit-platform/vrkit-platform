@@ -95,12 +95,12 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
   /**
    * Get the browser window
    */
-  get window() {
+  get browserWindow() {
     return this.#windowInstance_?.browserWindow
   }
 
-  get windowId() {
-    return this.window?.id
+  get browserWindowId() {
+    return this.browserWindow?.id
   }
 
   get screenRect(): RectI {
@@ -142,7 +142,7 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
     }
 
     try {
-      this.window?.close()
+      this.browserWindow?.close()
       deferred.resolve()
     } catch (err) {
       log.error(`Unable to close window`, err)
@@ -158,12 +158,24 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
   get placement() {
     return this.config.placement
   }
-
+  
+  /**
+   * Waits until the OverlayBrowserWindow is fully initialized and ready for use.
+   *
+   * This method ensures that any asynchronous processes required to set up the
+   * OverlayBrowserWindow are completed before proceeding. It resolves once the
+   * window instance is ready.
+   *
+   * @return {Promise<OverlayBrowserWindow>} A promise that resolves to the initialized OverlayBrowserWindow.
+   */
   whenReady(): Promise<OverlayBrowserWindow> {
-    return this.readyDeferred_.promise
+    log.assert(!!this.#windowInstancePromise, "Window instance promise is not set")
+    return this.#windowInstancePromise.then(() => this.readyDeferred_.promise)
   }
 
   get ready() {
+    log.assert(!!this.#windowInstancePromise, "Window instance promise is not set")
+    
     if (this.readyDeferred_.isRejected()) {
       throw this.readyDeferred_.error ?? Error(`Failed to reach ready state`)
     }
@@ -181,7 +193,7 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
 
   sendConfig() {
     log.info(`Sending overlay config`, this.config?.overlay?.id)
-    this.window?.webContents?.send(
+    this.browserWindow?.webContents?.send(
       OverlayClientEventTypeToIPCName(OverlayManagerClientEventType.OVERLAY_CONFIG),
       this.config
     )
@@ -290,7 +302,14 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
         },
         onBrowserWindowReady: (bw, winInstance) => {
           try {
+            
+            runInAction(() => {
+              this.setEditorEnabled(manager.editorEnabled)
+            })
+            
             this.initialize(bw, winInstance)
+            if (!deferred.isSettled())
+              deferred.resolve(this)
           } catch (err) {
             log.error(`failed to initialize overlay window`, err)
             deferred.reject(err)
@@ -300,13 +319,13 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
         url: `${resolveHtmlPath("index-overlay.html")}#${this.uniqueId}`
       })
 
-      runInAction(() => {
-        this.setEditorEnabled(manager.editorEnabled)
-      })
       this.#windowInstancePromise = this.windowManager.create(windowConfig)
           .then(wi => {
             if (!deferred.isSettled())
               deferred.resolve(this)
+            
+            if (deferred.isRejected())
+              throw deferred.error
             
             this.emit(OverlayBrowserWindowEvent.Ready, this)
             return wi
@@ -350,11 +369,11 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
 
   private setIgnoreMouseEvents(ignore: boolean): void {
     if (ignore) {
-      this.window?.setIgnoreMouseEvents(true, {
+      this.browserWindow?.setIgnoreMouseEvents(true, {
         forward: true
       })
     } else {
-      this.window?.setIgnoreMouseEvents(false)
+      this.browserWindow?.setIgnoreMouseEvents(false)
     }
   }
 
@@ -378,7 +397,7 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
 
     this.previousInvalidateTime_ = now
     guard(
-      () => this.window?.webContents?.invalidate(),
+      () => this.browserWindow?.webContents?.invalidate(),
       err => {
         log.warn(`Failed to invalidate overlay window (${this.uniqueId})`, err)
       }
@@ -398,6 +417,6 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
 
     log.info(`Setting new bounds`, newBounds)
     this.config_.placement.screenRect = rect
-    this.window?.setBounds(newBounds)
+    this.browserWindow?.setBounds(newBounds)
   }
 }

@@ -1,8 +1,9 @@
 import { getLogger } from "@3fv/logger-proxy"
-import { BrowserWindow, BrowserWindowConstructorOptions, IpcMainInvokeEvent, WebPreferences } from "electron"
+import { BrowserWindowConstructorOptions, IpcMainInvokeEvent } from "electron"
 import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "@vrkit-platform/models"
 import { Deferred } from "@3fv/deferred"
 import {
+  assign,
   isEditorInfoOUID,
   OverlayBrowserWindowType,
   OverlayClientEventTypeToIPCName,
@@ -14,12 +15,16 @@ import {
   OverlaySpecialIds,
   OverlayWindowRole
 } from "@vrkit-platform/shared"
-import { resolveHtmlPath, windowOptionDefaults } from "../../utils"
+import { resolveHtmlPath } from "../../utils"
 import type OverlayManager from "./OverlayManager"
-import { asOption, Option } from "@3fv/prelude-ts"
+import { asOption } from "@3fv/prelude-ts"
+import EventEmitter3 from "eventemitter3"
 
 import { adjustScreenRect, MaxOverlayWindowDimension, MaxOverlayWindowDimensionPadding } from "./OverlayLayoutTools"
-import { runInAction } from "mobx" // TypeScriptUnresolvedVariable
+import { runInAction } from "mobx"
+import { newWindowConfig, WindowConfig, WindowInstance, WindowManager, WindowRole } from "../window-manager" // TypeScriptUnresolvedVariable
+import { match } from "ts-pattern"
+import { guard } from "@3fv/guard"
 
 // TypeScriptUnresolvedVariable
 
@@ -31,10 +36,22 @@ const { debug, trace, info, error, warn } = log
 
 const MaxFPSIntervalMillis = Math.floor(1000 / 10)
 
-export class OverlayBrowserWindow {
-  private invalidateInterval_: NodeJS.Timeout
+export enum OverlayBrowserWindowEvent {
+  Created = "Created",
+  Ready = "Ready"
+}
 
-  private readonly window_: BrowserWindow
+export interface OverlayBrowserWindowEventArgs {
+  [OverlayBrowserWindowEvent.Created]: (overlayWin: OverlayBrowserWindow) => any
+  [OverlayBrowserWindowEvent.Ready]: (overlayWin: OverlayBrowserWindow) => any
+}
+
+export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEventArgs> {
+  #invalidateInterval_: NodeJS.Timeout
+
+  #windowInstance_: WindowInstance
+
+  readonly #windowInstancePromise: Promise<WindowInstance>
 
   private readonly config_: OverlayConfig
 
@@ -60,7 +77,8 @@ export class OverlayBrowserWindow {
         : OverlayWindowRole.OVERLAY
   }
 
-  readonly windowOptions: BrowserWindowConstructorOptions
+  //readonly windowOptions: BrowserWindowConstructorOptions
+  readonly windowConfig: WindowConfig
 
   get id() {
     return this.config_?.overlay.id
@@ -78,11 +96,11 @@ export class OverlayBrowserWindow {
    * Get the browser window
    */
   get window() {
-    return this.window_
+    return this.#windowInstance_?.browserWindow
   }
 
   get windowId() {
-    return this.window_?.id
+    return this.window?.id
   }
 
   get screenRect(): RectI {
@@ -118,9 +136,9 @@ export class OverlayBrowserWindow {
     }
 
     const deferred = (this.closeDeferred_ = new Deferred())
-    if (this.invalidateInterval_) {
-      clearInterval(this.invalidateInterval_)
-      this.invalidateInterval_ = null
+    if (this.#invalidateInterval_) {
+      clearInterval(this.#invalidateInterval_)
+      this.#invalidateInterval_ = null
     }
 
     try {
@@ -179,152 +197,164 @@ export class OverlayBrowserWindow {
 
   private constructor(
     readonly manager: OverlayManager,
+    readonly windowManager: WindowManager,
     readonly kind: OverlayBrowserWindowType,
     overlay: OverlayInfo,
     placement: OverlayPlacement
   ) {
-    this.config_ = {
-      isScreen: kind === OverlayBrowserWindowType.SCREEN,
-      overlay,
-      placement
+    super()
+    const deferred = this.readyDeferred_
+    const handleError = (err: Error) => {
+      log.error(`Failed to create window`, err)
+
+      if (!deferred.isSettled()) {
+        deferred.reject(err)
+      }
+
+      throw err
     }
 
-    this.uniqueId_ = overlayInfoToUniqueId(this.config.overlay, this.kind)
-    this.invalidateInterval_ = setInterval(() => {
-      this.invalidate()
-    }, MaxFPSIntervalMillis)
-
-    this.windowOptions = runInAction(() => {
-      const screenRect: RectI = this.isEditorInfo
-        ? this.isVR
-          ? placement.vrLayout.screenRect
-          : placement.screenRect
-        : this.isScreen
-          ? adjustScreenRect(placement.screenRect)
-          : asOption(placement.vrLayout.screenRect)
-              .map(adjustScreenRect)
-              .getOrCall(() => {
-                const size = placement.vrLayout.size,
-                  aspectRatio = size.height / size.width,
-                  defaultWidth = 200
-
-                placement.vrLayout.screenRect = {
-                  size: {
-                    width: defaultWidth,
-                    height: defaultWidth * aspectRatio
-                  },
-                  position: { x: 0, y: 0 }
-                }
-
-                return adjustScreenRect(placement.vrLayout.screenRect)
-              })
-
-      const extraWebPrefs: Partial<WebPreferences> = this.isVR
-        ? {
-            offscreen: true
-          }
-        : {
-            transparent: true
-          }
-
-      const extraWindowOpts = this.isVR
-        ? {}
-        : {
-            transparent: true,
-            alwaysOnTop: true
-          }
-
-      return {
-        ...windowOptionDefaults({
-          devTools: true, // isDev,
-          ...extraWebPrefs
-        }),
-        ...extraWindowOpts,
-        show: false,
-        frame: false,
-        backgroundColor: "#00000000",
-        ...screenRect.position,
-        ...screenRect.size,
-        maxWidth: MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding,
-        maxHeight: MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding
-      }
-    })
-
-    this.window_ = new BrowserWindow(this.windowOptions)
-    this.window_.setTitle(this.uniqueId)
-
-    this.window_.webContents.ipc.handle(
-      OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG),
-      this.fetchConfigHandler.bind(this)
-    )
-
-    runInAction(() => {
-      this.setEditorEnabled(manager.editorEnabled)
-
-      // The returned promise is tracked via `readyDeferred`
-      this.initialize().catch(err => {
-        log.error(`failed to initialize overlay window`, err)
-      })
-    })
-  }
-
-  private async initialize(): Promise<OverlayBrowserWindow> {
-    const deferred = this.readyDeferred_
     try {
-      const win = this.window_
-      const url = resolveHtmlPath("index-overlay.html")
-      const urlWithHash = `${url}#${this.uniqueId}`
-      info(`Resolved overlay url: ${url} with hash: ${urlWithHash}`)
-
-      // await win.loadURL(url)
-      await win.loadURL(urlWithHash)
-      info(`Loaded overlay url(${url}) for overlayWindow(${this.uniqueIdDebugString})`)
-      if (this.isScreen) {
-        info(`Showing window in SCREEN kind (${this.uniqueIdDebugString})`)
-        win.show()
-      } else {
-        info(`VR Windows are not shown as they render offscreen for performance (${this.uniqueIdDebugString})`)
-        win.webContents.startPainting()
+      this.config_ = {
+        isScreen: kind === OverlayBrowserWindowType.SCREEN,
+        overlay,
+        placement
       }
 
-      if (isDev && this.manager.mainAppState.devSettings.alwaysOpenDevTools) {
-        win.webContents.openDevTools({
-          mode: "detach"
+      this.uniqueId_ = overlayInfoToUniqueId(this.config.overlay, this.kind)
+      this.#invalidateInterval_ = setInterval(() => {
+        this.invalidate()
+      }, MaxFPSIntervalMillis)
+
+      const baseWindowOpts: Partial<BrowserWindowConstructorOptions> = match(this.isVR)
+        .with(true, () => ({ webPreferences: { offscreen: true } }))
+        .otherwise(() => ({
+          webPreferences: { transparent: true },
+          transparent: true,
+          alwaysOnTop: true
+        }))
+
+      const windowOpts = runInAction(() => {
+        const screenRect: RectI = this.isEditorInfo
+          ? this.isVR
+            ? placement.vrLayout.screenRect
+            : placement.screenRect
+          : this.isScreen
+            ? adjustScreenRect(placement.screenRect)
+            : asOption(placement.vrLayout.screenRect)
+                .map(adjustScreenRect)
+                .getOrCall(() => {
+                  const size = placement.vrLayout.size,
+                    aspectRatio = size.height / size.width,
+                    defaultWidth = 200
+
+                  placement.vrLayout.screenRect = {
+                    size: {
+                      width: defaultWidth,
+                      height: defaultWidth * aspectRatio
+                    },
+                    position: { x: 0, y: 0 }
+                  }
+
+                  return adjustScreenRect(placement.vrLayout.screenRect)
+                })
+
+        return assign(baseWindowOpts, {
+          ...screenRect.position,
+          ...screenRect.size,
+          maxWidth: MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding,
+          maxHeight: MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding
         })
-      }
+      })
 
-      if (this.isVR) {
-        // CONFIGURE THE `webContents` OF THE NEW WINDOW
-        win.webContents.setFrameRate(this.config.overlay.settings?.fps ?? 10)
-        win.webContents.on("paint", this.manager.createOnPaintHandler(this))
-      }
+      const windowConfig = newWindowConfig(WindowRole.Overlay, {
+        id: this.uniqueId,
+        browserWindowOptions: windowOpts,
+        onBrowserWindowCreated: (bw, winInstance) => {
+          try {
+            // SET THE WINDOW INSTANCE REF FIRST
+            this.#windowInstance_ = winInstance
+            
+            bw.setTitle(this.uniqueId)
 
-      deferred.resolve(this)
+            bw.webContents.ipc.handle(
+              OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG),
+              this.fetchConfigHandler.bind(this)
+            )
+            
+            this.emit(OverlayBrowserWindowEvent.Created, this)
+          } catch (err) {
+            log.error(`failed to initialize overlay window`, err)
+            deferred.reject(err)
+          }
+        },
+        onBrowserWindowReady: (bw, winInstance) => {
+          try {
+            this.initialize(bw, winInstance)
+          } catch (err) {
+            log.error(`failed to initialize overlay window`, err)
+            deferred.reject(err)
+          }
+        },
 
-      await deferred.promise
+        url: `${resolveHtmlPath("index-overlay.html")}#${this.uniqueId}`
+      })
+
+      runInAction(() => {
+        this.setEditorEnabled(manager.editorEnabled)
+      })
+      this.#windowInstancePromise = this.windowManager.create(windowConfig)
+          .then(wi => {
+            if (!deferred.isSettled())
+              deferred.resolve(this)
+            
+            this.emit(OverlayBrowserWindowEvent.Ready, this)
+            return wi
+          })
+          .catch(handleError)
+      // this.initialize(this.windowManager.create(windowConfig)).catch(err => {
+      //   log.error(`failed to initialize overlay window`, err)
+      // })
     } catch (err) {
-      log.error(`Failed to initialize overlay window`, err)
+      log.error(`Failed to create window`, err)
       deferred.reject(err)
     }
-    return deferred.promise
+  }
+
+  private initialize(win: Electron.BrowserWindow, winInstance: WindowInstance) {
+    info(
+      `Loaded overlay (id=${winInstance.id},url=${winInstance.config.url}) for overlayWindow(${this.uniqueIdDebugString})`
+    )
+    if (this.isVR) {
+      // CONFIGURE THE `webContents` OF THE NEW WINDOW
+      win.webContents.setFrameRate(this.config.overlay.settings?.fps ?? 10)
+      win.webContents.on("paint", this.manager.createOnPaintHandler(this))
+    }
+    if (this.isScreen) {
+      info(`Showing window in SCREEN kind (${this.uniqueIdDebugString})`)
+    } else {
+      info(`VR Windows are not shown as they render offscreen for performance (${this.uniqueIdDebugString})`)
+      win.webContents.startPainting()
+    }
   }
 
   static create(
     manager: OverlayManager,
+    windowManager: WindowManager,
     kind: OverlayBrowserWindowType,
     overlay: OverlayInfo,
     placement: OverlayPlacement
   ): OverlayBrowserWindow {
-    return new OverlayBrowserWindow(manager, kind, overlay, placement)
+    return new OverlayBrowserWindow(manager, windowManager, kind, overlay, placement)
   }
 
   private setIgnoreMouseEvents(ignore: boolean): void {
     if (ignore) {
-      this.window_?.setIgnoreMouseEvents(true, {
+      this.window?.setIgnoreMouseEvents(true, {
         forward: true
       })
     } else {
-      this.window_?.setIgnoreMouseEvents(false)
+      this.window?.setIgnoreMouseEvents(false)
     }
   }
 
@@ -347,7 +377,12 @@ export class OverlayBrowserWindow {
     }
 
     this.previousInvalidateTime_ = now
-    Option.try(() => this.window_?.webContents?.invalidate())
+    guard(
+      () => this.window?.webContents?.invalidate(),
+      err => {
+        log.warn(`Failed to invalidate overlay window (${this.uniqueId})`, err)
+      }
+    )
   }
 
   /**

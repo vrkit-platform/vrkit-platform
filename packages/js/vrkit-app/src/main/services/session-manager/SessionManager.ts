@@ -47,7 +47,7 @@ import { app, dialog, ipcMain, IpcMainInvokeEvent } from "electron"
 import { get } from "lodash/fp"
 import { Deferred } from "@3fv/deferred"
 import { match } from "ts-pattern"
-import { MainWindowManager } from "../window-manager"
+import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { action, observe, remove, runInAction, set, toJS } from "mobx"
 import { SessionPlayerContainer } from "./SessionPlayerContainer"
@@ -343,7 +343,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    * @param sharedAppState
    */
   constructor(
-    readonly mainWindowManager: MainWindowManager,
+    readonly mainWindowManager: WindowManager,
     readonly sharedAppState: MainSharedAppState
   ) {
     super()

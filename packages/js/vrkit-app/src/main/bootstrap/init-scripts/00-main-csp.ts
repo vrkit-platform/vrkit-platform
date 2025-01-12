@@ -2,7 +2,7 @@
 
 export default async function configureCSP() {
   // NOTE: This has been moved to `launch.ts` which will itself be moved to a
-  //   WindowManager once implemented
+  //   WindowStateManager once implemented
   //
   // session.defaultSession.webRequest.onBeforeSendHeaders(
   //     (details, callback) => {

@@ -27,7 +27,7 @@ import { endsWith, get } from "lodash/fp"
 import Path from "path"
 import PQueue from "p-queue"
 import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
-import { MainWindowManager } from "../window-manager"
+import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { action, runInAction, set, toJS } from "mobx"
 import { IDisposer } from "mobx-utils"
@@ -407,7 +407,7 @@ export class DashboardManager {
     readonly container: Container,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
-    readonly mainWindowManager: MainWindowManager,
+    readonly mainWindowManager: WindowManager,
     readonly mainAppState: MainSharedAppState,
     readonly fsManager: FileSystemManager
   ) {}

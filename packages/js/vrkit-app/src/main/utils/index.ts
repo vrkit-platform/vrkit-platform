@@ -1,5 +1,5 @@
 export * from "./FsExtra"
 export * from "./getAppThemeFromSystem"
-export * from "./WindowHelpers"
 export * from "./NativeImageSequenceCapture"
 export * from "./MobxUtils"
+export * from "./IPCHelpers"

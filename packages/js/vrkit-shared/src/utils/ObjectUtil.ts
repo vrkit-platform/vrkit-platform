@@ -148,7 +148,9 @@ export function shallowEqualsArrayOrList<
     return false
   }
 
-  if (val1.length === 0 && val2.length === 0) return true
+  if (val1.length === 0 && val2.length === 0) {
+    return true
+  }
 
   return val1.every((testVal1, index) => {
     const testVal2 = val2[index]
@@ -278,14 +280,16 @@ export interface IValueTransformer {
 }
 
 export function transformValues(o, fn: IValueTransformer): any {
-  return !o ? null : Array.isArray(o)
-    ? o.map(aVal => transformValues(aVal, fn))
-    : typeof o === "object"
-      ? Object.keys(o).reduce((newObj: any, nextKey: any) => {
-          newObj[nextKey] = fn(nextKey, o[nextKey])
-          return newObj
-        }, {})
-      : o
+  return !o
+    ? null
+    : Array.isArray(o)
+      ? o.map(aVal => transformValues(aVal, fn))
+      : typeof o === "object"
+        ? Object.keys(o).reduce((newObj: any, nextKey: any) => {
+            newObj[nextKey] = fn(nextKey, o[nextKey])
+            return newObj
+          }, {})
+        : o
 }
 
 export function extractError(error: Error): Error | null {
@@ -367,4 +371,43 @@ export function findValue<O extends {}>(o: O, predicate: (value: ValuesOf<O>, ke
 
 export function findKey<O extends {}>(o: O, predicate: (value: ValuesOf<O>, key: KeysOf<O>) => boolean) {
   return entriesOf<O>(o).find(([k, v]) => predicate(v, k as KeysOf<O>))?.[0]
+}
+
+export function deepFreezeArray<T>(items: T[]): T[] {
+  if (!Array.isArray(items)) {
+    return items
+  }
+
+  for (const child of items) {
+    if (Array.isArray(child)) {
+      deepFreezeArray(child)
+    } else if (typeof child === "object" || typeof child === "function") {
+      deepFreeze(child)
+    }
+  }
+
+  return Object.freeze(items) as T[]
+}
+
+export function deepFreeze<T>(o: T): T {
+  if (Array.isArray(o)) {
+    return deepFreezeArray(o) as T
+  }
+  // Retrieve the property names defined on object
+  const propNames = Reflect.ownKeys(o as any)
+
+  // Freeze properties before freezing self
+  for (const name of propNames) {
+    const value = o[name]
+
+    if (value) {
+      if (Array.isArray(value)) {
+        deepFreezeArray(value)
+      } else if (typeof value === "object" || typeof value === "function") {
+        deepFreeze(value)
+      }
+    }
+  }
+
+  return Object.freeze(o)
 }

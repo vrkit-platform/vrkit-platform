@@ -20,7 +20,10 @@ import {
   TPluginComponentType
 } from "@vrkit-platform/plugin-sdk"
 import {
-  OverlayConfig, OverlayKind, PluginComponentDefinition, PluginInstall
+  OverlayConfig,
+  OverlayKind,
+  PluginComponentDefinition,
+  PluginInstall, PluginUserSettingValue
 } from "@vrkit-platform/models"
 import OverlayManagerClient from "../overlay-manager-client"
 import { asOption } from "@3fv/prelude-ts"
@@ -169,26 +172,7 @@ export class PluginLoader {
             .on("error", this.onFileWatcherError.bind(this))
         state.fileWatcher = watcher
       }
-      // Object.assign(vmCtxObj, {
-      //   __dirname: pkgPath,
-      //   __filename: pkgMainFile
-      // })
-
-      // const
-      //   vmCtx = (this.state_.vm.context = VM.createContext(vmCtxObj, {
-      //     name: manifestName,
-      //     codeGeneration: {
-      //       strings: true
-      //     }
-      //
-      //     // TODO: Enable in future version as Node v22+ is required
-      //     //importModuleDynamically:
-      //     // VM.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER
-      //   }))
-
-      // let res = vmScript.runInContext(vmCtx, {
-      //   displayErrors: true
-      // })
+      
       let res = this.state.global.requireProxy(pkgMainFile)
       if (isPromise(res)) {
         res = await res
@@ -198,7 +182,9 @@ export class PluginLoader {
         factory: IPluginComponentFactory = (this.state.componentFactory = modExports?.default)
 
       assert(isFunction(factory), `Exported factory for ${manifestName} is not a function`)
-      log.info(`Result from loading plugin (${manifestName})`, modExports, factory)
+      if (log.isDebugEnabled())
+        log.debug(`Result from loading plugin (${manifestName})`, modExports, factory)
+      
       this.setupDeferred_.resolve()
     } catch (err) {
       log.error(`Failed to setup plugin`, err)
@@ -254,19 +240,6 @@ export class PluginLoader {
     this.state_ = {
       fileWatcher: null,
       moduleIdCache: {},
-
-      // vm: {
-      //   contextObj: {
-      //     ...window,
-      //     window,
-      //     console: window.console,
-      //     global,
-      //     module: {
-      //       exports: {}
-      //     },
-      //     ...globalRequire
-      //   }
-      // },
       global: globalRequire
     }
 
@@ -353,6 +326,11 @@ export class PluginClientLauncher {
         getOverlayInfo: () => {
           return this.getConfig()?.overlay
         },
+        
+        getUserSettingValue: (id:string):PluginUserSettingValue => {
+          return this.getConfig()?.overlay?.userSettingValues?.[id]
+        },
+        
         getSessionInfo: () => {
           return sharedAppSelectors.selectActiveSessionInfo(this.appStore.getState())
         },

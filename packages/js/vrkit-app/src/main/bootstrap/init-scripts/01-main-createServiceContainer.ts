@@ -6,7 +6,7 @@ import { NativeThemeManager } from "../../services/native-theme"
 import { ActionRegistry, once } from "@vrkit-platform/shared"
 import { AppSettingsService } from "../../services/app-settings"
 import ElectronMainActionManager from "../../services/electron-actions"
-import { MainWindowManager, WindowManager } from "../../services/window-manager"
+import WindowManager from "../../services/window-manager"
 import SessionManager from "../../services/session-manager"
 import { OverlayManager } from "../../services/overlay-manager"
 import SharedAppState, { createSharedAppStateStore } from "../../services/store"
@@ -27,11 +27,9 @@ const createServiceContainer = once(async function createServiceContainer() {
     .bindClass(ActionRegistry)
     .bindClass(ElectronMainActionManager)
     .bindClass(NativeThemeManager)
-    //.bindClass(ElectronMenuRenderer)
     .bindClass(AppSettingsService)
     .bindClass(ElectronMainMenuManager)
     .bindClass(WindowManager)
-    .bindClass(MainWindowManager)
     .bindClass(SessionManager)
     .bindClass(DashboardManager)
     .bindClass(OverlayManager)

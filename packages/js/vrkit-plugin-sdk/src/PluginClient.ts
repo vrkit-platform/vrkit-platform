@@ -2,7 +2,7 @@ import type {
   LapTrajectory,
   OverlayInfo,
   PluginComponentDefinition,
-  PluginManifest,
+  PluginManifest, PluginUserSettingValue,
   SessionDataVariableValueMap,
   SessionTiming,
   TrackMap
@@ -39,7 +39,10 @@ export type PluginClientEventHandler<Type extends keyof IPluginClientEventArgs> 
  */
 export interface IPluginClient {
   inActiveSession(): boolean
+  
   getOverlayInfo(): OverlayInfo
+  
+  getUserSettingValue(id: string): PluginUserSettingValue
   
   getSessionInfo(): SessionInfoMessage
   

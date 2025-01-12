@@ -30,7 +30,6 @@ import {
   OverlayWindowRole,
   Pair,
   pairOf,
-  PluginsState,
   removeIfMutation,
   SessionDetail,
   SessionManagerEventType,
@@ -58,8 +57,10 @@ import { AppSettingsService } from "../app-settings"
 import Fsx from "fs-extra"
 import Path from "path"
 import PQueue from "p-queue"
-import { OverlayBrowserWindow } from "./OverlayBrowserWindow"
-import { MainWindowManager } from "../window-manager"
+import {
+  OverlayBrowserWindow, OverlayBrowserWindowEvent
+} from "./OverlayBrowserWindow"
+import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { flatten, pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
@@ -211,14 +212,18 @@ export class OverlayManager {
         // CREATE NEW WINDOW
         this.updateDataVars(ouid, overlayInfo)
 
-        const newWin = OverlayBrowserWindow.create(this, windowKind, overlayInfo, placement)
-
+        const newWin = OverlayBrowserWindow.create(this, this.windowManager, windowKind, overlayInfo, placement)
+        
         // ATTACH LISTENERS
-        newWin.window.on("closed", this.createOnCloseHandler(ouid, newWin.windowId))
-        if (newWin.isScreen) {
-          const onBoundsChanged = this.createOnBoundsChangedHandler(placement, newWin)
-          newWin.window.on("moved", onBoundsChanged).on("resized", onBoundsChanged)
-        }
+        newWin.on(OverlayBrowserWindowEvent.Created, win => {
+          win.window.on("closed", this.createOnCloseHandler(ouid, newWin.windowId))
+          if (win.isScreen) {
+            const onBoundsChanged = this.createOnBoundsChangedHandler(placement, newWin)
+            win.window.on("moved", onBoundsChanged).on("resized", onBoundsChanged)
+          }
+        })
+        
+        
         return newWin
       })
   }
@@ -503,6 +508,7 @@ export class OverlayManager {
    * Service constructor
    *
    * @param container
+   * @param windowManager
    * @param mainActionManager
    * @param sessionManager
    * @param appSettingsService
@@ -512,10 +518,11 @@ export class OverlayManager {
    */
   constructor(
     @InjectContainer() readonly container: Container,
+    readonly windowManager: WindowManager,
     readonly mainActionManager: ElectronMainActionManager,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
-    readonly mainWindowManager: MainWindowManager,
+    readonly mainWindowManager: WindowManager,
     readonly mainAppState: MainSharedAppState,
     readonly dashManager: DashboardManager
   ) {

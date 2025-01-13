@@ -233,8 +233,17 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
           </FlexColumnBox>
           <FlexRowCenterBox>
             <AppIconButton
-                tooltip={isActive ? "Edit dashboard layout" : "You must open/launch a dashboard before you can edit the layout"}
-                // disabled={!isActive}
+                tooltip="Launch dashboard"
+                className={clsx(classNames.itemAction)}
+                onClick={toggleOpen}
+            >
+              <AppFAIcon
+                  size="2xs"
+                  icon={faRocketLaunch}
+              />
+            </AppIconButton>
+            <AppIconButton
+                tooltip={"Launch dashboard layout editor"}
                 className={clsx(classNames.itemAction)}
                 onClick={editLayout}
             >
@@ -251,19 +260,11 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
                   icon={faEdit}
                 />
             </AppIconButton>
-            <AppIconButton
-              tooltip="Launch dashboard"
-              className={clsx(classNames.itemAction)}
-              onClick={toggleOpen}
-            >
-              <AppFAIcon
-                size="2xs"
-                icon={faRocketLaunch}
-              />
-            </AppIconButton>
+            
 
             <DashboardsListItemMenu
               config={config}
+              disabled={isActive}
               onDelete={handleDelete}
               onSetAsDefault={handleSetAsDefault}
               isDefault={isDefault}

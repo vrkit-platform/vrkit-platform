@@ -2,6 +2,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import { session } from "electron"
 import { Deferred } from "@3fv/deferred"
 import Path from "path"
+import { isString } from "@3fv/guard"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -19,7 +20,8 @@ async function installDevTools() {
   info(`Installing devtools`)
 
   const reactDevToolExtId = REACT_DEVELOPER_TOOLS
-  const extensions = [reactDevToolExtId, REDUX_DEVTOOLS]
+  const includeRedux = false
+  const extensions = [reactDevToolExtId, includeRedux && REDUX_DEVTOOLS].filter(isString)
   const targetSession = session.defaultSession
 
   targetSession.flushStorageData()
@@ -35,15 +37,9 @@ async function installDevTools() {
     return res
   }
 
-  // TODO: Figure out why this has to run twice for React Dev Tools to be
-  //  Available on first load
-  // await Promise.all(range(2).map(installExtInternal))
-
   const installedExts = await installExtInternal()
   const reactExtIdInstalled = installedExts[0].id
 
-  //targetSession.flushStorageData()
-  // await Deferred.delay(250)
   await Deferred.delay(100)
 
   const allExts = targetSession.getAllExtensions()

@@ -9,6 +9,9 @@ import { isString } from "@3fv/guard"
 type GlobalErrorType = "windowError" | "uncaughtException" | "unhandledRejection"
 
 export function reportMainError(type: GlobalErrorType, ...args: any[]) {
+  const msg = `${type}, ${JSON.stringify(args,null,2)}`
+  console.error(msg,...args)
+  
   const isNotEmptyString = Predicate.of(isString).and(negate(isEmpty)),
       stack = args.map(it => it?.stack).filter(isNotEmptyString)[0] ?? "Not available",
       errorMsg = asOption(args.map(it => isNotEmptyString(it) ? it : it?.message).filter(isNotEmptyString).join("\n"))
@@ -24,10 +27,24 @@ function onRendererError(ev: Electron.IpcMainEvent, type, ...args: any[]) {
   reportMainError(type, ...args)
 }
 
+function makeErrorHandler(type:GlobalErrorType) {
+  return (...args:any[]) => {
+    reportMainError(type, ...args)
+  }
+}
+
+const handleUncaughtException = makeErrorHandler("uncaughtException"),
+    handleUnhandledRejection = makeErrorHandler("unhandledRejection")
+
+process.on("uncaughtException",handleUncaughtException)
+process.on("unhandledRejection", handleUnhandledRejection)
+
 ipcMain.on("unhandledError" satisfies ElectronIPCChannelKind, onRendererError)
 if (import.meta.webpackHot) {
   import.meta.webpackHot.addDisposeHandler(() => {
     ipcMain.off("unhandledError" satisfies ElectronIPCChannelKind, onRendererError)
+    process.removeAllListeners("uncaughtException")
+    process.removeAllListeners("unhandledRejection")
   })
 }
 export {}

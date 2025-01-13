@@ -49,7 +49,7 @@ import {
   VRLayout,
   VRPose
 } from "@vrkit-platform/models"
-import { isDefined } from "@3fv/guard"
+import { guard, isDefined } from "@3fv/guard"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
 import { PluginClientEventType } from "@vrkit-platform/plugin-sdk"
@@ -428,7 +428,7 @@ export class OverlayManager {
 
     await Promise.all(
       overlays.map(o => {
-        o.browserWindow?.webContents?.endFrameSubscription()
+        guard(() => o.browserWindow?.webContents?.endFrameSubscription())
         return o.close()
       })
     )

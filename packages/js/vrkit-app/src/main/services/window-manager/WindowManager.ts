@@ -326,7 +326,8 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
           browserWindowClosed: false,
           browserWindowOptions: bwOpts,
           onBrowserWindowEvent: config.onBrowserWindowEvent
-        }).browserWindow
+        }).browserWindow,
+          isOffscreen = bwOpts?.webPreferences?.offscreen ?? false
       
       
       log.assert(
@@ -363,7 +364,9 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
 
         // SHOW MAIN WINDOW
         log.debug(`window (${winId}) is ready to show`)
-        bw.show()
+        
+        if (!isOffscreen)
+          bw.show()
         this.emit("UI_READY", bw)
       })
 

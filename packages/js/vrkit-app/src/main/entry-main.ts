@@ -20,24 +20,10 @@ import { isPromise } from "@3fv/guard"
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
-function reportError(type: "uncaughtException" | "unhandledRejection", ...args: any[]) {
-  const msg = `${type}, ${JSON.stringify(args,null,2)}`
-  console.error(msg,...args)
-  error(msg, args)
-  import("./utils/ProcessErrorHelpers")
-      .then(Helpers => Helpers.reportMainError(type, ...args))
-}
-
-process.on("uncaughtException",(...args:any[]) => {
-  reportError("uncaughtException", ...args)
-  
-})
-
-process.on("unhandledRejection",(...args:any[]) => {
-  reportError("unhandledRejection", ...args)
-})
 
 async function start() {
+  await import("./utils/ProcessErrorHelpers")
+  
   if (!ElectronRemote.isInitialized())
     ElectronRemote.initialize()
   
@@ -60,12 +46,13 @@ if (app.requestSingleInstanceLock()) {
 
 // HMR
 if (import.meta.webpackHot) {
-  import.meta.webpackHot.accept((err) => {
-    if (err) {
-      log.error(`HMR ERROR`, err)
-    } else {
-      log.warn("HMR updates")
-    }
+  import.meta.webpackHot.accept((...args) => {
+    console.warn(`entry-main HMR accept`, ...args)
+    // if (err) {
+    //   log.error(`HMR ERROR`, err)
+    // } else {
+    //   log.warn("HMR updates")
+    // }
   })
 }
 

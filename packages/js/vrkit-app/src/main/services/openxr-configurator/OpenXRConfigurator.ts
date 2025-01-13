@@ -109,7 +109,7 @@ export class OpenXRConfigurator {
    * Initialize
    */
   @PostConstruct()
-  private async init() {
+  protected async init() {
     if (isDev) {
       Object.assign(global, {
         openXRConfigurator: this

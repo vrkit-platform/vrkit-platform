@@ -18,7 +18,7 @@ import { AppSettingsClient } from "../../../services/app-settings-client"
 import { useAppSelector } from "../../../services/store"
 import { PluginCompEntry, sharedAppSelectors } from "../../../services/store/slices/shared-app"
 import { isNotEmpty, isNotEmptyString } from "@vrkit-platform/shared"
-import Alerts from "../../../services/alerts"
+import Alerts, { Alert } from "../../../services/alerts"
 import {
   Ellipsis,
   EllipsisBox,
@@ -43,6 +43,7 @@ import { asOption } from "@3fv/prelude-ts"
 import { NavLink } from "react-router-dom"
 import { WebPaths } from "../../../routes/WebPaths"
 import AddIcon from "@mui/icons-material/Add"
+import OpenLayoutEditorIcon from '@mui/icons-material/SpaceDashboard'
 import { faEdit, faRocketLaunch } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
 import Tooltip from "@mui/material/Tooltip"
 import Button, { ButtonProps } from "@mui/material/Button"
@@ -136,10 +137,39 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
         dashClient.deleteDashboardConfig(config.id)
       }
     }, [config?.id, hasActive, dashClient]),
-    toggleOpen = useCallback(() => {
-      if (hasActive) {
+      editLayout = Alert.usePromise(async () => {
+        const idValid = isNotEmpty(config?.id)
+        if (!idValid) {
+          Alerts.onError(!idValid ? `Dashboard ID is invalid` : `Dashboard must be open in order to edit the layout`)
+          return
+        }
+        
+        if (!isActive) {
+          if (hasActive) {
+            info(`Closing active dashboard in order to start layout editor for ${config.id}`)
+            await dashClient.closeDashboard()    
+          }
+          info(`Launching dashboard to start layout editor for ${config.id}`)
+          await dashClient.openDashboard(config.id)
+        }
+        info(`Launching dashboard to start layout editor for ${config.id}`)
+        await dashClient.launchLayoutEditor(config.id)
+      }, {
+        loading: ctx => `Launching layout editor for dashboard (${config.name})`,
+        error: (ctx) => {
+          log.error(`Failed to launch layout editor for dashboard ${config.id}`, ctx)
+          return `Unable to launch layout editor: ${ctx.err?.message}`
+        },
+        success: () => `Launch dashboard layout editor`
+      },[config?.id, isActive, hasActive, dashClient]),
+  
+  toggleOpen = useCallback(() => {
+    
+    if (hasActive) {
         dashClient.closeDashboard()
-      } else if (isNotEmpty(config?.id)) {
+      }
+      
+      if (isNotEmpty(config?.id)) {
         dashClient.openDashboard(config.id)
       } else {
         Alerts.onError(`No dashboard ID available`)
@@ -148,13 +178,16 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
 
   return (
     <Box
-      className={clsx(classNames.item, className)}
+      className={clsx(classNames.item, {
+        [classNames.itemIsDefault]: isDefault,
+        [classNames.itemIsActive]: isActive
+      }, className)}
       {...other}
     >
       <Paper
         className={clsx(classNames.itemPaper, {
           [classNames.itemIsDefault]: isDefault,
-          [classNames.itemIsOpen]: isActive
+          [classNames.itemIsActive]: isActive
         },paperClassName)}
       >
         <FlexRowBox
@@ -200,7 +233,15 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
           </FlexColumnBox>
           <FlexRowCenterBox>
             <AppIconButton
-                tooltip="Edit"
+                tooltip={isActive ? "Edit dashboard layout" : "You must open/launch a dashboard before you can edit the layout"}
+                // disabled={!isActive}
+                className={clsx(classNames.itemAction)}
+                onClick={editLayout}
+            >
+              <OpenLayoutEditorIcon />
+            </AppIconButton>
+            <AppIconButton
+                tooltip="Edit Settings"
                 className={clsx(classNames.itemAction)}
                 component={NavLink}
                 to={WebPaths.app.dashboards + `/${config?.id}`}
@@ -261,6 +302,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
               date={Timestamp.toDate(config.fileInfo.modifiedAt)}
             />
           </EllipsisBox>
+          {isActive && <FlexAutoBox className={clsx(classNames.itemActiveBadge)}>ACTIVE</FlexAutoBox>}
           {isDefault && <FlexAutoBox className={clsx(classNames.itemDefaultBadge)}>DEFAULT</FlexAutoBox>}
         </FlexRowBox>
       </Paper>

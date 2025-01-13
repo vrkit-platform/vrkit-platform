@@ -109,7 +109,7 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
    * @private
    */
   @PostConstruct() // @ts-ignore
-  private async init(): Promise<void> {
+  protected async init(): Promise<void> {
     // tslint:disable-next-line
     window.addEventListener("beforeunload", this.unload)
     

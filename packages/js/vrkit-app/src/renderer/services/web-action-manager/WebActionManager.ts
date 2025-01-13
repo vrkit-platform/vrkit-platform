@@ -381,7 +381,7 @@ export class WebActionManager {
    */
   @PostConstruct()
   // @ts-ignore
-  private async init() {
+  protected async init() {
 
     /// REGISTER WEB APP ACTIONS
     this.actionRegistry.addAll(...this.webAppActions)

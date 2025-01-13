@@ -13,7 +13,8 @@ import {
   OverlayManagerClientFnTypeToIPCName,
   overlayPlacementToJson,
   OverlaySpecialIds,
-  OverlayWindowRole
+  OverlayWindowRole, WindowConfig,
+  WindowRole
 } from "@vrkit-platform/shared"
 import { resolveHtmlPath } from "../../utils"
 import type OverlayManager from "./OverlayManager"
@@ -22,7 +23,7 @@ import EventEmitter3 from "eventemitter3"
 
 import { adjustScreenRect, MaxOverlayWindowDimension, MaxOverlayWindowDimensionPadding } from "./OverlayLayoutTools"
 import { runInAction } from "mobx"
-import { newWindowConfig, WindowConfig, WindowInstance, WindowManager, WindowRole } from "../window-manager" // TypeScriptUnresolvedVariable
+import { newWindowCreateOptions, WindowMainInstance, WindowManager } from "../window-manager" // TypeScriptUnresolvedVariable
 import { match } from "ts-pattern"
 import { guard } from "@3fv/guard"
 
@@ -49,9 +50,9 @@ export interface OverlayBrowserWindowEventArgs {
 export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEventArgs> {
   #invalidateInterval_: NodeJS.Timeout
 
-  #windowInstance_: WindowInstance
+  #windowInstance_: WindowMainInstance
 
-  readonly #windowInstancePromise: Promise<WindowInstance>
+  readonly #windowInstancePromise: Promise<WindowMainInstance>
 
   private readonly config_: OverlayConfig
 
@@ -160,13 +161,15 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
   }
   
   /**
-   * Waits until the OverlayBrowserWindow is fully initialized and ready for use.
+   * Waits until the OverlayBrowserWindow is fully initialized and ready for
+   * use.
    *
    * This method ensures that any asynchronous processes required to set up the
    * OverlayBrowserWindow are completed before proceeding. It resolves once the
    * window instance is ready.
    *
-   * @return {Promise<OverlayBrowserWindow>} A promise that resolves to the initialized OverlayBrowserWindow.
+   * @return {Promise<OverlayBrowserWindow>} A promise that resolves to the
+   *     initialized OverlayBrowserWindow.
    */
   whenReady(): Promise<OverlayBrowserWindow> {
     log.assert(!!this.#windowInstancePromise, "Window instance promise is not set")
@@ -279,41 +282,15 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
         })
       })
 
-      const windowConfig = newWindowConfig(WindowRole.Overlay, {
+      const windowConfig = newWindowCreateOptions(WindowRole.Overlay, {
         id: this.uniqueId,
         browserWindowOptions: windowOpts,
-        onBrowserWindowCreated: (bw, winInstance) => {
-          try {
-            // SET THE WINDOW INSTANCE REF FIRST
-            this.#windowInstance_ = winInstance
-            
-            bw.setTitle(this.uniqueId)
-
-            bw.webContents.ipc.handle(
-              OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG),
-              this.fetchConfigHandler.bind(this)
-            )
-            
-            this.emit(OverlayBrowserWindowEvent.Created, this)
-          } catch (err) {
-            log.error(`failed to initialize overlay window`, err)
-            deferred.reject(err)
-          }
-        },
-        onBrowserWindowReady: (bw, winInstance) => {
-          try {
-            
-            runInAction(() => {
-              this.setEditorEnabled(manager.editorEnabled)
-            })
-            
-            this.initialize(bw, winInstance)
-            if (!deferred.isSettled())
-              deferred.resolve(this)
-          } catch (err) {
-            log.error(`failed to initialize overlay window`, err)
-            deferred.reject(err)
-          }
+        onBrowserWindowEvent: (type, bw, winInstance) => {
+          info(`onBrowserWindowEvent(type=${type}) triggered`)
+          match(type)
+              .with("Created", this.newWindowCreatedHandler(bw, winInstance))
+              .with("Ready", this.newWindowReadyHandler(bw, winInstance))
+              .otherwise(type => warn(`Unknown WindowInstance event ${type}`))
         },
 
         url: `${resolveHtmlPath("index-overlay.html")}#${this.uniqueId}`
@@ -340,23 +317,16 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
     }
   }
 
-  private initialize(win: Electron.BrowserWindow, winInstance: WindowInstance) {
-    info(
-      `Loaded overlay (id=${winInstance.id},url=${winInstance.config.url}) for overlayWindow(${this.uniqueIdDebugString})`
-    )
-    if (this.isVR) {
-      // CONFIGURE THE `webContents` OF THE NEW WINDOW
-      win.webContents.setFrameRate(this.config.overlay.settings?.fps ?? 10)
-      win.webContents.on("paint", this.manager.createOnPaintHandler(this))
-    }
-    if (this.isScreen) {
-      info(`Showing window in SCREEN kind (${this.uniqueIdDebugString})`)
-    } else {
-      info(`VR Windows are not shown as they render offscreen for performance (${this.uniqueIdDebugString})`)
-      win.webContents.startPainting()
-    }
-  }
-
+  
+  /**
+   * Create a new overlay window
+   *
+   * @param manager
+   * @param windowManager
+   * @param kind
+   * @param overlay
+   * @param placement
+   */
   static create(
     manager: OverlayManager,
     windowManager: WindowManager,
@@ -419,4 +389,66 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
     this.config_.placement.screenRect = rect
     this.browserWindow?.setBounds(newBounds)
   }
+  
+  private newWindowCreatedHandler(
+      bw:Electron.BrowserWindow,
+      winInstance:WindowMainInstance
+  ) {
+    return () => {
+      try {
+        // SET THE WINDOW INSTANCE REF FIRST
+        this.#windowInstance_ = winInstance
+        
+        bw.setTitle(this.uniqueId)
+        
+        bw.webContents.ipc.handle(
+            OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG),
+            this.fetchConfigHandler.bind(this)
+        )
+        
+        this.emit(OverlayBrowserWindowEvent.Created, this)
+      } catch (err) {
+        log.error(`failed to initialize overlay window`, err)
+        if (!this.readyDeferred_.isSettled()) this.readyDeferred_.reject(err)
+      }
+    }
+  }
+  
+  
+  private newWindowReadyHandler(
+      bw:Electron.BrowserWindow,
+      winInstance:WindowMainInstance
+  ) {
+    return () => {
+      const deferred = this.readyDeferred_
+      try {
+        runInAction(() => {
+          this.setEditorEnabled(this.manager.editorEnabled)
+        })
+        
+        info(
+            `Loaded overlay (id=${winInstance.id},url=${winInstance.config.url}) for overlayWindow(${this.uniqueIdDebugString})`
+        )
+        
+        if (this.isVR) {
+          // CONFIGURE THE `webContents` OF THE NEW WINDOW
+          info(`VR Windows are not shown as they render offscreen for performance (${this.uniqueIdDebugString})`)
+          bw.webContents.on("paint", this.manager.createOnPaintHandler(this))
+              .setFrameRate(this.config.overlay.settings?.fps ?? 10)
+          bw.webContents.startPainting()
+        }
+        if (this.isScreen) {
+          info(`Showing window in SCREEN kind (${this.uniqueIdDebugString})`)
+        }
+        
+        if (!deferred.isSettled())
+          deferred.resolve(this)
+      } catch (err) {
+        log.error(`failed to initialize overlay window`, err)
+        if (!deferred.isSettled())
+          deferred.reject(err)
+      }
+    }
+  }
+  
 }

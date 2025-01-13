@@ -275,7 +275,7 @@ export class ElectronMainActionManager {
   }
 
   @PostConstruct()
-  private async init() {
+  protected async init() {
     const { actions, actionRegistry } = this
 
     // ADD MAIN ACTIONS

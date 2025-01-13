@@ -56,7 +56,7 @@ export class FileSystemManager extends EventEmitter3<FileSystemManagerEventArgs>
    * @private
    */
   @PostConstruct()
-  private async init() {
+  protected async init() {
     if (isDev) {
       Object.assign(global, {
         fileSystemManager: this

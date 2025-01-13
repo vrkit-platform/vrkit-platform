@@ -346,7 +346,7 @@ export class DashboardManager {
    * @private
    */
   @PostConstruct() // @ts-ignore
-  private async init(): Promise<void> {
+  protected async init(): Promise<void> {
     this.mainAppState.setDashboards(await this.createInitialState())
     //this.checkActiveDashboardConfig()
 

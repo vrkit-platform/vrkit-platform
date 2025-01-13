@@ -170,7 +170,7 @@ export class PluginManager {
    * Initialize
    */
   @PostConstruct()
-  private async init() {
+  protected async init() {
     info(`Finding plugins`)
     await this.findPlugins()
     if (isDev) {

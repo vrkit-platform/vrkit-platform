@@ -47,7 +47,7 @@ export class AppSettingsClient {
    */
   @PostConstruct() // @ts-ignore
   // tslint:disable-next-line
-  private async init(): Promise<void> {
+  protected async init(): Promise<void> {
     // tslint:disable-next-line
     window.addEventListener("beforeunload", this.unload)
 

@@ -21,21 +21,24 @@ import {
   CssSelectors,
   EllipsisBox,
   Fill,
+  FillBounds,
   FillWidth,
   flex,
   flexAlign,
   FlexAuto,
   FlexColumn,
   FlexRowCenter,
-  FlexRowCenterBox, FlexScaleZero,
+  FlexRowCenterBox,
+  FlexScaleZero,
   hasCls,
   linearGradient,
   OverflowHidden,
   OverflowVisible,
   padding,
+  PositionAbsolute,
   PositionRelative,
   rem,
-  transition
+  transition, Transparent
 } from "@vrkit-platform/shared-ui"
 import clsx from "clsx"
 import { DashboardConfig } from "@vrkit-platform/models"
@@ -60,7 +63,7 @@ const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const classPrefix = "dashboardsListView"
-export const dashboardsListViewClasses = createClassNames(
+const classes = createClassNames(
   classPrefix,
   "root",
   "container",
@@ -69,10 +72,13 @@ export const dashboardsListViewClasses = createClassNames(
   "itemCreateButton",
   "itemAction",
   "itemSelected",
-  "itemIsOpen",
+  "itemIsActive",
   "itemIsDefault",
-  "itemDefaultBadge"
+  "itemDefaultBadge",
+  "itemActiveBadge"
 )
+
+export const dashboardsListViewClasses = classes
 export type DashboardsListViewClassKey = ClassNamesKey<typeof dashboardsListViewClasses>
 
 function itemActionStyle({ palette, spacing }: Theme) {
@@ -104,6 +110,23 @@ function itemActionStyle({ palette, spacing }: Theme) {
   }
 }
 
+function makeBadgeStyle(theme: Theme, color:string) {
+  const {typography, spacing} = theme
+  return {
+    ...FlexRowCenter,
+    ...padding(spacing(0.25), spacing(0.5)),
+    ...typography.button,
+    fontSize: rem(0.8),
+    fontWeight: 800,
+    borderColor: color,
+    borderRadius: spacing(0.25),
+    borderWidth: 1,
+    borderStyle: "solid",
+    color: color
+  }
+  
+}
+
 const DashboardsListViewRoot = styled(Box, {
   name: "DashboardsListViewRoot",
   label: "DashboardsListViewRoot"
@@ -129,6 +152,35 @@ const DashboardsListViewRoot = styled(Box, {
           filter: "drop-shadow(0px 2px 2px rgba(0,0,0, 0.25))",
           ...flex(1, 0, "min(35%, 30vw)"),
           ...flexAlign("stretch", "flex-start"),
+          
+          [hasCls(dashboardsListViewClasses.itemIsDefault)]: {
+            [child(dashboardsListViewClasses.itemPaper)]: {
+              "&::after": {
+                opacity: 1,
+                border: `2px solid ${palette.success.main}`,
+                backgroundImage: linearGradient(
+                    "to bottom",
+                    `${alpha(theme.palette.success.main, 0.05)} 0%`,
+                    `${alpha(theme.palette.success.main, 0.2)} 95%`,
+                    `${alpha(theme.palette.success.main, 0.3)} 100%`
+                ),
+              }
+            }
+          },
+          [hasCls(dashboardsListViewClasses.itemIsActive)]: {
+            [child(dashboardsListViewClasses.itemPaper)]: {
+              "&::after": {
+                opacity: 1,
+                border: `2px solid ${palette.error.main}`,
+                backgroundImage: linearGradient(
+                    "to bottom",
+                    `${alpha(theme.palette.error.main, 0.05)} 0%`,
+                    `${alpha(theme.palette.error.main, 0.2)} 95%`,
+                    `${alpha(theme.palette.error.main, 0.3)} 100%`
+                ),
+              }
+            }
+          },
           [hasCls(dashboardsListViewClasses.itemSelected)]: {},
 
           [child(dashboardsListViewClasses.itemPaper)]: {
@@ -140,7 +192,21 @@ const DashboardsListViewRoot = styled(Box, {
             gap: spacing(1),
             textDecoration: "none",
             ...flexAlign("stretch", "stretch"),
-
+            
+            "&::after": {
+              ...PositionAbsolute,
+              ...FillBounds,
+              // zIndex: 2,
+              
+              borderRadius: theme.shape.borderRadius,
+              pointerEvents: "none",
+              content: "' '",
+              border: `2px solid ${Transparent}`,
+              backgroundImage: "none",
+              opacity: 0,
+              transition: theme.transitions.create(["border", "background-image", "opacity"])
+            },
+            
             "&.first": {
               borderTopLeftRadius: theme.shape.borderRadius,
               borderTopRightRadius: theme.shape.borderRadius
@@ -161,17 +227,8 @@ const DashboardsListViewRoot = styled(Box, {
               borderBottomRightRadius: theme.shape.borderRadius
             },
 
-            [child(dashboardsListViewClasses.itemDefaultBadge)]: {
-              ...FlexRowCenter,
-              ...padding(spacing(0.25), spacing(0.5)),
-              ...theme.typography.button,
-              fontSize: rem(0.8),
-              borderColor: palette.success.main,
-              borderRadius: spacing(0.25),
-              borderWidth: 0.5,
-              borderStyle: "solid",
-              color: palette.success.main
-            }
+            [child(classes.itemDefaultBadge)]: makeBadgeStyle(theme, palette.success.main),
+            [child(classes.itemActiveBadge)]: makeBadgeStyle(theme, palette.error.main)
           },
           [`${hasCls(dashboardsListViewClasses.itemCreateButton)}, ${child(
             dashboardsListViewClasses.itemCreateButton

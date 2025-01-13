@@ -1,13 +1,10 @@
-import { isMac } from "./constants"
-import { getSharedAppStateStore } from "./services/store"
-import { app, BrowserWindow } from "electron"
-
 import { getLogger } from "@3fv/logger-proxy"
 import { getService } from "./ServiceContainer"
 import {
-  WindowInstance, WindowManager, WindowRole, WindowStateManager
+  WindowMainInstance, WindowManager, WindowStateManager
 } from "./services/window-manager"
 import { Deferred } from "@3fv/deferred"
+import { WindowRole } from "@vrkit-platform/shared"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -19,8 +16,8 @@ Object.assign(global, {
 })
 
 
-let wi:WindowInstance = null
-let createWindowDeferred:Deferred<WindowInstance> = null
+let wi:WindowMainInstance = null
+let createWindowDeferred:Deferred<WindowMainInstance> = null
 
 async function launch() {
   const
@@ -29,7 +26,7 @@ async function launch() {
         if (createWindowDeferred)
           return createWindowDeferred.promise
         
-        createWindowDeferred = new Deferred<WindowInstance>()
+        createWindowDeferred = new Deferred<WindowMainInstance>()
         try {
           wi = await windowManager.create(WindowRole.Main)
           createWindowDeferred.resolve(wi)

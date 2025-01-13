@@ -105,7 +105,7 @@ export class AppSettingsService {
    * Initialize
    */
   @PostConstruct()
-  private async init() {
+  protected async init() {
     this.sharedAppState.setAppSettings(await this.loadAppSettings())
 
     this.sharedAppState.setAppSettings(this.sharedAppState.appSettings)

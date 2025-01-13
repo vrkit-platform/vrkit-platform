@@ -450,7 +450,7 @@ export class OverlayManager {
    * @private
    */
   @PostConstruct() // @ts-ignore
-  private async init(): Promise<void> {
+  protected async init(): Promise<void> {
     app.on("quit", this.unload)
 
     const { sessionManager } = this,

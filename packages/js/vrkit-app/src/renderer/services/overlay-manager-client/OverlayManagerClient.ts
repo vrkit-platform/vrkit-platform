@@ -155,7 +155,7 @@ export class OverlayManagerClient
    * @private
    */
   @PostConstruct()
-  private async init(): Promise<void> {
+  protected async init(): Promise<void> {
     
     window.addEventListener("beforeunload", this.unload)
     

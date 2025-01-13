@@ -379,7 +379,7 @@ export class PluginClientLauncher {
    */
   @PostConstruct() // @ts-ignore
   // tslint:disable-next-line
-  private async init(): Promise<void> {
+  protected async init(): Promise<void> {
     window.addEventListener("beforeunload", this.unload)
 
     this.initDev()

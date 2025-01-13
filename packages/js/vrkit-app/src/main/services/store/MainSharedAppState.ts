@@ -114,7 +114,7 @@ export class MainSharedAppState implements ISharedAppState {
   }
 
   @Once()
-  private async init() {
+  protected async init() {
     if (this.initDeferred) {
       return this.initDeferred.promise
     }

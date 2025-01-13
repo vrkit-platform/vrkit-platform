@@ -24,7 +24,7 @@ function reportError(type: "uncaughtException" | "unhandledRejection", ...args: 
   const msg = `${type}, ${JSON.stringify(args,null,2)}`
   console.error(msg,...args)
   error(msg, args)
-  import("./utils/DialogHelpers")
+  import("./utils/ProcessErrorHelpers")
       .then(Helpers => Helpers.reportMainError(type, ...args))
 }
 

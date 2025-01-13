@@ -5,7 +5,7 @@ import { assign, defaults, toPlainObject } from "lodash"
 import { Future } from "@3fv/prelude-ts"
 import Debug from "debug"
 import { JSONStringifyAny } from "@vrkit-platform/shared"
-import { getValue } from "@3fv/guard"
+import { guard } from "@3fv/guard"
 
 
 
@@ -77,9 +77,13 @@ export class LogServerClientAppender implements Appender {
    * Close immediately
    */
   closeImmediate() {
-    getValue(() => {
-      this.messageClient.close()
+    guard(() => {
+      this.messageClient?.close?.()
+    }, err => {
+      console.error(`Unable to cleanly stop messageClient`, err)
     })
+    
+    delete this["messageClient"]
   }
   
   /**
@@ -90,7 +94,7 @@ export class LogServerClientAppender implements Appender {
   async close(): Promise<void> {
     await this.flush()
       .onComplete(() => {
-        this.messageClient.close()
+        this.closeImmediate()
       })
       .toPromise()
   }
@@ -183,7 +187,7 @@ export class LogServerClientAppender implements Appender {
    * @param {Partial<LogServerClientAppenderOptions<Record>>} options
    */
   constructor(
-    readonly messageClient: UPM.IMessageClient<LogServerRequestMap>,
+    protected messageClient: UPM.IMessageClient<LogServerRequestMap>,
     options: LogServerClientAppenderOptions = {}
   ) {
     this.config = applyConfigDefaults(options)

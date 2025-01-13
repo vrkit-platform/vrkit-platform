@@ -17,7 +17,8 @@ export enum ElectronIPCChannel {
   invokeMainAction = "invokeMainAction",
   sharedAppStateChanged = "sharedAppStateChanged",
   fetchSharedAppState = "fetchSharedAppState",
-  fetchAppStorage = "fetchAppStorage"
+  fetchAppStorage = "fetchAppStorage",
+  unhandledError = "unhandledError"
 }
 
 export type ElectronIPCChannelKind = ElectronIPCChannel | `${ElectronIPCChannel}`

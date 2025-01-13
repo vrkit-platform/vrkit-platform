@@ -56,7 +56,7 @@ export class PluginManagerClient extends EventEmitter3<PluginManagerEventArgs> i
    * @private
    */
   @PostConstruct()
-  private async init(): Promise<void> {
+  protected async init(): Promise<void> {
     window.addEventListener("beforeunload", this.unload)
 
     if (isDev) {

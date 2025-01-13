@@ -56,7 +56,7 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    * @private
    */
   @PostConstruct()
-  private async init() {
+  protected async init() {
     if (isDev) {
       Object.assign(global, {
         trackManager: this

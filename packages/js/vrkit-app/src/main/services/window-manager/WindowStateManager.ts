@@ -4,12 +4,13 @@ import Fsx from "fs-extra"
 
 import { Bind } from "@vrkit-platform/shared"
 import { WindowSizeDefault } from "./WindowConstants"
-import { defaults } from "@vrkit-platform/shared"
+import { defaults, WindowConfig } from "@vrkit-platform/shared"
 import { getLogger } from "@3fv/logger-proxy"
-import type { WindowConfig, WindowInstance } from "./WindowTypes"
+
 import { Deferred } from "@3fv/deferred"
 import { AppPaths } from "@vrkit-platform/shared/constants/node"
 import { asOption } from "@3fv/prelude-ts"
+import { WindowMainInstance } from "./WindowMainTypes"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -58,7 +59,7 @@ export class WindowStateManager {
   
   #stateChangeTimer: number
   
-  #winInstance: WindowInstance
+  #winInstance: WindowMainInstance
   
   #filename: string
   
@@ -226,10 +227,10 @@ export class WindowStateManager {
     //this.saveState()
   }
 
-  enable(winInstance: WindowInstance) {
+  enable(winInstance: WindowMainInstance) {
     log.assert(this.#winInstance?.id === winInstance.id || !this.#winInstance, `WindowInstance can only be enabled once with an instance of WindowStateManager`)
     
-    const { config: winConfig, browserWindow: win } = this.#winInstance = winInstance,
+    const { browserWindow: win } = this.#winInstance = winInstance,
         config = this.config
     
     if (this.#enabled)

@@ -288,7 +288,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    * @private
    */
   @PostConstruct() // @ts-ignore
-  private async init(): Promise<void> {
+  protected async init(): Promise<void> {
     const ipcFnHandlers = Array<[SessionManagerFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any]>(
       [SessionManagerFnType.SET_LIVE_SESSION_ACTIVE, this.setLiveSessionActiveHandler.bind(this)],
       [SessionManagerFnType.SHOW_OPEN_DISK_SESSION, this.showOpenDiskPlayerDialogHandler.bind(this)],

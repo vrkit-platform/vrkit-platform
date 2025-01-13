@@ -13,7 +13,7 @@ import { DashboardManagerClient } from "../../../services/dashboard-manager-clie
 import { useAsyncCallback } from "../../../hooks" // import {
 import { PageMetadata, PageMetadataProps } from "../../page-metadata"
 import { AppButtonGroupFormikPositiveNegative } from "../../app-button-group-positive-negative"
-import { assignDeep, generateUUID, isEmpty, isEqual, propEqualTo, removeIfMutation } from "@vrkit-platform/shared"
+import { assignDeep, generateUUID, isEqual, propEqualTo, removeIfMutation } from "@vrkit-platform/shared"
 import { FormContainer } from "../../form"
 import { AppTextFieldFormik } from "../../app-text-field"
 import {
@@ -58,6 +58,7 @@ import Alerts from "../../../services/alerts"
 import AppComponentPickerDialog from "../../app-component-picker-dialog"
 import Button from "@mui/material/Button"
 import { pick } from "lodash"
+import { WebPaths } from "../../../routes/WebPaths"
 
 const log = getLogger(__filename)
 
@@ -332,8 +333,8 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
       }
     },
     [negLabel, posLabel] = createAppContentBarLabels([
-      [isEmpty(config?.id) ? "Cancel" : "Revert", <CloseIcon />],
-      [isEmpty(config?.id) ? "Create" : "Save", <SaveIcon />]
+      [isTouched ? "Revert" : "Close", <CloseIcon />],
+      ["Save", <SaveIcon />]
     ]),
     pageMetadata: PageMetadataProps = {
       appContentBar: {
@@ -347,10 +348,14 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
             }}
             negativeLabel={negLabel}
             negativeHandler={() => {
-              resetForm()
-              //nav(-1)
+              if (!isTouched) {
+                nav(WebPaths.app.dashboards)
+              } else {
+                resetForm()
+              }
             }}
-            disabled={!isTouched}
+            
+            positiveDisabled={!isTouched}
             positiveLabel={posLabel}
             positiveHandler={() => {
               handleSubmit()

@@ -34,7 +34,7 @@ class LogServerMainSetup {
   /**
    * Initialize the service & setup the appender for the main process
    */
-  private async init() {
+  protected async init() {
     if (this.#readyDeferred) {
       return this.#readyDeferred.promise
     }

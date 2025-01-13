@@ -20,6 +20,14 @@ import { isPromise } from "@3fv/guard"
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
+const ProcPaths = {
+  cwd: process.cwd(),
+  argv: process.argv,
+  execPath: process.execPath,
+  resources: process.resourcesPath
+}
+
+console.info(`ProcPaths`, ProcPaths)
 
 async function start() {
   await import("./utils/ProcessErrorHelpers")

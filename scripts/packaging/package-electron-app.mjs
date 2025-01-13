@@ -124,7 +124,7 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
       },
       {
         from: Path.relative(appDir, Path.join(nativeDir, "out")),
-        to: "resources/native",
+        to: "resources/native/out",
         filter: ["**/*.node"]
       },
       {

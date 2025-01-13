@@ -5,6 +5,7 @@ import { PostConstruct, Singleton } from "@3fv/ditsy"
 import { assert, Disposables,  isArray } from "@vrkit-platform/shared"
 import { FindPathInTree } from "@vrkit-platform/shared/utils/node"
 import PQueue from "p-queue"
+import { dialog } from "electron"
 
 
 // noinspection TypeScriptUnresolvedVariable
@@ -66,6 +67,34 @@ export class OpenXRConfigurator {
       log.warn(`OpenXR is only installed via a packaged build`)
       return
     }
+    
+    const keyExists = await new Promise<boolean>(resolve => {
+      this.layersKey_.keyExists((err, exists) => {
+        if (err) {
+          log.error(`Unable to check if keyExists (exists=${exists})`, err)
+          resolve(false)
+        } else {
+          resolve(exists)
+        }
+      })
+    })
+    if (!keyExists) {
+      const createRes = await new Promise<boolean>(resolve => {
+        this.layersKey_.create((err) => {
+          if (err) {
+            log.error(`Unable to create key`, err)
+            resolve(false)
+          } else {
+            resolve(true)
+          }
+        })
+      })
+      if (!createRes) {
+        dialog.showErrorBox("OpenXR setup failed", "It appears that there is no OpenXR runtime installed, skipping setup")
+        return
+      }
+    }
+    
     
     let layer = await this.getLayer()
     if (layer && !forceUpdate) {
@@ -148,9 +177,11 @@ export class OpenXRConfigurator {
     const {layersKey} = this
     return new Promise<OpenXRLayerLibrary[]>((resolve, reject) => {
       layersKey.values((err, items) => {
-        if (err)
-          reject(err)
-        resolve(items.map(registryItemToLibrary))
+        if (err) {
+          log.warn("Unable to get registry values, likely OpenXR is not configured/installed yet", err)
+        }
+        //   reject(err)
+        resolve(err || !items ? [] : items.map(registryItemToLibrary))
       })
     })
   }

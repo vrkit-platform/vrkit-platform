@@ -5,13 +5,12 @@ import Bind from "bindings"
 
 import * as Path from "node:path"
 import { asOption, Option } from "@3fv/prelude-ts"
-import {getLogger} from "@3fv/logger-proxy"
+import { getLogger } from "@3fv/logger-proxy"
 import * as Fs from "node:fs"
 import { Deferred } from "@3fv/deferred"
-import type {NativeSessionPlayerCtor} from "./NativeSessionPlayer"
+import type { NativeSessionPlayerCtor } from "./NativeSessionPlayer"
 import type { NativeClientCtor } from "./NativeClient"
 import type { NativeOverlayManagerCtor } from "./NativeOverlayManager"
-
 
 const log = getLogger(__filename)
 
@@ -27,33 +26,42 @@ const gNativeLib = {
  */
 const kNativeLibTargets = ["Debug", "Release"]
 
+function findNativeModulePaths(): string[] {
+  const nativeFiles = kNativeLibTargets.flatMap(target => {
+    const electronResourcesPath = (process as any).resourcesPath,
+      candidates = [
+        Path.resolve(electronResourcesPath, "native", "out", target, "vrkit_native_interop.node"),
+        Path.resolve(electronResourcesPath, "out", target, "vrkit_native_interop.node"),
+        Path.resolve(__dirname, "..", "out", target, "vrkit_native_interop.node")
+      ].filter(it => !it.includes(".asar"))
+    log.info(`Native lib candidate files: ${candidates.join(", ")}`)
+    return candidates.filter(f => Fs.existsSync(f))
+  })
+
+  log.info(`Native lib files: ${nativeFiles.join(", ")}`)
+  return nativeFiles
+}
+
 /**
  * Internal cleanup function, which removes all cached references to
  * the underlying native library
  */
 function ReleaseNativeExports(): void {
-  if (gNativeLib.exports)
+  if (gNativeLib.exports) {
     delete gNativeLib.exports
-  
+  }
+
   gNativeLib.exports = null
 
   if (typeof require !== "undefined") {
-    kNativeLibTargets.forEach(target => {
-      // const nativeLibPaths = [
-      //
-      //     Path.resolve(__dirname, "..", "out", target, "vrkit_native_interop.node"),
-      //   Path.resolve(__dirname, "..", "native", target, "vrkit_native_interop.node")
-      // ]
-      asOption(target)
-        .map(target => Path.resolve(__dirname, "..", "out", target, "vrkit_native_interop.node"))
-        .filter(Fs.existsSync)
+    findNativeModulePaths().forEach(targetPath =>
+      asOption(targetPath)
         .flatMap(targetPath => {
           return Option.try(() => require.resolve(targetPath))
         })
         .ifSome(resolvedPath => {
           delete require.cache[resolvedPath]
         })
-    }
     )
   }
 }
@@ -62,7 +70,20 @@ function ReleaseNativeExports(): void {
  * Loads the native library OR returns existing ref if already loaded
  */
 export function GetNativeExports() {
-  if (!gNativeLib.exports) gNativeLib.exports = Bind("vrkit_native_interop")
+  if (!gNativeLib.exports) {
+    const nativeFiles = findNativeModulePaths()
+    log.assert(!!nativeFiles.length, `No native node modules found`)
+
+    const nativeFile = nativeFiles[0],
+      nativeRoot = Path.dirname(Path.dirname(Path.dirname(nativeFile)))
+    log.info(`nativeRoot=${nativeRoot},nativeFile=${nativeFile}`)
+
+    gNativeLib.exports = Bind({
+      // compiled: nativeFile,
+      module_root: nativeRoot,//"./" + Path.relative(process.cwd(), nativeRoot),
+      bindings: "vrkit_native_interop"
+    })
+  }
 
   return gNativeLib.exports
 }
@@ -72,29 +93,28 @@ export function GetNativeExports() {
  * unload/release the library references
  */
 export async function Shutdown() {
-  if (gNativeLib.exports)
+  if (gNativeLib.exports) {
     gNativeLib.exports.Shutdown()
-  
+  }
+
   ReleaseNativeExports()
 
   await Deferred.delay(100)
 }
 
-
 /**
  * Native library exports
  */
 export interface NativeExports {
-  
   /**
    * Native node module client
    */
   NativeClient: NativeClientCtor
-  
+
   NativeSessionPlayer: NativeSessionPlayerCtor
-  
+
   NativeOverlayManager: NativeOverlayManagerCtor
-  
+
   /**
    * Shutdown the underlying client
    *
@@ -102,4 +122,3 @@ export interface NativeExports {
    */
   Shutdown(): void
 }
-

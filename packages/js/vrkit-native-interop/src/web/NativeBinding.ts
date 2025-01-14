@@ -25,10 +25,11 @@ const gNativeLib = {
  * Native library possible targets
  */
 const kNativeLibTargets = ["Debug", "Release"]
+const electronResourcesPath = (process as any).resourcesPath
 
 function findNativeModulePaths(): string[] {
   const nativeFiles = kNativeLibTargets.flatMap(target => {
-    const electronResourcesPath = (process as any).resourcesPath,
+    const
       candidates = [
         Path.resolve(electronResourcesPath, "native", "out", target, "vrkit_native_interop.node"),
         Path.resolve(electronResourcesPath, "out", target, "vrkit_native_interop.node"),
@@ -80,8 +81,10 @@ export function GetNativeExports() {
 
     gNativeLib.exports = Bind({
       // compiled: nativeFile,
-      module_root: nativeRoot,//"./" + Path.relative(process.cwd(), nativeRoot),
-      bindings: "vrkit_native_interop"
+      module_root: electronResourcesPath,//"./" + Path.relative(process.cwd(), nativeRoot),
+      bindings: "vrkit_native_interop.node",
+      try: [["resources","native","out","Debug"],["native","out","Debug"],["out","Debug"]]
+          .map(parts => ["module_root",...parts,"vrkit_native_interop.node"])
     })
   }
 

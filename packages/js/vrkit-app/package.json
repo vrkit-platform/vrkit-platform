@@ -102,6 +102,8 @@
     "source-map-support": "^0.5.21",
     "stacktrace-js": "^2.0.2",
     "symbol-observable": "^4.0.0",
+    "hamt_plus": "^1.0.2",
+    "list": "^2.0.19",
     "tinycolor2": "^1.6.0",
     "ts-pattern": "^5.3.1",
     "turndown": "^7.2.0",

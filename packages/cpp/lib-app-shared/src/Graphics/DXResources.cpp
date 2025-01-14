@@ -52,8 +52,8 @@ namespace IRacingTools::Shared::Graphics {
     dxgiFlags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
-    check_hresult(
-        CreateDXGIFactory2(dxgiFlags, IID_PPV_ARGS(dxgiFactory_.put())));
+    VRK_LOG_AND_FATAL_IF(FAILED(
+        CreateDXGIFactory2(dxgiFlags, IID_PPV_ARGS(dxgiFactory_.put()))), "Failed creating DXGIFactory");
 
     winrt::com_ptr<IDXGIAdapter4> adapterIt;
     for (unsigned int i = 0; dxgiFactory_->EnumAdapterByGpuPreference(

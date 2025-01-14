@@ -103,6 +103,8 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
       "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
       "!**/node_modules/*.d.ts",
       "!**/node_modules/.bin",
+      "!**/node_modules/electron",
+      "!**/node_modules/@3fv/logger-proxy/node_modules/electron/**/*",
       "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
       "!.editorconfig",
       "!**/._*",
@@ -125,7 +127,7 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
       {
         from: Path.relative(appDir, Path.join(nativeDir, "out")),
         to: "resources/native/out",
-        filter: ["**/*.node"]
+        filter: ["**/*"]
       },
       {
         from: Path.relative(appDir, trackMapsDir),

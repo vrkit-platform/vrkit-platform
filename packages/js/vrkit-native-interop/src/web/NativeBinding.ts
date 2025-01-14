@@ -72,20 +72,33 @@ function ReleaseNativeExports(): void {
  */
 export function GetNativeExports() {
   if (!gNativeLib.exports) {
-    const nativeFiles = findNativeModulePaths()
-    log.assert(!!nativeFiles.length, `No native node modules found`)
-
-    const nativeFile = nativeFiles[0],
-      nativeRoot = Path.dirname(Path.dirname(Path.dirname(nativeFile)))
-    log.info(`nativeRoot=${nativeRoot},nativeFile=${nativeFile}`)
-
-    gNativeLib.exports = Bind({
-      // compiled: nativeFile,
-      module_root: electronResourcesPath,//"./" + Path.relative(process.cwd(), nativeRoot),
-      bindings: "vrkit_native_interop.node",
-      try: [["resources","native","out","Debug"],["native","out","Debug"],["out","Debug"]]
-          .map(parts => ["module_root",...parts,"vrkit_native_interop.node"])
-    })
+    try {
+      const nativeFiles = findNativeModulePaths()
+      log.assert(!!nativeFiles.length, `No native node modules found`)
+      
+      const nativeFile = nativeFiles[0],
+          nativeRoot = Path.dirname(Path.dirname(Path.dirname(nativeFile)))
+      log.info(`nativeRoot=${nativeRoot},nativeFile=${nativeFile}`)
+      
+      gNativeLib.exports = Bind({
+        // compiled: nativeFile,
+        module_root: electronResourcesPath,//"./" + Path.relative(process.cwd(), nativeRoot),
+        bindings: "vrkit_native_interop.node",
+        try: [
+          ["resources", "native", "out", "Debug"],
+          ["native", "out", "Debug"],
+          ["out", "Debug"]
+        ]
+            .map(parts => [
+              "module_root",
+              ...parts,
+              "vrkit_native_interop.node"
+            ])
+      })
+    } catch (err) {
+      console.error(`ERROR: native-interop failed to load`, err)
+      throw err
+    }
   }
 
   return gNativeLib.exports

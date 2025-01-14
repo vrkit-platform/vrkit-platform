@@ -96,9 +96,10 @@ namespace IRacingTools::Shared {
   inline void check_hresult(
       HRESULT code) {
     //winrt::check_hresult(code);
-    // if (FAILED(code)) [[unlikely]] {
-    //   VRK_LOG_SOURCE_LOCATION_AND_FATAL("HRESULT {}", static_cast<int32_t>(code));
-    // }
+    if (FAILED(code)) [[unlikely]] {
+      // VRK_LOG_SOURCE_LOCATION_AND_FATAL("HRESULT {}", static_cast<int32_t>(code));
+      VRK_LOG_SOURCE_LOCATION_AND_FATAL("HRESULT {}", static_cast<int32_t>(code));
+    }
   }
 
   namespace Win32 = IRacingTools::SDK::Utils::Win32;

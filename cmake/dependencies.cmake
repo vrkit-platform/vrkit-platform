@@ -10,8 +10,8 @@ set(DEP_PACKAGES
   fmt
   spdlog
   OpenXR
-  reproc
-  reproc++
+#  reproc
+#  reproc++
   cli
   protobuf
   effects11
@@ -41,7 +41,7 @@ find_path(DEP_BOOST_DI_INCLUDES "boost/di.hpp")
 #find_package(Boost REQUIRED COMPONENTS interprocess)
 
 # TinyORM Dep
-include(${CMAKE_CURRENT_LIST_DIR}/external/tiny_orm.cmake NO_POLICY_SCOPE)
+#include(${CMAKE_CURRENT_LIST_DIR}/external/tiny_orm.cmake NO_POLICY_SCOPE)
 
 #set(DEP_WXWIDGETS wx::core wx::base)
 set(DEP_CLI11 CLI11::CLI11)
@@ -87,7 +87,7 @@ set(DEP_DIRECTX
 set(DEP_FMT fmt::fmt)
 set(DEP_LOG spdlog::spdlog ${DEP_FMT})
 set(DEP_OPENXR OpenXR::headers)
-set(DEP_REPROC reproc reproc++)
+#set(DEP_REPROC reproc reproc++)
 set(DEP_CLI_CMD CLI11::CLI11)
 
 
@@ -104,7 +104,7 @@ set(ALL_APP_DEPS
   ${DEP_YAML}
   ${DEP_GSL}
   ${DEP_BOOST_DEFAULT}
-  ${DEP_REPROC}
+#  ${DEP_REPROC}
   ${DEP_CLI_CMD}
 )
 
@@ -114,8 +114,7 @@ set(ALL_SDK_DEPS
   ${DEP_FMT}
   ${DEP_YAML}
   ${DEP_LOG}
-  ${DEP_REPROC}
-  ${DEP_CLI_CMD}
+#  ${DEP_CLI_CMD}
 )
 
 set(DEP_GTEST_MAIN GTest::gtest_main)

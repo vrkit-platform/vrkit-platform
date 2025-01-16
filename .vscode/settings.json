@@ -18,13 +18,9 @@
     "-DVCPKG_LIBRARY_LINKAGE=static",
     // "-DVCPKG_INSTALL_OPTIONS=\"--allow-unsupported\""
   ],
-  // "cmake.generator": "ninja",
-  // "cmake.buildEnvironment": {
-  //   "UseMultiToolTask": "true",
-    
-
-  // },
-  // "C_Cpp.default.compilerPath": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\Llvm\\bin\\clang-cl.exe",
+  "cmake.generator": "Ninja",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
-  "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json"
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
+  "C_Cpp.intelliSenseMemoryLimit": 8192,
+  "C_Cpp.intelliSenseCacheSize": 15120
 }

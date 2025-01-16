@@ -18,7 +18,7 @@ import {
 } from "@vrkit-platform/models"
 import { getLogger } from "@3fv/logger-proxy"
 import { MessageTypeFromCtor, objectKeysLowerFirstReviver } from "./utils"
-import { GetNativeExports } from "./NativeBinding"
+import { GetNativeExports, IsNativeOverlaySupported } from "./NativeBinding"
 import { flatten, identity, isEmpty, negate, pick, range } from "lodash"
 
 import type { SessionInfoMessage } from "@vrkit-platform/plugin-sdk"
@@ -28,6 +28,7 @@ import {
   NativeSessionPlayerEventData,
   SessionPlayerId
 } from "./NativeSessionPlayer"
+import { Deferred } from "@3fv/deferred"
 
 
 
@@ -88,7 +89,9 @@ function CreateNativeSessionPlayer(
   id: string,
   file: string | null = null
 ): NativeSessionPlayer {
-  const NativeSessionPlayer = GetNativeExports().NativeSessionPlayer
+  const
+      nativeExports = GetNativeExports(),
+      NativeSessionPlayer = nativeExports.NativeSessionPlayer
   return new NativeSessionPlayer(eventCallback, id, file)
 }
 
@@ -196,14 +199,24 @@ export class SessionPlayer extends EventEmitter3<
   /**
    * Constructor
    */
-  constructor(file: string | null = null) {
+  private constructor(readonly file: string | null = null) {
     super()
     this.id = isNotEmpty(file) ? file : LiveSessionId
-    this.nativePlayer = CreateNativeSessionPlayer(
-      this.onEvent.bind(this),
-      this.id,
-      file
+    
+  }
+  
+  private async initialize(): Promise<boolean> {
+    this.nativePlayer = await CreateNativeSessionPlayer(
+        this.onEvent.bind(this),
+        this.id,
+        this.file
     )
+    
+    return !!this.nativePlayer
+  }
+  
+  get isReady() {
+    return !!this.nativePlayer
   }
 
   /**
@@ -365,6 +378,16 @@ export class SessionPlayer extends EventEmitter3<
     }
     //return {} as SessionInfoMessage
   }
+  
+  static Create(file: string | null = null): SessionPlayer {
+    
+    const player = new SessionPlayer(file)
+    if (!player.initialize()) {
+      throw Error(`Failed to initialize Session Player`)
+    }
+    
+    return player
+  }
 }
 
 export function isLivePlayer(player: SessionPlayer) {
@@ -374,9 +397,11 @@ export function isLivePlayer(player: SessionPlayer) {
 let liveVRKitSessionPlayer: SessionPlayer = null
 
 export function GetLiveVRKitSessionPlayer(): SessionPlayer {
-  if (!liveVRKitSessionPlayer) {
-    liveVRKitSessionPlayer = new SessionPlayer()
+  if (liveVRKitSessionPlayer) {
+    return liveVRKitSessionPlayer
   }
-
+  
+  liveVRKitSessionPlayer = SessionPlayer.Create()
+  
   return liveVRKitSessionPlayer
 }

@@ -554,7 +554,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   }
 
   async createDiskPlayer(filePath: string) {
-    const player = new SessionPlayer(filePath)
+    const player = await SessionPlayer.Create(filePath)
     player.start()
 
     this.addPlayer(filePath, player)

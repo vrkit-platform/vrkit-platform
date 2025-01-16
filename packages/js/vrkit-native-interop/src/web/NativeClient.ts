@@ -129,10 +129,14 @@ export interface NativeExports {
 /**
  * Cast the native addon to the interface defined above
  */
-export function CreateNativeClient(
+export async function CreateNativeClient(
   eventCallback: NativeClientEventCallback
-): NativeClient {
-  const NativeClient = GetNativeExports().NativeClient
+): Promise<NativeClient> {
+  const nativeExports = await GetNativeExports()
+  if (!nativeExports)
+    throw Error("Unable to create native client; is this a VM?")
+  
+  const NativeClient = nativeExports.NativeClient
   return new NativeClient(eventCallback)
 }
 

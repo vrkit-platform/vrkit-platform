@@ -16,6 +16,7 @@ import {
   NativeClientEventData
 } from "./NativeClient"
 import { isDev } from "./constants"
+import { Deferred } from "@3fv/deferred"
 
 const log = getLogger(__filename)
 
@@ -77,12 +78,18 @@ export class Client extends EventEmitter3<
   /**
    * Constructor
    */
-  constructor() {
+  private constructor() {
     super()
-    this.nativeClient = CreateNativeClient(this.onEvent.bind(this))
+    
   }
   
+  private async initialize() {
+    this.nativeClient = await CreateNativeClient(this.onEvent.bind(this))
+  }
   
+  get isReady() {
+    return !!this.nativeClient
+  }
   
   /**
    * Execute an RPC call
@@ -156,14 +163,29 @@ export class Client extends EventEmitter3<
     delete this.nativeClient
   }
   
-}
-
-let defaultVRKitClient: Client = null
-
-export function GetDefaultVRKitClient(): Client {
-  if (!defaultVRKitClient) {
-    defaultVRKitClient = new Client()
+  static async Create(): Promise<Client> {
+    const client = new Client()
+    await client.initialize()
+    if (!client.isReady)
+      return null
+    
+    return client
   }
   
-  return defaultVRKitClient
+}
+
+let defaultVRKitClientDeferred: Deferred<Client> = null
+
+export async function GetDefaultVRKitClient(): Promise<Client> {
+  if (!defaultVRKitClientDeferred) {
+    defaultVRKitClientDeferred = new Deferred<Client>()
+    try {
+      defaultVRKitClientDeferred.resolve(await Client.Create())
+    } catch (err) {
+      log.error(`Failed to create defaultVRKitClient`, err)
+      defaultVRKitClientDeferred.reject(err)
+    }
+  }
+  
+  return defaultVRKitClientDeferred.promise
 }

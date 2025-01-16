@@ -10,7 +10,8 @@ import {
   ElectronBuilderPaths as BuildPaths,
   nativeDir,
   pluginDefaultDir, trackMapsDir,
-  xrLayerDir
+  xrLayerDir,
+  nsisDir
 } from "../setup-env/workflow-global.mjs"
 
 export async function packageElectronApp(log = getOrCreateLogger("electron-builder")) {
@@ -90,6 +91,8 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
     },
     nodeGypRebuild: false,
     buildDependenciesFromSource: false,
+    productName: "VRKit",
+    appId: "3fv.vrkit.app",
     forceCodeSigning: false,
     directories: {
       output: electronBuilderOutDir,
@@ -98,7 +101,7 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
     icon: "resources/icons/icon.ico",
     files: [
       "**/*",
-      "resources/**/*",
+      "resources/icons/**/*",
       "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
       "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
       "!**/node_modules/*.d.ts",
@@ -146,16 +149,41 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
           "!tsconfig*",
           "!**/node_modules/**/*"
         ]
+      },
+      {
+        from:  Path.relative(appDir, Path.join(appDir, "resources", "redist")),
+        to: "",
+        filter: [
+          "ucrtbased.dll"
+        ]
+        
+      },
+      {
+        from:  Path.relative(appDir, Path.join(appDir, "resources", "redist")),
+        to: "resources/redist",
+        filter: [
+          "*.exe",
+          "Microsoft.WindowsAppRuntime.Redist.1.6.241114003/WindowsAppSDK-Installer-x64/WindowsAppRuntimeInstall-x64.exe",
+        ]
+      
       }
     ],
 
     win: {
-      target: ["nsis", "portable", "zip"],
+      //, "portable", "zip"
+      target: ["nsis"],
     },
     nsis: {
       deleteAppDataOnUninstall: true,
       oneClick: false,
-      perMachine: true
+      perMachine: true,
+      allowElevation: true,
+      allowToChangeInstallationDirectory: true,
+      installerHeader: Path.join(nsisDir, "vrkit-nsis-header.bmp"),
+      installerSidebar: Path.join(nsisDir, "vrkit-nsis-welcome-finish.bmp"),
+      artifactName: "VRKit Platform Installer ${version}.${ext}",
+      packElevateHelper: true,
+      include: Path.join(nsisDir, "installer.nsh")
       // include: "installer/win/nsis-installer.nsh"
     }
   }

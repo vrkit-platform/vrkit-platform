@@ -1,8 +1,5 @@
-// var addon = require('bindings')('SayHello');
-// noinspection ES6UnusedImports
-
 import Bind from "bindings"
-
+import {app} from "electron"
 import * as Path from "node:path"
 import { asOption, Option } from "@3fv/prelude-ts"
 import { getLogger } from "@3fv/logger-proxy"
@@ -29,12 +26,11 @@ const electronResourcesPath = (process as any).resourcesPath
 
 function findNativeModulePaths(): string[] {
   const nativeFiles = kNativeLibTargets.flatMap(target => {
-    const
-      candidates = [
-        Path.resolve(electronResourcesPath, "native", "out", target, "vrkit_native_interop.node"),
-        Path.resolve(electronResourcesPath, "out", target, "vrkit_native_interop.node"),
-        Path.resolve(__dirname, "..", "out", target, "vrkit_native_interop.node")
-      ].filter(it => !it.includes(".asar"))
+    const candidates = [
+      Path.resolve(electronResourcesPath, "native", "out", target, "vrkit_native_interop.node"),
+      Path.resolve(electronResourcesPath, "out", target, "vrkit_native_interop.node"),
+      Path.resolve(__dirname, "..", "out", target, "vrkit_native_interop.node")
+    ].filter(it => !it.includes(".asar"))
     log.info(`Native lib candidate files: ${candidates.join(", ")}`)
     return candidates.filter(f => Fs.existsSync(f))
   })
@@ -67,33 +63,49 @@ function ReleaseNativeExports(): void {
   }
 }
 
+let isNativeSupportedDeferred: Deferred<boolean> = null
+
+export async function IsNativeOverlaySupported(): Promise<boolean> {
+  if (isNativeSupportedDeferred)
+    return isNativeSupportedDeferred.promise
+  
+  isNativeSupportedDeferred = new Deferred<boolean>()
+  try {
+    const gpuInfo = await app.getGPUInfo("complete") as any
+    isNativeSupportedDeferred.resolve((
+            gpuInfo?.auxAttributes?.supportsD3dSharedImages ?? false
+        ) === true)
+  } catch (err) {
+    log.error(`IsNativeSupported failed`, err)
+    isNativeSupportedDeferred.resolve(false)
+  }
+  return isNativeSupportedDeferred.getResult()
+}
+
 /**
  * Loads the native library OR returns existing ref if already loaded
  */
-export function GetNativeExports() {
+export function GetNativeExports(): NativeExports {
   if (!gNativeLib.exports) {
     try {
       const nativeFiles = findNativeModulePaths()
       log.assert(!!nativeFiles.length, `No native node modules found`)
-      
+
       const nativeFile = nativeFiles[0],
-          nativeRoot = Path.dirname(Path.dirname(Path.dirname(nativeFile)))
-      log.info(`nativeRoot=${nativeRoot},nativeFile=${nativeFile}`)
+        nativeRoot = Path.dirname(Path.dirname(Path.dirname(nativeFile)))
       
+      if (log.isDebugEnabled())
+        log.debug(`nativeRoot=${nativeRoot},nativeFile=${nativeFile}`)
+
       gNativeLib.exports = Bind({
-        // compiled: nativeFile,
-        module_root: electronResourcesPath,//"./" + Path.relative(process.cwd(), nativeRoot),
+        module_root: nativeRoot,
         bindings: "vrkit_native_interop.node",
         try: [
+          ["..", "vrkit-native-interop", "out", "Debug"],
           ["resources", "native", "out", "Debug"],
           ["native", "out", "Debug"],
           ["out", "Debug"]
-        ]
-            .map(parts => [
-              "module_root",
-              ...parts,
-              "vrkit_native_interop.node"
-            ])
+        ].map(parts => ["module_root", ...parts, "vrkit_native_interop.node"])
       })
     } catch (err) {
       console.error(`ERROR: native-interop failed to load`, err)

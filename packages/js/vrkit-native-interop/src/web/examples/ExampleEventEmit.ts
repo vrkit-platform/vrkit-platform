@@ -7,7 +7,7 @@ import { ClientEventType } from "@vrkit-platform/models"
 async function run() {
   // noinspection DuplicatedCode
   
-  const client = new Client()
+  const client = await Client.Create()
   try {
     const testPromise = new Promise<any>((resolve, reject) => {
       let triggered = false

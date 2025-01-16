@@ -82,7 +82,7 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         ...OverflowHidden,
         ...PositionRelative,
         flex: "0 0 auto",
-        minWidth: "15%",
+        // minWidth: "15%",
         alignItems: "stretch",
         
         [hasCls(appTitlebarClasses.right)]: {
@@ -136,7 +136,6 @@ export function AppTitlebar({ className, ...other }: AppTitlebarProps) {
               {appTitlebar?.center}
             </Box>
             <Box className={clsx(appTitlebarClasses.right)}>
-              {/*<ActiveDashboardConfigWidget />*/}
               <AppTitlebarTrafficLights />
             </Box>
           </AppToolbarRoot>

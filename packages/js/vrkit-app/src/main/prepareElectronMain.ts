@@ -4,16 +4,25 @@ import { RemoteDebugPort } from "./constants"
 import Path from "path"
 import Fsx from "fs-extra"
 
+const log = (...args:any[]) => {
+  if (isDev) {
+    console.info(...args)
+  }
+}
+// SET THE NAME
+app.setName(isDev ? "VRKitDev" : "VRKit")
+
+// SETUP CRASH REPORTER
 const crashPath = Path.join(process.env.USERPROFILE, "Desktop", "vrkit","crashes")
+log(`CRASH PATH: ${crashPath}`)
 Fsx.mkdirpSync(crashPath)
-console.log(`Using crash dump path: ${crashPath}`)
 app.setPath("crashDumps", crashPath)
 crashReporter.start({
   uploadToServer: false
 })
 
 if (isDev) {
-  console.info(`Preparing main entry`)
+  log(`PREPARE MAIN (isDev=${isDev})`)
   
   // REMOTE DEBUGGING PORT
   app.commandLine.appendSwitch(
@@ -23,11 +32,11 @@ if (isDev) {
   
   // USER DATA PATH FOR DEV
   const currentUserData = app.getPath("userData")
-  console.debug(`Default userData path: %s`, currentUserData)
+  log(`Default userData path: %s`, currentUserData)
 } else {
   const sourceMapSupport = require("source-map-support")
   sourceMapSupport.install()
 }
 
 
-app.setName("VRKit")
+

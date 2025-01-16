@@ -46,7 +46,7 @@ import { Markdown } from "../markdown"
 import { AsyncImage } from "../async-image"
 import Paper, { PaperProps } from "@mui/material/Paper"
 import { rgbToHex } from "../../theme/paletteAndColorHelpers"
-import { arrayOf, isNotEmptyString } from "@vrkit-platform/shared"
+import { arrayOf, isNotEmptyString, stopEvent } from "@vrkit-platform/shared"
 import { PluginComponentView } from "../plugin-component-item"
 import { PluginIconView } from "../plugin-icon-view"
 import { capitalize } from "lodash"
@@ -282,25 +282,17 @@ export function PluginManifestView(props: PluginManifestViewProps) {
     onClick = !inOnClick
       ? undefined
       : (ev: React.SyntheticEvent) => {
-          ev.preventDefault()
-          ev.stopPropagation()
+          stopEvent(ev)
           inOnClick(manifest)
-        }, // @ts-ignore:next-line
-    // getActionFromEvent = (ev: React.SyntheticEvent<HTMLButtonElement>) => {
-    //   const elem = ev.target as HTMLButtonElement
-    //    return asOption(elem.getAttribute("data-action"))
-    //           .filter(action => isString(PluginManifestAction[action]))
-    //           .getOrElse(actions[0])
-    //
-    // },
-    handleAction = Alert.usePromise(
+        },
+    handleAction = Alert.usePromise<ReturnType<typeof createPluginManifestActionHandler>>(
       createPluginManifestActionHandler(pluginManagerClient, manifest?.id),
       {
-        loading: ({ args: [action = "unknown"] }) => `${capitalize(action)} plugin...`,
-        success: ({ result }) => `"Successfully installed plugin."`,
-        error: ({ err }) => `Unable to create dashboard config: ${err.message ?? err}`
+        loading: ({ args: [action = "none"] }) => `${capitalize(action)} plugin...`,
+        success: ({ result, args: [action = "none"] }) => `${capitalize(action)} Plugin Successful`,
+        error: ({ err, args: [action = "none"] }) => `${capitalize(action)} Plugin Failed: ${err.message ?? err}`
       },
-      [action, manifest?.id]
+      [action, manifest]
     ),
     featuresText = `# Features
 ${overview.featureContent}`,
@@ -345,14 +337,10 @@ ${overview.changeLogContent}`
                 gap: theme.spacing(1)
               }}
             >
-              {/* TODO: Add custom secondary actions control */}
+              
               <PluginManifestActionsButton
-                // color="primary"
-                // variant="contained"
-                // size="small"
                 actions={actions}
                 onAction={handleAction}
-                // data-action={actions[0]}
               />
 
               <EllipsisBox sx={{ ...FlexScaleZero }}>{version}</EllipsisBox>

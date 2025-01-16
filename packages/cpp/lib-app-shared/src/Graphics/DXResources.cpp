@@ -1,23 +1,3 @@
-/*
- * OpenKneeboard
- *
- * Copyright (C) 2022 Fred Emmott <fred@fredemmott.com>
- *
- * This program is free software; you can redistribute it and/or
- * odify_ it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; version 2.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * eRCHANTABILITY_ or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for ore_ details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
- * USA.
- */
-
 #include <IRacingTools/Shared/Graphics/DXResources.h>
 #include <IRacingTools/SDK/Utils/ScopeHelpers.h>
 #include <IRacingTools/Shared/Macros.h>
@@ -237,10 +217,6 @@ namespace IRacingTools::Shared::Graphics {
     );
 
     spriteBatch_ = std::make_unique<SpriteBatch>(dxDevice_.get());
-
-    //wicImagingFactory_ = winrt::create_instance<IWICImagingFactory>(CLSID_WICImagingFactory);
-
-    // check_hresult(PdfCreateRenderer(dXGIDevice_.get(), pDFRenderer_.put()));
 
     check_hresult(
         d2dDeviceContext_->CreateSolidColorBrush(

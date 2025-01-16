@@ -300,7 +300,9 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
             modified&nbsp;
             <Moment
               fromNow
-              date={Timestamp.toDate(config.fileInfo.modifiedAt)}
+              date={asOption(config.fileInfo?.modifiedAt)
+                  .map(it => Timestamp.toDate(it))
+                  .getOrCall(() => Timestamp.toDate(Timestamp.now()))}
             />
           </EllipsisBox>
           {isActive && <FlexAutoBox className={clsx(classNames.itemActiveBadge)}>ACTIVE</FlexAutoBox>}

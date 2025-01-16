@@ -9,9 +9,12 @@ import { isString } from "@3fv/guard"
 type GlobalErrorType = "windowError" | "uncaughtException" | "unhandledRejection"
 
 export function reportMainError(type: GlobalErrorType, ...args: any[]) {
-  const msg = `${type}, ${JSON.stringify(args,null,2)}`
-  console.error(msg,...args)
-  
+  const msg = `${type}, ${args.map(it => JSON.stringify(it,null,2)).join(", ")}`
+  // if (isDev) {
+  //   debugger
+  // }
+  console.error(msg,...args.map(it => JSON.stringify(it, null, 2)))
+  // console.error(...args)
   const isNotEmptyString = Predicate.of(isString).and(negate(isEmpty)),
       stack = args.map(it => it?.stack).filter(isNotEmptyString)[0] ?? "Not available",
       errorMsg = asOption(args.map(it => isNotEmptyString(it) ? it : it?.message).filter(isNotEmptyString).join("\n"))
@@ -24,7 +27,7 @@ export function reportMainError(type: GlobalErrorType, ...args: any[]) {
 
 function onRendererError(ev: Electron.IpcMainEvent, type, ...args: any[]) {
   args = Array.isArray(args[0]) ? flatten(args) : args
-  reportMainError(type, ...args)
+  reportMainError("windowError",type, ...args)
 }
 
 function makeErrorHandler(type:GlobalErrorType) {

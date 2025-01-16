@@ -1,5 +1,5 @@
 import type { RectF, RectI, SizeI, VRLayout } from "@vrkit-platform/models"
-import { GetNativeExports } from "./NativeBinding"
+import { GetNativeExports, IsNativeOverlaySupported } from "./NativeBinding"
 
 export interface NativeOverlayWindowResourceInfo {
   windowId: number
@@ -26,7 +26,15 @@ export interface NativeOverlayManagerCtor {
   new(): NativeOverlayManager
 }
 
-export function CreateNativeOverlayManager() {
-  const {NativeOverlayManager} = GetNativeExports()
+export async function CreateNativeOverlayManager() {
+  if (!await IsNativeOverlaySupported()) {
+    return null
+  }
+  // if (!nativeExports)
+  //   throw Error(`Native overlays for VR are not supported on this machine`)
+  
+  const
+    nativeExports = GetNativeExports(),
+    {NativeOverlayManager} = nativeExports
   return new NativeOverlayManager()
 }

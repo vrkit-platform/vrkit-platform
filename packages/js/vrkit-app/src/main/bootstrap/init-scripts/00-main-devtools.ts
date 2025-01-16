@@ -37,22 +37,26 @@ async function installDevTools() {
     return res
   }
 
-  const installedExts = await installExtInternal()
-  const reactExtIdInstalled = installedExts[0].id
-
-  await Deferred.delay(100)
-
-  const allExts = targetSession.getAllExtensions()
-  log.assert(
-    allExts.some(ext => ext.id === reactExtIdInstalled && Path.basename(ext.path) === reactDevToolExtId),
-    "React ext not found in all"
-  )
-
-  const reactExt = targetSession.getExtension(reactExtIdInstalled)
-  log.assert(reactExt !== null, "React extension not found")
-
-  const reactExtLoaded = await targetSession.loadExtension(reactExt.path)
-  log.assert(reactExtLoaded !== null, "React extension not loaded")
+  try {
+    const installedExts = await installExtInternal()
+    const reactExtIdInstalled = installedExts[0].id
+    
+    await Deferred.delay(100)
+    
+    const allExts = targetSession.getAllExtensions()
+    log.assert(allExts.some(ext => ext.id ===
+        reactExtIdInstalled &&
+        Path.basename(ext.path) ===
+        reactDevToolExtId), "React ext not found in all")
+    
+    const reactExt = targetSession.getExtension(reactExtIdInstalled)
+    log.assert(reactExt !== null, "React extension not found")
+    
+    const reactExtLoaded = await targetSession.loadExtension(reactExt.path)
+    log.assert(reactExtLoaded !== null, "React extension not loaded")
+  } catch (err) {
+    error(`Failed to install devtools`, err)
+  }
 }
 
 export default installDevTools

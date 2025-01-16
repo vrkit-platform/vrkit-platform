@@ -1,5 +1,6 @@
 import type { Theme, Components } from '@mui/material/styles';
 import { padding } from "@vrkit-platform/shared-ui"
+import {listClasses as muiListClasses} from "@mui/material/List"
 import {menuItemClasses as muiMenuItemClasses} from "@mui/material/MenuItem"
 // ----------------------------------------------------------------------
 
@@ -11,6 +12,9 @@ const MuiList: Components<Theme>['MuiList'] = {
   styleOverrides: {
     
     root: ({ theme }) => ({
+      [`&.${muiListClasses.padding}`]: {
+        ...padding(0)
+      },
       "&[role=menu]": {
         ...padding(0),
         [`& .${muiMenuItemClasses.root}`]: {

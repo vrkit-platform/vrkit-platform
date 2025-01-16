@@ -178,13 +178,13 @@ export function PluginsTabPanel(props: PluginsTabPanelProps) {
     handleAction = Alert.usePromise(
       createPluginManifestActionHandler(pluginManagerClient, null),
       {
-        loading: ({ args: [action = "unknown"] }) => `${capitalize(action)} plugin...`,
-        success: ({ result }) => `Successfully installed plugin.`,
-        error: ({ err }) => `Unable to create dashboard config: ${err.message ?? err}`
+        loading: ({ args: [action = "none"] }) => `${capitalize(action)} plugin...`,
+        success: ({ result, args: [action = "none"] }) => `${capitalize(action)} Plugin Successful`,
+        error: ({ err, args: [action = "none"] }) => `${capitalize(action)} Plugin Failed: ${err.message ?? err}`
       },
       [pluginManagerClient]
     ),
-    useInstallHandler = useCallback((id: string) => (action: PluginManifestActionKind) => handleAction(action, id), []),
+    useInstallHandler = useCallback((id: string) => (action: PluginManifestActionKind) => handleAction(action, id), [handleAction]),
     [selectedId, setSelectedId] = useState<string>(""),
     itemRenderer = useCallback(
       (plugin: PluginManifest, { className, ...otherItemProps }: FilterableListItemProps) => {
@@ -253,9 +253,9 @@ export function PluginsTabPanel(props: PluginsTabPanelProps) {
           </ButtonBase>
         )
       },
-      [selectedId]
+      [selectedId, installedPluginMap, availablePlugins, theme]
     ),
-    selected = useMemo(() => plugins.find(propEqualTo("id", selectedId)), [selectedId, plugins]),
+    selected = useMemo(() => plugins.find(propEqualTo("id", selectedId)), [selectedId, installedPlugins, availablePlugins]),
     itemFilter = useCallback(
       (item: PluginManifest, query: string) =>
         [item.name, item.author?.name, item.author?.company, item.overview?.featureContent]

@@ -34,3 +34,4 @@ node_modules
 *.backup.json
 .vrkit-dev.local.json
 yarn-error.log
+/compile_commands.json

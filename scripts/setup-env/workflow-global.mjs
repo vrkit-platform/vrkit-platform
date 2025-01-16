@@ -19,6 +19,8 @@ export const xrLayerDir = Path.join(cppDir, "lib-openxr-layer")
 
 export const jsDir = Path.join(rootDir,"packages","js")
 export const appDir = Path.join(jsDir,"vrkit-app")
+export const builderResourceDir = Path.join(appDir, "resources")
+export const nsisDir = Path.join(builderResourceDir, "nsis")
 export const pluginDefaultDir = Path.join(jsDir,"vrkit-plugin-internal")
 export const nativeDir = Path.join(jsDir,"vrkit-native-interop")
 export const nodeModulesBin = Path.join(rootDir, "node_modules", ".bin")

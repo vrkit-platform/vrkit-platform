@@ -3,6 +3,7 @@ import type { ToastOptions } from "react-hot-toast"
 
 export interface AlertOptions extends ToastOptions {
   formatPrefix?: string
+  cause?: ErrorKind
 }
 
 export type AlertErrorGuard<E extends ErrorKind> = (o: any) => o is E

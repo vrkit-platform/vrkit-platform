@@ -64,7 +64,9 @@ import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { flatten, pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
-import { CreateNativeOverlayManager } from "vrkit-native-interop"
+import {
+  CreateNativeOverlayManager, NativeOverlayManager
+} from "vrkit-native-interop"
 
 import { IValueDidChange, observe, reaction, runInAction, toJS } from "mobx"
 import { DashboardManager } from "../dashboard-manager"
@@ -111,7 +113,7 @@ export class OverlayManager {
 
   private readonly frameSequenceCaptures_ = Array<NativeImageSequenceCapture>()
 
-  private readonly nativeManager_ = CreateNativeOverlayManager()
+  private nativeManager_: NativeOverlayManager = null
 
   get state(): OverlaysState {
     return this.mainAppState.overlays
@@ -452,7 +454,8 @@ export class OverlayManager {
   @PostConstruct() // @ts-ignore
   protected async init(): Promise<void> {
     app.on("quit", this.unload)
-
+    
+    this.nativeManager_= await CreateNativeOverlayManager()
     const { sessionManager } = this,
       ipcFnHandlers = Array<Pair<OverlayManagerClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
         [OverlayManagerClientFnType.FETCH_WINDOW_ROLE, this.fetchOverlayWindowRoleHandler.bind(this)],
@@ -582,7 +585,7 @@ export class OverlayManager {
   private createOnCloseHandler(overlayUniqueId: string, windowId: number): Function {
     return (event: Electron.Event) => {
       this.sessionManager.unregisterComponentDataVars(overlayUniqueId)
-      this.nativeManager_.releaseResources(overlayUniqueId, windowId)
+      this.nativeManager_?.releaseResources(overlayUniqueId, windowId)
       removeIfMutation(this.overlayWindows_, overlay => overlay.browserWindowId === windowId)
     }
   }
@@ -632,15 +635,17 @@ export class OverlayManager {
 
         return
       }
-
-      this.nativeManager_.createOrUpdateResources(
-        win.uniqueId,
-        win.browserWindowId,
-        { width: imageSize.width, height: imageSize.height },
-        screenRect,
-        vrLayout
-      )
-      this.nativeManager_.processFrame(win.uniqueId, buf)
+      
+      if (this.nativeManager_) {
+        this.nativeManager_.createOrUpdateResources(
+            win.uniqueId,
+            win.browserWindowId,
+            { width: imageSize.width, height: imageSize.height },
+            screenRect,
+            vrLayout
+        )
+        this.nativeManager_.processFrame(win.uniqueId, buf)
+      }
     }
   }
 

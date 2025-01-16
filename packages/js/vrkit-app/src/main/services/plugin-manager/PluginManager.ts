@@ -14,7 +14,7 @@ import {
   pairOf,
   PluginManagerFnType,
   PluginManagerFnTypeToIPCName,
-  PluginsState
+  PluginsState, toPlainObjectDeep
 } from "@vrkit-platform/shared"
 import {
   createTempDirectory,
@@ -457,36 +457,42 @@ export class PluginManager {
 
       log.info(`Registering new PluginInstall ${manifest.name} (${id})`)
       this.setPluginInstalls(install)
-
-      return PluginInstall.toJson(install, { emitDefaultValues: true }) as any as PluginInstall
+      const installJson = toPlainObjectDeep(PluginInstall.toJson(install, { emitDefaultValues: true })) as any as PluginInstall
+      log.info(`Returning plain object PluginInstall`, installJson)
+      return installJson
     }
   }
 
   private uninstallPluginTask(id: string): () => Promise<void> {
     return async () => {
-      const install = this.state.plugins[id]
-      if (!install) {
-        log.warn(`Unable to find installed plugin ${id}`)
-        return
+      try {
+        const install = this.state.plugins[id]
+        if (!install) {
+          log.warn(`Unable to find installed plugin ${id}`)
+          return
+        }
+        
+        runInAction(() => {
+          remove(this.state.plugins, id)
+        })
+        
+        log.info(`Uninstalling plugin (${install.id}) @ ${install.path}`)
+        if (!(
+            await Fsx.pathExists(install.path)
+        )) {
+          log.warn(`Plugin path does not exist ${install.path}`)
+          return
+        }
+        
+        await Fsx.rm(install.path, {
+          retryDelay: 100, recursive: true, force: true
+        })
+        
+        log.info(`Uninstalled plugin (${install.id}) @ ${install.path}`)
+      } catch (err) {
+        log.error(`Failed to remove plugin ${id}`, err)
+        throw err
       }
-      
-      runInAction(() => {
-        remove(this.state.plugins, id)
-      })
-      
-      log.info(`Uninstalling plugin (${install.id}) @ ${install.path}`)
-      if (!(await Fsx.pathExists(install.path))) {
-        log.warn(`Plugin path does not exist ${install.path}`)
-        return
-      }
-      
-      await Fsx.rm(install.path, {
-        retryDelay: 100,
-        recursive: true,
-        force: true
-      })
-      
-      log.info(`Uninstalled plugin (${install.id}) @ ${install.path}`)
     }
   }
 

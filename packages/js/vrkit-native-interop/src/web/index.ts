@@ -1,5 +1,5 @@
 
-export {Shutdown, GetNativeExports} from "./NativeBinding"
+export {Shutdown, IsNativeOverlaySupported, GetNativeExports} from "./NativeBinding"
 export * from "./NativeSessionPlayer"
 export * from "./SessionPlayer"
 

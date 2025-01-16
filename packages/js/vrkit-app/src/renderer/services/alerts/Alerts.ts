@@ -58,13 +58,27 @@ const alertToastMapping = Object.fromEntries(
   valuesOf(AlertType).map(type => pairOf(type, makeHotToast(type)))
 ) as Record<AlertTypeKind, ToHotToast>
 
-function Alert(type: AlertType, errorOrMessage: ErrorKind | Renderable, opts: AlertOptions = {}): string {
-  const msg = isErrorKind(errorOrMessage)
+function Alert(type: AlertType, errorOrMessage: ErrorKind | Renderable, errOrOpts: ErrorKind | AlertOptions = {}, opts: AlertOptions = {}): string {
+  let err: ErrorKind = null
+  
+  if (isErrorKind(errOrOpts)) {
+    err = errOrOpts
+    opts.cause = err
+  } else {
+    opts = Object.assign(opts, {
+      ...errOrOpts
+    })
+  }
+  let msg = isErrorKind(errorOrMessage)
     ? alertErrorFormatter(errorOrMessage, opts)
-    : isAlertRenderable(errorOrMessage)
+      : isAlertRenderable(errorOrMessage)
       ? errorOrMessage
       : throwError(`Message is not renderable or error kind: ${(errorOrMessage as any)?.toString()}`)
 
+  if (isErrorKind(opts.cause)) {
+    msg = `${msg}\nDetails:${alertErrorFormatter(opts.cause, opts)}\nStack:\n${opts.cause.stack}`
+  }
+  
   if (isDev) {
     const msgStr = isFunction(msg?.toString) && msg.toString()
     if (isNotEmptyString(msgStr)) {
@@ -72,7 +86,9 @@ function Alert(type: AlertType, errorOrMessage: ErrorKind | Renderable, opts: Al
       logFn(msgStr)
     }
   }
-
+  
+  
+  
   // GET THE TOASTER BASED ON MESSAGE TYPE
   return asOption(alertToastMapping[type])
     .filter(isFunction)
@@ -88,11 +104,16 @@ export interface Alerter {
   type: AlertType
 
   (errorOrMessage: ErrorKind | Renderable, opts?: AlertOptions): string
+
+  (errorOrMessage: ErrorKind | Renderable, err: ErrorKind, opts?: AlertOptions): string
 }
 
 function createAlertFactory(type: AlertType): Alerter {
-  const alerter = ((errorOrMessage: ErrorKind | Renderable, opts: AlertOptions = {}) =>
-    Alert(type, errorOrMessage, opts)) as Alerter
+  const alerter = ((
+    errorOrMessage: ErrorKind | Renderable,
+    errOrOpts: ErrorKind | AlertOptions = {},
+    opts: AlertOptions = {}
+  ) => Alert(type, errorOrMessage, errOrOpts, opts)) as Alerter
 
   alerter.type = type
 
@@ -147,7 +168,7 @@ namespace Alert {
 
   type AlertPromiseMessageKind<Args extends any[], Res = any> = AlertPromiseMessageFactory<Args, Res> | Renderable
 
-  interface AlertPromiseOptions<Args extends any[] = any[], Res = any> {
+  export interface AlertPromiseOptions<Args extends any[] = any[], Res = any> {
     loading: AlertPromiseMessageKind<Args, Res>
 
     success?: AlertPromiseMessageKind<Args, Res>
@@ -155,13 +176,14 @@ namespace Alert {
     error?: AlertPromiseMessageKind<Args, Res>
   }
 
-  interface AlertUsePromiseOptions<Args extends any[] = any[], Res = any> extends AlertPromiseOptions<Args, Res> {
+  export interface AlertUsePromiseOptions<Args extends any[] = any[], Res = any>
+    extends AlertPromiseOptions<Args, Res> {
     canExecute?: () => boolean
   }
 
   export function promise<T, Args extends any[] = any[]>(
     pending: Promise<T>,
-    { loading, success, error }: AlertPromiseOptions,
+    { loading, success, error }: AlertPromiseOptions<Args, T>,
     args?: Args
   ): Promise<T> {
     const ctx: AlertPromiseContext<Args, T> = {
@@ -210,7 +232,7 @@ namespace Alert {
             true,
             () =>
               (...args: Args) =>
-                Alert.promise<T, Args>(fn(...args), options)
+                Alert.promise<T, Args>(fn(...args), options, args)
           )
           .otherwise(() => () => Promise.resolve(null)) as Fn,
       deps

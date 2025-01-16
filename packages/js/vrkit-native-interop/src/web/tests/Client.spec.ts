@@ -34,10 +34,10 @@ test("SessionPlayer.open", async () => {
   //log.info("Opening IBT File: ", ibtFile)
   let player:SessionPlayer = null;
   
-  expect(() => {
-    player = new SessionPlayer(ibtFile)
+  await expect(async () => {
+    player = await SessionPlayer.Create(ibtFile)
     return player
-  }).not.toThrow()
+  }).resolves.not.toThrow()
   
   const data = player.sessionData
   expect(data.fileInfo.file).toEqual(ibtFile)
@@ -81,7 +81,7 @@ test("SessionPlayer.open", async () => {
 })
 
 test.skip("SessionPlayer.live", async () => {
-  let player:SessionPlayer = GetLiveVRKitSessionPlayer()
+  let player:SessionPlayer = await GetLiveVRKitSessionPlayer()
   
   try {
     expect(player.start()).toBeTruthy()
@@ -150,7 +150,7 @@ test.skip("SessionPlayer.live", async () => {
 
 test.skip("VRKit Native Event", async () => {
   
-  const client = new Client()
+  const client = await Client.Create()
   let data:any = null
   const testPromise = new Promise<any>((resolve, reject) => {
     let triggered = false

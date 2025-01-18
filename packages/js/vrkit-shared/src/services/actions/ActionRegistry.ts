@@ -68,6 +68,14 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
   get globalActionIds():string[] {
     return this.globalActions.map(get("id"))
   }
+  
+  get appActions():Action[] {
+    return this.state.allActions.filter((action:Action) => action.type === ActionType.App)
+  }
+  
+  get appActionIds():string[] {
+    return this.appActions.map(get("id"))
+  }
 
   /**
    * Get all actions as a list

@@ -32,7 +32,7 @@ import { match } from "ts-pattern"
 import { getLogger } from "@3fv/logger-proxy"
 import SharedAppState from "../store"
 import { AppSettingsService } from "../app-settings"
-import { IValueDidChange, observe } from "mobx"
+import { IValueDidChange, observe, runInAction } from "mobx"
 import { guard, isDefined, isNumber, isPromise, isString } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
 import {
@@ -218,7 +218,8 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     for (const wi of this.#windows) {
       const { browserWindow, role } = wi
       if (!browserWindow || !isNormalWindow(wi)) {
-        log.warn(`Window (${wi.id}) of type (${wi.type}) is either not "Normal" or does not have a browserWindow set, can not adjust zoom`)
+        if (log.isDebugEnabled())
+          log.debug(`Window (${wi.id}) of type (${wi.type}) is either not "Normal" or does not have a browserWindow set, can not adjust zoom`)
         continue
       }
       const zoomFactor = asOption(this.settings.zoomFactor)
@@ -226,10 +227,11 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         .filter(greaterThan(0))
         .filter(lessThan(3))
         .getOrCall(
-          () =>
+          () => runInAction(() =>
             this.appSettingsManager.changeSettings({
               zoomFactor: 1.0
             }).zoomFactor
+          )
         )
 
       Array<[Electron.WebContents[], number]>(
@@ -371,7 +373,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       })
 
       bw.on("closed", () => {
-        if (role === WindowRole.Main) {
+        if (!isDev && role === WindowRole.Main) {
           log.info(`Main window closed, exiting app`)
           app.quit()
           app.exit(0)
@@ -450,11 +452,11 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         win.webContents.setWindowOpenHandler(windowOpenHandler)
         if (this.sharedAppState.devSettings.alwaysOpenDevTools) {
           if (isFloatingWindow(wi)) {
-            win.webContents.openDevTools()
-          } else {
             win.webContents.openDevTools({
               mode: "detach"
             })
+          } else {
+            win.webContents.openDevTools()
           }
         }
       })

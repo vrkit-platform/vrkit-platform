@@ -1,14 +1,8 @@
 #pragma once
 
 
-#include <atomic>
-#include <functional>
-#include <mutex>
-
-#include <IRacingTools/SDK/Utils/LockHelpers.h>
 #include <IRacingTools/SDK/Utils/LockHelpers.h>
 
-#include "../Macros.h"
 #include "../SharedAppLibPCH.h"
 #include "DX113D.h"
 
@@ -16,14 +10,6 @@
 
 
 namespace IRacingTools::Shared::Graphics {
-
-  // using Microsoft::WRL::ComPtr;
-
-  // /using Size = Size<UINT>;
-  // struct Size {
-  //     UINT width{0};
-  //     UINT height{0};
-  // };
 
   struct DeviceListener {
     virtual void onDeviceLost() = 0;
@@ -74,8 +60,6 @@ namespace IRacingTools::Shared::Graphics {
 
     winrt::com_ptr<IDXGIDevice2> &getDXGIDevice();
 
-    // virtual HWND windowHandle() const = 0;
-
     // Use `std::unique_lock`
     void lock() override;
 
@@ -88,7 +72,8 @@ namespace IRacingTools::Shared::Graphics {
     std::unique_ptr<Locks> locks_;
   };
 
-  /** Additional resources needed for Direct2D + DirectWrite.
+  /**
+   * Additional resources needed for Direct2D + DirectWrite.
    *
    * I've included DirectWrite here for now as it's the only current
    * reason for using Direct2D.

@@ -376,7 +376,6 @@ export class SessionPlayer extends EventEmitter3<
       log.error(`Failed to get session info message`, err)
       return {} as SessionInfoMessage
     }
-    //return {} as SessionInfoMessage
   }
   
   static Create(file: string | null = null): SessionPlayer {

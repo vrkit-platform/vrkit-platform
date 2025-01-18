@@ -16,6 +16,7 @@ import { app } from "electron"
 import { getLogger } from "@3fv/logger-proxy"
 import * as ElectronRemote from "@electron/remote/main"
 import { isPromise } from "@3fv/guard"
+import { Deferred } from "@3fv/deferred"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -30,18 +31,35 @@ const ProcPaths = {
 console.info(`ProcPaths`, ProcPaths)
 
 async function start() {
-  await import("./utils/ProcessErrorHelpers")
-  
-  if (!ElectronRemote.isInitialized())
-    ElectronRemote.initialize()
-  
-  const logServerInit = await import("../common/logger/main").then(mod => mod.default)
-  if (isPromise(logServerInit)) {
-    await logServerInit
+  console.info(`Starting entry-main`)
+  try {
+    await import("./utils/ProcessErrorHelpers")
+
+    console.info(`Init electron remote`)
+    if (!ElectronRemote.isInitialized()) {
+      ElectronRemote.initialize()
+    }
+
+    console.info(`Init Log Server`)
+    const logServerInit = await import("../common/logger/main").then(mod => mod.default)
+    if (isPromise(logServerInit)) {
+      console.info(`Waiting for Log Server`)
+      await logServerInit
+    }
+
+    console.info(`Init BootStrap`)
+    await import("./bootstrap/bootstrapElectronMain").then(mod => mod.default)
+
+    console.info(`Launch`)
+    await import("./launch").then(mod => mod.default)
+  } catch (err) {
+    console.error(`Failed to start`, err)
+    if (!isDev) {
+      app.quit()
+      process.exit(1)
+    }
+    throw err
   }
-  
-  await import("./bootstrap").then(mod => mod.default)
-  await import("./launch").then(mod => mod.default)
 }
 
 // SETUP PROCESS & APP EVENT HANDLERS
@@ -54,15 +72,21 @@ if (app.requestSingleInstanceLock()) {
 
 // HMR
 if (import.meta.webpackHot) {
-  import.meta.webpackHot.accept((...args) => {
-    console.warn(`entry-main HMR accept`, ...args)
-    // if (err) {
-    //   log.error(`HMR ERROR`, err)
-    // } else {
-    //   log.warn("HMR updates")
-    // }
-  })
+  import.meta.webpackHot.accept(
+    ["../common/logger/main", "./utils/ProcessErrorHelpers", "./bootstrap/bootstrapElectronMain", "./launch"],
+    (...args) => {
+      console.warn(`entry-main HMR accept`, ...args)
+      // NOTE: Delay is required to allow for async cleanup/disposal to complete
+      Deferred.delay(1500)
+        .then(() => start())
+        .then(() => console.info(`HMR Start complete`))
+        .catch(err => {
+          console.error(`HMR Start failed`, err)
+          app.quit()
+          process.exit(1)
+        })
+    }
+  )
 }
 
 export {}
-

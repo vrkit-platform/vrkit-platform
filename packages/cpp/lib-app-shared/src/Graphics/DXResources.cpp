@@ -21,8 +21,6 @@ namespace IRacingTools::Shared::Graphics {
     std::optional<DrawInfo> currentDraw_;
   };
 
-  //using winrt::check_hresult;
-
   D3D11Resources::D3D11Resources() {
     UINT d3dFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
     auto d3dLevel = D3D_FEATURE_LEVEL_11_1;
@@ -32,19 +30,24 @@ namespace IRacingTools::Shared::Graphics {
     dxgiFlags |= DXGI_CREATE_FACTORY_DEBUG;
 #endif
 
-    VRK_LOG_AND_FATAL_IF(FAILED(
-        CreateDXGIFactory2(dxgiFlags, IID_PPV_ARGS(dxgiFactory_.put()))), "Failed creating DXGIFactory");
+    VRK_LOG_AND_THROW_IF_FAILED(
+        CreateDXGIFactory2(dxgiFlags, IID_PPV_ARGS(dxgiFactory_.put())),
+        "Failed creating DXGIFactory");
 
     winrt::com_ptr<IDXGIAdapter4> adapterIt;
     for (unsigned int i = 0; dxgiFactory_->EnumAdapterByGpuPreference(
         i, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(adapterIt.put())) == S_OK; ++i) {
       const ScopedGuard releaseIt(
-          [&]() {
+          [&] {
             adapterIt = {nullptr};
           }
       );
       DXGI_ADAPTER_DESC1 desc{};
-      adapterIt->GetDesc1(&desc);
+      auto descRes = adapterIt->GetDesc1(&desc);
+      if (FAILED(descRes)) {
+        spdlog::warn("Unable to get adapter (index={}) description: {}",i, static_cast<std::int32_t>(descRes));
+        continue;
+      }
       fmt::println(
           L"  GPU {} (LUID {:#x}): {:04x}:{:04x}: '{}' ({}mb) {}",
           i,

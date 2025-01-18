@@ -27,7 +27,7 @@ export const ElectronMainAppActions = Object.fromEntries(
       type: ActionType.App,
       runtime: "main",
       name: "Quit",
-      defaultAccelerators: ["CommandOrControl+q"]
+      defaultAccelerators: ["Alt+F4"]
     },
     {
       id: AppActionId.zoomDefault,

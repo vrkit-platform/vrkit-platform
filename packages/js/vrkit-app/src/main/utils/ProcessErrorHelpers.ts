@@ -6,7 +6,17 @@ import type{
 import { negate, isEmpty, flatten } from "lodash"
 import { isString } from "@3fv/guard"
 
-type GlobalErrorType = "windowError" | "uncaughtException" | "unhandledRejection"
+declare global {
+  
+  type GlobalErrorType =
+    "windowError"
+    | "uncaughtException"
+    | "unhandledRejection"
+  
+  
+  
+  let VRKitReportMainFatalError: (type: GlobalErrorType, ...args: any[]) => void
+}
 
 export function reportMainError(type: GlobalErrorType, ...args: any[]) {
   const msg = `${type}, ${args.map(it => JSON.stringify(it,null,2)).join(", ")}`
@@ -24,6 +34,8 @@ export function reportMainError(type: GlobalErrorType, ...args: any[]) {
   
   dialog.showErrorBox("Unexpected error occurred in main process", `${errorMsg}\ntype: ${type}\nstack: \n${stack}\n\nRaw Details: \n${rawData}`)
 }
+
+;(global as any)["VRKitReportMainFatalError"] = reportMainError
 
 function onRendererError(ev: Electron.IpcMainEvent, type, ...args: any[]) {
   args = Array.isArray(args[0]) ? flatten(args) : args

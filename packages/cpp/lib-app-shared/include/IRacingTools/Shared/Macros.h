@@ -14,8 +14,8 @@
 
 
 #ifdef DEBUG
-  #define VRK_BREAK
-  //__debugbreak()
+#define VRK_BREAK
+//__debugbreak()
 #else
   #define VRK_BREAK
 #endif
@@ -62,6 +62,16 @@ namespace IRacingTools::Shared {
 #define VRK_FATAL \
   { fatal(); }
 
+
+#define VRK_LOG_SOURCE_LOCATION_AND_THROW(\
+  message, ...) \
+{ \
+auto msg = std::format("ERROR: " message "\n", ##__VA_ARGS__); \
+std::cerr << msg << "\n";  \
+throw std::runtime_error(msg); \
+}
+
+
 #define VRK_LOG_SOURCE_LOCATION_AND_FATAL(\
   message, ...) \
   { \
@@ -92,9 +102,27 @@ namespace IRacingTools::Shared {
       VRK_LOG_AND_FATAL(message, ##__VA_ARGS__); \
   }
 
+#define VRK_LOG_AND_THROW(message, ...) \
+VRK_LOG_SOURCE_LOCATION_AND_THROW( \
+message, ##__VA_ARGS__)
 
-  inline void check_hresult(
-      HRESULT code) {
+
+#define VRK_LOG_AND_THROW_IF(cond, message, ...) \
+{ \
+  if (cond) {\
+    VRK_LOG_AND_THROW(message, ##__VA_ARGS__); \
+  }\
+}
+
+#define VRK_LOG_AND_THROW_IF_FAILED(cond, message, ...) \
+{ \
+if (FAILED(cond)) {\
+VRK_LOG_AND_THROW(message, ##__VA_ARGS__); \
+}\
+}
+
+
+  inline void check_hresult(HRESULT code) {
     //winrt::check_hresult(code);
     if (FAILED(code)) [[unlikely]] {
       // VRK_LOG_SOURCE_LOCATION_AND_FATAL("HRESULT {}", static_cast<int32_t>(code));

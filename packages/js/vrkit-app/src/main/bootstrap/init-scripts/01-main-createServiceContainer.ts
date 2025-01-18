@@ -1,6 +1,8 @@
 import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { setServiceContainer } from "../../ServiceContainer"
+import {
+  setServiceContainer, shutdownServiceContainer
+} from "../../ServiceContainer"
 import { NativeThemeManager } from "../../services/native-theme"
 
 import { ActionRegistry, once } from "@vrkit-platform/shared"
@@ -39,34 +41,8 @@ const createServiceContainer = once(async function createServiceContainer() {
 
   setServiceContainer(container)
   if (import.meta.webpackHot) {
-    import.meta.webpackHot.dispose(() => {
-      setServiceContainer(null)
-
-      const keys = [...container.allKeys],
-          keyNames = keys.map(key => (isFunction(key) && isString(key.name)) ? key.name : isString(key) ? key : "N/A")
-      
-      const services = keys
-        .map((key, idx) =>
-          Option.try(() => container.get(key))
-            .map(service => [key, service, keyNames[idx]])
-            .getOrNull()
-        )
-        .filter(isDefined)
-
-      return Promise.all(
-        services.map(([key, service, keyName]) => {
-          const disposeFn: Function = service[Symbol.dispose] ?? service["unload"]
-          if (disposeFn) {
-            log.info(`Invoking dispose (key=${keyName})`)
-            const res = disposeFn.call(service)
-            if (isPromise(res)) {
-              return res
-            } else {
-              return Promise.resolve()
-            }
-          }
-        })
-      )
+    import.meta.webpackHot.addDisposeHandler(() => {
+      shutdownServiceContainer()
     })
   }
   return container

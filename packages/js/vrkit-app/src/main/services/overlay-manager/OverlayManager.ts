@@ -54,19 +54,13 @@ import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
 import { PluginClientEventType } from "@vrkit-platform/plugin-sdk"
 import { AppSettingsService } from "../app-settings"
-import Fsx from "fs-extra"
-import Path from "path"
 import PQueue from "p-queue"
-import {
-  OverlayBrowserWindow, OverlayBrowserWindowEvent
-} from "./OverlayBrowserWindow"
+import { OverlayBrowserWindow, OverlayBrowserWindowEvent } from "./OverlayBrowserWindow"
 import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { flatten, pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
-import {
-  CreateNativeOverlayManager, NativeOverlayManager
-} from "vrkit-native-interop"
+import { CreateNativeOverlayManager, NativeOverlayManager } from "vrkit-native-interop"
 
 import { IValueDidChange, observe, reaction, runInAction, toJS } from "mobx"
 import { DashboardManager } from "../dashboard-manager"
@@ -80,7 +74,7 @@ import {
   getVRRectangleLayoutTool,
   isValidOverlayScreenSize
 } from "./OverlayLayoutTools"
-import { AppPaths, FileExtensions } from "@vrkit-platform/shared/constants/node"
+import { AppPaths } from "@vrkit-platform/shared/constants/node"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -215,7 +209,7 @@ export class OverlayManager {
         this.updateDataVars(ouid, overlayInfo)
 
         const newWin = OverlayBrowserWindow.create(this, this.windowManager, windowKind, overlayInfo, placement)
-        
+
         // ATTACH LISTENERS
         newWin.on(OverlayBrowserWindowEvent.Created, win => {
           win.browserWindow.on("closed", this.createOnCloseHandler(ouid, newWin.browserWindowId))
@@ -224,8 +218,7 @@ export class OverlayManager {
             win.browserWindow.on("moved", onBoundsChanged).on("resized", onBoundsChanged)
           }
         })
-        
-        
+
         return newWin
       })
   }
@@ -434,15 +427,19 @@ export class OverlayManager {
         return o.close()
       })
     )
-      .then(() => info(`All windows closed`))
-      .catch(err => warn(`error closing windows`, err))
+      .then(() => {
+        info(`All overlay windows closed`)
+      })
+      .catch(err => {
+        warn(`error closing overlays`, err)
+      })
 
     this.overlayWindows_ = []
   }
 
   @Bind
   private onActiveSessionIdChanged(change: IValueDidChange<string>) {
-    info(`Active session id changed from (${change.oldValue}) to (${change.newValue}) `, change)
+    log.info(`Active session id changed from (${change.oldValue}) to (${change.newValue}) `, change)
     const { activeSessionId, activeSessionType, activeSession } = this.sessionManager
     this.updateActiveSession(activeSessionId, activeSessionType, activeSession, change.oldValue)
   }
@@ -454,8 +451,8 @@ export class OverlayManager {
   @PostConstruct() // @ts-ignore
   protected async init(): Promise<void> {
     app.on("quit", this.unload)
-    
-    this.nativeManager_= await CreateNativeOverlayManager()
+
+    this.nativeManager_ = await CreateNativeOverlayManager()
     const { sessionManager } = this,
       ipcFnHandlers = Array<Pair<OverlayManagerClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
         [OverlayManagerClientFnType.FETCH_WINDOW_ROLE, this.fetchOverlayWindowRoleHandler.bind(this)],
@@ -473,7 +470,11 @@ export class OverlayManager {
     this.disposers_.push(
       observe(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged),
       observe(this.mainAppState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged),
-      reaction(() => toJS(this.mainAppState.plugins.plugins), () => this.onPluginInstallsChanged(), {equals: isEqual}),
+      reaction(
+        () => toJS(this.mainAppState.plugins.plugins),
+        () => this.onPluginInstallsChanged(),
+        { equals: isEqual }
+      ),
       () => {
         ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayManagerClientFnTypeToIPCName(type)))
         ipcEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
@@ -520,7 +521,8 @@ export class OverlayManager {
    * @param dashManager
    */
   constructor(
-    @InjectContainer() readonly container: Container,
+    @InjectContainer()
+    readonly container: Container,
     readonly windowManager: WindowManager,
     readonly mainActionManager: ElectronMainActionManager,
     readonly sessionManager: SessionManager,
@@ -613,39 +615,47 @@ export class OverlayManager {
         screenRect = asOption(win.browserWindow)
           .map(bw => screen.dipToScreenRect(bw, bw.getBounds()))
           .map(electronRectangleToRectI)
-          .getOrThrow() as RectI, //vrLayout.screenRect
+          .getOrThrow() as RectI,
         imageSize = {
-          width: Math.min(screenRect.size.width, nativeImageSize.width),
-          height: Math.min(screenRect.size.height, nativeImageSize.height)
+          width:
+            nativeImageSize.width > 0 ? Math.min(screenRect.size.width, nativeImageSize.width) : screenRect.size.width,
+          height:
+            nativeImageSize.height > 0
+              ? Math.min(screenRect.size.height, nativeImageSize.height)
+              : screenRect.size.height
         }
 
       if (cap) {
         cap.push(image)
       }
-
-      if (!isValidOverlayScreenSize(imageSize) || !isEqualSize(imageSize, nativeImageSize)) {
-        log.warn(
-          `[${win.uniqueId}]: Invalid imageSize=`,
-          imageSize,
-          `,nativeImageSize=`,
-          nativeImageSize,
-          ` ignoring frame.  Window bounds=`,
-          win.browserWindow.getBounds()
-        )
-
+      
+      if (!this.nativeManager_) {
         return
       }
       
-      if (this.nativeManager_) {
-        this.nativeManager_.createOrUpdateResources(
-            win.uniqueId,
-            win.browserWindowId,
-            { width: imageSize.width, height: imageSize.height },
-            screenRect,
-            vrLayout
-        )
-        this.nativeManager_.processFrame(win.uniqueId, buf)
+      if (!isValidOverlayScreenSize(imageSize) || !isEqualSize(imageSize, nativeImageSize)) {
+        if (log.isDebugEnabled()) {
+          log.debug(
+            `[${win.uniqueId}]: Invalid imageSize=`,
+            imageSize,
+            `,nativeImageSize=`,
+            nativeImageSize,
+            ` ignoring frame.  Window bounds=`,
+            win.browserWindow.getBounds()
+          )
+        }
+
+        return
       }
+
+      this.nativeManager_.createOrUpdateResources(
+        win.uniqueId,
+        win.browserWindowId,
+        { width: imageSize.width, height: imageSize.height },
+        screenRect,
+        vrLayout
+      )
+      this.nativeManager_.processFrame(win.uniqueId, buf)
     }
   }
 
@@ -692,6 +702,7 @@ export class OverlayManager {
       this.autoLayoutEditorInfoWindows()
     }
   }
+
   //
   // /**
   //  * Create a delete dashboard config task
@@ -701,21 +712,13 @@ export class OverlayManager {
   //  */
   // private createDeleteDashboardConfigTask(id: string) {
   //   return async () => {
-  //     const dashFile = Path.join(AppPaths.dashboardsDir, id + FileExtensions.Dashboard)
-  //     info(`Deleting dashboard ${dashFile}`)
-  //
-  //     await Fsx.unlink(dashFile)
-  //   }
-  // }
-  //
-  // private createSaveDashboardConfigTask(config: DashboardConfig) {
-  //   return async () => {
-  //     const dashFile = Path.join(AppPaths.dashboardsDir, config.id + FileExtensions.Dashboard)
-  //     info(`Saving dashboard ${dashFile}`)
-  //
-  //     await Fsx.writeJSON(dashFile, DashboardConfig.toJson(config))
-  //   }
-  // }
+  //     const dashFile = Path.join(AppPaths.dashboardsDir, id +
+  // FileExtensions.Dashboard) info(`Deleting dashboard ${dashFile}`)  await
+  // Fsx.unlink(dashFile) } }  private createSaveDashboardConfigTask(config:
+  // DashboardConfig) { return async () => { const dashFile =
+  // Path.join(AppPaths.dashboardsDir, config.id + FileExtensions.Dashboard)
+  // info(`Saving dashboard ${dashFile}`)  await Fsx.writeJSON(dashFile,
+  // DashboardConfig.toJson(config)) } }
 
   updateOverlayPlacement(
     win: OverlayBrowserWindow,
@@ -906,7 +909,9 @@ export class OverlayManager {
 
   private updateAllDataVars() {
     for (const ow of this.overlayWindows_) {
-      if (ow.config?.overlay) this.updateDataVars(ow.uniqueId, ow.config.overlay)
+      if (ow.config?.overlay) {
+        this.updateDataVars(ow.uniqueId, ow.config.overlay)
+      }
     }
   }
 

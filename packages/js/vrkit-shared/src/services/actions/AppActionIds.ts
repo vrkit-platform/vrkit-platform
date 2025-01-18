@@ -5,13 +5,13 @@ export enum AppActionId {
   //newWindow =  "newWindow",
   closeWindow =  "closeWindow",
   
-  save =  "save",
+  // save =  "save",
   
   zoomDefault =  "zoomDefault",
   zoomIn =  "zoomIn",
   zoomOut =  "zoomOut",
-  importProject =  "importProject",
-  newProject =  "newProject"
+  // importProject =  "importProject",
+  // newProject =  "newProject"
 }
 
 export type AppActionIdName = `${AppActionId}` | AppActionId | string

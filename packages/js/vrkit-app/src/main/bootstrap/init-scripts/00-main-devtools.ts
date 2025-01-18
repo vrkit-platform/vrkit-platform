@@ -21,17 +21,21 @@ async function installDevTools() {
 
   const reactDevToolExtId = REACT_DEVELOPER_TOOLS
   const includeRedux = false
-  const extensions = [reactDevToolExtId, includeRedux && REDUX_DEVTOOLS].filter(isString)
+  // const extensions = [reactDevToolExtId, includeRedux && REDUX_DEVTOOLS].filter(isString)
+  const extensions = [reactDevToolExtId]
   const targetSession = session.defaultSession
 
   targetSession.flushStorageData()
-
+  // targetSession.clearCache()
   const installExtInternal = async () => {
     let res = await installExtensions(extensions, {
       loadExtensionOptions: {
         allowFileAccess: true
       },
-      session: targetSession
+      session: targetSession,
+      source: "npmmirror",
+      // forceDownload: true
+      
     })
     info(`Installed devtool`, res)
     return res

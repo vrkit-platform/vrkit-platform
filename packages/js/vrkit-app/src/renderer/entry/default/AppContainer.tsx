@@ -1,5 +1,5 @@
 import { StrictMode, Suspense } from "react"
-import { HashRouter } from "react-router-dom"
+import { MemoryRouter,HashRouter } from "react-router-dom"
 import { HelmetProvider } from "react-helmet-async"
 
 import App from "./App"
@@ -11,11 +11,11 @@ export default function AppContainer() {
     <StrictMode>
       <PageMetadataProvider>
         <HelmetProvider>
-          <HashRouter basename={DefaultConfig.app.basePath}>
+          <MemoryRouter basename={DefaultConfig.app.basePath}>
             <Suspense>
               <App />
             </Suspense>
-          </HashRouter>
+          </MemoryRouter>
         </HelmetProvider>
       </PageMetadataProvider>
     </StrictMode>

@@ -10,17 +10,20 @@ import { toJS } from "mobx" // ------ OverlayManager events & types
 export interface ActionsState {
   actions: Record<string, ActionDef>
   enabledGlobalIds: string[]
+  enabledAppIds: string[]
 }
 
 export function newActionsState(state: Partial<ActionsState> = {}): ActionsState {
   return defaults({...state},{
     actions: {},
-    enabledGlobalIds: []
+    enabledGlobalIds: [],
+    enabledAppIds: []
   }) as ActionsState
 }
 
 export const ActionsStateSchema = createSimpleSchema<ActionsState>({
   actions: custom(v => toJS(v), v => v),
-  enabledGlobalIds: list(primitive())
+  enabledGlobalIds: list(primitive()),
+  enabledAppIds: list(primitive())
 })
 

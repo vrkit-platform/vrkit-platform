@@ -65,6 +65,10 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
   private closeDeferred_: Deferred<void> = null
 
   private wasMovedManually_: boolean = false
+  
+  get isBrowserWindowActive():boolean {
+    return [!(this.browserWindow?.isDestroyed() ?? true), this.browserWindow?.isClosable() ?? false].every(it => it === true)
+  }
 
   get wasMovedManually(): boolean {
     return this.wasMovedManually_
@@ -137,17 +141,16 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
     }
 
     const deferred = (this.closeDeferred_ = new Deferred())
-    if (this.#invalidateInterval_) {
-      clearInterval(this.#invalidateInterval_)
-      this.#invalidateInterval_ = null
-    }
+    this.stopInvalidateInterval()
 
     try {
-      this.browserWindow?.close()
+      if (this.browserWindow && !this.browserWindow.isDestroyed()  && this.browserWindow.isClosable())
+        this.browserWindow.close()
       deferred.resolve()
     } catch (err) {
       log.error(`Unable to close window`, err)
-      deferred.reject(err)
+      // deferred.reject(err)
+      deferred.resolve()
     }
     return deferred.promise
   }
@@ -364,7 +367,12 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
     if (now - this.previousInvalidateTime_ < MaxFPSIntervalMillis) {
       return
     }
-
+    
+    if (!this.isBrowserWindowActive) {
+      this.stopInvalidateInterval()
+      return
+    }
+    
     this.previousInvalidateTime_ = now
     guard(
       () => this.browserWindow?.webContents?.invalidate(),
@@ -451,4 +459,10 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
     }
   }
   
+  private stopInvalidateInterval():void {
+    if (this.#invalidateInterval_) {
+      clearInterval(this.#invalidateInterval_)
+      this.#invalidateInterval_ = null
+    }
+  }
 }

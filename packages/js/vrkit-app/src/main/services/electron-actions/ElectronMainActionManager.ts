@@ -1,3 +1,4 @@
+import killAll from "tree-kill"
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 import {
@@ -9,7 +10,7 @@ import {
   ActionOptions,
   ActionRegistry,
   ActionsState,
-  ActionType,
+  ActionType, AppActionId,
   Bind,
   defaults,
   Disposables,
@@ -18,11 +19,11 @@ import {
   LazyGetter,
   removeIfMutation
 } from "@vrkit-platform/shared"
-import { app, globalShortcut, IpcMainInvokeEvent } from "electron"
+import { app, BrowserWindow, globalShortcut, IpcMainInvokeEvent } from "electron"
 import { flatten, omit, partition } from "lodash"
 import { ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin } from "../../constants"
 
-import { assert, isDefined, isPromise, isString } from "@3fv/guard"
+import { assert, guard, isDefined, isPromise, isString } from "@3fv/guard"
 import { get } from "lodash/fp"
 import { getSharedAppStateStore, MainSharedAppState } from "../store"
 import { IDisposer } from "mobx-utils"
@@ -31,9 +32,13 @@ import { ElectronMainGlobalActions } from "./ElectronMainGlobalActions"
 import { runInAction, set } from "mobx"
 import { editorExecuteAction } from "../overlay-manager/OverlayEditorActionFactory"
 import { asOption } from "@3fv/prelude-ts"
-import { getService } from "../../ServiceContainer"
+import {
+  getService,
+  getServiceContainer, shutdownServiceContainer
+} from "../../ServiceContainer"
 import { AppSettingsService } from "../app-settings"
 import Accelerator = Electron.Accelerator
+import { Deferred } from "@3fv/deferred"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -71,7 +76,7 @@ const roleAccelerators = Array<ElectronRoleAcceleratorData>(
   [ActionMenuItemDesktopRole.copy, "CommandOrControl+c"],
   [ActionMenuItemDesktopRole.paste, "CommandOrControl+v"],
   [ActionMenuItemDesktopRole.selectAll, "CommandOrControl+a"],
-  // [ActionMenuItemDesktopRole.quit, "CommandOrControl+q"],
+  [ActionMenuItemDesktopRole.quit, "Alt+F4"],
   ...(isDev &&
     ([
       [ActionMenuItemDesktopRole.reload, "CommandOrControl+r"],
@@ -139,6 +144,34 @@ export const electronGlobalActions: Array<ActionOptions> = [
     })
   }
 ]
+
+async function shutdownApp() {
+  
+    console.warn("QUIT INVOKED")
+    const store = getSharedAppStateStore()
+    store.setShutdownInProgress()
+    
+    const closeAllWindows = () => {
+      BrowserWindow.getAllWindows().forEach(w => guard(() => !w.isDestroyed() && w.close()))
+    }
+    
+    console.warn("START SHUTDOWN SERVICE CONTAINER")
+    await shutdownServiceContainer()
+    console.warn("SHUTDOWN SERVICE CONTAINER COMPLETE")
+    Deferred.delay(500).then(() => {
+      console.warn("Starting FORCE KILL")
+      closeAllWindows()
+      process.kill(process.pid)
+      killAll(process.pid, "SIGKILL")
+      app.quit()
+      process.exit(0)
+    })
+    closeAllWindows()
+    app.quit()
+    killAll(process.pid, "SIGKILL")
+    process.exit(0)
+  
+}
 /**
  * App actions
  */
@@ -157,18 +190,14 @@ export const electronAppActions: Array<ActionOptions> = [
     ...ElectronMainAppActions.closeWindow,
     role: "close",
     execute: (_menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, _event: Electron.KeyboardEvent) => {
-      browserWindow.close()
-      // const manager = getService(DesktopElectronWindowManager)
-      // manager.getWindowByBrowserWindow(browserWindow)?.close()
-      // ?.openWindow(DesktopWindowType.normal)
+      return shutdownApp()
     }
   },
   {
     ...ElectronMainAppActions.quit,
-    execute: () => {
-      const store = getSharedAppStateStore()
-      store.setShutdownInProgress()
-      app.quit()
+    role: "quit",
+    execute: (_menuItem: Electron.MenuItem) => {
+      return shutdownApp()
     }
   },
   {
@@ -216,6 +245,10 @@ export class ElectronMainActionManager {
 
   get enabledGlobalActionIds() {
     return this.actionsState.enabledGlobalIds
+  }
+  
+  get enabledAppActionIds() {
+    return this.actionsState.enabledAppIds
   }
 
   /**
@@ -273,11 +306,27 @@ export class ElectronMainActionManager {
   private unload() {
     this[Symbol.dispose]()
   }
+  
+  @Bind
+  private updateAppActions() {
+    process.nextTick(() => {
+      const wins = BrowserWindow.getAllWindows(),
+          focused = wins.some(it => it.isFocused()),
+          appActionIds = Object.keys(AppActionId)
+      
+      if (focused) {
+        this.enableActions(ActionType.App, ...appActionIds)
+      } else {
+        this.disableActions(ActionType.App, ...appActionIds)
+      }
+      
+    })
+  }
 
   @PostConstruct()
   protected async init() {
     const { actions, actionRegistry } = this
-
+    
     // ADD MAIN ACTIONS
     actionRegistry.addAll(...actions)
 
@@ -285,17 +334,22 @@ export class ElectronMainActionManager {
     this.updateActionsState()
 
     actionRegistry.on("actionsChanged", this.onActionsChanged)
-    this.disposers_.push(() => {
-      actionRegistry.off("actionsChanged", this.onActionsChanged)
-    })
-
+    
     // ADD HANDLER
     // ipcMain.handle(ElectronIPCChannel.invokeMainAction,
     // this.onInvokeMainAction)  if (import.meta.webpackHot) {
     // import.meta.webpackHot.addDisposeHandler(() => {
     // actionRegistry.removeAll(...actions.map(get("id")))
     // ipcMain.removeHandler(ElectronIPCChannel.invokeMainAction) }) }
-
+    
+    app.on("browser-window-blur", this.updateAppActions)
+    app.on("browser-window-focus", this.updateAppActions)
+    this.disposers_.push(() => {
+      actionRegistry.off("actionsChanged", this.onActionsChanged)
+      app.on("browser-window-blur", this.updateAppActions)
+      app.on("browser-window-focus", this.updateAppActions)
+    })
+    
     if (import.meta.webpackHot) {
       import.meta.webpackHot.addDisposeHandler(() => {
         this.disposers_.dispose()
@@ -321,62 +375,75 @@ export class ElectronMainActionManager {
     this.actionRegistry.removeAll(...actionIds)
     this.disableGlobalActions(...actionIds)
   }
-
-  @Bind
-  enableGlobalActions(...ids: string[]): IDisposer {
+  
+  enableActions(type: ActionType, ...ids: string[]): string[] {
     return runInAction(() => {
       const reg = this.actionRegistry,
-        actions = reg.globalActions.filter(it => ids.includes(it.id)),
-        [enableActions, ignoredActions] = partition(actions, it => !this.enabledGlobalActionIds.includes(it.id)),
-        enableActionIds = enableActions.map(get("id")),
-        enabledAccelerators = Array<Accelerator>()
-
+          typeActions = type === ActionType.Global ? reg.globalActions : reg.appActions,
+          typeEnabledActionIds = type === ActionType.Global ?  this.enabledGlobalActionIds : this.enabledAppActionIds,
+          actions = typeActions.filter(it => ids.includes(it.id)),
+          [enableActions, ignoredActions] = partition(actions, it => !typeEnabledActionIds.includes(it.id)),
+          enableActionIds = enableActions.map(get("id")),
+          enabledAccelerators = Array<Accelerator>()
+      
       if (isNotEmpty(ignoredActions)) {
         log.warn("Already active actions", ignoredActions)
       }
-
+      
       enableActions.forEach(action => {
         const accelerators = asOption(action.accelerators?.filter(isString))
-          .filter(isNotEmpty)
-          .orCall(() => asOption(action.defaultAccelerators?.filter(isString)))
-          .filter(isNotEmpty)
-          .getOrThrow(`No accelerators found for action id (${action.id})`)
-
+            .filter(isNotEmpty)
+            .orCall(() => asOption(action.defaultAccelerators?.filter(isString)))
+            .filter(isNotEmpty)
+            .getOrThrow(`No accelerators found for action id (${action.id})`)
+        
         const [accels, registeredAccels] = partition(accelerators, accel => !globalShortcut.isRegistered(accel))
-
+        
         if (registeredAccels.length) {
           log.info(`Already assigned shortcuts`, registeredAccels)
         }
-
+        
         enabledAccelerators.push(...accels)
         globalShortcut.registerAll(accels, () => action.execute())
-        this.enabledGlobalActionIds.push(action.id)
+        typeEnabledActionIds.push(action.id)
       })
-
-      const disposer = () => {
-        this.disableGlobalActions(enableActionIds)
-      }
-
-      this.disposers_.push(disposer)
-
-      return disposer
+      
+      return enableActionIds
     })
   }
 
   @Bind
-  disableGlobalActions(...enableActionIdArgs: Array<string | string[]>): void {
+  enableGlobalActions(...ids: string[]): IDisposer {
+    const enableActionIds = this.enableActions(ActionType.Global, ...ids)
+    const disposer = () => {
+      this.disableGlobalActions(enableActionIds)
+    }
+    
+    this.disposers_.push(disposer)
+    
+    return disposer
+  }
+  
+  @Bind
+  disableActions(type:ActionType, ...actionIdArgs: Array<string | string[]>): void {
     return runInAction(() => {
-      const enableActionIds = flatten(enableActionIdArgs),
-        enabledActionDefs = enableActionIds.map(id => this.actionsState.actions[id]).filter(isDefined<ActionDef>)
-
+      const actionIds = flatten(actionIdArgs),
+          enabledActionDefs = actionIds.map(id => this.actionsState.actions[id]).filter(isDefined<ActionDef>),
+          enabledActionIds = type === ActionType.Global ?  this.enabledGlobalActionIds : this.enabledAppActionIds
+      
       enabledActionDefs.forEach(actionDef => {
         actionDef.accelerators.forEach(accel => {
           globalShortcut.unregister(accel)
         })
       })
-
-      removeIfMutation(this.enabledGlobalActionIds, id => enableActionIds.includes(id))
+      
+      removeIfMutation(enabledActionIds, id => actionIds.includes(id))
     })
+  }
+  
+  @Bind
+  disableGlobalActions(...actionIdArgs: Array<string | string[]>): void {
+    return this.disableActions(ActionType.Global, ...actionIdArgs)
   }
 }
 

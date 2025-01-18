@@ -1,6 +1,6 @@
 import { Container } from '@3fv/ditsy';
-import { assert, ClassConstructor } from "@3fv/guard"
-
+import { assert, ClassConstructor, isDefined, isFunction, isPromise, isString } from "@3fv/guard"
+import {Option} from "@3fv/prelude-ts"
 
 let serviceContainer: Container = null
 
@@ -34,3 +34,43 @@ export function setServiceContainer(container: Container) {
   return serviceContainer
 }
 
+export async function shutdownServiceContainer(container: Container = serviceContainer) {
+  
+  if (!container) {
+    console.warn(`No service container to shutdown`)
+    return
+  }
+  
+  if (Object.is(serviceContainer, container)) {
+    setServiceContainer(null)
+  }
+  
+  const keys = [...container.allKeys],
+      keyNames = keys.map(key => (isFunction(key) && isString(key.name)) ? key.name : isString(key) ? key : "N/A")
+  
+  const services = keys
+      .map((key, idx) =>
+          Option.try(() => container.get(key))
+              .map(service => [key, service, keyNames[idx]])
+              .getOrNull()
+      )
+      .filter(isDefined)
+  
+  await Promise.all(
+      services.map(async ([key, service, keyName]) => {
+        try {
+          const disposeFn:Function = service[Symbol.dispose] ??
+              service["unload"]
+          if (disposeFn) {
+            console.info(`Invoking dispose (key=${keyName})`)
+            const res = disposeFn.call(service)
+            if (isPromise(res)) {
+              await res
+            }
+          }
+        } catch (err) {
+          console.error(`${key} >> Shutdown Error`, err)
+        }
+      })
+  )
+}

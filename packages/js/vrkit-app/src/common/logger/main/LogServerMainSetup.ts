@@ -83,13 +83,14 @@ class LogServerMainSetup {
   }
 }
 
-const logServerMain = asOption(import.meta?.webpackHot?.data)
-  .map((data: any) => data["logServerMain"] as LogServerMainSetup)
-  .getOrCall(() => new LogServerMainSetup())
+const logServerMain = new LogServerMainSetup()
+// asOption(import.meta?.webpackHot?.data)
+//   .map((data: any) => data["logServerMain"] as LogServerMainSetup)
+//   .getOrCall(() => )
 
-if (import.meta.webpackHot) {
-  import.meta.webpackHot.addDisposeHandler(data => {
-    data["logServerMain"] = logServerMain
-  })
-}
-export default logServerMain.whenReady()
+// if (import.meta.webpackHot) {
+//   import.meta.webpackHot.addDisposeHandler(data => {
+//     data["logServerMain"] = logServerMain
+//   })
+// }
+export default logServerMain

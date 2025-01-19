@@ -45,14 +45,30 @@ export interface WindowCreateOptions<Instance = unknown> {
   
   browserWindowOptions: Electron.BrowserWindowConstructorOptions
   
+  /**
+   * On BrowserWindowEvent handler
+   * TODO: Make `WindowConfig` extend `EventEmitter3<BrowserWindowEventArgMap>`
+   *   instead of 1-off handler
+   *
+   * @param type
+   * @param browserWindow
+   * @param windowInstance
+   */
   onBrowserWindowEvent?: (type: BrowserWindowEventKind, browserWindow: Electron.BrowserWindow, windowInstance: Instance) => any
   
+  /**
+   * URL of bundle to load
+   */
   url: string
+  
+  /**
+   * Initial route for react router
+   */
+  initialRoute?: string
 }
 
 export interface WindowConfig<Instance = unknown> extends WindowCreateOptions<Instance> {
   id: string
-  
 }
 
 export interface WindowInstance<Instance = unknown> {

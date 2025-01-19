@@ -123,9 +123,9 @@ const selectAppSettings = (state: ISharedAppState) => state.appSettings,
 function createActiveSessionSelector<T>(selector: (session: SessionDetail) => T) {
   return createSessionsSelector((state: SessionsState) =>
     selector(
-      state.activeSessionType === "LIVE"
+      state?.activeSessionType === "LIVE"
         ? state.liveSession
-        : state.activeSessionType === "DISK"
+        : state?.activeSessionType === "DISK"
           ? state.diskSession
           : null
     )

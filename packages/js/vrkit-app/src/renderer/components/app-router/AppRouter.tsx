@@ -1,3 +1,4 @@
+import type {} from "@vrkit-platform/shared"
 import { Suspense } from "react"
 import { IndexRouteObject, Navigate, NonIndexRouteObject, Outlet, RouteObject, useRoutes } from "react-router-dom"
 
@@ -13,9 +14,11 @@ import Page500 from "vrkit-app-renderer/pages/error/500"
 import { getWebPathPart, WebPaths, WebRootPath } from "vrkit-app-renderer/routes/WebPaths"
 
 function makeDefaultRouteConfigs(...routePaths: string[]): (IndexRouteObject | NonIndexRouteObject)[] {
-  const element = (
+  const
+    initialRoute = VRKitWindowConfig?.initialRoute ?? WebPaths.app.dashboards,
+    element = (
       <Navigate
-          to={WebPaths.app.dashboards}
+          to={initialRoute}
           replace
       />
   )
@@ -56,10 +59,6 @@ export const appRoutes: RouteObject[] = [
     path: getWebPathPart(WebPaths.app.plugins),
     children: [
       { element: <PluginsPage />, index: true },
-      // {
-      //   path: ":id",
-      //   element: <DashboardEditPage />
-      // }
     ]
   }
 ]

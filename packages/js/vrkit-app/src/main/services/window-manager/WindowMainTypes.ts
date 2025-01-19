@@ -58,7 +58,9 @@ function newNormalWindowCreateOptions() {
       titleBarStyle: "hidden",
       ...windowOptionDefaults()
     },
-    url: resolveHtmlPath("index.html")
+    url: resolveHtmlPath("index.html"),
+    initialRoute: "/app/dashboards"
+    
   } satisfies Partial<WindowConfig>
 }
 

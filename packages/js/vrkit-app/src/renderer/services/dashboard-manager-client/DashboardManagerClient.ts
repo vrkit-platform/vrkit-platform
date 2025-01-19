@@ -36,6 +36,15 @@ export class DashboardManagerClient {
   }
   
   
+  [Symbol.dispose]() {
+    debug(`Unloading dashboard manager client`)
+    
+    window.removeEventListener("beforeunload", this.unload)
+    Object.assign(global, {
+      dashboardManagerClient: null
+    })
+  }
+  
   /**
    * Cleanup resources on unload
    *
@@ -43,9 +52,8 @@ export class DashboardManagerClient {
    * @private
    */
   @Bind
-  private unload(event: Event) {
-    debug(`Unloading dashboard manager client`)
-
+  private unload(event: Event = null) {
+    this[Symbol.dispose]()
     // TODO: Unsubscribe from ipcRenderer
   }
 
@@ -66,10 +74,7 @@ export class DashboardManagerClient {
 
       if (import.meta.webpackHot) {
         import.meta.webpackHot.addDisposeHandler(() => {
-          window.removeEventListener("beforeunload", this.unload)
-          Object.assign(global, {
-            dashboardManagerClient: null
-          })
+          this.unload()
         })
       }
     }

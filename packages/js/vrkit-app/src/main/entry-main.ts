@@ -11,6 +11,7 @@
  */
 
 import "./prepareElectronMain"
+import "./ShutdownManager"
 
 import { app } from "electron"
 import { getLogger } from "@3fv/logger-proxy"
@@ -42,11 +43,9 @@ async function start() {
 
     console.info(`Init Log Server`)
     const logServerInit = await import("../common/logger/main").then(mod => mod.default)
-    if (isPromise(logServerInit)) {
-      console.info(`Waiting for Log Server`)
-      await logServerInit
-    }
-
+    console.info(`Waiting for Log Server`)
+    await logServerInit.whenReady()
+    
     console.info(`Init BootStrap`)
     await import("./bootstrap/bootstrapElectronMain").then(mod => mod.default)
 
@@ -77,7 +76,7 @@ if (import.meta.webpackHot) {
     (...args) => {
       console.warn(`entry-main HMR accept`, ...args)
       // NOTE: Delay is required to allow for async cleanup/disposal to complete
-      Deferred.delay(1500)
+      Deferred.delay(2000)
         .then(() => start())
         .then(() => console.info(`HMR Start complete`))
         .catch(err => {

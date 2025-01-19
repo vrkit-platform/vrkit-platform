@@ -9,8 +9,10 @@ import { guard } from "@3fv/guard"
 
 async function start() {
   const windowConfig: WindowConfig = ipcRenderer.sendSync("getWindowConfig" satisfies ElectronIPCChannelKind)
-  console.info(`WindowConfig`, windowConfig)
-  window["VRKWindowConfig"] = windowConfig
+  if (isDev)
+    console.info(`WindowConfig`, windowConfig)
+  
+  window["VRKitWindowConfig"] = windowConfig
   
   if (process.env.NODE_ENV !== "production") {
     Object.assign(global, {

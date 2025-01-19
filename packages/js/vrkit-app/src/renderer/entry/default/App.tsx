@@ -15,9 +15,13 @@ import AppBody from "./AppBody"
 
 
 export default function App() {
+  // SETUP SCROLLING
   useScrollToTop()
+  
+  // USE APP STORE
   const appStore = useAppStore()
 
+  // INJECT GLOBAL STYLES
   useLayoutEffect(() => {
     const headEl = document.head || document.getElementsByTagName("head")[0],
       styleEl = document.createElement("style")

@@ -1,12 +1,10 @@
 import { getLogger } from "@3fv/logger-proxy"
 import Bluebird from "bluebird"
-import { app } from "electron"
 import { Timer } from "timer-node"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
-type BootstrapStep = [description: string, fn: () => Promise<any>]
 type InitScriptModule = { default: () => Promise<void> }
 
 if (isDev) {
@@ -53,8 +51,10 @@ async function bootstrapElectronMain() {
     if (isDev) {
       warn(`In Dev mode we do not force quit on failure`)
     } else {
-      app.quit()
-      process.exit(1)
+      // @ts-ignore
+      // noinspection ES6MissingAwait
+      ShutdownManager.shutdown()
+      return
     }
     
     throw err
@@ -64,11 +64,11 @@ async function bootstrapElectronMain() {
 }
 
 // HMR
-if (import.meta.webpackHot) {
-  import.meta.webpackHot.accept(bootstrapKeys, (...args) => {
-    log.warn("Bootstrap HMR", ...args)
-    bootstrapElectronMain()
-  })
-}
+// if (import.meta.webpackHot) {
+//   import.meta.webpackHot.accept(bootstrapKeys, (...args) => {
+//     log.warn("Bootstrap HMR", ...args)
+//     bootstrapElectronMain()
+//   })
+// }
 
 export default bootstrapElectronMain()

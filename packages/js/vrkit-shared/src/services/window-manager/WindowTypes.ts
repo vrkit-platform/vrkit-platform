@@ -20,6 +20,7 @@ export enum BrowserWindowEventType {
   Created = "Created",
   Ready = "Ready"
 }
+
 export type BrowserWindowEventKind = `${BrowserWindowEventType}`
 
 export enum WindowRenderMode {
@@ -33,18 +34,21 @@ export function isWindowRole(candidate: any): candidate is WindowRole {
 
 export interface WindowCreateOptions<Instance = unknown> {
   id?: string
-  
+
   role: WindowRole
+
   type: WindowKind
-  
+
   renderMode?: WindowRenderMode
   
+  modal?: boolean
+  
   multiple: boolean
-  
+
   manageState: boolean
-  
+
   browserWindowOptions: Electron.BrowserWindowConstructorOptions
-  
+
   /**
    * On BrowserWindowEvent handler
    * TODO: Make `WindowConfig` extend `EventEmitter3<BrowserWindowEventArgMap>`
@@ -54,13 +58,17 @@ export interface WindowCreateOptions<Instance = unknown> {
    * @param browserWindow
    * @param windowInstance
    */
-  onBrowserWindowEvent?: (type: BrowserWindowEventKind, browserWindow: Electron.BrowserWindow, windowInstance: Instance) => any
-  
+  onBrowserWindowEvent?: (
+    type: BrowserWindowEventKind,
+    browserWindow: Electron.BrowserWindow,
+    windowInstance: Instance
+  ) => any
+
   /**
    * URL of bundle to load
    */
   url: string
-  
+
   /**
    * Initial route for react router
    */
@@ -73,14 +81,14 @@ export interface WindowConfig<Instance = unknown> extends WindowCreateOptions<In
 
 export interface WindowInstance<Instance = unknown> {
   id: string
-  
+
   role: WindowRole
+  modal: boolean
+  
   type: WindowKind
-  
+
   config: WindowConfig<Instance>
-  
 }
 
 export type WindowConfigRole<Config> = Config extends WindowConfig<infer Role> ? Role : never
 export type WindowCreateOptionsRole<Options> = Options extends WindowCreateOptions<infer Role> ? Role : never
-

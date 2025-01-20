@@ -13,17 +13,19 @@ message AppSettings {
 
   string default_dashboard_config_id = 1;
 
-  bool open_dashboard_on_launch = 6;
-
   ThemeType theme_type = 2;
 
   float zoom_factor = 3;
 
   bool autoconnect = 5;
 
-  map<string, string> custom_accelerators = 10;
+  bool open_app_on_boot = 10;
 
-  map<string, OverlayAnchor> overlay_anchors = 20;
+  bool open_dashboard_on_launch = 11;
+
+  map<string, string> custom_accelerators = 20;
+
+  map<string, OverlayAnchor> overlay_anchors = 30;
 }
 
 

@@ -16,8 +16,8 @@ import "./ShutdownManager"
 import { app } from "electron"
 import { getLogger } from "@3fv/logger-proxy"
 import * as ElectronRemote from "@electron/remote/main"
-import { isPromise } from "@3fv/guard"
 import { Deferred } from "@3fv/deferred"
+import { shutdownServiceContainer } from "./ServiceContainer"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -54,10 +54,12 @@ async function start() {
   } catch (err) {
     console.error(`Failed to start`, err)
     if (!isDev) {
-      app.quit()
-      process.exit(1)
+      ShutdownManager.shutdown()
+        .catch(err => {
+          console.error(`Shutdown failed`,err)
+        })
     }
-    throw err
+    // throw err
   }
 }
 
@@ -76,13 +78,12 @@ if (import.meta.webpackHot) {
     (...args) => {
       console.warn(`entry-main HMR accept`, ...args)
       // NOTE: Delay is required to allow for async cleanup/disposal to complete
-      Deferred.delay(2000)
+      Promise.all([shutdownServiceContainer(), Deferred.delay(2000)])
         .then(() => start())
         .then(() => console.info(`HMR Start complete`))
         .catch(err => {
           console.error(`HMR Start failed`, err)
-          app.quit()
-          process.exit(1)
+          ShutdownManager.shutdown()
         })
     }
   )

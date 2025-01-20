@@ -41,6 +41,7 @@ function newBaseWindowCreateOptions(
       ...config
     },
     {
+      modal: false,
       multiple: false,
       manageState: false,
       browserWindowOptions: {}
@@ -58,9 +59,7 @@ function newNormalWindowCreateOptions() {
       titleBarStyle: "hidden",
       ...windowOptionDefaults()
     },
-    url: resolveHtmlPath("index.html"),
-    initialRoute: "/app/dashboards"
-    
+    url: resolveHtmlPath("index.html")
   } satisfies Partial<WindowConfig>
 }
 
@@ -68,6 +67,7 @@ function newFloatingWindowCreateOptions(optConfig: Partial<WindowConfig> = {}) {
   const baseConfig = {
     type: "Floating",
     manageState: false,
+    modal: false,
     browserWindowOptions: {
       show: false,
       frame: false,
@@ -82,10 +82,13 @@ function newFloatingWindowCreateOptions(optConfig: Partial<WindowConfig> = {}) {
 
 export const BaseWindowConfigs: { [Role in WindowRole]: WindowCreateOptions<WindowMainInstance> } = deepFreeze({
   Main: newBaseWindowCreateOptions(WindowRole.Main, {
-    ...newNormalWindowCreateOptions()
+    ...newNormalWindowCreateOptions(),
+    initialRoute: "/main"
   }),
   Settings: newBaseWindowCreateOptions(WindowRole.Settings, {
-    ...newNormalWindowCreateOptions()
+    ...newNormalWindowCreateOptions(),
+    modal: true,
+    initialRoute: "/settings"
   }),
   DashboardVRLayout: newBaseWindowCreateOptions(WindowRole.DashboardVRLayout, {
     ...newFloatingWindowCreateOptions()

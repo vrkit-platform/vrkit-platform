@@ -104,7 +104,7 @@ export function AppBreadcrumbs(props: AppBreadcrumbsProps) {
             to={to}
             key={to}
           >
-            {value === "app" ? <HomeIcon/> : value}
+            {value === "main" ? <HomeIcon/> : value}
           </Link>
         )
       })}

@@ -253,7 +253,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
                 tooltip="Edit Settings"
                 className={clsx(classNames.itemAction)}
                 component={NavLink}
-                to={WebPaths.app.dashboards + `/${config?.id}`}
+                to={WebPaths.main.dashboards + `/${config?.id}`}
               >
                 <AppFAIcon
                   size="2xs"

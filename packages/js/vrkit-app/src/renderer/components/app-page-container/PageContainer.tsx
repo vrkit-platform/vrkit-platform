@@ -35,7 +35,7 @@ const classes = appPageContainerClasses
 export type AppPageContainerClassKey = ClassNamesKey<typeof appPageContainerClasses>
 
 
-const AppPageContainerRoot = styled(Box, {
+const PageContainerRoot = styled(Box, {
   name: "AppPageContainerRoot",
   label: "AppPageContainerRoot"
 })(({theme: {dimen,palette, shape, customShadows, shadows, components, colors, transitions, typography, insetShadows, mixins, zIndex, spacing }}) => ({
@@ -55,7 +55,7 @@ const AppPageContainerRoot = styled(Box, {
 /**
  * AppPageContainer Component Properties
  */
-export interface AppPageContainerProps extends BoxProps {
+export interface PageContainerProps extends BoxProps {
 
 }
 
@@ -63,15 +63,15 @@ export interface AppPageContainerProps extends BoxProps {
 /**
  * AppPageContainer Component
  *
- * @param { AppPageContainerProps } props
+ * @param { PageContainerProps } props
  */
-export function AppPageContainer(props:AppPageContainerProps) {
+export function PageContainer(props:PageContainerProps) {
   const { className, ...other } = props
 
-  return <AppPageContainerRoot
+  return <PageContainerRoot
     className={clsx(classes.root, {}, className)}
     {...other}
   />
 }
 
-export default AppPageContainer
+export default PageContainer

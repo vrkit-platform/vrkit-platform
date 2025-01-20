@@ -2,16 +2,17 @@ import React, { useCallback, useContext, useEffect, useState } from "react"
 import { Helmet } from "react-helmet-async"
 import { defaults } from "lodash"
 
-import { getLogger } from "@3fv/logger-proxy"
+import { getLogger } from "../../../../../../../../../../3fv/logger-proxy"
 import type { BoxProps } from "@mui/material/Box"
-import type { AppTitlebarOverrides } from "vrkit-app-renderer/components/app-titlebar"
-import type { AppContentBarOverrides } from "vrkit-app-renderer/components/app-content-bar"
+import type { AppTitlebarOverrides } from "../../app-titlebar"
+import type { AppContentBarOverrides } from "../../app-content-bar"
 
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 export interface PageMetadata {
+  title?: string | React.ReactNode
   appTitlebar?: PageAppTitlebarMetadata
   appContentBar?: PageAppContentBarMetadata
 }

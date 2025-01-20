@@ -7,22 +7,35 @@ import { rem } from "@vrkit-platform/shared-ui"
 // ----------------------------------------------------------------------
 
 declare module "@mui/material/styles" {
+  interface TypographyOptions {
+  
+  }
   interface TypographyVariants {
+    titleBar: React.CSSProperties
+    
     fontSecondaryFamily: React.CSSProperties["fontFamily"]
 
     fontWeightSemiBold: React.CSSProperties["fontWeight"]
   }
 
   interface TypographyVariantsOptions {
+    titleBar?: React.CSSProperties
     fontSecondaryFamily?: React.CSSProperties["fontFamily"]
 
     fontWeightSemiBold?: React.CSSProperties["fontWeight"]
   }
-
+  
   interface ThemeVars {
     typography: Theme["typography"]
   }
 }
+
+declare module '@mui/material/Typography' {
+  interface TypographyPropsVariantOverrides {
+    titleBar?: true;
+  }
+}
+
 
 // ----------------------------------------------------------------------
 
@@ -38,7 +51,8 @@ export enum Fonts {
   RobotoMono = "RobotoMono",
   Segoe = "Segoe",
   SegoeUI = "Segoe UI",
-  Metro = "Metro"
+  Metro = "Metro",
+  RaceSport = "Race Sport"
 }
 
 export const defaultFont = Fonts.SegoeUI
@@ -57,6 +71,9 @@ export const typography: TypographyOptions = {
   fontWeightMedium: "500",
   fontWeightSemiBold: "600",
   fontWeightBold: "700",
+  titleBar: {
+    fontFamily: setFont(Fonts.RaceSport)
+  },
   h1: {
     fontWeight: 800,
     lineHeight: 2,
@@ -146,7 +163,7 @@ export const typography: TypographyOptions = {
     lineHeight: 1,
     letterSpacing: 0.7,
     fontSize: rem(1),
-    fontFamily: Fonts.Segoe,
+    fontFamily: setFont(Fonts.SegoeUI),
     textTransform: "unset"
     // textTransform: "uppercase"
     //textTransform: "uppercase"

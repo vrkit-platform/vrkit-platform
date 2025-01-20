@@ -54,7 +54,7 @@ import { Alert } from "../../../services/alerts"
 import { Theme } from "../../../theme/ThemeTypes"
 import GlobalStyles from "@mui/material/GlobalStyles"
 import { DashboardsListItem, DashboardsListItemCreate } from "./DashboardsListItem"
-import { PageMetadata, PageMetadataProps } from "../../page-metadata"
+import { PageMetadata, PageMetadataProps } from "../../page"
 import { isNotEmptyString, newOnClickHandler } from "@vrkit-platform/shared"
 import { asOption } from "@3fv/prelude-ts"
 
@@ -275,7 +275,7 @@ export function DashboardsListView(props: DashboardsListViewProps) {
           const newDashConfig = await createDashAsync.execute()
           log.info(`Created new dashboard config (${newDashConfig.id}`)
           if (isMounted) {
-            nav(WebPaths.app.dashboards + `/${newDashConfig.id}`)
+            nav(WebPaths.main.dashboards + `/${newDashConfig.id}`)
           }
           return newDashConfig
         } catch (err) {

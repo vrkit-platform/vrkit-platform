@@ -10,14 +10,14 @@ import Typography from '@mui/material/Typography';
 
 import { RouterLink } from '../../components/app-router-link';
 
-import { AppLayout } from '../../components/app';
+import { PageLayout } from '../../components/page';
 
 
 import { varBounce, MotionContainer } from 'vrkit-app-renderer/components/animate';
 
 export function View500() {
   return (
-      <AppLayout>
+      <PageLayout>
         <Container component={MotionContainer}>
           <m.div variants={varBounce().in}>
             <Typography variant="h3" sx={{ mb: 2 }}>
@@ -39,7 +39,7 @@ export function View500() {
             Go to home
           </Button>
         </Container>
-      </AppLayout>
+      </PageLayout>
   );
 }
 

@@ -128,6 +128,7 @@ export class ElectronMainMenuManager {
         label: "File",
         submenu: [
           // actionToItem(AppActionIds.newWindow),
+          !isMac && actionToItem(AppActionId.closeWindow),
           !isMac && actionToItem(AppActionId.quit)
         ].filter(Boolean)
       }, // { role: 'editMenu' }

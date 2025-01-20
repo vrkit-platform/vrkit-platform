@@ -39,7 +39,7 @@ const { info, debug, warn, error } = log
 
 export type PluginCompEntry = Pair<PluginManifest, PluginComponentDefinition>
 
-const selectAppSettings = (state: ISharedAppState) => state.appSettings,
+const selectAppSettings = (state: ISharedAppState):AppSettings => state.appSettings,
   selectSessionsState = (state: ISharedAppState) => state.sessions,
   selectDashboardsState = (state: ISharedAppState) => state.dashboards,
   selectPluginState = (state: ISharedAppState): PluginsState => state.plugins,

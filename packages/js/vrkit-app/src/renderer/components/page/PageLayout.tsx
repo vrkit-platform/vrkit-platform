@@ -18,32 +18,23 @@ import {
 import { AppTitlebar } from "../app-titlebar"
 import { AppContentBar } from "../app-content-bar"
 import { AppSessionPlayerControlPanel } from "../app-session-player-control-panel"
-import AppDrawer from "./AppDrawer"
+import NavDrawer from "./NavDrawer"
+import { useWebPathRoot, WebRootPath } from "../../routes/WebPaths"
 
-export type AppLayoutProps = {
+export type PageLayoutProps = {
   sx?: SxProps
   children: React.ReactNode
 }
 
-export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
-  const theme = useTheme()
+export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
+  const rootPath = useWebPathRoot(),
+    isMain = rootPath === WebRootPath.main
   
 
   return (
     <>
-      <GlobalStyles
-        styles={{
-          body: {
-            [`& > #root`]: {
-              ...FlexColumn,
-              ...FillWindow,
-              ...OverflowHidden
-            }
-          }
-        }}
-      />
       <AppTitlebar />
-
+      
       <Box
         component="main"
         sx={{
@@ -57,7 +48,9 @@ export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
         }}
         
       >
-        <AppDrawer />
+        <If condition={isMain}>
+          <NavDrawer />
+        </If>
         <Box
           sx={{
             ...FlexScaleZero,
@@ -67,7 +60,9 @@ export function AppLayout({ sx, children, ...other }: AppLayoutProps) {
             ...flexAlign("stretch")
           }}
         >
-          <AppContentBar />
+          <If condition={isMain}>
+            <AppContentBar />
+          </If>
           {children}
         </Box>
       </Box>

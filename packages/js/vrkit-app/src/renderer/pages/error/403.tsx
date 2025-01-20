@@ -8,7 +8,7 @@ import Typography from "@mui/material/Typography"
 import { DefaultConfig } from "vrkit-app-renderer/config-global"
 import { MotionContainer, varBounce } from "../../components/animate"
 import { RouterLink } from "../../components/app-router-link"
-import { AppLayout } from "../../components/app"
+import { PageLayout } from "../../components/page"
 
 
 const metadata = { title: `403 forbidden! | Error - ${DefaultConfig.app.name}` }
@@ -20,7 +20,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      <AppLayout>
+      <PageLayout>
         <Container component={MotionContainer}>
           <m.div variants={varBounce().in}>
             <Typography
@@ -48,7 +48,7 @@ export default function Page() {
             Go to home
           </Button>
         </Container>
-      </AppLayout>
+      </PageLayout>
     </>
   )
 }

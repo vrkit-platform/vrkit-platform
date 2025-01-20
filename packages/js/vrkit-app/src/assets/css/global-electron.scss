@@ -86,7 +86,7 @@ html, body {
 	overflow: hidden !important;
 }
 
-#root {
+div#root {
 	max-width: 100vw;
 	min-width: 100vw;
 	max-height: 100vh;
@@ -94,6 +94,8 @@ html, body {
 	overflow: hidden !important;
 	background: transparent !important;
 	background-color: transparent !important;
+	display: flex;
+	flex-direction: column;
 	//filter: drop-shadow(0 0 1rem rgba(0,0,0,1));
 }
 

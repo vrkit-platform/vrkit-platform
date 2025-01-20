@@ -1,6 +1,10 @@
+import { useLocation } from "react-router-dom"
+import { isNotEmptyString } from "@vrkit-platform/shared"
 
 export enum WebRootPath {
-  app = 'app'
+  main = 'main',
+  settings = 'settings',
+  unknown = 'unknown'
 }
 
 export type WebRootPathKey = keyof typeof WebRootPath
@@ -14,10 +18,15 @@ export const WebPaths = {
   page404: '/error/404',
   page500: '/error/500',
   
-  // APP
-  app: {
-    dashboards: leaf(WebRootPath.app,"dashboards"),
-    plugins: leaf(WebRootPath.app,"plugins"),
+  // MAIN
+  main: {
+    dashboards: leaf(WebRootPath.main,"dashboards"),
+    plugins: leaf(WebRootPath.main,"plugins"),
+  },
+  
+  // SETTINGS
+  settings: {
+    general: leaf(WebRootPath.settings,"general"),
   },
 };
 
@@ -32,4 +41,13 @@ export function getWebPathPart(webPath: string, idx: number = -1) {
   idx = idx < 0 || idx >= parts.length ? parts.length - 1 :  idx
   
   return parts[idx]
+}
+
+export function useWebPathRoot() {
+  const loc = useLocation(),
+    parts = loc.pathname.split("/").filter(isNotEmptyString),
+    rootPart = parts[0]
+  
+  return WebRootPath[rootPart] ?? WebRootPath.unknown
+  
 }

@@ -40,6 +40,7 @@ import { AppFAIcon, isFAIconDefinition } from "../app-icon"
 import { isObject } from "@3fv/guard"
 import List from "@mui/material/List"
 import ListItemIcon from "@mui/material/ListItemIcon"
+import Tooltip from "@mui/material/Tooltip"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -73,7 +74,7 @@ const AppListItemButton = styled(ListItemButton, {
     width: "auto",
 
     [hasCls(appListItemClasses.active)]: {
-      backgroundColor: `${alpha(theme.palette.action.active, 0.25)}`
+      backgroundColor: `${alpha(theme.palette.action.active, 0.5)}`
     },
     
     [hasCls(appListItemClasses.iconOnly)]: {
@@ -81,7 +82,8 @@ const AppListItemButton = styled(ListItemButton, {
       minWidth: 50,
     },
     [child(appListItemClasses.icon)]: {
-      ...dimensionConstraints(50)
+      ...dimensionConstraints(50),
+      margin: 0,
     },
     [child(appListItemClasses.detail)]: {
     
@@ -116,6 +118,7 @@ function NavListItem({ path, iconOnly = false, icon, label, exact = false }: Nav
     theme = useTheme()
 
   return (
+    <Tooltip title={label}>
     <AppListItemButton
       className={clsx(appListItemClasses.root, {
         [appListItemClasses.active]: isActive,
@@ -139,6 +142,7 @@ function NavListItem({ path, iconOnly = false, icon, label, exact = false }: Nav
         primaryTypographyProps={{ variant: "button" }}
       />
     </AppListItemButton>
+    </Tooltip>
   )
 }
 
@@ -148,16 +152,14 @@ function NavListItem({ path, iconOnly = false, icon, label, exact = false }: Nav
  * @param { AppDrawerMenuProps } props
  */
 export function AppDrawerMenu(props: AppDrawerMenuProps) {
-  const { expanded: isExpanded, ...other } = props,
-    loc = useLocation()
-  // log.info(`Location details ${loc.pathname}`, loc)
+  const { expanded: isExpanded, ...other } = props
 
   return (
     <AppDrawerMenuRoot {...other}>
       <List disablePadding>
         <ListItem disablePadding disableGutters>
           <NavListItem
-            path={WebPaths.app.dashboards}
+            path={WebPaths.main.dashboards}
             label="Dashboards"
             icon={faGridHorizontal}
             iconOnly={!isExpanded}
@@ -165,7 +167,7 @@ export function AppDrawerMenu(props: AppDrawerMenuProps) {
         </ListItem>
         <ListItem disablePadding disableGutters>
           <NavListItem
-              path={WebPaths.app.plugins}
+              path={WebPaths.main.plugins}
               label="Plugins"
               icon={<ExtensionIcon/>}
               iconOnly={!isExpanded}

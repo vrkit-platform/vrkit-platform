@@ -1,2 +1,2 @@
-export * from "./AppPageContainer"
-export {default} from "./AppPageContainer"
+export * from "./PageContainer"
+export {default} from "./PageContainer"

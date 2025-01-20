@@ -17,12 +17,11 @@ import {
   electronRoleToId,
   isNotEmpty,
   LazyGetter,
-  removeIfMutation
+  removeIfMutation, WindowRole
 } from "@vrkit-platform/shared"
 import { app, BrowserWindow, globalShortcut, IpcMainInvokeEvent } from "electron"
 import { flatten, omit, partition } from "lodash"
-import { ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin } from "../../constants"
-
+import { ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin } from "../../../common"
 import { assert, isDefined, isPromise, isString } from "@3fv/guard"
 import { get } from "lodash/fp"
 import { getSharedAppStateStore, MainSharedAppState } from "../store"
@@ -35,6 +34,7 @@ import { asOption } from "@3fv/prelude-ts"
 import { getService } from "../../ServiceContainer"
 import { AppSettingsService } from "../app-settings"
 import Accelerator = Electron.Accelerator
+import { WindowManager } from "../window-manager"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -147,8 +147,14 @@ export const electronGlobalActions: Array<ActionOptions> = [
 export const electronAppActions: Array<ActionOptions> = [
   {
     ...ElectronMainAppActions.gotoAppSettings,
-    execute: () => {
+    execute: async () => {
       debug("Showing app settings / main")
+      try {
+        await getService(WindowManager)
+          .create(WindowRole.Settings)
+      } catch (err) {
+        error(`Unable to open app settings`, err)
+      }
       // TODO: Implement settings
       // getService(DesktopElectronWindowManager)?.openWindow(
       //   DesktopWindowType.settings
@@ -158,8 +164,9 @@ export const electronAppActions: Array<ActionOptions> = [
   {
     ...ElectronMainAppActions.closeWindow,
     role: "close",
-    execute: (_menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, _event: Electron.KeyboardEvent) => {
-      info(`close triggered - ignored for now`)
+    execute: () => {
+      info(`close triggered - passing to window manager`)
+      getService(WindowManager).closeRequest()
     }
   },
   {

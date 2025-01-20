@@ -2,12 +2,13 @@ import React from "react"
 import { AppBar, AppBarProps, Box, styled, Toolbar, toolbarClasses, useTheme } from "@mui/material"
 import clsx from "clsx"
 import {
+  alpha,
   child,
   createClassNames,
+  Ellipsis,
   Fill,
   FillHeight,
   FillWidth,
-  flex,
   flexAlign,
   FlexAuto,
   FlexColumn,
@@ -19,23 +20,23 @@ import {
   hasCls,
   heightConstraint,
   OverflowHidden,
+  padding,
   PositionRelative
 } from "@vrkit-platform/shared-ui"
-import { GlobalCSSClassNames } from "../../renderer-constants"
-import { usePageMetadata } from "../../components/page-metadata"
-
-import { useAppSelector } from "vrkit-app-renderer/services/store"
+import { GlobalCSSClassNames, isNotEmptyString } from "../../renderer-constants"
+import { usePageMetadata } from "../page"
 import { Logo } from "../../components/logo"
-import { sharedAppSelectors } from "vrkit-app-renderer/services/store/slices/shared-app"
 import AppTitlebarTrafficLights from "./traffic-lights"
-
-// import { useIsFullScreen } from "../../../hooks"
+import { useLocation } from "react-router-dom"
+import { asOption } from "@3fv/prelude-ts"
+import { WebRootPath } from "../../routes/WebPaths"
+import { capitalize } from "lodash"
 
 export interface AppTitlebarOverrides {
   left?: React.ReactNode
-  
+
   center?: React.ReactNode
-  
+
   right?: React.ReactNode
 }
 
@@ -54,12 +55,21 @@ const AppToolbarRoot = styled(Toolbar)(({ theme }) => ({
 }))
 
 const appTitlebarClassPrefix = "AppTitlebar"
-const appTitlebarClasses = createClassNames(appTitlebarClassPrefix, "root", "top", "bottom", "left", "center", "right")
+const appTitlebarClasses = createClassNames(
+  appTitlebarClassPrefix,
+  "root",
+  "top",
+  "bottom",
+  "left",
+  "center",
+  "right",
+  "title"
+)
 
 const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
   [hasCls(appTitlebarClasses.root)]: {
-    backgroundColor: theme.palette.background.appBar,
-    // boxShadow: theme.shadows[1],
+    backgroundColor: theme.palette.background.appBar, // boxShadow:
+    // theme.shadows[1],
     color: "inherit",
     zIndex: theme.zIndex.drawer + 1,
     filter: `drop-shadow(0 0 0.25rem ${theme.palette.background.session})`,
@@ -70,6 +80,7 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
     ...OverflowHidden,
     ...PositionRelative,
     [child(appTitlebarClasses.top)]: {
+      ...heightConstraint(theme.dimen.appBarHeight),
       ...FlexRowCenter,
       ...FillWidth,
       ...OverflowHidden,
@@ -81,10 +92,9 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         ...FlexRow,
         ...OverflowHidden,
         ...PositionRelative,
-        flex: "0 0 auto",
-        // minWidth: "15%",
+        flex: "0 0 auto", // minWidth: "15%",
         alignItems: "stretch",
-        
+
         [hasCls(appTitlebarClasses.right)]: {
           ...flexAlign("center", "flex-end")
         },
@@ -98,7 +108,16 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         ...OverflowHidden,
         ...PositionRelative,
         ...flexAlign("stretch", "stretch"),
-        height: "auto"
+        height: "auto",
+        [child(appTitlebarClasses.title)]: {
+          ...OverflowHidden,
+          ...FlexScaleZero,
+          ...Ellipsis,
+          ...padding(0, theme.spacing(1)),
+          ...theme.typography.titleBar,
+          color: alpha(theme.palette.text.primary, 0.5),
+          alignSelf: "center"
+        }
       }
     },
     [child(appTitlebarClasses.bottom)]: {
@@ -110,39 +129,49 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
 
 export function AppTitlebar({ className, ...other }: AppTitlebarProps) {
   const pageMetadata = usePageMetadata(),
-      { appTitlebar } = pageMetadata,
-      theme = useTheme(),
-      appBarHeight = theme.dimen.appBarHeight,
-      activeDashboardConfig = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
-      isLiveAvailable = useAppSelector(sharedAppSelectors.isLiveSessionAvailable)
-  
+    { appTitlebar, title } = pageMetadata,
+    loc = useLocation(),
+    defaultTitle = asOption(loc.pathname.split("/").filter(x => isNotEmptyString(x)))
+      .mapIf(
+        parts => parts[0] === WebRootPath.main,
+        (parts: string[]) => parts.slice(1)
+      )
+      .map(parts => capitalize(parts[0]))
+      .getOrElse(""),
+    theme = useTheme()
+
   return (
-      <AppTitlebarRoot
-          className={clsx(appTitlebarClasses.root, className)}
-          elevation={0}
-          {...other}
-      >
-        <Box
-            className={appTitlebarClasses.top}
-            sx={{
-              ...heightConstraint(appBarHeight)
-            }}
-        >
-          <AppToolbarRoot>
-            <Box className={clsx(appTitlebarClasses.left, GlobalCSSClassNames.electronWindowDraggable)}>
-              <Logo />
-            </Box>
-            <Box className={clsx(appTitlebarClasses.center, GlobalCSSClassNames.electronWindowDraggable)}>
-              {appTitlebar?.center}
-            </Box>
-            <Box className={clsx(appTitlebarClasses.right)}>
-              <AppTitlebarTrafficLights />
-            </Box>
-          </AppToolbarRoot>
-        </Box>
-        
-        {/*<AppSessionPlayerControlPanel className={appTitlebarClasses.bottom} />*/}
-      </AppTitlebarRoot>
+    <AppTitlebarRoot
+      className={clsx(appTitlebarClasses.root, className)}
+      elevation={0}
+      {...other}
+    >
+      <Box className={appTitlebarClasses.top}>
+        <AppToolbarRoot>
+          <Box className={clsx(appTitlebarClasses.left, GlobalCSSClassNames.electronWindowDraggable)}>
+            <Logo />
+          </Box>
+          <Box
+            className={clsx(appTitlebarClasses.center, {
+              [GlobalCSSClassNames.electronWindowDraggable]: !appTitlebar?.center
+            })}
+          >
+            <Choose>
+              <When condition={!!appTitlebar?.center}>{appTitlebar?.center}</When>
+              <When condition={!!title}>{title}</When>
+              <Otherwise>
+                <Box className={appTitlebarClasses.title}>{defaultTitle}</Box>
+              </Otherwise>
+            </Choose>
+          </Box>
+          <Box className={clsx(appTitlebarClasses.right)}>
+            <AppTitlebarTrafficLights />
+          </Box>
+        </AppToolbarRoot>
+      </Box>
+
+      {/*<AppSessionPlayerControlPanel className={appTitlebarClasses.bottom} />*/}
+    </AppTitlebarRoot>
   )
 }
 

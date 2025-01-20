@@ -1,4 +1,4 @@
-import { AppContent } from "../../components/app"
+import { PageContent } from "../../components/page"
 
 // ----------------------------------------------------------------------
 
@@ -8,7 +8,7 @@ type Props = {
 
 export function BlankView({ title = 'Blank' }: Props) {
   return (
-    <AppContent maxWidth="xl">
-    </AppContent>
+    <PageContent maxWidth="xl">
+    </PageContent>
   );
 }

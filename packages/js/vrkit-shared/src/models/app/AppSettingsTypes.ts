@@ -5,10 +5,10 @@ export interface AppConfig {
   env: EnvironmentKind
 }
 
-
 export const AppSettingsDefaults: AppSettings = {
   defaultDashboardConfigId: null,
   autoconnect: false,
+  openAppOnBoot: false,
   openDashboardOnLaunch: true,
   zoomFactor: 1.0,
   customAccelerators: {},

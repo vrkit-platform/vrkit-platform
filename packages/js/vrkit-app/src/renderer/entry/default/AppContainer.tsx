@@ -4,7 +4,7 @@ import { HelmetProvider } from "react-helmet-async"
 
 import App from "./App"
 import { DefaultConfig } from "../../config-global"
-import { PageMetadataProvider } from "../../components/page-metadata"
+import { PageMetadataProvider } from "../../components/page"
 
 export default function AppContainer() {
   return (

@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box"
 import { styled, useTheme } from "@mui/material/styles"
-import { AppContent } from "../../components/app"
+import { PageContent } from "../../components/page"
 import React, { useEffect } from "react"
 import {
   child,
@@ -58,19 +58,19 @@ export function DashboardEditPage() {
 
   useEffect(() => {
     if (!config) {
-      nav(WebPaths.app.dashboards)
+      nav(WebPaths.main.dashboards)
     }
   }, [config])
 
   return (
-    <AppContent>
+    <PageContent>
       <DashboardEditPageRoot className={clsx(dashboardEditPageClasses.root)}>
         <DashboardEditorView
           className={clsx(dashboardEditPageClasses.editor)}
           config={config}
         />
       </DashboardEditPageRoot>
-    </AppContent>
+    </PageContent>
   )
 }
 

@@ -6,9 +6,6 @@ export const isLinux = process.platform === "linux"
 export const isWindows = !isLinux && !isMac && process.platform === "win32"
 
 
-export const ZoomFactorIncrement = 0.15
-export const ZoomFactorMin = 0.7
-export const ZoomFactorMax = 2.25
 
 export const RemoteDebugEnabled = isDev
 export const RemoteDebugPort = 9229

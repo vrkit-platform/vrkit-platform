@@ -20,10 +20,6 @@ export interface AppSettings {
      */
     defaultDashboardConfigId: string;
     /**
-     * @generated from protobuf field: bool open_dashboard_on_launch = 6;
-     */
-    openDashboardOnLaunch: boolean;
-    /**
      * @generated from protobuf field: IRacingTools.Models.ThemeType theme_type = 2;
      */
     themeType: ThemeType;
@@ -36,13 +32,21 @@ export interface AppSettings {
      */
     autoconnect: boolean;
     /**
-     * @generated from protobuf field: map<string, string> custom_accelerators = 10;
+     * @generated from protobuf field: bool open_app_on_boot = 10;
+     */
+    openAppOnBoot: boolean;
+    /**
+     * @generated from protobuf field: bool open_dashboard_on_launch = 11;
+     */
+    openDashboardOnLaunch: boolean;
+    /**
+     * @generated from protobuf field: map<string, string> custom_accelerators = 20;
      */
     customAccelerators: {
         [key: string]: string;
     };
     /**
-     * @generated from protobuf field: map<string, IRacingTools.Models.OverlayAnchor> overlay_anchors = 20;
+     * @generated from protobuf field: map<string, IRacingTools.Models.OverlayAnchor> overlay_anchors = 30;
      */
     overlayAnchors: {
         [key: string]: OverlayAnchor;
@@ -70,21 +74,23 @@ class AppSettings$Type extends MessageType<AppSettings> {
     constructor() {
         super("IRacingTools.Models.AppSettings", [
             { no: 1, name: "default_dashboard_config_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "open_dashboard_on_launch", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 2, name: "theme_type", kind: "enum", T: () => ["IRacingTools.Models.ThemeType", ThemeType] },
             { no: 3, name: "zoom_factor", kind: "scalar", T: 2 /*ScalarType.FLOAT*/ },
             { no: 5, name: "autoconnect", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 10, name: "custom_accelerators", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } },
-            { no: 20, name: "overlay_anchors", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "enum", T: () => ["IRacingTools.Models.OverlayAnchor", OverlayAnchor, "OVERLAY_ANCHOR_"] } }
+            { no: 10, name: "open_app_on_boot", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 11, name: "open_dashboard_on_launch", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 20, name: "custom_accelerators", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "scalar", T: 9 /*ScalarType.STRING*/ } },
+            { no: 30, name: "overlay_anchors", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "enum", T: () => ["IRacingTools.Models.OverlayAnchor", OverlayAnchor, "OVERLAY_ANCHOR_"] } }
         ]);
     }
     create(value?: PartialMessage<AppSettings>): AppSettings {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.defaultDashboardConfigId = "";
-        message.openDashboardOnLaunch = false;
         message.themeType = 0;
         message.zoomFactor = 0;
         message.autoconnect = false;
+        message.openAppOnBoot = false;
+        message.openDashboardOnLaunch = false;
         message.customAccelerators = {};
         message.overlayAnchors = {};
         if (value !== undefined)
@@ -99,9 +105,6 @@ class AppSettings$Type extends MessageType<AppSettings> {
                 case /* string default_dashboard_config_id */ 1:
                     message.defaultDashboardConfigId = reader.string();
                     break;
-                case /* bool open_dashboard_on_launch */ 6:
-                    message.openDashboardOnLaunch = reader.bool();
-                    break;
                 case /* IRacingTools.Models.ThemeType theme_type */ 2:
                     message.themeType = reader.int32();
                     break;
@@ -111,11 +114,17 @@ class AppSettings$Type extends MessageType<AppSettings> {
                 case /* bool autoconnect */ 5:
                     message.autoconnect = reader.bool();
                     break;
-                case /* map<string, string> custom_accelerators */ 10:
-                    this.binaryReadMap10(message.customAccelerators, reader, options);
+                case /* bool open_app_on_boot */ 10:
+                    message.openAppOnBoot = reader.bool();
                     break;
-                case /* map<string, IRacingTools.Models.OverlayAnchor> overlay_anchors */ 20:
-                    this.binaryReadMap20(message.overlayAnchors, reader, options);
+                case /* bool open_dashboard_on_launch */ 11:
+                    message.openDashboardOnLaunch = reader.bool();
+                    break;
+                case /* map<string, string> custom_accelerators */ 20:
+                    this.binaryReadMap20(message.customAccelerators, reader, options);
+                    break;
+                case /* map<string, IRacingTools.Models.OverlayAnchor> overlay_anchors */ 30:
+                    this.binaryReadMap30(message.overlayAnchors, reader, options);
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -128,7 +137,7 @@ class AppSettings$Type extends MessageType<AppSettings> {
         }
         return message;
     }
-    private binaryReadMap10(map: AppSettings["customAccelerators"], reader: IBinaryReader, options: BinaryReadOptions): void {
+    private binaryReadMap20(map: AppSettings["customAccelerators"], reader: IBinaryReader, options: BinaryReadOptions): void {
         let len = reader.uint32(), end = reader.pos + len, key: keyof AppSettings["customAccelerators"] | undefined, val: AppSettings["customAccelerators"][any] | undefined;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -144,7 +153,7 @@ class AppSettings$Type extends MessageType<AppSettings> {
         }
         map[key ?? ""] = val ?? "";
     }
-    private binaryReadMap20(map: AppSettings["overlayAnchors"], reader: IBinaryReader, options: BinaryReadOptions): void {
+    private binaryReadMap30(map: AppSettings["overlayAnchors"], reader: IBinaryReader, options: BinaryReadOptions): void {
         let len = reader.uint32(), end = reader.pos + len, key: keyof AppSettings["overlayAnchors"] | undefined, val: AppSettings["overlayAnchors"][any] | undefined;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -164,9 +173,6 @@ class AppSettings$Type extends MessageType<AppSettings> {
         /* string default_dashboard_config_id = 1; */
         if (message.defaultDashboardConfigId !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.defaultDashboardConfigId);
-        /* bool open_dashboard_on_launch = 6; */
-        if (message.openDashboardOnLaunch !== false)
-            writer.tag(6, WireType.Varint).bool(message.openDashboardOnLaunch);
         /* IRacingTools.Models.ThemeType theme_type = 2; */
         if (message.themeType !== 0)
             writer.tag(2, WireType.Varint).int32(message.themeType);
@@ -176,12 +182,18 @@ class AppSettings$Type extends MessageType<AppSettings> {
         /* bool autoconnect = 5; */
         if (message.autoconnect !== false)
             writer.tag(5, WireType.Varint).bool(message.autoconnect);
-        /* map<string, string> custom_accelerators = 10; */
+        /* bool open_app_on_boot = 10; */
+        if (message.openAppOnBoot !== false)
+            writer.tag(10, WireType.Varint).bool(message.openAppOnBoot);
+        /* bool open_dashboard_on_launch = 11; */
+        if (message.openDashboardOnLaunch !== false)
+            writer.tag(11, WireType.Varint).bool(message.openDashboardOnLaunch);
+        /* map<string, string> custom_accelerators = 20; */
         for (let k of globalThis.Object.keys(message.customAccelerators))
-            writer.tag(10, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.LengthDelimited).string(message.customAccelerators[k]).join();
-        /* map<string, IRacingTools.Models.OverlayAnchor> overlay_anchors = 20; */
+            writer.tag(20, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.LengthDelimited).string(message.customAccelerators[k]).join();
+        /* map<string, IRacingTools.Models.OverlayAnchor> overlay_anchors = 30; */
         for (let k of globalThis.Object.keys(message.overlayAnchors))
-            writer.tag(20, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.Varint).int32(message.overlayAnchors[k]).join();
+            writer.tag(30, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k).tag(2, WireType.Varint).int32(message.overlayAnchors[k]).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

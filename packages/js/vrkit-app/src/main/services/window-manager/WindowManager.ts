@@ -191,6 +191,24 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
   }
   
   /**
+   * Request a window close (normally called from a traffic light press, etc)
+   *
+   * @param win
+   */
+  closeRequest(win: Electron.BrowserWindow = BrowserWindow.getFocusedWindow()) {
+    const wi = this.getByBrowserWindow(win)
+    this.close(wi)
+    match(wi.role)
+      .with(WindowRole.Main, () => {
+        ShutdownManager.shutdown()
+      })
+      .otherwise(role => {
+        log.debug(`No special action taken for Window closing with role (${role})`)
+      })
+    
+  }
+  
+  /**
    * Traffic light handler
    *
    * @param ev
@@ -199,10 +217,12 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
    */
   @Bind
   private handleTrafficLightTrigger(ev: Electron.IpcMainEvent, trafficLight: DesktopWindowTrafficLight) {
-    const win = BrowserWindow.fromWebContents(ev.sender)
+    const wi = this.getByWebContents(ev.sender)
+    log.assert(!!wi, `Unable to find window instance for webContents`)
+    const win = wi.browserWindow
     log.info(`Traffic light pressed (${trafficLight})`)
     match(trafficLight)
-      .with(DesktopWindowTrafficLight.close, () => app.quit())
+      .with(DesktopWindowTrafficLight.close, () => this.closeRequest(win))
       .with(DesktopWindowTrafficLight.minimize, () => win.minimize())
       .with(DesktopWindowTrafficLight.maximize, () => (win.isMaximized() ? win.restore() : win.maximize()))
       .run()
@@ -295,13 +315,20 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         optionsExt
       ) as WindowConfig,
       role = config.role,
+      modal = config.modal,
+      parentWinInstance = modal ? this.mainWindowInstance : undefined
+    
+    log.assert(!modal || (modal && !!parentWinInstance),`Modal window config, but main window is not available`)
+    
+    const
       winId = isNotEmptyString(config.id)
         ? config.id
         : config.multiple
           ? `${config.role}-${generateShortId()}`
           : config.role,
         winInstance = {
-          id: winId
+          id: winId,
+          modal
         } as WindowMainInstance
     
     
@@ -317,7 +344,11 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
 
         bwOpts: Electron.BrowserWindowConstructorOptions = {
             ...config.browserWindowOptions,
-            ...wsmWinOpts
+            ...wsmWinOpts,
+            ...(modal && {
+              modal,
+              parent: parentWinInstance?.browserWindow
+            })
           },
           bw = assign(winInstance, {
           type: config.type,
@@ -374,17 +405,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
 
       bw.on("closed", () => {
         if (!isDev && role === WindowRole.Main) {
-          log.info(`Main window closed, exiting app`)
-          app.quit()
-          app.exit(0)
-
-          Deferred.delay(200).then(() => {
-            const pid = process.pid
-            console.info(`Exiting process`)
-
-            process.kill(pid)
-            process.exit(0)
-          })
+          ShutdownManager.shutdown()
         }
       })
 

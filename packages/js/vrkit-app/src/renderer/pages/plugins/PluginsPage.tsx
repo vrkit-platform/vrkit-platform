@@ -25,11 +25,11 @@ import {
 } from "@vrkit-platform/shared-ui"
 
 // APP
-import { AppContent } from "vrkit-app-renderer/components/app"
-import AppPageContainer, {
-  AppPageContainerProps
+import { Page, PageContent } from "vrkit-app-renderer/components/page"
+import PageContainer, {
+  PageContainerProps
 } from "../../components/app-page-container"
-import { PageMetadata, PageMetadataProps } from "../../components/page-metadata"
+import { PageMetadata, PageMetadataProps } from "../../components/page"
 import PluginsTabView from "../../components/plugins-tab-view"
 
 const log = getLogger(__filename),
@@ -38,7 +38,7 @@ const log = getLogger(__filename),
 /**
  * PluginsPage Component Properties
  */
-export interface PluginsPageProps extends AppPageContainerProps {
+export interface PluginsPageProps extends PageContainerProps {
 
 }
 
@@ -46,20 +46,14 @@ export interface PluginsPageProps extends AppPageContainerProps {
 export function PluginsPage({className, ...other}: PluginsPageProps) {
   const pageMetadata: PageMetadataProps = {
     appContentBar: {
-      title: "Plugins",
       actions: <></>
     }
   }
   
   return (
-    <AppContent>
-      <AppPageContainer className={clsx(className)} {...other}>
-        <>
-          <PageMetadata {...pageMetadata} />
-          <PluginsTabView/>
-        </>
-      </AppPageContainer>
-    </AppContent>
+    <Page metadata={pageMetadata} >
+      <PluginsTabView/>
+    </Page>
   )
 }
 

@@ -11,7 +11,7 @@ import {
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { useAsyncCallback } from "../../../hooks" // import {
-import { PageMetadata, PageMetadataProps } from "../../page-metadata"
+import { PageMetadata, PageMetadataProps } from "../../page"
 import { AppButtonGroupFormikPositiveNegative } from "../../app-button-group-positive-negative"
 import { assignDeep, generateUUID, isEqual, propEqualTo, removeIfMutation } from "@vrkit-platform/shared"
 import { FormContainer } from "../../form"
@@ -349,7 +349,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
             negativeLabel={negLabel}
             negativeHandler={() => {
               if (!isTouched) {
-                nav(WebPaths.app.dashboards)
+                nav(WebPaths.main.dashboards)
               } else {
                 resetForm()
               }

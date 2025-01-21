@@ -24,7 +24,7 @@
   "esm": "./src/mjs/index.mjs",
   "dependencies": {
     "@3fv/guard": "^1.4.35",
-    "@3fv/prelude-ts": "^0.8.34",
+    "@3fv/prelude-ts": "^0.8.37",
     "@babel/cli": "^7.24.8",
     "@babel/core": "^7.25.2",
     "@babel/plugin-transform-modules-commonjs": "^7.24.8",

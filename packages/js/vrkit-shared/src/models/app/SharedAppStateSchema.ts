@@ -1,5 +1,5 @@
 import { isPlainObject, omit } from "lodash"
-import { createSimpleSchema, custom, list, ModelSchema, object, primitive } from "serializr"
+import { createSimpleSchema, map, custom, list, ModelSchema, object, primitive } from "serializr"
 import type { ISharedAppState } from "./SharedAppState"
 import type { DashboardsState } from "../dashboards"
 import { Identity } from "../../utils"
@@ -15,21 +15,18 @@ import { OverlaysStateSchema } from "../overlays"
 import { ActionsStateSchema } from "../actions"
 import { PluginsStateSchema } from "../plugins"
 import { isFunction } from "@3fv/guard"
-
-// export const AppSettingsSchema = createSimpleSchema<AppSettings>({
-//   themeType: primitive(),
-//   zoomFactor: primitive(),
-//   autoconnect: primitive(),
-//   defaultDashboardConfigId: primitive(),
-//   openDashboardOnLaunch: primitive(),
-//   customAccelerators: map(primitive())
-// })
-
+import { DesktopWindowsState } from "../desktop-windows/DesktopWindowsState"
 
 
 export const AppSettingsSchema = custom(
   v => AppSettings.toJson(v),
   v => AppSettings.fromJson(v)
+)
+
+export const DesktopWindowsStateSchema = createSimpleSchema<DesktopWindowsState>({
+  windows: map(custom(v => toJS(v), v => toJS(v)))
+  }
+  
 )
 
 export const SessionDetailSchema = createSimpleSchema<SessionDetail>({
@@ -75,7 +72,8 @@ export const SharedAppStateSchema = createSimpleSchema<ISharedAppState>({
   dashboards: object(DashboardsStateSchema),
   sessions: object(SessionsStateSchema),
   overlays: object(OverlaysStateSchema),
-  actions: object(ActionsStateSchema)
+  actions: object(ActionsStateSchema),
+  desktopWindows: object(DesktopWindowsStateSchema)
 })
 
 export interface IValueSchema {
@@ -101,6 +99,7 @@ export const SharedAppStateLeafSchemas: Record<ISharedAppStateLeaf, ModelSchema<
     v => AppSettings.toJson(v),
     v => AppSettings.fromJson(v)
   ),
+  desktopWindows: DesktopWindowsStateSchema,
   devSettings: createValueSchema(toJS, v => v),
   plugins: PluginsStateSchema,
   dashboards: DashboardsStateSchema,

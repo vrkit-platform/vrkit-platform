@@ -1,4 +1,4 @@
-import type { WindowConfig } from "../services/window-manager"
+import type { WindowConfig } from "../models/desktop-windows"
 
 declare global {
   let isDev: boolean

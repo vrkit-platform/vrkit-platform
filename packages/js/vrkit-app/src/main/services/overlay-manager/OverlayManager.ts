@@ -423,10 +423,10 @@ export class OverlayManager {
   /**
    * Set editor enabled
    *
-   * @param event
+   * @param _event
    * @param editorEnabled
    */
-  async setEditorEnabledHandler(event: IpcMainInvokeEvent, editorEnabled: boolean): Promise<boolean> {
+  async setEditorEnabledHandler(_event: IpcMainInvokeEvent, editorEnabled: boolean): Promise<boolean> {
     return this.setEditorEnabled(editorEnabled)
   }
 

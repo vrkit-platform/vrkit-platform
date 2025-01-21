@@ -24,7 +24,7 @@
     "@3fv/deferred": "^1.2.12",
     "@3fv/guard": "^1.4.37",
     "@3fv/logger-proxy": "^1.0.71",
-    "@3fv/prelude-ts": "^0.8.34",
+    "@3fv/prelude-ts": "^0.8.37",
     "bindings": "^1.5.0",
     "eventemitter3": "^5.0.1",
     "@protobuf-ts/runtime": "^2.9.4",

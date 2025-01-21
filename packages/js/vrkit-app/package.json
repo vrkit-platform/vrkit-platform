@@ -25,7 +25,7 @@
     "@3fv/electron-utility-process-manager": "^1.0.1",
     "@3fv/guard": "^1.4.35",
     "@3fv/logger-proxy": "^1.0.71",
-    "@3fv/prelude-ts": "^0.8.34",
+    "@3fv/prelude-ts": "^0.8.37",
     "@awesome.me/kit-79150a3eed": "latest",
     "@electron/remote": "^2.1.2",
     "@emotion/cache": "^11.13.1",

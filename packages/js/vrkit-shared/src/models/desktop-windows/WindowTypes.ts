@@ -94,3 +94,6 @@ export interface WindowInstance<Instance = unknown> {
 
 export type WindowConfigRole<Config> = Config extends WindowConfig<infer Role> ? Role : never
 export type WindowCreateOptionsRole<Options> = Options extends WindowCreateOptions<infer Role> ? Role : never
+
+export type WindowMetadata = Omit<WindowConfig, "onBrowserWindowEvent">
+

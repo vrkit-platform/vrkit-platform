@@ -4,7 +4,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import {
   assign,
   Bind,
-  DashboardsState,
+  DashboardsState, DesktopWindowsState,
   DevSettings,
   Disposables,
   ElectronIPCChannel,
@@ -14,6 +14,7 @@ import {
   isValueSchema,
   newActionsState,
   newDashboardsState,
+  newDesktopWindowsState,
   newOverlaysState,
   newPluginsState,
   newSessionsState,
@@ -64,6 +65,8 @@ export class MainSharedAppState implements ISharedAppState {
   @observable actions = newActionsState()
 
   @observable sessions = newSessionsState()
+  
+  @observable desktopWindows = newDesktopWindowsState()
 
   @observable overlays: OverlaysState = newOverlaysState()
 
@@ -195,7 +198,24 @@ export class MainSharedAppState implements ISharedAppState {
       return this.sessions
     })
   }
-
+  
+  @Bind
+  setDesktopWindows(newDesktopWindows: DesktopWindowsState) {
+    return runInAction(() => {
+      set(this.desktopWindows, newDesktopWindows)
+      return this.desktopWindows
+    })
+  }
+  
+  @Bind
+  updateDesktopWindows(patch: Partial<DesktopWindowsState>) {
+    return runInAction(() => {
+      set(this.desktopWindows, patch)
+      return this.desktopWindows
+    })
+  }
+  
+  
   @Bind
   setDashboards(state: DashboardsState) {
     return runInAction(() => {

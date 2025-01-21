@@ -5,13 +5,14 @@ import { newDashboardsState } from "../dashboards"
 import { newSessionsState } from "../sessions"
 import { newOverlaysState } from "../overlays"
 import { newPluginsState } from "../plugins"
-import { ISharedAppState } from "./SharedAppState"
+import type { ISharedAppState } from "./SharedAppState"
+import { newDesktopWindowsState } from "../desktop-windows"
 
 export function newSharedAppState():ISharedAppState {
   return {
     devSettings: newDevSettings(),
     appSettings: AppSettings.create(),
-    
+    desktopWindows: newDesktopWindowsState(),
     actions: newActionsState(),
     dashboards: newDashboardsState(),
     sessions: newSessionsState(),

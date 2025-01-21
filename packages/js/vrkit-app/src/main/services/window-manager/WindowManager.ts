@@ -48,7 +48,7 @@ import { WindowSizeDefault } from "./WindowConstants"
 import { Deferred } from "@3fv/deferred"
 import { get } from "lodash/fp"
 import { isMac } from "../../constants"
-import { omit } from "lodash"
+import { omit, pick } from "lodash"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -341,13 +341,17 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       // WINDOW STATE MANAGER (WSM)
       const wsm = config.manageState ? new WindowStateManager(winId, config) : null,
         wsmWinOpts = wsm ? defaults(await wsm.whenReady().then(get("createWindowOptions")), WindowSizeDefault) : {},
-
+        parentSize = parentWinInstance?.browserWindow?.getSize?.() ?? [],
+        parentPos = parentWinInstance?.browserWindow?.getPosition?.() ?? [],
+        size = pick(config.browserWindowOptions, ["width", "height"]),
         bwOpts: Electron.BrowserWindowConstructorOptions = {
             ...config.browserWindowOptions,
             ...wsmWinOpts,
             ...(modal && {
               modal,
-              parent: parentWinInstance?.browserWindow
+              parent: parentWinInstance.browserWindow,
+              x: (parentPos[0] + (parentSize[0] / 2) - (size.width / 2)),
+              y: (parentPos[1] + (parentSize[1] / 2) - (size.height / 2))
             })
           },
           bw = assign(winInstance, {

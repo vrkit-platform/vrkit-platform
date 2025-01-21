@@ -41,7 +41,7 @@ const SettingsPageRoot = styled("div", {
 interface SettingsPageTabPanelProps extends Omit<BoxProps, "children"> {
   id: string
   visible: boolean
-  contentFn: () => React.ReactElement
+  contentFn: () => React.ReactNode
 }
 
 const SettingsPageTabPanelRoot = styled(Box, {

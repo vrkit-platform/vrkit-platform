@@ -94,9 +94,8 @@ export const BaseWindowConfigs: { [Role in WindowRole]: WindowCreateOptions<Wind
       devToolMode: "undocked",
       browserWindowOptions: {
         modal: true,
-        center: true,
-        width: 900,
-        minWidth: 900,
+        width: 1024,
+        minWidth: 1024,
         height: 600
       }
     }),

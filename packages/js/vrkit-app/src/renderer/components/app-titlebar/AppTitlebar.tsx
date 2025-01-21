@@ -8,7 +8,8 @@ import {
   Ellipsis,
   Fill,
   FillHeight,
-  FillWidth, flex,
+  FillWidth,
+  flex,
   flexAlign,
   FlexAuto,
   FlexColumn,
@@ -111,7 +112,7 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         height: "auto",
         [child(appTitlebarClasses.title)]: {
           ...OverflowHidden,
-          ...flex(0,1,"auto"),
+          ...flex(0, 1, "auto"),
           ...Ellipsis,
           ...padding(0, theme.spacing(1)),
           ...theme.typography.titleBar,
@@ -151,22 +152,24 @@ export function AppTitlebar({ className, ...other }: AppTitlebarProps) {
           <Box className={clsx(appTitlebarClasses.left, GlobalCSSClassNames.electronWindowDraggable)}>
             <Logo />
           </Box>
-          <Box
-            className={clsx(appTitlebarClasses.center)}
-          >
-            <Box className={appTitlebarClasses.title}>{defaultTitle}</Box>
-            <Box className={GlobalCSSClassNames.electronWindowDraggable}
+          <Box className={clsx(appTitlebarClasses.center)}>
+            <Box className={clsx(appTitlebarClasses.title, GlobalCSSClassNames.electronWindowDraggable)}>
+              {defaultTitle}
+            </Box>
+            <Box
+              className={GlobalCSSClassNames.electronWindowDraggable}
               sx={{
-                ...flex(1,5,0)
+                ...flex(1, 5, 0)
               }}
             />
             <If condition={!!appTitlebar?.center}>{appTitlebar?.center}</If>
             <If condition={!!title}>{title}</If>
-            
-            <Box className={GlobalCSSClassNames.electronWindowDraggable}
-                 sx={{
-                   ...flex(1,5,0)
-                 }}
+
+            <Box
+              className={GlobalCSSClassNames.electronWindowDraggable}
+              sx={{
+                ...flex(1, 5, 0)
+              }}
             />
           </Box>
           <Box className={clsx(appTitlebarClasses.right)}>

@@ -41,6 +41,8 @@ export interface WindowCreateOptions<Instance = unknown> {
 
   renderMode?: WindowRenderMode
   
+  devToolMode?: Electron.OpenDevToolsOptions["mode"]
+  
   modal?: boolean
   
   multiple: boolean

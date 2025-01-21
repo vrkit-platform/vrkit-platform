@@ -4,7 +4,6 @@ import {
   setServiceContainer, shutdownServiceContainer
 } from "../../ServiceContainer"
 import { NativeThemeManager } from "../../services/native-theme"
-
 import { ActionRegistry, once } from "@vrkit-platform/shared"
 import { AppSettingsService } from "../../services/app-settings"
 import ElectronMainActionManager from "../../services/electron-actions"
@@ -13,12 +12,11 @@ import SessionManager from "../../services/session-manager"
 import { OverlayManager } from "../../services/overlay-manager"
 import SharedAppState, { createSharedAppStateStore } from "../../services/store"
 import { DashboardManager } from "../../services/dashboard-manager"
-import { isDefined, isFunction, isPromise, isString } from "@3fv/guard"
-import { Option } from "@3fv/prelude-ts"
 import { PluginManager } from "../../services/plugin-manager"
 import OpenXRConfigurator from "../../services/openxr-configurator"
 import { FileSystemManager } from "@vrkit-platform/shared/services/node"
 import { ElectronMainMenuManager } from "../../services/electron-menu"
+import { SystemIntegrationManager } from "../../services/system-integration"
 
 const log = getLogger(__filename)
 
@@ -30,6 +28,7 @@ const createServiceContainer = once(async function createServiceContainer() {
     .bindClass(ElectronMainActionManager)
     .bindClass(NativeThemeManager)
     .bindClass(AppSettingsService)
+    .bindClass(SystemIntegrationManager)
     .bindClass(ElectronMainMenuManager)
     .bindClass(WindowManager)
     .bindClass(SessionManager)

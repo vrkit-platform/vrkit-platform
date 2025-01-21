@@ -108,8 +108,6 @@ export class AppSettingsService {
   protected async init() {
     this.sharedAppState.setAppSettings(await this.loadAppSettings())
 
-    this.sharedAppState.setAppSettings(this.sharedAppState.appSettings)
-
     ipcMain.handle(ElectronIPCChannel.getAppSettings, this.onGetAppSettings)
     ipcMain.handle(ElectronIPCChannel.saveAppSettings, this.onSaveAppSettings)
     ipcMain.on(ElectronIPCChannel.getAppSettingsSync, this.onGetAppSettingsSync)

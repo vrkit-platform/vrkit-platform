@@ -472,9 +472,10 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       .on("show", () => {
         win.webContents.setWindowOpenHandler(windowOpenHandler)
         if (this.sharedAppState.devSettings.alwaysOpenDevTools) {
-          if (isFloatingWindow(wi)) {
+          if (isFloatingWindow(wi) || wi.config.devToolMode) {
             win.webContents.openDevTools({
-              mode: "detach"
+              mode: wi.config.devToolMode ?? "detach",
+              activate: false
             })
           } else {
             win.webContents.openDevTools()

@@ -397,6 +397,29 @@ export class OverlayManager {
     return enabled
   }
 
+  async [Symbol.asyncDispose]() {
+    debug(`Unloading OverlayManager`)
+    
+    this.disposers_.dispose()
+    
+    const overlays = this.allOverlays ?? []
+    
+    await Promise.all(
+        overlays.map(o => {
+          guard(() => o.browserWindow?.webContents?.endFrameSubscription())
+          return o.close()
+        })
+      )
+      .then(() => {
+        info(`All overlay windows closed`)
+      })
+      .catch(err => {
+        warn(`error closing overlays`, err)
+      })
+    
+    this.overlayWindows_ = []
+  }
+  
   /**
    * Set editor enabled
    *
@@ -414,27 +437,8 @@ export class OverlayManager {
    * @private
    */
   @Bind
-  private async unload(event: Electron.Event = null) {
-    debug(`Unloading OverlayManager`, event)
-
-    this.disposers_.dispose()
-
-    const overlays = this.allOverlays ?? []
-
-    await Promise.all(
-      overlays.map(o => {
-        guard(() => o.browserWindow?.webContents?.endFrameSubscription())
-        return o.close()
-      })
-    )
-      .then(() => {
-        info(`All overlay windows closed`)
-      })
-      .catch(err => {
-        warn(`error closing overlays`, err)
-      })
-
-    this.overlayWindows_ = []
+  private unload(event: Electron.Event = null) {
+    return this[Symbol.asyncDispose]()
   }
 
   @Bind

@@ -66,7 +66,9 @@ export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
           {children}
         </Box>
       </Box>
-      <AppSessionPlayerControlPanel />
+      <If condition={isMain}>
+        <AppSessionPlayerControlPanel />
+      </If>
     </>
   )
 }

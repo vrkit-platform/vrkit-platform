@@ -49,8 +49,8 @@ function newBaseWindowCreateOptions(
   )
 }
 
-function newNormalWindowCreateOptions() {
-  return {
+function newNormalWindowCreateOptions(optConfig: Partial<WindowConfig> = {}) {
+  const baseConfig:Partial<WindowConfig> = {
     type: "Normal",
     manageState: true,
     browserWindowOptions: {
@@ -60,7 +60,9 @@ function newNormalWindowCreateOptions() {
       ...windowOptionDefaults()
     },
     url: resolveHtmlPath("index.html")
-  } satisfies Partial<WindowConfig>
+  }
+  
+  return assign(baseConfig, optConfig)
 }
 
 function newFloatingWindowCreateOptions(optConfig: Partial<WindowConfig> = {}) {
@@ -86,8 +88,18 @@ export const BaseWindowConfigs: { [Role in WindowRole]: WindowCreateOptions<Wind
     initialRoute: "/main"
   }),
   Settings: newBaseWindowCreateOptions(WindowRole.Settings, {
-    ...newNormalWindowCreateOptions(),
-    modal: true,
+    ...newNormalWindowCreateOptions({
+      manageState: false,
+      modal: true,
+      devToolMode: "undocked",
+      browserWindowOptions: {
+        modal: true,
+        center: true,
+        width: 900,
+        minWidth: 900,
+        height: 600
+      }
+    }),
     initialRoute: "/settings"
   }),
   DashboardVRLayout: newBaseWindowCreateOptions(WindowRole.DashboardVRLayout, {

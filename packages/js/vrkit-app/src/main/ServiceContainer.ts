@@ -50,7 +50,6 @@ export async function shutdownServiceContainer(container: Container = serviceCon
       return
     }
     deferred = serviceContainerShutdown = new Deferred()
-    setServiceContainer(null)
   }
   
   try {
@@ -67,7 +66,7 @@ export async function shutdownServiceContainer(container: Container = serviceCon
     
     await Promise.all(services.map(async ([key, service, keyName]) => {
       try {
-        const disposeFn:Function = service[Symbol.dispose] ?? service["unload"]
+        const disposeFn:Function = service[Symbol.asyncDispose] ?? service[Symbol.dispose] ?? service["unload"]
         if (disposeFn) {
           console.info(`Invoking dispose (key=${keyName})`)
           const res = disposeFn.call(service)
@@ -91,6 +90,7 @@ export async function shutdownServiceContainer(container: Container = serviceCon
   } finally {
     if (Object.is(deferred, serviceContainerShutdown)) {
       serviceContainerShutdown = null
+      setServiceContainer(null)
     }
   }
   

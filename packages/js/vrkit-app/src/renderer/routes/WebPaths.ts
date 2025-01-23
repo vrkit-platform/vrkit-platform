@@ -4,7 +4,8 @@ import { isNotEmptyString } from "@vrkit-platform/shared"
 export enum WebRootPath {
   main = 'main',
   settings = 'settings',
-  unknown = 'unknown'
+  unknown = 'unknown',
+  dashboardVRLayout = 'dashboardVRLayout'
 }
 
 export type WebRootPathKey = keyof typeof WebRootPath
@@ -23,6 +24,8 @@ export const WebPaths = {
     dashboards: leaf(WebRootPath.main,"dashboards"),
     plugins: leaf(WebRootPath.main,"plugins"),
   },
+  
+  dashboardVRLayout: leaf(WebRootPath.dashboardVRLayout),
   
   // SETTINGS
   settings: {

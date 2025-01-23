@@ -323,7 +323,7 @@ export function DashboardsListView(props: DashboardsListViewProps) {
               <CloseIcon />
               <EllipsisBox sx={{...FlexScaleZero}}>Close Dash {asOption(activeDashboardConfig?.name).filter(isNotEmptyString).map(it => `(${it})`).getOrElse("")}</EllipsisBox>
             </Button>
-            <DashboardsListItemCreate onClick={createDash} />
+            <DashboardsListItemCreate onClick={createDash.execute} />
           </FlexRowCenterBox>
         )
       }

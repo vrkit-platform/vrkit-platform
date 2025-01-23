@@ -1,23 +1,17 @@
-import { Box, Button, Divider, FormControl, Radio, RadioGroup, styled, Typography } from "@mui/material"
+import { Box, FormControl, styled } from "@mui/material"
 import * as React from "react"
 import { FormContainer, FormContent, formContentClasses } from "../../../components/form"
-import ThemeAutoIcon from "assets/images/settings/theme-auto-icon.png"
-import ThemeLightIcon from "assets/images/settings/theme-light-icon.png"
-import ThemeDarkIcon from "assets/images/settings/theme-dark-icon.png"
-import { Fill, FlexColumnCenter, FlexDefaults, FlexRowCenter, FlexScaleZero, hasCls } from "@vrkit-platform/shared-ui"
+import { Fill, FlexColumnCenter, FlexDefaults, FlexScaleZero, hasCls } from "@vrkit-platform/shared-ui"
 import { lighten } from "@mui/material/styles"
-import Switch, { SwitchProps } from "@mui/material/Switch"
+import Switch from "@mui/material/Switch"
 import { SettingsDivider } from "../components/SettingsDivider"
 import { SettingsLabel } from "../components/SettingsLabel"
 import { useService } from "../../../components/service-container"
-import { useAppDispatch, useAppSelector } from "../../../services/store"
-import { ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin } from "../../../../common/common-constants"
+import { useAppSelector } from "../../../services/store"
 import { sharedAppSelectors } from "../../../services/store/slices/shared-app"
 
-import { ActionRegistry, stopEvent } from "@vrkit-platform/shared"
+import { AppSettingBoolKey, AppSettingsKey, stopEvent } from "@vrkit-platform/shared"
 import { AppSettingsClient } from "../../../services/app-settings-client"
-import { AppSettings, ThemeType } from "@vrkit-platform/models"
-import { isElectron } from "../../../renderer-constants"
 import { getLogger } from "@3fv/logger-proxy"
 
 const log = getLogger(__filename)
@@ -59,26 +53,18 @@ const GeneralFormContent = styled(FormContent, {
         }
       }
     }
- }
+  }
 }))
-
-type AppSettingsKey = keyof AppSettings
-
-// type AppSettingsOfType<T> = AppSettings[AppSettingsKey] extends T ?
-
-type AppSettingKeyType<K extends AppSettingsKey, T> = AppSettings[K] extends T ? K : never
-
-type AppSettingBoolKey<K extends AppSettingsKey> = AppSettingKeyType<K,boolean>
 
 export function GeneralSettingsPanel(_props: GeneralSettingsPanelProps) {
   const appSettings = useAppSelector(sharedAppSelectors.selectAppSettings),
     appSettingsClient = useService(AppSettingsClient),
-    newHandleSwitch = <K extends AppSettingsKey>(settingKey:AppSettingBoolKey<K>) =>
+    newHandleSwitch =
+      <K extends AppSettingsKey>(settingKey: AppSettingBoolKey<K>) =>
       (e: React.ChangeEvent) => {
-      stopEvent(e)
-      appSettingsClient.changeSettings({ [settingKey]: !appSettings[settingKey] })
-    }
-    
+        stopEvent(e)
+        appSettingsClient.changeSettings({ [settingKey]: !appSettings[settingKey] })
+      }
 
   return (
     <GeneralFormContainer>
@@ -99,9 +85,10 @@ export function GeneralSettingsPanel(_props: GeneralSettingsPanelProps) {
           }}
         >
           {/* THEME */}
-          <SettingsLabel >Start with PC</SettingsLabel>
+          <SettingsLabel>Start with PC</SettingsLabel>
           <FormControl>
-            <Switch checked={appSettings.openAppOnBoot}
+            <Switch
+              checked={appSettings.openAppOnBoot}
               aria-labelledby="general-open-app-on-boot"
               onChange={newHandleSwitch("openAppOnBoot")}
               name="general-open-app-on-boot"
@@ -110,17 +97,17 @@ export function GeneralSettingsPanel(_props: GeneralSettingsPanelProps) {
           </FormControl>
 
           {/* TEXT SIZE (Electron ONLY) */}
-              <SettingsDivider />
-          <SettingsLabel >Auto Open Dash</SettingsLabel>
+          <SettingsDivider />
+          <SettingsLabel>Auto Open Dash</SettingsLabel>
           <FormControl>
-            <Switch checked={appSettings.openDashboardOnLaunch}
-                    aria-labelledby="general-open-dash-on-launch"
-                    onChange={newHandleSwitch("openDashboardOnLaunch")}
-                    name="general-open-dash-on-launch"
-                    sx={{ gap: 8 }}
+            <Switch
+              checked={appSettings.openDashboardOnLaunch}
+              aria-labelledby="general-open-dash-on-launch"
+              onChange={newHandleSwitch("openDashboardOnLaunch")}
+              name="general-open-dash-on-launch"
+              sx={{ gap: 8 }}
             />
           </FormControl>
-          
         </Box>
       </GeneralFormContent>
     </GeneralFormContainer>

@@ -18,6 +18,7 @@ const DashboardsPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboa
 const DashboardEditPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboards/DashboardEditPage"))
 
 const SettingsPage = React.lazy(() => import("vrkit-app-renderer/pages/settings/SettingsPage"))
+const DashboardVRLayoutPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboard-vr-layout/DashboardVRLayoutPage"))
 
 function makeDefaultRouteConfigs(...routePaths: string[]): (IndexRouteObject | NonIndexRouteObject)[] {
   const
@@ -90,6 +91,16 @@ export const settingsRoutes: RouteObject[] = [
   }
 ]
 
+export const dashboardVRLayoutRoutes: RouteObject[] = [
+  {
+    path: getWebPathPart(WebPaths.dashboardVRLayout),
+    element: (
+        <DashboardVRLayoutPage />
+    ),
+    index: true
+  }
+]
+
 
 /**
  * Error routes
@@ -143,6 +154,17 @@ export function AppRouter() {
         </PageLayout>
       ),
       children: [...settingsRoutes]
+    },
+    {
+      path: WebRootPath.dashboardVRLayout,
+      element: (
+          <PageLayout>
+            <Suspense fallback={<LoadingScreen />}>
+              <Outlet />
+            </Suspense>
+          </PageLayout>
+      ),
+      children: [...dashboardVRLayoutRoutes]
     },
     
     ...errorRoutes

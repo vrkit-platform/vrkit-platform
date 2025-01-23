@@ -1,5 +1,6 @@
 syntax = "proto3";
 import "OverlayTypes.proto";
+import "Actions.proto";
 
 package IRacingTools.Models;
 
@@ -8,6 +9,7 @@ enum ThemeType {
   LIGHT = 1;
   DARK = 2;
 }
+
 
 message AppSettings {
 
@@ -23,7 +25,7 @@ message AppSettings {
 
   bool open_dashboard_on_launch = 11;
 
-  map<string, string> custom_accelerators = 20;
+  map<string, ActionCustomization> action_customizations = 20;
 
   map<string, OverlayAnchor> overlay_anchors = 30;
 }

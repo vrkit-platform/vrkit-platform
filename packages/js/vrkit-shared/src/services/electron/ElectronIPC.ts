@@ -1,6 +1,8 @@
 
 
 export enum ElectronIPCChannel {
+  setCaptureKeyboardEnabled = "setCaptureKeyboardEnabled",
+  updateActionCustomization = "updateActionCustomization",
   trafficLightTrigger = "trafficLightTrigger",
   openExternal = "openExternal",
   getNativeThemeSync = "getNativeThemeSync",

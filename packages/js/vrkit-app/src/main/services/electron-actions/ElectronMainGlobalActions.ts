@@ -8,6 +8,7 @@ export const ElectronMainGlobalActions = Object.fromEntries(Array<ActionDef>({
   id: GlobalActionId.toggleOverlayEditor,
   type: ActionType.Global,
   runtime: "main",
+  alwaysEnabled: true,
   name: "Toggle Overlay Edit Mode",
   defaultAccelerators: ["Control+Alt+F9"]
 }, {

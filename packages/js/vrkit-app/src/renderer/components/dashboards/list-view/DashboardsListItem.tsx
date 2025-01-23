@@ -245,7 +245,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
             <AppIconButton
                 tooltip={"Launch dashboard layout editor"}
                 className={clsx(classNames.itemAction)}
-                onClick={editLayout}
+                onClick={editLayout.execute}
             >
               <OpenLayoutEditorIcon />
             </AppIconButton>

@@ -16,23 +16,25 @@ import {
   greaterThan,
   invoke,
   invokeProp,
-  isNotEmptyString, isWindowRole,
+  isNotEmptyString,
+  isWindowRole,
   lessThan,
   pairOf,
   propEqualTo,
   removeIfMutation,
   signalFlag,
-  WindowConfig,
-  WindowCreateOptions,
-  WindowCreateOptionsRole,
-  WindowInstance,
+  type WindowConfig,
+  type WindowCreateOptions,
+  type WindowCreateOptionsRole,
+  type WindowInstance,
+  type WindowMetadata,
   WindowRole
 } from "@vrkit-platform/shared"
 import { match } from "ts-pattern"
 import { getLogger } from "@3fv/logger-proxy"
 import SharedAppState from "../store"
 import { AppSettingsService } from "../app-settings"
-import { IValueDidChange, observe, runInAction } from "mobx"
+import { IValueDidChange, observe, runInAction, set } from "mobx"
 import { guard, isDefined, isNumber, isPromise, isString } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
 import {
@@ -64,6 +66,13 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
 
   readonly #disposers = new Disposables()
 
+  #updateDesktopWindowsState() {
+    runInAction(() => {
+      const windowsMetadata = this.#windows.map(get("config")).map(it => omit(it, ["onBrowserWindowEvent", "browserWindowOptions"]) as WindowMetadata)
+      set(this.sharedAppState.desktopWindows, "windows", windowsMetadata)
+    })
+  }
+  
   has(id: string) {
     return !!this.get(id)
   }
@@ -104,7 +113,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
   get settings() {
     return this.sharedAppState.appSettings
   }
-
+  
   constructor(
     readonly sharedAppState: SharedAppState,
     readonly appSettingsManager: AppSettingsService
@@ -144,12 +153,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       })
     }
     
-    
     // PREPARE ALTERNATIVE
-    // app.on("browser-window-created", (_, newWin) => {
-    //   prepareWindow(getSharedAppStateStore(), newWin)
-    // })
-
     ipcMain.on(ElectronIPCChannel.trafficLightTrigger, this.handleTrafficLightTrigger)
     ipcMain.on(ElectronIPCChannel.getWindowConfig, this.handleGetWindowConfig)
     this.#disposers.push(() => {
@@ -301,6 +305,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     }
 
     removeIfMutation(this.#windows, ({ id }) => winIds.includes(id))
+    this.#updateDesktopWindowsState()
   }
 
   async create<Options extends WindowCreateOptions>(options: Options): Promise<WindowMainInstance>
@@ -430,6 +435,8 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       this.close(winInstance as WindowMainInstance)
       
       throw err
+    } finally {
+      this.#updateDesktopWindowsState()
     }
   }
 
@@ -441,8 +448,6 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
   @Bind
   private prepareBrowserWindow(win: BrowserWindow) {
     const wi = this.getByBrowserWindow(win)
-
-    //const { id } = win
 
     win.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
       callback({ requestHeaders: { Origin: "*", ...details.requestHeaders } })
@@ -492,10 +497,6 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       .on("render-process-gone", (event, details) => {
         error(`Renderer process crashed`, details, event)
       })
-      // .on("did-create-window", (newWin, details) => {
-      //   info(`Preparing new webContents window`)
-      //   this.prepareWindow(newWin)
-      // })
       .on("devtools-opened", () => {
         asOption(AppBuildPaths.root)
           .filter(Fsx.existsSync)

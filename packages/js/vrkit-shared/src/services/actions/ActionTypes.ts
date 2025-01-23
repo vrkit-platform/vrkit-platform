@@ -309,7 +309,12 @@ export interface ActionOptions {
    * Global, App or Regular command
    */
   type?: ActionTypeKind
-
+  
+  /**
+   * If the global shortcut should be enabled at all times
+   */
+  alwaysEnabled?: boolean
+  
   /**
    * Electron/OS level menu item role
    */

@@ -48,7 +48,7 @@ const MuiDialogActions: Components<Theme>['MuiDialogActions'] = {
    *************************************** */
   styleOverrides: {
     root: ({ theme }) => ({
-      padding: theme.spacing(3),
+      padding: theme.spacing(1.5),
       '& > :not(:first-of-type)': { marginLeft: theme.spacing(1.5) },
     }),
   },

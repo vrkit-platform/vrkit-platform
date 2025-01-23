@@ -1,5 +1,12 @@
-import { EnvironmentKind } from "./Environment"
-import { AppSettings, ThemeType } from "@vrkit-platform/models"
+import type { EnvironmentKind } from "./Environment"
+import { type AppSettings, ThemeType } from "@vrkit-platform/models"
+
+export type AppSettingsKey = keyof AppSettings
+
+export type AppSettingKeyType<K extends AppSettingsKey, T> = AppSettings[K] extends T ? K : never
+
+export type AppSettingBoolKey<K extends AppSettingsKey> = AppSettingKeyType<K,boolean>
+
 
 export interface AppConfig {
   env: EnvironmentKind
@@ -11,7 +18,7 @@ export const AppSettingsDefaults: AppSettings = {
   openAppOnBoot: false,
   openDashboardOnLaunch: true,
   zoomFactor: 1.0,
-  customAccelerators: {},
+  actionCustomizations: {},
   overlayAnchors: {},
   themeType: ThemeType.DARK
 }

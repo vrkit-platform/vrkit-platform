@@ -133,6 +133,7 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
    * Add action object
    *
    * @param {Action | ActionOptions} actionArg
+   * @param skipEmit
    */
   add(actionArg: Action | ActionOptions, skipEmit?:boolean)
 
@@ -141,6 +142,7 @@ export class ActionRegistry extends EventEmitter3<ActionRegistryEvents> {
    *
    * @param {string} id
    * @param {Action | ActionOptions} actionArg
+   * @param skipEmit
    */
   add(id: string, actionArg: Action | ActionOptions, skipEmit?: boolean)
 

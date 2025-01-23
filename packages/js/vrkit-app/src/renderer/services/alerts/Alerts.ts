@@ -19,7 +19,7 @@ import { isAlertRenderable } from "./isAlertRenderable"
 import { isFunction, isString } from "@3fv/guard"
 
 import { isEmpty, omit } from "lodash"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { match } from "ts-pattern"
 import { isDev } from "../../renderer-constants"
 
@@ -219,24 +219,51 @@ namespace Alert {
         throw err
       })
   }
-
+  
+  export type AlertFunction<
+    Fn extends (...args: any[]) => Promise<any>,
+    Args extends Parameters<Fn> = Parameters<Fn>,
+    T extends Awaited<ReturnType<Fn>> = Awaited<ReturnType<Fn>>
+  > = {
+    executing: boolean
+    execute: (...args:Args) => Promise<T>
+  }
+  
   export function usePromise<
     Fn extends (...args: any[]) => Promise<any>,
     Args extends Parameters<Fn> = Parameters<Fn>,
     T extends Awaited<ReturnType<Fn>> = Awaited<ReturnType<Fn>>
-  >(fn: (...args: Args) => Promise<T>, options: AlertUsePromiseOptions<Args, T>, deps: any[] = []): Fn {
-    return useMemo(
-      () =>
-        match(isFunction(options?.canExecute) ? options.canExecute() : true)
+  >(fn: (...args: Args) => Promise<T>, options: AlertUsePromiseOptions<Args, T>, deps: any[] = []): AlertFunction<Fn, Args, T> {
+    const [alertFnState, setAlertFnState] = useState<AlertFunction<Fn, Args, T>>(null),
+    alertFn = useMemo(
+      
+      () => {
+        const alertExecute = match(isFunction(options?.canExecute) ? options.canExecute() : true)
           .with(
             true,
-            () =>
-              (...args: Args) =>
-                Alert.promise<T, Args>(fn(...args), options, args)
+            () => (...args:Args): Promise<T> => {
+              setAlertFnState(state => ({ ...state, executing: true }))
+              log.assert(!!alertFnState, `AlertFn not set in state`)
+              return Alert.promise<T, Args>(fn(...args), options, args)
+                .finally(() => {
+                  setAlertFnState(state => ({ ...state, executing: false }))
+                })
+            }
           )
-          .otherwise(() => () => Promise.resolve(null)) as Fn,
+          .otherwise(() => () => Promise.resolve(null)) as Fn
+        
+        const alertFn:AlertFunction<Fn, Args,T> = {
+          execute: alertExecute,
+          executing: false
+        }
+        
+        setAlertFnState(alertFn)
+        return alertFn
+      },
       deps
     )
+    
+    return alertFnState ?? alertFn
   }
 }
 

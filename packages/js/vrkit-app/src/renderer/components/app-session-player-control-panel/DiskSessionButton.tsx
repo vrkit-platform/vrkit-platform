@@ -54,11 +54,10 @@ export function DiskSessionButton({ sx, ...other }: DiskSessionButtonProps) {
       variant="contained"
       color={isAvailable ? "error" : "primary"}
       size="small"
-      onClick={isAvailable ? onCloseClick : onOpenClick}
+      onClick={isAvailable ? onCloseClick.execute : onOpenClick.execute}
       sx={{
         ...FlexRowCenter,
-        lineHeight: 1, // ...sx,
-        //...flexAlign("center","center"),
+        lineHeight: 1,
         gap: theme.spacing(1)
       }}
       {...other}

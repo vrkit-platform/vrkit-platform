@@ -132,7 +132,7 @@ export function DashboardEditorView(props: DashboardEditorProps) {
     >
       <DashboardEditorForm
         config={config}
-        onSubmit={onSubmit}
+        onSubmit={onSubmit.execute}
       />
     </DashboardEditorRoot>
   )

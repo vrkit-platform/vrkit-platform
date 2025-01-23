@@ -44,6 +44,7 @@ function newBaseWindowCreateOptions(
       modal: false,
       multiple: false,
       manageState: false,
+      aspectRatio: 0,
       browserWindowOptions: {}
     }
   )
@@ -102,7 +103,21 @@ export const BaseWindowConfigs: { [Role in WindowRole]: WindowCreateOptions<Wind
     initialRoute: "/settings"
   }),
   DashboardVRLayout: newBaseWindowCreateOptions(WindowRole.DashboardVRLayout, {
-    ...newFloatingWindowCreateOptions()
+    ...newNormalWindowCreateOptions({
+      manageState: false,
+      modal: true,
+      devToolMode: "undocked",
+      aspectRatio: 1,
+      browserWindowOptions: {
+        modal: true,
+        width: 1024,
+        minWidth: 1024,
+        height: 1024,
+        minHeight: 1024,
+        
+      }
+    }),
+    initialRoute: "/dashboardVRLayout"
   }),
   DashboardInfo: newBaseWindowCreateOptions(WindowRole.DashboardInfo, {
     manageState: true,

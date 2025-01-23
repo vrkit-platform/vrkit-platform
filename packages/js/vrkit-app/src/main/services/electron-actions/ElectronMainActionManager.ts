@@ -11,15 +11,18 @@ import {
   ActionsState,
   ActionType,
   AppActionId,
-  Bind,
+  assign,
+  Bind, cloneDeep,
   defaults,
   Disposables,
+  ElectronIPCChannel,
   electronRoleToId,
   isNotEmpty,
   LazyGetter,
-  removeIfMutation, WindowRole
+  removeIfMutation,
+  WindowRole
 } from "@vrkit-platform/shared"
-import { app, BrowserWindow, globalShortcut, IpcMainInvokeEvent } from "electron"
+import { app, BrowserWindow, globalShortcut, ipcMain, IpcMainInvokeEvent } from "electron"
 import { flatten, omit, partition } from "lodash"
 import { ZoomFactorIncrement, ZoomFactorMax, ZoomFactorMin } from "../../../common"
 import { assert, isDefined, isPromise, isString } from "@3fv/guard"
@@ -28,13 +31,14 @@ import { getSharedAppStateStore, MainSharedAppState } from "../store"
 import { IDisposer } from "mobx-utils"
 import { ElectronMainAppActions } from "./ElectronMainAppActions"
 import { ElectronMainGlobalActions } from "./ElectronMainGlobalActions"
-import { runInAction, set } from "mobx"
+import { reaction, runInAction, set, toJS } from "mobx"
 import { editorExecuteAction } from "../overlay-manager/OverlayEditorActionFactory"
 import { asOption } from "@3fv/prelude-ts"
 import { getService } from "../../ServiceContainer"
 import { AppSettingsService } from "../app-settings"
-import Accelerator = Electron.Accelerator
 import { WindowManager } from "../window-manager"
+import { ActionCustomization } from "@vrkit-platform/models"
+import Accelerator = Electron.Accelerator
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -150,8 +154,7 @@ export const electronAppActions: Array<ActionOptions> = [
     execute: async () => {
       debug("Showing app settings / main")
       try {
-        await getService(WindowManager)
-          .create(WindowRole.Settings)
+        await getService(WindowManager).create(WindowRole.Settings)
       } catch (err) {
         error(`Unable to open app settings`, err)
       }
@@ -215,6 +218,11 @@ function actionOptionsToActionDefs(actions: ActionOptions[]): Array<ActionDef> {
 export class ElectronMainActionManager {
   private readonly disposers_ = new Disposables()
 
+  private readonly pendingCaptureActionIds = {
+    globalIds: Array<string>(),
+    appIds: Array<string>()
+  }
+
   get actionsState(): ActionsState {
     return this.sharedAppState.actions
   }
@@ -225,6 +233,10 @@ export class ElectronMainActionManager {
 
   get enabledAppActionIds() {
     return this.actionsState.enabledAppIds
+  }
+
+  get captureKeyboardEnabled() {
+    return this.actionsState.captureKeyboardEnabled
   }
 
   /**
@@ -283,9 +295,69 @@ export class ElectronMainActionManager {
     this[Symbol.dispose]()
   }
 
+  /**
+   * Handles the request to enable or disable keyboard capture functionality.
+   *
+   * @param {Electron.IpcMainEvent} _ev - The IPC event triggering this method
+   *   call.
+   * @param {boolean} enabled - A boolean value indicating whether to enable or
+   *   disable keyboard capture.
+   * @return {Promise<boolean>} A promise that resolves to the updated state of
+   *   keyboard capture enablement.
+   */
+  @Bind
+  private async handleSetCaptureKeyboardEnabled(_ev: Electron.IpcMainEvent, enabled: boolean): Promise<boolean> {
+    if (enabled !== this.actionsState.captureKeyboardEnabled) {
+      return runInAction(() => {
+        this.actionsState.captureKeyboardEnabled = enabled
+        return enabled
+      })
+    }
+    return enabled
+  }
+
+  /**
+   * Handles the update of an action customization by modifying the application
+   * settings and updating the corresponding action customization data.
+   *
+   * @param {Electron.IpcMainEvent} _ev The IPC main event triggering the action
+   *   customization update.
+   * @param {ActionCustomization} customization The action customization object
+   *   containing updated customization details.
+   * @return {Promise<void>} A promise that resolves once the action
+   *   customization update is handled.
+   */
+  @Bind
+  private async handleUpdateActionCustomization(
+    _ev: Electron.IpcMainEvent,
+    customization: ActionCustomization
+  ): Promise<void> {
+    const { appSettings } = this.sharedAppState
+    if (log.isDebugEnabled()) {
+      log.debug(`Updating Action Customization`, customization)
+    }
+    
+    runInAction(() => {
+      this.appSettingsManager.changeSettings({
+        actionCustomizations: asOption(toJS(appSettings.actionCustomizations) ?? {})
+          .map(cloneDeep)
+          .map(customizations =>
+            Object.assign(customizations, {
+              [customization.id]: customization
+            })
+          )
+          .get()
+      })
+    })
+  }
+
   @Bind
   private updateAppActions() {
     process.nextTick(() => {
+      if (this.captureKeyboardEnabled) {
+        log.debug(`Skipping App Action enablement because we are in keyboard capture mode`)
+        return
+      }
       const wins = BrowserWindow.getAllWindows(),
         focused = wins.some(it => it.isFocused()),
         appActionIds = Object.keys(AppActionId)
@@ -309,13 +381,33 @@ export class ElectronMainActionManager {
     this.updateActionsState()
 
     actionRegistry.on("actionsChanged", this.onActionsChanged)
+    this.disposers_.push(
+      reaction(
+        () => this.actionsState.captureKeyboardEnabled,
+        enabled => {
+          const pending = this.pendingCaptureActionIds
+          if (!enabled) {
+            this.enableActions(ActionType.Global, ...pending.globalIds)
+            this.enableActions(ActionType.App, ...pending.appIds)
+            assign(pending, {
+              globalIds: [],
+              appIds: []
+            })
+          } else {
+            assign(pending, {
+              globalIds: [...this.enabledGlobalActionIds],
+              appIds: [...this.enabledAppActionIds]
+            })
+            this.disableActions(ActionType.Global, ...pending.globalIds)
+            this.disableActions(ActionType.App, ...pending.appIds)
+          }
+        }
+      )
+    )
 
     // ADD HANDLER
-    // ipcMain.handle(ElectronIPCChannel.invokeMainAction,
-    // this.onInvokeMainAction)  if (import.meta.webpackHot) {
-    // import.meta.webpackHot.addDisposeHandler(() => {
-    // actionRegistry.removeAll(...actions.map(get("id")))
-    // ipcMain.removeHandler(ElectronIPCChannel.invokeMainAction) }) }
+    ipcMain.handle(ElectronIPCChannel.setCaptureKeyboardEnabled, this.handleSetCaptureKeyboardEnabled)
+    ipcMain.handle(ElectronIPCChannel.updateActionCustomization, this.handleUpdateActionCustomization)
 
     app.on("browser-window-blur", this.updateAppActions)
     app.on("browser-window-focus", this.updateAppActions)
@@ -323,11 +415,13 @@ export class ElectronMainActionManager {
       actionRegistry.off("actionsChanged", this.onActionsChanged)
       app.on("browser-window-blur", this.updateAppActions)
       app.on("browser-window-focus", this.updateAppActions)
+      ipcMain.removeHandler(ElectronIPCChannel.setCaptureKeyboardEnabled)
     })
 
     if (import.meta.webpackHot) {
       import.meta.webpackHot.addDisposeHandler(() => {
-        this.disposers_.dispose()
+        this.unload()
+        // this.disposers_.dispose()
       })
     }
   }
@@ -336,7 +430,8 @@ export class ElectronMainActionManager {
     @InjectContainer()
     readonly container: Container,
     readonly actionRegistry: ActionRegistry,
-    readonly sharedAppState: MainSharedAppState
+    readonly sharedAppState: MainSharedAppState,
+    readonly appSettingsManager: AppSettingsService
   ) {}
 
   registerGlobalActions(...actions: Action[]) {

@@ -123,8 +123,10 @@ export function AppTitlebarTrafficLights(props:AppTitlebarTrafficLightsProps) {
     className={clsx(trafficLightsClasses.root, {}, className)}
     {...other}
   >
-    <TrafficLight variant={"minimize"} icon={faWindowMinimize}/>
-    <TrafficLight variant={"maximize"} icon={faWindowMaximize}/>
+    <If condition={!VRKitWindowConfig.modal}>
+      <TrafficLight variant={"minimize"} icon={faWindowMinimize}/>
+      <TrafficLight variant={"maximize"} icon={faWindowMaximize}/>
+    </If>
     <TrafficLight variant={"close"} icon={faWindowClose}/>
   </AppTitlebarTrafficLightsRoot>
 }

@@ -1,11 +1,10 @@
-import GlobalStyles from "@mui/material/GlobalStyles"
 import { SxProps, useTheme } from "@mui/material/styles"
 
 import React, { useState } from "react"
 
 import Box from "@mui/material/Box"
 import {
-  FillHeight,
+  alpha, FillHeight,
   FillWindow,
   flex,
   flexAlign,
@@ -20,6 +19,9 @@ import { AppContentBar } from "../app-content-bar"
 import { AppSessionPlayerControlPanel } from "../app-session-player-control-panel"
 import NavDrawer from "./NavDrawer"
 import { useWebPathRoot, WebRootPath } from "../../routes/WebPaths"
+import { useAppSelector } from "../../services/store"
+import { sharedAppSelectors } from "../../services/store/slices/shared-app"
+import Backdrop from "@mui/material/Backdrop"
 
 export type PageLayoutProps = {
   sx?: SxProps
@@ -28,7 +30,8 @@ export type PageLayoutProps = {
 
 export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
   const rootPath = useWebPathRoot(),
-    isMain = rootPath === WebRootPath.main
+    isMain = rootPath === WebRootPath.main,
+    isModalActive = useAppSelector(sharedAppSelectors.hasActiveModalDesktopWindow)
   
 
   return (
@@ -68,6 +71,15 @@ export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
       </Box>
       <If condition={isMain}>
         <AppSessionPlayerControlPanel />
+        <Backdrop
+          open={isModalActive}
+          sx={{
+            backdropFilter: `blur(6px)`,
+            WebkitBackdropFilter: `blur(6px)`,
+            backgroundColor: alpha("rgb(0,0,0)", 0.5),
+            zIndex: 5000
+          }}
+        />
       </If>
     </>
   )

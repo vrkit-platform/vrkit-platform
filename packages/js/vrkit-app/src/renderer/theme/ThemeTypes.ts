@@ -149,6 +149,7 @@ declare module "@mui/material/styles" {
   interface Theme {
     dimen:Dimensions
     
+    colorScheme: ThemeColorScheme
     colors:ThemeColors
     
     insetShadows: Theme["shadows"]

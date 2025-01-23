@@ -340,7 +340,7 @@ ${overview.changeLogContent}`
               
               <PluginManifestActionsButton
                 actions={actions}
-                onAction={handleAction}
+                onAction={handleAction.execute}
               />
 
               <EllipsisBox sx={{ ...FlexScaleZero }}>{version}</EllipsisBox>

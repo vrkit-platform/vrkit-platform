@@ -57,6 +57,7 @@ const softVariant: Record<string, ComponentsVariants<Theme>['MuiButton']> = {
     {
       props: ({ ownerState }) => ownerState.variant === 'soft',
       style: ({ theme }) => ({
+        minWidth: "auto",
         backgroundColor: appAlpha(theme.palette.grey['500'], 0.08),
         '&:hover': { backgroundColor: appAlpha(theme.palette.grey['500'], 0.24) },
         [`&.${buttonClasses.disabled}`]: {
@@ -93,6 +94,10 @@ const MuiButton: Components<Theme>['MuiButton'] = {
    * STYLE
    *************************************** */
   styleOverrides: {
+    root: {
+      minWidth: "auto",
+      height: "auto"
+    },
     /**
      * @variant contained
      */

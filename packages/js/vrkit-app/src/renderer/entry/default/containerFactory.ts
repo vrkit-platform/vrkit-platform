@@ -4,7 +4,7 @@ import { Deferred } from "@3fv/deferred"
 import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 import { ActionRegistry } from "@vrkit-platform/shared"
-import WebActionManager from "../../services/web-action-manager"
+import { WebActionManager } from "../../services/actions-web"
 import SessionManagerClient from "../../services/session-manager-client"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"

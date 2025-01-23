@@ -4,6 +4,7 @@ export * from "./RPC"
 
 export * from "./AssetTypes"
 export * from "./Session"
+export * from "./Actions"
 
 export * from "./UIResource"
 export * from "./GraphicsTypes"

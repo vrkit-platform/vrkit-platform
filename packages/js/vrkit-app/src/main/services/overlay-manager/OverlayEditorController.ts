@@ -6,7 +6,6 @@ import {
   OverlayVREditorState
 } from "@vrkit-platform/shared"
 import type OverlayManager from "./OverlayManager"
-import { BindAction } from "../../decorators"
 import { Disposables, isEmpty, isNotEmpty } from "@vrkit-platform/shared"
 import { getLogger } from "@3fv/logger-proxy"
 import { deepObserve, IDisposer } from "mobx-utils"
@@ -96,67 +95,57 @@ export class OverlayEditorController {
 
   @Bind
   setSelectedOverlayConfigId(selectedOverlayConfigId: string) {
-    runInAction(() =>{
+    runInAction(() => {
       this.state.selectedOverlayConfigId = selectedOverlayConfigId
     })
   }
-  
-  
+
   @Bind
   setSelectedOverlayConfigProp(selectedOverlayConfigProp: OverlayVREditorPropertyName) {
-    runInAction(() =>{this.state.selectedOverlayConfigProp = selectedOverlayConfigProp})
+    runInAction(() => {
+      this.state.selectedOverlayConfigProp = selectedOverlayConfigProp
+    })
   }
 
-  
   @Bind
   executeNextVROverlayEditorInfoAnchor() {
     runInAction(() => {
-      const anchors = this.manager.mainAppState.appSettings.overlayAnchors ??
-              {},
-          currentAnchor = asOption(anchors[EditorInfoVROverlayOUID] ??
-              OverlayAnchor.CENTER)
-              .map(it => isString(it) ? OverlayAnchor[it] : it)
-              .filter(isNumber)
-              .getOrThrow(`No idea what the current value type is`),
-          newIdx = asOption(AllOverlayAnchors.indexOf(currentAnchor))
-              .filter(it => it > -1)
-              .map(it => (
-                  it + 1
-              ) % AllOverlayAnchors.length)
-              .getOrElse(0)
-      
-      anchors[EditorInfoVROverlayOUID] =
-          AllOverlayAnchors[newIdx] as OverlayAnchor
-      
+      const anchors = this.manager.mainAppState.appSettings.overlayAnchors ?? {},
+        currentAnchor = asOption(anchors[EditorInfoVROverlayOUID] ?? OverlayAnchor.CENTER)
+          .map(it => (isString(it) ? OverlayAnchor[it] : it))
+          .filter(isNumber)
+          .getOrThrow(`No idea what the current value type is`),
+        newIdx = asOption(AllOverlayAnchors.indexOf(currentAnchor))
+          .filter(it => it > -1)
+          .map(it => (it + 1) % AllOverlayAnchors.length)
+          .getOrElse(0)
+
+      anchors[EditorInfoVROverlayOUID] = AllOverlayAnchors[newIdx] as OverlayAnchor
+
       set(this.manager.mainAppState.appSettings, "overlayAnchors", anchors)
-      
+
       this.manager.autoLayoutEditorInfoWindows()
     })
   }
-  
+
   @action
   @Bind
   executeNextScreenOverlayEditorInfoAnchor() {
     runInAction(() => {
-      const anchors = this.manager.mainAppState.appSettings.overlayAnchors ??
-              {},
-          currentAnchor = asOption(anchors[EditorInfoScreenOverlayOUID] ??
-              OverlayAnchor.CENTER)
-              .map(it => isString(it) ? OverlayAnchor[it] : it)
-              .filter(isNumber)
-              .getOrThrow(`No idea what the current value type is`),
-          newIdx = asOption(AllOverlayAnchors.indexOf(currentAnchor))
-              .filter(it => it > -1)
-              .map(it => (
-                  it + 1
-              ) % AllOverlayAnchors.length)
-              .getOrElse(0)
-      
-      anchors[EditorInfoScreenOverlayOUID] =
-          AllOverlayAnchors[newIdx] as OverlayAnchor
-      
+      const anchors = this.manager.mainAppState.appSettings.overlayAnchors ?? {},
+        currentAnchor = asOption(anchors[EditorInfoScreenOverlayOUID] ?? OverlayAnchor.CENTER)
+          .map(it => (isString(it) ? OverlayAnchor[it] : it))
+          .filter(isNumber)
+          .getOrThrow(`No idea what the current value type is`),
+        newIdx = asOption(AllOverlayAnchors.indexOf(currentAnchor))
+          .filter(it => it > -1)
+          .map(it => (it + 1) % AllOverlayAnchors.length)
+          .getOrElse(0)
+
+      anchors[EditorInfoScreenOverlayOUID] = AllOverlayAnchors[newIdx] as OverlayAnchor
+
       set(this.manager.mainAppState.appSettings, "overlayAnchors", anchors)
-      
+
       this.manager.autoLayoutEditorInfoWindows()
     })
   }
@@ -183,11 +172,19 @@ export class OverlayEditorController {
     this.manager.mainActionManager.disableGlobalActions(...GlobalAlwaysOnActionIds)
   }
 
+  
   destroy() {
     this[Symbol.dispose]()
   }
 
-  update() {
+  /**
+   * Updates the selected overlay configuration and its properties based on the
+   * current state. Ensures appropriate defaults are set if no valid selection
+   * exists and attaches or detaches resources based on the enablement status.
+   *
+   * @return {void} This method does not return any value.
+   */
+  update(): void {
     const { selectedOverlayConfigId, selectedOverlayConfigProp } = this,
       overlayConfigs = this.overlayConfigs
 

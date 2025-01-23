@@ -93,7 +93,7 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         ...FlexRow,
         ...OverflowHidden,
         ...PositionRelative,
-        flex: "0 0 auto", // minWidth: "15%",
+        flex: "0 0 280px", // minWidth: "15%",
         alignItems: "stretch",
 
         [hasCls(appTitlebarClasses.right)]: {
@@ -101,15 +101,8 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         },
         [hasCls(appTitlebarClasses.left)]: {
           ...flexAlign("center", "flex-start")
-        }
-      },
-      [child([appTitlebarClasses.center])]: {
-        ...FlexScaleZero, //...FlexAuto,
-        ...FlexRow,
-        ...OverflowHidden,
-        ...PositionRelative,
-        ...flexAlign("stretch", "stretch"),
-        height: "auto",
+        },
+        
         [child(appTitlebarClasses.title)]: {
           ...OverflowHidden,
           ...flex(0, 1, "auto"),
@@ -119,6 +112,14 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
           color: alpha(theme.palette.text.primary, 0.5),
           alignSelf: "center"
         }
+      },
+      [child([appTitlebarClasses.center])]: {
+        ...FlexScaleZero, //...FlexAuto,
+        ...FlexRow,
+        ...OverflowHidden,
+        ...PositionRelative,
+        ...flexAlign("stretch", "stretch"),
+        height: "auto"
       }
     },
     [child(appTitlebarClasses.bottom)]: {
@@ -151,11 +152,12 @@ export function AppTitlebar({ className, ...other }: AppTitlebarProps) {
         <AppToolbarRoot>
           <Box className={clsx(appTitlebarClasses.left, GlobalCSSClassNames.electronWindowDraggable)}>
             <Logo />
-          </Box>
-          <Box className={clsx(appTitlebarClasses.center)}>
             <Box className={clsx(appTitlebarClasses.title, GlobalCSSClassNames.electronWindowDraggable)}>
               {defaultTitle}
             </Box>
+          </Box>
+          <Box className={clsx(appTitlebarClasses.center)}>
+            
             <Box
               className={GlobalCSSClassNames.electronWindowDraggable}
               sx={{

@@ -184,7 +184,7 @@ export function PluginsTabPanel(props: PluginsTabPanelProps) {
       },
       [pluginManagerClient]
     ),
-    useInstallHandler = useCallback((id: string) => (action: PluginManifestActionKind) => handleAction(action, id), [handleAction]),
+    useInstallHandler = useCallback((id: string) => (action: PluginManifestActionKind) => handleAction.execute(action, id), [handleAction.execute]),
     [selectedId, setSelectedId] = useState<string>(""),
     itemRenderer = useCallback(
       (plugin: PluginManifest, { className, ...otherItemProps }: FilterableListItemProps) => {

@@ -1,12 +1,15 @@
 import Typography, { TypographyProps } from "@mui/material/Typography"
 
+export interface SettingsLabelProps extends TypographyProps {
+  bold?: boolean
+}
 
-export const SettingsLabel = (props: TypographyProps) => <Typography
+export const SettingsLabel = ({bold = false, ...other}: SettingsLabelProps) => <Typography
   sx={{
-    fontWeight: 700,
+    fontWeight: bold ? 700 : 400,
     textAlign: "right"
   }}
 
-  {...props}
+  {...other}
 />
 

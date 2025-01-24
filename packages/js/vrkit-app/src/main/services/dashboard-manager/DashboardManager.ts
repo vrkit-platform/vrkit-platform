@@ -8,13 +8,15 @@ import {
   DashboardManagerFnTypeToIPCName,
   DashboardsState,
   Disposables,
-  inList,
   isEmpty,
-  isNotEmpty, isNotEmptyString,
+  isEqual,
+  isNotEmpty,
+  isNotEmptyString,
   notInList,
   Pair,
   removeIfMutation,
-  SignalFlag
+  SignalFlag,
+  WindowRole
 } from "@vrkit-platform/shared"
 import { DashboardConfig } from "@vrkit-platform/models"
 import { getValue, isDefined } from "@3fv/guard"
@@ -29,9 +31,9 @@ import PQueue from "p-queue"
 import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
 import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
-import { action, runInAction, set, toJS } from "mobx"
+import { action, reaction, runInAction, set, toJS } from "mobx"
 import { IDisposer } from "mobx-utils"
-import { assign, defaultsDeep, first } from "lodash"
+import { assign, first } from "lodash"
 import { FileSystemManager } from "@vrkit-platform/shared/services/node"
 
 // noinspection TypeScriptUnresolvedVariable
@@ -44,9 +46,19 @@ const dashDir = AppPaths.dashboardsDir
 
 type DashFnPair = Pair<DashboardManagerFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>
 
+interface VRLayoutEditorDetail {
+  activeDashboardId: string
+
+  vrEnabled: boolean
+}
+
 @Singleton()
 export class DashboardManager {
   private persistQueue_ = new PQueue({
+    concurrency: 1
+  })
+
+  private vrLayoutEditorQueue_ = new PQueue({
     concurrency: 1
   })
 
@@ -102,8 +114,9 @@ export class DashboardManager {
   private validateState(state: DashboardsState = this.state): DashboardsState {
     // CREATE A DEFAULT CONFIG IF NONE EXIST
     if (isEmpty(state.configs)) {
-      const defaultConfig = DashboardConfig.create(newDashboardTrackMapMockConfig(
-          { name: this.nextDashboardConfigName() }))
+      const defaultConfig = DashboardConfig.create(
+        newDashboardTrackMapMockConfig({ name: this.nextDashboardConfigName() })
+      )
       this.saveDashboardConfigTaskFactory(defaultConfig).catch(err => {
         error("Failed to save default config", err)
       })
@@ -152,9 +165,11 @@ export class DashboardManager {
       await Promise.all(
         dashFiles.map(file =>
           Fsx.readJSON(file)
-            .then(json => assign(DashboardConfig.fromJson(json), {
-              id: Path.basename(file,FileExtensions.Dashboard)
-            }))
+            .then(json =>
+              assign(DashboardConfig.fromJson(json), {
+                id: Path.basename(file, FileExtensions.Dashboard)
+              })
+            )
             .then(config => this.fsManager.getFileInfo(file).then(fileInfo => assign(config, { fileInfo })))
             .catch(err => {
               error(`Unable to read/parse file (${file}), deleting`, err)
@@ -171,13 +186,13 @@ export class DashboardManager {
       .map(configs => configs.filter(isDefined))
       .filter(isDefined)
       .getOrThrow()
-    
+
     const configIds = new Set<string>()
-    configs.forEach(({id}) =>{
+    configs.forEach(({ id }) => {
       assert(!configIds.has(id))
       configIds.add(id)
     })
-    
+
     return runInAction(() => {
       this.mainAppState.dashboards = {
         ...this.state,
@@ -236,25 +251,24 @@ export class DashboardManager {
   ): Promise<DashboardConfig> {
     return this.updateDashboardConfig(id, patch)
   }
-  
+
   /**
    * Generate a new dashboard name
    */
   nextDashboardConfigName() {
-    const {dashboardConfigs: configs} = this,
-        nameSuffix = configs.length ? ` ${configs.length + 1}` : ""
+    const { dashboardConfigs: configs } = this,
+      nameSuffix = configs.length ? ` ${configs.length + 1}` : ""
     return `My Dashboard${nameSuffix}`
   }
-  
+
   @Bind
   async createDashboardConfig(patch: Partial<DashboardConfig> = {}): Promise<DashboardConfig> {
-    const
-        {dashboardConfigs: configs} = this,
-        nameSuffix = configs.length ? ` ${configs.length + 1}` : ""
+    const { dashboardConfigs: configs } = this,
+      nameSuffix = configs.length ? ` ${configs.length + 1}` : ""
     patch.name = asOption(patch?.name)
-          .filter(isNotEmptyString)
-          .filter(notInList(configs.map(get("name"))))
-          .getOrCall(() => `My Dashboard${nameSuffix}`)
+      .filter(isNotEmptyString)
+      .filter(notInList(configs.map(get("name"))))
+      .getOrCall(() => `My Dashboard${nameSuffix}`)
     const dashConfig = newDashboardTrackMapMockConfig(patch)
     await this.saveDashboardConfigTaskFactory(dashConfig)
     runInAction(() => {
@@ -364,7 +378,15 @@ export class DashboardManager {
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(DashboardManagerFnTypeToIPCName(type), handler))
 
     mainWindowManager.on("UI_READY", this.onUIReady)
-
+    reaction(
+      () => this.getVRLayoutEditorDetail(),
+      () => {
+        this.checkVRLayoutEditor()
+      },
+      {
+        equals: isEqual
+      }
+    )
     if (isDev) {
       Object.assign(global, {
         dashboardsManager: this
@@ -381,7 +403,7 @@ export class DashboardManager {
       app.off("quit", this.unload)
 
       Object.assign(global, {
-        overlayManager: undefined
+        dashboardsManager: undefined
       })
     })
 
@@ -445,6 +467,42 @@ export class DashboardManager {
 
   dashboardConfigById(id: string): DashboardConfig {
     return this.dashboardConfigs.find(it => it.id === id)
+  }
+
+  private getVRLayoutEditorDetail(): VRLayoutEditorDetail {
+    return {
+      activeDashboardId: this.activeDashboardId,
+      vrEnabled: this.activeDashboardConfig?.vrEnabled === true
+    }
+  }
+
+  private checkVRLayoutEditor(): void {
+    log.info(`Scheduling VR Layout Editor check`)
+    this.vrLayoutEditorQueue_
+      .add(async () => {
+        const detail: VRLayoutEditorDetail = this.getVRLayoutEditorDetail(),
+          targetVisible =
+            isNotEmptyString(detail.activeDashboardId) &&
+            detail.vrEnabled &&
+            this.mainAppState.overlays?.editor?.enabled === true
+
+        const wins = this.mainWindowManager.getByRole(WindowRole.DashboardVRLayout)
+        if (targetVisible) {
+          if (wins.length) {
+            log.info(`checkVRLayoutEditor: Already visible`)
+            return
+          }
+
+          log.info(`checkVRLayoutEditor: Creating window`)
+          await this.mainWindowManager.create(WindowRole.DashboardVRLayout)
+          log.info(`checkVRLayoutEditor: Created window`)
+        } else if (wins.length) {
+          this.mainWindowManager.close(...wins.map(get("id")))
+        }
+      })
+      .catch(err => {
+        log.error(`Unable to checkVRLayoutEditor`, err)
+      })
   }
 }
 

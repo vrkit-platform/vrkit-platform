@@ -44,6 +44,7 @@ import { NavLink } from "react-router-dom"
 import { WebPaths } from "../../../routes/WebPaths"
 import AddIcon from "@mui/icons-material/Add"
 import OpenLayoutEditorIcon from '@mui/icons-material/SpaceDashboard'
+import DashboardIcon from '@mui/icons-material/Dashboard'
 import { faEdit, faRocketLaunch } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
 import Tooltip from "@mui/material/Tooltip"
 import Button, { ButtonProps } from "@mui/material/Button"

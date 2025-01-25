@@ -32,6 +32,8 @@ import { useLocation } from "react-router-dom"
 import { asOption } from "@3fv/prelude-ts"
 import { WebRootPath } from "../../routes/WebPaths"
 import { capitalize } from "lodash"
+import { isDefined, isString } from "@3fv/guard"
+import ElectronDraggableSpacer from "./ElectronDraggableSpacer"
 
 export interface AppTitlebarOverrides {
   left?: React.ReactNode
@@ -41,7 +43,9 @@ export interface AppTitlebarOverrides {
   right?: React.ReactNode
 }
 
-export interface AppTitlebarProps extends AppBarProps {}
+export interface AppTitlebarProps extends AppBarProps {
+  transparent?: boolean
+}
 
 const AppToolbarRoot = styled(Toolbar)(({ theme }) => ({
   [`&.${toolbarClasses.root}`]: {
@@ -59,6 +63,7 @@ const appTitlebarClassPrefix = "AppTitlebar"
 const appTitlebarClasses = createClassNames(
   appTitlebarClassPrefix,
   "root",
+  "transparent",
   "top",
   "bottom",
   "left",
@@ -69,31 +74,48 @@ const appTitlebarClasses = createClassNames(
 
 const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
   [hasCls(appTitlebarClasses.root)]: {
-    backgroundColor: theme.palette.background.appBar, // boxShadow:
-    // theme.shadows[1],
     color: "inherit",
     zIndex: theme.zIndex.drawer + 1,
-    filter: `drop-shadow(0 0 0.25rem ${theme.palette.background.session})`,
     ...FlexAuto,
     ...FlexColumn,
     ...FlexDefaults.stretch,
     ...FillWidth,
     ...OverflowHidden,
     ...PositionRelative,
+    [hasCls(appTitlebarClasses.transparent)]: {
+      backgroundColor: "transparent",
+      [child(appTitlebarClasses.top)]: {
+        backgroundColor: "transparent",
+        backgroundImage: "none",
+        [child([appTitlebarClasses.left, appTitlebarClasses.right])]: {
+          flex: "1 1 auto",
+        }
+      }
+    },
+    [`&:not(.${appTitlebarClasses.transparent})`]: {
+      filter: `drop-shadow(0 0 0.25rem ${theme.palette.background.session})`,
+      backgroundColor: theme.palette.background.appBar,
+      [child(appTitlebarClasses.top)]: {
+        backgroundColor: theme.palette.background.appBar,
+        backgroundImage: theme.palette.background.appBarGradient,
+        
+        [child([appTitlebarClasses.left, appTitlebarClasses.right])]: {
+          flex: "0 0 280px",
+        }
+      }
+    },
+    
     [child(appTitlebarClasses.top)]: {
       ...heightConstraint(theme.dimen.appBarHeight),
       ...FlexRowCenter,
       ...FillWidth,
       ...OverflowHidden,
-      backgroundColor: theme.palette.background.appBar,
-      backgroundImage: theme.palette.background.appBarGradient,
       [child([appTitlebarClasses.left, appTitlebarClasses.right])]: {
         ...FillHeight,
         ...FlexAuto,
         ...FlexRow,
         ...OverflowHidden,
         ...PositionRelative,
-        flex: "0 0 280px", // minWidth: "15%",
         alignItems: "stretch",
 
         [hasCls(appTitlebarClasses.right)]: {
@@ -102,7 +124,7 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         [hasCls(appTitlebarClasses.left)]: {
           ...flexAlign("center", "flex-start")
         },
-        
+
         [child(appTitlebarClasses.title)]: {
           ...OverflowHidden,
           ...flex(0, 1, "auto"),
@@ -129,22 +151,27 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
   }
 }))
 
-export function AppTitlebar({ className, ...other }: AppTitlebarProps) {
+export function AppTitlebar({ className,transparent = false, ...other }: AppTitlebarProps) {
   const pageMetadata = usePageMetadata(),
-    { appTitlebar, title } = pageMetadata,
+    { appTitlebar } = pageMetadata,
     loc = useLocation(),
-    defaultTitle = asOption(loc.pathname.split("/").filter(x => isNotEmptyString(x)))
+    title = asOption(pageMetadata.title)
+        .filter(isDefined)
+        .orCall(() => asOption(loc.pathname.split("/").filter(x => isNotEmptyString(x)))
       .mapIf(
         parts => parts[0] === WebRootPath.main,
         (parts: string[]) => parts.slice(1)
       )
-      .map(parts => capitalize(parts[0]))
-      .getOrElse(""),
+      .map(parts => capitalize(parts[0])))
+      .getOrElse(null),
+      
     theme = useTheme()
 
   return (
     <AppTitlebarRoot
-      className={clsx(appTitlebarClasses.root, className)}
+      className={clsx(appTitlebarClasses.root, {
+        [appTitlebarClasses.transparent]: transparent
+      },className)}
       elevation={0}
       {...other}
     >
@@ -152,29 +179,21 @@ export function AppTitlebar({ className, ...other }: AppTitlebarProps) {
         <AppToolbarRoot>
           <Box className={clsx(appTitlebarClasses.left, GlobalCSSClassNames.electronWindowDraggable)}>
             <Logo />
-            <Box className={clsx(appTitlebarClasses.title, GlobalCSSClassNames.electronWindowDraggable)}>
-              {defaultTitle}
-            </Box>
+            <If condition={isDefined(title)}>
+              {!isString(title) ? title : <Box className={clsx(appTitlebarClasses.title, GlobalCSSClassNames.electronWindowDraggable)}>
+                {title}
+              </Box>}
+            </If>
+            <ElectronDraggableSpacer />
           </Box>
           <Box className={clsx(appTitlebarClasses.center)}>
-            
-            <Box
-              className={GlobalCSSClassNames.electronWindowDraggable}
-              sx={{
-                ...flex(1, 5, 0)
-              }}
-            />
+            <ElectronDraggableSpacer />
             <If condition={!!appTitlebar?.center}>{appTitlebar?.center}</If>
-            <If condition={!!title}>{title}</If>
-
-            <Box
-              className={GlobalCSSClassNames.electronWindowDraggable}
-              sx={{
-                ...flex(1, 5, 0)
-              }}
-            />
+            
+            <ElectronDraggableSpacer />
           </Box>
           <Box className={clsx(appTitlebarClasses.right)}>
+            <ElectronDraggableSpacer />
             <AppTitlebarTrafficLights />
           </Box>
         </AppToolbarRoot>

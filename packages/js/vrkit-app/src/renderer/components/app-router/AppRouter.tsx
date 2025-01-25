@@ -13,12 +13,13 @@ import Page404 from "vrkit-app-renderer/pages/error/404"
 import Page500 from "vrkit-app-renderer/pages/error/500"
 import { getWebPathPart, WebPaths, WebRootPath } from "vrkit-app-renderer/routes/WebPaths"
 import React from "react"
+import DashboardVRLayoutPage from "vrkit-app-renderer/pages/dashboard-vr-layout/DashboardVRLayoutPage"
 
 const DashboardsPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboards/DashboardsPage"))
 const DashboardEditPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboards/DashboardEditPage"))
 
 const SettingsPage = React.lazy(() => import("vrkit-app-renderer/pages/settings/SettingsPage"))
-const DashboardVRLayoutPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboard-vr-layout/DashboardVRLayoutPage"))
+// const DashboardVRLayoutPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboard-vr-layout/DashboardVRLayoutPage"))
 
 function makeDefaultRouteConfigs(...routePaths: string[]): (IndexRouteObject | NonIndexRouteObject)[] {
   const
@@ -91,15 +92,15 @@ export const settingsRoutes: RouteObject[] = [
   }
 ]
 
-export const dashboardVRLayoutRoutes: RouteObject[] = [
-  {
-    path: getWebPathPart(WebPaths.dashboardVRLayout),
-    element: (
-        <DashboardVRLayoutPage />
-    ),
-    index: true
-  }
-]
+// export const dashboardVRLayoutRoutes: RouteObject[] = [
+//   {
+//     path: getWebPathPart(WebPaths.dashboardVRLayout),
+//     element: (
+//         <DashboardVRLayoutPage />
+//     ),
+//     index: true
+//   }
+// ]
 
 
 /**
@@ -159,12 +160,12 @@ export function AppRouter() {
       path: WebRootPath.dashboardVRLayout,
       element: (
           <PageLayout>
-            <Suspense fallback={<LoadingScreen />}>
-              <Outlet />
-            </Suspense>
+            {/*<Suspense fallback={<LoadingScreen />}>*/}
+              <DashboardVRLayoutPage />
+            {/*</Suspense>*/}
           </PageLayout>
       ),
-      children: [...dashboardVRLayoutRoutes]
+      // children: [...dashboardVRLayoutRoutes]
     },
     
     ...errorRoutes

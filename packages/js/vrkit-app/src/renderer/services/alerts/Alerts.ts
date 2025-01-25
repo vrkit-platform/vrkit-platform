@@ -243,7 +243,7 @@ namespace Alert {
             true,
             () => (...args:Args): Promise<T> => {
               setAlertFnState(state => ({ ...state, executing: true }))
-              log.assert(!!alertFnState, `AlertFn not set in state`)
+              //log.assert(!!alertFnState, `AlertFn not set in state`)
               return Alert.promise<T, Args>(fn(...args), options, args)
                 .finally(() => {
                   setAlertFnState(state => ({ ...state, executing: false }))

@@ -1,25 +1,15 @@
 import { getLogger } from "@3fv/logger-proxy"
 
 import { PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind, isEqual, toSessionTimeAndDuration } from "@vrkit-platform/shared"
-
-import {
-  GetLiveVRKitSessionPlayer,
-  isLivePlayer,
-  SessionPlayer,
-  SessionPlayerEventDataDefault
-} from "vrkit-native-interop"
-import { isDefined, isFunction, isNumber, isString } from "@3fv/guard"
-import {
-  SessionData,
-  SessionDataVariableValueMap,
-  SessionEventData,
-  SessionEventType,
-  SessionTiming
-} from "@vrkit-platform/models"
 import {
   ActiveSessionType,
+  Bind,
+  CachedStateComputationEventType,
+  Disposables,
+  isEqual,
+  isNotEmpty,
   LiveSessionId,
+  propEqualTo,
   SessionDetail,
   sessionDetailDefaults,
   SessionManagerEventType,
@@ -29,20 +19,28 @@ import {
   SessionManagerStatePatchFn,
   SessionManagerStateSessionKey,
   SessionPlayerId,
-  SessionsState
+  SessionsState,
+  toSessionTimeAndDuration,
+  valuesOf
 } from "@vrkit-platform/shared"
+
+import {
+  GetLiveVRKitSessionPlayer,
+  isLivePlayer,
+  SessionPlayer,
+  SessionPlayerEventDataDefault
+} from "vrkit-native-interop"
+import { isDefined, isFunction, isString } from "@3fv/guard"
+import {
+  SessionData,
+  SessionDataVariableValueMap,
+  SessionEventData,
+  SessionEventType,
+  SessionTiming
+} from "@vrkit-platform/models"
 import { first, flatten, isEmpty, uniq } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
 import EventEmitter3 from "eventemitter3"
-import {
-  CachedStateComputation,
-  CachedStateComputationChangeEvent,
-  CachedStateComputationEventType,
-  Disposables,
-  isNotEmpty, isTrue,
-  propEqualTo,
-  valuesOf
-} from "@vrkit-platform/shared"
 import { app, dialog, ipcMain, IpcMainInvokeEvent } from "electron"
 import { get } from "lodash/fp"
 import { Deferred } from "@3fv/deferred"
@@ -51,6 +49,7 @@ import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { action, observe, remove, runInAction, set, toJS } from "mobx"
 import { SessionPlayerContainer } from "./SessionPlayerContainer"
+import { LiveAutoConnectChangeEvent, LiveAutoConnectComputation } from "./LiveAutoConnectComputation"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -59,38 +58,16 @@ const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
 export interface SessionManagerEventArgs {
-  [SessionManagerEventType.DATA_FRAME]: (sessionId: string, timing: SessionTiming, dataVarValues: SessionDataVariableValueMap) => void
+  [SessionManagerEventType.DATA_FRAME]: (
+    sessionId: string,
+    timing: SessionTiming,
+    dataVarValues: SessionDataVariableValueMap
+  ) => void
 }
 
 function getWeekendInfo(session: SessionDetail) {
   return session?.info?.weekendInfo
 }
-
-type LiveAutoConnectTypes = [
-  MainSharedAppState,
-  sourceSelectorResult: [
-    isAutoConnectEnabled: boolean,
-    liveIsAvailable: boolean,
-    activeSessionType: ActiveSessionType,
-    liveSessionId: number
-  ],
-  sessionId: number, // should connect to live
-  cachedSessionIds: Set<number> // liveSessionIds cache
-]
-
-type LiveAutoConnectChangeEvent = CachedStateComputationChangeEvent<
-  LiveAutoConnectTypes[0],
-  LiveAutoConnectTypes[1],
-  LiveAutoConnectTypes[2],
-  LiveAutoConnectTypes[3]
->
-
-type LiveAutoConnectComputation = CachedStateComputation<
-  LiveAutoConnectTypes[0],
-  LiveAutoConnectTypes[1],
-  LiveAutoConnectTypes[2],
-  LiveAutoConnectTypes[3]
->
 
 @Singleton()
 export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
@@ -108,11 +85,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
   private diskPlayerContainer_: SessionPlayerContainer = null
 
-  private get playerContainers_():SessionPlayerContainer[] {
+  private get playerContainers_(): SessionPlayerContainer[] {
     return [this.livePlayerContainer_, this.diskPlayerContainer_]
   }
 
-  private getContainerByPlayer(player: SessionPlayer):SessionPlayerContainer {
+  private getContainerByPlayer(player: SessionPlayer): SessionPlayerContainer {
     return this.playerContainers_.filter(isDefined).find(({ id }) => id === player.id)
   }
 
@@ -128,38 +105,32 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       return
     }
 
-    const data = ev.payload
-    // info(
-    //   `SESSION_EVENT(${SessionEventType[ev.type]}),SESSION(${data.sessionId}):
-    // Session availability change event`, data )
-
-    this.updateSession(player, data)
+    this.updateSession(player, ev.payload)
   }
 
-  @Bind registerComponentDataVars(componentId: string, ...dataVarNameArgs: Array<string | string[]>) {
+  @Bind
+  registerComponentDataVars(componentId: string, ...dataVarNameArgs: Array<string | string[]>) {
     runInAction(() => {
-      set(
-          this.state.componentDataVars,
-          componentId,
-          uniq(flatten(dataVarNameArgs))
-      )
+      set(this.state.componentDataVars, componentId, uniq(flatten(dataVarNameArgs)))
     })
   }
 
-  @Bind unregisterComponentDataVars(componentId: string) {
+  @Bind
+  unregisterComponentDataVars(componentId: string) {
     runInAction(() => {
-      remove(this.state.componentDataVars,componentId)
+      remove(this.state.componentDataVars, componentId)
     })
   }
 
-  @Bind onComponentDataVarsChanged() {
+  @Bind
+  onComponentDataVarsChanged() {
     this.configureDataVarNames()
   }
 
   get allComponentDataVars() {
     return uniq(flatten(valuesOf(this.state.componentDataVars)))
   }
-  
+
   /**
    * Connects to live session automatically when triggered
    *
@@ -168,8 +139,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    */
   private onLiveAutoConnectChanged(ev: LiveAutoConnectChangeEvent) {
     log.info(`LiveAutoConnectChanged, connecting to LIVE session (${ev.target})`, ev)
-    
-    log.assert(this.activeSessionType === "NONE", `activeSessionType should be NONE, when triggered, but it is ${this.activeSessionType}`)
+
+    log.assert(
+      this.activeSessionType === "NONE",
+      `activeSessionType should be NONE, when triggered, but it is ${this.activeSessionType}`
+    )
     this.setLiveSessionActive(true)
   }
 
@@ -188,8 +162,8 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     asOption(data.payload?.sessionData?.timing).ifSome(timing => {
       container.setDataFrame(timing, dataVarValues)
       const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession",
-          timeAndDuration = toSessionTimeAndDuration(timing)
-      
+        timeAndDuration = toSessionTimeAndDuration(timing)
+
       if (!isEqual(timeAndDuration, toJS(this.state[stateKey].timeAndDuration))) {
         this.patchState({
           [stateKey]: {
@@ -234,6 +208,16 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return player
   }
 
+  /**
+   * Adds a player to the SessionManager, linking it to a specified session ID.
+   * Also configures data variable names and sets up event listeners.
+   *
+   * @param sessionId - The ID of the session to which the player belongs
+   * @param player - The `SessionPlayer` instance to be added
+   *
+   * @returns The created `SessionPlayerContainer` or `null` if the session ID
+   *     is already registered
+   */
   addPlayer(sessionId: SessionPlayerId, player: SessionPlayer) {
     if (this.getPlayerContainer(sessionId)) {
       error(`${sessionId} is already registered, not adding`, player)
@@ -260,6 +244,9 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return container
   }
 
+  /**
+   * Dispose of remaining resources on garbage collection
+   */
   [Symbol.dispose]() {
     debug(`Unloading SessionManager`)
     this.liveAutoConnectComputation_[Symbol.dispose]()
@@ -275,11 +262,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   /**
    * Cleanup resources on unload
    *
-   * @param event
+   * @param _event
    * @private
    */
   @Bind
-  private unload(event: Event) {
+  private unload(_event: Event) {
     this[Symbol.dispose]()
   }
 
@@ -339,55 +326,18 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   /**
    * Service constructor
    *
-   * @param mainWindowManager
+   * @param windowManager
    * @param sharedAppState
    */
   constructor(
-    readonly mainWindowManager: WindowManager,
+    readonly windowManager: WindowManager,
     readonly sharedAppState: MainSharedAppState
   ) {
     super()
-    this.liveAutoConnectComputation_ = new CachedStateComputation<
-      LiveAutoConnectTypes[0],
-      LiveAutoConnectTypes[1],
-      LiveAutoConnectTypes[2],
-      LiveAutoConnectTypes[3]
-    >(
-      sharedAppState,
-      // SELECTOR
-      (state: MainSharedAppState, selectorState) => [
-        state.appSettings.autoconnect,
-        state.sessions.liveSession?.isAvailable ?? false,
-        state.sessions.activeSessionType,
-        state.sessions.liveSession?.info?.weekendInfo?.sessionID ?? 0
-      ],
-      // TRANSFORM
-      ([isAutoConnectEnabled, isAvailable, activeSessionType, liveSessionId], _oldValues, state) => {
-        if (log.isDebugEnabled())
-          log.debug("LiveAutoConnect transform with", {isAutoConnectEnabled, isAvailable, activeSessionType, liveSessionId})
-        if (!isAutoConnectEnabled || !isAvailable || activeSessionType !== "NONE" || !liveSessionId) {
-          return 0
-        }
-
-        const cache = state.customCache,
-          isNewSessionId = !cache.has(liveSessionId)
-
-        if (isNewSessionId) cache.add(liveSessionId)
-
-        return isNewSessionId ? liveSessionId : 0
-      },
-      {
-        startImmediate: false,
-        predicate: ({ target, source }) => asOption(target)
-            .filter(isNumber)
-            .filter(it => it > 0)
-            .match({
-              None: () => false,
-              Some: () => true
-            }) && source.slice(0,2).every(isTrue),
-        customCacheInit: () => new Set<number>()
-      }
-    ).on(CachedStateComputationEventType.CHANGED, this.onLiveAutoConnectChanged.bind(this))
+    this.liveAutoConnectComputation_ = new LiveAutoConnectComputation(sharedAppState).on(
+      CachedStateComputationEventType.CHANGED,
+      this.onLiveAutoConnectChanged.bind(this)
+    )
   }
 
   /**
@@ -398,11 +348,12 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    * @private
    */
   private toSessionDetailFromPlayer(player: SessionPlayer, evData: SessionEventData): SessionDetail {
-    if (!player)
+    if (!player) {
       return {
         id: "",
         isAvailable: false
       }
+    }
 
     return asOption(evData).match({
       Some: ({ sessionData: data }): SessionDetail => ({
@@ -441,7 +392,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   get activeSession(): SessionDetail {
     return this.getActiveSessionFromState()
   }
-  
+
   /**
    * Get current active session id
    */
@@ -454,7 +405,6 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     return type === "DISK" ? state.diskSession : type === "LIVE" ? state.liveSession : null
   }
 
-  
   @Bind
   setLiveSessionActive(active: boolean): ActiveSessionType {
     const activeSessionType: ActiveSessionType = active ? "LIVE" : "NONE"
@@ -466,13 +416,15 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     }
     return activeSessionType
   }
+
   @Bind
   async setLiveSessionActiveHandler(event: IpcMainInvokeEvent, active: boolean): Promise<ActiveSessionType> {
     log.info(`Received handler callback setActiveSessionTypeHandler`, event)
     return this.setLiveSessionActive(active)
   }
 
-  @Bind hasActiveSession() {
+  @Bind
+  hasActiveSession() {
     const { activeSession } = this
     return isString(activeSession?.id) && !isEmpty(activeSession.id)
   }
@@ -630,17 +582,14 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   @action
   @Bind
   private patchState(newStateOrFn: Partial<SessionsState> | SessionManagerStatePatchFn = {}): void {
-    
-      const currentState = this.state,
-          currentActiveSessionType = currentState.activeSessionType,
-          currentActiveSession = this.getActiveSessionFromState(currentState),
-          currentActiveSessionId = getWeekendInfo(currentActiveSession)?.sessionID
-    
+    const currentState = this.state,
+      currentActiveSessionType = currentState.activeSessionType,
+      currentActiveSession = this.getActiveSessionFromState(currentState),
+      currentActiveSessionId = getWeekendInfo(currentActiveSession)?.sessionID
+
     runInAction(() => {
-      const newStatePatch = isFunction(newStateOrFn) ?
-          newStateOrFn(currentState) :
-          newStateOrFn
-      
+      const newStatePatch = isFunction(newStateOrFn) ? newStateOrFn(currentState) : newStateOrFn
+
       this.sharedAppState.updateSessions(newStatePatch)
     })
   }
@@ -657,7 +606,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     const ipcEventName = SessionManagerEventTypeToIPCName(type)
     ;(this.emit as any)(type, ...args)
 
-    asOption(this.mainWindowManager?.mainWindow).ifSome(win => {
+    asOption(this.windowManager?.mainWindow).ifSome(win => {
       win.webContents?.send(ipcEventName, ...args)
     })
   }
@@ -685,7 +634,9 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       })
 
       log.info("Selected file to open as session", res)
-      if (res.canceled || isEmpty(res.filePaths)) throw Error("showOpenDiskPlayerDialog cancelled or no file")
+      if (res.canceled || isEmpty(res.filePaths)) {
+        throw Error("showOpenDiskPlayerDialog cancelled or no file")
+      }
 
       const filePath = first(res.filePaths)
       await this.createDiskPlayer(filePath)
@@ -710,16 +661,18 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    * @private
    */
   private configureDataVarNames(...sessionPlayers: SessionPlayer[]): void {
-    const dataVarNames = this.allComponentDataVars
+    runInAction(() => {
+      const dataVarNames = this.allComponentDataVars
 
-    asOption(sessionPlayers)
-      .filter(isNotEmpty)
-      .orCall(() => asOption(Array<SessionPlayer>(this.liveSessionPlayer, this.diskSessionPlayer)))
-      .ifSome(players => {
-        players.filter(isDefined<SessionPlayer>).forEach(player => {
-          player.resetDataVariables(...dataVarNames)
+      asOption(sessionPlayers)
+        .filter(isNotEmpty)
+        .orCall(() => asOption(Array<SessionPlayer>(this.liveSessionPlayer, this.diskSessionPlayer)))
+        .ifSome(players => {
+          players.filter(isDefined<SessionPlayer>).forEach(player => {
+            player.resetDataVariables(...dataVarNames)
+          })
         })
-      })
+    })
   }
 }
 

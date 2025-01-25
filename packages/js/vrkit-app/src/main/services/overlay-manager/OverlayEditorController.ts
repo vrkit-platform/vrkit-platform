@@ -1,18 +1,23 @@
 import {
-  Bind, EditorInfoScreenOverlayOUID,
+  Bind,
+  Disposables,
+  EditorInfoScreenOverlayOUID,
   EditorInfoVROverlayOUID,
+  GlobalActionId,
+  GlobalActionIdName,
+  isEmpty,
+  isNotEmpty,
+  OverlayEditorGlobalActionIds,
   OverlayVREditorPropertyName,
   OverlayVREditorPropertyNames,
   OverlayVREditorState
 } from "@vrkit-platform/shared"
 import type OverlayManager from "./OverlayManager"
-import { Disposables, isEmpty, isNotEmpty } from "@vrkit-platform/shared"
 import { getLogger } from "@3fv/logger-proxy"
 import { deepObserve, IDisposer } from "mobx-utils"
 import { IObserveChange } from "../../utils"
 import { asOption } from "@3fv/prelude-ts"
 import { first, uniq } from "lodash"
-import { GlobalActionId, GlobalActionIdName, OverlayEditorGlobalActionIds } from "@vrkit-platform/shared"
 import { Container } from "@3fv/ditsy"
 import { isFunction, isNumber, isString } from "@3fv/guard"
 import { get } from "lodash/fp"
@@ -172,7 +177,6 @@ export class OverlayEditorController {
     this.manager.mainActionManager.disableGlobalActions(...GlobalAlwaysOnActionIds)
   }
 
-  
   destroy() {
     this[Symbol.dispose]()
   }

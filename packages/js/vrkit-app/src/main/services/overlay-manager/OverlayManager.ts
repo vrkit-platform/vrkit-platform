@@ -426,7 +426,7 @@ export class OverlayManager {
    * @param _event
    * @param editorEnabled
    */
-  async setEditorEnabledHandler(_event: IpcMainInvokeEvent, editorEnabled: boolean): Promise<boolean> {
+  async handleSetEditorEnabled(_event: IpcMainInvokeEvent, editorEnabled: boolean): Promise<boolean> {
     return this.setEditorEnabled(editorEnabled)
   }
 
@@ -461,7 +461,7 @@ export class OverlayManager {
       ipcFnHandlers = Array<Pair<OverlayManagerClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
         [OverlayManagerClientFnType.FETCH_WINDOW_ROLE, this.fetchOverlayWindowRoleHandler.bind(this)],
         [OverlayManagerClientFnType.FETCH_CONFIG_ID, this.fetchOverlayConfigIdHandler.bind(this)],
-        [OverlayManagerClientFnType.SET_EDITOR_ENABLED, this.setEditorEnabledHandler.bind(this)],
+        [OverlayManagerClientFnType.SET_EDITOR_ENABLED, this.handleSetEditorEnabled.bind(this)],
         [OverlayManagerClientFnType.CLOSE, this.closeHandler.bind(this)]
       ),
       ipcEventHandlers = Array<Pair<SessionManagerEventType, (...args: any[]) => void>>([
@@ -920,15 +920,17 @@ export class OverlayManager {
   }
 
   private updateDataVars(ouid: string, overlayInfo: OverlayInfo): void {
-    const dataVarNames = overlayInfo.dataVarNames ?? []
-    for (const [id, install] of Object.entries(this.mainAppState.plugins.plugins)) {
-      for (const comp of install.manifest.components) {
-        if (comp.id === overlayInfo.componentId) {
-          dataVarNames.push(...(comp.overlayIracingSettings?.dataVariablesUsed ?? []))
+    runInAction(() => {
+      const dataVarNames = overlayInfo.dataVarNames ?? []
+      for (const [id, install] of Object.entries(this.mainAppState.plugins.plugins)) {
+        for (const comp of install.manifest.components) {
+          if (comp.id === overlayInfo.componentId) {
+            dataVarNames.push(...(comp.overlayIracingSettings?.dataVariablesUsed ?? []))
+          }
         }
       }
-    }
-    this.sessionManager.registerComponentDataVars(ouid, dataVarNames)
+      this.sessionManager.registerComponentDataVars(ouid, dataVarNames)
+    })
   }
 }
 

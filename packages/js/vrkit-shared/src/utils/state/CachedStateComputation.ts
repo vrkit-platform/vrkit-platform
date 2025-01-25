@@ -1,7 +1,5 @@
 import { isEqual } from "../ObjectUtil"
-//import { Disposables } from "../Disposables"
-import type { IValueDidChange, Lambda } from "mobx"
-import { observe } from "mobx"
+import type { Lambda } from "mobx"
 import { getLogger } from "@3fv/logger-proxy"
 import EventEmitter3 from "eventemitter3"
 import { Bind } from "../decorators"

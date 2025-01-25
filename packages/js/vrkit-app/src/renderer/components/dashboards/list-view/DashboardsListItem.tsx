@@ -234,7 +234,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
           </FlexColumnBox>
           <FlexRowCenterBox>
             <AppIconButton
-                tooltip="Launch dashboard"
+                tooltip="Launch Dashboard"
                 className={clsx(classNames.itemAction)}
                 onClick={toggleOpen}
             >
@@ -244,7 +244,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
               />
             </AppIconButton>
             <AppIconButton
-                tooltip={"Launch dashboard layout editor"}
+                tooltip={"Layout Editor"}
                 className={clsx(classNames.itemAction)}
                 onClick={editLayout.execute}
             >

@@ -1,7 +1,13 @@
 import { Box, FormControl, styled } from "@mui/material"
 import * as React from "react"
 import { FormContainer, FormContent, formContentClasses } from "../../../components/form"
-import { Fill, FlexColumnCenter, FlexDefaults, FlexScaleZero, hasCls } from "@vrkit-platform/shared-ui"
+import {
+  Fill, FlexColumn,
+  FlexColumnCenter,
+  FlexDefaults,
+  FlexScaleZero,
+  hasCls
+} from "@vrkit-platform/shared-ui"
 import { lighten } from "@mui/material/styles"
 import Switch from "@mui/material/Switch"
 import { SettingsDivider } from "../components/SettingsDivider"
@@ -35,20 +41,12 @@ const GeneralFormContent = styled(FormContent, {
       ...FlexDefaults.stretchSelf, // justifyContent: "center",
       [`& > .${formContentClasses.content}`]: {
         // alignItems: "center",
-        ...FlexColumnCenter,
+        ...FlexColumn,
         flex: "1 0 auto",
         "& span.MuiRadio-root.MuiRadio-colorPrimary:hover": {
           backgroundColor: "transparent",
           "& > img": {
             border: `0.3rem solid ${lighten(theme.palette.action.active, 0.25)}`
-          }
-        },
-        "& img": {
-          borderRadius: "1rem",
-          border: `0.3rem solid transparent`,
-          transition: theme.transitions.create("border"),
-          "&.checked": {
-            border: `0.3rem solid ${theme.palette.action.active}`
           }
         }
       }
@@ -71,20 +69,20 @@ export function GeneralSettingsPanel(_props: GeneralSettingsPanelProps) {
       <GeneralFormContent
         flexGrow={1}
         contentProps={{
-          alignSelf: "center"
+          alignSelf: "flex-start"
         }}
       >
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "min(20vw,150px) auto",
+            gridTemplateColumns: "40vw 40vw",
             columnGap: "3rem",
-            rowGap: "4rem",
+            rowGap: "2rem",
             justifyContent: "center",
             alignItems: "center"
           }}
         >
-          {/* THEME */}
+          {/* Start with PC */}
           <SettingsLabel>Start with PC</SettingsLabel>
           <FormControl>
             <Switch
@@ -95,8 +93,21 @@ export function GeneralSettingsPanel(_props: GeneralSettingsPanelProps) {
               sx={{ gap: 8 }}
             />
           </FormControl>
-
-          {/* TEXT SIZE (Electron ONLY) */}
+          
+          {/* Automatically connect to an available live session */}
+          <SettingsDivider />
+          <SettingsLabel>Auto-connect Live Session</SettingsLabel>
+          <FormControl>
+            <Switch
+                checked={appSettings.autoconnect}
+                aria-labelledby="general-autoconnect"
+                onChange={newHandleSwitch("autoconnect")}
+                name="general-autoconnect"
+                sx={{ gap: 8 }}
+            />
+          </FormControl>
+          
+          {/* Auto Open `default` dashboard at start */}
           <SettingsDivider />
           <SettingsLabel>Auto Open Dash</SettingsLabel>
           <FormControl>

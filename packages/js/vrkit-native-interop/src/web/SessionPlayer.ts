@@ -205,8 +205,8 @@ export class SessionPlayer extends EventEmitter3<
     
   }
   
-  private async initialize(): Promise<boolean> {
-    this.nativePlayer = await CreateNativeSessionPlayer(
+  private initialize(): boolean {
+    this.nativePlayer = CreateNativeSessionPlayer(
         this.onEvent.bind(this),
         this.id,
         this.file

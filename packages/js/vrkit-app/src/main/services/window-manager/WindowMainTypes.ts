@@ -54,6 +54,9 @@ function newNormalWindowCreateOptions(optConfig: Partial<WindowConfig> = {}) {
   const baseConfig:Partial<WindowConfig> = {
     type: "Normal",
     manageState: true,
+    multiple: false,
+    aspectRatio: 0,
+    
     browserWindowOptions: {
       backgroundColor: "black",
       show: false,
@@ -104,16 +107,17 @@ export const BaseWindowConfigs: { [Role in WindowRole]: WindowCreateOptions<Wind
   }),
   DashboardVRLayout: newBaseWindowCreateOptions(WindowRole.DashboardVRLayout, {
     ...newNormalWindowCreateOptions({
-      manageState: false,
-      modal: true,
+      manageState: true,
+      modal: false,
       devToolMode: "undocked",
       aspectRatio: 1,
       browserWindowOptions: {
-        modal: true,
+        modal: false,
         width: 1024,
         minWidth: 1024,
         height: 1024,
         minHeight: 1024,
+        resizable: false
         
       }
     }),

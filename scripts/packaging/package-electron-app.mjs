@@ -170,7 +170,7 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
     ],
 
     win: {
-      //, "portable", "zip"
+      requestedExecutionLevel: "requireAdministrator",
       target: ["nsis"],
     },
     nsis: {

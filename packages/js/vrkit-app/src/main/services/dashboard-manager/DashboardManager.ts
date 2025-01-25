@@ -35,6 +35,7 @@ import { action, reaction, runInAction, set, toJS } from "mobx"
 import { IDisposer } from "mobx-utils"
 import { assign, first } from "lodash"
 import { FileSystemManager } from "@vrkit-platform/shared/services/node"
+import { getService } from "../../ServiceContainer"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -48,7 +49,7 @@ type DashFnPair = Pair<DashboardManagerFnType, (event: IpcMainInvokeEvent, ...ar
 
 interface VRLayoutEditorDetail {
   activeDashboardId: string
-
+  editorEnabled: boolean
   vrEnabled: boolean
 }
 
@@ -317,6 +318,20 @@ export class DashboardManager {
   }
 
   async launchDashboardLayoutEditorHandler(event: IpcMainInvokeEvent, id: string): Promise<void> {
+    log.debug(`Starting VR Layout Editor for dashboard(id=${id})`)
+    if (this.activeDashboardId !== id) {
+      const msg = `Active dashboard id === ${this.activeDashboardId}, can not start editing ${id} if it's not open`
+      log.error(msg)
+      throw Error(msg)
+    }
+    
+    const { OverlayManager } = await import("../overlay-manager/OverlayManager"),
+        overlayManager = getService(OverlayManager)
+    
+    if (!overlayManager.editorEnabled)
+      await overlayManager.setEditorEnabled(true)
+    
+    await this.executeVRLayoutEditorCheck()
     // return this.dashboardConfigs.map(it => DashboardConfig.toJson(it) as any)
   }
 
@@ -381,7 +396,7 @@ export class DashboardManager {
     reaction(
       () => this.getVRLayoutEditorDetail(),
       () => {
-        this.checkVRLayoutEditor()
+        this.scheduleVRLayoutEditorCheck()
       },
       {
         equals: isEqual
@@ -471,38 +486,43 @@ export class DashboardManager {
 
   private getVRLayoutEditorDetail(): VRLayoutEditorDetail {
     return {
+      editorEnabled: this.mainAppState.overlays?.editor?.enabled === true,
       activeDashboardId: this.activeDashboardId,
       vrEnabled: this.activeDashboardConfig?.vrEnabled === true
     }
   }
 
-  private checkVRLayoutEditor(): void {
+  private scheduleVRLayoutEditorCheck(): void {
     log.info(`Scheduling VR Layout Editor check`)
-    this.vrLayoutEditorQueue_
-      .add(async () => {
-        const detail: VRLayoutEditorDetail = this.getVRLayoutEditorDetail(),
-          targetVisible =
-            isNotEmptyString(detail.activeDashboardId) &&
-            detail.vrEnabled &&
-            this.mainAppState.overlays?.editor?.enabled === true
-
-        const wins = this.mainWindowManager.getByRole(WindowRole.DashboardVRLayout)
-        if (targetVisible) {
-          if (wins.length) {
-            log.info(`checkVRLayoutEditor: Already visible`)
-            return
-          }
-
-          log.info(`checkVRLayoutEditor: Creating window`)
-          await this.mainWindowManager.create(WindowRole.DashboardVRLayout)
-          log.info(`checkVRLayoutEditor: Created window`)
-        } else if (wins.length) {
-          this.mainWindowManager.close(...wins.map(get("id")))
-        }
-      })
+    this.executeVRLayoutEditorCheck()
       .catch(err => {
         log.error(`Unable to checkVRLayoutEditor`, err)
       })
+  }
+  
+  private executeVRLayoutEditorCheck():Promise<void> {
+    return this.vrLayoutEditorQueue_
+        .add(async () => {
+          const detail: VRLayoutEditorDetail = this.getVRLayoutEditorDetail(),
+              targetVisible =
+                  isNotEmptyString(detail.activeDashboardId) &&
+                  detail.vrEnabled &&
+                  this.mainAppState.overlays?.editor?.enabled === true,
+              wins = this.mainWindowManager.getByRole(WindowRole.DashboardVRLayout)
+          
+          if (targetVisible && wins.length) {
+            log.info(`checkVRLayoutEditor: Already visible`)
+            return
+          }
+          
+          if (targetVisible) {
+            log.info(`checkVRLayoutEditor: Creating window`)
+            await this.mainWindowManager.create(WindowRole.DashboardVRLayout)
+            log.info(`checkVRLayoutEditor: Created window`)
+          } else if (wins.length) {
+            this.mainWindowManager.close(...wins.map(get("id")))
+          }
+        })
   }
 }
 

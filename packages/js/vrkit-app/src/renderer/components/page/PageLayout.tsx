@@ -31,12 +31,18 @@ export type PageLayoutProps = {
 export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
   const rootPath = useWebPathRoot(),
     isMain = rootPath === WebRootPath.main,
+      isSettings = rootPath === WebRootPath.settings,
+      isVRLayoutEditor = rootPath === WebRootPath.dashboardVRLayout,
+      showTitlebar = isMain || isSettings,
+      
     isModalActive = useAppSelector(sharedAppSelectors.hasActiveModalDesktopWindow)
   
 
   return (
     <>
-      <AppTitlebar />
+      
+      <AppTitlebar transparent={isVRLayoutEditor} />
+      
       
       <Box
         component="main"

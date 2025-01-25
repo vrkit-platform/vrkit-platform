@@ -68,23 +68,25 @@ export class OverlayEditorController {
   }
 
   updateSelectedOverlayConfigVRLayout(vrLayoutMutator: (vrLayout: VRLayout) => VRLayout) {
-    const selectedId = this.selectedOverlayConfigId,
-      win = this.manager.vrOverlays.find(it => it.id === selectedId)
-    if (!win) {
-      log.warn(`No window for selected id ${selectedId}`)
-      return
-    }
-
-    this.manager.updateOverlayPlacement(win, (placement, _dashboardConfig) => {
-      if (!win.isVR) {
-        return placement
+    runInAction(() => {
+      const selectedId = this.selectedOverlayConfigId,
+        win = this.manager.vrOverlays.find(it => it.id === selectedId)
+      if (!win) {
+        log.warn(`No window for selected id ${selectedId}`)
+        return
       }
-
-      placement.vrLayout = vrLayoutMutator(placement.vrLayout)
-      Object.assign(win.placement.vrLayout, toJS(placement.vrLayout))
-      win.browserWindow.webContents.invalidate()
-      log.debug(`Saving updated dashboard config updated vrLayout`, placement.vrLayout)
-      return placement
+  
+      this.manager.updateOverlayPlacement(win, (placement, _dashboardConfig) => {
+        if (!win.isVR) {
+          return placement
+        }
+  
+        placement.vrLayout = vrLayoutMutator(placement.vrLayout)
+        Object.assign(win.placement.vrLayout, toJS(placement.vrLayout))
+        win.browserWindow.webContents.invalidate()
+        log.debug(`Saving updated dashboard config updated vrLayout`, placement.vrLayout)
+        return placement
+      })
     })
   }
 

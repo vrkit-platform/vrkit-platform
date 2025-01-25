@@ -73,7 +73,7 @@ export default function OverlayWindowAppBody() {
           className={clsx(classes.root)}
           ref={contentRef}
         >
-          <If condition={!!PluginComponent && !!size}>
+          <If condition={!!PluginComponent && !!size && !!window["getVRKitPluginClient"]}>
             <PluginComponentContainer
               Component={PluginComponent}
               client={getVRKitPluginClient()}
@@ -81,13 +81,14 @@ export default function OverlayWindowAppBody() {
             />
           </If>
         </OverlayAppBodyContentRoot>
+      
+        <If condition={!isEditorInfo && isEditMode && isObject(size)}>
+          <OverlayWindowLayoutEditor
+            editorEnabled={isEditMode}
+            size={size}
+          />
+        </If>
       </ErrorBoundary>
-      <If condition={!isEditorInfo && isEditMode && isObject(size)}>
-        <OverlayWindowLayoutEditor
-          editorEnabled={isEditMode}
-          size={size}
-        />
-      </If>
     </>
   )
 }

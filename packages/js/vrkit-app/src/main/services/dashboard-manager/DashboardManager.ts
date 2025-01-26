@@ -240,9 +240,8 @@ export class DashboardManager {
     })
 
     await this.saveDashboardConfigTaskFactory(dashConfig)
-    const dashConfigJson = toJS(DashboardConfig.toJson(dashConfig)) as any
-
-    return dashConfigJson
+    
+    return toJS(DashboardConfig.toJson(dashConfig)) as any
   }
 
   updateDashboardConfigHandler(

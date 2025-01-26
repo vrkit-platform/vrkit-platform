@@ -1,8 +1,9 @@
 import { Rnd } from "react-rnd"
 import { Page, PageProps } from "../../components/page"
-import React, { useCallback, useMemo } from "react"
+import React, { useCallback, useLayoutEffect, useMemo, useState } from "react"
 import { getLogger } from "@3fv/logger-proxy"
 import { lighten, styled } from "@mui/material/styles"
+import { useDebounceCallback } from 'usehooks-ts'
 import clsx from "clsx"
 import {
   child,
@@ -18,17 +19,27 @@ import {
 import Box, { BoxProps } from "@mui/material/Box"
 import { useResizeObserver } from "../../hooks"
 import { isNumber } from "@3fv/guard"
-import { OverlayInfo, OverlayPlacement, RectI } from "@vrkit-platform/models"
+import {
+  OverlayInfo, OverlayPlacement, PositionI, RectI, SizeI, VRLayout
+} from "@vrkit-platform/models"
 import { asOption } from "@3fv/prelude-ts"
 import { DndProvider, useDrag, useDrop, XYCoord } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
+import {
+  assign, ConvertScreenRectToVRLayout, ConvertVRLayoutToScreenRect, pairOf
+} from "@vrkit-platform/shared"
+import { useAppSelector } from "../../services/store"
+import { sharedAppSelectors } from "../../services/store/slices/shared-app"
+import { OverlayManagerClient } from "../../services/overlay-manager-client"
+import { useService } from "../../components/service-container"
+import { Alert } from "../../services/alerts"
+import dashboardVRLayoutPageClasses from "./DashboardVRLayoutPageClasses"
+import { EditorSurface } from "./EditorSurface"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
-const classPrefix = "dashboardVRLayoutPage"
-const classes = createClassNames(classPrefix, "surface", "item", "itemDragging")
-export const dashboardVRLayoutPageClasses = classes
+const classes = dashboardVRLayoutPageClasses
 
 const DashboardVRLayoutPageRoot = styled(Box, {
   name: "DashboardVRLayoutPageRoot"
@@ -45,102 +56,13 @@ const DashboardVRLayoutPageRoot = styled(Box, {
     backgroundColor: lighten(theme.palette.primary.main, 0.35),
     [child(classes.item)]: {
       ...PositionAbsolute,
-      ...OverflowHidden
+      ...OverflowHidden,
+      border: `1px solid ${theme.palette.secondary.main}`,
+      backgroundColor: theme.palette.secondary.main,
+      borderRadius: theme.shape.borderRadius,
     }
   }
 }))
-
-enum EditorItemType {
-  Overlay = "Overlay"
-}
-
-interface EditorItemProps extends BoxProps {
-  info: OverlayInfo
-
-  placement: OverlayPlacement
-
-  surfaceRect: RectI
-}
-
-function EditorItem({ info, placement, surfaceRect, ...other }: EditorItemProps) {
-  //const // itemRect = asOption(placement.vrLayout)
-    //     .map(({pose, size}) => {
-    //
-    //       return RectI.create({
-    //         x: pose.x
-    //       })
-    //     }),
-    
-
-  return (
-    <Rnd
-      bounds={`.${classes.surface}`}
-      size={{
-        width: this.state.width,
-        height: this.state.height
-      }}
-      position={{
-        x: this.state.x,
-        y: this.state.y
-      }}
-      onDragStop={(e, d) => {
-        this.setState({ x: d.x, y: d.y })
-      }}
-      onResize={(e, direction, ref, delta, position) => {
-        this.setState({
-          width: ref.offsetWidth,
-          height: ref.offsetHeight,
-          ...position
-        })
-      }}
-    >
-      {info.name}
-    </Rnd>
-  )
-}
-
-interface EditorSurfaceProps {
-  rect: RectI
-}
-
-function EditorSurface({ rect, ...other }: EditorSurfaceProps) {
-  // const moveItem = useCallback((id: string, left: number, top: number) => {
-  //   // setBoxes(
-  //   //     update(boxes, {
-  //   //       [id]: {
-  //   //         $merge: { left, top },
-  //   //       },
-  //   //     }),
-  //   // )
-  // }, [])
-  //
-  // const [, drop] = useDrop(
-  //   () => ({
-  //     accept: EditorItemType.Overlay,
-  //     drop(item: OverlayPlacement, monitor) {
-  //       const delta = monitor.getDifferenceFromInitialOffset() as XYCoord
-  //       // const left = Math.round(item.left + delta.x)
-  //       // const top = Math.round(item.top + delta.y)
-  //       // moveItem(item.id, left, top)
-  //       return undefined
-  //     }
-  //   }),
-  //   [moveItem]
-  // )
-
-  return (
-    <Box
-      className={clsx(classes.surface)}
-      sx={{
-        left: rect.position.x,
-        top: rect.position.y,
-        ...dimensionConstraints(rect.size.width, rect.size.height)
-      }}
-    >
-      Components go here...
-    </Box>
-  )
-}
 
 export interface DashboardVRLayoutPageProps extends PageProps {}
 

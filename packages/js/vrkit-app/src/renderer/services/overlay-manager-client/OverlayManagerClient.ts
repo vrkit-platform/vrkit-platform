@@ -23,7 +23,11 @@ import {
   OverlayManagerClientFnTypeToIPCName,
 } from "@vrkit-platform/shared"
 import { PluginClientEventType, type SessionInfoMessage } from "@vrkit-platform/plugin-sdk"
-import { OverlayConfig, SessionDataVariableValueMap, SessionTiming } from "@vrkit-platform/models"
+import {
+  OverlayConfig,
+  SessionDataVariableValueMap,
+  SessionTiming, VRLayout
+} from "@vrkit-platform/models"
 import type { AppStore } from "../store"
 import { sharedAppSelectors } from "../store/slices/shared-app"
 import { overlayWindowActions } from "../store/slices/overlay-window"
@@ -241,6 +245,20 @@ export class OverlayManagerClient
   async fetchOverlayId(): Promise<string> {
     return await ipcRenderer.invoke(
         OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG_ID)
+    )
+  }
+  
+  /**
+   * Invokes setVRLayout in the main process
+   *
+   * @param placementId
+   * @param vrLayout
+   */
+  @Bind
+  async setVRLayout(placementId: string, vrLayout: VRLayout): Promise<void> {
+    const vrLayoutJson = VRLayout.toJson(vrLayout)
+    return await ipcRenderer.invoke(
+        OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.SET_VR_LAYOUT), placementId, vrLayoutJson
     )
   }
   

@@ -62,7 +62,7 @@ import { flatten, pick } from "lodash"
 import { NativeImageSequenceCapture } from "../../utils"
 import { CreateNativeOverlayManager, NativeOverlayManager } from "vrkit-native-interop"
 
-import { IValueDidChange, observe, reaction, runInAction, toJS } from "mobx"
+import { IValueDidChange, observe, reaction, runInAction, set, toJS } from "mobx"
 import { DashboardManager } from "../dashboard-manager"
 
 import { OverlayEditorController } from "./OverlayEditorController"
@@ -88,6 +88,13 @@ const WinRendererEvents = OverlayWindowRendererEvents
 const WinMainEvents = OverlayWindowMainEvents
 
 export type EditorInfoWithStatus = Triple<OverlayBrowserWindowType, boolean, OverlayBrowserWindow>
+
+function vrLayoutToJsonString(vrLayout:VRLayout):string {
+  return VRLayout.toJsonString(
+      toJS(vrLayout),{
+        prettySpaces: 2
+      })
+}
 
 @Singleton()
 export class OverlayManager {
@@ -426,10 +433,36 @@ export class OverlayManager {
    * @param _event
    * @param editorEnabled
    */
-  async handleSetEditorEnabled(_event: IpcMainInvokeEvent, editorEnabled: boolean): Promise<boolean> {
+  private async handleSetEditorEnabled(_event: IpcMainInvokeEvent, editorEnabled: boolean): Promise<boolean> {
     return this.setEditorEnabled(editorEnabled)
   }
-
+  
+  /**
+   * Handler for a layout editor to change/set the VRLayout
+   * of a specific placement
+   *
+   * @param _ev
+   * @param placementId
+   * @param vrLayoutJson
+   */
+  private async handleSetVRLayout(_ev: IpcMainInvokeEvent, placementId: string, vrLayoutJson: VRLayout) {
+    const ow = this.vrOverlays.find(ow => ow.placement.id === placementId)
+    log.assert(!!ow, `Unable to find VR OverlayWindow with placement id (${placementId})`)
+    this.updateOverlayPlacement(ow, (placement, dashboardConfig) => {
+      const vrLayout = VRLayout.create(vrLayoutJson)
+      log.info(`Changing VRLayout for placement (${placementId}) from
+        (${vrLayoutToJsonString(placement.vrLayout)})
+        to
+        (${vrLayoutToJsonString(vrLayout)})`)
+      
+      
+      set(placement, "vrLayout", vrLayout)
+      return placement
+    })
+    
+    log.info(`Set VRLayout for placement (${placementId})`)
+  }
+  
   /**
    * Cleanup resources on unload
    *
@@ -461,7 +494,8 @@ export class OverlayManager {
       ipcFnHandlers = Array<Pair<OverlayManagerClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
         [OverlayManagerClientFnType.FETCH_WINDOW_ROLE, this.fetchOverlayWindowRoleHandler.bind(this)],
         [OverlayManagerClientFnType.FETCH_CONFIG_ID, this.fetchOverlayConfigIdHandler.bind(this)],
-        [OverlayManagerClientFnType.SET_EDITOR_ENABLED, this.handleSetEditorEnabled.bind(this)],
+          [OverlayManagerClientFnType.SET_VR_LAYOUT, this.handleSetVRLayout.bind(this)],
+          [OverlayManagerClientFnType.SET_EDITOR_ENABLED, this.handleSetEditorEnabled.bind(this)],
         [OverlayManagerClientFnType.CLOSE, this.closeHandler.bind(this)]
       ),
       ipcEventHandlers = Array<Pair<SessionManagerEventType, (...args: any[]) => void>>([
@@ -735,7 +769,7 @@ export class OverlayManager {
             error(`Unable to find placement ${win.id} in config`, config)
             return null
           },
-          Some: placement => {
+          Some: placement => runInAction(() => {
             const newPlacement = mutator(placement, config)
             if (newPlacement !== placement && !isEqual(placement, newPlacement)) {
               assign(placement, { ...newPlacement })
@@ -749,7 +783,7 @@ export class OverlayManager {
               })
 
             return placement
-          }
+          })
         })
       )
       .getOrNull()

@@ -35,10 +35,12 @@ export function ConvertScreenRectToVRLayout(surfaceSize: SizeI, screenRect: Rect
         size: vrSize
       })
   
-  log.info(`Converted screen rect`, screenRect, "to VR layout", vrLayout)
+  if (log.isDebugEnabled())
+    log.debug(`Converted screen rect`, screenRect, "to VR layout", vrLayout)
   
   return vrLayout
 }
+
 export function ConvertVRLayoutToScreenRect(surfaceSize: SizeI, vrLayout: VRLayout) {
   const
       scale = Math.min(surfaceSize.width,surfaceSize.height) / VRLayoutBoundsDiameter,
@@ -56,7 +58,9 @@ export function ConvertVRLayoutToScreenRect(surfaceSize: SizeI, vrLayout: VRLayo
         size: screenSize,
         position: screenPos
       })
-  log.info(`Converted VRLayout`, vrLayout, "to screen rect", screenRect)
+  
+  if (log.isDebugEnabled())
+    log.debug(`Converted VRLayout`, vrLayout, "to screen rect", screenRect)
   
   return screenRect
 }

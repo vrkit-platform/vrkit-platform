@@ -15,6 +15,12 @@ import { app } from "electron"
 import type WindowStateManager from "./WindowStateManager"
 import { resolveHtmlPath } from "../../utils/FsExtra"
 
+export type OnBrowserWindowEventHandler = (
+    type: BrowserWindowEventKind,
+    browserWindow: Electron.BrowserWindow,
+    windowInstance: WindowMainInstance
+) => any
+
 export interface WindowMainInstance extends WindowInstance<WindowMainInstance> {
   stateManager: WindowStateManager
 
@@ -24,11 +30,7 @@ export interface WindowMainInstance extends WindowInstance<WindowMainInstance> {
 
   browserWindowClosed: boolean
 
-  onBrowserWindowEvent?: (
-    type: BrowserWindowEventKind,
-    browserWindow: Electron.BrowserWindow,
-    windowInstance: WindowMainInstance
-  ) => any
+  onBrowserWindowEvent?: OnBrowserWindowEventHandler
 }
 
 function newBaseWindowCreateOptions(
@@ -89,7 +91,8 @@ function newFloatingWindowCreateOptions(optConfig: Partial<WindowConfig> = {}) {
 export const BaseWindowConfigs: { [Role in WindowRole]: WindowCreateOptions<WindowMainInstance> } = deepFreeze({
   Main: newBaseWindowCreateOptions(WindowRole.Main, {
     ...newNormalWindowCreateOptions(),
-    initialRoute: "/main"
+    initialRoute: "/main",
+    devToolMode: "bottom"
   }),
   Settings: newBaseWindowCreateOptions(WindowRole.Settings, {
     ...newNormalWindowCreateOptions({

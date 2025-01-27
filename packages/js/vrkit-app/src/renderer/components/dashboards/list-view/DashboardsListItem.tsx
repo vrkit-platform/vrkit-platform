@@ -54,7 +54,7 @@ import Moment from "react-moment"
 import { dashboardsListViewClasses as classNames } from "./DashboardsListView"
 import { isDefined } from "@3fv/guard"
 import AppIconButton from "../../app-icon-button"
-import PluginOverlayIcon from "./PluginOverlayIcon"
+import { PluginOverlayIcon } from "../../plugins/components"
 import DashboardsListItemMenu from "./DashboardsListItemMenu"
 
 const log = getLogger(__filename)

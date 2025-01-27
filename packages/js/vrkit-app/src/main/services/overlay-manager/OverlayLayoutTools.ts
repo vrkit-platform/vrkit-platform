@@ -116,14 +116,14 @@ export function adjustScreenRect(rect: RectI | RectF) {
     asOption(rect)
       .ifSome(rect => {
         assign(rect.size, {
-          width: Math.max(
+          width: Math.round(Math.max(
             Math.min(rect.size.width, MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding),
             MinOverlayWindowDimension
-          ),
-          height: Math.max(
+          )),
+          height: Math.round(Math.max(
             Math.min(rect.size.height, MaxOverlayWindowDimension - MaxOverlayWindowDimensionPadding),
             MinOverlayWindowDimension
-          )
+          ))
         })
       })
       .getOrThrow()

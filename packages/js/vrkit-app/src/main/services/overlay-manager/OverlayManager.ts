@@ -89,11 +89,10 @@ const WinMainEvents = OverlayWindowMainEvents
 
 export type EditorInfoWithStatus = Triple<OverlayBrowserWindowType, boolean, OverlayBrowserWindow>
 
-function vrLayoutToJsonString(vrLayout:VRLayout):string {
-  return VRLayout.toJsonString(
-      toJS(vrLayout),{
-        prettySpaces: 2
-      })
+function vrLayoutToJsonString(vrLayout: VRLayout): string {
+  return VRLayout.toJsonString(toJS(vrLayout), {
+    prettySpaces: 2
+  })
 }
 
 @Singleton()
@@ -215,16 +214,28 @@ export class OverlayManager {
         // CREATE NEW WINDOW
         this.updateDataVars(ouid, overlayInfo)
 
-        const newWin = OverlayBrowserWindow.create(this, this.windowManager, windowKind, overlayInfo, placement)
-
-        // ATTACH LISTENERS
-        newWin.on(OverlayBrowserWindowEvent.Created, win => {
-          win.browserWindow.on("closed", this.createOnCloseHandler(ouid, newWin.browserWindowId))
-          if (win.isScreen) {
-            const onBoundsChanged = this.createOnBoundsChangedHandler(placement, newWin)
-            win.browserWindow.on("moved", onBoundsChanged).on("resized", onBoundsChanged)
+        const newWin = OverlayBrowserWindow.create(
+          this,
+          this.windowManager,
+          windowKind,
+          overlayInfo,
+          placement,
+          (type, browserWindow, windowInstance) => {
+            const ow = this.allOverlays.find(it => it?.browserWindow?.id === browserWindow.id)
+            if (!ow) {
+              log.warn(`Unable to find matching overlay browser window for id (${browserWindow.id})`)
+              return
+            }
+            if (type === "Created") {
+              // ATTACH LISTENERS
+              ow.browserWindow.on("closed", this.createOnCloseHandler(ouid, newWin.browserWindowId))
+              if (ow.isScreen) {
+                const onBoundsChanged = this.createOnBoundsChangedHandler(placement, newWin)
+                ow.browserWindow.on("moved", onBoundsChanged).on("resized", onBoundsChanged)
+              }
+            }
           }
-        })
+        )
 
         return newWin
       })
@@ -406,27 +417,27 @@ export class OverlayManager {
 
   async [Symbol.asyncDispose]() {
     debug(`Unloading OverlayManager`)
-    
+
     this.disposers_.dispose()
-    
+
     const overlays = this.allOverlays ?? []
-    
+
     await Promise.all(
-        overlays.map(o => {
-          guard(() => o.browserWindow?.webContents?.endFrameSubscription())
-          return o.close()
-        })
-      )
+      overlays.map(o => {
+        guard(() => o.browserWindow?.webContents?.endFrameSubscription())
+        return o.close()
+      })
+    )
       .then(() => {
         info(`All overlay windows closed`)
       })
       .catch(err => {
         warn(`error closing overlays`, err)
       })
-    
+
     this.overlayWindows_ = []
   }
-  
+
   /**
    * Set editor enabled
    *
@@ -436,7 +447,7 @@ export class OverlayManager {
   private async handleSetEditorEnabled(_event: IpcMainInvokeEvent, editorEnabled: boolean): Promise<boolean> {
     return this.setEditorEnabled(editorEnabled)
   }
-  
+
   /**
    * Handler for a layout editor to change/set the VRLayout
    * of a specific placement
@@ -454,15 +465,14 @@ export class OverlayManager {
         (${vrLayoutToJsonString(placement.vrLayout)})
         to
         (${vrLayoutToJsonString(vrLayout)})`)
-      
-      
+
       set(placement, "vrLayout", vrLayout)
       return placement
     })
-    
+
     log.info(`Set VRLayout for placement (${placementId})`)
   }
-  
+
   /**
    * Cleanup resources on unload
    *
@@ -494,8 +504,8 @@ export class OverlayManager {
       ipcFnHandlers = Array<Pair<OverlayManagerClientFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>>(
         [OverlayManagerClientFnType.FETCH_WINDOW_ROLE, this.fetchOverlayWindowRoleHandler.bind(this)],
         [OverlayManagerClientFnType.FETCH_CONFIG_ID, this.fetchOverlayConfigIdHandler.bind(this)],
-          [OverlayManagerClientFnType.SET_VR_LAYOUT, this.handleSetVRLayout.bind(this)],
-          [OverlayManagerClientFnType.SET_EDITOR_ENABLED, this.handleSetEditorEnabled.bind(this)],
+        [OverlayManagerClientFnType.SET_VR_LAYOUT, this.handleSetVRLayout.bind(this)],
+        [OverlayManagerClientFnType.SET_EDITOR_ENABLED, this.handleSetEditorEnabled.bind(this)],
         [OverlayManagerClientFnType.CLOSE, this.closeHandler.bind(this)]
       ),
       ipcEventHandlers = Array<Pair<SessionManagerEventType, (...args: any[]) => void>>([
@@ -625,6 +635,7 @@ export class OverlayManager {
   private createOnCloseHandler(overlayUniqueId: string, windowId: number): Function {
     return (event: Electron.Event) => {
       this.sessionManager.unregisterComponentDataVars(overlayUniqueId)
+      log.info(`onCloseHandler for overlay/window`, overlayUniqueId, windowId)
       this.nativeManager_?.releaseResources(overlayUniqueId, windowId)
       removeIfMutation(this.overlayWindows_, overlay => overlay.browserWindowId === windowId)
     }
@@ -666,11 +677,11 @@ export class OverlayManager {
       if (cap) {
         cap.push(image)
       }
-      
+
       if (!this.nativeManager_) {
         return
       }
-      
+
       if (!isValidOverlayScreenSize(imageSize) || !isEqualSize(imageSize, nativeImageSize)) {
         if (log.isDebugEnabled()) {
           log.debug(
@@ -769,21 +780,22 @@ export class OverlayManager {
             error(`Unable to find placement ${win.id} in config`, config)
             return null
           },
-          Some: placement => runInAction(() => {
-            const newPlacement = mutator(placement, config)
-            if (newPlacement !== placement && !isEqual(placement, newPlacement)) {
-              assign(placement, { ...newPlacement })
-            }
+          Some: placement =>
+            runInAction(() => {
+              const newPlacement = mutator(placement, config)
+              if (newPlacement !== placement && !isEqual(placement, newPlacement)) {
+                assign(placement, { ...newPlacement })
+              }
 
-            this.dashManager
-              .updateDashboardConfig(config.id, config)
-              .then(() => info(`Saved updated dashboard config`, config))
-              .catch(err => {
-                error(`failed to save config`, config)
-              })
+              this.dashManager
+                .updateDashboardConfig(config.id, config)
+                .then(() => info(`Saved updated dashboard config`, config))
+                .catch(err => {
+                  error(`failed to save config`, config)
+                })
 
-            return placement
-          })
+              return placement
+            })
         })
       )
       .getOrNull()

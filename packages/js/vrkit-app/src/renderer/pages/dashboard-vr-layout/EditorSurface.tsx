@@ -1,44 +1,52 @@
 import { Rnd } from "react-rnd"
-import React, { useCallback, useLayoutEffect, useState } from "react"
+import React, { HTMLAttributes, useCallback, useLayoutEffect, useState } from "react"
 import { getLogger } from "@3fv/logger-proxy"
-import { lighten, styled } from "@mui/material/styles"
+import DragIcon from "@mui/icons-material/DragIndicator"
 import { useDebounceCallback } from "usehooks-ts"
 import clsx from "clsx"
+import { dimensionConstraints, EllipsisBox, FlexScaleZero } from "@vrkit-platform/shared-ui"
+import Box from "@mui/material/Box"
 import {
-  child,
-  dimensionConstraints,
-  FlexColumnCenter,
-  FlexScaleZero,
-  OverflowHidden,
-  OverflowVisible,
-  PositionAbsolute,
-  PositionRelative
-} from "@vrkit-platform/shared-ui"
-import Box, { BoxProps } from "@mui/material/Box"
-import { OverlayInfo, OverlayPlacement, PositionI, RectI, SizeI, VRLayout } from "@vrkit-platform/models"
+  OverlayInfo,
+  OverlayPlacement,
+  PluginComponentDefinition,
+  PositionI,
+  RectI,
+  SizeI,
+  VRLayout
+} from "@vrkit-platform/models"
 import { asOption } from "@3fv/prelude-ts"
-import { assign, ConvertScreenRectToVRLayout, ConvertVRLayoutToScreenRect, pairOf } from "@vrkit-platform/shared"
+import {
+  assign,
+  ConvertScreenRectToVRLayout,
+  ConvertVRLayoutToScreenRect,
+  pairOf,
+  tripleOf
+} from "@vrkit-platform/shared"
 import { useAppSelector } from "../../services/store"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import { OverlayManagerClient } from "../../services/overlay-manager-client"
 import { useService } from "../../components/service-container"
 import { Alert } from "../../services/alerts"
 import dashboardVRLayoutPageClasses from "./DashboardVRLayoutPageClasses"
+import { PluginOverlayIcon } from "../../components/plugins"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
 const classes = dashboardVRLayoutPageClasses
 
-export interface EditorItemProps extends BoxProps {
+export interface EditorItemProps extends Omit<HTMLAttributes<"div">, "component"> {
   info: OverlayInfo
 
   placement: OverlayPlacement
 
+  component: PluginComponentDefinition
+
   surfaceSize: SizeI
 }
 
-export function EditorItem({ info, placement, surfaceSize, className, ...other }: EditorItemProps) {
+export function EditorItem({ info, component, placement, surfaceSize, className, ...other }: EditorItemProps) {
   const [itemRect, setItemRect] = useState<RectI>(null),
     overlayManagerClient = useService(OverlayManagerClient),
     updateVRLayout = useCallback(
@@ -84,7 +92,9 @@ export function EditorItem({ info, placement, surfaceSize, className, ...other }
             y: d.y
           })
         })
-        log.info(`onDragStop`, newItemRect)
+        if (log.isDebugEnabled()) {
+          log.debug(`onDragStop`, newItemRect)
+        }
 
         setItemRect(newItemRect)
         updateVRLayoutDebounced(placement.id, ConvertScreenRectToVRLayout(surfaceSize, newItemRect))
@@ -97,12 +107,20 @@ export function EditorItem({ info, placement, surfaceSize, className, ...other }
           })
         })
 
-        log.info(`onResize`, newItemRect)
+        if (log.isDebugEnabled()) {
+          log.debug(`onResize`, newItemRect)
+        }
         setItemRect(newItemRect)
         updateVRLayoutDebounced(placement.id, ConvertScreenRectToVRLayout(surfaceSize, newItemRect))
       }}
     >
-      {info.name}
+      <Box className={clsx(classes.itemContent)}>
+        <Box className={clsx(classes.itemContentHeader)}>
+          <PluginOverlayIcon component={component} />
+          <EllipsisBox sx={{ ...FlexScaleZero }}>{info.name}</EllipsisBox>
+          <DragIcon />
+        </Box>
+      </Box>
     </Rnd>
   )
 }
@@ -113,8 +131,13 @@ export interface EditorSurfaceProps {
 
 export function EditorSurface({ rect, ...other }: EditorSurfaceProps) {
   const dash = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
-    { overlays = [] } = dash,
-    placementOverlays =
+    components = useAppSelector(sharedAppSelectors.selectPluginComponentOverlayDefsMap)
+  if (!dash || !components || !rect) {
+    return null
+  }
+
+  const { overlays = [] } = dash,
+    placementOverlayComps =
       dash.placements
         ?.filter(p => !!p.vrLayout && overlays.some(o => o.id === p.overlayId))
         .map(p =>
@@ -122,7 +145,9 @@ export function EditorSurface({ rect, ...other }: EditorSurfaceProps) {
             p,
             overlays.find(o => o.id === p.overlayId)
           )
-        ) ?? []
+        )
+        .filter(([, o]) => !!components[o.componentId])
+        .map(([p, o]) => tripleOf(p, o, components[o.componentId][1])) ?? []
 
   return (
     <Box
@@ -133,11 +158,12 @@ export function EditorSurface({ rect, ...other }: EditorSurfaceProps) {
         ...dimensionConstraints(rect.size.width, rect.size.height)
       }}
     >
-      {placementOverlays.map(([p, o]) => (
+      {placementOverlayComps.map(([p, o, c]) => (
         <EditorItem
           key={p.id}
           info={o}
           placement={p}
+          component={c}
           surfaceSize={rect.size}
         />
       ))}

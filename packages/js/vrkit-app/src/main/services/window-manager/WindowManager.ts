@@ -201,6 +201,13 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
    */
   closeRequest(win: Electron.BrowserWindow = BrowserWindow.getFocusedWindow()) {
     const wi = this.getByBrowserWindow(win)
+    if (!wi) {
+      if (win) {
+        log.warn(`Unknown browser window instance (${win.id}), closing explicitly`)
+        guard(() => win.close())
+      }
+      return
+    }
     this.close(wi)
     match(wi.role)
       .with(WindowRole.Main, () => {
@@ -481,13 +488,18 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       .on("show", () => {
         win.webContents.setWindowOpenHandler(windowOpenHandler)
         if (this.sharedAppState.devSettings.alwaysOpenDevTools) {
+          const devToolsTitle = asOption(wi.config.initialRoute)
+              .filter(isNotEmptyString)
+              .getOrElse(wi.id)
           if (isFloatingWindow(wi) || wi.config.devToolMode) {
             win.webContents.openDevTools({
               mode: wi.config.devToolMode ?? "detach",
-              activate: false
+              activate: false,
+              title: devToolsTitle
             })
           } else {
             win.webContents.openDevTools()
+            win.webContents.setDevToolsTitle(devToolsTitle)
           }
         }
       })

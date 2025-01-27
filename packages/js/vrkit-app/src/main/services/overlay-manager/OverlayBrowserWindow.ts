@@ -23,7 +23,11 @@ import EventEmitter3 from "eventemitter3"
 
 import { adjustScreenRect, MaxOverlayWindowDimension, MaxOverlayWindowDimensionPadding } from "./OverlayLayoutTools"
 import { runInAction } from "mobx"
-import { newWindowCreateOptions, WindowMainInstance, WindowManager } from "../window-manager" // TypeScriptUnresolvedVariable
+import {
+  newWindowCreateOptions, OnBrowserWindowEventHandler,
+  WindowMainInstance,
+  WindowManager
+} from "../window-manager" // TypeScriptUnresolvedVariable
 import { match } from "ts-pattern"
 import { guard } from "@3fv/guard"
 
@@ -218,7 +222,8 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
     readonly windowManager: WindowManager,
     readonly kind: OverlayBrowserWindowType,
     overlay: OverlayInfo,
-    placement: OverlayPlacement
+    placement: OverlayPlacement,
+      onBrowserWindowEvent?: OnBrowserWindowEventHandler
   ) {
     super()
     const deferred = this.readyDeferred_
@@ -269,7 +274,7 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
                   placement.vrLayout.screenRect = {
                     size: {
                       width: defaultWidth,
-                      height: defaultWidth * aspectRatio
+                      height: Math.round(defaultWidth * aspectRatio)
                     },
                     position: { x: 0, y: 0 }
                   }
@@ -290,6 +295,9 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
         browserWindowOptions: windowOpts,
         onBrowserWindowEvent: (type, bw, winInstance) => {
           info(`onBrowserWindowEvent(type=${type}) triggered`)
+          if (onBrowserWindowEvent) {
+            onBrowserWindowEvent(type,bw,winInstance)
+          }
           match(type)
               .with("Created", this.newWindowCreatedHandler(bw, winInstance))
               .with("Ready", this.newWindowReadyHandler(bw, winInstance))
@@ -335,9 +343,10 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
     windowManager: WindowManager,
     kind: OverlayBrowserWindowType,
     overlay: OverlayInfo,
-    placement: OverlayPlacement
+    placement: OverlayPlacement,
+      onBrowserWindowEvent?: OnBrowserWindowEventHandler
   ): OverlayBrowserWindow {
-    return new OverlayBrowserWindow(manager, windowManager, kind, overlay, placement)
+    return new OverlayBrowserWindow(manager, windowManager, kind, overlay, placement, onBrowserWindowEvent)
   }
 
   private setIgnoreMouseEvents(ignore: boolean): void {

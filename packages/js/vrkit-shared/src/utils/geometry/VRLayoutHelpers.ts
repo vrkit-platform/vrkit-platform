@@ -45,8 +45,8 @@ export function ConvertVRLayoutToScreenRect(surfaceSize: SizeI, vrLayout: VRLayo
   const
       scale = Math.min(surfaceSize.width,surfaceSize.height) / VRLayoutBoundsDiameter,
       screenSize = SizeI.create({
-        width: vrLayout.size.width * scale,
-        height: vrLayout.size.height * scale,
+        width: Math.round(vrLayout.size.width * scale),
+        height: Math.round(vrLayout.size.height * scale),
       }),
       // VR Pose is the center of the surface/texture
       // We scale and calculate the correct offset here

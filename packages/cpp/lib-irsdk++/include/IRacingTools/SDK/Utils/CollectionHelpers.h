@@ -54,4 +54,16 @@ namespace IRacingTools::SDK::Utils {
 
         return false;
     }
+
+
+    template <template <typename, typename...> class C, typename V, class UnaryPred, typename...Other>
+    std::optional<V> FindValue(const C<V,Other...>& container, UnaryPred predicate) {
+        for (auto& it : container) {
+            if (predicate(it)) {
+                return std::make_optional<V>(it);
+            }
+        }
+
+        return std::nullopt;
+    }
 }

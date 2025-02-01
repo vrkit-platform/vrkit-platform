@@ -7,7 +7,8 @@
 #include "ErrorTypes.h"
 
 namespace IRacingTools::SDK::Resources {
-constexpr auto DataValidEventName     = _T("Local\\IRSDKDataValidEvent");
+  constexpr _TCHAR IRSDK_DATAVALIDEVENTNAME[] = _T("Local\\IRSDKDataValidEvent");
+  constexpr auto DataValidEventName     = _T("Local\\IRSDKDataValidEvent");
 constexpr auto MemMapFilename         = _T("Local\\IRSDKMemMapFileName");
 constexpr auto BroadcastMessageName   = _T("IRSDK_BROADCASTMSG");
 

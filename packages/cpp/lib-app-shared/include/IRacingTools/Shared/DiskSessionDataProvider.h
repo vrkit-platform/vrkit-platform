@@ -95,6 +95,8 @@ namespace IRacingTools::Shared {
     private:
         void init();
 
+        void updateSessionData();
+
         void process();
 
         bool processYAMLLiveString();

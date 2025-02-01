@@ -293,6 +293,58 @@
                     ],
                     "title": "Session Status"
                 },
+                "subCount": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "subId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "subNum": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "subType": {
+                    "enum": [
+                        "SESSION_SUB_TYPE_PRACTICE",
+                        0,
+                        "SESSION_SUB_TYPE_QUALIFY",
+                        1,
+                        "SESSION_SUB_TYPE_RACE",
+                        2
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Sub Type"
+                },
                 "timing": {
                     "$ref": "#/definitions/IRacingTools.Models.Session.SessionTiming",
                     "additionalProperties": true,
@@ -322,6 +374,36 @@
                         },
                         {}
                     ]
+                },
+                "carStatus": {
+                    "enum": [
+                        "SESSION_CAR_STATUS_INVALID",
+                        0,
+                        "SESSION_CAR_STATUS_GET_IN_CAR",
+                        1,
+                        "SESSION_CAR_STATUS_WARMUP",
+                        3,
+                        "SESSION_CAR_STATUS_PARADE_LAPS",
+                        4,
+                        "SESSION_CAR_STATUS_RACE",
+                        5,
+                        "SESSION_CAR_STATUS_CHECKERED",
+                        6,
+                        "SESSION_CAR_STATUS_COOLDOWN",
+                        7
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Car Status"
                 },
                 "sessionInfoJson": {
                     "oneOf": [

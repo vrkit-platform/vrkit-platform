@@ -74,7 +74,7 @@ namespace IRacingTools::App::Commands {
     // open a file for writing, without overwriting any existing files
     std::optional<std::pair<std::string, FILE *>> openUniqueFile(const char *name, const char *ext, time_t t_time, bool asBinary) {
       FILE *file = nullptr;
-      char tstr[MAX_PATH] = "";
+      char tmpFileNameStr[MAX_PATH] = "";
       int i = 0;
 
       // find an unused filename
@@ -83,23 +83,23 @@ namespace IRacingTools::App::Commands {
           fclose(file);
 
 
-        _snprintf(tstr, MAX_PATH, "%s\\%s", gOutputPath.c_str(), name);
-        tstr[MAX_PATH - 1] = '\0';
+        _snprintf(tmpFileNameStr, MAX_PATH, "%s\\%s", gOutputPath.c_str(), name);
+        tmpFileNameStr[MAX_PATH - 1] = '\0';
 
         tm tm_time;
         localtime_s(&tm_time, &t_time);
-        strftime(tstr + strlen(tstr), MAX_PATH - strlen(tstr), " %Y-%m-%d %H-%M-%S", &tm_time);
-        tstr[MAX_PATH - 1] = '\0';
+        strftime(tmpFileNameStr + strlen(tmpFileNameStr), MAX_PATH - strlen(tmpFileNameStr), " %Y-%m-%d %H-%M-%S", &tm_time);
+        tmpFileNameStr[MAX_PATH - 1] = '\0';
 
         if (i > 0) {
-          _snprintf(tstr + strlen(tstr), MAX_PATH - strlen(tstr), " %02d", i, ext);
-          tstr[MAX_PATH - 1] = '\0';
+          _snprintf(tmpFileNameStr + strlen(tmpFileNameStr), MAX_PATH - strlen(tmpFileNameStr), " %02d", i, ext);
+          tmpFileNameStr[MAX_PATH - 1] = '\0';
         }
 
-        _snprintf(tstr + strlen(tstr), MAX_PATH - strlen(tstr), ".%s", ext);
-        tstr[MAX_PATH - 1] = '\0';
+        _snprintf(tmpFileNameStr + strlen(tmpFileNameStr), MAX_PATH - strlen(tmpFileNameStr), ".%s", ext);
+        tmpFileNameStr[MAX_PATH - 1] = '\0';
 
-        file = fopen(tstr, "r");
+        file = fopen(tmpFileNameStr, "r");
       } while (file && ++i < 100);
 
       // failed to find an unused file
@@ -108,52 +108,13 @@ namespace IRacingTools::App::Commands {
         return std::nullopt;
       }
 
-      std::string filename(tstr);
-      return {{filename,fopen(tstr, asBinary ? "wb" : "w")}};
+      std::string filename(tmpFileNameStr);
+      return {{filename,fopen(tmpFileNameStr, asBinary ? "wb" : "w")}};
 
     }
 
-    void writeSessionItem(FILE *file, const char *path, const char *desc) {
-      const char *valstr;
-      int valstrlen;
+    constexpr int reserveCount = 32;
 
-      fprintf(file, desc);
-      if (Utils::ParseYaml(LiveConnection::GetInstance().getSessionInfoStr(), path, &valstr, &valstrlen))
-        fwrite(valstr, 1, valstrlen, file);
-      fprintf(file, "\n");
-    }
-
-    static const int reserveCount = 32;
-    // reserve a little space in the file for a number to be written
-    long int fileReserveSpace(FILE *file) {
-      const long int pos = ftell(file);
-
-      int count = reserveCount;
-      while (count--)
-        fputc(' ', file);
-      fputs("\n", file);
-
-      return pos;
-    }
-
-    // fill in a number in our reserved space, without overwriting the newline
-    void fileWriteReservedInt(FILE *file, long int pos, int value) {
-      const long int curpos = ftell(file);
-
-      fseek(file, pos, SEEK_SET);
-      fprintf(file, "%d", value);
-
-      fseek(file, curpos, SEEK_SET);
-    }
-
-    void fileWriteReservedFloat(FILE *file, long int pos, double value) {
-      const long int curpos = ftell(file);
-
-      fseek(file, pos, SEEK_SET);
-      fprintf(file, "%f", value);
-
-      fseek(file, curpos, SEEK_SET);
-    }
 
     // log header to ibt binary format
     void logHeaderToIBT(const DataHeader *header, FILE *file, time_t t_time) {
@@ -162,11 +123,11 @@ namespace IRacingTools::App::Commands {
         int offset = 0;
 
         // main header
-        memcpy(&g_diskHeader, header, sizeof(g_diskHeader));
+        std::memcpy(&g_diskHeader, header, sizeof(g_diskHeader));
         offset += sizeof(g_diskHeader);
 
         // sub header is written out at end of session
-        memset(&g_diskSubHeader, 0, sizeof(g_diskSubHeader));
+        std::memset(&g_diskSubHeader, 0, sizeof(g_diskSubHeader));
         g_diskSubHeader.startDate = t_time;
         g_diskSubHeaderOffset = offset;
         offset += sizeof(g_diskSubHeader);
@@ -234,8 +195,16 @@ namespace IRacingTools::App::Commands {
 
     void logStateToFile(time_t t_time) {
       static auto &conn = LiveConnection::GetInstance();
+      static std::atomic_int32_t counter {0};
+      auto tickCountRes = conn.getSessionTickCount();
+      if (!tickCountRes.has_value()) {
+        printf("Tick count unavailable\n");
+        return;
+      }
+
       if (auto sessionInfoStr = conn.getSessionInfoStr()) {
-        auto fileRes = openUniqueFile("irsdk_session", "txt", t_time, false);
+        auto filePrefix = std::format("{}_{}_irsdk_session", counter.load(), tickCountRes.value());
+        auto fileRes = openUniqueFile(filePrefix.c_str(), "yaml", t_time, false);
         if (!fileRes)
           abort();
 
@@ -245,6 +214,8 @@ namespace IRacingTools::App::Commands {
           fputs(sessionInfoStr, file);
           fclose(file);
         }
+
+        ++counter;
       }
     }
 

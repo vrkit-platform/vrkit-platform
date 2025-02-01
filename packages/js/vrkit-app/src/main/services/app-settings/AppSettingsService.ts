@@ -30,13 +30,6 @@ export class AppSettingsService {
     concurrency: 1
   })
 
-  // private state: AppSettingsServiceState = {
-  //   appSettings: AppSettings.create()
-  // }
-  get state() {
-    return this.sharedAppState.appSettings
-  }
-
   @Bind
   private patchSettings(settings: Partial<AppSettings>): AppSettings {
     return runInAction(() => {
@@ -170,7 +163,28 @@ export class AppSettingsService {
   private onStateChange(_change: IObjectDidChange<AppSettings>) {
     this.saveAppSettings(this.appSettings)
   }
-
+  
+  /**
+   * Get current app settings state
+   */
+  get state() {
+    return this.sharedAppState.appSettings
+  }
+  
+  /**
+   * Alias to `.state`
+   */
+  get appSettings() {
+    return this.state
+  }
+  
+  /**
+   * Is autoconnect enabled in settings
+   */
+  get isAutoConnectEnabled() {
+    return this.state.autoconnect ?? false
+  }
+  
   /**
    * Constructor for singleton
    *
@@ -178,10 +192,9 @@ export class AppSettingsService {
    */
   constructor(readonly sharedAppState: SharedAppState) {}
 
-  get appSettings() {
-    return this.sharedAppState.appSettings
-  }
-
+  
+  
+  
   changeSettings(newSettings: Partial<AppSettings>): AppSettings {
     return this.patchSettings(newSettings)
   }

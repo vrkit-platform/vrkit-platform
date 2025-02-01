@@ -67,7 +67,23 @@ export interface SessionData {
      */
     status: SessionStatus;
     /**
-     * @generated from protobuf field: IRacingTools.Models.Session.SessionTiming timing = 10;
+     * @generated from protobuf field: int32 sub_count = 6;
+     */
+    subCount: number;
+    /**
+     * @generated from protobuf field: int32 sub_id = 7;
+     */
+    subId: number;
+    /**
+     * @generated from protobuf field: int32 sub_num = 8;
+     */
+    subNum: number;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionSubType sub_type = 9;
+     */
+    subType: SessionSubType;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionTiming timing = 15;
      */
     timing?: SessionTiming;
     /**
@@ -78,6 +94,10 @@ export interface SessionData {
      * @generated from protobuf field: IRacingTools.Models.FileInfo file_info = 21;
      */
     fileInfo?: FileInfo;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionCarStatus car_status = 30;
+     */
+    carStatus: SessionCarStatus;
     /**
      * @generated from protobuf field: string session_info_json = 90;
      */
@@ -99,6 +119,56 @@ export enum SessionType {
      * @generated from protobuf enum value: SESSION_TYPE_DISK = 1;
      */
     DISK = 1
+}
+/**
+ * @generated from protobuf enum IRacingTools.Models.Session.SessionSubType
+ */
+export enum SessionSubType {
+    /**
+     * @generated from protobuf enum value: SESSION_SUB_TYPE_PRACTICE = 0;
+     */
+    PRACTICE = 0,
+    /**
+     * @generated from protobuf enum value: SESSION_SUB_TYPE_QUALIFY = 1;
+     */
+    QUALIFY = 1,
+    /**
+     * @generated from protobuf enum value: SESSION_SUB_TYPE_RACE = 2;
+     */
+    RACE = 2
+}
+/**
+ * @generated from protobuf enum IRacingTools.Models.Session.SessionCarStatus
+ */
+export enum SessionCarStatus {
+    /**
+     * @generated from protobuf enum value: SESSION_CAR_STATUS_INVALID = 0;
+     */
+    INVALID = 0,
+    /**
+     * @generated from protobuf enum value: SESSION_CAR_STATUS_GET_IN_CAR = 1;
+     */
+    GET_IN_CAR = 1,
+    /**
+     * @generated from protobuf enum value: SESSION_CAR_STATUS_WARMUP = 3;
+     */
+    WARMUP = 3,
+    /**
+     * @generated from protobuf enum value: SESSION_CAR_STATUS_PARADE_LAPS = 4;
+     */
+    PARADE_LAPS = 4,
+    /**
+     * @generated from protobuf enum value: SESSION_CAR_STATUS_RACE = 5;
+     */
+    RACE = 5,
+    /**
+     * @generated from protobuf enum value: SESSION_CAR_STATUS_CHECKERED = 6;
+     */
+    CHECKERED = 6,
+    /**
+     * @generated from protobuf enum value: SESSION_CAR_STATUS_COOLDOWN = 7;
+     */
+    COOLDOWN = 7
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.Session.SessionStatus
@@ -233,9 +303,14 @@ class SessionData$Type extends MessageType<SessionData> {
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionType", SessionType, "SESSION_TYPE_"] },
             { no: 5, name: "status", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionStatus", SessionStatus, "SESSION_STATUS_"] },
-            { no: 10, name: "timing", kind: "message", T: () => SessionTiming },
+            { no: 6, name: "sub_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 7, name: "sub_id", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 8, name: "sub_num", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 9, name: "sub_type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionSubType", SessionSubType, "SESSION_SUB_TYPE_"] },
+            { no: 15, name: "timing", kind: "message", T: () => SessionTiming },
             { no: 20, name: "track_layout_metadata", kind: "message", T: () => TrackLayoutMetadata },
             { no: 21, name: "file_info", kind: "message", T: () => FileInfo },
+            { no: 30, name: "car_status", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionCarStatus", SessionCarStatus, "SESSION_CAR_STATUS_"] },
             { no: 90, name: "session_info_json", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 91, name: "session_info_yaml", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
@@ -245,6 +320,11 @@ class SessionData$Type extends MessageType<SessionData> {
         message.id = "";
         message.type = 0;
         message.status = 0;
+        message.subCount = 0;
+        message.subId = 0;
+        message.subNum = 0;
+        message.subType = 0;
+        message.carStatus = 0;
         message.sessionInfoJson = "";
         message.sessionInfoYaml = "";
         if (value !== undefined)
@@ -265,7 +345,19 @@ class SessionData$Type extends MessageType<SessionData> {
                 case /* IRacingTools.Models.Session.SessionStatus status */ 5:
                     message.status = reader.int32();
                     break;
-                case /* IRacingTools.Models.Session.SessionTiming timing */ 10:
+                case /* int32 sub_count */ 6:
+                    message.subCount = reader.int32();
+                    break;
+                case /* int32 sub_id */ 7:
+                    message.subId = reader.int32();
+                    break;
+                case /* int32 sub_num */ 8:
+                    message.subNum = reader.int32();
+                    break;
+                case /* IRacingTools.Models.Session.SessionSubType sub_type */ 9:
+                    message.subType = reader.int32();
+                    break;
+                case /* IRacingTools.Models.Session.SessionTiming timing */ 15:
                     message.timing = SessionTiming.internalBinaryRead(reader, reader.uint32(), options, message.timing);
                     break;
                 case /* IRacingTools.Models.TrackLayoutMetadata track_layout_metadata */ 20:
@@ -273,6 +365,9 @@ class SessionData$Type extends MessageType<SessionData> {
                     break;
                 case /* IRacingTools.Models.FileInfo file_info */ 21:
                     message.fileInfo = FileInfo.internalBinaryRead(reader, reader.uint32(), options, message.fileInfo);
+                    break;
+                case /* IRacingTools.Models.Session.SessionCarStatus car_status */ 30:
+                    message.carStatus = reader.int32();
                     break;
                 case /* string session_info_json */ 90:
                     message.sessionInfoJson = reader.string();
@@ -301,15 +396,30 @@ class SessionData$Type extends MessageType<SessionData> {
         /* IRacingTools.Models.Session.SessionStatus status = 5; */
         if (message.status !== 0)
             writer.tag(5, WireType.Varint).int32(message.status);
-        /* IRacingTools.Models.Session.SessionTiming timing = 10; */
+        /* int32 sub_count = 6; */
+        if (message.subCount !== 0)
+            writer.tag(6, WireType.Varint).int32(message.subCount);
+        /* int32 sub_id = 7; */
+        if (message.subId !== 0)
+            writer.tag(7, WireType.Varint).int32(message.subId);
+        /* int32 sub_num = 8; */
+        if (message.subNum !== 0)
+            writer.tag(8, WireType.Varint).int32(message.subNum);
+        /* IRacingTools.Models.Session.SessionSubType sub_type = 9; */
+        if (message.subType !== 0)
+            writer.tag(9, WireType.Varint).int32(message.subType);
+        /* IRacingTools.Models.Session.SessionTiming timing = 15; */
         if (message.timing)
-            SessionTiming.internalBinaryWrite(message.timing, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
+            SessionTiming.internalBinaryWrite(message.timing, writer.tag(15, WireType.LengthDelimited).fork(), options).join();
         /* IRacingTools.Models.TrackLayoutMetadata track_layout_metadata = 20; */
         if (message.trackLayoutMetadata)
             TrackLayoutMetadata.internalBinaryWrite(message.trackLayoutMetadata, writer.tag(20, WireType.LengthDelimited).fork(), options).join();
         /* IRacingTools.Models.FileInfo file_info = 21; */
         if (message.fileInfo)
             FileInfo.internalBinaryWrite(message.fileInfo, writer.tag(21, WireType.LengthDelimited).fork(), options).join();
+        /* IRacingTools.Models.Session.SessionCarStatus car_status = 30; */
+        if (message.carStatus !== 0)
+            writer.tag(30, WireType.Varint).int32(message.carStatus);
         /* string session_info_json = 90; */
         if (message.sessionInfoJson !== "")
             writer.tag(90, WireType.LengthDelimited).string(message.sessionInfoJson);

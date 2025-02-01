@@ -23,6 +23,23 @@ enum SessionType {
   SESSION_TYPE_DISK = 1;
 }
 
+enum SessionSubType {
+  SESSION_SUB_TYPE_PRACTICE = 0;
+  SESSION_SUB_TYPE_QUALIFY = 1;
+  SESSION_SUB_TYPE_RACE = 2;
+}
+
+enum SessionCarStatus {
+  SESSION_CAR_STATUS_INVALID = 0;
+  SESSION_CAR_STATUS_GET_IN_CAR = 1;
+  SESSION_CAR_STATUS_WARMUP = 3;
+  SESSION_CAR_STATUS_PARADE_LAPS = 4;
+  SESSION_CAR_STATUS_RACE = 5;
+  SESSION_CAR_STATUS_CHECKERED = 6;
+  SESSION_CAR_STATUS_COOLDOWN = 7;
+}
+
+
 enum SessionStatus {
   SESSION_STATUS_CREATED = 0;
   SESSION_STATUS_READY = 1;
@@ -38,10 +55,17 @@ message SessionData {
 
   SessionStatus status = 5;
 
-  SessionTiming timing = 10;
+  int32 sub_count = 6;
+  int32 sub_id = 7;
+  int32 sub_num = 8;
+  SessionSubType sub_type = 9;
+
+  SessionTiming timing = 15;
 
   TrackLayoutMetadata track_layout_metadata = 20;
   FileInfo file_info = 21;
+
+  SessionCarStatus car_status = 30;
 
   string session_info_json = 90;
   string session_info_yaml = 91;

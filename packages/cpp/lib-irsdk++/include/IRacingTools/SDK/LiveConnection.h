@@ -18,8 +18,6 @@
 #include "SessionInfo/ModelParser.h"
 #include "Types.h"
 
-
-#include "Utils/LUT.h"
 #include "Utils/Singleton.h"
 
 namespace IRacingTools::SDK {
@@ -46,6 +44,8 @@ public:
 
     const VarDataHeader *getVarHeaderPtr();
     const VarDataHeader *getVarHeaderEntry(uint32_t index);
+
+    std::optional<std::int32_t> getSessionTickCount();
 
     int varNameToIndex(const std::string_view& name);
     int varNameToOffset(const std::string_view& name);

@@ -92,7 +92,9 @@ namespace IRacingTools::SDK {
 
       if (gSharedMemPtr) {
         if (!gDataValidEventHandle) {
-          gDataValidEventHandle = OpenEvent(SYNCHRONIZE, false, Resources::DataValidEventName);
+          gDataValidEventHandle = OpenEventA(SYNCHRONIZE, false, Resources::IRSDK_DATAVALIDEVENTNAME);
+          // if (!gDataValidEventHandle)
+          //   gDataValidEventHandle = CreateEvent(NULL, true, false, Resources::IRSDK_DATAVALIDEVENTNAME);
           gLastTickCount = INT_MAX;
         }
 
@@ -100,7 +102,7 @@ namespace IRacingTools::SDK {
           gIsInitialized = true;
           return gIsInitialized;
         }
-        //else printf("Error opening event: %d\n", GetLastError());
+        else printf("Error opening event: %d\n", GetLastError());
       }
       //else printf("Error mapping file: %d\n", GetLastError());
     }
@@ -164,7 +166,7 @@ namespace IRacingTools::SDK {
           return true;
         }
       }
-      // if older than last recieved, than reset, we probably disconnected
+      // if older than last received, than reset, we probably disconnected
       else if (gLastTickCount > gDataHeader->varBuf[latest].tickCount) {
         gLastTickCount = gDataHeader->varBuf[latest].tickCount;
         return false;
@@ -173,6 +175,13 @@ namespace IRacingTools::SDK {
     }
 
     return false;
+  }
+
+  std::optional<std::int32_t> LiveConnection::getSessionTickCount() {
+    if (gLastTickCount < 0 || gLastTickCount >= INT_MAX)
+      return std::nullopt;
+
+    return gLastTickCount;
   }
 
   bool LiveConnection::waitForDataReady(int timeOut, char* data) {

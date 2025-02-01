@@ -44,12 +44,13 @@ import EventEmitter3 from "eventemitter3"
 import { app, dialog, ipcMain, IpcMainInvokeEvent } from "electron"
 import { get } from "lodash/fp"
 import { Deferred } from "@3fv/deferred"
-import { match } from "ts-pattern"
+import { match, P } from "ts-pattern"
 import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { action, observe, remove, runInAction, set, toJS } from "mobx"
 import { SessionPlayerContainer } from "./SessionPlayerContainer"
 import { LiveAutoConnectChangeEvent, LiveAutoConnectComputation } from "./LiveAutoConnectComputation"
+import { AppSettingsService } from "../app-settings"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -328,10 +329,12 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
    *
    * @param windowManager
    * @param sharedAppState
+   * @param appSettings
    */
   constructor(
     readonly windowManager: WindowManager,
-    readonly sharedAppState: MainSharedAppState
+    readonly sharedAppState: MainSharedAppState,
+    readonly appSettings: AppSettingsService
   ) {
     super()
     this.liveAutoConnectComputation_ = new LiveAutoConnectComputation(sharedAppState).on(
@@ -453,9 +456,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   ) {
     const player = playerOrContainer instanceof SessionPlayerContainer ? playerOrContainer.player : playerOrContainer
 
-    if (!player) {
-      throw Error(`Invalid playerOrContainer`)
-    }
+    log.assert(!!player,`Invalid playerOrContainer`)
 
     const sessionDetail = this.toSessionDetailFromPlayer(player, data)
     const { isAvailable } = sessionDetail
@@ -463,14 +464,22 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     const isLive = isLivePlayer(player)
     const stateKey: SessionManagerStateSessionKey = isLive ? "liveSession" : "diskSession"
 
-    match([isLive, activeSessionType, isAvailable])
-      .with([true, "LIVE", false], () => {
+    match([isLive, activeSessionType, isAvailable, this.appSettings.isAutoConnectEnabled])
+      .with([true, "NONE", true, true], () => {
+        activeSessionType = "LIVE"
+      })
+      .with([true, "LIVE", false, P._], () => {
         activeSessionType = "NONE"
       })
-      .with([false, "DISK", false], () => {
+      .with([false, "DISK", false, P._], () => {
         activeSessionType = "NONE"
       })
-      .otherwise(() => {})
+      .with([false, "LIVE", false, P._], () => {
+        activeSessionType = "NONE"
+      })
+      .otherwise(() => {
+        // NO STATE CHANGE HERE
+      })
 
     this.patchState({
       activeSessionId: sessionDetail?.id,
@@ -506,7 +515,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   }
 
   async createDiskPlayer(filePath: string) {
-    const player = await SessionPlayer.Create(filePath)
+    const player = SessionPlayer.Create(filePath)
     player.start()
 
     this.addPlayer(filePath, player)

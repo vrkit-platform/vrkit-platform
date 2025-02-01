@@ -10,6 +10,7 @@
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
 #include <IRacingTools/SDK/Utils/ChronoHelpers.h>
+#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
 #include <IRacingTools/SDK/Utils/ThreadHelpers.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/DiskSessionDataProvider.h>
@@ -76,13 +77,15 @@ namespace IRacingTools::Shared {
         sessionData_->set_status(Models::Session::SESSION_STATUS_READY);
 
         auto sessionInfo = diskClient.getSessionInfo().lock();
-
         VRK_LOG_AND_FATAL_IF(
             !Utils::GetSessionInfoTrackLayoutMetadata(sessionData_->mutable_track_layout_metadata(), sessionInfo.get()).
             has_value(),
             "Unable to populate track layout metadata for {}",
             file.string()
         );
+
+        auto subSessions = sessionInfo->sessionInfo.sessions;
+        sessionData_->set_sub_count(subSessions.size());
 
         L->warn("HACK: Skipping to SessionNum == 2 (RACE)");
         if (!seekToSessionNum(2)) {
@@ -177,7 +180,6 @@ namespace IRacingTools::Shared {
             if (!nextDataFrame()) {
                 if (running_) {
                     L->info("Reached the last sample, resetting to the first of {}", diskClient.getSampleCount());
-
                 }
                 break;
             }
@@ -222,9 +224,42 @@ namespace IRacingTools::Shared {
         timeBeginPeriod(1);
     }
 
+    void DiskSessionDataProvider::updateSessionData() {
+        if (!isAvailable()) {
+            return;
+        }
+
+        auto sessionNumRes = diskClient_->getVarInt(KnownVarName::SessionNum);
+        if (!sessionNumRes) {
+            L->error("'SessionNum' data var is unavailable");
+        } else {
+            auto sessionNum = sessionNumRes.value();
+            auto sessionInfo = diskClient_->getSessionInfo().lock();
+            auto subSessionInfo = SDK::Utils::FindValue(sessionInfo->sessionInfo.sessions, [sessionNum] (auto & subInfo) {
+                return subInfo.sessionNum == sessionNum;
+            });
+            if (!subSessionInfo) {
+                L->error("ERROR, SUB SESSION NUM ({}) NOT FOUND IN YAML", sessionNum);
+                return;
+            }
+
+            sessionData_->set_sub_id(sessionInfo->weekendInfo.subSessionID);
+            sessionData_->set_sub_num(sessionNum);
+            auto subSessionName = subSessionInfo.value().sessionName;
+
+            sessionData_->set_sub_type(
+                subSessionName == "PRACTICE" ? Models::Session::SESSION_SUB_TYPE_PRACTICE :
+                subSessionName == "QUALIFY" ? Models::Session::SESSION_SUB_TYPE_QUALIFY :
+                 Models::Session::SESSION_SUB_TYPE_RACE);
+
+        }
+
+    }
+
 
     void DiskSessionDataProvider::process() {
         checkConnection();
+        updateSessionData();
         fireDataUpdatedEvent();
         // processYAMLLiveString();
 

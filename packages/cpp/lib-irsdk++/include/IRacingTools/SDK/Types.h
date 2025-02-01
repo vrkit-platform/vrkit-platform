@@ -81,14 +81,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <chrono>
 
 #include <magic_enum.hpp>
+#include <regex>
 #include <windows.h>
 
 #include <IRacingTools/SDK/Utils/LUT.h>
+#include <Session/SessionState.pb.h>
+
+#include "Utils/EnumHelpers.h"
 
 namespace IRacingTools::SDK {
   using ClientId = std::string_view;
 
-  template<typename T>
+  template <typename T>
   using Opt = std::optional<T>;
 
   using SessionTime = std::chrono::milliseconds;
@@ -115,14 +119,14 @@ namespace IRacingTools::SDK {
   constexpr std::size_t VarDataTypeCount = magic_enum::enum_count<VarDataType>();
 
   constexpr Utils::LUT<VarDataType, std::size_t, VarDataTypeCount> VarDataTypeSizeTable = {
-      {
-          {VarDataType::Char, 1},
-          {VarDataType::Bool, 1},
-          {VarDataType::Int32, 4},
-          {VarDataType::Bitmask, 4},
-          {VarDataType::Float, 4},
-          {VarDataType::Double, 8},
-      },
+    {
+      {VarDataType::Char, 1},
+      {VarDataType::Bool, 1},
+      {VarDataType::Int32, 4},
+      {VarDataType::Bitmask, 4},
+      {VarDataType::Float, 4},
+      {VarDataType::Double, 8},
+    },
   };
 
   constexpr std::array<std::size_t, VarDataTypeCount> VarDataTypeBytes = VarDataTypeSizeTable.values();
@@ -173,7 +177,7 @@ namespace IRacingTools::SDK {
     StartGo = 0x80000000,
   };
 
-  template<FlagType FT>
+  template <FlagType FT>
   bool IsFlagSet(uint32_t bitmask) {
     return magic_enum::enum_underlying(FT) & bitmask > 0;
   }
@@ -245,7 +249,7 @@ namespace IRacingTools::SDK {
     // there are cars on each side.
     LR2CarsLeft,
     // there are two cars to our left.
-    LR2CarsRight// there are two cars to our right.
+    LR2CarsRight // there are two cars to our right.
   };
 
   enum class CameraState {
@@ -567,13 +571,32 @@ namespace IRacingTools::SDK {
      * @param name Known variable name
      * @return string_view of enum constant
      */
-  constexpr std::string_view KnownVarNameToStringView(const KnownVarName &name) {
+  constexpr std::string_view KnownVarNameToStringView(const KnownVarName& name) {
     return magic_enum::enum_name(name);
   }
 
 
-  //----
-  //
+  inline std::array<std::string_view, 3> GetSessionSubTypes() {
+    return {
+      {
+        std::regex_replace(
+          Utils::EnumName(Models::Session::SessionSubType::SESSION_SUB_TYPE_PRACTICE),
+          std::regex{"SESSION_SUB_TYPE_"},
+          ""
+        ),
+        std::regex_replace(
+          Utils::EnumName(Models::Session::SessionSubType::SESSION_SUB_TYPE_QUALIFY),
+          std::regex{"SESSION_SUB_TYPE_"},
+          ""
+        ),
+        std::regex_replace(
+          Utils::EnumName(Models::Session::SessionSubType::SESSION_SUB_TYPE_RACE),
+          std::regex{"SESSION_SUB_TYPE_"},
+          ""
+        )
+      }
+    };
+  }
 
 
   //----
@@ -609,7 +632,7 @@ namespace IRacingTools::SDK {
     // sessionNum, sessionTimeMS (high, low)
     VideoCapture,
     // VideoCaptureMode, unused, unused
-    Last// unused placeholder
+    Last // unused placeholder
   };
 
   enum class ChatCommandMode {
@@ -619,10 +642,10 @@ namespace IRacingTools::SDK {
     // Open up a new chat window
     Reply,
     // Reply to last private chat
-    Cancel// Close chat window
+    Cancel // Close chat window
   };
 
-  enum class PitCommandMode// this only works when the driver is in the car
+  enum class PitCommandMode // this only works when the driver is in the car
   {
     Clear = 0,
     // Clear all pit checkboxes
@@ -650,7 +673,7 @@ namespace IRacingTools::SDK {
     // Uncheck add fuel
   };
 
-  enum class TelemetryCommandMode// You can call this any time, but telemtry only records when driver is in there car
+  enum class TelemetryCommandMode // You can call this any time, but telemtry only records when driver is in there car
   {
     Stop = 0,
     // Turn telemetry recording off
@@ -663,13 +686,13 @@ namespace IRacingTools::SDK {
   enum class ReplayStateMode {
     EraseTape = 0,
     // clear any data in the replay tape
-    Last// unused place holder
+    Last // unused place holder
   };
 
   enum class ReloadTexturesMode {
     All = 0,
     // reload all textuers
-    CarIdx// reload only textures for the specific carIdx
+    CarIdx // reload only textures for the specific carIdx
   };
 
   // Search replay tape for events
@@ -684,21 +707,21 @@ namespace IRacingTools::SDK {
     NextFrame,
     PrevIncident,
     NextIncident,
-    Last// unused placeholder
+    Last // unused placeholder
   };
 
   enum class ReplayPositionMode {
     Begin = 0,
     Current,
     End,
-    Last// unused placeholder
+    Last // unused placeholder
   };
 
-  enum class FFBCommandMode// You can call this any time
+  enum class FFBCommandMode // You can call this any time
   {
     MaxForce = 0,
     // Set the maximum force when mapping steering torque force to direct input units (float in Nm)
-    Last// unused placeholder
+    Last // unused placeholder
   };
 
   // CamSwitchPos or CamSwitchNum camera focus defines
@@ -725,4 +748,4 @@ namespace IRacingTools::SDK {
     HideVideoTimer,
     // hide video timer
   };
-}// namespace IRacingTools::SDK
+} // namespace IRacingTools::SDK

@@ -1,12 +1,11 @@
-import { SxProps, useTheme } from "@mui/material/styles"
+import { SxProps } from "@mui/material/styles"
 
-import React, { useState } from "react"
+import React from "react"
 
 import Box from "@mui/material/Box"
 import {
-  alpha, FillHeight,
-  FillWindow,
-  flex,
+  alpha,
+  FillHeight,
   flexAlign,
   FlexColumn,
   FlexRow,
@@ -29,21 +28,19 @@ export type PageLayoutProps = {
 }
 
 export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
+  // noinspection UnnecessaryLocalVariableJS
   const rootPath = useWebPathRoot(),
     isMain = rootPath === WebRootPath.main,
-      isSettings = rootPath === WebRootPath.settings,
-      isVRLayoutEditor = rootPath === WebRootPath.dashboardVRLayout,
-      showTitlebar = isMain || isSettings,
-      
+    isSettings = rootPath === WebRootPath.settings,
+    isVRLayoutEditor = rootPath === WebRootPath.dashboardVRLayout,
+    showTitlebar = isMain || isSettings,
+    isSessionControlVisible = isMain,
     isModalActive = useAppSelector(sharedAppSelectors.hasActiveModalDesktopWindow)
-  
 
   return (
     <>
-      
       <AppTitlebar transparent={isVRLayoutEditor} />
-      
-      
+
       <Box
         component="main"
         sx={{
@@ -55,7 +52,6 @@ export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
           backgroundColor: "transparent",
           ...sx
         }}
-        
       >
         <If condition={isMain}>
           <NavDrawer />
@@ -75,8 +71,10 @@ export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
           {children}
         </Box>
       </Box>
-      <If condition={isMain}>
+      <If condition={isSessionControlVisible}>
         <AppSessionPlayerControlPanel />
+      </If>
+      <If condition={isMain}>
         <Backdrop
           open={isModalActive}
           sx={{

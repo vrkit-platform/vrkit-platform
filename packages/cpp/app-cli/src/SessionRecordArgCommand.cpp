@@ -6,6 +6,7 @@
 #include <conio.h>
 #include <csignal>
 #include <cstdio>
+#include <cassert>
 #include <ctime>
 #include <windows.h>
 
@@ -45,23 +46,12 @@ namespace IRacingTools::App::Commands {
     const char g_sessionUniqueIdString[] = "SessionUniqueID";
     int g_sessionUniqueIdOffset = -1;
 
+    const char g_sessionTickString[] = "SessionTick";
+    int g_sessionTickOffset = -1;
+
 
     const char g_lapIndexString[] = "Lap";
     int g_lapIndexOffset = -1;
-
-    // place holders for variables that need to be updated in the header of our CSV file
-    double startTime;
-    long int startTimeOffset;
-
-    double endTime;
-    long int endTimeOffset;
-
-    int lastLap;
-    int lapCount;
-    long int lapCountOffset;
-
-    int recordCount;
-    long int recordCountOffset;
 
     // place holders for data that needs to be updated in our IBT file
     DataHeader g_diskHeader;
@@ -72,7 +62,7 @@ namespace IRacingTools::App::Commands {
     std::string gOutputPath{};
 
     // open a file for writing, without overwriting any existing files
-    std::optional<std::pair<std::string, FILE *>> openUniqueFile(const char *name, const char *ext, time_t t_time, bool asBinary) {
+    std::optional<std::pair<std::string, FILE *>> openUniqueFile(const char *name, const char *ext, time_t t_time, bool asBinary, std::string outputPath = gOutputPath) {
       FILE *file = nullptr;
       char tmpFileNameStr[MAX_PATH] = "";
       int i = 0;
@@ -83,7 +73,7 @@ namespace IRacingTools::App::Commands {
           fclose(file);
 
 
-        _snprintf(tmpFileNameStr, MAX_PATH, "%s\\%s", gOutputPath.c_str(), name);
+        _snprintf(tmpFileNameStr, MAX_PATH, "%s\\%s", outputPath.c_str(), name);
         tmpFileNameStr[MAX_PATH - 1] = '\0';
 
         tm tm_time;
@@ -109,12 +99,15 @@ namespace IRacingTools::App::Commands {
       }
 
       std::string filename(tmpFileNameStr);
-      return {{filename,fopen(tmpFileNameStr, asBinary ? "wb" : "w")}};
+      auto fileMode = asBinary ? "wb" : "w";
+      file = fopen(tmpFileNameStr, fileMode);
+      if (!file) {
+        std::println(std::cerr, "Failed to open temp file {} with mode {}", tmpFileNameStr, fileMode);
+        return std::nullopt;
+      }
+      return {{filename,file}};
 
     }
-
-    constexpr int reserveCount = 32;
-
 
     // log header to ibt binary format
     void logHeaderToIBT(const DataHeader *header, FILE *file, time_t t_time) {
@@ -294,17 +287,11 @@ namespace IRacingTools::App::Commands {
 
       // grab the memory offset to the playerInCar flag
       g_playerInCarOffset = LiveConnection::GetInstance().varNameToOffset(g_playerInCarString);
+      g_sessionTickOffset = LiveConnection::GetInstance().varNameToOffset(g_sessionTickString);
       g_sessionUniqueIdOffset = LiveConnection::GetInstance().varNameToOffset(g_sessionUniqueIdString);
       g_sessionTimeOffset = LiveConnection::GetInstance().varNameToOffset(g_sessionTimeString);
       g_lapIndexOffset = LiveConnection::GetInstance().varNameToOffset(g_lapIndexString);
 
-      // get the playerCarIdx
-      //const char *valstr;
-      //int valstrlen;
-      //const char g_playerCarIdxPath[] = "DriverInfo:DriverCarIdx:";
-      //playerCarIdx = -1;
-      //if(ParseYaml(irsdk_getSessionInfoStr(), g_playerCarIdxPath, &valstr, &valstrlen))
-      //	playerCarIdx = atoi(valstr);
     }
 
     bool canLogToFile(const DataHeader *header, const char *data) {
@@ -401,11 +388,32 @@ namespace IRacingTools::App::Commands {
       exit(0);
     }
 
+    int getSessionId() {
+      assert((g_sessionUniqueIdOffset > -1, "g_sessionUniqueIdOffset is not set properly"));
+      auto sessionId = *((int *) (g_data + g_sessionUniqueIdOffset));
+      return sessionId;
+    }
+
+    int getSessionTick() {
+      assert((g_sessionTickOffset > -1 && "g_sessionTickOffset is not set properly"));
+      auto sessionTick = *((int *) (g_data + g_sessionTickOffset));
+      return sessionTick;
+    }
+
     int recordSession(const std::string &outputPath, bool printHeader, bool printData) {
 
+      // SET GLOBAL OUTPUT PATH
       assert((std::filesystem::is_directory(outputPath) && "output path is does not exist"));
 
       gOutputPath = outputPath;
+
+      // CREATE CHILD SESSION INFO OUTPUT PATH
+      auto sessionInfoOutputPath = fs::path(gOutputPath) / "session-info";
+      if (!fs::is_directory(sessionInfoOutputPath)) {
+        fs::create_directories(sessionInfoOutputPath);
+      }
+
+      assert((std::filesystem::is_directory(sessionInfoOutputPath) && "output path is does not exist"));
 
       // trap ctrl-c
       signal(SIGINT, ex_program);
@@ -420,6 +428,7 @@ namespace IRacingTools::App::Commands {
       g_nData = 0;
       //auto &client = LiveClient::GetInstance();
       auto &conn = LiveConnection::GetInstance();
+
       //std::shared_ptr<Client::WeakSessionInfoWithUpdateCount> prevSessionInfo{nullptr};
       std::atomic_uint32_t prevSessionInfoUpdateCount = 0;
       while (!_kbhit()) {
@@ -438,7 +447,9 @@ namespace IRacingTools::App::Commands {
             }
 
             if (g_data) {
-              const int sessionId = *((int *) (g_data + g_sessionUniqueIdOffset));
+              auto sessionId = getSessionId();
+              auto sessionTick = getSessionTick();
+
               // open file if first time
               if (!g_file && open_file(sessionId, g_file, g_ttime)) {
                 logHeaderToIBT(pHeader, g_file, g_ttime);
@@ -452,7 +463,7 @@ namespace IRacingTools::App::Commands {
               if (printData) {
                 static int ct = 0;
                 if (ct++ % 100 == 0) {
-                  printf("Index %d session info updates %u\n", ct, prevSessionInfoUpdateCount.load());
+                  printf("Index %d ticks=%d, session info updates=%u\n", ct, sessionTick, prevSessionInfoUpdateCount.load());
                   //logDataToDisplay(pHeader, g_data);
                 }
               }
@@ -466,15 +477,17 @@ namespace IRacingTools::App::Commands {
                   auto sessionInfo = conn.getSessionInfo();
 
                   auto t_time = time(nullptr);
-                  std::string prefix = fmt::format("{}_ir_session_info_update-{}_track-{}", sessionId, newSessionInfoUpdateCount, sessionInfo->weekendInfo.trackName);
-                  auto fileRes = openUniqueFile(prefix.c_str(), "yaml", t_time, false);
-                  auto [filename, tmpFile] = fileRes.value();
-                  if (!tmpFile) {
-                    fmt::println("ERROR creating file for session info dump #{}", newSessionInfoUpdateCount);
-                  } else {
-                    fmt::println("Session info updated #{}, dumping {} ", newSessionInfoUpdateCount, filename);
-                    fwrite(sessionInfoStr, 1, sessionInfoLen, tmpFile);
-                    fclose(tmpFile);
+                  std::string prefix = fmt::format("{}_{}_{}_ir_session_info_update_track-{}", sessionTick, sessionId, newSessionInfoUpdateCount, sessionInfo->weekendInfo.trackName);
+                  auto fileRes = openUniqueFile(prefix.c_str(), "yaml", t_time, false, sessionInfoOutputPath.string());
+                  if (fileRes) {
+                    auto [filename, tmpFile] = fileRes.value();
+                    if (!tmpFile) {
+                      fmt::println("ERROR creating file for session info dump #{}", newSessionInfoUpdateCount);
+                    } else {
+                      fmt::println("Session info updated #{}, dumping {} ", newSessionInfoUpdateCount, filename);
+                      fwrite(sessionInfoStr, 1, sessionInfoLen, tmpFile);
+                      fclose(tmpFile);
+                    }
                   }
                 }
               }

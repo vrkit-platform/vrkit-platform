@@ -85,7 +85,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <windows.h>
 
 #include <IRacingTools/SDK/Utils/LUT.h>
-#include <Session/SessionState.pb.h>
+// #include <IRacingTools/Models/Session/SessionState.pb.h>
 
 #include "Utils/EnumHelpers.h"
 
@@ -573,29 +573,6 @@ namespace IRacingTools::SDK {
      */
   constexpr std::string_view KnownVarNameToStringView(const KnownVarName& name) {
     return magic_enum::enum_name(name);
-  }
-
-
-  inline std::array<std::string_view, 3> GetSessionSubTypes() {
-    return {
-      {
-        std::regex_replace(
-          Utils::EnumName(Models::Session::SessionSubType::SESSION_SUB_TYPE_PRACTICE),
-          std::regex{"SESSION_SUB_TYPE_"},
-          ""
-        ),
-        std::regex_replace(
-          Utils::EnumName(Models::Session::SessionSubType::SESSION_SUB_TYPE_QUALIFY),
-          std::regex{"SESSION_SUB_TYPE_"},
-          ""
-        ),
-        std::regex_replace(
-          Utils::EnumName(Models::Session::SessionSubType::SESSION_SUB_TYPE_RACE),
-          std::regex{"SESSION_SUB_TYPE_"},
-          ""
-        )
-      }
-    };
   }
 
 

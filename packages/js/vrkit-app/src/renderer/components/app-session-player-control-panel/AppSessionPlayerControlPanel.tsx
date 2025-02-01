@@ -5,7 +5,7 @@ import Button from "@mui/material/Button"
 import { darken, styled, useTheme } from "@mui/material/styles"
 import {
   child,
-  createClassNames,
+  createClassNames, CursorPointer,
   Ellipsis,
   EllipsisBox,
   flexAlign,
@@ -38,6 +38,8 @@ import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import Typography from "@mui/material/Typography"
 import { SessionActiveIndicator } from "./SessionActiveIndicator"
 import { DiskSessionView } from "./DiskSessionView"
+import { DiskSessionButton } from "./DiskSessionButton"
+import LiveSessionButton from "./LiveSessionButton"
 
 const log = getLogger(__filename)
 
@@ -60,7 +62,7 @@ const SPCRoot = styled(Box, { name: "AppSessionPlayerControlPanelRoot" })(
       borderTopRightRadius: `calc(${shape.borderRadius} * 2)`,
       minHeight: dimen.appBarHeight,
       maxHeight: dimen.appBarHeight,
-      ...widthConstraint(300),
+      ...widthConstraint(`min(400px,80vw)`),
       [notHasCls(classNames.expanded)]: {
         [child(classNames.content)]: {
           ...OverflowHidden,
@@ -71,7 +73,7 @@ const SPCRoot = styled(Box, { name: "AppSessionPlayerControlPanelRoot" })(
         maxHeight: "max(50vh,400px)",
         [child(classNames.content)]: {
           ...OverflowAuto,
-          maxHeight: `calc(max(50vh,400px) - ${dimen.appBarHeight})`,
+          maxHeight: `calc(max(50vh,400px) - ${dimen.appBarHeight})`
         }
       },
       [hasCls(classNames.active)]: {
@@ -120,9 +122,6 @@ const SPCRoot = styled(Box, { name: "AppSessionPlayerControlPanelRoot" })(
   })
 )
 
-
-
-
 function SessionActiveTop({ session, sessionType }: { session: SessionDetail; sessionType: ActiveSessionType }) {
   const theme = useTheme(),
     info = session.info,
@@ -141,7 +140,8 @@ function SessionActiveTop({ session, sessionType }: { session: SessionDetail; se
         <Typography
           sx={{
             ...FlexAuto,
-            transform: "translateY(-2px)", opacity: 0.6
+            transform: "translateY(-2px)",
+            opacity: 0.6
           }}
           fontStyle="italic"
           fontSize={rem(0.7)}
@@ -201,7 +201,11 @@ export function AppSessionPlayerControlPanel({ className, ...other }: AppSession
       {...other}
     >
       <Button
+        component={Box}
         className={clsx(classNames.top)}
+        sx={{
+          ...CursorPointer
+        }}
         onClick={e => {
           e.preventDefault()
           e.stopPropagation()
@@ -228,12 +232,25 @@ export function AppSessionPlayerControlPanel({ className, ...other }: AppSession
           ) : (
             <Typography
               color="action.disabled"
-              sx={{ opacity: 0.65, ...Ellipsis }}
+              sx={{ opacity: 0.65, ...Ellipsis, ...FlexScaleZero }}
               fontStyle="italic"
+              textAlign="left"
             >
               No active game session
             </Typography>
           )}
+
+          <Choose>
+            <When condition={("NONE" === activeSessionType && isLiveSessionAvailable) || activeSessionType === "LIVE"}>
+              <LiveSessionButton sx={{ ...FlexAuto }} />
+            </When>
+            <When condition={["NONE", "DISK"].includes(activeSessionType)}>
+              <DiskSessionButton sx={{ ...FlexAuto }} />
+            </When>
+            <Otherwise>
+              <></>
+            </Otherwise>
+          </Choose>
         </FlexScaleZeroBox>
 
         <DownIcon
@@ -243,13 +260,23 @@ export function AppSessionPlayerControlPanel({ className, ...other }: AppSession
             transform: !expanded ? "rotate(180deg)" : "none"
           }}
         />
-
       </Button>
       <Box className={clsx(classNames.content)}>
-        <If condition={activeSessionType !== "LIVE"}>
-          <DiskSessionView />
-        </If>
-      
+        <Choose>
+          <When condition={activeSessionType === "NONE"}>
+            <Typography
+                color="action.disabled"
+                sx={{ opacity: 0.65, ...Ellipsis }}
+                fontStyle="italic"
+                textAlign="center"
+            >
+              Disconnected
+            </Typography>
+          </When>
+          <When condition={activeSessionType === "DISK"}>
+            <DiskSessionView />
+          </When>
+        </Choose>
       </Box>
     </SPCRoot>
   )

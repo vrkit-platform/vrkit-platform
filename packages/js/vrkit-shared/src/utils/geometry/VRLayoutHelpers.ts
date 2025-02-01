@@ -11,14 +11,36 @@ import {
 
 const log = getLogger(__filename)
 
+export const VRLayoutScreenDimension = 2048
+export const VRLayoutMaxWidgets = 8
 export const VRLayoutBoundsDiameter = 2
 export const VRLayoutBoundsRadius = VRLayoutBoundsDiameter / 2
 
 export const VRLayoutBounds = SizeF.create({
   width: VRLayoutBoundsDiameter,
   height: VRLayoutBoundsDiameter,
-
 })
+
+export const VRScreenSize = SizeI.create({
+  width: VRLayoutBoundsDiameter,
+  height: VRLayoutBoundsDiameter,
+})
+
+export function ConvertVRSizeToScreenRect(vrSize:SizeI):RectI {
+  const vrScreenScale = VRLayoutScreenDimension / VRLayoutBoundsDiameter
+  
+  return RectI.create({
+    size: {
+      width: vrSize.width * vrScreenScale,
+      height: vrSize.height * vrScreenScale
+    },
+    position: {
+      x: 0,
+      y: 0
+    }
+  })
+}
+
 export function ConvertScreenRectToVRLayout(surfaceSize: SizeI, screenRect: RectI): VRLayout {
   const scale = Math.min(surfaceSize.width, surfaceSize.height) / VRLayoutBoundsDiameter,
       vrSize = SizeI.create({
@@ -30,9 +52,11 @@ export function ConvertScreenRectToVRLayout(surfaceSize: SizeI, screenRect: Rect
         eyeY: (-1 * ((screenRect.position.y / scale) - VRLayoutBoundsRadius)) - (vrSize.height / 2),
         z: -1
       }),
+      
       vrLayout = VRLayout.create({
         pose: vrPose,
-        size: vrSize
+        size: vrSize,
+        screenRect: ConvertVRSizeToScreenRect(vrSize)
       })
   
   if (log.isDebugEnabled())

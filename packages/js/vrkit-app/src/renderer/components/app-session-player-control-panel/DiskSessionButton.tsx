@@ -16,7 +16,7 @@ const log = getLogger(__filename)
 
 export interface DiskSessionButtonProps extends Pick<ButtonProps, "disabled" | "sx" | "variant" | "size"> {}
 
-export function DiskSessionButton({ sx, ...other }: DiskSessionButtonProps) {
+export function DiskSessionButton({ sx, disabled = false,...other }: DiskSessionButtonProps) {
   const theme = useTheme(),
     diskSession = useAppSelector(sharedAppSelectors.selectDiskSession),
     activeSessionType = useAppSelector(sharedAppSelectors.selectActiveSessionType),
@@ -51,19 +51,21 @@ export function DiskSessionButton({ sx, ...other }: DiskSessionButtonProps) {
 
   return (
     <Button
+      disabled={disabled}
       variant="contained"
-      color={isAvailable ? "error" : "primary"}
+      color={isActive ? "error" : "primary"}
       size="small"
-      onClick={isAvailable ? onCloseClick.execute : onOpenClick.execute}
+      onClick={isActive ? onCloseClick.execute : onOpenClick.execute}
       sx={{
         ...FlexRowCenter,
         lineHeight: 1,
-        gap: theme.spacing(1)
+        gap: theme.spacing(1),
+        ...sx
       }}
       {...other}
     >
       <FileOpenIcon />
-      <Typography variant="inherit">{!isAvailable ? `Open Disk Session` : `Close Disk Session`}</Typography>
+      <Typography variant="inherit">{!isActive ? `Open Session File` : `Close Session File`}</Typography>
     </Button>
   )
 }

@@ -1,4 +1,8 @@
-import { assign, Pair, RectangleLayoutTool } from "@vrkit-platform/shared"
+import {
+  assign,
+  Pair,
+  RectangleLayoutTool, VRLayoutScreenDimension
+} from "@vrkit-platform/shared"
 import { OverlayAnchor, PositionF, PositionI, RectF, RectI, SizeF, SizeI } from "@vrkit-platform/models"
 import { screen } from "electron"
 import { asOption } from "@3fv/prelude-ts"
@@ -7,7 +11,7 @@ import { match } from "ts-pattern"
 import { runInAction } from "mobx"
 
 const VRPerEyeDefaultDimension = 1
-export const MaxOverlayWindowDimension = 2048
+export const MaxOverlayWindowDimension = VRLayoutScreenDimension
 export const MaxOverlayWindowDimensionPadding = 256
 
 export const MinOverlayWindowDimension = 32

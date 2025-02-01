@@ -4,6 +4,7 @@ import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy
 import {
   assert,
   Bind,
+  ConvertVRSizeToScreenRect,
   DashboardManagerFnType,
   DashboardManagerFnTypeToIPCName,
   DashboardsState,
@@ -49,7 +50,9 @@ type DashFnPair = Pair<DashboardManagerFnType, (event: IpcMainInvokeEvent, ...ar
 
 interface VRLayoutEditorDetail {
   activeDashboardId: string
+
   editorEnabled: boolean
+
   vrEnabled: boolean
 }
 
@@ -172,6 +175,17 @@ export class DashboardManager {
               })
             )
             .then(config => this.fsManager.getFileInfo(file).then(fileInfo => assign(config, { fileInfo })))
+            .then(config => {
+              if (config.vrEnabled) {
+                for (const placement of config.placements) {
+                  if (placement.vrLayout?.size && placement.vrLayout?.pose) {
+                    placement.vrLayout.screenRect = ConvertVRSizeToScreenRect(placement.vrLayout.size)
+                  }
+                }
+              }
+
+              return config
+            })
             .catch(err => {
               error(`Unable to read/parse file (${file}), deleting`, err)
               getValue(
@@ -240,7 +254,7 @@ export class DashboardManager {
     })
 
     await this.saveDashboardConfigTaskFactory(dashConfig)
-    
+
     return toJS(DashboardConfig.toJson(dashConfig)) as any
   }
 
@@ -323,13 +337,14 @@ export class DashboardManager {
       log.error(msg)
       throw Error(msg)
     }
-    
+
     const { OverlayManager } = await import("../overlay-manager/OverlayManager"),
-        overlayManager = getService(OverlayManager)
-    
-    if (!overlayManager.editorEnabled)
+      overlayManager = getService(OverlayManager)
+
+    if (!overlayManager.editorEnabled) {
       await overlayManager.setEditorEnabled(true)
-    
+    }
+
     await this.executeVRLayoutEditorCheck()
     // return this.dashboardConfigs.map(it => DashboardConfig.toJson(it) as any)
   }
@@ -493,35 +508,33 @@ export class DashboardManager {
 
   private scheduleVRLayoutEditorCheck(): void {
     log.info(`Scheduling VR Layout Editor check`)
-    this.executeVRLayoutEditorCheck()
-      .catch(err => {
-        log.error(`Unable to checkVRLayoutEditor`, err)
-      })
+    this.executeVRLayoutEditorCheck().catch(err => {
+      log.error(`Unable to checkVRLayoutEditor`, err)
+    })
   }
-  
-  private executeVRLayoutEditorCheck():Promise<void> {
-    return this.vrLayoutEditorQueue_
-        .add(async () => {
-          const detail: VRLayoutEditorDetail = this.getVRLayoutEditorDetail(),
-              targetVisible =
-                  isNotEmptyString(detail.activeDashboardId) &&
-                  detail.vrEnabled &&
-                  this.mainAppState.overlays?.editor?.enabled === true,
-              wins = this.mainWindowManager.getByRole(WindowRole.DashboardVRLayout)
-          
-          if (targetVisible && wins.length) {
-            log.info(`checkVRLayoutEditor: Already visible`)
-            return
-          }
-          
-          if (targetVisible) {
-            log.info(`checkVRLayoutEditor: Creating window`)
-            await this.mainWindowManager.create(WindowRole.DashboardVRLayout)
-            log.info(`checkVRLayoutEditor: Created window`)
-          } else if (wins.length) {
-            this.mainWindowManager.close(...wins.map(get("id")))
-          }
-        })
+
+  private executeVRLayoutEditorCheck(): Promise<void> {
+    return this.vrLayoutEditorQueue_.add(async () => {
+      const detail: VRLayoutEditorDetail = this.getVRLayoutEditorDetail(),
+        targetVisible =
+          isNotEmptyString(detail.activeDashboardId) &&
+          detail.vrEnabled &&
+          this.mainAppState.overlays?.editor?.enabled === true,
+        wins = this.mainWindowManager.getByRole(WindowRole.DashboardVRLayout)
+
+      if (targetVisible && wins.length) {
+        log.info(`checkVRLayoutEditor: Already visible`)
+        return
+      }
+
+      if (targetVisible) {
+        log.info(`checkVRLayoutEditor: Creating window`)
+        await this.mainWindowManager.create(WindowRole.DashboardVRLayout)
+        log.info(`checkVRLayoutEditor: Created window`)
+      } else if (wins.length) {
+        this.mainWindowManager.close(...wins.map(get("id")))
+      }
+    })
   }
 }
 

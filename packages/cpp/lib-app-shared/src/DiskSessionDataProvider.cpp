@@ -37,8 +37,9 @@ namespace IRacingTools::Shared {
         const std::optional<Options>& options
     )
         : clientId_(clientId),
-          file_(file),
-          diskClient_(std::make_shared<DiskClient>(file, clientId)),
+    diskClient_(fs::is_directory(file) ? DiskClient::CreateForRaceRecording(file.string()) : std::make_shared<DiskClient>(file, clientId)),
+    file_(diskClient_->getFilePath().value()),
+
           dataAccess_(std::make_unique<SessionDataAccess>(diskClient_->getProvider())),
           options_(options.value_or(Options{})) {
         std::scoped_lock lock(diskClientMutex_);
@@ -47,7 +48,7 @@ namespace IRacingTools::Shared {
 
         L->info(
             "Disk client opened {}: ready={},sampleCount={}",
-            file.string(),
+            file_.string(),
             diskClient.isFileOpen(),
             diskClient.getSampleCount()
         );
@@ -67,12 +68,12 @@ namespace IRacingTools::Shared {
         auto fileInfo = sessionData_->mutable_file_info();
 
         VRK_LOG_AND_FATAL_IF(
-            !Utils::GetFileInfo(fileInfo, file).has_value(),
+            !Utils::GetFileInfo(fileInfo, file_).has_value(),
             "Unable to get file info for {}",
-            file.string()
+            file_.string()
         );
 
-        sessionData_->set_id(file.string());
+        sessionData_->set_id(file_.string());
         sessionData_->set_type(Models::Session::SESSION_TYPE_DISK);
         sessionData_->set_status(Models::Session::SESSION_STATUS_READY);
 
@@ -81,7 +82,7 @@ namespace IRacingTools::Shared {
             !Utils::GetSessionInfoTrackLayoutMetadata(sessionData_->mutable_track_layout_metadata(), sessionInfo.get()).
             has_value(),
             "Unable to populate track layout metadata for {}",
-            file.string()
+            file_.string()
         );
 
         auto subSessions = sessionInfo->sessionInfo.sessions;
@@ -186,26 +187,26 @@ namespace IRacingTools::Shared {
                 break;
             }
 
-            auto nextSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
-            VRK_LOG_AND_FATAL_IF(!nextSessionTimeVal, "No next session time");
-            auto nextSessionTime = nextSessionTimeVal.value();
-            auto nextSessionTimeMillis = SDK::Utils::SessionTimeToMillis(nextSessionTime);
-
-            auto dataFrameIntervalMillis = std::chrono::milliseconds(nextSessionTimeMillis - currentSessionTimeMillis);
-            auto nextTimeMillis = currentTimeMillis + dataFrameIntervalMillis;
-            std::chrono::steady_clock::time_point nextTime{nextTimeMillis};
-
-            auto nowTime = std::chrono::steady_clock::now();
-            auto intervalDuration = nextTime - nowTime;
-            // if (DEBUG && L->should_log(spdlog::level::debug)) {
-            //     L->debug("next data frame in {}ms", duration_cast<std::chrono::milliseconds>(intervalDuration).count());
-            // }
-
+            if (!options().disableRealtimePlayback)
             {
-                std::unique_lock threadLock(threadMutex_);
-                pausedCondition_.wait_for(threadLock, intervalDuration, [&] {
-                    return !running_;
-                });
+
+                auto nextSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
+                VRK_LOG_AND_FATAL_IF(!nextSessionTimeVal, "No next session time");
+                auto nextSessionTime = nextSessionTimeVal.value();
+                auto nextSessionTimeMillis = SDK::Utils::SessionTimeToMillis(nextSessionTime);
+
+                auto dataFrameIntervalMillis = std::chrono::milliseconds(nextSessionTimeMillis - currentSessionTimeMillis);
+                auto nextTimeMillis = currentTimeMillis + dataFrameIntervalMillis;
+                std::chrono::steady_clock::time_point nextTime{nextTimeMillis};
+
+                auto nowTime = std::chrono::steady_clock::now();
+                auto intervalDuration = nextTime - nowTime;
+                {
+                    std::unique_lock threadLock(threadMutex_);
+                    pausedCondition_.wait_for(threadLock, intervalDuration, [&] {
+                        return !running_;
+                    });
+                }
             }
         }
     }

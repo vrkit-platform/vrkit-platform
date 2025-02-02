@@ -701,7 +701,7 @@ namespace IRacingTools::SDK {
     std::optional<SessionInfoFileOverride> currentOverride{std::nullopt};
     for (auto nextOverride : extras_.sessionInfoTickQueue) {
       auto nextTickCount = std::get<0>(nextOverride);
-      if (!currentOverride || (std::get<0>(currentOverride.value()) < nextTickCount && nextTickCount >= tickCount)) {
+      if (!currentOverride || (std::get<0>(currentOverride.value()) <= nextTickCount && nextTickCount <= tickCount)) {
         currentOverride = std::make_optional<SessionInfoFileOverride>(nextOverride);
       }
     }

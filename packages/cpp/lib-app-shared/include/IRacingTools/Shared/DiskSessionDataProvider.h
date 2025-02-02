@@ -25,6 +25,8 @@ namespace IRacingTools::Shared {
        * @brief Number of data frames to skip inbetween each data emit
        */
       std::size_t skipEmitDataFrames{0};
+
+      bool disableRealtimePlayback{false};
     };
 
     DiskSessionDataProvider() = delete;
@@ -133,8 +135,9 @@ namespace IRacingTools::Shared {
     const Models::Session::SessionTiming* updateTiming();
 
     SDK::ClientId clientId_;
-    std::filesystem::path file_;
     std::shared_ptr<SDK::DiskClient> diskClient_;
+    std::filesystem::path file_;
+
     std::unique_ptr<SessionDataAccess> dataAccess_;
 
     std::unique_ptr<std::thread> thread_{nullptr};

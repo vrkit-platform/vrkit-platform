@@ -97,7 +97,9 @@ namespace IRacingTools::SDK {
 
     virtual bool isAvailable() override;
     
-    
+    const Extras* extras() const {
+      return &extras_;
+    }
 
     // return how many variables this .ibt file has in the header
     std::optional<uint32_t> getNumVars() override;

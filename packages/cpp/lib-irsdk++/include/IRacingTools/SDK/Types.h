@@ -409,6 +409,7 @@ namespace IRacingTools::SDK {
     SessionLapsRemain,
     SessionNum,
     SessionState,
+    SessionTick,
     SessionTime,
     SessionTimeRemain,
     SessionUniqueID,

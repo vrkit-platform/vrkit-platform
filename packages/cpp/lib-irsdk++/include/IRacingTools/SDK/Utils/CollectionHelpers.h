@@ -7,6 +7,15 @@
 #include <vector>
 
 namespace IRacingTools::SDK::Utils {
+
+    namespace rng = std::ranges;
+
+    template <rng::range R>
+    constexpr auto RangeToVector(R&& r) {
+        using T = std::decay_t<rng::range_value_t<R>>;
+        return std::vector<T>{r.begin(), r.end()};
+    }
+
     /**
      * @brief
      * @tparam C container of type map<K,V>

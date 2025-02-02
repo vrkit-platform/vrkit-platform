@@ -9,7 +9,7 @@
 
 namespace IRacingTools::SDK::Utils {
     template<typename E>
-    std::string EnumName(E value) {
-        return magic_enum::enum_name<E>(value);
+    auto EnumName(E value) {
+        return std::string{magic_enum::enum_name<E>(value)};
     }
 }

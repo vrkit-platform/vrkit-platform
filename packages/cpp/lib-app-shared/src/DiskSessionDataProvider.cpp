@@ -167,14 +167,16 @@ namespace IRacingTools::Shared {
             auto currentTimeMillis = TimeEpoch();
 
             //auto posCountRes = diskClient.getVarCount(KnownVarName::CarIdxPosition);
-            auto currentSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
+            // auto currentSessionTickVal = diskClient.getVarInt(KnownVarName::SessionTick);
+            // VRK_LOG_AND_FATAL_IF(!currentSessionTickVal, "No session tick");
+            // auto currentSessionTick = currentSessionTickVal.value();
 
+            auto currentSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
             VRK_LOG_AND_FATAL_IF(!currentSessionTimeVal, "No session time");
             auto currentSessionTime = currentSessionTimeVal.value();
             auto currentSessionTimeMillis = SDK::Utils::SessionTimeToMillis(currentSessionTime);
-            // L->info("Session time {}", currentSessionTime);
-            updateTiming();
 
+            updateTiming();
             process();
 
             if (!nextDataFrame()) {
@@ -224,6 +226,12 @@ namespace IRacingTools::Shared {
         timeBeginPeriod(1);
     }
 
+    void DiskSessionDataProvider::updateSessionInfo() {
+        if (auto res = diskClient_->updateSessionInfo(nullptr, true); res.has_value() && res.value() == true) {
+            L->info("SESSION INFO CHANGED, Firing event");
+            fireInfoChangedEvent();
+        }
+    }
     void DiskSessionDataProvider::updateSessionData() {
         if (!isAvailable()) {
             return;
@@ -259,6 +267,7 @@ namespace IRacingTools::Shared {
 
     void DiskSessionDataProvider::process() {
         checkConnection();
+        updateSessionInfo();
         updateSessionData();
         fireDataUpdatedEvent();
         // processYAMLLiveString();
@@ -274,9 +283,12 @@ namespace IRacingTools::Shared {
         // pump our connection status
 
     }
+    void DiskSessionDataProvider::fireInfoChangedEvent() {
+        auto ev = createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_INFO_CHANGED);
+        publish(Models::RPC::Events::SESSION_EVENT_TYPE_INFO_CHANGED, ev);
+    }
 
     void DiskSessionDataProvider::fireDataUpdatedEvent() {
-        // publish(std::make_shared<SessionDataUpdatedDataEvent>(SessionDataEventType::UpdatedData, dataAccess_.get()));
         auto ev = createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME);
         publish(Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME, ev);
     }
@@ -305,37 +317,6 @@ namespace IRacingTools::Shared {
         ev->mutable_session_data()->CopyFrom(*data);
 
         return ev;
-    }
-
-    bool DiskSessionDataProvider::processYAMLLiveString() {
-        bool wasUpdated = false;
-
-        //****Note, your code goes here
-        // can write to disk, parse, etc
-
-        // output file once every 1 seconds
-        const auto minTime = static_cast<DWORD>(1000);
-        const auto curTime = timeGetTime(); // millisecond resolution
-        if (abs(static_cast<long long>(curTime - lastUpdatedTime_)) > minTime) {
-            lastUpdatedTime_ = curTime;
-            wasUpdated = true;
-            //        qDebug() << "Updated session str at: " << curTime;
-            //        const char* yamlStr = generateLiveYAMLString();
-            //        // validate string
-            //        if (yamlStr && yamlStr[0])
-            //        {
-            //            FILE* f = fopen("liveStr.txt", "w");
-            //            if (f)
-            //            {
-            //                fputs(yamlStr, f);
-            //                fclose(f);
-            //                f = nullptr;
-            //                wasUpdated = true;
-            //            }
-            //        }
-        }
-
-        return wasUpdated;
     }
 
     bool DiskSessionDataProvider::isRunning() {

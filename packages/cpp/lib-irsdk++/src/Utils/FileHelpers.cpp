@@ -8,6 +8,31 @@ namespace IRacingTools::SDK::Utils {
     namespace fs = std::filesystem;
 
 
+    std::vector<fs::path> ListAllFiles(const std::vector<fs::path>& paths, bool recursive, const std::string &ext) {
+        std::vector<fs::path> files{};
+        
+        for (auto& path : paths) {
+            auto iterateFiles = [&](auto it) {
+                for(auto& fileEntry : it) {
+                    auto& file = fileEntry.path();
+                    if (ext.empty() || file.string().ends_with(ext)) {
+                        files.push_back(file);
+                    }
+                }
+            };
+            if (recursive)
+            iterateFiles(fs::recursive_directory_iterator(path));
+            else iterateFiles(fs::directory_iterator(path));
+            // auto fileIterator = recursive ? fs::recursive_directory_iterator(path) : fs::directory_iterator(path);
+            // for(auto& fileEntry : fileIterator) {
+            //     auto& file = fileEntry.path();
+            //     if (ext.empty() || file.string().ends_with(ext)) {
+            //         files.push_back(file);
+            //     }
+            // }
+        }
+        return files;
+    }
 
 
     /**

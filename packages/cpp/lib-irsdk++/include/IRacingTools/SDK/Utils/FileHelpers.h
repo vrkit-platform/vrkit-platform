@@ -34,6 +34,7 @@ namespace IRacingTools::SDK::Utils {
     bool HasFileExtension(const std::filesystem::path& file, const std::string& ext);
     bool HasFileExtension(const std::filesystem::path& file, const std::vector<std::string>& exts);
     bool FileReadDataFully(void* buffer, std::size_t size, std::size_t count, std::FILE* stream);
+    std::vector<std::filesystem::path> ListAllFiles(const std::vector<std::filesystem::path>& paths, bool recursive = false, const std::string &ext = "");
 
     Expected<std::vector<unsigned char>> ReadFile(const std::filesystem::path& path);
     Expected<std::string> ReadTextFile(const std::filesystem::path& path);

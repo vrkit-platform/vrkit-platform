@@ -6,6 +6,7 @@
 
 #include <gtest/gtest.h>
 #include <fmt/core.h>
+#include <gsl/util>
 #include <IRacingTools/SDK/ClientManager.h>
 #include <IRacingTools/SDK/DiskClient.h>
 #include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
@@ -28,13 +29,27 @@ namespace {
     // LMP3 @ motegi
     constexpr auto IBTTestFile2 = "ligierjsp320_twinring.ibt";
 
+    constexpr auto IBTRaceRecordingTestFile1 = "f4-tsukubu";
+
     std::filesystem::path ToIBTTestFile(const std::string & filename) {
-        return fs::current_path() / "data" / "ibt" / filename;
+        return fs::current_path() / "data" / "ibt" / "telemetry" / filename;
+    }
+
+
+
+    std::filesystem::path ToRaceRecordingTestFile(const std::string & raceName) {
+        return fs::current_path() / "data" / "ibt" / "race-recordings" / raceName;
     }
 
     std::shared_ptr<IRacingTools::SDK::DiskClient> CreateDiskClient(const std::string& filename) {
         auto file = ToIBTTestFile(filename);
         auto client = std::make_shared<IRacingTools::SDK::DiskClient>(file, file.string());
+        return client;
+    }
+
+    std::shared_ptr<IRacingTools::SDK::DiskClient> CreateRaceRecordingDiskClient(const std::string& raceName) {
+        auto file = ToRaceRecordingTestFile(raceName);
+        auto client = IRacingTools::SDK::DiskClient::CreateForRaceRecording(file.string());
         return client;
     }
 }
@@ -55,8 +70,13 @@ class DiskClientTests : public testing::Test {
 TEST_F(DiskClientTests, can_open) {
 
     auto client = CreateDiskClient(IBTTestFile1);
+
     EXPECT_TRUE(client->isAvailable());
     EXPECT_TRUE(client->isFileOpen());
+
+    auto disposer = gsl::finally([&client] {
+        client->close();
+    });
 
     auto provider = client->getProvider();
 
@@ -183,5 +203,15 @@ TEST_F(DiskClientTests, aggregate_laps) {
 
     info("Best lap ({}), seconds: {}", getLap(bestLap), getLapTime(bestLap));
 
+
+}
+
+TEST_F(DiskClientTests, can_use_race_recording) {
+
+    auto client = CreateRaceRecordingDiskClient(IBTRaceRecordingTestFile1);
+
+    EXPECT_TRUE(client->isAvailable());
+    EXPECT_TRUE(client->isFileOpen());
+    EXPECT_TRUE(client->hasSessionInfoFileOverride());
 
 }

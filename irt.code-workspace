@@ -32,6 +32,7 @@
 		"files.associations": {
 			"*.hbs": "handlebars",
 			"*.djson": "json",
+			"*.dashboard": "json",
 			"xrandr-new-mode": "fish",
 			"CMakeLists.txt": "cmake",
 			"*.txt": "plaintext",
@@ -141,7 +142,10 @@
 			"xutility": "cpp",
 			"*.ipp": "cpp",
 			"resumable": "cpp",
-			"sml2": "cpp"
+			"sml2": "cpp",
+			"string_view": "cpp",
+			"xmemory0": "cpp",
+			"xstddef": "cpp"
 		},
 		"autoHide.autoHideSideBar": false,
 		"autoHide.autoHideAuxiliaryBar": false

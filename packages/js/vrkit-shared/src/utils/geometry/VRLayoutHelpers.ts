@@ -26,13 +26,13 @@ export const VRScreenSize = SizeI.create({
   height: VRLayoutBoundsDiameter,
 })
 
-export function ConvertVRSizeToScreenRect(vrSize:SizeI):RectI {
+export function ConvertVRSizeToScreenRect(vrSize:SizeF | SizeI):RectI {
   const vrScreenScale = VRLayoutScreenDimension / VRLayoutBoundsDiameter
   
   return RectI.create({
     size: {
-      width: vrSize.width * vrScreenScale,
-      height: vrSize.height * vrScreenScale
+      width: Math.round(vrSize.width * vrScreenScale),
+      height: Math.round(vrSize.height * vrScreenScale)
     },
     position: {
       x: 0,
@@ -43,7 +43,7 @@ export function ConvertVRSizeToScreenRect(vrSize:SizeI):RectI {
 
 export function ConvertScreenRectToVRLayout(surfaceSize: SizeI, screenRect: RectI): VRLayout {
   const scale = Math.min(surfaceSize.width, surfaceSize.height) / VRLayoutBoundsDiameter,
-      vrSize = SizeI.create({
+      vrSize = SizeF.create({
         width: screenRect.size.width / scale,
         height: screenRect.size.height / scale
       }),

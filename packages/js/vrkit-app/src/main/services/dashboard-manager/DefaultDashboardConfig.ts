@@ -15,8 +15,8 @@ const log = getLogger(__filename)
 export function newDashboardTrackMapMockConfig(patch: Partial<DashboardConfig>): DashboardConfig {
   log.assert(isNotEmptyString(patch?.name), "A name must be provided")
   const { name } = patch,
-    trackMapOverlay = newTrackMapOverlayInfo(`${name}-overlay-trackmap`),
-    clockOverlay = newClockOverlayInfo(`${name}-overlay-clock`)
+    trackMapOverlay = newTrackMapOverlayInfo(),
+    clockOverlay = newClockOverlayInfo()
 
   return DashboardConfig.create(assignDeep({
     id: generateUUID(),

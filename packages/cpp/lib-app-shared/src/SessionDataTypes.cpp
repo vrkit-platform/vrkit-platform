@@ -7,17 +7,17 @@ namespace IRacingTools::Shared {
       {
         std::regex_replace(
           SDK::Utils::EnumName(Models::Session::SessionSubType::SESSION_SUB_TYPE_PRACTICE),
-          std::regex{"SESSION_SUB_TYPE_"},
+          std::regex{"^SESSION_SUB_TYPE_"},
           ""
         ),
         std::regex_replace(
           SDK::Utils::EnumName(Models::Session::SessionSubType::SESSION_SUB_TYPE_QUALIFY),
-          std::regex{"SESSION_SUB_TYPE_"},
+          std::regex{"^SESSION_SUB_TYPE_"},
           ""
         ),
         std::regex_replace(
           SDK::Utils::EnumName(Models::Session::SessionSubType::SESSION_SUB_TYPE_RACE),
-          std::regex{"SESSION_SUB_TYPE_"},
+          std::regex{"^SESSION_SUB_TYPE_"},
           ""
         )
       }

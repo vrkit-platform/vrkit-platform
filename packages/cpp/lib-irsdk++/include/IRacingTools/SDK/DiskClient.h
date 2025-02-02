@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include <atomic>
+#include <deque>
 #include <filesystem>
 #include <memory>
 #include <mutex>
@@ -47,7 +48,23 @@ namespace IRacingTools::SDK {
 
   class DiskClient : public Client, public std::enable_shared_from_this<DiskClient> {
   public:
-    DiskClient(const std::filesystem::path &file, const std::optional<ClientId> &clientId);
+
+    /**
+     * @brief Tuple defining session info yaml override file
+     *
+     * `SessionTick, SessionInfo Filename, Session Info YAML`
+     */
+    using SessionInfoFileOverride = std::tuple<std::uint32_t, std::string, std::string>;
+
+    /**
+     * @brief Extra options for the DiskClient to use in setup & processing
+     */
+    struct Extras {
+      std::vector<SessionInfoFileOverride> sessionInfoTickQueue{};
+    };
+    static std::shared_ptr<DiskClient> CreateForRaceRecording(const std::string& path);
+
+    DiskClient(const std::filesystem::path &file, const std::optional<ClientId> &clientId, const Extras& extras = {});
     DiskClient() = delete;
     DiskClient(const DiskClient &other) = delete;
     DiskClient(DiskClient &&other) noexcept = delete;
@@ -170,9 +187,14 @@ namespace IRacingTools::SDK {
 
     virtual bool copyDataVariableBuffer(void* target, std::size_t size);
 
+    virtual bool hasSessionInfoFileOverride();
+
+    std::expected<bool, GeneralError> updateSessionInfo(std::FILE * ibtFile = nullptr, bool onlyCheckOverrides = false);
+
   protected:
-    std::expected<bool, GeneralError> updateSessionInfo(std::FILE * ibtFile = nullptr);
-    
+
+    virtual std::optional<SessionInfoFileOverride> findSessionInfoFileOverride(std::uint32_t tickCount);
+
     bool openFile();
 
     const std::string_view clientId_;
@@ -189,6 +211,9 @@ namespace IRacingTools::SDK {
     std::atomic_int64_t sampleIndex_{};
 
     std::shared_ptr<Utils::DynamicBuffer<char>> sessionInfoBuf_;
+    const Extras extras_;
+    std::optional<SessionInfoFileOverride> previousSessionInfoOverride_{};
+    //std::optional<std::pair<SessionInfoFileOverride,SessionInfoFileOverride>> sessionInfoOverrides_{std::nullopt};
     SessionInfoWithUpdateCount sessionInfo_{-1, nullptr};
     // std::shared_ptr<SessionInfo::SessionInfoMessage> sessionInfo_{nullptr};
 
@@ -196,5 +221,6 @@ namespace IRacingTools::SDK {
     Utils::DynamicBuffer<char> varBuf_{};
     std::shared_ptr<ClientProvider> clientProvider_{};
     FILE *ibtFile_{nullptr};
+
   };
 }// namespace IRacingTools::SDK

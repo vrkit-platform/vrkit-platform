@@ -174,11 +174,13 @@ namespace IRacingTools::SDK {
     // 1 success, 0 failure, -n minimum buffer size
     //int getSessionStrVal(const std::string_view& path, char *val, int valLen) override;
 
+    virtual std::optional<std::int32_t> getSessionTicks() override;
+
     /**
-             * @brief Session update string (yaml)
-             *
-             * @return string_view or error if unavailable
-             */
+     * @brief Session update string (yaml)
+     *
+     * @return string_view or error if unavailable
+     */
     Expected<std::string_view> getSessionInfoStr() override;
 
     virtual std::optional<std::int32_t> getSessionInfoUpdateCount() override;

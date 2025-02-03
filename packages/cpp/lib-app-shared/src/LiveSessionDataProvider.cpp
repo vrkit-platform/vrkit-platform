@@ -221,6 +221,14 @@ namespace IRacingTools::Shared {
     return false;
   }
 
+  std::optional<std::int32_t> LiveSessionDataProvider::sessionTicks() {
+    return LiveClient::GetInstance().getSessionTicks();
+  }
+
+  std::optional<std::int32_t> LiveSessionDataProvider::sessionTickCount() {
+    return std::nullopt;
+  }
+
   std::shared_ptr<Models::Session::SessionData> LiveSessionDataProvider::sessionData() {
     return sessionData_;
   }

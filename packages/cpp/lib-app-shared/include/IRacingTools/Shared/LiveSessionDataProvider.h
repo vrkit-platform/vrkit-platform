@@ -36,6 +36,9 @@ namespace IRacingTools::Shared {
     virtual bool pause() override;
     virtual bool resume() override;
 
+    virtual std::optional<std::int32_t> sessionTicks() override;
+    virtual std::optional<std::int32_t> sessionTickCount() override;
+
     virtual std::shared_ptr<Models::Session::SessionData> sessionData() override;
 
     virtual std::string sessionInfoStr() override;

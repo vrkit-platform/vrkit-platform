@@ -26,6 +26,11 @@ namespace IRacingTools::Shared {
        */
       std::size_t skipEmitDataFrames{0};
 
+      /**
+       * @brief Skips sleeping inbetween frames
+       *
+       * > NOTE: the purpose being to disable the simulation of "realtime"
+       */
       bool disableRealtimePlayback{false};
     };
 
@@ -97,6 +102,9 @@ namespace IRacingTools::Shared {
     virtual bool pause() override;
 
     virtual bool resume() override;
+
+    virtual std::optional<std::int32_t> sessionTickCount() override;
+    virtual std::optional<std::int32_t> sessionTicks() override;
 
     virtual std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
 

@@ -130,11 +130,7 @@ namespace IRacingTools::SDK {
     }
 
     // 1 success, 0 failure, -n minimum buffer size
-    //    virtual int getSessionStrVal(const std::string_view &path, char *val, int valLen) override;
-
-    // get the whole string
-    // get the whole string
-
+    virtual std::optional<std::int32_t> getSessionTicks() override;
     virtual Expected<std::string_view> getSessionInfoStr() override;
     virtual std::optional<WeakSessionInfoWithUpdateCount> getSessionInfoWithUpdateCount() override;
     virtual std::weak_ptr<SessionInfo::SessionInfoMessage> getSessionInfo() override;

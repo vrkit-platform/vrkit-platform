@@ -108,6 +108,22 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     this.updateSession(player, ev.payload)
   }
+  
+  @Bind
+  private onEventSessionInfoChanged(player: SessionPlayer, ev: SessionPlayerEventDataDefault) {
+    log.debug(`SESSION INFO CHANGED`)
+    if (!this.checkPlayerIsManaged(player)) {
+      log.warn("Player is not currently managed & has been removed", player.id)
+      return
+    }
+    
+    // if (!ev?.payload) {
+    //   warn(`No event payload`, ev)
+    //   return
+    // }
+    
+    this.updateSession(player, ev.payload)
+  }
 
   @Bind
   registerComponentDataVars(componentId: string, ...dataVarNameArgs: Array<string | string[]>) {
@@ -228,11 +244,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     const container = new SessionPlayerContainer(sessionId, player)
     player.on(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
-    player.on(SessionEventType.INFO_CHANGED, this.onEventSessionStateChange)
+    player.on(SessionEventType.INFO_CHANGED, this.onEventSessionInfoChanged)
     player.on(SessionEventType.DATA_FRAME, this.onEventDataFrame)
     container.disposers.push(() => {
       player.off(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
-      player.off(SessionEventType.INFO_CHANGED, this.onEventSessionStateChange)
+      player.off(SessionEventType.INFO_CHANGED, this.onEventSessionInfoChanged)
       player.off(SessionEventType.DATA_FRAME, this.onEventDataFrame)
     })
 
@@ -371,11 +387,6 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
         isAvailable: player.isAvailable,
         info: player.sessionInfo,
         data: !player.sessionData ? null : player.sessionData, // instanceof
-        // SessionData$
-        // ?
-        // player.sessionData
-        // :
-        // SessionData.fromJson(player.sessionData),
         timeAndDuration: toSessionTimeAndDuration(player.sessionTiming)
       })
     })
@@ -639,7 +650,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     try {
       const res = await dialog.showOpenDialog({
-        properties: ["openFile"]
+        properties: ["openFile", "openDirectory"]
       })
 
       log.info("Selected file to open as session", res)

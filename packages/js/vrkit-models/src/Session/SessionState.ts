@@ -125,17 +125,21 @@ export enum SessionType {
  */
 export enum SessionSubType {
     /**
-     * @generated from protobuf enum value: SESSION_SUB_TYPE_PRACTICE = 0;
+     * @generated from protobuf enum value: SESSION_SUB_TYPE_UNKNOWN = 0;
      */
-    PRACTICE = 0,
+    UNKNOWN = 0,
     /**
-     * @generated from protobuf enum value: SESSION_SUB_TYPE_QUALIFY = 1;
+     * @generated from protobuf enum value: SESSION_SUB_TYPE_PRACTICE = 1;
      */
-    QUALIFY = 1,
+    PRACTICE = 1,
     /**
-     * @generated from protobuf enum value: SESSION_SUB_TYPE_RACE = 2;
+     * @generated from protobuf enum value: SESSION_SUB_TYPE_QUALIFY = 2;
      */
-    RACE = 2
+    QUALIFY = 2,
+    /**
+     * @generated from protobuf enum value: SESSION_SUB_TYPE_RACE = 3;
+     */
+    RACE = 3
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.Session.SessionCarStatus

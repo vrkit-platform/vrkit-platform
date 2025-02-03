@@ -2,7 +2,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import { session } from "electron"
 import { Deferred } from "@3fv/deferred"
 import Path from "path"
-import { isString } from "@3fv/guard"
+// import { isString } from "@3fv/guard"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log

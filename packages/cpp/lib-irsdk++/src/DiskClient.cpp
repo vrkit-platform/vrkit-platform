@@ -13,6 +13,7 @@
 #include <IRacingTools/SDK/Utils/CollectionHelpers.h>
 #include <IRacingTools/SDK/Utils/FileHelpers.h>
 #include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
+#include <IRacingTools/SDK/Utils/Win32.h>
 #include <spdlog/spdlog.h>
 
 #pragma warning(disable : 4996)
@@ -102,8 +103,8 @@ namespace IRacingTools::SDK {
             continue;
           }
           auto tickStr = m[1].str();
-          auto tick = std::stoi(tickStr);
-          if (std::abs(tick ) == 842150451) {
+          std::int32_t tick = std::stoi(tickStr);
+          if (Win32::IsWindowsMagicNumber<std::int32_t>(tick)) {
             L->warn("Ignoring well known MS heap alloc value");
             continue;
           }
@@ -262,11 +263,15 @@ namespace IRacingTools::SDK {
           return std::unexpected(GeneralError("SessionTick is unavailable"));
         }
         tickCount = tickCountRes.value();
+        if (Win32::IsWindowsMagicNumber<std::int32_t>(tickCount)) {
+          L->warn("Ignoring well known MS heap alloc value");
+          return std::unexpected(GeneralError("SessionTick is a magic number, ignoring"));
+        }
       }
 
       auto sessionInfoOverrideRes = findSessionInfoFileOverride(tickCount);
       if (!sessionInfoOverrideRes) {
-        L->error("Session info override returned no value, but this client has session info overrides");
+        L->warn("Session info override returned no value, but this client has session info overrides or tick is invalid");
         return std::unexpected(
           GeneralError("Session info override returned no value, but this client has session info overrides")
         );
@@ -284,14 +289,14 @@ namespace IRacingTools::SDK {
       auto sessionInfoLen = sessionInfoStr.length();
 
       sessionInfoBuf_->reset();
-      if (!sessionInfoBuf_->resize(sessionInfoLen)) {
+      if (!sessionInfoBuf_->resize(sessionInfoLen + 1)) {
         return std::unexpected(GeneralError("Unable to resize sessionInfoBuf"));
       }
 
       L->info("IBT session info buf resized based on override ({}bytes)", sessionInfoLen);
       data = sessionInfoBuf_->data();
       std::memcpy(data, sessionInfoStr.c_str(), sessionInfoLen);
-      data[sessionInfoLen - 1] = '\0';
+      data[sessionInfoLen] = '\0';
 
     } else {
       auto sessionLength = header_.session.len;
@@ -650,6 +655,10 @@ namespace IRacingTools::SDK {
     return header_.session.count;
   }
 
+  std::optional<std::int32_t> DiskClient::getSessionTicks() {
+    return getVarInt(KnownVarName::SessionTick);
+  }
+
   Expected<std::string_view> DiskClient::getSessionInfoStr() {
     if (!sessionInfoBuf_) return MakeUnexpected<GeneralError>("Session str not available");
 
@@ -698,8 +707,13 @@ namespace IRacingTools::SDK {
   std::optional<DiskClient::SessionInfoFileOverride> DiskClient::findSessionInfoFileOverride(std::uint32_t tickCount) {
     if (!hasSessionInfoFileOverride()) return std::nullopt;
 
+    if (Win32::IsWindowsMagicNumber<std::int32_t>(tickCount)) {
+      L->warn("Ignoring well known MS heap alloc value");
+      return std::nullopt;
+    }
+
     std::optional<SessionInfoFileOverride> currentOverride{std::nullopt};
-    for (auto nextOverride : extras_.sessionInfoTickQueue) {
+    for (auto& nextOverride : extras_.sessionInfoTickQueue) {
       auto nextTickCount = std::get<0>(nextOverride);
       if (!currentOverride || (std::get<0>(currentOverride.value()) <= nextTickCount && nextTickCount <= tickCount)) {
         currentOverride = std::make_optional<SessionInfoFileOverride>(nextOverride);

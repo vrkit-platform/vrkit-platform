@@ -58,7 +58,9 @@ namespace IRacingTools::App::Node {
                 InstanceAccessor<&NativeSessionPlayer::jsGetFileInfo>("fileInfo"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetSessionInfoYAMLStr>("sessionInfoYAMLStr"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetSessionData>("sessionData"),
-                InstanceAccessor<&NativeSessionPlayer::jsGetSessionTiming>("sessionTiming")
+                InstanceAccessor<&NativeSessionPlayer::jsGetSessionTiming>("sessionTiming"),
+                InstanceAccessor<&NativeSessionPlayer::jsGetSessionTicks>("sessionTicks"),
+                InstanceAccessor<&NativeSessionPlayer::jsGetSessionTickCount>("sessionTickCount")
             }
         );
 
@@ -101,13 +103,20 @@ namespace IRacingTools::App::Node {
 
             fs::path filePath{filePathStr};
             argError(
-                !GetFileInfo(sessionData_->mutable_file_info(), filePath).has_value(),
+                !fs::is_directory(filePath) && !GetFileInfo(sessionData_->mutable_file_info(), filePath).has_value(),
                 std::format("FileInfo is unavailable: {}", filePathStr)
             );
 
             dataProvider_ = std::make_shared<DiskSessionDataProvider>(filePath, filePath.filename().string());
-            //auto diskDataProvider = std::static_pointer_cast<DiskSessionDataProvider>(dataProvider_);
 
+            if (fs::is_directory(filePath)) {
+                auto diskClient = std::static_pointer_cast<DiskClient>(dataProvider_->clientProvider()->getClient());
+                auto realFilePath = diskClient->getFilePath().value();
+                argError(
+                  !GetFileInfo(sessionData_->mutable_file_info(), realFilePath).has_value(),
+                  std::format("FileInfo is unavailable: {}", filePathStr)
+              );
+            }
 
             sessionData_ = dataProvider_->sessionData();
         } else {
@@ -234,6 +243,16 @@ namespace IRacingTools::App::Node {
         // auto sessionInfoYamlNode = YAML::convert<SessionInfo::SessionInfoMessage>::encode(*sessionInfo);
         // auto sessionInfoYaml = YAML::Dump(sessionInfoYamlNode);
         return Napi::String::New(info.Env(), sessionInfoYaml);
+    }
+
+    Napi::Value NativeSessionPlayer::jsGetSessionTicks(const Napi::CallbackInfo& info) {
+        auto tickRes = dataProvider_->sessionTicks();
+        return Napi::Number::New(info.Env(), tickRes.value_or(-1));
+    }
+
+    Napi::Value NativeSessionPlayer::jsGetSessionTickCount(const Napi::CallbackInfo& info) {
+        auto tickRes = dataProvider_->sessionTickCount();
+        return Napi::Number::New(info.Env(), tickRes.value_or(-1));
     }
 
     /**

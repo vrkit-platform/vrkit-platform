@@ -117,8 +117,8 @@ set(ALL_SDK_DEPS
 #  ${DEP_CLI_CMD}
 )
 
-set(DEP_GTEST_MAIN GTest::gtest_main)
-set(DEP_GTEST GTest::gtest)
+set(DEP_GTEST_MAIN GTest::gtest_main GTest::gmock)
+set(DEP_GTEST GTest::gtest GTest::gmock)
 
 function(VRK_CONFIGURE_SDK_LIBS TARGET)
   target_link_libraries(${TARGET} PUBLIC ${ALL_SDK_DEPS})

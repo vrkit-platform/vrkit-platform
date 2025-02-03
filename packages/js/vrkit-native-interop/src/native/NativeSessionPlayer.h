@@ -100,6 +100,9 @@ namespace IRacingTools::App::Node {
         Napi::Value jsGetDataVariableHeaders(const Napi::CallbackInfo& info);
         Napi::Value jsGetSessionInfoYAMLStr(const Napi::CallbackInfo& info);
 
+        Napi::Value jsGetSessionTicks(const Napi::CallbackInfo& info);
+        Napi::Value jsGetSessionTickCount(const Napi::CallbackInfo& info);
+
         Napi::Value jsGetSessionData(const Napi::CallbackInfo& info);
 
         Napi::Value jsGetSessionTiming(const Napi::CallbackInfo& info);
@@ -135,10 +138,6 @@ namespace IRacingTools::App::Node {
         SessionPlayerEventFn jsSessionPlayerEventFn_;
         std::string id_;
 
-        
-        
-        
-        
 
     };
 }

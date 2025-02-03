@@ -22,47 +22,57 @@
 #include <windows.h>
 #include <winrt/base.h>
 
+#include "./CollectionHelpers.h"
+
 namespace IRacingTools::SDK::Utils::Win32 {
 
-// Wrappers around Win32 functions
-//
-// This currently contains wrappers around functions that return `HANDLE`, where
-// the wrappers either return a `winrt::handle` for functions that may return
-// `NULL`, or a `winrt::file_handle` for functions that may return
-// `INVALID_HANDLE_VALUE`.
+  template <typename T>
+  requires std::is_scalar_v<T>
+  bool IsWindowsMagicNumber(T value) {
+    static std::vector<T> MagicNumbers{842150451, -842150451, static_cast<T>(0xCDCDCDCD)};
 
-namespace detail {
-
-template <class THandle, class TFun, TFun fun>
-struct HandleWrapper;
-
-template <class THandle, class... TArgs, HANDLE(__stdcall* fun)(TArgs...)>
-struct HandleWrapper<THandle, HANDLE(__stdcall*)(TArgs...), fun> {
-  static constexpr THandle wrap(TArgs&&... args) {
-    return THandle {fun(std::forward<TArgs>(args)...)};
+    return IRacingTools::SDK::Utils::ContainsValue(MagicNumbers, value);
   }
-};
 
-}// namespace detail
+  // Wrappers around Win32 functions
+  //
+  // This currently contains wrappers around functions that return `HANDLE`, where
+  // the wrappers either return a `winrt::handle` for functions that may return
+  // `NULL`, or a `winrt::file_handle` for functions that may return
+  // `INVALID_HANDLE_VALUE`.
 
-///// May return NULL /////
+  namespace detail {
+
+    template <class THandle, class TFun, TFun fun>
+    struct HandleWrapper;
+
+    template <class THandle, class... TArgs, HANDLE(__stdcall*fun)(TArgs...)>
+    struct HandleWrapper<THandle, HANDLE(__stdcall*)(TArgs...), fun> {
+      static constexpr THandle wrap(TArgs&&... args) {
+        return THandle{fun(std::forward<TArgs>(args)...)};
+      }
+    };
+
+  } // namespace detail
+
+  ///// May return NULL /////
 
 #define IT(FUN) \
   constexpr auto FUN \
     = detail::HandleWrapper<winrt::handle, decltype(&::FUN), &::FUN>::wrap;
-IT(CreateEventW);
-IT(CreateFileMappingW);
-IT(CreateMutexW);
-IT(CreateWaitableTimerW);
+  IT(CreateEventW);
+  IT(CreateFileMappingW);
+  IT(CreateMutexW);
+  IT(CreateWaitableTimerW);
 #undef IT
 
-///// May return INVALID_HANDLE_VALUE /////
+  ///// May return INVALID_HANDLE_VALUE /////
 
 #define IT(FUN) \
   constexpr auto FUN = detail:: \
     HandleWrapper<winrt::file_handle, decltype(&::FUN), ::FUN>::wrap;
-IT(CreateFileW);
-IT(CreateMailslotW);
+  IT(CreateFileW);
+  IT(CreateMailslotW);
 #undef IT
 
-}// namespace OpenKneeboard::Win32
+}

@@ -111,12 +111,12 @@ namespace IRacingTools::SDK {
     virtual std::optional<double> getVarDouble(KnownVarName name, uint32_t entry = 0);
 
 
-    // 1 success, 0 failure, -n minimum buffer size
     virtual Expected<std::string_view> getSessionInfoStr() = 0;
+    virtual std::optional<std::int32_t> getSessionTicks() = 0;
     virtual std::optional<std::int32_t> getSessionInfoUpdateCount() = 0;
     virtual std::optional<WeakSessionInfoWithUpdateCount> getSessionInfoWithUpdateCount() = 0;
     virtual std::weak_ptr<SessionInfo::SessionInfoMessage> getSessionInfo() = 0;
-//    virtual int getSessionStrVal(const std::string_view &path, char *val, int valLen) = 0;
+
 
     // get the whole string
 //    virtual const char *getSessionInfoStr() = 0;

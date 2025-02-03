@@ -154,12 +154,14 @@
                 },
                 "subType": {
                     "enum": [
-                        "SESSION_SUB_TYPE_PRACTICE",
+                        "SESSION_SUB_TYPE_UNKNOWN",
                         0,
-                        "SESSION_SUB_TYPE_QUALIFY",
+                        "SESSION_SUB_TYPE_PRACTICE",
                         1,
+                        "SESSION_SUB_TYPE_QUALIFY",
+                        2,
                         "SESSION_SUB_TYPE_RACE",
-                        2
+                        3
                     ],
                     "oneOf": [
                         {

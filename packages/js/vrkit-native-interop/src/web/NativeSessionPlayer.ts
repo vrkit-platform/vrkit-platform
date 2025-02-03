@@ -36,6 +36,10 @@ export interface NativeSessionPlayer {
   
   readonly sessionInfoYAMLStr: string
   
+  readonly sessionTicks: number
+  
+  readonly sessionTickCount: number
+  
   readonly isAvailable: boolean
   
   readonly id: string
@@ -48,7 +52,9 @@ export interface NativeSessionPlayer {
   
   pause(): boolean
   
-  seek(index: number): boolean
+  seek(tick: number): boolean
+  
+  
   
   /**
    * Destroy the native client instance

@@ -23,412 +23,434 @@
 #include <spdlog/spdlog.h>
 
 namespace IRacingTools::Shared {
-    using namespace std::chrono_literals;
-    using namespace IRacingTools::SDK;
+  using namespace std::chrono_literals;
+  using namespace IRacingTools::SDK;
 
-    namespace {
-        auto L = Logging::GetCategoryWithType<DiskSessionDataProvider>();
-    }
-
-
-    DiskSessionDataProvider::DiskSessionDataProvider(
-        const std::filesystem::path& file,
-        ClientId clientId,
-        const std::optional<Options>& options
-    )
-        : clientId_(clientId),
-    diskClient_(fs::is_directory(file) ? DiskClient::CreateForRaceRecording(file.string()) : std::make_shared<DiskClient>(file, clientId)),
-    file_(diskClient_->getFilePath().value()),
-
-          dataAccess_(std::make_unique<SessionDataAccess>(diskClient_->getProvider())),
-          options_(options.value_or(Options{})) {
-        std::scoped_lock lock(diskClientMutex_);
-
-        auto& diskClient = *diskClient_;
-
-        L->info(
-            "Disk client opened {}: ready={},sampleCount={}",
-            file_.string(),
-            diskClient.isFileOpen(),
-            diskClient.getSampleCount()
-        );
-
-        sessionData_ = std::make_shared<Models::Session::SessionData>();
-        auto timing = sessionData_->mutable_timing();
-        timing->set_is_live(false);
-        timing->set_is_valid(false);
-
-        auto sampleCount = diskClient_->getSampleCount();
-        auto totalTimeMillisDouble = (static_cast<double>(sampleCount) / 60.0) * 1000.0;
-
-        timing->set_total_time_millis(std::floor(totalTimeMillisDouble));
-        timing->set_sample_index(0);
-        timing->set_sample_count(sampleCount);
-
-        auto fileInfo = sessionData_->mutable_file_info();
-
-        VRK_LOG_AND_FATAL_IF(
-            !Utils::GetFileInfo(fileInfo, file_).has_value(),
-            "Unable to get file info for {}",
-            file_.string()
-        );
-
-        sessionData_->set_id(file_.string());
-        sessionData_->set_type(Models::Session::SESSION_TYPE_DISK);
-        sessionData_->set_status(Models::Session::SESSION_STATUS_READY);
-
-        auto sessionInfo = diskClient.getSessionInfo().lock();
-        VRK_LOG_AND_FATAL_IF(
-            !Utils::GetSessionInfoTrackLayoutMetadata(sessionData_->mutable_track_layout_metadata(), sessionInfo.get()).
-            has_value(),
-            "Unable to populate track layout metadata for {}",
-            file_.string()
-        );
-
-        auto subSessions = sessionInfo->sessionInfo.sessions;
-        sessionData_->set_sub_count(subSessions.size());
-
-        L->warn("HACK: Skipping to SessionNum == 2 (RACE)");
-        if (!seekToSessionNum(2)) {
-            L->error("HACK: ERROR: Failed Skipping to SessionNum == 2 (RACE)");
-        }
-    }
+  namespace {
+    auto L = Logging::GetCategoryWithType<DiskSessionDataProvider>();
+  }
 
 
-    DiskSessionDataProvider::~DiskSessionDataProvider() {
-        DiskSessionDataProvider::stop();
-    }
+  DiskSessionDataProvider::DiskSessionDataProvider(
+    const std::filesystem::path& file,
+    ClientId clientId,
+    const std::optional<Options>& options
+  )
+    : clientId_(clientId),
+      diskClient_(
+        fs::is_directory(file) ?
+          DiskClient::CreateForRaceRecording(file.string()) :
+          std::make_shared<DiskClient>(file, clientId)
+      ),
+      file_(diskClient_->getFilePath().value()),
 
-    /**
-     * @brief Retrieve `SessionDataAccess` context
-     * @return `SessionDataAccess` context
-     */
-    SessionDataAccess& DiskSessionDataProvider::dataAccess() {
-        return *dataAccess_;
-    }
+      dataAccess_(std::make_unique<SessionDataAccess>(diskClient_->getProvider())),
+      options_(options.value_or(Options{})) {
+    std::scoped_lock lock(diskClientMutex_);
 
-    SessionDataAccess* DiskSessionDataProvider::dataAccessPtr() {
-        return dataAccess_.get();
-    }
+    auto& diskClient = *diskClient_;
 
-    SDK::ClientProvider* DiskSessionDataProvider::clientProvider() {
-        return diskClient_->getProvider().get();
-    }
+    L->info(
+      "Disk client opened {}: ready={},sampleCount={}",
+      file_.string(),
+      diskClient.isFileOpen(),
+      diskClient.getSampleCount()
+    );
 
-    /**
-     * @brief returns a true if this is a live session, THIS IMPL IS NOT
-     *
-     * @return Is live session or not
-     */
-    bool DiskSessionDataProvider::isLive() const {
+    sessionData_ = std::make_shared<Models::Session::SessionData>();
+    auto timing = sessionData_->mutable_timing();
+    timing->set_is_live(false);
+    timing->set_is_valid(false);
+
+    auto sampleCount = diskClient_->getSampleCount();
+    auto totalTimeMillisDouble = (static_cast<double>(sampleCount) / 60.0) * 1000.0;
+
+    timing->set_total_time_millis(std::floor(totalTimeMillisDouble));
+    timing->set_sample_index(0);
+    timing->set_sample_count(sampleCount);
+
+    auto fileInfo = sessionData_->mutable_file_info();
+
+    VRK_LOG_AND_FATAL_IF(
+      !Utils::GetFileInfo(fileInfo, file_).has_value(),
+      "Unable to get file info for {}",
+      file_.string()
+    );
+
+    sessionData_->set_id(file_.string());
+    sessionData_->set_type(Models::Session::SESSION_TYPE_DISK);
+    sessionData_->set_status(Models::Session::SESSION_STATUS_READY);
+
+    auto sessionInfo = diskClient.getSessionInfo().lock();
+    VRK_LOG_AND_FATAL_IF(
+      !Utils::GetSessionInfoTrackLayoutMetadata(sessionData_->mutable_track_layout_metadata(), sessionInfo.get()).
+      has_value(),
+      "Unable to populate track layout metadata for {}",
+      file_.string()
+    );
+
+    auto subSessions = sessionInfo->sessionInfo.sessions;
+    sessionData_->set_sub_count(subSessions.size());
+
+    // L->warn("HACK: Skipping to SessionNum == 2 (RACE)");
+    // if (!seekToSessionNum(2)) {
+    //     L->error("HACK: ERROR: Failed Skipping to SessionNum == 2 (RACE)");
+    // }
+  }
+
+
+  DiskSessionDataProvider::~DiskSessionDataProvider() {
+    DiskSessionDataProvider::stop();
+  }
+
+  /**
+   * @brief Retrieve `SessionDataAccess` context
+   * @return `SessionDataAccess` context
+   */
+  SessionDataAccess& DiskSessionDataProvider::dataAccess() {
+    return *dataAccess_;
+  }
+
+  SessionDataAccess* DiskSessionDataProvider::dataAccessPtr() {
+    return dataAccess_.get();
+  }
+
+  SDK::ClientProvider* DiskSessionDataProvider::clientProvider() {
+    return diskClient_->getProvider().get();
+  }
+
+  /**
+   * @brief returns a true if this is a live session, THIS IMPL IS NOT
+   *
+   * @return Is live session or not
+   */
+  bool DiskSessionDataProvider::isLive() const {
+    return false;
+  }
+
+  /**
+   * @inherit
+   */
+  void DiskSessionDataProvider::runnable() {
+    auto& diskClient = *diskClient_;
+    bool isFirst = true;
+
+    auto nextDataFrame = [&]() -> bool {
+      std::scoped_lock lock(diskClientMutex_);
+
+      if (!diskClient.next()) {
+        L->debug("Reached last sample {} of {}", diskClient.getSampleIndex(), diskClient.getSampleCount());
         return false;
-    }
+      }
 
-    /**
-     * @inherit
-     */
-    void DiskSessionDataProvider::runnable() {
-        auto& diskClient = *diskClient_;
-        bool isFirst = true;
+      if (isFirst) isFirst = false;
 
-        auto nextDataFrame = [&] () -> bool {
-            std::scoped_lock lock(diskClientMutex_);
+      return true;
+    };
 
-            if (!diskClient.next()) {
-                L->debug("Reached last sample {} of {}", diskClient.getSampleIndex(), diskClient.getSampleCount());
-                return false;
+    while (true) {
+      {
+        std::unique_lock threadLock(threadMutex_);
+        if (!running_) break;
+
+        if (paused_) {
+          pausedCondition_.wait(
+            threadLock,
+            [&] {
+              return !paused_ || !running_;
             }
+          );
 
-            if (isFirst) isFirst = false;
-
-            return true;
-        };
-
-        while (true) {
-            {
-                std::unique_lock threadLock(threadMutex_);
-                if (!running_) break;
-
-                if (paused_) {
-                    pausedCondition_.wait(
-                        threadLock,
-                        [&] {
-                            return !paused_ || !running_;
-                        }
-                    );
-
-                    continue;
-                }
-            }
-
-            if (isFirst && !nextDataFrame()) {
-                break;
-            }
-
-            auto currentTimeMillis = TimeEpoch();
-
-            //auto posCountRes = diskClient.getVarCount(KnownVarName::CarIdxPosition);
-            // auto currentSessionTickVal = diskClient.getVarInt(KnownVarName::SessionTick);
-            // VRK_LOG_AND_FATAL_IF(!currentSessionTickVal, "No session tick");
-            // auto currentSessionTick = currentSessionTickVal.value();
-
-            auto currentSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
-            VRK_LOG_AND_FATAL_IF(!currentSessionTimeVal, "No session time");
-            auto currentSessionTime = currentSessionTimeVal.value();
-            auto currentSessionTimeMillis = SDK::Utils::SessionTimeToMillis(currentSessionTime);
-
-            updateTiming();
-            process();
-
-            if (!nextDataFrame()) {
-                if (running_) {
-                    L->info("Reached the last sample, resetting to the first of {}", diskClient.getSampleCount());
-                }
-                break;
-            }
-
-            if (!options().disableRealtimePlayback)
-            {
-
-                auto nextSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
-                VRK_LOG_AND_FATAL_IF(!nextSessionTimeVal, "No next session time");
-                auto nextSessionTime = nextSessionTimeVal.value();
-                auto nextSessionTimeMillis = SDK::Utils::SessionTimeToMillis(nextSessionTime);
-
-                auto dataFrameIntervalMillis = std::chrono::milliseconds(nextSessionTimeMillis - currentSessionTimeMillis);
-                auto nextTimeMillis = currentTimeMillis + dataFrameIntervalMillis;
-                std::chrono::steady_clock::time_point nextTime{nextTimeMillis};
-
-                auto nowTime = std::chrono::steady_clock::now();
-                auto intervalDuration = nextTime - nowTime;
-                {
-                    std::unique_lock threadLock(threadMutex_);
-                    pausedCondition_.wait_for(threadLock, intervalDuration, [&] {
-                        return !running_;
-                    });
-                }
-            }
+          continue;
         }
-    }
+      }
 
-    /**
-     * @inherit
-     */
-    void DiskSessionDataProvider::init() {
-        std::scoped_lock lock(threadMutex_);
-        if (!running_) {
-            return;
+      if (isFirst && !nextDataFrame()) {
+        break;
+      }
+
+      auto currentTimeMillis = TimeEpoch();
+
+      auto currentSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
+      VRK_LOG_AND_FATAL_IF(!currentSessionTimeVal, "No session time");
+      auto currentSessionTime = currentSessionTimeVal.value();
+      auto currentSessionTimeMillis = SDK::Utils::SessionTimeToMillis(currentSessionTime);
+
+      updateTiming();
+      process();
+
+      if (!nextDataFrame()) {
+        if (running_) {
+          L->info("Reached the last sample, resetting to the first of {}", diskClient.getSampleCount());
         }
+        break;
+      }
 
-        // bump priority up so we get time from the sim
-        SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+      if (!options().disableRealtimePlayback) {
 
-        // ask for 1ms timer so sleeps are more precise
-        timeBeginPeriod(1);
-    }
+        auto nextSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
+        VRK_LOG_AND_FATAL_IF(!nextSessionTimeVal, "No next session time");
+        auto nextSessionTime = nextSessionTimeVal.value();
+        auto nextSessionTimeMillis = SDK::Utils::SessionTimeToMillis(nextSessionTime);
 
-    void DiskSessionDataProvider::updateSessionInfo() {
-        if (auto res = diskClient_->updateSessionInfo(nullptr, true); res.has_value() && res.value() == true) {
-            L->info("SESSION INFO CHANGED, Firing event");
-            fireInfoChangedEvent();
-        }
-    }
-    void DiskSessionDataProvider::updateSessionData() {
-        if (!isAvailable()) {
-            return;
-        }
+        auto dataFrameIntervalMillis = std::chrono::milliseconds(nextSessionTimeMillis - currentSessionTimeMillis);
+        auto nextTimeMillis = currentTimeMillis + dataFrameIntervalMillis;
+        std::chrono::steady_clock::time_point nextTime{nextTimeMillis};
 
-        auto sessionNumRes = diskClient_->getVarInt(KnownVarName::SessionNum);
-        if (!sessionNumRes) {
-            L->error("'SessionNum' data var is unavailable");
-        } else {
-            auto sessionNum = sessionNumRes.value();
-            auto sessionInfo = diskClient_->getSessionInfo().lock();
-            auto subSessionInfo = SDK::Utils::FindValue(sessionInfo->sessionInfo.sessions, [sessionNum] (auto & subInfo) {
-                return subInfo.sessionNum == sessionNum;
-            });
-            if (!subSessionInfo) {
-                L->error("ERROR, SUB SESSION NUM ({}) NOT FOUND IN YAML", sessionNum);
-                return;
+        auto nowTime = std::chrono::steady_clock::now();
+        auto intervalDuration = nextTime - nowTime;
+        {
+          std::unique_lock threadLock(threadMutex_);
+          pausedCondition_.wait_for(
+            threadLock,
+            intervalDuration,
+            [&] {
+              return !running_;
             }
-
-            sessionData_->set_sub_id(sessionInfo->weekendInfo.subSessionID);
-            sessionData_->set_sub_num(sessionNum);
-            auto subSessionName = subSessionInfo.value().sessionName;
-
-            sessionData_->set_sub_type(
-                subSessionName == "PRACTICE" ? Models::Session::SESSION_SUB_TYPE_PRACTICE :
-                subSessionName == "QUALIFY" ? Models::Session::SESSION_SUB_TYPE_QUALIFY :
-                 Models::Session::SESSION_SUB_TYPE_RACE);
-
+          );
         }
+      }
+    }
+  }
 
+  /**
+   * @inherit
+   */
+  void DiskSessionDataProvider::init() {
+    std::scoped_lock lock(threadMutex_);
+    if (!running_) {
+      return;
     }
 
+    // bump priority up so we get time from the sim
+    SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 
-    void DiskSessionDataProvider::process() {
-        checkConnection();
-        updateSessionInfo();
-        updateSessionData();
-        fireDataUpdatedEvent();
-        // processYAMLLiveString();
+    // ask for 1ms timer so sleeps are more precise
+    timeBeginPeriod(1);
+  }
 
-        //    if (processYAMLLiveString())
-        //        wasUpdated = true;
-        //
-        //    // only process session string if it changed
-        //    if (client.wasSessionInfoUpdated()) {
-        //        wasUpdated = true;
-        //    }
-
-        // pump our connection status
-
+  void DiskSessionDataProvider::updateSessionInfo() {
+    if (auto res = diskClient_->updateSessionInfo(nullptr, true); res.has_value() && res.value() == true) {
+      L->info("SESSION INFO CHANGED, Firing event");
+      fireInfoChangedEvent();
     }
-    void DiskSessionDataProvider::fireInfoChangedEvent() {
-        auto ev = createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_INFO_CHANGED);
-        publish(Models::RPC::Events::SESSION_EVENT_TYPE_INFO_CHANGED, ev);
+  }
+
+  void DiskSessionDataProvider::updateSessionData() {
+    if (!isAvailable()) {
+      return;
     }
 
-    void DiskSessionDataProvider::fireDataUpdatedEvent() {
-        auto ev = createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME);
-        publish(Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME, ev);
-    }
-
-    void DiskSessionDataProvider::checkConnection() {
-        auto isAvailable = diskClient_->isAvailable();
-        if (isAvailable_ == isAvailable) return;
-
-        //****Note, put your connection handling here
-        isAvailable_ = isAvailable;
-        publish(
-            Models::RPC::Events::SESSION_EVENT_TYPE_AVAILABLE,
-            createEventData(Models::RPC::Events::SessionEventType::SESSION_EVENT_TYPE_AVAILABLE)
+    auto sessionNumRes = diskClient_->getVarInt(KnownVarName::SessionNum);
+    if (!sessionNumRes) {
+      L->warn("'SessionNum' data var is unavailable");
+    } else {
+      auto sessionNum = sessionNumRes.value();
+      if (!Win32::IsWindowsMagicNumber(sessionNum)) {
+        auto sessionInfo = diskClient_->getSessionInfo().lock();
+        auto subSessionInfo = SDK::Utils::FindValue(
+          sessionInfo->sessionInfo.sessions,
+          [sessionNum](auto& subInfo) {
+            return subInfo.sessionNum == sessionNum;
+          }
         );
-    }
+        if (subSessionInfo) {
+          sessionData_->set_sub_id(sessionInfo->weekendInfo.subSessionID);
+          sessionData_->set_sub_num(sessionNum);
+          auto subSessionName = subSessionInfo.value().sessionName;
 
-    std::shared_ptr<Models::RPC::Events::SessionEventData> DiskSessionDataProvider::createEventData(
-        Models::RPC::Events::SessionEventType type
-    ) {
-        auto data = sessionData();
-        auto ev = std::make_shared<Models::RPC::Events::SessionEventData>();
-        ev->set_id(Common::NewUUID());
-        ev->set_type(type);
-        ev->set_session_id(data->id());
-        ev->set_session_type(Models::Session::SESSION_TYPE_DISK);
-        ev->mutable_session_data()->CopyFrom(*data);
+          sessionData_->set_sub_type(
+            subSessionName == "PRACTICE" ?
+              Models::Session::SESSION_SUB_TYPE_PRACTICE :
+              subSessionName == "QUALIFY" ?
+              Models::Session::SESSION_SUB_TYPE_QUALIFY :
+              subSessionName == "RACE" ?
+              Models::Session::SESSION_SUB_TYPE_RACE :
+              Models::Session::SESSION_SUB_TYPE_UNKNOWN
+          );
 
-        return ev;
-    }
-
-    bool DiskSessionDataProvider::isRunning() {
-        return running_.load();
-    }
-
-    bool DiskSessionDataProvider::resume() {
-        std::scoped_lock lock(threadMutex_);
-        if (!paused_.exchange(false)) return true;
-
-        pausedCondition_.notify_all();
-        return true;
-    }
-
-    std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> DiskSessionDataProvider::sessionInfo() {
-        return diskClient_->getSessionInfo().lock();
-    }
-
-    std::string DiskSessionDataProvider::sessionInfoStr() {
-        auto res = diskClient_->getSessionInfoStr();
-        if (!res) {
-            L->error("Failed to get session info string: {}", res.error().what());
-            return "";
+        } else {
+          L->warn("ERROR, SUB SESSION NUM ({}) NOT FOUND IN YAML", sessionNum);
+          sessionData_->set_sub_id(0);
+          sessionData_->set_sub_num(0);
+          sessionData_->set_sub_type(Models::Session::SESSION_SUB_TYPE_UNKNOWN);
         }
+      }
 
-        return std::string{res.value()};
+
     }
 
-    bool DiskSessionDataProvider::pause() {
-        std::scoped_lock lock(threadMutex_);
-        paused_.exchange(true);
-        return true;
+  }
+
+
+  void DiskSessionDataProvider::process() {
+    checkConnection();
+    updateSessionInfo();
+    updateSessionData();
+    fireDataUpdatedEvent();
+    // processYAMLLiveString();
+
+    //    if (processYAMLLiveString())
+    //        wasUpdated = true;
+    //
+    //    // only process session string if it changed
+    //    if (client.wasSessionInfoUpdated()) {
+    //        wasUpdated = true;
+    //    }
+
+    // pump our connection status
+
+  }
+
+  void DiskSessionDataProvider::fireInfoChangedEvent() {
+    auto ev = createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_INFO_CHANGED);
+    publish(Models::RPC::Events::SESSION_EVENT_TYPE_INFO_CHANGED, ev);
+  }
+
+  void DiskSessionDataProvider::fireDataUpdatedEvent() {
+    auto ev = createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME);
+    publish(Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME, ev);
+  }
+
+  void DiskSessionDataProvider::checkConnection() {
+    auto isAvailable = diskClient_->isAvailable();
+    if (isAvailable_ == isAvailable) return;
+
+    //****Note, put your connection handling here
+    isAvailable_ = isAvailable;
+    publish(
+      Models::RPC::Events::SESSION_EVENT_TYPE_AVAILABLE,
+      createEventData(Models::RPC::Events::SessionEventType::SESSION_EVENT_TYPE_AVAILABLE)
+    );
+  }
+
+  std::shared_ptr<Models::RPC::Events::SessionEventData> DiskSessionDataProvider::createEventData(
+    Models::RPC::Events::SessionEventType type
+  ) {
+    auto data = sessionData();
+    auto ev = std::make_shared<Models::RPC::Events::SessionEventData>();
+    ev->set_id(Common::NewUUID());
+    ev->set_type(type);
+    ev->set_session_id(data->id());
+    ev->set_session_type(Models::Session::SESSION_TYPE_DISK);
+    ev->mutable_session_data()->CopyFrom(*data);
+
+    return ev;
+  }
+
+  bool DiskSessionDataProvider::isRunning() {
+    return running_.load();
+  }
+
+  bool DiskSessionDataProvider::resume() {
+    std::scoped_lock lock(threadMutex_);
+    if (!paused_.exchange(false)) return true;
+
+    pausedCondition_.notify_all();
+    return true;
+  }
+
+  std::optional<std::int32_t> DiskSessionDataProvider::sessionTickCount() {
+    return std::nullopt;
+  }
+
+  std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> DiskSessionDataProvider::sessionInfo() {
+    return diskClient_->getSessionInfo().lock();
+  }
+
+  std::string DiskSessionDataProvider::sessionInfoStr() {
+    auto res = diskClient_->getSessionInfoStr();
+    if (!res) {
+      L->error("Failed to get session info string: {}", res.error().what());
+      return "";
     }
 
-    bool DiskSessionDataProvider::isPaused() {
-        return paused_;
+    return std::string{res.value()};
+  }
+
+  bool DiskSessionDataProvider::pause() {
+    std::scoped_lock lock(threadMutex_);
+    paused_.exchange(true);
+    return true;
+  }
+
+  bool DiskSessionDataProvider::isPaused() {
+    return paused_;
+  }
+
+  bool DiskSessionDataProvider::start() {
+    std::scoped_lock lock(threadMutex_);
+    if (running_.exchange(true) || thread_) {
+      L->warn("Already started");
+      return true;
     }
 
-    bool DiskSessionDataProvider::start() {
-        std::scoped_lock lock(threadMutex_);
-        if (running_.exchange(true) || thread_) {
-            L->warn("Already started");
-            return true;
-        }
+    thread_ = std::make_unique<std::thread>(&DiskSessionDataProvider::runnable, this);
+    SDK::Utils::SetThreadName(thread_.get(), std::format("DiskSessionDataProvider({})", file_.string()));
 
-        thread_ = std::make_unique<std::thread>(&DiskSessionDataProvider::runnable, this);
-        SDK::Utils::SetThreadName(thread_.get(), std::format("DiskSessionDataProvider({})", file_.string()));
+    return running_;
+  }
 
-        return running_;
+  /**
+   * @brief Stop the data provider & cleanup resources
+   */
+  void DiskSessionDataProvider::stop() {
+    if (!running_.exchange(false)) return;
+
+
+    if (!thread_) {
+      return;
     }
 
-    /**
-     * @brief Stop the data provider & cleanup resources
-     */
-    void DiskSessionDataProvider::stop() {
-        if (!running_.exchange(false)) return;
+    // If the thread is in a paused state,
+    // then notify, just in case
+    pausedCondition_.notify_all();
 
-
-        if (!thread_) {
-            return;
-        }
-
-        // If the thread is in a paused state,
-        // then notify, just in case
-        pausedCondition_.notify_all();
-
-        if (thread_->joinable()) {
-            thread_->join();
-        }
-
-        // thread_.reset();
+    if (thread_->joinable()) {
+      thread_->join();
     }
 
-    bool DiskSessionDataProvider::seekToSessionNum(std::int32_t sessionNum) {
-        return isAvailable() && diskClient_->seekToSessionNum(sessionNum);
-    }
+    // thread_.reset();
+  }
 
-    bool DiskSessionDataProvider::isAvailable() {
-        return diskClient_->isAvailable();
-    }
+  bool DiskSessionDataProvider::seekToSessionNum(std::int32_t sessionNum) {
+    return isAvailable() && diskClient_->seekToSessionNum(sessionNum);
+  }
 
-    const Models::Session::SessionTiming* DiskSessionDataProvider::updateTiming() {
-        std::scoped_lock lock(diskClientMutex_);
+  bool DiskSessionDataProvider::isAvailable() {
+    return diskClient_->isAvailable();
+  }
 
-        auto timing = sessionData_->mutable_timing();
-        auto idx = diskClient_->getSampleIndex();
+  const Models::Session::SessionTiming* DiskSessionDataProvider::updateTiming() {
+    std::scoped_lock lock(diskClientMutex_);
 
-        timing->set_sample_index(idx);
+    auto timing = sessionData_->mutable_timing();
+    auto idx = diskClient_->getSampleIndex();
 
-        auto sessionTimeVal = diskClient_->getVarDouble(KnownVarName::SessionTime);
-        std::int64_t sessionMillis = SDK::Utils::SessionTimeToMillis(sessionTimeVal.value());
-        timing->set_current_time_millis(sessionMillis);
+    timing->set_sample_index(idx);
 
-        return &sessionData_->timing();
-    }
+    auto sessionTimeVal = diskClient_->getVarDouble(KnownVarName::SessionTime);
+    std::int64_t sessionMillis = SDK::Utils::SessionTimeToMillis(sessionTimeVal.value());
+    timing->set_current_time_millis(sessionMillis);
+
+    return &sessionData_->timing();
+  }
 
 
-    std::shared_ptr<Models::Session::SessionData> DiskSessionDataProvider::sessionData() {
-        std::scoped_lock lock(diskClientMutex_);
-        return sessionData_;
-    }
+  std::shared_ptr<Models::Session::SessionData> DiskSessionDataProvider::sessionData() {
+    std::scoped_lock lock(diskClientMutex_);
+    return sessionData_;
+  }
 
-    const SDK::VarHeaders& DiskSessionDataProvider::getDataVariableHeaders() {
-        return diskClient_->getVarHeaders();
-    }
+  const SDK::VarHeaders& DiskSessionDataProvider::getDataVariableHeaders() {
+    return diskClient_->getVarHeaders();
+  }
 
-    const DiskSessionDataProvider::Options& DiskSessionDataProvider::options() {
-        return options_;
-    }
+  const DiskSessionDataProvider::Options& DiskSessionDataProvider::options() {
+    return options_;
+  }
 
-    void DiskSessionDataProvider::setOptions(const Options& newOptions) {
-        options_ = newOptions;
-    }
+  void DiskSessionDataProvider::setOptions(const Options& newOptions) {
+    options_ = newOptions;
+  }
 } // namespace IRacingTools::Shared

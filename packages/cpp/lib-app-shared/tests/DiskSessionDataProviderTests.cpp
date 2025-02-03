@@ -1,6 +1,7 @@
 #include <chrono>
 #include <fmt/core.h>
 #include <gsl/util>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <ranges>
 
@@ -26,9 +27,17 @@ using namespace IRacingTools::Shared::Logging;
 using namespace spdlog;
 using namespace std::chrono_literals;
 
+using namespace IRacingTools::Models::RPC::Events;
+
 namespace fs = std::filesystem;
 
 namespace {
+
+    class MockSubscriber {
+    public:
+        MOCK_METHOD(void, onEvent, (SessionEventType type, std::shared_ptr<SessionEventData> data), ());
+    };
+
     class DiskSessionDataProviderTests;
 
     auto L = Logging::GetCategoryWithType<DiskSessionDataProviderTests>();
@@ -81,18 +90,22 @@ namespace {
 
 
 TEST_F(DiskSessionDataProviderTests, session_info_updates) {
+    MockSubscriber subscriber{};
+    EXPECT_CALL(subscriber, onEvent)
+        .Times(testing::AtLeast(5));
 
     auto provider = CreateRaceRecordingDiskSessionDataProvider(IBTRaceRecordingTestFile1);
     auto client = std::static_pointer_cast<DiskClient>(provider->clientProvider()->getClient());
 
     std::atomic_int32_t sessionInfoChangeCount = 0;
-    provider->subscribe([&] (auto type, auto ev) {
-        // L->info("Event received ({})", magic_enum::enum_name(type));
-        if (type == IRacingTools::Models::RPC::Events::SessionEventType::SESSION_EVENT_TYPE_INFO_CHANGED) {
-            ++sessionInfoChangeCount;
-        }
-    });
+    auto onEventHandler = [&subscriber, &sessionInfoChangeCount] (SessionEventType type, std::shared_ptr<SessionEventData> data) {
+        if (type != SessionEventType::SESSION_EVENT_TYPE_INFO_CHANGED)
+            return;
+        subscriber.onEvent(type, data);
+        ++sessionInfoChangeCount;
+    };
 
+    provider->subscribe(onEventHandler);
     provider->start();
     while (provider->isRunning()) {
         std::this_thread::sleep_for(100ms);
@@ -100,8 +113,6 @@ TEST_F(DiskSessionDataProviderTests, session_info_updates) {
             provider->stop();
             break;
         }
-        // EXPECT_TRUE(client->isFileOpen());
-        // EXPECT_TRUE(client->hasSessionInfoFileOverride());
     }
 
     EXPECT_GT(sessionInfoChangeCount, 5);

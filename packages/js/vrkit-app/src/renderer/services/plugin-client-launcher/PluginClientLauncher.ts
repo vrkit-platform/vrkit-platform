@@ -86,7 +86,7 @@ export class PluginLoader {
         .getOrThrow("This first argument to require must be a string with at least 1 character"),
       { state } = this,
       { moduleIdCache } = state,
-      { nodeRequire, webpackRequire } = state.global,
+      // { nodeRequire, webpackRequire } = state.global,
       errors = Array<[string, Error]>()
 
     log.info(`Attempting to load module ${moduleName}`)
@@ -97,7 +97,7 @@ export class PluginLoader {
         return mod
       }
     } catch (err) {
-      log.error(`pluginExternalRequire`, err)
+      log.error(`pluginExternalRequire(${moduleName})`, err)
     }
 
     if (moduleIdCache[moduleName]) {
@@ -110,7 +110,7 @@ export class PluginLoader {
       try {
         mod = __webpack_modules__[moduleName]
         if (!!mod) {
-          log.info("Mod is not available through webpack")
+          log.info(`Mod (${moduleName}) is not available through webpack`)
           moduleIdCache[moduleName] = mod
           return mod
         }

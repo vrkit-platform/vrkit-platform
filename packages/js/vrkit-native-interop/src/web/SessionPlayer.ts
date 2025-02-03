@@ -366,8 +366,8 @@ export class SessionPlayer extends EventEmitter3<
   }
 
   get sessionInfo(): SessionInfoMessage {
+    const yamlStr = this.nativePlayer.sessionInfoYAMLStr
     try {
-      const yamlStr = this.nativePlayer.sessionInfoYAMLStr
       // log.info("SessionInfoMessage (YAML)", yamlStr)
       return (
         isEmpty(yamlStr) ? {} : YAML.parse(yamlStr, objectKeysLowerFirstReviver)

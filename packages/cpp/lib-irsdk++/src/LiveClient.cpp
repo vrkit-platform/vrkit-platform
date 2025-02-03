@@ -301,6 +301,10 @@ namespace IRacingTools::SDK {
     return std::nullopt;
   }
 
+  std::optional<std::int32_t> LiveClient::getSessionTicks() {
+    return getVarInt(KnownVarName::SessionTick);
+  }
+
   Opt<std::int32_t> LiveClient::getSessionInfoUpdateCount() {
     std::scoped_lock lock(sessionInfoMutex_);
     if (isConnected()) {

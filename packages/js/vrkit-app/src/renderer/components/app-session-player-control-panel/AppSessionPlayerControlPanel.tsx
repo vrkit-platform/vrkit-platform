@@ -124,8 +124,12 @@ const SPCRoot = styled(Box, { name: "AppSessionPlayerControlPanelRoot" })(
 
 function SessionActiveTop({ session, sessionType }: { session: SessionDetail; sessionType: ActiveSessionType }) {
   const theme = useTheme(),
-    info = session.info,
-    { driverInfo, weekendInfo } = info,
+    info = session?.info
+  if (!info || !info.weekendInfo)
+    return <></>
+    
+     
+ const { driverInfo, weekendInfo } = info,
     drivers = driverInfo?.drivers,
     { trackDisplayName: trackName, trackCity, trackCountry, trackConfigName, trackLength } = weekendInfo
   return (

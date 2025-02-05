@@ -12,7 +12,6 @@ import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { FileInfo } from "../FileInfo";
 import { TrackLayoutMetadata } from "../TrackLayoutMetadata";
-import { Timestamp } from "../google/protobuf/timestamp";
 /**
  * @generated from protobuf message IRacingTools.Models.Session.SessionTiming
  */
@@ -24,23 +23,10 @@ export interface SessionTiming {
     /**
      * @generated from protobuf field: bool is_valid = 2;
      */
-    isValid: boolean;
-    /**
-     * @generated from protobuf field: google.protobuf.Timestamp start_time = 10;
-     */
-    startTime?: Timestamp;
-    /**
-     * @generated from protobuf field: google.protobuf.Timestamp end_time = 11;
-     */
-    endTime?: Timestamp;
-    /**
-     * @generated from protobuf field: int32 current_time_millis = 20;
-     */
-    currentTimeMillis: number;
-    /**
-     * @generated from protobuf field: int32 total_time_millis = 21;
-     */
-    totalTimeMillis: number; // int64 position = 21;
+    isValid: boolean; //  google.protobuf.Timestamp start_time  = 10;
+    //  google.protobuf.Timestamp end_time = 11;
+    //  int32 current_time_millis = 20;
+    //  int32 total_time_millis = 21;
     /**
      * @generated from protobuf field: int32 sample_index = 50;
      */
@@ -49,6 +35,14 @@ export interface SessionTiming {
      * @generated from protobuf field: int32 sample_count = 51;
      */
     sampleCount: number;
+    /**
+     * @generated from protobuf field: int32 ticks = 60;
+     */
+    ticks: number;
+    /**
+     * @generated from protobuf field: int32 tick_count = 61;
+     */
+    tickCount: number;
 }
 /**
  * @generated from protobuf message IRacingTools.Models.Session.SessionData
@@ -205,22 +199,20 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
         super("IRacingTools.Models.Session.SessionTiming", [
             { no: 1, name: "is_live", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 2, name: "is_valid", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 10, name: "start_time", kind: "message", T: () => Timestamp },
-            { no: 11, name: "end_time", kind: "message", T: () => Timestamp },
-            { no: 20, name: "current_time_millis", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
-            { no: 21, name: "total_time_millis", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
             { no: 50, name: "sample_index", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
-            { no: 51, name: "sample_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
+            { no: 51, name: "sample_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 60, name: "ticks", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 61, name: "tick_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
         ]);
     }
     create(value?: PartialMessage<SessionTiming>): SessionTiming {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.isLive = false;
         message.isValid = false;
-        message.currentTimeMillis = 0;
-        message.totalTimeMillis = 0;
         message.sampleIndex = 0;
         message.sampleCount = 0;
+        message.ticks = 0;
+        message.tickCount = 0;
         if (value !== undefined)
             reflectionMergePartial<SessionTiming>(this, message, value);
         return message;
@@ -236,23 +228,17 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
                 case /* bool is_valid */ 2:
                     message.isValid = reader.bool();
                     break;
-                case /* google.protobuf.Timestamp start_time */ 10:
-                    message.startTime = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.startTime);
-                    break;
-                case /* google.protobuf.Timestamp end_time */ 11:
-                    message.endTime = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.endTime);
-                    break;
-                case /* int32 current_time_millis */ 20:
-                    message.currentTimeMillis = reader.int32();
-                    break;
-                case /* int32 total_time_millis */ 21:
-                    message.totalTimeMillis = reader.int32();
-                    break;
                 case /* int32 sample_index */ 50:
                     message.sampleIndex = reader.int32();
                     break;
                 case /* int32 sample_count */ 51:
                     message.sampleCount = reader.int32();
+                    break;
+                case /* int32 ticks */ 60:
+                    message.ticks = reader.int32();
+                    break;
+                case /* int32 tick_count */ 61:
+                    message.tickCount = reader.int32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -272,24 +258,18 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
         /* bool is_valid = 2; */
         if (message.isValid !== false)
             writer.tag(2, WireType.Varint).bool(message.isValid);
-        /* google.protobuf.Timestamp start_time = 10; */
-        if (message.startTime)
-            Timestamp.internalBinaryWrite(message.startTime, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
-        /* google.protobuf.Timestamp end_time = 11; */
-        if (message.endTime)
-            Timestamp.internalBinaryWrite(message.endTime, writer.tag(11, WireType.LengthDelimited).fork(), options).join();
-        /* int32 current_time_millis = 20; */
-        if (message.currentTimeMillis !== 0)
-            writer.tag(20, WireType.Varint).int32(message.currentTimeMillis);
-        /* int32 total_time_millis = 21; */
-        if (message.totalTimeMillis !== 0)
-            writer.tag(21, WireType.Varint).int32(message.totalTimeMillis);
         /* int32 sample_index = 50; */
         if (message.sampleIndex !== 0)
             writer.tag(50, WireType.Varint).int32(message.sampleIndex);
         /* int32 sample_count = 51; */
         if (message.sampleCount !== 0)
             writer.tag(51, WireType.Varint).int32(message.sampleCount);
+        /* int32 ticks = 60; */
+        if (message.ticks !== 0)
+            writer.tag(60, WireType.Varint).int32(message.ticks);
+        /* int32 tick_count = 61; */
+        if (message.tickCount !== 0)
+            writer.tag(61, WireType.Varint).int32(message.tickCount);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

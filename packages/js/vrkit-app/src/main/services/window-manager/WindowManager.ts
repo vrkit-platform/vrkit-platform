@@ -114,6 +114,21 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     return this.sharedAppState.appSettings
   }
   
+  /**
+   * Broadcast an event to the main window
+   *
+   * @param ipcEventName
+   * @param args
+   * @private
+   */
+  sendToMainWindow<T extends string, Args extends any[]>(
+      ipcEventName: T,
+      ...args: Args
+  ): void {
+    
+    this.mainWindow?.webContents?.send(ipcEventName, ...args)
+  }
+  
   constructor(
     readonly sharedAppState: SharedAppState,
     readonly appSettingsManager: AppSettingsService

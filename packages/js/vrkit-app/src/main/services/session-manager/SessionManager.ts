@@ -64,6 +64,10 @@ export interface SessionManagerEventArgs {
     timing: SessionTiming,
     dataVarValues: SessionDataVariableValueMap
   ) => void
+  [SessionManagerEventType.TIMING_CHANGED]: (
+      sessionId: string,
+      timing: SessionTiming
+  ) => void
 }
 
 function getWeekendInfo(session: SessionDetail) {
@@ -163,7 +167,25 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     )
     this.setLiveSessionActive(true)
   }
-
+  
+  
+  @Bind
+  private onEventSessionTimingChanged(
+      player: SessionPlayer,
+      data: SessionPlayerEventDataDefault
+  ) {
+    const timing = asOption(data?.payload?.sessionTiming)
+        .map(it => SessionTiming.toJson(it) as any as SessionTiming)
+        .getOrNull()
+    
+    //log.debug("TIMING_CHANGED", timing)
+    
+    this.windowManager.sendToMainWindow(
+        SessionManagerEventTypeToIPCName(SessionManagerEventType.TIMING_CHANGED),
+        player.id, timing)
+    this.emit(SessionManagerEventType.TIMING_CHANGED, player.id, timing)
+  }
+  
   @Bind
   private onEventDataFrame(
     player: SessionPlayer,
@@ -178,17 +200,18 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     asOption(data.payload?.sessionData?.timing).ifSome(timing => {
       container.setDataFrame(timing, dataVarValues)
-      const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession",
-        timeAndDuration = toSessionTimeAndDuration(timing)
+      const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession"
+        //   ,
+        // timeAndDuration = toSessionTimeAndDuration(timing)
 
-      if (!isEqual(timeAndDuration, toJS(this.state[stateKey].timeAndDuration))) {
-        this.patchState({
-          [stateKey]: {
-            ...this.state[stateKey],
-            timeAndDuration
-          }
-        })
-      }
+      //if (!isEqual(timeAndDuration, toJS(this.state[stateKey].timeAndDuration))) {
+      //   this.patchState({
+      //     [stateKey]: {
+      //       ...this.state[stateKey],
+      //       timeAndDuration
+      //     }
+      //   })
+      //}
       // TODO: Implement value based SessionDataVariable interface & emit
       this.emit(SessionManagerEventType.DATA_FRAME, player.id, timing, dataVarValues)
     })
@@ -245,10 +268,12 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     const container = new SessionPlayerContainer(sessionId, player)
     player.on(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
     player.on(SessionEventType.INFO_CHANGED, this.onEventSessionInfoChanged)
+    player.on(SessionEventType.TIMING_CHANGED, this.onEventSessionTimingChanged)
     player.on(SessionEventType.DATA_FRAME, this.onEventDataFrame)
     container.disposers.push(() => {
       player.off(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
       player.off(SessionEventType.INFO_CHANGED, this.onEventSessionInfoChanged)
+      player.off(SessionEventType.TIMING_CHANGED, this.onEventSessionTimingChanged)
       player.off(SessionEventType.DATA_FRAME, this.onEventDataFrame)
     })
 
@@ -379,15 +404,13 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
         id: data.id,
         isAvailable: player.isAvailable,
         info: player.sessionInfo,
-        data: SessionData.create(data as any),
-        timeAndDuration: toSessionTimeAndDuration(data.timing)
+        data: SessionData.create(data as any)
       }),
       None: (): SessionDetail => ({
         id: player.id,
         isAvailable: player.isAvailable,
         info: player.sessionInfo,
-        data: !player.sessionData ? null : player.sessionData, // instanceof
-        timeAndDuration: toSessionTimeAndDuration(player.sessionTiming)
+        data: !player.sessionData ? null : player.sessionData
       })
     })
   }

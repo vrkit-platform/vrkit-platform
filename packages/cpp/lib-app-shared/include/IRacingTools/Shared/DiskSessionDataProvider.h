@@ -103,6 +103,11 @@ namespace IRacingTools::Shared {
 
     virtual bool resume() override;
 
+    virtual bool seek(std::size_t sampleIndex) override;
+
+    virtual std::size_t sampleIndex() override;
+    virtual std::size_t sampleCount() override;
+
     virtual std::optional<std::int32_t> sessionTickCount() override;
     virtual std::optional<std::int32_t> sessionTicks() override;
 
@@ -140,7 +145,7 @@ namespace IRacingTools::Shared {
 
     void fireDataUpdatedEvent();
 
-    const Models::Session::SessionTiming* updateTiming();
+    const Models::Session::SessionTiming*updateSessionTiming();
 
     SDK::ClientId clientId_;
     std::shared_ptr<SDK::DiskClient> diskClient_;

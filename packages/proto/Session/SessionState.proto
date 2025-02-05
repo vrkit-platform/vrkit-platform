@@ -8,14 +8,16 @@ package IRacingTools.Models.Session;
 message SessionTiming {
   bool is_live = 1;
   bool is_valid = 2;
-  google.protobuf.Timestamp start_time  = 10;
-  google.protobuf.Timestamp end_time = 11;
-  int32 current_time_millis = 20;
-  int32 total_time_millis = 21;
-  //int64 position = 21;
+//  google.protobuf.Timestamp start_time  = 10;
+//  google.protobuf.Timestamp end_time = 11;
+//  int32 current_time_millis = 20;
+//  int32 total_time_millis = 21;
 
   int32 sample_index = 50;
   int32 sample_count = 51;
+
+  int32 ticks = 60;
+  int32 tick_count = 61;
 }
 
 enum SessionType {

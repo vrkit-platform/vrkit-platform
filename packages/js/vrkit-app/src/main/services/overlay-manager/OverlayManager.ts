@@ -32,7 +32,7 @@ import {
   pairOf,
   removeIfMutation,
   SessionDetail,
-  SessionManagerEventType,
+  SessionManagerEventType, SessionManagerEventTypes,
   SignalFlag,
   Triple,
   tripleOf
@@ -508,7 +508,7 @@ export class OverlayManager {
         [OverlayManagerClientFnType.SET_EDITOR_ENABLED, this.handleSetEditorEnabled.bind(this)],
         [OverlayManagerClientFnType.CLOSE, this.closeHandler.bind(this)]
       ),
-      ipcEventHandlers = Array<Pair<SessionManagerEventType, (...args: any[]) => void>>([
+      sessionEventHandlers = Array<Pair<SessionManagerEventType, (...args: any[]) => void>>([
         SessionManagerEventType.DATA_FRAME,
         this.onSessionDataFrameEvent.bind(this)
       ])
@@ -525,7 +525,7 @@ export class OverlayManager {
       ),
       () => {
         ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayManagerClientFnTypeToIPCName(type)))
-        ipcEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
+        sessionEventHandlers.forEach(([type, handler]) => sessionManager.off(type, handler))
         app.off("quit", this.unload)
 
         Object.assign(global, {
@@ -547,7 +547,7 @@ export class OverlayManager {
       })
     }
 
-    ipcEventHandlers.forEach(([type, handler]) => sessionManager.on(type, handler))
+    sessionEventHandlers.forEach(([type, handler]) => sessionManager.on(type, handler))
   }
 
   @Bind
@@ -601,20 +601,7 @@ export class OverlayManager {
     })
   }
 
-  /**
-   * Broadcast an event to the main window
-   *
-   * @param type
-   * @param args
-   * @private
-   */
-  private broadcastRendererMainWindow(
-    type: OverlayManagerClientEventType | PluginClientEventType,
-    ...args: any[]
-  ): void {
-    const ipcEventName = OverlayClientEventTypeToIPCName(type)
-    this.mainWindowManager.mainWindow?.webContents?.send(ipcEventName, ...args)
-  }
+  
 
   /**
    * Check if `windowId` is valid

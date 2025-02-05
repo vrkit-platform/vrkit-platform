@@ -8,6 +8,7 @@ enum SessionEventType {
   SESSION_EVENT_TYPE_AVAILABLE = 1;
   SESSION_EVENT_TYPE_INFO_CHANGED = 2;
   SESSION_EVENT_TYPE_DATA_FRAME = 3;
+  SESSION_EVENT_TYPE_TIMING_CHANGED = 4;
 }
 
 message SessionEventData {
@@ -16,5 +17,6 @@ message SessionEventData {
 
   string session_id = 10;
   Session.SessionType session_type = 11;
+  Session.SessionTiming session_timing = 15;
   Session.SessionData session_data = 20;
 }

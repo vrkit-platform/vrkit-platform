@@ -288,36 +288,8 @@
                         {
                             "type": "boolean"
                         }
-                    ]
-                },
-                "startTime": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "endTime": {
-                    "type": "string",
-                    "format": "date-time"
-                },
-                "currentTimeMillis": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "totalTimeMillis": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
                     ],
-                    "description": "int64 position = 21;"
+                    "description": "google.protobuf.Timestamp start_time  = 10;  google.protobuf.Timestamp end_time = 11;  int32 current_time_millis = 20;  int32 total_time_millis = 21;"
                 },
                 "sampleIndex": {
                     "oneOf": [
@@ -330,6 +302,26 @@
                     ]
                 },
                 "sampleCount": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "ticks": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "tickCount": {
                     "oneOf": [
                         {
                             "type": "null"
@@ -460,7 +452,9 @@
                         "SESSION_EVENT_TYPE_INFO_CHANGED",
                         2,
                         "SESSION_EVENT_TYPE_DATA_FRAME",
-                        3
+                        3,
+                        "SESSION_EVENT_TYPE_TIMING_CHANGED",
+                        4
                     ],
                     "oneOf": [
                         {
@@ -504,6 +498,16 @@
                         }
                     ],
                     "title": "Session Type"
+                },
+                "sessionTiming": {
+                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionTiming",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
                 },
                 "sessionData": {
                     "$ref": "#/definitions/IRacingTools.Models.Session.SessionData",

@@ -21,6 +21,7 @@ import Box from "@mui/material/Box"
 import { DiskSessionButton } from "./DiskSessionButton"
 import { useAppSelector } from "../../services/store"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
+import { SessionTimingView } from "./SessionTimingView"
 
 const log = getLogger(__filename)
 
@@ -69,6 +70,11 @@ export function DiskSessionView({ ...other }: DiskSessionViewProps) {
             <FlexScaleZeroBox sx={{...Ellipsis}}>{activeSession.id}</FlexScaleZeroBox> <DiskSessionButton />
           </Box>
           <Box className={classes.details}>
+            <SessionTimingView
+              type={activeSessionType}
+              session={activeSession}
+            />
+            
             {/*<FlexScaleZeroBox sx={{ ...Ellipsis, ...theme.typography.body2 }}>Disk</FlexScaleZeroBox>*/}
           </Box>
         </When>

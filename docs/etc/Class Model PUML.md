@@ -29,7 +29,7 @@ namespace IRacingTools {
 			-process() : void
 			#runnable() : void
 			+stop() : void
-			-updateTiming() : void
+			-updateSessionTiming() : void
 		}
 
 		class LiveSessionDataProvider {

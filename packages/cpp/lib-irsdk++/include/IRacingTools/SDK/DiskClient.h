@@ -82,13 +82,17 @@ namespace IRacingTools::SDK {
     void reset();
 
     // read next line out of file
-    bool next();
+    bool next(bool readOnly = false);
     bool hasNext();
 
     bool seek(std::size_t sampleIndex, bool skipRead = false);
 
     bool seekToSessionNum(std::int32_t sessionNum);
 
+
+    virtual std::optional<std::int32_t> getSessionTicks() override;
+    virtual std::optional<std::int32_t> getSessionTickCount();
+    std::int32_t getSessionTickSampleOffset();
     std::size_t getSampleCount();
     std::size_t getSampleIndex();
 
@@ -174,7 +178,6 @@ namespace IRacingTools::SDK {
     // 1 success, 0 failure, -n minimum buffer size
     //int getSessionStrVal(const std::string_view& path, char *val, int valLen) override;
 
-    virtual std::optional<std::int32_t> getSessionTicks() override;
 
     /**
      * @brief Session update string (yaml)
@@ -212,6 +215,8 @@ namespace IRacingTools::SDK {
 
     std::size_t sampleDataSize_{};
     std::size_t sampleDataOffset_{};
+    std::int32_t tickSampleIndexOffset_{-1};
+    std::int64_t sampleIndexValidOffset_{0};
     std::atomic_int64_t sampleIndex_{};
 
     std::shared_ptr<Utils::DynamicBuffer<char>> sessionInfoBuf_;

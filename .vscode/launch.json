@@ -56,10 +56,27 @@
       ]
     },
     {
-      "name": "irt-tests: shared_app_lib",
+      "name": "irsdkcpp_tests",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${command:cmake.launchTargetDirectory}\\iracing_tools_shared_app_lib_tests.exe",
+      "program": "${command:cmake.launchTargetPath}",
+      // "program": "${command:cmake.launchTargetDirectory}\\irsdkcpp_tests.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "PATH",
+          "value": "${env:PATH};${command:cmake.launchTargetDirectory};C:/Qt/6.5.0;C:/Qt/6.5.0/bin;;C:/Qt/6.5.0/lib"
+        }
+      ]
+    },
+    {
+      "name": "vrkit_app_shared_tests",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetPath}",
+      // "program": "${command:cmake.launchTargetDirectory}\\vrkit_shared_app_lib_tests.exe",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

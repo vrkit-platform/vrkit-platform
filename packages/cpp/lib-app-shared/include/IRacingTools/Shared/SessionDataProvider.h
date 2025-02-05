@@ -51,6 +51,11 @@ namespace IRacingTools::Shared {
 
     virtual bool resume() = 0;
 
+    virtual bool seek(std::size_t sampleIndex);
+
+    virtual std::size_t sampleIndex();
+    virtual std::size_t sampleCount();
+
     virtual std::optional<std::int32_t> sessionTicks() = 0;
     virtual std::optional<std::int32_t> sessionTickCount() = 0;
 

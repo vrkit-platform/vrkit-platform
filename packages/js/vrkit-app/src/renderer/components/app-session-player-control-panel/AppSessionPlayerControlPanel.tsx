@@ -188,8 +188,8 @@ export function AppSessionPlayerControlPanel({ className, ...other }: AppSession
     liveSession = useAppSelector(sharedAppSelectors.selectLiveSession),
     diskSession = useAppSelector(sharedAppSelectors.selectDiskSession),
     activeSession = useAppSelector(sharedAppSelectors.selectActiveSession),
-    activeSessionType = useAppSelector(sharedAppSelectors.selectActiveSessionType),
-    activeSessionTimeAndDuration = useAppSelector(sharedAppSelectors.selectActiveSessionTimeAndDuration)
+    activeSessionType = useAppSelector(sharedAppSelectors.selectActiveSessionType)
+    // activeSessionTimeAndDuration = useAppSelector(sharedAppSelectors.selectActiveSessionTimeAndDuration)
 
   return (
     <SPCRoot
@@ -222,12 +222,7 @@ export function AppSessionPlayerControlPanel({ className, ...other }: AppSession
             active={!!activeSession}
           />
 
-          {/*<SessionTimingView*/}
-          {/*  type={activeSessionType}*/}
-          {/*  session={activeSession}*/}
-          {/*  timeAndDuration={activeSessionTimeAndDuration}*/}
-          {/*/>*/}
-
+          
           {activeSession ? (
             <SessionActiveTop
               session={activeSession}

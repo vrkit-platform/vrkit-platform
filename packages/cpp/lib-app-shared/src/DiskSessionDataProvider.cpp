@@ -19,7 +19,7 @@
 #include <IRacingTools/Shared/SessionDataAccess.h>
 #include <IRacingTools/Shared/Common/UUIDHelpers.h>
 #include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
-#include <rpc/Events/SessionEvent.pb.h>
+#include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
 #include <spdlog/spdlog.h>
 
 namespace IRacingTools::Shared {
@@ -40,7 +40,7 @@ namespace IRacingTools::Shared {
       diskClient_(
         fs::is_directory(file) ?
           DiskClient::CreateForRaceRecording(file.string()) :
-          std::make_shared<DiskClient>(file, clientId)
+          std::make_shared<DiskClient>(file, std::string(clientId), DiskClient::Extras{})
       ),
       file_(diskClient_->getFilePath().value()),
 
@@ -58,14 +58,15 @@ namespace IRacingTools::Shared {
     );
 
     sessionData_ = std::make_shared<Models::Session::SessionData>();
+
+    auto sampleCount = diskClient_->getSampleCount();
+
     auto timing = sessionData_->mutable_timing();
     timing->set_is_live(false);
     timing->set_is_valid(false);
 
-    auto sampleCount = diskClient_->getSampleCount();
-    auto totalTimeMillisDouble = (static_cast<double>(sampleCount) / 60.0) * 1000.0;
-
-    timing->set_total_time_millis(std::floor(totalTimeMillisDouble));
+    timing->set_ticks(0);
+    timing->set_tick_count(0);
     timing->set_sample_index(0);
     timing->set_sample_count(sampleCount);
 
@@ -176,7 +177,6 @@ namespace IRacingTools::Shared {
       auto currentSessionTime = currentSessionTimeVal.value();
       auto currentSessionTimeMillis = SDK::Utils::SessionTimeToMillis(currentSessionTime);
 
-      updateTiming();
       process();
 
       if (!nextDataFrame()) {
@@ -285,6 +285,7 @@ namespace IRacingTools::Shared {
 
   void DiskSessionDataProvider::process() {
     checkConnection();
+    updateSessionTiming();
     updateSessionInfo();
     updateSessionData();
     fireDataUpdatedEvent();
@@ -327,14 +328,18 @@ namespace IRacingTools::Shared {
   std::shared_ptr<Models::RPC::Events::SessionEventData> DiskSessionDataProvider::createEventData(
     Models::RPC::Events::SessionEventType type
   ) {
-    auto data = sessionData();
+    auto data = sessionData_;
     auto ev = std::make_shared<Models::RPC::Events::SessionEventData>();
     ev->set_id(Common::NewUUID());
     ev->set_type(type);
     ev->set_session_id(data->id());
     ev->set_session_type(Models::Session::SESSION_TYPE_DISK);
-    ev->mutable_session_data()->CopyFrom(*data);
 
+    if (type != Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED) {
+      ev->mutable_session_data()->CopyFrom(*data);
+    } else {
+      ev->mutable_session_timing()->CopyFrom(data->timing());
+    }
     return ev;
   }
 
@@ -351,7 +356,11 @@ namespace IRacingTools::Shared {
   }
 
   std::optional<std::int32_t> DiskSessionDataProvider::sessionTickCount() {
-    return std::nullopt;
+    return diskClient_->getSessionTickCount();
+  }
+
+  std::optional<std::int32_t> DiskSessionDataProvider::sessionTicks() {
+    return diskClient_->getSessionTicks();
   }
 
   std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> DiskSessionDataProvider::sessionInfo() {
@@ -413,6 +422,15 @@ namespace IRacingTools::Shared {
     // thread_.reset();
   }
 
+  bool DiskSessionDataProvider::seek(std::size_t sampleIndex) {
+    if (!isAvailable() || !diskClient_->seek(sampleIndex)) {
+      return false;
+    }
+
+    updateSessionTiming();
+    return true;
+  }
+
   bool DiskSessionDataProvider::seekToSessionNum(std::int32_t sessionNum) {
     return isAvailable() && diskClient_->seekToSessionNum(sessionNum);
   }
@@ -421,21 +439,34 @@ namespace IRacingTools::Shared {
     return diskClient_->isAvailable();
   }
 
-  const Models::Session::SessionTiming* DiskSessionDataProvider::updateTiming() {
+  const Models::Session::SessionTiming* DiskSessionDataProvider::updateSessionTiming() {
     std::scoped_lock lock(diskClientMutex_);
 
     auto timing = sessionData_->mutable_timing();
     auto idx = diskClient_->getSampleIndex();
+    auto ticks = diskClient_->getSessionTicks().value_or(0);
 
     timing->set_sample_index(idx);
+    timing->set_sample_count(diskClient_->getSampleCount());
+    timing->set_ticks(ticks);
+    timing->set_tick_count(diskClient_->getSessionTickCount().value_or(-1));
+    timing->set_is_valid(ticks >= 0);
 
-    auto sessionTimeVal = diskClient_->getVarDouble(KnownVarName::SessionTime);
-    std::int64_t sessionMillis = SDK::Utils::SessionTimeToMillis(sessionTimeVal.value());
-    timing->set_current_time_millis(sessionMillis);
+    publish(
+      Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED,
+      createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED)
+    );
 
     return &sessionData_->timing();
   }
 
+   std::size_t DiskSessionDataProvider::sampleIndex() {
+    return diskClient_->getSampleIndex();
+  }
+
+  std::size_t DiskSessionDataProvider::sampleCount() {
+    return diskClient_->getSampleCount();
+  }
 
   std::shared_ptr<Models::Session::SessionData> DiskSessionDataProvider::sessionData() {
     std::scoped_lock lock(diskClientMutex_);

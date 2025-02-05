@@ -4,13 +4,13 @@
 			"name": "vrkit-platform",
 			"path": "."
 		},
-		{
-			"name": "vrkit-plugin-leaderboard",
-			"path": "../vrkit-plugin-leaderboard"
-		},
-		{
-			"path": "../vrkit-plugin-manifest"
-		}
+		// {
+		// 	"name": "vrkit-plugin-leaderboard",
+		// 	"path": "../vrkit-plugin-leaderboard"
+		// },
+		// {
+		// 	"path": "../vrkit-plugin-manifest"
+		// }
 	],
 	
 	"settings": {
@@ -23,7 +23,7 @@
 			"**/Thumbs.db": true,
 			//"build/**": true,
 			".vs/**": true,
-			".idea/**": true,
+			".idea/**": false,
 			".run/**": true,
 			"dist/**": true,
 			"venv/**": true,

@@ -1,43 +1,62 @@
 import { type BoxProps } from "@mui/material/Box"
-import { ISessionTimeAndDuration } from "@vrkit-platform/plugin-sdk"
-import type { ActiveSessionType, SessionDetail } from "@vrkit-platform/shared"
-import { FlexScaleZeroBox } from "@vrkit-platform/shared-ui"
+// import type { ISessionTimeAndDuration } from "@vrkit-platform/plugin-sdk"
+import { ActiveSessionType, MILLIS_IN_HR, SessionDetail } from "@vrkit-platform/shared"
+import { DurationView, FlexScaleZeroBox } from "@vrkit-platform/shared-ui"
+import { useSessionTiming } from "../../hooks"
+import { getLogger } from "@3fv/logger-proxy"
+import { asOption } from "@3fv/prelude-ts"
+
+const log = getLogger(__filename)
 
 interface SessionTimingViewProps extends BoxProps {
-  timeAndDuration: ISessionTimeAndDuration
-  
   type: ActiveSessionType
-  
+
   session: SessionDetail
-  
-  showHours?: boolean
+
+  showHours?: boolean | "AUTO"
 }
 
 export function SessionTimingView({
   type,
   session,
-  timeAndDuration,
-  showHours = true // timeAndDuration.currentTimeMillis >= MILLIS_IN_HR
+  showHours: showHoursArg = "AUTO", // timeAndDuration.currentTimeMillis
+  // >= MILLIS_IN_HR
+  ...others
 }: SessionTimingViewProps) {
+  const sessionTiming = useSessionTiming()
+
+  const duration = asOption(sessionTiming?.sampleIndex)
+      .map(idx => (1000 / 60) * idx)
+      .getOrElse(0),
+    finalDuration = asOption(sessionTiming?.sampleCount)
+      .map(idx => (1000 / 60) * idx)
+      .getOrElse(0)
+
+  const showHours = showHoursArg === "AUTO" ? duration >= MILLIS_IN_HR : showHoursArg
+
   //sampleIndex
-  const { isLive } = timeAndDuration
-  
+  const isLive = sessionTiming?.isLive
+
   return (
-      <FlexScaleZeroBox>
-        {/*<DurationView*/}
-        {/*    //timeAndDuration.currentTimeMillis*/}
-        {/*  millis={0}*/}
-        {/*  showHours={showHours}*/}
-        {/*/>*/}
-        {/*{!isLive && timeAndDuration.totalTimeMillis > 0 && (*/}
-        {/*  <>*/}
-        {/*    &nbsp;of&nbsp;*/}
-        {/*    <DurationView*/}
-        {/*      millis={timeAndDuration.totalTimeMillis}*/}
-        {/*      showHours={showHours}*/}
-        {/*    />*/}
-        {/*  </>*/}
-        {/*)}*/}
-      </FlexScaleZeroBox>
+    <FlexScaleZeroBox>
+      <If condition={!!sessionTiming}>
+        <>
+          <DurationView
+            //timeAndDuration.currentTimeMillis
+            millis={duration}
+            showHours={showHours}
+          />
+          {!isLive && finalDuration > 0 && (
+            <>
+              &nbsp;of&nbsp;
+              <DurationView
+                millis={finalDuration}
+                showHours={showHours}
+              />
+            </>
+          )}
+        </>
+      </If>
+    </FlexScaleZeroBox>
   )
 }

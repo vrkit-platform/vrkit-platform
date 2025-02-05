@@ -70,7 +70,7 @@ set(CMAKE_CXX_VISIBILITY_PRESET visible)
 #set(CMAKE_CXX_VISIBILITY_PRESET default)
 
 # Add WCHAR def for `spdlog` header inclusion
-add_compile_definitions(SPDLOG_WCHAR_TO_UTF8_SUPPORT SPDLOG_WCHAR_SUPPORT)
+add_compile_definitions(SPDLOG_WCHAR_TO_UTF8_SUPPORT SPDLOG_WCHAR_SUPPORT SPDLOG_NO_EXCEPTIONS)
 
 # Include CMake helper libs
 include(cmake/system.cmake)

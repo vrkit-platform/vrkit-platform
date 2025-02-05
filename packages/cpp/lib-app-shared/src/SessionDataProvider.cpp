@@ -11,4 +11,15 @@ namespace IRacingTools::Shared {
   using namespace IRacingTools::SDK;
 
 
+  bool SessionDataProvider::seek(std::size_t sampleIndex) {
+    return false;
+  }
+
+  std::size_t SessionDataProvider::sampleIndex() {
+    return 0;
+  }
+
+  std::size_t SessionDataProvider::sampleCount() {
+    return 0;
+  }
 }// namespace IRacingTools::Shared

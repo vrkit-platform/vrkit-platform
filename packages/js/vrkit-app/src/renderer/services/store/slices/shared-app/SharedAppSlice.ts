@@ -216,7 +216,7 @@ const slice = createSlice({
     selectActiveSession: createActiveSessionSelector(Identity),
     selectActiveSessionData: createActiveSessionSelector(session => session?.data),
     selectActiveSessionId: createActiveSessionSelector(session => session?.id),
-    selectActiveSessionTimeAndDuration: createActiveSessionSelector(session => session?.timeAndDuration),
+    // selectActiveSessionTimeAndDuration: createActiveSessionSelector(session => session?.timeAndDuration),
     selectActiveSessionInfo: createActiveSessionSelector(session => session?.info),
     selectActiveSessionWeekendInfo: createActiveSessionSelector(session => session?.info?.weekendInfo),
 
@@ -229,9 +229,9 @@ const slice = createSlice({
     ),
     selectLiveSessionData: createSessionsSelector((state: SessionsState) => state.liveSession?.data),
     selectLiveSessionId: createSessionsSelector((state: SessionsState) => state.liveSession?.id),
-    selectLiveSessionTimeAndDuration: createSessionsSelector(
-      (state: SessionsState) => state.liveSession?.timeAndDuration
-    ),
+    // selectLiveSessionTimeAndDuration: createSessionsSelector(
+    //   (state: SessionsState) => state.liveSession?.timeAndDuration
+    // ),
     selectLiveSessionInfo: createSessionsSelector((state: SessionsState) => state.liveSession?.info),
     selectLiveSessionWeekendInfo: createSessionsSelector((state: SessionsState) => state.liveSession?.info?.weekendInfo)
   }

@@ -211,30 +211,36 @@ namespace IRacingTools::SDK {
     ibtFile = nullptr;
 
     // Setup var buffer
-
     sampleIndex_ = 0;
     sampleDataSize_ = header_.bufLen;
     sampleDataOffset_ = header_.varBuf[0].bufOffset;
 
     varBuf_.resize(sampleDataSize_);
     if (std::fseek(ibtFile_, sampleDataOffset_, SEEK_SET)) {
+        return false;
+    }
+
+    while (next()) {
+        auto tickRes = getVarInt(KnownVarName::SessionTick);
+        if (tickRes) {
+            auto tick = tickRes.value();
+            if (!Win32::IsWindowsMagicNumber(tick) && tick >= 0) {
+                sampleIndexValidOffset_ = sampleIndex_.load();
+                tickSampleIndexOffset_ = tick;
+                break;
+            }
+        }
+    }
+
+
+    sampleIndex_ = sampleIndexValidOffset_;
+    if (tickSampleIndexOffset_ == -1 || std::fseek(ibtFile_, sampleDataOffset_ + (header_.bufLen * sampleIndex_), SEEK_SET)) {
       return false;
     }
     L->info("IBT disk client ready, sampleDataSize {} bytes", sampleDataSize_);
 
     return true;
 
-    //delete [] varBuf_;
-    //varBuf_ = NULL;
-
-    // delete [] varHeaders_;
-    // varHeaders_ = nullptr;
-    //
-
-    // delete [] sessionInfoString_;
-    // sessionInfoString_ = nullptr;
-
-    //    return false;
   }
 
   std::expected<bool, GeneralError> DiskClient::updateSessionInfo(std::FILE* ibtFile, bool onlyCheckOverrides) {
@@ -367,12 +373,17 @@ namespace IRacingTools::SDK {
 
   bool DiskClient::seek(std::size_t sampleIndex, bool skipRead) {
     std::scoped_lock lock(ibtFileMutex_);
+    sampleIndex = std::max<std::int32_t>(
+      static_cast<std::int32_t>(sampleIndexValidOffset_),
+      static_cast<std::int32_t>(sampleIndex));
+    
     if (!isFileOpen() || sampleIndex >= getSampleCount()) return false;
 
     if (std::fseek(ibtFile_, sampleDataOffset_ + (header_.bufLen * sampleIndex), SEEK_SET)) return false;
 
     sampleIndex_ = sampleIndex;
-    return skipRead ? true : next();
+
+    return skipRead || next();
   }
 
   bool DiskClient::seekToSessionNum(std::int32_t sessionNum) {
@@ -402,12 +413,25 @@ namespace IRacingTools::SDK {
     return false;
   }
 
-  bool DiskClient::next() {
+//  bool DiskClient::current() {
+//    std::scoped_lock lock(ibtFileMutex_);
+//    if (hasNext()) {
+//      varBuf_.reset();
+//      if (FileReadDataFully(varBuf_.data(), 1, header_.bufLen, ibtFile_)) {
+//        ++sampleIndex_;
+//        return true;
+//      }
+//    }
+//    return false;
+//  }
+//
+  bool DiskClient::next(bool readOnly) {
     std::scoped_lock lock(ibtFileMutex_);
     if (hasNext()) {
       varBuf_.reset();
       if (FileReadDataFully(varBuf_.data(), 1, header_.bufLen, ibtFile_)) {
-        ++sampleIndex_;
+        if (!readOnly)
+          ++sampleIndex_;
         return true;
       }
     }
@@ -659,6 +683,14 @@ namespace IRacingTools::SDK {
     return getVarInt(KnownVarName::SessionTick);
   }
 
+  std::optional<std::int32_t> DiskClient::getSessionTickCount() {
+    return static_cast<std::int32_t>(getSampleCount()) + getSessionTickSampleOffset();
+  }
+
+  std::int32_t DiskClient::getSessionTickSampleOffset() {
+    return tickSampleIndexOffset_;
+  }
+
   Expected<std::string_view> DiskClient::getSessionInfoStr() {
     if (!sessionInfoBuf_) return MakeUnexpected<GeneralError>("Session str not available");
 
@@ -703,6 +735,7 @@ namespace IRacingTools::SDK {
   bool DiskClient::hasSessionInfoFileOverride() {
     return !extras_.sessionInfoTickQueue.empty();
   }
+
 
   std::optional<DiskClient::SessionInfoFileOverride> DiskClient::findSessionInfoFileOverride(std::uint32_t tickCount) {
     if (!hasSessionInfoFileOverride()) return std::nullopt;

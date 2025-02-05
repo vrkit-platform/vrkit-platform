@@ -42,10 +42,10 @@ export const SessionDetailSchema = createSimpleSchema<SessionDetail>({
     v => (!v ? {} : SessionData.toJson(toJS(v))),
     v => (!v ? {} : SessionData.fromJson(v))
   ),
-  timeAndDuration: custom(
-    v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex", "sampleCount","currentTimeMillis"])),
-    v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex", "sampleCount","currentTimeMillis"]))
-  )
+  // timeAndDuration: custom(
+  //   v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex", "sampleCount","currentTimeMillis"])),
+  //   v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex", "sampleCount","currentTimeMillis"]))
+  // )
 })
 
 export const SessionsStateSchema = createSimpleSchema<SessionsState>({

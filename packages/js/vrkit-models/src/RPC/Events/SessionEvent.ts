@@ -11,6 +11,7 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { SessionData } from "../../Session/SessionState";
+import { SessionTiming } from "../../Session/SessionState";
 import { SessionType } from "../../Session/SessionState";
 /**
  * @generated from protobuf message IRacingTools.Models.RPC.Events.SessionEventData
@@ -32,6 +33,10 @@ export interface SessionEventData {
      * @generated from protobuf field: IRacingTools.Models.Session.SessionType session_type = 11;
      */
     sessionType: SessionType;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionTiming session_timing = 15;
+     */
+    sessionTiming?: SessionTiming;
     /**
      * @generated from protobuf field: IRacingTools.Models.Session.SessionData session_data = 20;
      */
@@ -56,7 +61,11 @@ export enum SessionEventType {
     /**
      * @generated from protobuf enum value: SESSION_EVENT_TYPE_DATA_FRAME = 3;
      */
-    DATA_FRAME = 3
+    DATA_FRAME = 3,
+    /**
+     * @generated from protobuf enum value: SESSION_EVENT_TYPE_TIMING_CHANGED = 4;
+     */
+    TIMING_CHANGED = 4
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class SessionEventData$Type extends MessageType<SessionEventData> {
@@ -66,6 +75,7 @@ class SessionEventData$Type extends MessageType<SessionEventData> {
             { no: 2, name: "type", kind: "enum", T: () => ["IRacingTools.Models.RPC.Events.SessionEventType", SessionEventType, "SESSION_EVENT_TYPE_"] },
             { no: 10, name: "session_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 11, name: "session_type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionType", SessionType, "SESSION_TYPE_"] },
+            { no: 15, name: "session_timing", kind: "message", T: () => SessionTiming },
             { no: 20, name: "session_data", kind: "message", T: () => SessionData }
         ]);
     }
@@ -96,6 +106,9 @@ class SessionEventData$Type extends MessageType<SessionEventData> {
                 case /* IRacingTools.Models.Session.SessionType session_type */ 11:
                     message.sessionType = reader.int32();
                     break;
+                case /* IRacingTools.Models.Session.SessionTiming session_timing */ 15:
+                    message.sessionTiming = SessionTiming.internalBinaryRead(reader, reader.uint32(), options, message.sessionTiming);
+                    break;
                 case /* IRacingTools.Models.Session.SessionData session_data */ 20:
                     message.sessionData = SessionData.internalBinaryRead(reader, reader.uint32(), options, message.sessionData);
                     break;
@@ -123,6 +136,9 @@ class SessionEventData$Type extends MessageType<SessionEventData> {
         /* IRacingTools.Models.Session.SessionType session_type = 11; */
         if (message.sessionType !== 0)
             writer.tag(11, WireType.Varint).int32(message.sessionType);
+        /* IRacingTools.Models.Session.SessionTiming session_timing = 15; */
+        if (message.sessionTiming)
+            SessionTiming.internalBinaryWrite(message.sessionTiming, writer.tag(15, WireType.LengthDelimited).fork(), options).join();
         /* IRacingTools.Models.Session.SessionData session_data = 20; */
         if (message.sessionData)
             SessionData.internalBinaryWrite(message.sessionData, writer.tag(20, WireType.LengthDelimited).fork(), options).join();

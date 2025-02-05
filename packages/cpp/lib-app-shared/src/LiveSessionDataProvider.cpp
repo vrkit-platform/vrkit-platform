@@ -87,14 +87,22 @@ namespace IRacingTools::Shared {
 
       std::int64_t sessionMillis = SDK::Utils::SessionTimeToMillis(sessionTimeVal.value());
       timing->set_is_valid(true);
-      timing->set_current_time_millis(sessionMillis);
+      timing->set_ticks(client.getSessionTicks().value_or(0));
+      timing->set_tick_count(-1);
+      timing->set_sample_index(client.getSampleIndex());
       timing->set_sample_count(client.getSampleCount());
       timing->set_sample_index(client.getSampleIndex());
+
+      publish(
+        Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED,
+        createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED)
+      );
     } else {
+      timing->set_ticks(0);
+      timing->set_tick_count(-1);
       timing->set_sample_count(0);
       timing->set_sample_index(0);
       timing->set_is_valid(false);
-      timing->set_current_time_millis(0);
     }
   }
 

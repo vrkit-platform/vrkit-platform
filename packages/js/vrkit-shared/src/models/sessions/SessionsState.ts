@@ -1,7 +1,6 @@
 import { SessionData, SessionTiming, SessionType } from "@vrkit-platform/models"
 import type { SessionPlayerId } from "vrkit-native-interop"
 import type {
-  ISessionTimeAndDuration,
   SessionInfoMessage
 } from "@vrkit-platform/plugin-sdk"
 import { omit } from "lodash"
@@ -14,7 +13,7 @@ export const LiveSessionId: SessionPlayerId = "SESSION_TYPE_LIVE"
 
 
 export function toSessionTimeAndDuration(timing: SessionTiming) {
-  return omit(toJS(timing), ["sampleIndex", "sampleCount", "currentTimeMillis"])
+  return omit(toJS(timing), ["sampleIndex", "sampleCount", "ticks", "tickCount"])
 }
 
 export interface SessionDetail {
@@ -28,8 +27,6 @@ export interface SessionDetail {
 
   data?: SessionData
   
-  timeAndDuration?: ISessionTimeAndDuration
-
   info?: SessionInfoMessage
 }
 
@@ -66,8 +63,11 @@ export type SessionManagerStateSessionKey = keyof Pick<
 >
 
 export enum SessionManagerEventType {
+  TIMING_CHANGED = "TIMING_CHANGED",
   DATA_FRAME = "DATA_FRAME"
 }
+
+export type SessionManagerEventTypes = `${SessionManagerEventType}`
 
 export type SessionManagerEventIPCName =
   `SESSION_MANAGER_EVENT_${SessionManagerEventType}`

@@ -75,7 +75,7 @@ namespace {
 
     std::shared_ptr<IRacingTools::SDK::DiskClient> CreateDiskClient(const std::string& filename) {
         auto file = ToIBTTestFile(filename);
-        auto client = std::make_shared<IRacingTools::SDK::DiskClient>(file, file.string());
+        auto client = std::make_shared<IRacingTools::SDK::DiskClient>(file, file.string(),IRacingTools::SDK::DiskClient::Extras{});
         return client;
     }
 

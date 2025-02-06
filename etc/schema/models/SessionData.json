@@ -84,8 +84,7 @@
                         {
                             "type": "boolean"
                         }
-                    ],
-                    "description": "google.protobuf.Timestamp start_time  = 10;  google.protobuf.Timestamp end_time = 11;  int32 current_time_millis = 20;  int32 total_time_millis = 21;"
+                    ]
                 },
                 "sampleIndex": {
                     "oneOf": [
@@ -118,6 +117,133 @@
                     ]
                 },
                 "tickCount": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "sessionSubCount": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "sessionSubNum": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "sessionSubType": {
+                    "enum": [
+                        "SESSION_SUB_TYPE_UNKNOWN",
+                        0,
+                        "SESSION_SUB_TYPE_PRACTICE",
+                        1,
+                        "SESSION_SUB_TYPE_QUALIFY",
+                        2,
+                        "SESSION_SUB_TYPE_RACE",
+                        3
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Sub Type",
+                    "description": "Enum representing the sub-types of a session. This distinguishes specific parts of a session, such as practice, qualifying, or race phases."
+                },
+                "sessionSubTimingType": {
+                    "enum": [
+                        "SESSION_SUB_TIMING_TYPE_UNKNOWN",
+                        0,
+                        "SESSION_SUB_TIMING_TYPE_TIMED",
+                        1,
+                        "SESSION_SUB_TIMING_TYPE_LAPS",
+                        2
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Sub Timing Type"
+                },
+                "sessionSubLap": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "sessionSubLapRemaining": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "sessionSubLapCount": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "sessionSubTime": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "sessionSubTimeRemaining": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "sessionSubTimeTotal": {
                     "oneOf": [
                         {
                             "type": "null"
@@ -337,7 +463,8 @@
                             "type": "null"
                         }
                     ],
-                    "title": "Session Sub Type"
+                    "title": "Session Sub Type",
+                    "description": "Enum representing the sub-types of a session. This distinguishes specific parts of a session, such as practice, qualifying, or race phases."
                 },
                 "timing": {
                     "$ref": "#/definitions/IRacingTools.Models.Session.SessionTiming",

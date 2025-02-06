@@ -70,12 +70,10 @@ export function DiskSessionView({ ...other }: DiskSessionViewProps) {
             <FlexScaleZeroBox sx={{...Ellipsis}}>{activeSession.id}</FlexScaleZeroBox> <DiskSessionButton />
           </Box>
           <Box className={classes.details}>
-            <SessionTimingView
-              type={activeSessionType}
-              session={activeSession}
-            />
-            
-            {/*<FlexScaleZeroBox sx={{ ...Ellipsis, ...theme.typography.body2 }}>Disk</FlexScaleZeroBox>*/}
+            {/*<SessionTimingView*/}
+            {/*  type={activeSessionType}*/}
+            {/*  session={activeSession}*/}
+            {/*/>*/}
           </Box>
         </When>
         <Otherwise>

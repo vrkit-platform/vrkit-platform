@@ -16,6 +16,7 @@ import { Container } from "@3fv/ditsy"
 export enum PluginClientEventType {
   SESSION_ID_CHANGED = "SESSION_ID_CHANGED",
   SESSION_INFO_CHANGED = "SESSION_INFO_CHANGED",
+  SESSION_TIMING_CHANGED = "SESSION_TIMING_CHANGED",
   DATA_FRAME = "DATA_FRAME"
 }
 
@@ -29,6 +30,10 @@ export interface IPluginClientEventArgs {
   ) => void
   [PluginClientEventType.SESSION_ID_CHANGED]: (sessionId: string, info: SessionInfoMessage) => void
   [PluginClientEventType.SESSION_INFO_CHANGED]: (sessionId: string, info: SessionInfoMessage) => void
+  [PluginClientEventType.SESSION_TIMING_CHANGED]: (
+      sessionId: string,
+      timing: SessionTiming
+  ) => void
 }
 
 export type PluginClientEventHandler<Type extends keyof IPluginClientEventArgs> = IPluginClientEventArgs[Type]

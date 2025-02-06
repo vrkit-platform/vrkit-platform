@@ -174,14 +174,13 @@ export class SessionPlayer extends EventEmitter3<SessionPlayerEventArgs, Session
     }
     
     const extraArgs:any[] = []
+    
     if (type === SessionEventType.DATA_FRAME) {
       extraArgs.push(this.getDataVariableValueMap())
-      delete data.payload["timing"]
+      delete data.payload["sessionTiming"]
+      // if (data.payload["sessionData"])
+      //   delete data.payload["sessionData"]["timing"]
     }
-    
-    // if (data.payload && type !== SessionEventType.TIMING_CHANGED) {
-    //
-    // }
     
     guard(
         () => this.emit(type, this, data, ...extraArgs),

@@ -23,10 +23,7 @@ export interface SessionTiming {
     /**
      * @generated from protobuf field: bool is_valid = 2;
      */
-    isValid: boolean; //  google.protobuf.Timestamp start_time  = 10;
-    //  google.protobuf.Timestamp end_time = 11;
-    //  int32 current_time_millis = 20;
-    //  int32 total_time_millis = 21;
+    isValid: boolean;
     /**
      * @generated from protobuf field: int32 sample_index = 50;
      */
@@ -43,6 +40,46 @@ export interface SessionTiming {
      * @generated from protobuf field: int32 tick_count = 61;
      */
     tickCount: number;
+    /**
+     * @generated from protobuf field: int32 session_sub_count = 70;
+     */
+    sessionSubCount: number;
+    /**
+     * @generated from protobuf field: int32 session_sub_num = 71;
+     */
+    sessionSubNum: number;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionSubType session_sub_type = 72;
+     */
+    sessionSubType: SessionSubType;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionSubTimingType session_sub_timing_type = 73;
+     */
+    sessionSubTimingType: SessionSubTimingType;
+    /**
+     * @generated from protobuf field: int32 session_sub_lap = 75;
+     */
+    sessionSubLap: number;
+    /**
+     * @generated from protobuf field: int32 session_sub_lap_remaining = 76;
+     */
+    sessionSubLapRemaining: number;
+    /**
+     * @generated from protobuf field: int32 session_sub_lap_count = 77;
+     */
+    sessionSubLapCount: number;
+    /**
+     * @generated from protobuf field: int32 session_sub_time = 80;
+     */
+    sessionSubTime: number;
+    /**
+     * @generated from protobuf field: int32 session_sub_time_remaining = 81;
+     */
+    sessionSubTimeRemaining: number;
+    /**
+     * @generated from protobuf field: int32 session_sub_time_total = 82;
+     */
+    sessionSubTimeTotal: number;
 }
 /**
  * @generated from protobuf message IRacingTools.Models.Session.SessionData
@@ -102,19 +139,9 @@ export interface SessionData {
     sessionInfoYaml: string;
 }
 /**
- * @generated from protobuf enum IRacingTools.Models.Session.SessionType
- */
-export enum SessionType {
-    /**
-     * @generated from protobuf enum value: SESSION_TYPE_LIVE = 0;
-     */
-    LIVE = 0,
-    /**
-     * @generated from protobuf enum value: SESSION_TYPE_DISK = 1;
-     */
-    DISK = 1
-}
-/**
+ * Enum representing the sub-types of a session. This distinguishes
+ * specific parts of a session, such as practice, qualifying, or race phases.
+ *
  * @generated from protobuf enum IRacingTools.Models.Session.SessionSubType
  */
 export enum SessionSubType {
@@ -134,6 +161,36 @@ export enum SessionSubType {
      * @generated from protobuf enum value: SESSION_SUB_TYPE_RACE = 3;
      */
     RACE = 3
+}
+/**
+ * @generated from protobuf enum IRacingTools.Models.Session.SessionSubTimingType
+ */
+export enum SessionSubTimingType {
+    /**
+     * @generated from protobuf enum value: SESSION_SUB_TIMING_TYPE_UNKNOWN = 0;
+     */
+    UNKNOWN = 0,
+    /**
+     * @generated from protobuf enum value: SESSION_SUB_TIMING_TYPE_TIMED = 1;
+     */
+    TIMED = 1,
+    /**
+     * @generated from protobuf enum value: SESSION_SUB_TIMING_TYPE_LAPS = 2;
+     */
+    LAPS = 2
+}
+/**
+ * @generated from protobuf enum IRacingTools.Models.Session.SessionType
+ */
+export enum SessionType {
+    /**
+     * @generated from protobuf enum value: SESSION_TYPE_LIVE = 0;
+     */
+    LIVE = 0,
+    /**
+     * @generated from protobuf enum value: SESSION_TYPE_DISK = 1;
+     */
+    DISK = 1
 }
 /**
  * @generated from protobuf enum IRacingTools.Models.Session.SessionCarStatus
@@ -202,7 +259,17 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
             { no: 50, name: "sample_index", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
             { no: 51, name: "sample_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
             { no: 60, name: "ticks", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
-            { no: 61, name: "tick_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
+            { no: 61, name: "tick_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 70, name: "session_sub_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 71, name: "session_sub_num", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 72, name: "session_sub_type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionSubType", SessionSubType, "SESSION_SUB_TYPE_"] },
+            { no: 73, name: "session_sub_timing_type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionSubTimingType", SessionSubTimingType, "SESSION_SUB_TIMING_TYPE_"] },
+            { no: 75, name: "session_sub_lap", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 76, name: "session_sub_lap_remaining", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 77, name: "session_sub_lap_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 80, name: "session_sub_time", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 81, name: "session_sub_time_remaining", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 82, name: "session_sub_time_total", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
         ]);
     }
     create(value?: PartialMessage<SessionTiming>): SessionTiming {
@@ -213,6 +280,16 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
         message.sampleCount = 0;
         message.ticks = 0;
         message.tickCount = 0;
+        message.sessionSubCount = 0;
+        message.sessionSubNum = 0;
+        message.sessionSubType = 0;
+        message.sessionSubTimingType = 0;
+        message.sessionSubLap = 0;
+        message.sessionSubLapRemaining = 0;
+        message.sessionSubLapCount = 0;
+        message.sessionSubTime = 0;
+        message.sessionSubTimeRemaining = 0;
+        message.sessionSubTimeTotal = 0;
         if (value !== undefined)
             reflectionMergePartial<SessionTiming>(this, message, value);
         return message;
@@ -239,6 +316,36 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
                     break;
                 case /* int32 tick_count */ 61:
                     message.tickCount = reader.int32();
+                    break;
+                case /* int32 session_sub_count */ 70:
+                    message.sessionSubCount = reader.int32();
+                    break;
+                case /* int32 session_sub_num */ 71:
+                    message.sessionSubNum = reader.int32();
+                    break;
+                case /* IRacingTools.Models.Session.SessionSubType session_sub_type */ 72:
+                    message.sessionSubType = reader.int32();
+                    break;
+                case /* IRacingTools.Models.Session.SessionSubTimingType session_sub_timing_type */ 73:
+                    message.sessionSubTimingType = reader.int32();
+                    break;
+                case /* int32 session_sub_lap */ 75:
+                    message.sessionSubLap = reader.int32();
+                    break;
+                case /* int32 session_sub_lap_remaining */ 76:
+                    message.sessionSubLapRemaining = reader.int32();
+                    break;
+                case /* int32 session_sub_lap_count */ 77:
+                    message.sessionSubLapCount = reader.int32();
+                    break;
+                case /* int32 session_sub_time */ 80:
+                    message.sessionSubTime = reader.int32();
+                    break;
+                case /* int32 session_sub_time_remaining */ 81:
+                    message.sessionSubTimeRemaining = reader.int32();
+                    break;
+                case /* int32 session_sub_time_total */ 82:
+                    message.sessionSubTimeTotal = reader.int32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -270,6 +377,36 @@ class SessionTiming$Type extends MessageType<SessionTiming> {
         /* int32 tick_count = 61; */
         if (message.tickCount !== 0)
             writer.tag(61, WireType.Varint).int32(message.tickCount);
+        /* int32 session_sub_count = 70; */
+        if (message.sessionSubCount !== 0)
+            writer.tag(70, WireType.Varint).int32(message.sessionSubCount);
+        /* int32 session_sub_num = 71; */
+        if (message.sessionSubNum !== 0)
+            writer.tag(71, WireType.Varint).int32(message.sessionSubNum);
+        /* IRacingTools.Models.Session.SessionSubType session_sub_type = 72; */
+        if (message.sessionSubType !== 0)
+            writer.tag(72, WireType.Varint).int32(message.sessionSubType);
+        /* IRacingTools.Models.Session.SessionSubTimingType session_sub_timing_type = 73; */
+        if (message.sessionSubTimingType !== 0)
+            writer.tag(73, WireType.Varint).int32(message.sessionSubTimingType);
+        /* int32 session_sub_lap = 75; */
+        if (message.sessionSubLap !== 0)
+            writer.tag(75, WireType.Varint).int32(message.sessionSubLap);
+        /* int32 session_sub_lap_remaining = 76; */
+        if (message.sessionSubLapRemaining !== 0)
+            writer.tag(76, WireType.Varint).int32(message.sessionSubLapRemaining);
+        /* int32 session_sub_lap_count = 77; */
+        if (message.sessionSubLapCount !== 0)
+            writer.tag(77, WireType.Varint).int32(message.sessionSubLapCount);
+        /* int32 session_sub_time = 80; */
+        if (message.sessionSubTime !== 0)
+            writer.tag(80, WireType.Varint).int32(message.sessionSubTime);
+        /* int32 session_sub_time_remaining = 81; */
+        if (message.sessionSubTimeRemaining !== 0)
+            writer.tag(81, WireType.Varint).int32(message.sessionSubTimeRemaining);
+        /* int32 session_sub_time_total = 82; */
+        if (message.sessionSubTimeTotal !== 0)
+            writer.tag(82, WireType.Varint).int32(message.sessionSubTimeTotal);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

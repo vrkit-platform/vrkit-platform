@@ -55,6 +55,8 @@ namespace IRacingTools::App::Commands {
         // CALCULATED REQUIRED SHARED MEMORY SIZE
         // AND CREATE OBJECTS
         auto sessionInfoStr = std::string{diskClient.getSessionInfoStr().value()};
+        sessionInfoStr.data()[sessionInfoStr.length() - 1] = '\0';
+
         auto sessionInfoStrSize = static_cast<uint32_t>(sessionInfoStr.length());
 
         auto headers = diskClient.getVarHeaders();

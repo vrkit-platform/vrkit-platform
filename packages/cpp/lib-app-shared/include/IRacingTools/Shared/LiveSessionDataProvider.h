@@ -66,7 +66,7 @@ namespace IRacingTools::Shared {
      */
     void process();
 
-    void updateTiming();
+    void updateSessionTiming();
     void processData();
 
     // void processDataUpdate();

@@ -296,6 +296,7 @@ class TrackMapOverlayCanvasRenderer {
       }
       const drivers = info?.driverInfo?.drivers
       if (!drivers) {
+        log.warn("No drivers")
         return
       }
 
@@ -382,8 +383,6 @@ class TrackMapOverlayCanvasRenderer {
       return
     }
     try {
-      // log.debug("DATA_FRAME EVENT", sessionId, timing.currentTimeMillis,
-      // "DATA VAR VALUE COUNT = ", dataVarValues.length)
       this.updateCars(dataVarValues)
     } catch (err) {
       log.error(`Unable to process data frame`, err)

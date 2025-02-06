@@ -5,12 +5,13 @@ import Button from "@mui/material/Button"
 import { darken, styled, useTheme } from "@mui/material/styles"
 import {
   child,
-  createClassNames, CursorPointer,
+  createClassNames,
+  CursorPointer,
   Ellipsis,
   EllipsisBox,
   flexAlign,
   FlexAuto,
-  FlexColumn,
+  FlexColumn, FlexColumnBox,
   FlexProperties,
   FlexRow,
   FlexRowBox,
@@ -40,12 +41,13 @@ import { SessionActiveIndicator } from "./SessionActiveIndicator"
 import { DiskSessionView } from "./DiskSessionView"
 import { DiskSessionButton } from "./DiskSessionButton"
 import LiveSessionButton from "./LiveSessionButton"
+import { SessionTimingView } from "./SessionTimingView"
 
 const log = getLogger(__filename)
 
 const classNamePrefix = "appSessionPlayerControlPanel"
 
-const classNames = createClassNames(classNamePrefix, "root", "inactive", "active", "expanded", "top", "content")
+const classNames = createClassNames(classNamePrefix, "root", "inactive", "active", "expanded", "top", "content", "contentTimingView")
 
 const SPCRoot = styled(Box, { name: "AppSessionPlayerControlPanelRoot" })(
   ({ theme: { palette, zIndex, transitions, spacing, shape, dimen, typography } }) => ({
@@ -116,7 +118,12 @@ const SPCRoot = styled(Box, { name: "AppSessionPlayerControlPanelRoot" })(
         ...FlexColumn,
         ...FlexAuto,
         ...flexAlign("stretch", "flex-start"),
-        ...padding(spacing(1))
+        ...padding(spacing(1)),
+        [child(classNames.contentTimingView)]: {
+          ...FlexRow,
+          ...OverflowHidden,
+          ...flexAlign("center", "stretch"),
+        }
       }
     }
   })
@@ -272,8 +279,18 @@ export function AppSessionPlayerControlPanel({ className, ...other }: AppSession
               Disconnected
             </Typography>
           </When>
-          <When condition={activeSessionType === "DISK"}>
-            <DiskSessionView />
+          <When condition={activeSessionType !== "NONE"}>
+            <>
+              <Box className={classNames.contentTimingView}>
+                <SessionTimingView
+                    type={activeSessionType}
+                    session={activeSession}
+                />
+              </Box>
+              {activeSessionType === "DISK" &&
+                <DiskSessionView />
+              }
+            </>
           </When>
         </Choose>
       </Box>

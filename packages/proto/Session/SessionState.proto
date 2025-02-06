@@ -5,31 +5,48 @@ import "TrackLayoutMetadata.proto";
 
 package IRacingTools.Models.Session;
 
+// Enum representing the sub-types of a session. This distinguishes
+// specific parts of a session, such as practice, qualifying, or race phases.
+enum SessionSubType {
+  SESSION_SUB_TYPE_UNKNOWN = 0;
+  SESSION_SUB_TYPE_PRACTICE = 1;
+  SESSION_SUB_TYPE_QUALIFY = 2;
+  SESSION_SUB_TYPE_RACE = 3;
+}
+
+enum SessionSubTimingType {
+  SESSION_SUB_TIMING_TYPE_UNKNOWN = 0;
+  SESSION_SUB_TIMING_TYPE_TIMED = 1;
+  SESSION_SUB_TIMING_TYPE_LAPS = 2;
+}
+
 message SessionTiming {
   bool is_live = 1;
   bool is_valid = 2;
-//  google.protobuf.Timestamp start_time  = 10;
-//  google.protobuf.Timestamp end_time = 11;
-//  int32 current_time_millis = 20;
-//  int32 total_time_millis = 21;
 
   int32 sample_index = 50;
   int32 sample_count = 51;
 
   int32 ticks = 60;
   int32 tick_count = 61;
+
+  int32 session_sub_count = 70;
+  int32 session_sub_num = 71;
+  SessionSubType session_sub_type = 72;
+  SessionSubTimingType session_sub_timing_type = 73;
+
+  int32 session_sub_lap = 75;
+  int32 session_sub_lap_remaining = 76;
+  int32 session_sub_lap_count = 77;
+  int32 session_sub_time = 80;
+  int32 session_sub_time_remaining = 81;
+  int32 session_sub_time_total = 82;
+
 }
 
 enum SessionType {
   SESSION_TYPE_LIVE = 0;
   SESSION_TYPE_DISK = 1;
-}
-
-enum SessionSubType {
-  SESSION_SUB_TYPE_UNKNOWN = 0;
-  SESSION_SUB_TYPE_PRACTICE = 1;
-  SESSION_SUB_TYPE_QUALIFY = 2;
-  SESSION_SUB_TYPE_RACE = 3;
 }
 
 enum SessionCarStatus {

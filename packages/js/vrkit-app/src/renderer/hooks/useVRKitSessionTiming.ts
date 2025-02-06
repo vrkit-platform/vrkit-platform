@@ -10,7 +10,7 @@ const log = getLogger(__filename)
 /**
  * Provides access to current session info
  */
-export function useSessionTiming() {
+export function useVRKitSessionTiming() {
   const client = useService(SessionManagerClient),
     [sessionTiming, setSessionTiming] = useState<SessionTiming>(null)
   

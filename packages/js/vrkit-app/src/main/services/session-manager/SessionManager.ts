@@ -200,7 +200,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     asOption(data.payload?.sessionData?.timing).ifSome(timing => {
       container.setDataFrame(timing, dataVarValues)
-      const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession"
+      // const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession"
         //   ,
         // timeAndDuration = toSessionTimeAndDuration(timing)
 

@@ -1,6 +1,6 @@
 {
   "name": "vrkit-native-interop",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "",
   "license": "ISC",
   "author": "",
@@ -29,8 +29,8 @@
     "eventemitter3": "^5.0.1",
     "@protobuf-ts/runtime": "^2.9.4",
     "yaml": "^2.5.0",
-    "@vrkit-platform/models": "1.1.0",
-    "@vrkit-platform/plugin-sdk": "1.1.0"
+    "@vrkit-platform/models": "1.1.2",
+    "@vrkit-platform/plugin-sdk": "1.1.2"
   },
   "peerDependencies": {
     "electron": "31.3.0"
@@ -46,6 +46,6 @@
     "node-addon-api": "^8.1.0",
     "node-addon-api-helper": "^2.2.0",
     "typescript": "^5.5.4",
-    "vrkit-builder-tool": "1.1.0"
+    "vrkit-builder-tool": "1.1.2"
   }
 }

@@ -152,7 +152,7 @@
     "vrkit-app:start": "yarn workspace vrkit-app run start",
     "vrkit-app:start-brk": "yarn workspace vrkit-app run start:brk"
   },
-  "version": "1.1.0",
+  "version": "1.1.2",
   "workspaces": [
     "packages/js/*"
   ]

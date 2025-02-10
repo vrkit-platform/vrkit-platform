@@ -25,8 +25,6 @@ import {
   signalFlag,
   type WindowConfig,
   type WindowCreateOptions,
-  type WindowCreateOptionsRole,
-  type WindowInstance,
   type WindowMetadata,
   WindowRole
 } from "@vrkit-platform/shared"
@@ -47,7 +45,6 @@ import {
 import Path from "path"
 import { createWindowOpenHandler } from "./WindowHelpers"
 import { WindowSizeDefault } from "./WindowConstants"
-import { Deferred } from "@3fv/deferred"
 import { get } from "lodash/fp"
 import { isMac } from "../../constants"
 import { omit, pick } from "lodash"
@@ -61,18 +58,19 @@ export interface MainWindowEventArgs {
 
 @Singleton()
 export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
-  
   readonly #windows = Array<WindowMainInstance>()
 
   readonly #disposers = new Disposables()
 
   #updateDesktopWindowsState() {
     runInAction(() => {
-      const windowsMetadata = this.#windows.map(get("config")).map(it => omit(it, ["onBrowserWindowEvent", "browserWindowOptions"]) as WindowMetadata)
+      const windowsMetadata = this.#windows
+        .map(get("config"))
+        .map(it => omit(it, ["onBrowserWindowEvent", "browserWindowOptions"]) as WindowMetadata)
       set(this.sharedAppState.desktopWindows, "windows", windowsMetadata)
     })
   }
-  
+
   has(id: string) {
     return !!this.get(id)
   }
@@ -93,11 +91,11 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
 
     return matches
   }
-  
+
   getByWebContents(webContents: WebContents): WindowMainInstance {
     return this.#windows.find(it => Object.is(it.browserWindow?.webContents, webContents))
   }
-  
+
   getByBrowserWindow(win: BrowserWindow): WindowMainInstance {
     return this.#windows.find(it => Object.is(it.browserWindow, win))
   }
@@ -113,7 +111,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
   get settings() {
     return this.sharedAppState.appSettings
   }
-  
+
   /**
    * Broadcast an event to the main window
    *
@@ -121,27 +119,23 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
    * @param args
    * @private
    */
-  sendToMainWindow<T extends string, Args extends any[]>(
-      ipcEventName: T,
-      ...args: Args
-  ): void {
-    
+  sendToMainWindow<T extends string, Args extends any[]>(ipcEventName: T, ...args: Args): void {
     this.mainWindow?.webContents?.send(ipcEventName, ...args)
   }
-  
+
   constructor(
     readonly sharedAppState: SharedAppState,
     readonly appSettingsManager: AppSettingsService
   ) {
     super()
-    
+
     app.on("window-all-closed", () => {
       if (!isMac) {
         app.quit()
       }
     })
   }
-  
+
   /**
    * Dispose symbol implementation
    */
@@ -151,7 +145,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     Object.assign(global, {
       windowManager: null
     })
-    
+
     this.close(...this.#windows)
   }
 
@@ -167,7 +161,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         windowManager: this
       })
     }
-    
+
     // PREPARE ALTERNATIVE
     ipcMain.on(ElectronIPCChannel.trafficLightTrigger, this.handleTrafficLightTrigger)
     ipcMain.on(ElectronIPCChannel.getWindowConfig, this.handleGetWindowConfig)
@@ -182,7 +176,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       })
     }
   }
-  
+
   /**
    *
    /**
@@ -206,9 +200,15 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
   private handleGetWindowConfig(ev: Electron.IpcMainEvent) {
     const wi = this.getByWebContents(ev.sender)
     log.assertFatal(!!wi, "The event sender (webContents) was not found in the #windows list")
-    ev.returnValue = omit(wi.config,"onBrowserWindowCreated", "onBrowserWindowReady", "browserWindowOptions")
+    ev.returnValue = omit(
+      wi.config,
+      "onBrowserWindowEvent",
+      "onBrowserWindowCreated",
+      "onBrowserWindowReady",
+      "browserWindowOptions"
+    )
   }
-  
+
   /**
    * Request a window close (normally called from a traffic light press, etc)
    *
@@ -231,9 +231,8 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       .otherwise(role => {
         log.debug(`No special action taken for Window closing with role (${role})`)
       })
-    
   }
-  
+
   /**
    * Traffic light handler
    *
@@ -264,19 +263,23 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     for (const wi of this.#windows) {
       const { browserWindow, role } = wi
       if (!browserWindow || !isNormalWindow(wi)) {
-        if (log.isDebugEnabled())
-          log.debug(`Window (${wi.id}) of type (${wi.type}) is either not "Normal" or does not have a browserWindow set, can not adjust zoom`)
+        if (log.isDebugEnabled()) {
+          log.debug(
+            `Window (${wi.id}) of type (${wi.type}) is either not "Normal" or does not have a browserWindow set, can not adjust zoom`
+          )
+        }
         continue
       }
       const zoomFactor = asOption(this.settings.zoomFactor)
         .filter(isNumber)
         .filter(greaterThan(0))
         .filter(lessThan(3))
-        .getOrCall(
-          () => runInAction(() =>
-            this.appSettingsManager.changeSettings({
-              zoomFactor: 1.0
-            }).zoomFactor
+        .getOrCall(() =>
+          runInAction(
+            () =>
+              this.appSettingsManager.changeSettings({
+                zoomFactor: 1.0
+              }).zoomFactor
           )
         )
 
@@ -304,17 +307,18 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
    * @param winOrIds
    */
   close(...winOrIds: Array<string | WindowMainInstance>) {
-    const wis = winOrIds.map(it => (isString(it) ? this.get(it) : it))
-            .filter(it => !!it && !it.browserWindowClosed),
+    const wis = winOrIds.map(it => (isString(it) ? this.get(it) : it)).filter(it => !!it && !it.browserWindowClosed),
       winIds = wis.map(get("id"))
-    
-    if (!winIds.length)
+
+    if (!winIds.length) {
       return
+    }
 
     for (const wi of wis) {
-      if (wi.browserWindowClosed)
+      if (wi.browserWindowClosed) {
         continue
-      
+      }
+
       wi.browserWindowClosed = true
       const bw = wi?.browserWindow
 
@@ -331,36 +335,36 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
   }
 
   async create<Options extends WindowCreateOptions>(options: Options): Promise<WindowMainInstance>
-  async create<Role extends WindowRole>(role: Role, optionsExt?: Partial<WindowCreateOptions>): Promise<WindowMainInstance>
+  async create<Role extends WindowRole>(
+    role: Role,
+    optionsExt?: Partial<WindowCreateOptions>
+  ): Promise<WindowMainInstance>
   async create(
     optionsOrRole: WindowCreateOptions | WindowRole,
     optionsExt: Partial<WindowCreateOptions> = {}
   ): Promise<WindowMainInstance> {
-    const
-      config = assign(cloneDeep(
-        isWindowRole(optionsOrRole) ? BaseWindowConfigs[optionsOrRole] : optionsOrRole),
+    const config = assign(
+        cloneDeep(isWindowRole(optionsOrRole) ? BaseWindowConfigs[optionsOrRole] : optionsOrRole),
         optionsExt
       ) as WindowConfig,
       role = config.role,
       modal = config.modal,
       parentWinInstance = modal ? this.mainWindowInstance : undefined
-    
-    log.assert(!modal || (modal && !!parentWinInstance),`Modal window config, but main window is not available`)
-    
-    const
-      winId = isNotEmptyString(config.id)
+
+    log.assert(!modal || (modal && !!parentWinInstance), `Modal window config, but main window is not available`)
+
+    const winId = isNotEmptyString(config.id)
         ? config.id
         : config.multiple
           ? `${config.role}-${generateShortId()}`
           : config.role,
-        winInstance = {
-          id: winId,
-          modal
-        } as WindowMainInstance
-    
-    
-    log.assert(!this.has(winId),`A window with ID=${winId} already exists`)
-    
+      winInstance = {
+        id: winId,
+        modal
+      } as WindowMainInstance
+
+    log.assert(!this.has(winId), `A window with ID=${winId} already exists`)
+
     try {
       // UPDATE IDs
       winInstance.id = config.id = winId
@@ -372,16 +376,16 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         parentPos = parentWinInstance?.browserWindow?.getPosition?.() ?? [],
         size = pick(config.browserWindowOptions, ["width", "height"]),
         bwOpts: Electron.BrowserWindowConstructorOptions = {
-            ...config.browserWindowOptions,
-            ...wsmWinOpts,
-            ...(modal && {
-              modal,
-              parent: parentWinInstance.browserWindow,
-              x: (parentPos[0] + (parentSize[0] / 2) - (size.width / 2)),
-              y: (parentPos[1] + (parentSize[1] / 2) - (size.height / 2))
-            })
-          },
-          bw = assign(winInstance, {
+          ...config.browserWindowOptions,
+          ...wsmWinOpts,
+          ...(modal && {
+            modal,
+            parent: parentWinInstance.browserWindow,
+            x: parentPos[0] + parentSize[0] / 2 - size.width / 2,
+            y: parentPos[1] + parentSize[1] / 2 - size.height / 2
+          })
+        },
+        bw = assign(winInstance, {
           type: config.type,
           role,
           config,
@@ -391,17 +395,18 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
           browserWindowOptions: bwOpts,
           onBrowserWindowEvent: config.onBrowserWindowEvent
         }).browserWindow,
-          isOffscreen = bwOpts?.webPreferences?.offscreen ?? false
-      
-      
+        isOffscreen = bwOpts?.webPreferences?.offscreen ?? false
+
       log.assert(
-          !this.has(winId),
-          `new window id (${winId}) is not unique and multiple windows with role (${role}) is not allowed`
+        !this.has(winId),
+        `new window id (${winId}) is not unique and multiple windows with role (${role}) is not allowed`
       )
       this.#windows.push(winInstance as WindowMainInstance)
 
       // INVOKING CREATED CALLBACK
-      const onCreatedRes = asOption(winInstance.onBrowserWindowEvent).map(invoke("Created", bw, winInstance)).getOrNull()
+      const onCreatedRes = asOption(winInstance.onBrowserWindowEvent)
+        .map(invoke("Created", bw, winInstance))
+        .getOrNull()
 
       if (isPromise(onCreatedRes)) {
         log.info(`Waiting for onCreatedRes promise to resolve`)
@@ -413,9 +418,9 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       this.prepareBrowserWindow(bw)
 
       // ENABLE WINDOW STATE MANAGER
-      if (wsm)
+      if (wsm) {
         wsm.enable(winInstance as WindowMainInstance)
-
+      }
 
       const firstLoadSignal = signalFlag()
       bw.on("ready-to-show", () => {
@@ -428,9 +433,10 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
 
         // SHOW MAIN WINDOW
         log.debug(`window (${winId}) is ready to show`)
-        
-        if (!isOffscreen)
+
+        if (!isOffscreen) {
           bw.show()
+        }
         this.emit("UI_READY", bw)
       })
 
@@ -444,7 +450,9 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       await bw.loadURL(config.url).catch(err => log.error("Failed to load url", config.url, err))
 
       // INVOKING READY CALLBACK
-      const onReadyRes = asOption(winInstance.onBrowserWindowEvent).map(invoke("Ready", bw, winInstance)).getOrNull()
+      const onReadyRes = asOption(winInstance.onBrowserWindowEvent)
+        .map(invoke("Ready", bw, winInstance))
+        .getOrNull()
 
       if (isPromise(onReadyRes)) {
         log.info(`Waiting for onReadyRes promise to resolve`)
@@ -455,7 +463,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     } catch (err) {
       log.error(`createWindow(id=${winInstance.id}) failed`, err)
       this.close(winInstance as WindowMainInstance)
-      
+
       throw err
     } finally {
       this.#updateDesktopWindowsState()
@@ -497,15 +505,14 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     // ATTACH WINDOW EVENT HANDLERS
     win
       .on("close", () => {
-        if (!wi.browserWindowClosed)
+        if (!wi.browserWindowClosed) {
           this.close(wi.id)
+        }
       })
       .on("show", () => {
         win.webContents.setWindowOpenHandler(windowOpenHandler)
         if (this.sharedAppState.devSettings.alwaysOpenDevTools) {
-          const devToolsTitle = asOption(wi.config.initialRoute)
-              .filter(isNotEmptyString)
-              .getOrElse(wi.id)
+          const devToolsTitle = asOption(wi.config.initialRoute).filter(isNotEmptyString).getOrElse(wi.id)
           if (isFloatingWindow(wi) || wi.config.devToolMode) {
             win.webContents.openDevTools({
               mode: wi.config.devToolMode ?? "detach",

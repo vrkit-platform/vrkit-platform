@@ -16,7 +16,6 @@ import Box from "@mui/material/Box"
 
 import clsx from "clsx"
 import { isObject } from "@3fv/guard"
-import { EditorInfoScreenOverlayOUID, EditorInfoVROverlayOUID } from "@vrkit-platform/shared"
 import { overlayWindowSelectors } from "../../services/store/slices/overlay-window"
 import { useAppSelector } from "../../services/store"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
@@ -47,7 +46,6 @@ export default function OverlayWindowAppBody() {
   const theme = useTheme(),
     isEditMode = useAppSelector(sharedAppSelectors.selectEditorEnabled),
     PluginComponent = useAppSelector(overlayWindowSelectors.selectOverlayComponent),
-    isEditorInfo = [EditorInfoScreenOverlayOUID, EditorInfoVROverlayOUID].some(id => window.location.hash.includes(id)),
     [contentRef, size] = useResizeObserver()
 
   return (
@@ -82,7 +80,7 @@ export default function OverlayWindowAppBody() {
           </If>
         </OverlayAppBodyContentRoot>
       
-        <If condition={!isEditorInfo && isEditMode && isObject(size)}>
+        <If condition={isEditMode && isObject(size)}>
           <OverlayWindowLayoutEditor
             editorEnabled={isEditMode}
             size={size}

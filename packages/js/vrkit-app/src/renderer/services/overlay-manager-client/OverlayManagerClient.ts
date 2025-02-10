@@ -2,7 +2,7 @@ import { ipcRenderer, IpcRendererEvent } from "electron"
 import { getLogger } from "@3fv/logger-proxy"
 
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind } from "@vrkit-platform/shared"
+import { Bind, WindowRenderMode, WindowRole } from "@vrkit-platform/shared"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
@@ -163,7 +163,7 @@ export class OverlayManagerClient
     
     window.addEventListener("beforeunload", this.unload)
     
-    if (isVRKitOverlayWindow) {
+    if (VRKitWindowConfig.role === WindowRole.Overlay) {
       // IPC EVENT CHANNEL <> HANDLER PAIRS
       const ipcEventHandlers = Array<
         Pair<OverlayManagerClientEventType | PluginClientEventType, (event: IpcRendererEvent, ...args: any[]) => any>
@@ -288,7 +288,7 @@ export class OverlayManagerClient
       overlayConfig = OverlayConfig.fromJson(overlayConfigJs as any)
     } else {
       overlayConfig = {
-        isScreen: !isVRKitEnvVR,
+        isScreen: VRKitWindowConfig.renderMode === WindowRenderMode.VR,
         overlay, placement
       }
     }

@@ -129,7 +129,7 @@ class TrackMapOverlayCanvasRenderer {
   private get isInitialized() {
     return this.initializeDeferred?.isFulfilled() ?? false
   }
-  
+
   /**
    * Create car records for rendering
    *
@@ -252,14 +252,22 @@ class TrackMapOverlayCanvasRenderer {
             )
         },
         two = statePatch.two,
+        scaledPadding = 10,
         scaledTrackMap = ScaleTrackMapToFit(
           trackMap,
           { width, height },
           {
-            padding: 10
+            padding: scaledPadding
           }
         ),
-        trackPathAnchors = scaledTrackMap.path.map(coord => new Two.Anchor(coord.x, coord.y))
+        scaledSize = pick(scaledTrackMap.scaledSize, ["width", "height"]),
+        scaledOffset = {
+          x: Math.floor((width - scaledSize.width) / 2),
+          y: Math.floor((height - scaledSize.height) / 2)
+        },
+        trackPathAnchors = scaledTrackMap.path.map(
+          coord => new Two.Anchor(scaledOffset.x + coord.x, scaledOffset.y + coord.y)
+        )
 
       asOption(this.state.trackPath).match({
         Some: tp => {

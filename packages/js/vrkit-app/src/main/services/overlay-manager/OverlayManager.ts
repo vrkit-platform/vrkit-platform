@@ -7,13 +7,8 @@ import {
   assign,
   Bind,
   Disposables,
-  EditorInfoOverlayInfo,
-  EditorInfoOverlayPlacement,
-  EditorInfoScreenOverlayOUID,
-  EditorInfoVROverlayOUID,
   electronRectangleToRectI,
   hasProps,
-  isEditorInfoOUID,
   isEqual,
   isEqualSize,
   isRectValid,
@@ -29,25 +24,21 @@ import {
   OverlayWindowRendererEvents,
   OverlayWindowRole,
   Pair,
-  pairOf,
   removeIfMutation,
   SessionDetail,
-  SessionManagerEventType, SessionManagerEventTypes,
+  SessionManagerEventType,
   SignalFlag,
-  Triple,
-  tripleOf
+  Triple, WindowRenderMode
 } from "@vrkit-platform/shared"
 import {
   DashboardConfig,
-  OverlayAnchor,
   OverlayInfo,
   OverlayKind,
   OverlayPlacement,
   RectI,
   SessionDataVariableValueMap,
   SessionTiming,
-  VRLayout,
-  VRPose
+  VRLayout
 } from "@vrkit-platform/models"
 import { guard, isDefined } from "@3fv/guard"
 import { SessionManager } from "../session-manager"
@@ -55,7 +46,7 @@ import { asOption } from "@3fv/prelude-ts"
 import { PluginClientEventType } from "@vrkit-platform/plugin-sdk"
 import { AppSettingsService } from "../app-settings"
 import PQueue from "p-queue"
-import { OverlayBrowserWindow, OverlayBrowserWindowEvent } from "./OverlayBrowserWindow"
+import { OverlayBrowserWindow } from "./OverlayBrowserWindow"
 import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { flatten, pick } from "lodash"
@@ -67,13 +58,7 @@ import { DashboardManager } from "../dashboard-manager"
 
 import { OverlayEditorController } from "./OverlayEditorController"
 import { ElectronMainActionManager } from "../electron-actions"
-import { match } from "ts-pattern"
-import {
-  GetAnchorPosition,
-  getScreenRectangleLayoutTool,
-  getVRRectangleLayoutTool,
-  isValidOverlayScreenSize
-} from "./OverlayLayoutTools"
+import { isValidOverlayScreenSize } from "./OverlayLayoutTools"
 import { AppPaths } from "@vrkit-platform/shared/constants/node"
 
 // noinspection TypeScriptUnresolvedVariable
@@ -83,11 +68,6 @@ const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
 const dashDir = AppPaths.dashboardsDir
-
-const WinRendererEvents = OverlayWindowRendererEvents
-const WinMainEvents = OverlayWindowMainEvents
-
-export type EditorInfoWithStatus = Triple<OverlayBrowserWindowType, boolean, OverlayBrowserWindow>
 
 function vrLayoutToJsonString(vrLayout: VRLayout): string {
   return VRLayout.toJsonString(toJS(vrLayout), {
@@ -107,8 +87,6 @@ export class OverlayManager {
 
   private readonly disposers_ = new Disposables()
 
-  //private stopObservingCallbacks = Array<IDisposer>()
-
   private readonly shutdownFlag_ = SignalFlag.new()
 
   private readonly frameSequenceCaptures_ = Array<NativeImageSequenceCapture>()
@@ -121,18 +99,6 @@ export class OverlayManager {
 
   get editorEnabled(): boolean {
     return this.state.editor.enabled
-  }
-
-  get editorInfoWindows(): OverlayBrowserWindow[] {
-    return pairOf(this.screenEditorInfoWindow, this.vrEditorInfoWindow)
-  }
-
-  get screenEditorInfoWindow(): OverlayBrowserWindow {
-    return this.allOverlays.find(it => it.uniqueId === EditorInfoScreenOverlayOUID)
-  }
-
-  get vrEditorInfoWindow(): OverlayBrowserWindow {
-    return this.allOverlays.find(it => it.uniqueId === EditorInfoVROverlayOUID)
   }
 
   get editorController(): OverlayEditorController {
@@ -156,11 +122,11 @@ export class OverlayManager {
   }
 
   get vrOverlays() {
-    return this.allOverlays.filter(it => it.isVR && !isEditorInfoOUID(it.uniqueId))
+    return this.allOverlays.filter(it => it.isVR)
   }
 
   get screenOverlays() {
-    return this.allOverlays.filter(it => it.isScreen && !isEditorInfoOUID(it.uniqueId))
+    return this.allOverlays.filter(it => it.isScreen)
   }
 
   get activeDashboardId() {
@@ -221,17 +187,17 @@ export class OverlayManager {
           overlayInfo,
           placement,
           (type, browserWindow, windowInstance) => {
-            const ow = this.allOverlays.find(it => it?.browserWindow?.id === browserWindow.id)
-            if (!ow) {
-              log.warn(`Unable to find matching overlay browser window for id (${browserWindow.id})`)
-              return
-            }
+            // const ow = this.allOverlays.find(it => it?.browserWindow?.id === browserWindow.id)
+            // if (!ow) {
+            //   log.warn(`Unable to find matching overlay browser window for id (${browserWindow.id})`)
+            //   return
+            // }
             if (type === "Created") {
               // ATTACH LISTENERS
-              ow.browserWindow.on("closed", this.createOnCloseHandler(ouid, newWin.browserWindowId))
-              if (ow.isScreen) {
-                const onBoundsChanged = this.createOnBoundsChangedHandler(placement, newWin)
-                ow.browserWindow.on("moved", onBoundsChanged).on("resized", onBoundsChanged)
+              browserWindow.on("closed", this.createOnCloseHandler(ouid, browserWindow.id))
+              if (windowInstance.config.renderMode === WindowRenderMode.Screen) {
+                const onBoundsChanged = this.createOnBoundsChangedHandler(placement, browserWindow)
+                browserWindow.on("moved", onBoundsChanged).on("resized", onBoundsChanged)
               }
             }
           }
@@ -239,42 +205,6 @@ export class OverlayManager {
 
         return newWin
       })
-  }
-
-  /**
-   * Get or create VR Editor Window overlay
-   * @private
-   */
-  private async getOrCreateEditorInfoWindow(kind: OverlayBrowserWindowType) {
-    const { editorEnabled } = this
-    if (!editorEnabled) {
-      return null
-    }
-
-    const info = EditorInfoOverlayInfo,
-      placement = EditorInfoOverlayPlacement,
-      ouid = kind === OverlayBrowserWindowType.VR ? EditorInfoVROverlayOUID : EditorInfoScreenOverlayOUID
-
-    let win = this.overlayWindowByUniqueId(ouid)
-    if (win) {
-      return win
-    }
-
-    win = this.createOrUpdateOverlayBrowserWindow(info, placement, kind)
-
-    try {
-      await win.whenReady()
-      this.overlayWindows_.push(win)
-    } catch (err) {
-      log.error(`Failed to create Editor Info window`, err)
-      if (win) {
-        await win.close()
-      }
-
-      return null
-    }
-
-    return win
   }
 
   @Bind
@@ -402,15 +332,12 @@ export class OverlayManager {
         return enabled
       }
 
-      //this.mainAppState.updateOverlays({editor:{enabled}})
       this.state.editor.enabled = enabled
 
       for (const ow of this.allOverlays) {
         ow.setEditorEnabled(enabled)
       }
     })
-
-    await this.checkEditorInfoWindows()
 
     return enabled
   }
@@ -497,7 +424,7 @@ export class OverlayManager {
    */
   @PostConstruct() // @ts-ignore
   protected async init(): Promise<void> {
-    app.on("quit", this.unload)
+    // app.on("quit", this.unload)
 
     this.nativeManager_ = await CreateNativeOverlayManager()
     const { sessionManager } = this,
@@ -600,8 +527,6 @@ export class OverlayManager {
       }
     })
   }
-
-  
 
   /**
    * Check if `windowId` is valid
@@ -725,17 +650,12 @@ export class OverlayManager {
    * @param win
    * @private
    */
-  private createOnBoundsChangedHandler(targetPlacement: OverlayPlacement, win: OverlayBrowserWindow): Function {
+  private createOnBoundsChangedHandler(targetPlacement: OverlayPlacement, win: BrowserWindow): Function {
     return (_event: Electron.Event) => {
-      if (!win.isEditorInfo) {
-        this.updateScreenOverlayWindowBounds(win)
-      }
-
-      if (win.isEditorInfo) {
-        win.setMovedManually(true)
-      }
-
-      this.autoLayoutEditorInfoWindows()
+      asOption(this.overlayWindows_.find(ow => ow.browserWindowId === win.id))
+          .ifSome(ow => {
+            this.updateScreenOverlayWindowBounds(ow)
+          })
     }
   }
 
@@ -834,114 +754,6 @@ export class OverlayManager {
         })
       )
       .getOrThrow() as VRLayout
-  }
-
-  /**
-   * Get editor info windows with status & enablement
-   */
-  get editorInfoWindowsWithStatus(): Array<EditorInfoWithStatus> {
-    return pairOf(
-      tripleOf(OverlayBrowserWindowType.VR, this.isVREnabled, this.vrEditorInfoWindow),
-      tripleOf(OverlayBrowserWindowType.SCREEN, this.isScreenEnabled, this.screenEditorInfoWindow)
-    )
-  }
-
-  /**
-   * Auto layout the editor info windows
-   */
-  autoLayoutEditorInfoWindows() {
-    if (!this.editorEnabled) {
-      return
-    }
-
-    this.editorInfoWindowsWithStatus
-      .filter(
-        ([_, enabled, win]: EditorInfoWithStatus) =>
-          !!enabled && isDefined<OverlayBrowserWindow>(win) && !win.wasMovedManually
-      )
-      .forEach(([kind, _, win]: EditorInfoWithStatus) => {
-        const anchor = this.mainAppState.appSettings.overlayAnchors?.[win.uniqueId] ?? OverlayAnchor.CENTER
-
-        match(kind === OverlayBrowserWindowType.VR)
-          .with(true, () => {
-            const tool = getVRRectangleLayoutTool({ anchor })
-
-            const { placement } = win,
-              size = placement.vrLayout.size,
-              newPosition = tool.findPositionClosestToAnchor(size.width, size.height),
-              newPose = assign(VRPose.clone(placement.vrLayout.pose), {
-                x: newPosition.x + size.width / 2,
-                eyeY: newPosition.y * -1 + (size.height / 2) * -1
-              })
-
-            log.info(`New EditorInfo VR pose`, newPose)
-            placement.vrLayout.pose = newPose
-            win.invalidate()
-          })
-          .otherwise(() => {
-            const tool = getScreenRectangleLayoutTool(anchor)
-            // this.screenOverlays
-            //   .map(it => it.placement.screenRect)
-            //   .map(
-            //     rect =>
-            //       new RectangleLayoutTool.Rectangle(rect.position.x,
-            // rect.position.y, rect.size.width, rect.size.height) )
-            // .forEach(rect => { tool.push(rect) })
-
-            const { placement } = win,
-              size = placement.screenRect.size,
-              display = screen.getPrimaryDisplay(),
-              newPosition = asOption(GetAnchorPosition(anchor, electronRectangleToRectI(display.bounds)))
-                .map(({ x, y }) => ({
-                  x: x - size.width / 2,
-                  y: y - size.height / 2
-                }))
-                .get()
-            // tool.findPositionClosestToAnchor(size.width, size.height)
-
-            log.info(`New EditorInfo Screen position`, newPosition)
-            placement.screenRect.position = newPosition
-
-            win.setBounds(placement.screenRect)
-          })
-      })
-  }
-
-  /**
-   * Setup VR Editor Window based on current mode
-   *
-   * @private
-   */
-  private async checkEditorInfoWindows() {
-    const windows = this.editorInfoWindowsWithStatus
-
-    await match(this.editorEnabled)
-      .with(false, () =>
-        Promise.all(
-          windows.map(async ([kind, kindEnabled, win]) => {
-            if (win) {
-              await win.close()
-
-              removeIfMutation(this.overlayWindows_, it => it.uniqueId === win.uniqueId)
-            }
-          })
-        )
-      )
-      .otherwise(async () => {
-        await Promise.all(
-          windows.map(async ([kind, enabled, win]) => {
-            if (enabled && !win) {
-              win = await this.getOrCreateEditorInfoWindow(kind)
-            }
-
-            if (win) {
-              win.setEditorEnabled(this.editorEnabled)
-            }
-          })
-        )
-
-        this.autoLayoutEditorInfoWindows()
-      })
   }
 
   private updateAllDataVars() {

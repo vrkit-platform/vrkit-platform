@@ -222,7 +222,7 @@ export function ComponentInstanceForm(props: ComponentInstanceFormProps) {
             )
             .get(),
           onSettingChange = (value: Partial<PluginUserSettingValue>) => {
-            values[settingId] = assignDeep({ ...currentValue }, value)
+            values[settingId] = { ...currentValue, ...value } // assignDeep({ ...currentValue }, value)
             onChange(overlayInfo.id, { ...overlayInfo, userSettingValues: values })
           }
         if (!PluginUserSettingType[setting.type]) {

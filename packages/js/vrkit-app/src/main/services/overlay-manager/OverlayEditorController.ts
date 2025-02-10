@@ -1,8 +1,6 @@
 import {
   Bind,
   Disposables,
-  EditorInfoScreenOverlayOUID,
-  EditorInfoVROverlayOUID,
   GlobalActionId,
   GlobalActionIdName,
   isEmpty,
@@ -75,12 +73,12 @@ export class OverlayEditorController {
         log.warn(`No window for selected id ${selectedId}`)
         return
       }
-  
+
       this.manager.updateOverlayPlacement(win, (placement, _dashboardConfig) => {
         if (!win.isVR) {
           return placement
         }
-  
+
         placement.vrLayout = vrLayoutMutator(placement.vrLayout)
         Object.assign(win.placement.vrLayout, toJS(placement.vrLayout))
         win.browserWindow.webContents.invalidate()
@@ -117,21 +115,19 @@ export class OverlayEditorController {
   @Bind
   executeNextVROverlayEditorInfoAnchor() {
     runInAction(() => {
-      const anchors = this.manager.mainAppState.appSettings.overlayAnchors ?? {},
-        currentAnchor = asOption(anchors[EditorInfoVROverlayOUID] ?? OverlayAnchor.CENTER)
-          .map(it => (isString(it) ? OverlayAnchor[it] : it))
-          .filter(isNumber)
-          .getOrThrow(`No idea what the current value type is`),
-        newIdx = asOption(AllOverlayAnchors.indexOf(currentAnchor))
-          .filter(it => it > -1)
-          .map(it => (it + 1) % AllOverlayAnchors.length)
-          .getOrElse(0)
-
-      anchors[EditorInfoVROverlayOUID] = AllOverlayAnchors[newIdx] as OverlayAnchor
-
-      set(this.manager.mainAppState.appSettings, "overlayAnchors", anchors)
-
-      this.manager.autoLayoutEditorInfoWindows()
+      // const anchors = this.manager.mainAppState.appSettings.overlayAnchors ?? {},
+      //   currentAnchor = asOption(anchors[EditorInfoVROverlayOUID] ?? OverlayAnchor.CENTER)
+      //     .map(it => (isString(it) ? OverlayAnchor[it] : it))
+      //     .filter(isNumber)
+      //     .getOrThrow(`No idea what the current value type is`),
+      //   newIdx = asOption(AllOverlayAnchors.indexOf(currentAnchor))
+      //     .filter(it => it > -1)
+      //     .map(it => (it + 1) % AllOverlayAnchors.length)
+      //     .getOrElse(0)
+      //
+      // anchors[EditorInfoVROverlayOUID] = AllOverlayAnchors[newIdx] as OverlayAnchor
+      //
+      // set(this.manager.mainAppState.appSettings, "overlayAnchors", anchors)
     })
   }
 
@@ -139,21 +135,19 @@ export class OverlayEditorController {
   @Bind
   executeNextScreenOverlayEditorInfoAnchor() {
     runInAction(() => {
-      const anchors = this.manager.mainAppState.appSettings.overlayAnchors ?? {},
-        currentAnchor = asOption(anchors[EditorInfoScreenOverlayOUID] ?? OverlayAnchor.CENTER)
-          .map(it => (isString(it) ? OverlayAnchor[it] : it))
-          .filter(isNumber)
-          .getOrThrow(`No idea what the current value type is`),
-        newIdx = asOption(AllOverlayAnchors.indexOf(currentAnchor))
-          .filter(it => it > -1)
-          .map(it => (it + 1) % AllOverlayAnchors.length)
-          .getOrElse(0)
-
-      anchors[EditorInfoScreenOverlayOUID] = AllOverlayAnchors[newIdx] as OverlayAnchor
-
-      set(this.manager.mainAppState.appSettings, "overlayAnchors", anchors)
-
-      this.manager.autoLayoutEditorInfoWindows()
+      // const anchors = this.manager.mainAppState.appSettings.overlayAnchors ?? {},
+      //   currentAnchor = asOption(anchors[EditorInfoScreenOverlayOUID] ?? OverlayAnchor.CENTER)
+      //     .map(it => (isString(it) ? OverlayAnchor[it] : it))
+      //     .filter(isNumber)
+      //     .getOrThrow(`No idea what the current value type is`),
+      //   newIdx = asOption(AllOverlayAnchors.indexOf(currentAnchor))
+      //     .filter(it => it > -1)
+      //     .map(it => (it + 1) % AllOverlayAnchors.length)
+      //     .getOrElse(0)
+      //
+      // anchors[EditorInfoScreenOverlayOUID] = AllOverlayAnchors[newIdx] as OverlayAnchor
+      //
+      // set(this.manager.mainAppState.appSettings, "overlayAnchors", anchors)
     })
   }
 

@@ -79,7 +79,4 @@ export type TPluginComponentType = React.ComponentType<IPluginComponentProps> | 
 
 declare global {
   function getVRKitPluginClient(): IPluginClient
-  
-  const isVRKitOverlayWindow: boolean
-  const isVRKitEnvVR: boolean
 }

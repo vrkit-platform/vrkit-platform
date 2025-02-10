@@ -195,6 +195,7 @@ namespace Alert {
 
     const toastId = Alert.loading(toMessage(loading)),
       handleError = (err: ErrorKind) => {
+        log.error(`Pending alert promise failed and error was not handled`, err)
         ctx.err = err
         Alert.error(toMessage(error ?? err.message), {
           id: toastId
@@ -216,7 +217,7 @@ namespace Alert {
       })
       .catch(err => {
         handleError(err)
-        throw err
+        return Promise.reject(err)
       })
   }
   

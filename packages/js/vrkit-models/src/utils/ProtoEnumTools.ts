@@ -28,6 +28,6 @@ export function GetEnumLabel<E extends {[k: string | number]: string | number}, 
     label = type[value] as string
   }
   
-  label = prefixBag.reduce((label, nextPrefix) => label.startsWith(nextPrefix) ? label.substring(nextPrefix.length) : label)
+  label = prefixBag.reduce((label, nextPrefix) => label.startsWith(nextPrefix) ? label.substring(nextPrefix.length) : label, label)
   return label
 }

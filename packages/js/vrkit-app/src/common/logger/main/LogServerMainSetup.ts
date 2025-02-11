@@ -4,9 +4,9 @@ import Path from "path"
 import type { LogServerRequestMap } from "../LogServerTypes"
 import { LogServerClientAppender } from "../LogServerClientAppender"
 import { Appender, ConsoleAppender, getLoggingManager } from "@3fv/logger-proxy"
-import { asOption } from "@3fv/prelude-ts"
 import { isDefined } from "@3fv/guard"
 import { filter, flow } from "lodash/fp"
+import type { CreateServiceOptions } from "@3fv/electron-utility-process-manager"
 
 const log = console,
   entryFile = Path.resolve(__dirname, "..", "main-logserver", "electron-main-logserver.js")
@@ -44,7 +44,17 @@ class LogServerMainSetup {
 
     try {
       // Create the UPM service
-      const service = this.#service = await upmMainServiceManager.createService<LogServerRequestMap>("logserver", entryFile)
+      const serviceOpts:CreateServiceOptions = {}
+      if (isDev) {
+        serviceOpts.inspect = {
+          // inspect: {
+          // break: true,
+          port: 9442
+          // }
+        }
+      }
+      const service = this.#service = await upmMainServiceManager.createService<LogServerRequestMap>("logserver", entryFile,
+          serviceOpts)
       
       // Setup appenders
       const logServerClientAppender = new LogServerClientAppender(this.#service)
@@ -84,13 +94,5 @@ class LogServerMainSetup {
 }
 
 const logServerMain = new LogServerMainSetup()
-// asOption(import.meta?.webpackHot?.data)
-//   .map((data: any) => data["logServerMain"] as LogServerMainSetup)
-//   .getOrCall(() => )
 
-// if (import.meta.webpackHot) {
-//   import.meta.webpackHot.addDisposeHandler(data => {
-//     data["logServerMain"] = logServerMain
-//   })
-// }
 export default logServerMain

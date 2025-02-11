@@ -46,7 +46,7 @@ export type AWSErrorKind = Omit<ErrorKind, "code"> & {
 //Error |
 
 export function isErrorKind(err: any): err is ErrorKind {
-  return isError(err) || isString(err?.message)
+  return isError(err) || (isString(err?.message) && isString(err?.stack))
 }
 
 export interface ThrowErrorLogOptions {

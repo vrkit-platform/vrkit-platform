@@ -71,6 +71,10 @@ if (app.requestSingleInstanceLock()) {
   app.quit()
 }
 
+if (isDev) {
+  global["GetLogger"] = getLogger
+}
+
 // HMR
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept(

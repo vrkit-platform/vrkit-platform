@@ -1,35 +1,39 @@
 import { isPrimitive } from "./assignDeep"
-import { isPlainObject, toPlainObject } from "lodash"
 import { transformValues } from "./ObjectUtil"
 import { isFunction } from "@3fv/guard"
+import { isArray } from "./Guards"
 
-export function toPlainObjectDeep(o:any, recordSet:Set<{}> = new Set<{}>(), depth:number = 0): any {
-  if (depth > 3)
+export function toPlainObjectDeep(o: any, recordSet: Set<{}> = new Set<{}>(), depth: number = 0): any {
+  if (depth > 3) {
     return null
-  
+  }
+
   if (recordSet.has(o)) {
     return null
   }
-  
-  return transformValues(o, (k, value) => {
-    
-    
+
+  let transformFn: (...args: any[]) => any = null
+
+  transformFn = (k, value) => {
+    if (isArray(value)) {
+      return transformValues(value, transformFn)
+    }
+
     if (isFunction(value)) {
       return null
     }
-    
+
     if (typeof value === "bigint") {
       return value.toString() + "n"
     }
     if (!value || isPrimitive(value)) {
       return value
     }
-    
-    
-      recordSet.add(value)
-      return toPlainObjectDeep(value, recordSet, depth + 1)
-    
-  })
+
+    recordSet.add(value)
+    return toPlainObjectDeep(value, recordSet, depth + 1)
+  }
+  return transformValues(o, transformFn)
 }
 
 /**
@@ -46,11 +50,7 @@ export function toPlainObjectDeep(o:any, recordSet:Set<{}> = new Set<{}>(), dept
 export function JSONStringifyAny(data: any, space: number = undefined): string {
   const bigInts = /([\[:])?"(-?\d+)n"([,\}\]])/g
   const plainData = toPlainObjectDeep(data)
-  const json = JSON.stringify(
-      plainData,
-    null,
-    space
-  )
+  const json = JSON.stringify(plainData, null, space)
 
   return json.replace(bigInts, "$1$2$3")
 }

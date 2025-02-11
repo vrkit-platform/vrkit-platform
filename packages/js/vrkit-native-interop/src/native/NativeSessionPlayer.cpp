@@ -171,11 +171,11 @@ namespace IRacingTools::App::Node {
             return;
         }
 
-        L->info("Cleaning up data provider");
+        L->debug("Cleaning up data provider");
         this->dataProvider_->stop();
         this->dataProvider_.reset();
 
-        L->info("Cleaned up data provider");
+        L->debug("Cleaned up data provider");
 
         jsSessionPlayerEventFn_.Release();
     }
@@ -238,11 +238,11 @@ namespace IRacingTools::App::Node {
 
     Napi::Value NativeSessionPlayer::jsGetSessionInfoYAMLStr(const Napi::CallbackInfo& info) {
         // TODO: Change implementation to use raw string from shared memory via `Client` implementations
-        auto sessionInfoYaml = dataProvider_->sessionInfoStr();
+        //auto sessionInfoYaml = dataProvider_->sessionInfoStr();
         // auto sessionInfo = dataProvider_->sessionInfo();
         // auto sessionInfoYamlNode = YAML::convert<SessionInfo::SessionInfoMessage>::encode(*sessionInfo);
         // auto sessionInfoYaml = YAML::Dump(sessionInfoYamlNode);
-        return Napi::String::New(info.Env(), sessionInfoYaml);
+        return Napi::String::New(info.Env(), dataProvider_->sessionInfoStr());
     }
 
     Napi::Value NativeSessionPlayer::jsGetSessionTicks(const Napi::CallbackInfo& info) {

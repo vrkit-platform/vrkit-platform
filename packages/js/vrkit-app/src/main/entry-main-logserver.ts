@@ -6,7 +6,6 @@ import type { LogServerEventData, LogServerRecordCount, LogServerRequestMap } fr
 import Fsx from "fs-extra"
 import { isArray } from "@3fv/guard"
 import PQueue from "p-queue"
-import type { LogRecord } from "@3fv/logger-proxy"
 
 const jsonlFile = Path.join(AppPaths.logsDir, "VRKitApp.jsonl")
 const logFile = Path.join(AppPaths.logsDir, "VRKitApp.log")
@@ -14,9 +13,10 @@ let totalCount = 0
 
 const log = Tracer.colorConsole({
   transport: function (data) {
-    // console.log(data.output)
     Fsx.appendFile(logFile, data.rawoutput + "\n", err => {
-      if (err) throw err
+      if (err) {
+        console.warn(`Unable to append to file (${logFile})`, err)
+      }
     })
   }
 })
@@ -29,16 +29,8 @@ function writeRecords(records: string[]) {
   const recordData = records.join("\n")
   writeQueue.add(() => Fsx.appendFile(jsonlFile, recordData + "\n", "utf-8"))
 }
-// const appender = new FileAppender({
-//   enableRolling: true,
-//   maxFiles: 5,
-//   maxSize: 2048,
-//   filename: Path.join(AppPaths.logsDir, "vrkit-app-electron.log")
-// })
-// log.info(`Log file ${logFile}`)
-// console.info(`Log file ${logFile}`)
 
-upmNodeProcess.addEventHandler((clientId, port, payload: LogServerEventData) => {
+upmNodeProcess.addEventHandler((_clientId, _port, payload: LogServerEventData) => {
   if (!isArray(payload?.records)) {
     log.error(`Received mis-shaped log records`, payload)
     return
@@ -46,7 +38,8 @@ upmNodeProcess.addEventHandler((clientId, port, payload: LogServerEventData) => 
 
   const { records } = payload
   totalCount += records.length
-  log.info(`Received (${records.length}) log records, total is now (${totalCount})`)
+  // ENABLE TO SEE RECORD RECEIPTS
+  // log.debug(`Received (${records.length}) log records, total is now (${totalCount})`)
   writeRecords(records)
   
   return true
@@ -54,12 +47,12 @@ upmNodeProcess.addEventHandler((clientId, port, payload: LogServerEventData) => 
 
 upmNodeProcess.addRequestHandler<LogServerRequestMap>(
   "getLogRecordCount",
-  async (type, messageId): Promise<LogServerRecordCount> => {
-    return { count: totalCount } as LogServerRecordCount //`pong: ${what}`
+  async (_type, _messageId): Promise<LogServerRecordCount> => {
+    return { count: totalCount } as LogServerRecordCount
   }
 )
 
-upmNodeProcess.addRequestHandler<LogServerRequestMap>("getLogFile", async (type, messageId) => {
+upmNodeProcess.addRequestHandler<LogServerRequestMap>("getLogFile", async (_type, _messageId) => {
   return logFile
 })
 

@@ -14,13 +14,14 @@ import "./prepareElectronMain"
 import "./ShutdownManager"
 
 import { app } from "electron"
-import { getLogger } from "@3fv/logger-proxy"
 import * as ElectronRemote from "@electron/remote/main"
 import { Deferred } from "@3fv/deferred"
 import { shutdownServiceContainer } from "./ServiceContainer"
 
-const log = getLogger(__filename)
-const { debug, trace, info, error, warn } = log
+const ConsoleLevels: Array<keyof Console> = ["debug", "info", "error", "warn"],
+  [debug, info, error, warn] = ConsoleLevels.map(level => (...args: any[]) => {
+    ;(console as any)[level](...args)
+  }) 
 
 const ProcPaths = {
   cwd: process.cwd(),
@@ -29,35 +30,34 @@ const ProcPaths = {
   resources: process.resourcesPath
 }
 
-console.info(`ProcPaths`, ProcPaths)
+info(`ProcPaths`, ProcPaths)
 
 async function start() {
-  console.info(`Starting entry-main`)
+  info(`Starting entry-main`)
   try {
     await import("./utils/ProcessErrorHelpers")
 
-    console.info(`Init electron remote`)
+    info(`Init electron remote`)
     if (!ElectronRemote.isInitialized()) {
       ElectronRemote.initialize()
     }
 
-    console.info(`Init Log Server`)
+    info(`Init Log Server`)
     const logServerInit = await import("../common/logger/main").then(mod => mod.default)
-    console.info(`Waiting for Log Server`)
+    info(`Waiting for Log Server`)
     await logServerInit.whenReady()
-    
-    console.info(`Init BootStrap`)
+
+    info(`Init BootStrap`)
     await import("./bootstrap/bootstrapElectronMain").then(mod => mod.default)
 
-    console.info(`Launch`)
+    info(`Launch`)
     await import("./launch").then(mod => mod.default)
   } catch (err) {
-    console.error(`Failed to start`, err)
+    error(`Failed to start`, err)
     if (!isDev) {
-      ShutdownManager.shutdown()
-        .catch(err => {
-          console.error(`Shutdown failed`,err)
-        })
+      ShutdownManager.shutdown().catch(err => {
+        error(`Shutdown failed`, err)
+      })
     }
     // throw err
   }
@@ -67,28 +67,34 @@ async function start() {
 if (app.requestSingleInstanceLock()) {
   app.whenReady().then(start)
 } else {
-  log.warn(`Another instance already exists`)
+  warn(`Another instance already exists`)
   app.quit()
 }
 
+// IN DEV ENVIRONMENTS, EXPOSE `GetLogger -> getLogger` GLOBALLY
 if (isDev) {
-  global["GetLogger"] = getLogger
+  global["GetLogger"] = require("@3fv/logger-proxy").getLogger
 }
 
 // HMR
 if (import.meta.webpackHot) {
+  import.meta.webpackHot.addDisposeHandler(_data => Promise.all([shutdownServiceContainer(), Deferred.delay(2000)]))
+
   import.meta.webpackHot.accept(
     ["../common/logger/main", "./utils/ProcessErrorHelpers", "./bootstrap/bootstrapElectronMain", "./launch"],
-    (...args) => {
-      console.warn(`entry-main HMR accept`, ...args)
+    (...args: any[]) => {
+      warn(`entry-main HMR accept`, ...args)
       // NOTE: Delay is required to allow for async cleanup/disposal to complete
-      Promise.all([shutdownServiceContainer(), Deferred.delay(2000)])
-        .then(() => start())
-        .then(() => console.info(`HMR Start complete`))
+
+      return start()
+        .then(() => info(`HMR Start complete`))
         .catch(err => {
-          console.error(`HMR Start failed`, err)
+          error(`HMR Start failed`, err)
           ShutdownManager.shutdown()
         })
+    },
+    err => {
+      error(`HMR UPDATE FAILED`, err)
     }
   )
 }

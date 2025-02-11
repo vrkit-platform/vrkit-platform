@@ -1,15 +1,7 @@
 import { getLogger } from "@3fv/logger-proxy"
-import Chokidar, {FSWatcher} from "chokidar"
-import {
-  Container, Inject, InjectContainer, PostConstruct, Singleton
-} from "@3fv/ditsy"
-import {
-  assert,
-  Bind,
-  importDefault,
-  isNotEmpty,
-  OverlayManagerClientEventHandler, propEqualTo
-} from "@vrkit-platform/shared"
+import Chokidar, { FSWatcher } from "chokidar"
+import { Container, Inject, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
+import { assert, Bind, importDefault, isNotEmpty, OverlayManagerClientEventHandler } from "@vrkit-platform/shared"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 import {
@@ -23,7 +15,8 @@ import {
   OverlayConfig,
   OverlayKind,
   PluginComponentDefinition,
-  PluginInstall, PluginUserSettingValue
+  PluginInstall,
+  PluginUserSettingValue
 } from "@vrkit-platform/models"
 import OverlayManagerClient from "../overlay-manager-client"
 import { asOption } from "@3fv/prelude-ts"
@@ -61,13 +54,13 @@ Object.assign(window, {
 
 export class PluginLoader {
   private readonly state_: {
-    fileWatcher: FSWatcher,
+    fileWatcher: FSWatcher
     moduleIdCache: Record<string, any>
     componentFactory?: IPluginComponentFactory
     global: {
       require: IPluginRequireFunction
       requireProxy: IPluginRequireFunction
-    //  customRequire: IPluginRequireFunction
+      //  customRequire: IPluginRequireFunction
       nodeRequire: IPluginRequireFunction
       webpackRequire: IPluginRequireFunction
     }
@@ -75,6 +68,34 @@ export class PluginLoader {
 
   private readonly setupDeferred_ = new Deferred<void>()
 
+  /**
+   * Handles the custom require mechanism for loading plugin modules.
+   *
+   * This function is designed to intercept calls to `require` and attempt to
+   * resolve plugins through different mappings and caching mechanisms before
+   * falling back on Node.js's native `require`.
+   *
+   * Steps for resolution:
+   * 1. Verify that the `moduleName` argument is a valid string.
+   * 2. Check if the module exists in the `PluginExternalModuleMap`. If yes,
+   * return it.
+   * 3. If not in the map, check for its presence in the `moduleIdCache`.
+   * 4. Attempt to load the module as a Webpack module if it is not a built-in
+   * module.
+   * 5. Fall back to the original `target` require if none of the above resolve
+   * the module.
+   *
+   * @param target - Original Node.js `require` function to fall back to when
+   *     module resolution fails.
+   * @param _thisArg - `this` argument passed to the `Function.prototype.apply`
+   *     during method call.
+   * @param args - Array of arguments passed to the `require` function. The
+   *     first argument should be the module name.
+   * @returns {any} The resolved module or throws an error if the resolution
+   *     fails.
+   *
+   * @throws `Error` if the provided module name is not a valid string.
+   */
   private pluginRequire(target: NodeJS.Require, _thisArg: any, ...args: any[]) {
     const moduleName = asOption(args[0])
         .mapIf(
@@ -86,14 +107,16 @@ export class PluginLoader {
         .getOrThrow("This first argument to require must be a string with at least 1 character"),
       { state } = this,
       { moduleIdCache } = state,
-      // { nodeRequire, webpackRequire } = state.global,
       errors = Array<[string, Error]>()
 
-    log.info(`Attempting to load module ${moduleName}`)
+    if (log.isDebugEnabled()) {
+      log.debug(`Attempting to load module ${moduleName}`)
+    }
+
     try {
       const mod = PluginExternalModuleMap[moduleName]
       if (mod) {
-        log.info(`Resolved ${moduleName} via PluginExternalModuleMap`)
+        // log.info(`Resolved ${moduleName} via PluginExternalModuleMap`)
         return mod
       }
     } catch (err) {
@@ -101,7 +124,6 @@ export class PluginLoader {
     }
 
     if (moduleIdCache[moduleName]) {
-      log.info(`Resolved ${moduleName} in moduleIdCache`)
       return moduleIdCache[moduleName]
     }
 
@@ -110,36 +132,29 @@ export class PluginLoader {
       try {
         mod = __webpack_modules__[moduleName]
         if (!!mod) {
-          log.info(`Mod (${moduleName}) is not available through webpack`)
           moduleIdCache[moduleName] = mod
           return mod
         }
-        // if (!mod) {
-        //   const id = __web.resolve(moduleName)
-        //   assert(isNotEmpty(id), `Unable to resolve ${moduleName} inside
-        // webpack require`)  }
-        
-        // if (moduleIdCache[moduleName]) {
-        //   return moduleIdCache[moduleName]
-        // }
-
-        
       } catch (err) {
         errors.push([`Unable to load module (${moduleName}) via webpack`, err])
       }
     }
-    
-    for (const [msg, err] of errors) {
-      log.error(msg, err)
-    }
 
-    log.info(`Unable to resolve ${moduleName} with internal mappings, probably an external dep`)
-    return target(moduleName)
+    try {
+      return target(moduleName)
+    } catch (err) {
+      errors.push([`FAILED TO LOAD MODULE (${moduleName}) VIA ANY/ALL MECHANISMS`, err])
+      for (const [msg, err] of errors) {
+        log.error(msg, err)
+      }
+
+      throw err
+    }
   }
 
   private async setup(): Promise<void> {
     try {
-      const { manager, serviceContainer, install, state } = this,
+      const { install, state } = this,
         { manifest } = install,
         manifestName = manifest.name ?? manifest.id,
         pkgPath = install.path,
@@ -153,26 +168,18 @@ export class PluginLoader {
 
       assert(await Fsx.pathExists(pkgMainFile), `Main file specified in ${pkgJsonFile} does not exist @ ${pkgMainFile}`)
 
-      log.info(`Reading plugin installation bundle @ ${pkgMainFile}`)
-      // const code = await Fsx.readFile(pkgMainFile, "utf-8"),
-      //   vmScript = (this.state_.vm.script = new VM.Script(code, {
-      //     filename: pkgMainFile,
-      //     importModuleDynamically: VM.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER
-      //   })),
-      //   vmCtxObj = this.state.vm.contextObj
-      //
-      // IF A `PluginInstall` IS MARKED AS DEV ENABLED
-      // THEN WATCH FOR CHANGES
+      if (log.isDebugEnabled()) log.debug(`Reading plugin installation bundle @ ${pkgMainFile}`)
+
+      // ENABLED THEN WATCH FOR CHANGES
       if (install.isDevEnabled) {
         log.info(`Plugin DEV MODE setting up file watcher`, install)
         const watcher = Chokidar.watch(pkgMainFile, {
           awaitWriteFinish: true
         })
-        watcher.on("change", this.onFileWatcherChanged.bind(this))
-            .on("error", this.onFileWatcherError.bind(this))
+        watcher.on("change", this.onFileWatcherChanged.bind(this)).on("error", this.onFileWatcherError.bind(this))
         state.fileWatcher = watcher
       }
-      
+
       let res = this.state.global.requireProxy(pkgMainFile)
       if (isPromise(res)) {
         res = await res
@@ -182,9 +189,10 @@ export class PluginLoader {
         factory: IPluginComponentFactory = (this.state.componentFactory = modExports?.default)
 
       assert(isFunction(factory), `Exported factory for ${manifestName} is not a function`)
-      if (log.isDebugEnabled())
+      if (log.isDebugEnabled()) {
         log.debug(`Result from loading plugin (${manifestName})`, modExports, factory)
-      
+      }
+
       this.setupDeferred_.resolve()
     } catch (err) {
       log.error(`Failed to setup plugin`, err)
@@ -192,22 +200,43 @@ export class PluginLoader {
       throw err
     }
   }
-  
-  private onFileWatcherError(err: Error) {
+
+  /**
+   * Handles errors that occur within the file watcher.
+   *
+   * @param {Error} err - The error object representing the issue encountered
+   *     by the file watcher.
+   * @return {void} This method does not return a value.
+   */
+  private onFileWatcherError(err: Error): void {
     log.error(`File watcher error occurred`, err)
   }
-  
-  private onFileWatcherChanged(file: string) {
+
+  /**
+   * Handles the event triggered when a file watcher detects a change in the
+   * specified file.
+   *
+   * @param {string} file - The file path that was changed.
+   * @return {void} This method does not return a value.
+   */
+  private onFileWatcherChanged(file: string): void {
     log.info(`File watcher change event: ${file}`)
     window.location.reload()
   }
-
+  
+  /**
+   * Constructor for initializing the plugin system and setting up custom module resolution.
+   *
+   * @param {PluginClientLauncher} manager - The plugin client launcher responsible for managing plugin clients.
+   * @param {Container} serviceContainer - The service container providing dependencies and services.
+   * @param {PluginInstall} install - The plugin installation details used to configure the environment.
+   */
   constructor(
     readonly manager: PluginClientLauncher,
     readonly serviceContainer: Container,
     readonly install: PluginInstall
   ) {
-    const //customRequire = Module.createRequire(install.path),
+    const
       requireProxy = new Proxy(Module.prototype.require.bind(module), {
         apply: this.pluginRequire.bind(this)
       }),
@@ -217,10 +246,11 @@ export class PluginLoader {
         nodeRequire: __non_webpack_require__,
         webpackRequire: __webpack_require__
       }
-    
+
     // ASSIGN ALL REQUIRE FNs TO WINDOW/GLOBAL OBJECT
     const defaultRequire = Module.prototype.require
-    function newRequire(id:string) {
+
+    function newRequire(id: string) {
       try {
         return requireProxy(id)
       } catch (err) {
@@ -228,7 +258,7 @@ export class PluginLoader {
         return defaultRequire(id)
       }
     }
-    
+
     newRequire.cache = defaultRequire.cache
     newRequire.resolve = defaultRequire.resolve
     newRequire.extensions = defaultRequire.extensions
@@ -236,7 +266,7 @@ export class PluginLoader {
     Module.prototype.require = newRequire as any
     Object.assign(global, globalRequire)
     Object.assign(window, globalRequire)
-    
+
     this.state_ = {
       fileWatcher: null,
       moduleIdCache: {},
@@ -326,16 +356,16 @@ export class PluginClientLauncher {
         getOverlayInfo: () => {
           return this.getConfig()?.overlay
         },
-        
-        getUserSettingValue: (id:string):PluginUserSettingValue => {
+
+        getUserSettingValue: (id: string): PluginUserSettingValue => {
           return this.getConfig()?.overlay?.userSettingValues?.[id]
         },
-        
+
         getSessionInfo: () => {
           return sharedAppSelectors.selectActiveSessionInfo(this.appStore.getState())
-        },
-        // getSessionTimeAndDuration: () => {
-        //   return sharedAppSelectors.selectActiveSessionTimeAndDuration(this.appStore.getState())
+        }, // getSessionTimeAndDuration: () => {
+        //   return
+        // sharedAppSelectors.selectActiveSessionTimeAndDuration(this.appStore.getState())
         // },
         getLapTrajectory: (trackLayoutId: string) => {
           return this.trackManager.getLapTrajectory(trackLayoutId)

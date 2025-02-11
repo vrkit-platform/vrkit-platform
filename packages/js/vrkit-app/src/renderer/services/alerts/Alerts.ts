@@ -21,7 +21,7 @@ import { isFunction, isString } from "@3fv/guard"
 import { isEmpty, omit } from "lodash"
 import { useMemo, useState } from "react"
 import { match } from "ts-pattern"
-import { isDev } from "../../renderer-constants"
+// import { isDev } from "../../renderer-constants"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -58,9 +58,14 @@ const alertToastMapping = Object.fromEntries(
   valuesOf(AlertType).map(type => pairOf(type, makeHotToast(type)))
 ) as Record<AlertTypeKind, ToHotToast>
 
-function Alert(type: AlertType, errorOrMessage: ErrorKind | Renderable, errOrOpts: ErrorKind | AlertOptions = {}, opts: AlertOptions = {}): string {
+function Alert(
+  type: AlertType,
+  errorOrMessage: ErrorKind | Renderable,
+  errOrOpts: ErrorKind | AlertOptions = {},
+  opts: AlertOptions = {}
+): string {
   let err: ErrorKind = null
-  
+
   if (isErrorKind(errOrOpts)) {
     err = errOrOpts
     opts.cause = err
@@ -71,14 +76,14 @@ function Alert(type: AlertType, errorOrMessage: ErrorKind | Renderable, errOrOpt
   }
   let msg = isErrorKind(errorOrMessage)
     ? alertErrorFormatter(errorOrMessage, opts)
-      : isAlertRenderable(errorOrMessage)
+    : isAlertRenderable(errorOrMessage)
       ? errorOrMessage
       : throwError(`Message is not renderable or error kind: ${(errorOrMessage as any)?.toString()}`)
 
   if (isErrorKind(opts.cause)) {
     msg = `${msg}\nDetails:${alertErrorFormatter(opts.cause, opts)}\nStack:\n${opts.cause.stack}`
   }
-  
+
   if (isDev) {
     const msgStr = isFunction(msg?.toString) && msg.toString()
     if (isNotEmptyString(msgStr)) {
@@ -86,9 +91,7 @@ function Alert(type: AlertType, errorOrMessage: ErrorKind | Renderable, errOrOpt
       logFn(msgStr)
     }
   }
-  
-  
-  
+
   // GET THE TOASTER BASED ON MESSAGE TYPE
   return asOption(alertToastMapping[type])
     .filter(isFunction)
@@ -134,7 +137,7 @@ namespace Alert {
   /**
    * Alert event handlers
    */
-  export const [onInfo, onError, onSuccess, onWarning] = Array<AlertTypeKind>("info", "error", "success", "warning")
+  export const [onInfo, onError, onSuccess, onWarning, onLoading] = Array<AlertTypeKind>("info", "error", "success", "warning", "loading")
     .map(createAlertFactory)
     .map(
       createAlert =>
@@ -181,6 +184,7 @@ namespace Alert {
     canExecute?: () => boolean
   }
 
+  // @ts-ignore
   export function promise<T, Args extends any[] = any[]>(
     pending: Promise<T>,
     { loading, success, error }: AlertPromiseOptions<Args, T>,
@@ -220,50 +224,46 @@ namespace Alert {
         return Promise.reject(err)
       })
   }
-  
+
   export type AlertFunction<
     Fn extends (...args: any[]) => Promise<any>,
     Args extends Parameters<Fn> = Parameters<Fn>,
     T extends Awaited<ReturnType<Fn>> = Awaited<ReturnType<Fn>>
   > = {
     executing: boolean
-    execute: (...args:Args) => Promise<T>
+    execute: (...args: Args) => Promise<T>
   }
-  
+
   export function usePromise<
     Fn extends (...args: any[]) => Promise<any>,
     Args extends Parameters<Fn> = Parameters<Fn>,
     T extends Awaited<ReturnType<Fn>> = Awaited<ReturnType<Fn>>
-  >(fn: (...args: Args) => Promise<T>, options: AlertUsePromiseOptions<Args, T>, deps: any[] = []): AlertFunction<Fn, Args, T> {
+  >(
+    fn: (...args: Args) => Promise<T>,
+    options: AlertUsePromiseOptions<Args, T>,
+    deps: any[] = []
+  ): AlertFunction<Fn, Args, T> {
     const [alertFnState, setAlertFnState] = useState<AlertFunction<Fn, Args, T>>(null),
-    alertFn = useMemo(
-      
-      () => {
+      alertFn = useMemo(() => {
         const alertExecute = match(isFunction(options?.canExecute) ? options.canExecute() : true)
-          .with(
-            true,
-            () => (...args:Args): Promise<T> => {
-              setAlertFnState(state => ({ ...state, executing: true }))
-              //log.assert(!!alertFnState, `AlertFn not set in state`)
-              return Alert.promise<T, Args>(fn(...args), options, args)
-                .finally(() => {
-                  setAlertFnState(state => ({ ...state, executing: false }))
-                })
-            }
-          )
+          .with(true, () => (...args: Args): Promise<T> => {
+            setAlertFnState(state => ({ ...state, executing: true }))
+            //log.assert(!!alertFnState, `AlertFn not set in state`)
+            return Alert.promise<T, Args>(fn(...args), options, args).finally(() => {
+              setAlertFnState(state => ({ ...state, executing: false }))
+            })
+          })
           .otherwise(() => () => Promise.resolve(null)) as Fn
-        
-        const alertFn:AlertFunction<Fn, Args,T> = {
+
+        const alertFn: AlertFunction<Fn, Args, T> = {
           execute: alertExecute,
           executing: false
         }
-        
+
         setAlertFnState(alertFn)
         return alertFn
-      },
-      deps
-    )
-    
+      }, deps)
+
     return alertFnState ?? alertFn
   }
 }

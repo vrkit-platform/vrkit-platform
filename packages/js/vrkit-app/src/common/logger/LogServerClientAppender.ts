@@ -6,7 +6,7 @@ import { Future } from "@3fv/prelude-ts"
 import Debug from "debug"
 import { JSONStringifyAny } from "@vrkit-platform/shared"
 import { guard } from "@3fv/guard"
-
+import EventEmitter3 from "eventemitter3"
 
 
 const debug = Debug("vrkit:UPMLogServerClientAppender")
@@ -25,7 +25,14 @@ export interface LogServerClientAppenderConfig {
 
 export type LogServerClientAppenderOptions = Partial<LogServerClientAppenderConfig>
 
-export class LogServerClientAppender implements Appender {
+export interface LogServerClientAppenderEventMap {
+  ready: (appender:LogServerClientAppender, ready: boolean) => any
+  closed: (appender:LogServerClientAppender) => any
+}
+
+export class LogServerClientAppender extends EventEmitter3<LogServerClientAppenderEventMap> implements Appender {
+  #messageClient: UPM.IMessageClient<LogServerRequestMap>
+  
   readonly config: LogServerClientAppenderConfig
 
   private readonly state: {
@@ -33,57 +40,82 @@ export class LogServerClientAppender implements Appender {
     flushContinue: boolean
     queue: Array<string>
     ready: boolean
-    destroyed: boolean
     error?: Error
   } = {
     ready: false,
     flushing: false,
     flushContinue: false,
-    destroyed: false,
     queue: []
   }
-
-  isReady() {
-    return this.state.ready
+  
+  /**
+   * setReady
+   *
+   * @param ready
+   * @param skipEvent
+   */
+  setReady(ready: boolean, skipEvent: boolean = false) {
+    const { state } = this
+    if (state.ready === ready) {
+      return this
+    }
+    
+    state.ready = ready
+    
+    this.emit("ready", this, ready)
+    return this
   }
-
+  
+  /**
+   * Is ready & has valid client
+   */
+  isReady() {
+    return this.state.ready && !!this.#messageClient
+  }
+  
   /**
    * Initialize and setup the appender
    *
    * @returns {LogServerClientAppender<Record>}
    */
-  setup(): LogServerClientAppender {
-    const { state } = this
-    if (!!state.ready) {
+  setMessageClient(
+      messageClient: UPM.IMessageClient<LogServerRequestMap>
+  ): LogServerClientAppender {
+    if (Object.is(this.#messageClient, messageClient))
       return this
-    }
-
-    try {
-      assign(state, {
-        ready: true
-      })
-
-      return this
-    } catch (err) {
-      assign(state, {
-        error: err,
-        ready: false
-      })
-      throw err
-    }
+    
+    if (this.#messageClient)
+      this.closeImmediate(true)
+    
+    if (this.isReady())
+      throw Error(`Something is funky, isReady should ALWAYS be false after closeImmediate(true)`)
+    
+    this.#messageClient = messageClient
+    
+    this.setReady(true)
+    
+    return this
   }
   
   /**
    * Close immediately
    */
-  closeImmediate() {
+  closeImmediate(skipEvent: boolean = false) {
     guard(() => {
-      this.messageClient?.close?.()
+      this.#messageClient?.close?.()
     }, err => {
       console.error(`Unable to cleanly stop messageClient`, err)
     })
     
-    delete this["messageClient"]
+    if (this.#messageClient) {
+      this.#messageClient = null
+    }
+    
+    if (!skipEvent) {
+      this.emit("closed", this)
+    }
+    
+    
   }
   
   /**
@@ -111,17 +143,13 @@ export class LogServerClientAppender implements Appender {
    * Appends the log queue records to the file
    */
   private flush(): Future<boolean> {
-    const { state, messageClient } = this
+    const { state } = this
 
-    if (!messageClient) {
+    if (!this.#messageClient) {
       console.error("Service must be set in order to flush")
       return Future.ok(false)
     }
 
-    if (state.destroyed) {
-      console.error("Appender is destroyed, can not flush")
-      return Future.ok(false)
-    }
 
     if (state.flushing) {
       console.error("Flush in progress, only 1 flush runs at a time")
@@ -135,8 +163,8 @@ export class LogServerClientAppender implements Appender {
         const records = [...this.queue]
         this.queue.splice(0, this.queue.length)
 
-        const msg:LogServerEventData = { clientId: this.messageClient.clientId, records }
-        messageClient.sendEvent(msg)
+        const msg:LogServerEventData = { clientId: this.#messageClient.clientId, records }
+        this.#messageClient.sendEvent(msg)
         return true
       } catch (err) {
         console.error(`Failed to send log records`, err)
@@ -159,9 +187,9 @@ export class LogServerClientAppender implements Appender {
    * @param record
    */
   append(record: LogRecord): void {
-    const { destroyed, queue } = this.state
-    if (destroyed || !record) {
-      console.error("Appender is destroyed or record is null, can not append")
+    const { queue, ready } = this.state
+    if (!ready || !record) {
+      console.error("Appender is not ready or record is null, can not append")
       return
     }
 
@@ -187,11 +215,12 @@ export class LogServerClientAppender implements Appender {
    * @param {Partial<LogServerClientAppenderOptions<Record>>} options
    */
   constructor(
-    protected messageClient: UPM.IMessageClient<LogServerRequestMap>,
+    messageClient: UPM.IMessageClient<LogServerRequestMap>,
     options: LogServerClientAppenderOptions = {}
   ) {
+    super()
     this.config = applyConfigDefaults(options)
 
-    this.setup()
+    this.setMessageClient(messageClient)
   }
 }

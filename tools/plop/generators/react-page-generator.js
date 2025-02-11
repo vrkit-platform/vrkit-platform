@@ -56,26 +56,21 @@ function generator(plop) {
           dirName: "{{dashCase name}}",
           name: "{{name}}"
         },
+        
+        templateFile: `${rootDir}/tools/plop/templates/react-page/PageClasses.tsx.hbs`,
+        path: `${rootDir}/{{reactTargetToPagePath targetModule}}/{{dashCase name}}/{{name}}PageClasses.tsx`
+      },
+      {
+        type: "add",
+        data: {
+          version,
+          dirName: "{{dashCase name}}",
+          name: "{{name}}"
+        },
 
         templateFile: `${rootDir}/tools/plop/templates/react-page/index.ts.hbs`,
         path: `${rootDir}/{{reactTargetToPagePath targetModule}}/{{dashCase name}}/index.ts`
-      } // PRINT FILES
-      // {
-      // 	type: "print-files",
-      // 	abortOnFail: true
-      // },
-      //
-      // // DUMP FILES
-      // {
-      // 	type: "flush-files",
-      // 	abortOnFail: true
-      // }
-
-      // UPDATE PROJECT
-      // {
-      //   type: "update-project",
-      //   abortOnFail: true
-      // }
+      }
     ]
   }
 }

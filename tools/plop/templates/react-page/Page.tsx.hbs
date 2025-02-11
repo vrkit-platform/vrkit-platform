@@ -4,30 +4,91 @@ import React from "react"
 // CLSX
 import clsx from "clsx"
 
+// MUI
+import { styled } from "@mui/material/styles"
+import Box from "@mui/material/Box"
+
 // 3FV
 import { getLogger } from "@3fv/logger-proxy"
 
 // APP
-import { AppContent } from "vrkit-app-renderer/components/page"
-import AppPageContainer, { type AppPageContainerProps } from "vrkit-app-renderer/components/app-page-container"
+import { Page, PageProps } from "vrkit-app-renderer/components/page"
+import {
+  child,
+  hasCls,
+  Ellipsis,
+  flexAlign,
+  FlexAuto,
+  FlexColumn,
+  FlexRow,
+  FlexRowCenter,
+  FlexScaleZero,
+  OverflowAuto,
+  OverflowHidden,
+  padding,
+  PositionRelative
+} from "@vrkit-platform/shared-ui"
+import classes from "./{{name}}PageClasses"
 
 const log = getLogger(__filename),
   { info, debug, warn, error } = log
 
+const {{name}}PageRoot = styled(Box, {
+  name: "{{name}}PageRoot"
+})(({ theme }) => ({
+  [hasCls(classes.root)]: {
+    ...PositionRelative,
+    ...FlexScaleZero,
+    ...OverflowHidden,
+    ...FlexColumn,
+    ...flexAlign("stretch", "stretch"),
+    [child(classes.header)]: {
+      ...FlexRow,
+      ...flexAlign("stretch", "stretch"),
+      [child(classes.headerDetails)]: {
+        ...FlexScaleZero,
+        ...Ellipsis,
+        ...OverflowHidden
+      },
+      [child(classes.headerButtons)]: {
+        ...FlexRowCenter,
+        ...FlexAuto,
+        [child(classes.headerButton)]: {
+          ...FlexAuto
+        }
+      }
+    },
+  }
+}))
+
 /**
  * {{name}}Page Component Properties
  */
-export interface {{name}}PageProps extends AppPageContainerProps {
+export interface {{name}}PageProps extends PageProps {
 
 }
 
 export function {{name}}Page({className, ...other}: {{name}}PageProps) {
   return (
-    <AppContent>
-      <AppPageContainer className={clsx(className)} {...other}>
-        {{name}}Page content here
-      </AppPageContainer>
-    </AppContent>
+      <Page
+          metadata={{doubleBracketLeft}}
+            title: "{{name}}"
+        {{doubleBracketRight}}
+      >
+      <{{name}}PageRoot className={clsx(classes.root, className)} {...other}>
+        <Box className={classes.header}>
+          <Box className={classes.headerDetails}>
+          </Box>
+          <Box className={classes.headerButtons}>
+            <Box className={classes.headerButton}>
+            </Box>
+          </Box>
+        </Box>
+        <Box className={classes.content}>
+          {{name}}Page content here
+        </Box>
+      </{{name}}PageRoot>
+    </Page>
   )
 }
 

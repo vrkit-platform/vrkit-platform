@@ -1,6 +1,6 @@
 import type {} from "@vrkit-platform/shared"
 import { app, crashReporter } from "electron"
-import { RemoteDebugPort } from "./constants"
+import { AppName, RemoteDebugPort } from "./constants"
 import Path from "path"
 import Fsx from "fs-extra"
 
@@ -10,7 +10,8 @@ const log = (...args:any[]) => {
   }
 }
 // SET THE NAME
-app.setName(isDev ? "VRKitDev" : "VRKit")
+
+app.setName(AppName)
 
 // SETUP CRASH REPORTER
 const crashPath = Path.join(process.env.USERPROFILE, "Desktop", "vrkit","crashes")
@@ -22,7 +23,7 @@ crashReporter.start({
 })
 
 if (isDev) {
-  log(`PREPARE MAIN (isDev=${isDev})`)
+  log(`PREPARE MAIN`)
   
   // REMOTE DEBUGGING PORT
   app.commandLine.appendSwitch(

@@ -17,7 +17,7 @@ class LogServerMainSetup {
   #appenders: Appender[] = []
 
   #service: UPMMainService<LogServerRequestMap> = null
-  
+
   /**
    * Install the internal appenders
    *
@@ -30,7 +30,7 @@ class LogServerMainSetup {
     log.info(`Adding Appenders`, this.#appenders)
     getLoggingManager().setAppenders(this.#appenders)
   }
-  
+
   /**
    * Initialize the service & setup the appender for the main process
    */
@@ -44,32 +44,54 @@ class LogServerMainSetup {
 
     try {
       // Create the UPM service
-      const serviceOpts:CreateServiceOptions = {}
+      const serviceOpts: CreateServiceOptions = {}
       if (isDev) {
         serviceOpts.inspect = {
-          // inspect: {
           // break: true,
           port: 9442
-          // }
         }
       }
-      const service = this.#service = await upmMainServiceManager.createService<LogServerRequestMap>("logserver", entryFile,
-          serviceOpts)
-      
+
+      const createService = async () => {
+          log.info(`Creating new service connection`)
+          try {
+            if (upmMainServiceManager.getService("logserver")) {
+              await upmMainServiceManager.destroyService("logserver")
+            }
+          } catch (err) {
+            log.error(`Failed to shutdown existing log server`, err)
+          }
+          
+          const newService = await upmMainServiceManager.createService<LogServerRequestMap>(
+            "logserver",
+            entryFile,
+            serviceOpts
+          )
+          return newService
+        },
+        service = this.#service = await createService()
+
       // Setup appenders
-      const logServerClientAppender = new LogServerClientAppender(this.#service)
+      const logServerClientAppender = new LogServerClientAppender(service)
+      logServerClientAppender.on("closed", async appender => {
+        try {
+          const newService = await createService()
+          appender.setMessageClient(newService)
+        } catch (err) {
+          log.error(`Failed to reconnect to log server service`, err)
+        }
+      })
       if (import.meta.webpackHot) {
         import.meta.webpackHot.addDisposeHandler(() => {
           logServerClientAppender.closeImmediate()
           service.close()
         })
       }
-      flow(filter(isDefined), this.#installAppenders.bind(this))([
-        isDev && new ConsoleAppender(),
-        logServerClientAppender
-      ])
+      flow(
+        filter(isDefined),
+        this.#installAppenders.bind(this)
+      )([isDev && new ConsoleAppender(), logServerClientAppender])
 
-      
       deferred.resolve(this)
       return this
     } catch (err) {

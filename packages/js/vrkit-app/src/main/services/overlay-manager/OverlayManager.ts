@@ -188,7 +188,8 @@ export class OverlayManager {
           placement,
           (type, browserWindow, windowInstance) => {
             // const ow = this.allOverlays.find(it => it?.browserWindow?.id === browserWindow.id)
-            // if (!ow) {
+            // if (!
+            // ow) {
             //   log.warn(`Unable to find matching overlay browser window for id (${browserWindow.id})`)
             //   return
             // }
@@ -352,7 +353,9 @@ export class OverlayManager {
     await Promise.all(
       overlays.map(o => {
         guard(() => o.browserWindow?.webContents?.endFrameSubscription())
-        return o.close()
+        return o.close().catch(err  => {
+          warn("Unable to cleanly close all windows", err)
+        })
       })
     )
       .then(() => {
@@ -403,12 +406,12 @@ export class OverlayManager {
   /**
    * Cleanup resources on unload
    *
-   * @param event
+   * @param _event
    * @private
    */
   @Bind
-  private unload(event: Electron.Event = null) {
-    return this[Symbol.asyncDispose]()
+  private async unload(_event: Electron.Event = null) {
+    await this[Symbol.asyncDispose]()
   }
 
   @Bind
@@ -545,9 +548,12 @@ export class OverlayManager {
    * @private
    */
   private createOnCloseHandler(overlayUniqueId: string, windowId: number): Function {
-    return (event: Electron.Event) => {
+    return (_event: Electron.Event) => {
       this.sessionManager.unregisterComponentDataVars(overlayUniqueId)
-      log.info(`onCloseHandler for overlay/window`, overlayUniqueId, windowId)
+      
+      if (log.isDebugEnabled())
+        log.debug(`onCloseHandler for overlay/window`, overlayUniqueId, windowId)
+      
       this.nativeManager_?.releaseResources(overlayUniqueId, windowId)
       removeIfMutation(this.overlayWindows_, overlay => overlay.browserWindowId === windowId)
     }

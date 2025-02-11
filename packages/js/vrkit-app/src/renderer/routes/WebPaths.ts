@@ -5,6 +5,7 @@ export enum WebRootPath {
   main = 'main',
   settings = 'settings',
   unknown = 'unknown',
+  dashboardController = 'dashboardController',
   dashboardVRLayout = 'dashboardVRLayout'
 }
 
@@ -26,6 +27,7 @@ export const WebPaths = {
   },
   
   dashboardVRLayout: leaf(WebRootPath.dashboardVRLayout),
+  dashboardController: leaf(WebRootPath.dashboardController),
   
   // SETTINGS
   settings: {

@@ -1,3 +1,6 @@
+import { app } from "electron"
+
+
 if (typeof isDev === "undefined") {
   const g:any = typeof global !== "undefined" ? global : typeof window !== "undefined" ? window : null
   if(!g) throw Error("No global found")
@@ -9,4 +12,6 @@ export const isDevLocal = isDev
 export const isElectron =
     typeof process !== "undefined" && process?.versions?.electron?.length > 0
 
-export const AppName = isDevLocal ? "VRKitDev" : "VRKit"
+ // || /electron(\.exe)?$/.test(process.execPath)
+export const isPackaged = app?.isPackaged ?? false
+export const AppName = !isPackaged || isDev ? "VRKitDev" : "VRKit"

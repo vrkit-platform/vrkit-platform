@@ -1,10 +1,13 @@
+import { app } from "electron"
+
+export const isPackaged = app.isPackaged
+export const AppName = !isPackaged || isDev ? "VRKitDev" : "VRKit"
+
 export const isProd = !isDev
-//export const isDev = !isProd
 
 export const isMac = process.platform === "darwin"
 export const isLinux = process.platform === "linux"
 export const isWindows = !isLinux && !isMac && process.platform === "win32"
-
 
 
 export const RemoteDebugEnabled = isDev

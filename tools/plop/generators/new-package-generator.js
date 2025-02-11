@@ -8,13 +8,6 @@ module.exports = {
   description: "Add a new package to the mono-repo",
   prompts: [
     {
-      type: "choice",
-      name: "pkgType",
-      choices: ["apps", "libs", "tools"],
-
-      message: "Package type (purpose)"
-    },
-    {
       type: "input",
       name: "name",
       message: "New package name",
@@ -41,13 +34,13 @@ module.exports = {
       data: {
         version,
         name: "{{name}}",
-        pkgType: "{{pkgType}}"
+        
       },
 
       // abortOnFail: true,
       base: `${rootDir}/tools/plop/templates/new-package`,
       templateFiles: `${rootDir}/tools/plop/templates/new-package/**/*.hbs`,
-      destination: `${rootDir}/{{pkgType}}/{{name}}/`
+      destination: `${rootDir}/packages/js/{{name}}/`
     },
 
     // PRINT FILES
@@ -62,10 +55,5 @@ module.exports = {
       abortOnFail: true
     }
 
-    // UPDATE PROJECT
-    // {
-    //   type: "update-project",
-    //   abortOnFail: true
-    // }
   ]
 }

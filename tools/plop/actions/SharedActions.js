@@ -73,7 +73,7 @@ module.exports = function register(plop) {
       rm("-Rf", packageDir)
     }
 
-    const refPath = `./${pkgType}/${name}/tsconfig.json`
+    const refPath = `./packages/js/${name}/tsconfig.json`
     if (!rootRefs.some(ref => ref.path === refPath)) {
       rootRefs.push({
         path: refPath
@@ -85,8 +85,8 @@ module.exports = function register(plop) {
     tsBaseConfig.compilerOptions.paths = {
       ...tsBaseConfig.compilerOptions.paths,
 
-      [`@taskx/${pkgType}-${name}`]: [`./${pkgType}/${name}/src`],
-      [`@taskx/${pkgType}-${name}/*`]: [`./${pkgType}/${name}/src/*`]
+      [`@vrkit-platform/${name}`]: [`./packages/js/${name}/src`],
+      [`@vrkit-platform/${name}/*`]: [`./packages/js/${name}/src/*`]
     }
 
     writeFile(tsBaseConfigFile, JSON.stringify(tsBaseConfig, null, 2))

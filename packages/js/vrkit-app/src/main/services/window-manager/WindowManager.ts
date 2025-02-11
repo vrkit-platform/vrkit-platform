@@ -19,6 +19,7 @@ import {
   isNotEmptyString,
   isWindowRole,
   lessThan,
+  Noop,
   pairOf,
   propEqualTo,
   removeIfMutation,
@@ -28,12 +29,12 @@ import {
   type WindowMetadata,
   WindowRole
 } from "@vrkit-platform/shared"
-import { match } from "ts-pattern"
+import { match, P } from "ts-pattern"
 import { getLogger } from "@3fv/logger-proxy"
 import SharedAppState from "../store"
 import { AppSettingsService } from "../app-settings"
 import { IValueDidChange, observe, runInAction, set } from "mobx"
-import { guard, isDefined, isNumber, isPromise, isString } from "@3fv/guard"
+import { guard, isArray, isDefined, isNumber, isPromise, isString } from "@3fv/guard"
 import { asOption } from "@3fv/prelude-ts"
 import {
   AppBuildPaths,
@@ -47,7 +48,7 @@ import { createWindowOpenHandler } from "./WindowHelpers"
 import { WindowSizeDefault } from "./WindowConstants"
 import { get } from "lodash/fp"
 import { isMac } from "../../constants"
-import { omit, pick } from "lodash"
+import { first, omit, pick } from "lodash"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -67,6 +68,13 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       const windowsMetadata = this.#windows
         .map(get("config"))
         .map(it => omit(it, ["onBrowserWindowEvent", "browserWindowOptions"]) as WindowMetadata)
+        .reduce(
+          (map, md) => ({
+            ...map,
+            [md.id]: md
+          }),
+          {} as Record<string, WindowMetadata>
+        )
       set(this.sharedAppState.desktopWindows, "windows", windowsMetadata)
     })
   }
@@ -347,9 +355,20 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         cloneDeep(isWindowRole(optionsOrRole) ? BaseWindowConfigs[optionsOrRole] : optionsOrRole),
         optionsExt
       ) as WindowConfig,
-      role = config.role,
-      modal = config.modal,
-      parentWinInstance = modal ? this.mainWindowInstance : undefined
+      { role, modal, parentRole } = config
+
+    // IF THIS IS A MODAL WINDOW, FIND THE CORRECT PARENT
+    const parentWinInstance: WindowMainInstance = match([modal, parentRole])
+      .with([true, P.string], ([, role]) =>
+        asOption(this.getByRole(role))
+          .filter(isArray)
+          .map(first)
+          .getOrThrow(`Unable to find a working parent for modal with role (${role})`)
+      )
+      .with([true, P._], () =>
+        asOption(this.mainWindowInstance).getOrThrow(`Unable to find a working parent for modal`)
+      )
+      .otherwise(() => null)
 
     log.assert(!modal || (modal && !!parentWinInstance), `Modal window config, but main window is not available`)
 
@@ -380,7 +399,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
           ...wsmWinOpts,
           ...(modal && {
             modal,
-            parent: parentWinInstance.browserWindow,
+            parent: parentWinInstance?.browserWindow,
             x: parentPos[0] + parentSize[0] / 2 - size.width / 2,
             y: parentPos[1] + parentSize[1] / 2 - size.height / 2
           })
@@ -439,11 +458,21 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         }
         this.emit("UI_READY", bw)
       })
-
+      bw.on("close", () => {
+        match([isDev, role])
+            .with([P._, WindowRole.DashboardController], () => {
+              runInAction(() => {
+                set(this.sharedAppState.dashboards, "activeConfigId", "")
+              })
+            })
+            .otherwise(Noop)
+      })
       bw.on("closed", () => {
-        if (!isDev && role === WindowRole.Main) {
-          ShutdownManager.shutdown()
-        }
+        match([isDev, role])
+          .with([false, WindowRole.Main], () => {
+            ShutdownManager.shutdown()
+          })
+          .otherwise(Noop)
       })
 
       log.info(`Loading url (${config.url}) for window (${winId})`)

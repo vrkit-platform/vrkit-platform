@@ -193,7 +193,7 @@ export class PluginManager {
       [PluginManagerFnType.REFRESH_AVAILABLE_PLUGINS, this.refreshAvailablePluginsHandler.bind(this)]
     )
 
-    app.on("quit", this.unload)
+    //app.on("quit", this.unload)
     this.disposers_.push(() => {
       app.off("quit", this.unload)
       ipcFnHandlers.forEach(([type]) => ipcMain.removeHandler(PluginManagerFnTypeToIPCName(type)))

@@ -46,7 +46,7 @@ export class OverlayEditorController {
   }
 
   get state(): OverlayVREditorState {
-    return this.manager.mainAppState.overlays.editor
+    return this.manager.appState.overlays.editor
   }
 
   get isEnabled() {

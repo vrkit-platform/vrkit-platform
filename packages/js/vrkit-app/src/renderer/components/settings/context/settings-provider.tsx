@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, createContext } from 'react';
 
-import { useLocalStorage } from 'vrkit-app-renderer/hooks/use-local-storage';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 
 import { STORAGE_KEY } from '../config-settings';
 

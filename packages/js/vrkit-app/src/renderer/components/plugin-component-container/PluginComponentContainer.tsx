@@ -76,7 +76,9 @@ export class PluginComponentContainer extends React.Component<
     const { Component, ...other } = this.props,
       { sessionId } = this.state
     
-    log.info(`Rendering with session id`, sessionId)
+    if (log.isDebugEnabled())
+      log.debug(`Rendering with session id`, sessionId)
+    
     return !Component ? null : (
       <Component
         sessionId={sessionId}

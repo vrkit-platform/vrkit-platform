@@ -111,25 +111,43 @@ export const BaseWindowConfigs: { [Role in WindowRole]: WindowCreateOptions<Wind
   DashboardVRLayout: newBaseWindowCreateOptions(WindowRole.DashboardVRLayout, {
     ...newNormalWindowCreateOptions({
       manageState: true,
-      modal: false,
+      modal: true,
+      parentRole: WindowRole.DashboardController,
       devToolMode: "undocked",
       aspectRatio: 1,
       browserWindowOptions: {
-        modal: false,
+        center: true,
+        modal: true,
         width: 1024,
-        minWidth: 1024,
+        minWidth: 768,
         height: 1024,
-        minHeight: 1024,
-        resizable: false
+        minHeight: 768,
+        resizable: true,
+        alwaysOnTop: true
         
       }
     }),
     initialRoute: "/dashboardVRLayout"
   }),
-  DashboardInfo: newBaseWindowCreateOptions(WindowRole.DashboardInfo, {
-    manageState: true,
-    ...newFloatingWindowCreateOptions()
+  DashboardController: newBaseWindowCreateOptions(WindowRole.DashboardController, {
+    ...newNormalWindowCreateOptions({
+      manageState: true,
+      modal: false,
+      devToolMode: "detach",
+      browserWindowOptions: {
+        modal: false,
+        width: 768,
+        minWidth: 768,
+        height: 768,
+        minHeight: 512,
+        resizable: true,
+        show: true
+        // alwaysOnTop: true
+      }
+    }),
+    initialRoute: "/dashboardController"
   }),
+  
   Overlay: newBaseWindowCreateOptions(WindowRole.Overlay, {
     multiple: true,
     ...newFloatingWindowCreateOptions({

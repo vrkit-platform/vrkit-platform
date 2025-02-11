@@ -20,18 +20,18 @@ import {
   OverlayManagerClientFnType,
   OverlayManagerClientFnTypeToIPCName,
   OverlaysState,
-  OverlayWindowMainEvents,
-  OverlayWindowRendererEvents,
   OverlayWindowRole,
   Pair,
+  propEqualTo,
   removeIfMutation,
   SessionDetail,
   SessionManagerEventType,
   SignalFlag,
-  Triple, WindowRenderMode
+  WindowRenderMode
 } from "@vrkit-platform/shared"
 import {
   DashboardConfig,
+  IsValidId,
   OverlayInfo,
   OverlayKind,
   OverlayPlacement,
@@ -50,10 +50,10 @@ import { OverlayBrowserWindow } from "./OverlayBrowserWindow"
 import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { flatten, pick } from "lodash"
-import { NativeImageSequenceCapture } from "../../utils"
+import { NativeImageSequenceCapture, StateReaction } from "../../utils"
 import { CreateNativeOverlayManager, NativeOverlayManager } from "vrkit-native-interop"
 
-import { IValueDidChange, observe, reaction, runInAction, set, toJS } from "mobx"
+import { IValueDidChange, observe, runInAction, set, toJS } from "mobx"
 import { DashboardManager } from "../dashboard-manager"
 
 import { OverlayEditorController } from "./OverlayEditorController"
@@ -94,7 +94,7 @@ export class OverlayManager {
   private nativeManager_: NativeOverlayManager = null
 
   get state(): OverlaysState {
-    return this.mainAppState.overlays
+    return this.appState.overlays
   }
 
   get editorEnabled(): boolean {
@@ -130,11 +130,13 @@ export class OverlayManager {
   }
 
   get activeDashboardId() {
-    return this.dashManager.activeDashboardId
+    return this.appState.dashboards?.activeConfigId ?? ""
   }
 
   get activeDashboardConfig(): DashboardConfig {
-    return this.dashManager.activeDashboardConfig
+    return asOption(this.appState?.dashboards.configs ?? [])
+      .map(configs => configs.find(propEqualTo("id", this.activeDashboardId)))
+      .getOrNull()
   }
 
   getOverlayByWindowId(windowId: number) {
@@ -187,12 +189,10 @@ export class OverlayManager {
           overlayInfo,
           placement,
           (type, browserWindow, windowInstance) => {
-            // const ow = this.allOverlays.find(it => it?.browserWindow?.id === browserWindow.id)
-            // if (!
-            // ow) {
-            //   log.warn(`Unable to find matching overlay browser window for id (${browserWindow.id})`)
-            //   return
-            // }
+            // const ow = this.allOverlays.find(it => it?.browserWindow?.id
+            // === browserWindow.id) if (! ow) { log.warn(`Unable to find
+            // matching overlay browser window for id
+            // (${browserWindow.id})`) return }
             if (type === "Created") {
               // ATTACH LISTENERS
               browserWindow.on("closed", this.createOnCloseHandler(ouid, browserWindow.id))
@@ -253,7 +253,13 @@ export class OverlayManager {
     this.editorController.update()
 
     if (overlayWindows.length) {
-      await Promise.all(overlayWindows.map(overlay => overlay.whenReady()))
+      await Promise.all(overlayWindows.map(overlay => overlay.whenReady())).catch(err => {
+        log.error(`FAILED TO CREATE OVERLAY WINDOWS`, err)
+
+        return this.closeAllOverlays().catch(err2 => {
+          log.error(`FAILED TO CLOSE OVERLAY WINDOWS CLEANLY`, err2)
+        })
+      })
     }
   }
 
@@ -275,11 +281,9 @@ export class OverlayManager {
     // activeSession?.id, toJS(activeSession?.info))
   }
 
-  private onSessionDataFrameEvent(
-    sessionId: string,
-    timing: SessionTiming,
-    dataVarValues: SessionDataVariableValueMap
-  ) {
+  private
+
+  onSessionDataFrameEvent(sessionId: string, timing: SessionTiming, dataVarValues: SessionDataVariableValueMap) {
     this.broadcastRendererOverlays(
       PluginClientEventType.DATA_FRAME,
       sessionId,
@@ -322,25 +326,22 @@ export class OverlayManager {
   }
 
   /**
-   * Set overlay mode
+   * Set overlay editing enabled.
+   *
+   * NOTE: This cascades to the controller & all overlays
    *
    * @param enabled
    */
   @Bind
-  async setEditorEnabled(enabled: boolean) {
-    runInAction(() => {
+  setEditorEnabled(enabled: boolean) {
+    return runInAction(() => {
       if (this.editorEnabled === enabled) {
         return enabled
       }
 
       this.state.editor.enabled = enabled
-
-      for (const ow of this.allOverlays) {
-        ow.setEditorEnabled(enabled)
-      }
+      return enabled
     })
-
-    return enabled
   }
 
   async [Symbol.asyncDispose]() {
@@ -353,7 +354,7 @@ export class OverlayManager {
     await Promise.all(
       overlays.map(o => {
         guard(() => o.browserWindow?.webContents?.endFrameSubscription())
-        return o.close().catch(err  => {
+        return o.close().catch(err => {
           warn("Unable to cleanly close all windows", err)
         })
       })
@@ -446,12 +447,28 @@ export class OverlayManager {
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(OverlayManagerClientFnTypeToIPCName(type), handler))
 
     this.disposers_.push(
-      observe(this.mainAppState.sessions, "activeSessionId", this.onActiveSessionIdChanged),
-      observe(this.mainAppState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged),
-      reaction(
-        () => toJS(this.mainAppState.plugins.plugins),
-        () => this.onPluginInstallsChanged(),
-        { equals: isEqual }
+      observe(this.appState.sessions, "activeSessionId", this.onActiveSessionIdChanged),
+      observe(this.appState.dashboards, "activeConfigId", this.onActiveDashboardConfigIdChanged),
+      StateReaction(
+        () => toJS(this.appState.plugins.plugins),
+        () => this.onPluginInstallsChanged()
+      ),
+      StateReaction(
+        () =>
+          asOption(this.appState)
+            .map(state => pick(state, "overlays", "dashboards"))
+            .map(({ overlays, dashboards }) => [overlays?.editor?.enabled ?? false, dashboards?.activeConfigId])
+            .getOrThrow(`Invalid state, can not get overlays & dashboards`),
+        ([enabled, activeDashId]: [boolean, string]) => {
+          if (enabled && !IsValidId(activeDashId)) {
+            this.setEditorEnabled(false)
+            return
+          }
+
+          for (const ow of this.allOverlays) {
+            ow.setEditorEnabled(enabled)
+          }
+        }
       ),
       () => {
         ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(OverlayManagerClientFnTypeToIPCName(type)))
@@ -495,7 +512,7 @@ export class OverlayManager {
    * @param sessionManager
    * @param appSettingsService
    * @param mainWindowManager
-   * @param mainAppState
+   * @param appState
    * @param dashManager
    */
   constructor(
@@ -506,7 +523,7 @@ export class OverlayManager {
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
     readonly mainWindowManager: WindowManager,
-    readonly mainAppState: MainSharedAppState,
+    readonly appState: MainSharedAppState,
     readonly dashManager: DashboardManager
   ) {
     this.editorController_ = new OverlayEditorController(this.container, this)
@@ -550,10 +567,11 @@ export class OverlayManager {
   private createOnCloseHandler(overlayUniqueId: string, windowId: number): Function {
     return (_event: Electron.Event) => {
       this.sessionManager.unregisterComponentDataVars(overlayUniqueId)
-      
-      if (log.isDebugEnabled())
+
+      if (log.isDebugEnabled()) {
         log.debug(`onCloseHandler for overlay/window`, overlayUniqueId, windowId)
-      
+      }
+
       this.nativeManager_?.releaseResources(overlayUniqueId, windowId)
       removeIfMutation(this.overlayWindows_, overlay => overlay.browserWindowId === windowId)
     }
@@ -567,7 +585,7 @@ export class OverlayManager {
    * @private
    */
   private createFrameProcessor(win: OverlayBrowserWindow, capSuffix: string) {
-    const cap: NativeImageSequenceCapture = asOption(this.mainAppState.devSettings?.imageSequenceCapture)
+    const cap: NativeImageSequenceCapture = asOption(this.appState.devSettings?.imageSequenceCapture)
       .filter(it => it !== false)
       .map(
         ({ format, outputPath }) =>
@@ -658,10 +676,9 @@ export class OverlayManager {
    */
   private createOnBoundsChangedHandler(targetPlacement: OverlayPlacement, win: BrowserWindow): Function {
     return (_event: Electron.Event) => {
-      asOption(this.overlayWindows_.find(ow => ow.browserWindowId === win.id))
-          .ifSome(ow => {
-            this.updateScreenOverlayWindowBounds(ow)
-          })
+      asOption(this.overlayWindows_.find(ow => ow.browserWindowId === win.id)).ifSome(ow => {
+        this.updateScreenOverlayWindowBounds(ow)
+      })
     }
   }
 
@@ -762,6 +779,12 @@ export class OverlayManager {
       .getOrThrow() as VRLayout
   }
 
+  /**
+   * Update the data vars that are pumped to the overlays
+   * on each data frame
+   *
+   * @private
+   */
   private updateAllDataVars() {
     for (const ow of this.overlayWindows_) {
       if (ow.config?.overlay) {
@@ -770,10 +793,16 @@ export class OverlayManager {
     }
   }
 
+  /**
+   * Link specific data vars to a specific overlay
+   * @param ouid
+   * @param overlayInfo
+   * @private
+   */
   private updateDataVars(ouid: string, overlayInfo: OverlayInfo): void {
     runInAction(() => {
       const dataVarNames = overlayInfo.dataVarNames ?? []
-      for (const [id, install] of Object.entries(this.mainAppState.plugins.plugins)) {
+      for (const [id, install] of Object.entries(this.appState.plugins.plugins)) {
         for (const comp of install.manifest.components) {
           if (comp.id === overlayInfo.componentId) {
             dataVarNames.push(...(comp.overlayIracingSettings?.dataVariablesUsed ?? []))

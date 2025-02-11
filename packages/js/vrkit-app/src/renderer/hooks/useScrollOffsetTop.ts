@@ -8,7 +8,7 @@ export type UseScrollOffSetTopReturn = {
   elementRef: React.RefObject<HTMLDivElement>;
 };
 
-export function useScrollOffSetTop(top = 0): UseScrollOffSetTopReturn {
+export function useScrollOffsetTop(top = 0): UseScrollOffSetTopReturn {
   const elementRef = useRef<HTMLDivElement>(null);
 
   const { scrollY } = useScroll();

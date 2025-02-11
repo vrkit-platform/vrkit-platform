@@ -17,10 +17,11 @@ import { AppTitlebar } from "../app-titlebar"
 import { AppContentBar } from "../app-content-bar"
 import { AppSessionPlayerControlPanel } from "../app-session-player-control-panel"
 import NavDrawer from "./NavDrawer"
-import { useWebPathRoot, WebRootPath } from "../../routes/WebPaths"
+import { WebRootPath } from "../../routes/WebPaths"
 import { useAppSelector } from "../../services/store"
 import { sharedAppSelectors } from "../../services/store/slices/shared-app"
 import Backdrop from "@mui/material/Backdrop"
+import { useWebPathRoot } from "../../hooks/useWebPathRoot"
 
 export type PageLayoutProps = {
   sx?: SxProps

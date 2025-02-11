@@ -14,11 +14,10 @@ import Page500 from "vrkit-app-renderer/pages/error/500"
 import { getWebPathPart, WebPaths, WebRootPath } from "vrkit-app-renderer/routes/WebPaths"
 import React from "react"
 
-import DashboardVRLayoutPage from "vrkit-app-renderer/pages/dashboard-vr-layout/DashboardVRLayoutPage"
-
 const DashboardsPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboards/DashboardsPage"))
 const DashboardEditPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboards/DashboardEditPage"))
-
+const DashboardVRLayoutPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboard-vr-layout/DashboardVRLayoutPage"))
+const DashboardControllerPage = React.lazy(() => import("vrkit-app-renderer/pages/dashboard-controller/DashboardControllerPage"))
 const SettingsPage = React.lazy(() => import("vrkit-app-renderer/pages/settings/SettingsPage"))
 
 function makeDefaultRouteConfigs(...routePaths: string[]): (IndexRouteObject | NonIndexRouteObject)[] {
@@ -151,7 +150,9 @@ export function AppRouter() {
       path: WebRootPath.dashboardVRLayout,
       element: (
           <PageLayout>
-            <DashboardVRLayoutPage />
+            <Suspense fallback={<LoadingScreen />}>
+              <DashboardVRLayoutPage />
+            </Suspense>
           </PageLayout>
       )
     },
@@ -159,7 +160,9 @@ export function AppRouter() {
       path: WebRootPath.dashboardController,
       element: (
           <PageLayout>
-            <DashboardVRLayoutPage />
+            <Suspense fallback={<LoadingScreen />}>
+              <DashboardControllerPage />
+            </Suspense>
           </PageLayout>
       )
     },

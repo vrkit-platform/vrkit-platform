@@ -3,14 +3,15 @@ import type { BoxProps } from '@mui/material/Box';
 import Box from '@mui/material/Box';
 import Portal from '@mui/material/Portal';
 import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from "@mui/material/CircularProgress"
 
 // ----------------------------------------------------------------------
 
-type Props = BoxProps & {
-  portal?: boolean;
-};
+export interface LoadingScreenProps extends BoxProps  {
+  portal?: boolean
+}
 
-export function LoadingScreen({ portal, sx, ...other }: Props) {
+export function LoadingScreen({ portal, sx, ...other }: LoadingScreenProps) {
   const content = (
     <Box
       sx={{
@@ -25,7 +26,7 @@ export function LoadingScreen({ portal, sx, ...other }: Props) {
       }}
       {...other}
     >
-      <LinearProgress color="inherit" sx={{ width: 1, maxWidth: 360 }} />
+      <CircularProgress color="inherit" sx={{ width: 1, maxWidth: 360 }} />
     </Box>
   );
 

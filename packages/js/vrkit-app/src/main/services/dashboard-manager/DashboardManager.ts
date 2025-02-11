@@ -1,5 +1,6 @@
 import { getLogger } from "@3fv/logger-proxy"
 import { app, BrowserWindow, ipcMain, IpcMainInvokeEvent } from "electron"
+import type { OverlayManager as OverlayManagerType } from "../overlay-manager/OverlayManager"
 import { Container, InjectContainer, PostConstruct, Singleton } from "@3fv/ditsy"
 import {
   assert,
@@ -10,17 +11,17 @@ import {
   DashboardsState,
   Disposables,
   isEmpty,
-  isEqual,
   isNotEmpty,
   isNotEmptyString,
   notInList,
   Pair,
   removeIfMutation,
   SignalFlag,
+  WindowMetadata,
   WindowRole
 } from "@vrkit-platform/shared"
-import { DashboardConfig } from "@vrkit-platform/models"
-import { getValue, isDefined } from "@3fv/guard"
+import { DashboardConfig, IsValidId } from "@vrkit-platform/models"
+import { getValue, guard, isDefined, isString } from "@3fv/guard"
 import { SessionManager } from "../session-manager"
 import { asOption } from "@3fv/prelude-ts"
 import { AppPaths, FileExtensions } from "@vrkit-platform/shared/constants/node"
@@ -32,11 +33,12 @@ import PQueue from "p-queue"
 import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
 import { WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
-import { action, reaction, runInAction, set, toJS } from "mobx"
+import { action, runInAction, set, toJS } from "mobx"
 import { IDisposer } from "mobx-utils"
 import { assign, first } from "lodash"
 import { FileSystemManager } from "@vrkit-platform/shared/services/node"
 import { getService } from "../../ServiceContainer"
+import { StateReaction } from "../../utils"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -48,12 +50,22 @@ const dashDir = AppPaths.dashboardsDir
 
 type DashFnPair = Pair<DashboardManagerFnType, (event: IpcMainInvokeEvent, ...args: any[]) => any>
 
-interface VRLayoutEditorDetail {
+function getOverlayManager(): OverlayManagerType {
+  const OverlayManager = require("../overlay-manager/OverlayManager").OverlayManager as typeof OverlayManagerType
+  return getService(OverlayManager) as OverlayManagerType
+}
+
+export interface DashboardStateSummary {
   activeDashboardId: string
 
   editorEnabled: boolean
 
   vrEnabled: boolean
+
+  windowMetadata: {
+    controller: WindowMetadata
+    vrLayout: WindowMetadata
+  }
 }
 
 @Singleton()
@@ -62,7 +74,7 @@ export class DashboardManager {
     concurrency: 1
   })
 
-  private vrLayoutEditorQueue_ = new PQueue({
+  private dashboardWindowsQueue_ = new PQueue({
     concurrency: 1
   })
 
@@ -73,11 +85,20 @@ export class DashboardManager {
   private readonly shutdownFlag_ = SignalFlag.new()
 
   get state(): DashboardsState {
-    return this.mainAppState.dashboards
+    return this.appState.dashboards
   }
 
   get isShutdown() {
     return this.shutdownFlag_.isSet
+  }
+
+  /**
+   * Checks if the editor is currently enabled.
+   *
+   * @return {boolean} Returns true if the editor is enabled, otherwise false.
+   */
+  get isEditorEnabled(): boolean {
+    return this.appState.overlays?.editor?.enabled === true
   }
 
   get dashboardConfigs(): DashboardConfig[] {
@@ -85,15 +106,15 @@ export class DashboardManager {
   }
 
   get defaultDashboardConfig() {
-    return this.dashboardConfigById(this.defaultDashboardId)
+    return this.getDashboardConfigById(this.defaultDashboardId)
   }
 
   get defaultDashboardId() {
-    return this.mainAppState.appSettings.defaultDashboardConfigId
+    return this.appState.appSettings.defaultDashboardConfigId
   }
 
   get defaultDashboardConfigIsValid() {
-    return isNotEmpty(this.defaultDashboardId) && !!this.dashboardConfigById(this.defaultDashboardId)
+    return isNotEmpty(this.defaultDashboardId) && !!this.getDashboardConfigById(this.defaultDashboardId)
   }
 
   get activeDashboardId() {
@@ -126,18 +147,18 @@ export class DashboardManager {
       })
 
       state.configs.push(defaultConfig)
-      state = this.mainAppState.updateDashboards(state)
+      state = this.appState.updateDashboards(state)
     }
 
     if (!this.defaultDashboardConfigIsValid) {
       const config = first(state.configs)
-      assert(isDefined(config) && isNotEmpty(config.id), "No dashboard configs exist after it was just checked")
+      log.assert(isDefined(config) && isNotEmpty(config.id), "No dashboard configs exist after it was just checked")
       this.appSettingsService.changeSettings({
         defaultDashboardConfigId: config.id
       })
     }
 
-    assert(
+    log.assert(
       this.defaultDashboardConfigIsValid,
       "this.defaultDashboardConfigIsValid is false, but should've been resolved"
     )
@@ -209,7 +230,7 @@ export class DashboardManager {
     })
 
     return runInAction(() => {
-      this.mainAppState.dashboards = {
+      this.appState.dashboards = {
         ...this.state,
         configs,
         activeConfigId: ""
@@ -241,6 +262,17 @@ export class DashboardManager {
     return this.persistQueue_.add(this.createSaveDashboardConfigTask(dashConfig))
   }
 
+  /**
+   * Updates the configuration for a specified dashboard by applying a partial
+   * update. Fetches the dashboard configuration by id, applies the patch, and
+   * saves the updated configuration.
+   *
+   * @param {string} id - The unique identifier of the dashboard to update.
+   * @param {Partial<DashboardConfig>} patch - An object containing the partial
+   *     updates to apply to the dashboard configuration.
+   * @return {Promise<DashboardConfig>} A promise that resolves with the
+   *     updated dashboard configuration object.
+   */
   @Bind
   async updateDashboardConfig(id: string, patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
     const dashConfig = runInAction(() => {
@@ -258,8 +290,20 @@ export class DashboardManager {
     return toJS(DashboardConfig.toJson(dashConfig)) as any
   }
 
+  /**
+   * Handles the update of the dashboard configuration by applying a patch.
+   *
+   * @param {IpcMainInvokeEvent} _event - The IPC event that triggered the
+   *     handler.
+   * @param {string} id - The unique identifier of the dashboard configuration
+   *     to be updated.
+   * @param {Partial<DashboardConfig>} patch - The partial updates to be
+   *     applied to the dashboard configuration.
+   * @return {Promise<DashboardConfig>} A promise that resolves to the updated
+   *     dashboard configuration.
+   */
   updateDashboardConfigHandler(
-    event: IpcMainInvokeEvent,
+    _event: IpcMainInvokeEvent,
     id: string,
     patch: Partial<DashboardConfig>
   ): Promise<DashboardConfig> {
@@ -271,8 +315,8 @@ export class DashboardManager {
    */
   nextDashboardConfigName() {
     const { dashboardConfigs: configs } = this,
-      nameSuffix = configs.length ? ` ${configs.length + 1}` : ""
-    return `My Dashboard${nameSuffix}`
+      nameSuffix = configs.length ? ` (${configs.length + 1})` : ""
+    return `Dashboard${nameSuffix}`
   }
 
   @Bind
@@ -292,8 +336,19 @@ export class DashboardManager {
     return dashConfig
   }
 
+  /**
+   * Handles the creation of a new dashboard configuration based on a partial
+   * patch object. Logs the created dashboard configuration and returns it in
+   * JSON format.
+   *
+   * @param _event - The event triggered by the IPC main process invoke.
+   * @param patch - A partial object containing fields to be updated or created
+   *     in the dashboard configuration.
+   * @return A Promise that resolves with the complete dashboard configuration
+   *     object in JSON format.
+   */
   async createDashboardConfigHandler(
-    event: IpcMainInvokeEvent,
+    _event: IpcMainInvokeEvent,
     patch: Partial<DashboardConfig>
   ): Promise<DashboardConfig> {
     const dashConfig = await this.createDashboardConfig(patch),
@@ -303,10 +358,27 @@ export class DashboardManager {
     return dashConfigJson
   }
 
+  /**
+   * Closes the currently active dashboard, if any.
+   * This method checks if there is an active dashboard ID before proceeding.
+   * If no active dashboard exists, a log message is generated, and the
+   * operation is aborted. Otherwise, it resets the active dashboard
+   * configuration state.
+   *
+   * @return {Promise<void>} Resolves when the dashboard closure process is
+   *     complete.
+   */
   @Bind
-  async closeDashboard() {
-    runInAction(() => {
-      set(this.state, "activeConfigId", "")
+  async closeDashboard(): Promise<void> {
+    await this.dashboardWindowsQueue_.add(async (): Promise<string> => {
+      if (!this.activeDashboardId || isEmpty(this.activeDashboardId)) {
+        log.info(`No active dashboard to close`)
+        return
+      }
+      runInAction(() => {
+        set(this.state, "activeConfigId", "")
+        this.scheduleDashboardWindowsCheck()
+      })
     })
   }
 
@@ -314,44 +386,71 @@ export class DashboardManager {
     return await this.closeDashboard()
   }
 
+  /**
+   * Opens a dashboard with the given identifier. If the specified dashboard is
+   * already open, the method returns the ID without reopening it. If another
+   * dashboard is active, it closes the currently active dashboard before
+   * opening the new one. Updates the state with the new active dashboard
+   * config ID.
+   *
+   * @param {string} id - The identifier of the dashboard to be opened.
+   * @return {Promise<string>} A promise that resolves to the ID of the opened
+   *     dashboard.
+   */
   @Bind
-  async openDashboard(id: string) {
-    return runInAction(() => {
-      if (!this.dashboardConfigById(id)) {
-        throw Error(`Unable to find config for id (${id})`)
+  async openDashboard(id: string): Promise<string> {
+    const newId = await this.dashboardWindowsQueue_.add(async (): Promise<string> => {
+      let { activeDashboardId } = this
+  
+      if (id === activeDashboardId) {
+        log.info(`Dashboard is already open (${id})`)
+        return id
       }
-
-      set(this.state, "activeConfigId", id)
-      return id
+  
+      if (isNotEmptyString(activeDashboardId)) {
+        await this.closeDashboard()
+        activeDashboardId = this.activeDashboardId
+        log.assert(
+          !activeDashboardId || isEmpty(activeDashboardId),
+          `Expected no active dashboard id, but found (${activeDashboardId})`
+        )
+      }
+  
+      return runInAction(() => {
+        log.assert(!!this.getDashboardConfigById(id), `Unable to find config for id (${id})`)
+  
+        set(this.state, "activeConfigId", id)
+        this.scheduleDashboardWindowsCheck()
+        
+        return id
+      })
     })
+    
+    return isString(newId) ? newId : id
   }
 
   async openDashboardHandler(event: IpcMainInvokeEvent, id: string): Promise<string> {
     return await this.openDashboard(id)
   }
 
-  async launchDashboardLayoutEditorHandler(event: IpcMainInvokeEvent, id: string): Promise<void> {
-    log.debug(`Starting VR Layout Editor for dashboard(id=${id})`)
-    if (this.activeDashboardId !== id) {
-      const msg = `Active dashboard id === ${this.activeDashboardId}, can not start editing ${id} if it's not open`
-      log.error(msg)
-      throw Error(msg)
-    }
+  async launchDashboardVRLayoutEditorHandler(_event: IpcMainInvokeEvent): Promise<void> {
+    log.assert(
+      isNotEmptyString(this.activeDashboardId),
+      `A dashboard must be open with VR enabled in order to open the VR layout editor`
+    )
 
-    const { OverlayManager } = await import("../overlay-manager/OverlayManager"),
-      overlayManager = getService(OverlayManager)
+    const overlayManager = getOverlayManager()
 
     if (!overlayManager.editorEnabled) {
-      await overlayManager.setEditorEnabled(true)
+      overlayManager.setEditorEnabled(true)
     }
 
-    await this.executeVRLayoutEditorCheck()
-    // return this.dashboardConfigs.map(it => DashboardConfig.toJson(it) as any)
+    await this.executeDashboardWindowsCheck()
   }
 
   @Bind
   private async onUIReady(win: BrowserWindow) {
-    if (!this.mainAppState.appSettings.openDashboardOnLaunch) {
+    if (!this.appState.appSettings.openDashboardOnLaunch) {
       log.info(`open dash on launch is not enabled`)
       return
     }
@@ -373,15 +472,19 @@ export class DashboardManager {
     this.disposers_.dispose()
   }
 
+  async [Symbol.asyncDispose]() {
+    this[Symbol.dispose]()
+  }
+
   /**
    * Cleanup resources on unload
    *
-   * @param event
+   * @param _event
    * @private
    */
   @Bind
-  private async unload(event: Electron.Event = null) {
-    this[Symbol.dispose]()
+  private async unload(_event: Electron.Event = null): Promise<any> {
+    await ((this[Symbol.asyncDispose] as any)() as Promise<any>)
   }
 
   /**
@@ -390,14 +493,13 @@ export class DashboardManager {
    */
   @PostConstruct() // @ts-ignore
   protected async init(): Promise<void> {
-    this.mainAppState.setDashboards(await this.createInitialState())
-    //this.checkActiveDashboardConfig()
+    this.appState.setDashboards(await this.createInitialState())
+    //
+    // app.on("quit", this.unload)
 
-    app.on("quit", this.unload)
-
-    const { mainWindowManager, sessionManager } = this,
+    const { windowManager, sessionManager } = this,
       ipcFnHandlers = [
-        [DashboardManagerFnType.LAUNCH_DASHBOARD_LAYOUT_EDITOR, this.launchDashboardLayoutEditorHandler.bind(this)],
+        [DashboardManagerFnType.LAUNCH_DASHBOARD_LAYOUT_EDITOR, this.launchDashboardVRLayoutEditorHandler.bind(this)],
         [DashboardManagerFnType.OPEN_DASHBOARD, this.openDashboardHandler.bind(this)],
         [DashboardManagerFnType.CLOSE_DASHBOARD, this.closeDashboardHandler.bind(this)],
         [DashboardManagerFnType.CREATE_DASHBOARD_CONFIG, this.createDashboardConfigHandler.bind(this)],
@@ -406,35 +508,36 @@ export class DashboardManager {
       ] as DashFnPair[]
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(DashboardManagerFnTypeToIPCName(type), handler))
 
-    mainWindowManager.on("UI_READY", this.onUIReady)
-    reaction(
-      () => this.getVRLayoutEditorDetail(),
-      () => {
-        this.scheduleVRLayoutEditorCheck()
-      },
-      {
-        equals: isEqual
-      }
-    )
+    windowManager.on("UI_READY", this.onUIReady)
+
     if (isDev) {
       Object.assign(global, {
         dashboardsManager: this
       })
     }
     // In dev mode, make everything accessible
-    this.disposers_.push(() => {
-      mainWindowManager.off("UI_READY", this.onUIReady)
+    this.disposers_.push(
+      StateReaction(
+        () => this.getDashboardStateSummary(),
+        () => {
+          this.scheduleDashboardWindowsCheck()
+        }
+      ),
+      () => {
+        windowManager.off("UI_READY", this.onUIReady)
 
-      if (this.stopObserving) {
-        this.stopObserving()
+        if (this.stopObserving) {
+          this.stopObserving()
+        }
+        
+        ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(DashboardManagerFnTypeToIPCName(type)))
+        app.off("quit", this.unload)
+
+        Object.assign(global, {
+          dashboardsManager: undefined
+        })
       }
-      ipcFnHandlers.forEach(([type, handler]) => ipcMain.removeHandler(DashboardManagerFnTypeToIPCName(type)))
-      app.off("quit", this.unload)
-
-      Object.assign(global, {
-        dashboardsManager: undefined
-      })
-    })
+    )
 
     if (import.meta.webpackHot) {
       import.meta.webpackHot.addDisposeHandler(() => {
@@ -449,8 +552,8 @@ export class DashboardManager {
    * @param container
    * @param sessionManager
    * @param appSettingsService
-   * @param mainWindowManager
-   * @param mainAppState
+   * @param windowManager
+   * @param appState
    * @param fsManager
    */
   constructor(
@@ -458,8 +561,8 @@ export class DashboardManager {
     readonly container: Container,
     readonly sessionManager: SessionManager,
     readonly appSettingsService: AppSettingsService,
-    readonly mainWindowManager: WindowManager,
-    readonly mainAppState: MainSharedAppState,
+    readonly windowManager: WindowManager,
+    readonly appState: MainSharedAppState,
     readonly fsManager: FileSystemManager
   ) {}
 
@@ -494,45 +597,77 @@ export class DashboardManager {
     }
   }
 
-  dashboardConfigById(id: string): DashboardConfig {
+  /**
+   * Retrieves the dashboard configuration for the specified ID.
+   *
+   * @param {string} id - The unique identifier for the dashboard
+   *     configuration.
+   * @return {DashboardConfig} The dashboard configuration corresponding to the
+   *     provided ID.
+   */
+  getDashboardConfigById(id: string): DashboardConfig {
     return this.dashboardConfigs.find(it => it.id === id)
   }
 
-  private getVRLayoutEditorDetail(): VRLayoutEditorDetail {
+  /**
+   * Retrieves the active dashboard details including whether the editor is
+   * enabled, the active dashboard ID, controller window metadata, and VR
+   * enable state.
+   *
+   * @return {DashboardStateSummary} An object containing the details of the
+   *     active dashboard.
+   */
+  getDashboardStateSummary(): DashboardStateSummary {
     return {
-      editorEnabled: this.mainAppState.overlays?.editor?.enabled === true,
+      editorEnabled: this.appState.overlays?.editor?.enabled === true,
+      windowMetadata: {
+        controller: this.appState.desktopWindows?.windows?.[WindowRole.DashboardController],
+        vrLayout: this.appState.desktopWindows?.windows?.[WindowRole.DashboardVRLayout]
+      },
       activeDashboardId: this.activeDashboardId,
       vrEnabled: this.activeDashboardConfig?.vrEnabled === true
     }
   }
 
-  private scheduleVRLayoutEditorCheck(): void {
-    log.info(`Scheduling VR Layout Editor check`)
-    this.executeVRLayoutEditorCheck().catch(err => {
-      log.error(`Unable to checkVRLayoutEditor`, err)
+  private scheduleDashboardWindowsCheck(): void {
+    log.info(`Scheduling DashboardWindows check`)
+    this.executeDashboardWindowsCheck().catch(err => {
+      log.error(`Unable to executeDashboardWindowsCheck`, err)
     })
   }
 
-  private executeVRLayoutEditorCheck(): Promise<void> {
-    return this.vrLayoutEditorQueue_.add(async () => {
-      const detail: VRLayoutEditorDetail = this.getVRLayoutEditorDetail(),
-        targetVisible =
-          isNotEmptyString(detail.activeDashboardId) &&
-          detail.vrEnabled &&
-          this.mainAppState.overlays?.editor?.enabled === true,
-        wins = this.mainWindowManager.getByRole(WindowRole.DashboardVRLayout)
+  private async executeDashboardWindowsCheck(): Promise<void> {
+    await this.dashboardWindowsQueue_.add(async () => {
+      try {
+        const summary: DashboardStateSummary = this.getDashboardStateSummary()
+          let winController = first(this.windowManager.getByRole(WindowRole.DashboardController)),
+          winVRLayout = first(this.windowManager.getByRole(WindowRole.DashboardVRLayout)),
+          wins = [winController, winVRLayout].filter(isDefined)
 
-      if (targetVisible && wins.length) {
-        log.info(`checkVRLayoutEditor: Already visible`)
-        return
-      }
+        if (!IsValidId(summary.activeDashboardId)) {
+          log.info(`No active dashboard, closing windows (${wins.map(get("id")).join(",")})`)
+          wins.forEach(win => this.windowManager.close(win))
+          return
+        }
 
-      if (targetVisible) {
-        log.info(`checkVRLayoutEditor: Creating window`)
-        await this.mainWindowManager.create(WindowRole.DashboardVRLayout)
-        log.info(`checkVRLayoutEditor: Created window`)
-      } else if (wins.length) {
-        this.mainWindowManager.close(...wins.map(get("id")))
+        if (winVRLayout && !summary.vrEnabled) {
+          log.info(
+            `Closing VR layout editor because active dash doesn't have vr enabled (${summary.activeDashboardId})`
+          )
+          guard(() => this.windowManager.close(winVRLayout))
+        }
+
+        if (!winController) {
+          winController = first(this.windowManager.getByRole(WindowRole.DashboardController))
+          if (winController)
+            return
+          
+          log.info(`executeDashboardWindowsCheck: Creating Dashboard Controller Window`)
+          await this.windowManager.create(WindowRole.DashboardController)
+          log.info(`executeDashboardWindowsCheck: Created Dashboard Controller Window`)
+        }
+      } catch (err) {
+        log.error(`FAILED TO UPDATE DASHBOARD WINDOWS`, err)
       }
     })
   }

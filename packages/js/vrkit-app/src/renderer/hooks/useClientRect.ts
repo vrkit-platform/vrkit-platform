@@ -1,6 +1,6 @@
 import { useRef, useMemo, useState, useEffect, useCallback, useLayoutEffect } from 'react';
 
-import { useEventListener } from './use-event-listener';
+import { useEventListener } from './useEventListener';
 
 // ----------------------------------------------------------------------
 

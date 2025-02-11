@@ -6,7 +6,7 @@ import { forwardRef } from 'react';
 
 import Box from '@mui/material/Box';
 
-import { useResponsive } from 'vrkit-app-renderer/hooks/use-responsive';
+import { useResponsive } from '../../hooks/useResponsive';
 
 import { varContainer } from './variants';
 

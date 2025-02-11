@@ -1,4 +1,4 @@
-import { useScrollToTop } from "vrkit-app-renderer/hooks/use-scroll-to-top"
+import { useScrollToTop } from "../../hooks/useScrollToTop"
 import { I18nProvider } from "vrkit-app-renderer/locales/i18n-provider"
 import { ThemeProvider } from "../../theme/ThemeProvider"
 import { AppAlertCenter } from "../../components/app-alert-center"

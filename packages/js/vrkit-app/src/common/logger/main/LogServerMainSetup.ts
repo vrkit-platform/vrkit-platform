@@ -61,15 +61,10 @@ class LogServerMainSetup {
           } catch (err) {
             log.error(`Failed to shutdown existing log server`, err)
           }
-          
-          const newService = await upmMainServiceManager.createService<LogServerRequestMap>(
-            "logserver",
-            entryFile,
-            serviceOpts
-          )
-          return newService
+  
+          return await upmMainServiceManager.createService<LogServerRequestMap>("logserver", entryFile, serviceOpts)
         },
-        service = this.#service = await createService()
+        service = (this.#service = await createService())
 
       // Setup appenders
       const logServerClientAppender = new LogServerClientAppender(service)
@@ -90,7 +85,10 @@ class LogServerMainSetup {
       flow(
         filter(isDefined),
         this.#installAppenders.bind(this)
-      )([isDev && new ConsoleAppender(), logServerClientAppender])
+      )([logServerClientAppender])
+      //isDev && new ConsoleAppender({
+      //
+      //       })
 
       deferred.resolve(this)
       return this

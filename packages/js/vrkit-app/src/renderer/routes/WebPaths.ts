@@ -1,6 +1,3 @@
-import { useLocation } from "react-router-dom"
-import { isNotEmptyString } from "@vrkit-platform/shared"
-
 export enum WebRootPath {
   main = 'main',
   settings = 'settings',
@@ -48,11 +45,3 @@ export function getWebPathPart(webPath: string, idx: number = -1) {
   return parts[idx]
 }
 
-export function useWebPathRoot() {
-  const loc = useLocation(),
-    parts = loc.pathname.split("/").filter(isNotEmptyString),
-    rootPart = parts[0]
-  
-  return WebRootPath[rootPart] ?? WebRootPath.unknown
-  
-}

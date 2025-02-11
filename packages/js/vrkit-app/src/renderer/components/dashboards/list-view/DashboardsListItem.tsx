@@ -60,7 +60,7 @@ import DashboardsListItemMenu from "./DashboardsListItemMenu"
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
-const ListItemVisiblePluginMaxCount = 3
+export const DashboardOverlayListItemMaxVisiblePluginCount = 3
 
 /**
  * Props for list item
@@ -97,8 +97,8 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
     overlayDefs = useMemo(() => {
       return compIds.map(compId => allOverlayCompEntryMap[compId]).filter(isDefined) as PluginCompEntry[]
     }, [allOverlayCompEntryMap, compIds]),
-    visibleOverlayDefCount = Math.min(ListItemVisiblePluginMaxCount, overlayDefs.length),
-    moreOverlayDefCount = Math.max(0, overlayDefs.length - ListItemVisiblePluginMaxCount),
+    visibleOverlayDefCount = Math.min(DashboardOverlayListItemMaxVisiblePluginCount, overlayDefs.length),
+    moreOverlayDefCount = Math.max(0, overlayDefs.length - DashboardOverlayListItemMaxVisiblePluginCount),
     pluginIcons = range(0, visibleOverlayDefCount)
       .map(idx => overlayDefs[idx][1])
       .filter(isDefined)

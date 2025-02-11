@@ -324,7 +324,7 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       [SessionManagerFnType.CLOSE_DISK_SESSION, this.closeDiskSessionHandler.bind(this)]
     )
 
-    app.on("quit", this.unload)
+    //app.on("quit", this.unload)
     this.disposers_.push(() => {
       app.off("quit", this.unload)
       ipcFnHandlers.forEach(([type]) => ipcMain.removeHandler(SessionManagerFnTypeToIPCName(type)))

@@ -1,14 +1,9 @@
-import { isPlainObject, omit } from "lodash"
-import { createSimpleSchema, map, custom, list, ModelSchema, object, primitive } from "serializr"
+import { createSimpleSchema, custom, list, map, ModelSchema, object, primitive } from "serializr"
 import type { ISharedAppState } from "./SharedAppState"
 import type { DashboardsState } from "../dashboards"
 import { Identity } from "../../utils"
 
-import {
-  AppSettings,
-  DashboardConfig,
-  SessionData, ThemeType
-} from "@vrkit-platform/models"
+import { AppSettings, DashboardConfig, SessionData } from "@vrkit-platform/models"
 import type { SessionDetail, SessionsState } from "../sessions"
 import { toJS } from "mobx"
 import { OverlaysStateSchema } from "../overlays"
@@ -17,17 +12,19 @@ import { PluginsStateSchema } from "../plugins"
 import { isFunction } from "@3fv/guard"
 import { DesktopWindowsState } from "../desktop-windows/DesktopWindowsState"
 
-
 export const AppSettingsSchema = custom(
   v => AppSettings.toJson(v),
   v => AppSettings.fromJson(v)
 )
 
 export const DesktopWindowsStateSchema = createSimpleSchema<DesktopWindowsState>({
-  windows: map(custom(v => toJS(v), v => toJS(v)))
-  }
-  
-)
+  windows: map(
+    custom(
+      v => toJS(v),
+      v => toJS(v)
+    )
+  )
+})
 
 export const SessionDetailSchema = createSimpleSchema<SessionDetail>({
   id: primitive(),
@@ -41,11 +38,10 @@ export const SessionDetailSchema = createSimpleSchema<SessionDetail>({
   data: custom(
     v => (!v ? {} : SessionData.toJson(toJS(v))),
     v => (!v ? {} : SessionData.fromJson(v))
-  ),
-  // timeAndDuration: custom(
-  //   v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex", "sampleCount","currentTimeMillis"])),
-  //   v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex", "sampleCount","currentTimeMillis"]))
-  // )
+  ) // timeAndDuration: custom(
+  //   v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex",
+  // "sampleCount","currentTimeMillis"])), v => toJS(!v ? {} : isPlainObject(v)
+  // ? v : omit(toJS(v), ["sampleIndex", "sampleCount","currentTimeMillis"])) )
 })
 
 export const SessionsStateSchema = createSimpleSchema<SessionsState>({

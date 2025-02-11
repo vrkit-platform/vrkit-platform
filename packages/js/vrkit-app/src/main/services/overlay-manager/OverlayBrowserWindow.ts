@@ -226,16 +226,21 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
     const deferred = this.#readyDeferred_,
       isScreen = kind === OverlayBrowserWindowType.SCREEN,
       isVR = !isScreen,
-      handleError = (err: Error): never => {
+      handleError = (err: Error) => {
         log.error(`Failed to create window`, err)
 
         if (!deferred.isSettled()) {
           deferred.reject(err)
         }
-
-        throw err
+        
+        this.close()
+            .catch(err => log.error(`Unable to cleanly shutdown window`, err))
+        
+        //throw err
+        return null
+        // return deferred.promise
       }
-
+    
     try {
       this.#config_ = {
         isScreen,
@@ -318,6 +323,7 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
           return wi
         })
         .catch(handleError)
+      
     } catch (err) {
       log.error(`Failed to create window`, err)
       deferred.reject(err)
@@ -429,15 +435,20 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
   private newWindowReadyHandler(bw: Electron.BrowserWindow, winInstance: WindowMainInstance) {
     return () => {
       const deferred = this.#readyDeferred_
+      if (bw.isDestroyed() || bw.webContents.isDestroyed()) {
+        deferred.reject(Error(`BrowserWindow/WebContents destroyed`))
+        return
+      }
       try {
-        runInAction(() => {
-          this.setEditorEnabled(this.manager.editorEnabled)
-        })
-
+        
+        this.setEditorEnabled(this.manager.editorEnabled)
+        
         info(
           `Loaded overlay (id=${winInstance.id},url=${winInstance.config.url}) for overlayWindow(${this.uniqueIdDebugString})`
         )
-
+        
+        
+        
         if (this.isVR) {
           // CONFIGURE THE `webContents` OF THE NEW WINDOW
           info(`VR Windows are not shown as they render offscreen for performance (${this.uniqueIdDebugString})`)

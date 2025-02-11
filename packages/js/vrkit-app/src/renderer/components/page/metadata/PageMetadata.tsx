@@ -11,6 +11,8 @@ import type { AppContentBarOverrides } from "../../app-content-bar"
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
+
+
 export interface PageMetadata {
   title?: string | React.ReactNode
   appTitlebar?: PageAppTitlebarMetadata

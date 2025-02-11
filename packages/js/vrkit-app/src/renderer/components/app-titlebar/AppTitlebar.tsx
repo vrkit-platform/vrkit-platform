@@ -27,7 +27,7 @@ import {
 import { GlobalCSSClassNames, isNotEmptyString } from "../../renderer-constants"
 import { usePageMetadata } from "../page"
 import { Logo } from "../../components/logo"
-import AppTitlebarTrafficLights from "./traffic-lights"
+import AppTitlebarTrafficLights, { TrafficLightType } from "./traffic-lights"
 import { useLocation } from "react-router-dom"
 import { asOption } from "@3fv/prelude-ts"
 import { WebRootPath } from "../../routes/WebPaths"
@@ -41,6 +41,8 @@ export interface AppTitlebarOverrides {
   center?: React.ReactNode
 
   right?: React.ReactNode
+  
+  lightsEnabled?: Partial<Record<TrafficLightType, boolean>>
 }
 
 export interface AppTitlebarProps extends AppBarProps {
@@ -100,7 +102,8 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         backgroundImage: theme.palette.background.appBarGradient,
         
         [child([appTitlebarClasses.left, appTitlebarClasses.right])]: {
-          flex: "0 0 280px",
+          flex: "0 0 340px",
+          
         }
       }
     },
@@ -122,12 +125,15 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
           ...flexAlign("center", "flex-end")
         },
         [hasCls(appTitlebarClasses.left)]: {
-          ...flexAlign("center", "flex-start")
+          ...flexAlign("center", "flex-start"),
+          // overflowX: "visible"
         },
 
         [child(appTitlebarClasses.title)]: {
+          // overflowY:"hidden",
+          // overflowX: "visible",
           ...OverflowHidden,
-          ...flex(0, 1, "auto"),
+          ...flex(0, 0, "auto"),
           ...Ellipsis,
           ...padding(0, theme.spacing(1)),
           ...theme.typography.titleBar,
@@ -151,7 +157,7 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
   }
 }))
 
-export function AppTitlebar({ className,transparent = false, ...other }: AppTitlebarProps) {
+export function AppTitlebar({ className, transparent = false, ...other }: AppTitlebarProps) {
   const pageMetadata = usePageMetadata(),
     { appTitlebar } = pageMetadata,
     loc = useLocation(),
@@ -194,7 +200,7 @@ export function AppTitlebar({ className,transparent = false, ...other }: AppTitl
           </Box>
           <Box className={clsx(appTitlebarClasses.right)}>
             <ElectronDraggableSpacer />
-            <AppTitlebarTrafficLights />
+            <AppTitlebarTrafficLights lightsEnabled={appTitlebar?.lightsEnabled ?? {}}/>
           </Box>
         </AppToolbarRoot>
       </Box>

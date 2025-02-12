@@ -100,7 +100,16 @@ export class DashboardManager {
   get isEditorEnabled(): boolean {
     return this.appState.overlays?.editor?.enabled === true
   }
-
+  
+  get vrLayoutWindowInstance() {
+    return first(this.windowManager.getByRole(WindowRole.DashboardVRLayout))
+  }
+  
+  get controllerWindowInstance() {
+    return first(this.windowManager.getByRole(WindowRole.DashboardController))
+  }
+  
+  
   get dashboardConfigs(): DashboardConfig[] {
     return this.state?.configs ?? []
   }
@@ -377,8 +386,9 @@ export class DashboardManager {
       }
       runInAction(() => {
         set(this.state, "activeConfigId", "")
-        this.scheduleDashboardWindowsCheck()
       })
+      
+      this.scheduleDashboardWindowsCheck()
     })
   }
 
@@ -434,18 +444,31 @@ export class DashboardManager {
   }
 
   async launchDashboardVRLayoutEditorHandler(_event: IpcMainInvokeEvent): Promise<void> {
-    log.assert(
-      isNotEmptyString(this.activeDashboardId),
-      `A dashboard must be open with VR enabled in order to open the VR layout editor`
-    )
-
-    const overlayManager = getOverlayManager()
-
-    if (!overlayManager.editorEnabled) {
-      overlayManager.setEditorEnabled(true)
+    try {
+      log.assert(
+          isNotEmptyString(this.activeDashboardId),
+          `A dashboard must be open with VR enabled in order to open the VR layout editor`
+      )
+      
+      const overlayManager = getOverlayManager()
+      
+      if (!overlayManager.editorEnabled) {
+        overlayManager.setEditorEnabled(true)
+      }
+      
+      await this.executeDashboardWindowsCheck()
+      
+      if (this.vrLayoutWindowInstance) {
+        log.warn(`vrLayoutEditor already created/opened`)
+        return
+      }
+      
+      log.info(`vrLayoutEditor opening`)
+      await this.windowManager.create(WindowRole.DashboardVRLayout)
+      log.info(`vrLayoutEditor opened`)
+    } catch (err) {
+      log.error(`Failed to launch (vr layout editor)`, err)
     }
-
-    await this.executeDashboardWindowsCheck()
   }
 
   @Bind
@@ -640,8 +663,8 @@ export class DashboardManager {
     await this.dashboardWindowsQueue_.add(async () => {
       try {
         const summary: DashboardStateSummary = this.getDashboardStateSummary()
-          let winController = first(this.windowManager.getByRole(WindowRole.DashboardController)),
-          winVRLayout = first(this.windowManager.getByRole(WindowRole.DashboardVRLayout)),
+          let winController = this.controllerWindowInstance,
+          winVRLayout = this.vrLayoutWindowInstance,
           wins = [winController, winVRLayout].filter(isDefined)
 
         if (!IsValidId(summary.activeDashboardId)) {
@@ -656,16 +679,15 @@ export class DashboardManager {
           )
           guard(() => this.windowManager.close(winVRLayout))
         }
-
-        if (!winController) {
-          winController = first(this.windowManager.getByRole(WindowRole.DashboardController))
-          if (winController)
-            return
-          
-          log.info(`executeDashboardWindowsCheck: Creating Dashboard Controller Window`)
-          await this.windowManager.create(WindowRole.DashboardController)
-          log.info(`executeDashboardWindowsCheck: Created Dashboard Controller Window`)
-        }
+        
+        winController = this.controllerWindowInstance
+        if (winController)
+          return
+        
+        log.info(`executeDashboardWindowsCheck: Creating Dashboard Controller Window`)
+        await this.windowManager.create(WindowRole.DashboardController)
+        log.info(`executeDashboardWindowsCheck: Created Dashboard Controller Window`)
+      
       } catch (err) {
         log.error(`FAILED TO UPDATE DASHBOARD WINDOWS`, err)
       }

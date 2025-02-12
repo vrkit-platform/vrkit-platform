@@ -326,8 +326,20 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       if (wi.browserWindowClosed) {
         continue
       }
-
+      
       wi.browserWindowClosed = true
+
+      // HANDLE ROLE SPECIFIC CLOSE BEHAVIOR
+      // TODO: Generify this
+      match([isDev, wi.role])
+        .with([P._, WindowRole.DashboardController], () => {
+          runInAction(() => {
+            set(this.sharedAppState.dashboards, "activeConfigId", "")
+          })
+        })
+        .otherwise(Noop)
+
+      
       const bw = wi?.browserWindow
 
       if (bw && bw.isClosable()) {
@@ -342,11 +354,42 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     this.#updateDesktopWindowsState()
   }
 
+  /**
+   * Creates a new window instance with the specified options.
+   *
+   * @param {Options} options - An object containing configuration options for
+   *     the window creation.
+   * @returns {Promise<WindowMainInstance>} A promise that resolves to the
+   *     created window instance.
+   */
   async create<Options extends WindowCreateOptions>(options: Options): Promise<WindowMainInstance>
+
+  /**
+   * Creates a new window of the specified role with optional extended options.
+   *
+   * @param {Role} role - The role of the window to create. It determines the
+   *     type of window being instantiated.
+   * @param {Partial<WindowCreateOptions>} [optionsExt] - An optional parameter
+   *     containing additional window configuration options.
+   * @return {Promise<WindowMainInstance>} A promise that resolves to an
+   *     instance of the created window.
+   */
   async create<Role extends WindowRole>(
     role: Role,
     optionsExt?: Partial<WindowCreateOptions>
   ): Promise<WindowMainInstance>
+
+  /**
+   * Creates a new window instance with the specified configuration options or
+   * role.
+   *
+   * @param {WindowCreateOptions|WindowRole} optionsOrRole Configuration
+   *     options for the window or predefined window role.
+   * @param {Partial<WindowCreateOptions>} [optionsExt={}] Additional
+   *     configuration options to extend or override the base options.
+   * @return {Promise<WindowMainInstance>} A promise that resolves to the
+   *     created window instance (WindowMainInstance).
+   */
   async create(
     optionsOrRole: WindowCreateOptions | WindowRole,
     optionsExt: Partial<WindowCreateOptions> = {}
@@ -408,13 +451,13 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
           type: config.type,
           role,
           config,
+          isOffscreen: bwOpts?.webPreferences?.offscreen ?? false,
           stateManager: wsm,
           browserWindow: new BrowserWindow(bwOpts),
           browserWindowClosed: false,
           browserWindowOptions: bwOpts,
           onBrowserWindowEvent: config.onBrowserWindowEvent
-        }).browserWindow,
-        isOffscreen = bwOpts?.webPreferences?.offscreen ?? false
+        }).browserWindow
 
       log.assert(
         !this.has(winId),
@@ -434,46 +477,12 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
 
       // PREPARE THE WINDOW
       log.info(`Preparing window (${winId})`)
-      this.prepareBrowserWindow(bw)
+      this.prepareBrowserWindow(winId, winInstance, bw)
 
       // ENABLE WINDOW STATE MANAGER
       if (wsm) {
         wsm.enable(winInstance as WindowMainInstance)
       }
-
-      const firstLoadSignal = signalFlag()
-      bw.on("ready-to-show", () => {
-        if (firstLoadSignal.set()) {
-          log.warn(`Already called ready-to-show`)
-          return
-        }
-
-        log.assert(!!bw, '"bw" is not defined')
-
-        // SHOW MAIN WINDOW
-        log.debug(`window (${winId}) is ready to show`)
-
-        if (!isOffscreen) {
-          bw.show()
-        }
-        this.emit("UI_READY", bw)
-      })
-      bw.on("close", () => {
-        match([isDev, role])
-            .with([P._, WindowRole.DashboardController], () => {
-              runInAction(() => {
-                set(this.sharedAppState.dashboards, "activeConfigId", "")
-              })
-            })
-            .otherwise(Noop)
-      })
-      bw.on("closed", () => {
-        match([isDev, role])
-          .with([false, WindowRole.Main], () => {
-            ShutdownManager.shutdown()
-          })
-          .otherwise(Noop)
-      })
 
       log.info(`Loading url (${config.url}) for window (${winId})`)
       await bw.loadURL(config.url).catch(err => log.error("Failed to load url", config.url, err))
@@ -502,11 +511,13 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
   /**
    * Prepare window & attach event handlers, etc
    *
+   * @param winId
+   * @param winInstance
    * @param win
    */
   @Bind
-  private prepareBrowserWindow(win: BrowserWindow) {
-    const wi = this.getByBrowserWindow(win)
+  private prepareBrowserWindow(winId: string, winInstance: WindowMainInstance, win: BrowserWindow) {
+    const wi = winInstance //this.getByBrowserWindow(win)
 
     win.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
       callback({ requestHeaders: { Origin: "*", ...details.requestHeaders } })
@@ -532,11 +543,38 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     ElectronRemote.enable(win.webContents)
 
     // ATTACH WINDOW EVENT HANDLERS
+    const firstLoadSignal = signalFlag()
     win
-      .on("close", () => {
-        if (!wi.browserWindowClosed) {
-          this.close(wi.id)
+      .on("ready-to-show", () => {
+        if (firstLoadSignal.set()) {
+          log.warn(`Already called ready-to-show`)
+          return
         }
+
+        log.assert(!!win, '"win" is not defined')
+
+        // SHOW MAIN WINDOW
+        log.debug(`window (${winId}) is ready to show`)
+
+        if (!wi.isOffscreen) {
+          win.show()
+        }
+
+        this.emit("UI_READY", win)
+      })
+      .on("close", () => {
+        if (wi.browserWindowClosed) {
+          return
+        }
+
+        this.close(wi.id)
+      })
+      .on("closed", () => {
+        match([isDev, wi.role])
+          .with([false, WindowRole.Main], () => {
+            ShutdownManager.shutdown()
+          })
+          .otherwise(Noop)
       })
       .on("show", () => {
         win.webContents.setWindowOpenHandler(windowOpenHandler)

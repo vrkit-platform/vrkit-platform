@@ -1,16 +1,10 @@
 #include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/Macros.h>
 #include <IRacingTools/Shared/Utils/Win32ProcessTool.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 #include "psapi.h"
 
 namespace IRacingTools::Shared::Utils {
-  using namespace IRacingTools::Shared::Logging;
-
-  namespace {
-    auto L = LoggingManager::Get().getCategory(__FILE__);
-  }
 
   /**
    * @brief Sets current process to `HIGH_PRIORITY_CLASS` &
@@ -26,7 +20,7 @@ namespace IRacingTools::Shared::Utils {
 
   std::string GetProcessName() {
     static std::mutex sMutex{};
-    static std::string sProcessName{};
+    static std::string sProcessName{""};
     LOCK(sMutex, lock);
     if (!sProcessName.empty()) {
       return sProcessName;

@@ -126,7 +126,7 @@ namespace IRacingTools::Shared::Services {
      */
     virtual std::optional<SDK::GeneralError> destroy() override;
 
-    std::vector<fs::path> listTelemetryFiles();
+    std::vector<fs::path> listTelemetryFiles(const std::optional<std::vector<std::filesystem::path>>& overrideFilePaths);
 
     void setOptions(const Options &options);
 
@@ -137,7 +137,7 @@ namespace IRacingTools::Shared::Services {
     bool hasPendingTasks();
     std::size_t pendingTaskCount();
 
-    std::size_t scanAllFiles();
+    std::size_t scanAllFiles(const std::optional<std::vector<std::filesystem::path>>& overrideFilePaths);
 
     std::expected<std::shared_ptr<TrackLayoutMetadata>, GeneralError> getTrackLayoutMetadata(const std::shared_ptr<TelemetryDataFile>& dataFile);
     std::expected<std::shared_ptr<TrackLayoutMetadata>, GeneralError> getTrackLayoutMetadata(const fs::path& file);

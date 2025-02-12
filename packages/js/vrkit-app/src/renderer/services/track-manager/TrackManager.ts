@@ -3,20 +3,15 @@ import { getLogger } from "@3fv/logger-proxy"
 import Fs from "fs-extra"
 
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind, IAppStorage } from "@vrkit-platform/shared"
-import {
-  type IAppFiles,
-  type IAppPaths,
-  isDev
-} from "../../renderer-constants"
+import { Bind, IAppStorage, LapTrajectoryConverter } from "@vrkit-platform/shared"
+import { isDev } from "../../renderer-constants"
 import EventEmitter3 from "eventemitter3"
 import { FileObject, FileSystemManager } from "@vrkit-platform/shared/services/node"
-import { FileInfo, LapTrajectory, TrackMapFile } from "@vrkit-platform/models"
+import { LapTrajectory, TrackMapFile } from "@vrkit-platform/models"
 import Path from "path"
 import { Deferred } from "@3fv/deferred"
 import { endsWith } from "lodash/fp"
 import { isString } from "@3fv/guard"
-import { LapTrajectoryConverter } from "@vrkit-platform/shared"
 import { uniqBy } from "lodash"
 import { SharedAppStateClient } from "../shared-app-state-client"
 
@@ -37,9 +32,13 @@ export interface TrackManagerEventArgs {
 @Singleton()
 export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
   private trackFileMap: { [id: string]: TrackMapFile } = {}
+
   private trackFiles: TrackMapFile[] = []
-  private appStorage:IAppStorage
+
+  private appStorage: IAppStorage
+
   private readyDeferred: Deferred<TrackManager> = null
+
   /**
    * Cleanup resources on unload
    *
@@ -63,7 +62,6 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
       })
     }
 
-    this.readyDeferred = new Deferred()
     this.appStorage = await this.sharedAppStateClient.fetchAppStorage()
     await this.reloadDatabase(true)
     if (typeof window !== "undefined") {
@@ -76,7 +74,11 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    *
    * @param fsManager
    */
-  constructor(@Inject(FileSystemManager) readonly fsManager: FileSystemManager, readonly sharedAppStateClient: SharedAppStateClient) {
+  constructor(
+    @Inject(FileSystemManager)
+    readonly fsManager: FileSystemManager,
+    readonly sharedAppStateClient: SharedAppStateClient
+  ) {
     super()
   }
 
@@ -85,7 +87,6 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    * @private
    */
   private getDatabaseFileAccess() {
-    
     return this.fsManager.getFileObject(this.appStorage.files.trackMapListFile)
   }
 
@@ -102,11 +103,8 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
     for (const tmDir of this.appStorage.paths.trackMapsSearchPath) {
       // const tmDir = AppPaths.trackMapsDir
       const tmDirFiles = await Fs.promises
-          .readdir(tmDir)
-          .then(files => files.filter(endsWith(".trackmap")).map(f => Path.join(
-              tmDir,
-              f
-          )))
+        .readdir(tmDir)
+        .then(files => files.filter(endsWith(".trackmap")).map(f => Path.join(tmDir, f)))
       tmFiles.push(...tmDirFiles)
     }
     let tmfs = await Promise.all(
@@ -119,11 +117,13 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
         })
       })
     )
-    
+
     tmfs = uniqBy(tmfs, tmf => tmf.trackLayoutMetadata?.id)
 
     const jsonL = tmfs.reduce((data: string, tmf) => {
-      if (data.length) data += "\n"
+      if (data.length) {
+        data += "\n"
+      }
 
       return (
         data +
@@ -144,8 +144,11 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    * List all track map files
    */
   async list(): Promise<TrackMapFile[]> {
+    if (!this.readyDeferred) {
+      await this.reloadDatabase(true)
+    }
     await this.readyDeferred.promise
-    await this.reloadDatabase()
+    // await this.reloadDatabase()
 
     return this.trackFiles ?? []
   }
@@ -172,32 +175,44 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    * @param ignoreCache
    */
   async reloadDatabase(ignoreCache: boolean = false): Promise<TrackManager> {
-    if (!ignoreCache && this.readyDeferred.isFulfilled()) {
-      return this
-    }
-    
-    if (ignoreCache) {
-      log.info("Rebuilding track map database")
-      await this.rebuildDatabase()
-    }
-
-    const dataFile = this.getDatabaseFileAccess()
-    if (!(await dataFile.exists)) {
-      return this
+    const firstLoad = !this.readyDeferred,
+      deferred = this.readyDeferred ?? (this.readyDeferred = new Deferred())
+    if (!firstLoad) {
+      if (ignoreCache) {
+        await deferred.promise
+      } else {
+        return await deferred.promise
+      }
     }
 
-    const buf = await dataFile.readBytes()
-    const jsonl = buf.toString()
-    const lines = jsonl.split("\n").filter(it => it?.startsWith("{") && it.endsWith("}"))
+    try {
+      if (ignoreCache || firstLoad) {
+        log.info("Rebuilding track map database")
+        await this.rebuildDatabase()
+      }
 
-    const files = lines.map(line =>
-      TrackMapFile.fromJsonString(line, {
-        ignoreUnknownFields: true
-      })
-    )
-    log.info(`Loaded track map files`, files)
-    this.setTrackMapFiles(files)
-    return this
+      const dataFile = this.getDatabaseFileAccess()
+      if (!(await dataFile.exists)) {
+        return this
+      }
+
+      const buf = await dataFile.readBytes()
+      const jsonl = buf.toString()
+      const lines = jsonl.split("\n").filter(it => it?.startsWith("{") && it.endsWith("}"))
+
+      const files = lines.map(line =>
+        TrackMapFile.fromJsonString(line, {
+          ignoreUnknownFields: true
+        })
+      )
+      log.info(`Loaded track map files`, files)
+      this.setTrackMapFiles(files)
+      deferred.resolve(this)
+    } catch (err) {
+      log.error(`Failed to load track map database`, err)
+      deferred.reject(err)
+    }
+    return deferred.promise
   }
 
   /**
@@ -216,7 +231,9 @@ export class TrackManager extends EventEmitter3<TrackManagerEventArgs> {
    */
   async getLapTrajectory(id: string): Promise<LapTrajectory> {
     const tmf = this.getTrackMapFile(id)
-    if (!tmf) return null
+    if (!tmf) {
+      return null
+    }
 
     const fileAccess = new FileObject(tmf.fileInfo.file)
     if (!(await fileAccess.exists)) {

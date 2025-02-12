@@ -19,15 +19,21 @@ namespace IRacingTools::Shared::Logging {
 #endif
 
     std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> gFileSink{nullptr};
+    bool gFileSinkEnabled;
   }// namespace
 
-  LoggingManager::LoggingManager(token) {
-    auto logDir = GetAppDataPath(Directories::LOGS);
-    auto logFile = logDir / std::format("{}-{}.log", Files::LOG_FILENAME_PREFIX, Utils::GetProcessName());
-    std::cerr << std::format("Writing to log file ({})\n", logFile.string());
 
-    gFileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFile.string(), LogFileMaxSize, 1u);
-    gFileSink->set_level(Level::trace);
+  LoggingManager::LoggingManager(token) {
+    //auto processName = Utils::GetProcessName();
+    gFileSinkEnabled = Utils::GetProcessName() != "vrkit_tool";
+    if (gFileSinkEnabled) {
+      auto logDir = GetAppDataPath(Directories::LOGS);
+      auto logFile = logDir / std::format("{}-{}.log", Files::LOG_FILENAME_PREFIX, Utils::GetProcessName());
+      std::cerr << std::format("Writing to log file ({})\n", logFile.string());
+
+      gFileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFile.string(), LogFileMaxSize, 1u);
+      gFileSink->set_level(Level::trace);
+    }
   }
 
   /**
@@ -54,10 +60,16 @@ namespace IRacingTools::Shared::Logging {
     }
 
     if (!loggers_.contains(prettyName)) {
-      auto logger = std::make_shared<spdlog::logger>(prettyName, gFileSink);
+      std::shared_ptr<spdlog::logger> logger;
+      if (gFileSinkEnabled) {
+        logger = std::make_shared<spdlog::logger>(prettyName, gFileSink);
+        logger->flush_on(LogFlushOn);
+        loggers_[prettyName] = logger;
+      } else {
+        logger = std::make_shared<spdlog::logger>(prettyName);
+      }
+
       logger->set_level(spdlog::level::level_enum::debug);
-      logger->flush_on(LogFlushOn);
-      loggers_[prettyName] = logger;
     }
     return loggers_[prettyName];
   }

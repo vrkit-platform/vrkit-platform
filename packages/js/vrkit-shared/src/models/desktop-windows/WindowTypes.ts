@@ -115,6 +115,7 @@ export interface WindowInstance<Instance = unknown> {
   modal: boolean
   type: WindowKind
   config: WindowConfig<Instance>
+  isOffscreen: boolean
 }
 
 

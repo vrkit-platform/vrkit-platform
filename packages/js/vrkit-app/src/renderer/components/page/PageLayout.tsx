@@ -31,12 +31,15 @@ export type PageLayoutProps = {
 export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
   // noinspection UnnecessaryLocalVariableJS
   const rootPath = useWebPathRoot(),
+    isNormalWindow = VRKitWindowConfig.type === "Normal",
     isMain = rootPath === WebRootPath.main,
     isSettings = rootPath === WebRootPath.settings,
     isVRLayoutEditor = rootPath === WebRootPath.dashboardVRLayout,
-    showTitlebar = isMain || isSettings,
     isSessionControlVisible = isMain,
-    isModalActive = useAppSelector(sharedAppSelectors.hasActiveModalDesktopWindow)
+    currentWindowRole = VRKitWindowConfig.role,
+    modalDesktopWindows = useAppSelector(sharedAppSelectors.selectModalDesktopWindows),
+    isModalActive = modalDesktopWindows.some(it => !it.parentRole || it.parentRole === currentWindowRole)
+  
 
   return (
     <>
@@ -75,7 +78,7 @@ export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
       <If condition={isSessionControlVisible}>
         <AppSessionPlayerControlPanel />
       </If>
-      <If condition={isMain}>
+      <If condition={isNormalWindow}>
         <Backdrop
           open={isModalActive}
           sx={{

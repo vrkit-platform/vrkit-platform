@@ -132,23 +132,14 @@ namespace IRacingTools::Shared::Services {
 
             std::scoped_lock handlerLock(stateMutex_);
             enqueueFiles({file.path});
-            // if (!req) {
-            //   L->error("No request received for {}", file.path.string());
-            // } else {
-            //   L->debug(
-            //       "FileWatcher submitted request for processing "
-            //       "(id={},file={})",
-            //       req->id,
-            //       file.path.string());
-            // }
           }));
     }
 
     return true;
   }
 
-  std::size_t TelemetryDataService::scanAllFiles() {
-    return enqueueFiles(listTelemetryFiles());
+  std::size_t TelemetryDataService::scanAllFiles(const std::optional<std::vector<std::filesystem::path>>& overrideFilePaths) {
+    return enqueueFiles(listTelemetryFiles(!overrideFilePaths ? filePaths_ : overrideFilePaths.value()));
   }
 
 
@@ -302,8 +293,11 @@ namespace IRacingTools::Shared::Services {
     return tdf;
   }
 
-  std::vector<fs::path> TelemetryDataService::listTelemetryFiles() {
-    return ListAllFilesRecursively(filePaths_);
+  std::vector<fs::path> TelemetryDataService::listTelemetryFiles(
+    const std::optional<std::vector<std::filesystem::path>>& overrideFilePaths
+  ) {
+    
+    return ListAllFilesRecursively(!overrideFilePaths ? filePaths_ : overrideFilePaths.value());
   }
   std::optional<SDK::GeneralError>
   TelemetryDataService::load(bool reload) {
@@ -313,8 +307,12 @@ namespace IRacingTools::Shared::Services {
 
     auto res = dataFileHandler_->read();
     // IF THERE WAS AN ERROR, THEN RETURN HERE
+
     if (!res) { // && res.error().code() != SDK::ErrorCode::NotFound
-      return res.error();
+      if (res.error().code() == ErrorCode::NotFound)
+        L->info("Creating new telemetry data file");
+      else
+        return res.error();
     }
 
     return std::nullopt;

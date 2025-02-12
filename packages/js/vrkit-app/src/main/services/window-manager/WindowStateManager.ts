@@ -2,7 +2,7 @@ import Path from "path"
 import { screen } from "electron"
 import Fsx from "fs-extra"
 
-import { Bind } from "@vrkit-platform/shared"
+import { Bind, cloneDeep } from "@vrkit-platform/shared"
 import { WindowSizeDefault } from "./WindowConstants"
 import { defaults, WindowConfig } from "@vrkit-platform/shared"
 import { getLogger } from "@3fv/logger-proxy"
@@ -11,6 +11,7 @@ import { Deferred } from "@3fv/deferred"
 import { AppPaths } from "@vrkit-platform/shared/constants/node"
 import { asOption } from "@3fv/prelude-ts"
 import { WindowMainInstance } from "./WindowMainTypes"
+import PQueue from "p-queue"
 
 const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
@@ -52,7 +53,11 @@ export function getDisplayBounds(win: Electron.BrowserWindow): Electron.Rectangl
 
 export class WindowStateManager {
   static readonly EventHandlingDelay = 100
-
+  
+  static readonly #SaveQueue_ = new PQueue({
+    concurrency: 1
+  })
+  
   #state: Partial<WindowStatePersistData> = {}
   
   #enabled: boolean = false
@@ -171,7 +176,7 @@ export class WindowStateManager {
   @Bind updateState(win: Electron.BrowserWindow = null) {
     win = win ?? this.winRef
     if (!win) {
-      return
+      return false
     }
 
     // const { #state } = this
@@ -188,26 +193,35 @@ export class WindowStateManager {
       this.#state.isMaximized = win.isMaximized()
       this.#state.isFullScreen = win.isFullScreen()
       this.#state.displayBounds = getDisplayBounds(win)
+      return true
     } catch (err) {
       error("Failed to update state", err)
+      return false
     }
   }
 
   @Bind async saveState(win: Electron.BrowserWindow = null) {
-    // Update window state only if it was provided
     win = win ?? this.winRef
-    if (win) {
-      this.updateState(win)
+    if (!win || win.isDestroyed() || !this.updateState(win)) {
+      warn(`Window has been destroyed or is unavailable`)
+      return
     }
-
-    // Save state
-    try {
-      await Fsx.mkdirs(Path.dirname(this.#filename))
-      await Fsx.writeJSON(this.#filename, this.#state)
-      info("Saved state", this.#state)
-    } catch (err) {
-      error("Failed to save state", err)
-    }
+    const stateToWrite = cloneDeep(this.#state),
+        filename = this.#filename
+    
+    // UPDATE WINDOW STATE ONLY IF IT WAS PROVIDED
+    await WindowStateManager.#SaveQueue_.add(async () => {
+      
+        // WRITE TO DISK
+        try {
+          await Fsx.mkdirs(Path.dirname(this.#filename))
+          await Fsx.writeJSON(filename, stateToWrite)
+          info("Saved state", this.#state)
+        } catch (err) {
+          error("Failed to save state", err)
+        }
+      
+    })
   }
 
   @Bind stateChangeHandler() {
@@ -219,11 +233,12 @@ export class WindowStateManager {
   @Bind closeHandler() {
     //this.updateState()
     this.saveState()
+    this.disable()
   }
 
   @Bind closedHandler() {
     // Unregister listeners and save state
-    this.disable()
+    // this.disable()
     //this.saveState()
   }
 
@@ -235,7 +250,8 @@ export class WindowStateManager {
     
     if (this.#enabled)
       this.disable()
-
+    
+    this.#enabled = true
     
     if (config.maximize && this.#state.isMaximized) {
       win.maximize()
@@ -249,6 +265,7 @@ export class WindowStateManager {
     win.on("move", this.stateChangeHandler)
     win.on("close", this.closeHandler)
     win.on("closed", this.closedHandler)
+    
   }
 
   disable() {

@@ -23,7 +23,7 @@
 
 #include "TrackMapGenerator.h"
 
-#include <IRacingTools/Shared/Services/RPCServerService.h>
+// #include <IRacingTools/Shared/Services/RPCServerService.h>
 
 namespace IRacingTools::Shared::Services {
   using namespace IRacingTools::SDK::Utils;
@@ -165,17 +165,17 @@ namespace IRacingTools::Shared::Services {
             enqueueDataFiles(changedDataFiles);
           });
 
-      auto rpc = getContainer()->getService<RPCServerService>();
-      // auto rpcListPtr = std::mem_fn(&TrackMapService::rpcList);
-      auto rpcListRoute = RPCServerService::TypedRoute<
-        RPC::Messages::ListMessage, RPC::Messages::ListMessage>::Create(
-          //std::bind(rpcListPtr, this, std::placeholders::_1, std::placeholders::_2),
-          [this](auto &request, auto &response) {
-            return rpcList(request, response);
-          },
-          "/tracks/list");
-      rpc->addRoute(rpcListRoute);
-
+    //   auto rpc = getContainer()->getService<RPCServerService>();
+    //   // auto rpcListPtr = std::mem_fn(&TrackMapService::rpcList);
+    //   auto rpcListRoute = RPCServerService::TypedRoute<
+    //     RPC::Messages::ListMessage, RPC::Messages::ListMessage>::Create(
+    //       //std::bind(rpcListPtr, this, std::placeholders::_1, std::placeholders::_2),
+    //       [this](auto &request, auto &response) {
+    //         return rpcList(request, response);
+    //       },
+    //       "/tracks/list");
+    //   rpc->addRoute(rpcListRoute);
+    //
     }
     return true;
   }
@@ -210,23 +210,23 @@ namespace IRacingTools::Shared::Services {
     return std::nullopt;
   }
 
-  std::expected<std::shared_ptr<RPC::Messages::ListMessage>, GeneralError>
-  TrackMapService::rpcList(
-      const std::shared_ptr<Models::RPC::Messages::ListMessage> &request,
-      const std::shared_ptr<RPC::Envelope> &envelope) {
-    auto response = std::make_shared<RPC::Messages::ListMessage>();
-    auto tmfs = ValuesOf(files_);
-    for (auto &tmf: tmfs) {
-      auto result = response->add_results();
-      if (!result->PackFrom(*tmf.get())) {
-        L->warn(
-            "Unable to pack track map file protobuf into list, tmf({})",
-            tmf->DebugString());
-        response->mutable_results()->RemoveLast();
-      }
-    }
-    return response;
-  }
+  // std::expected<std::shared_ptr<RPC::Messages::ListMessage>, GeneralError>
+  // TrackMapService::rpcList(
+  //     const std::shared_ptr<Models::RPC::Messages::ListMessage> &request,
+  //     const std::shared_ptr<RPC::Envelope> &envelope) {
+  //   auto response = std::make_shared<RPC::Messages::ListMessage>();
+  //   auto tmfs = ValuesOf(files_);
+  //   for (auto &tmf: tmfs) {
+  //     auto result = response->add_results();
+  //     if (!result->PackFrom(*tmf.get())) {
+  //       L->warn(
+  //           "Unable to pack track map file protobuf into list, tmf({})",
+  //           tmf->DebugString());
+  //       response->mutable_results()->RemoveLast();
+  //     }
+  //   }
+  //   return response;
+  // }
 
   /**
    * @brief Remove underlying data file & clear the map

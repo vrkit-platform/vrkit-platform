@@ -22,6 +22,7 @@ export type OnBrowserWindowEventHandler = (
 ) => any
 
 export interface WindowMainInstance extends WindowInstance<WindowMainInstance> {
+  
   stateManager: WindowStateManager
 
   browserWindowOptions: Electron.BrowserWindowConstructorOptions

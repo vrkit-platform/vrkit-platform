@@ -174,12 +174,22 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
    * @return {Promise<OverlayBrowserWindow>} A promise that resolves to the
    *     initialized OverlayBrowserWindow.
    */
-  whenReady(): Promise<OverlayBrowserWindow> {
+  async whenReady(): Promise<OverlayBrowserWindow> {
     log.assert(!!this.#windowInstancePromise, "Window instance promise is not set")
-    return this.#windowInstancePromise.then(() => this.#readyDeferred_.promise)
+    await this.#windowInstancePromise
+    return this.#readyDeferred_.promise
   }
 
-  get ready() {
+  /**
+   * Gets the ready state of the current instance.
+   * Ensures that the window instance promise is set and verifies if the
+   * deferred ready state has been settled. If the ready state is rejected, it
+   * throws an appropriate error.
+   *
+   * @return {boolean} True if the ready state is settled, otherwise an error
+   *     is thrown.
+   */
+  get ready(): boolean {
     log.assert(!!this.#windowInstancePromise, "Window instance promise is not set")
 
     if (this.#readyDeferred_.isRejected()) {
@@ -232,15 +242,14 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
         if (!deferred.isSettled()) {
           deferred.reject(err)
         }
-        
-        this.close()
-            .catch(err => log.error(`Unable to cleanly shutdown window`, err))
-        
+
+        this.close().catch(err => log.error(`Unable to cleanly shutdown window`, err))
+
         //throw err
         return null
         // return deferred.promise
       }
-    
+
     try {
       this.#config_ = {
         isScreen,
@@ -323,7 +332,6 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
           return wi
         })
         .catch(handleError)
-      
     } catch (err) {
       log.error(`Failed to create window`, err)
       deferred.reject(err)
@@ -440,15 +448,12 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
         return
       }
       try {
-        
         this.setEditorEnabled(this.manager.editorEnabled)
-        
+
         info(
           `Loaded overlay (id=${winInstance.id},url=${winInstance.config.url}) for overlayWindow(${this.uniqueIdDebugString})`
         )
-        
-        
-        
+
         if (this.isVR) {
           // CONFIGURE THE `webContents` OF THE NEW WINDOW
           info(`VR Windows are not shown as they render offscreen for performance (${this.uniqueIdDebugString})`)

@@ -78,21 +78,20 @@ if (isDev) {
 
 // HMR
 if (import.meta.webpackHot) {
-  import.meta.webpackHot.addDisposeHandler(_data => Promise.all([shutdownServiceContainer(), Deferred.delay(2000)]))
-
+  import.meta.webpackHot.dispose(_data => Promise.all([shutdownServiceContainer(), Deferred.delay(2000)]))
   import.meta.webpackHot.accept(
-    ["../common/logger/main", "./utils/ProcessErrorHelpers", "./bootstrap/bootstrapElectronMain", "./launch"],
-    (...args: any[]) => {
-      warn(`entry-main HMR accept`, ...args)
-      // NOTE: Delay is required to allow for async cleanup/disposal to complete
-
-      return start()
-        .then(() => info(`HMR Start complete`))
-        .catch(err => {
-          error(`HMR Start failed`, err)
-          ShutdownManager.shutdown()
-        })
-    },
+    // ["../common/logger/main", "./utils/ProcessErrorHelpers", "./bootstrap/bootstrapElectronMain", "./launch"],
+    // (...args: any[]) => {
+    //   warn(`entry-main HMR accept`, ...args)
+    //   // NOTE: Delay is required to allow for async cleanup/disposal to complete
+    //
+    //   return start()
+    //     .then(() => info(`HMR Start complete`))
+    //     .catch(err => {
+    //       error(`HMR Start failed`, err)
+    //       ShutdownManager.shutdown()
+    //     })
+    // },
     err => {
       error(`HMR UPDATE FAILED`, err)
     }

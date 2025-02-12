@@ -5,9 +5,14 @@ const classPrefix = "dashboardControllerPage"
 export const dashboardControllerPageClasses = createClassNames(
   classPrefix,
   "header",
-  "headerInstructions",
+  "headerPaper",
+    "headerTop",
+    "headerTitle",
+    "headerBottom",
+    "headerInstructions",
   "headerButtons",
   "headerButton",
+  
   "overlays",
   "overlayRow",
   "overlayDetails",

@@ -2,7 +2,7 @@ import type { TypographyOptions } from "@mui/material/styles/createTypography"
 
 import { setFont } from "../styles"
 import React from "react"
-import { rem } from "@vrkit-platform/shared-ui"
+import { rem, remToPx } from "@vrkit-platform/shared-ui"
 
 // ----------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ export const typography: TypographyOptions = {
   h1: {
     fontWeight: 800,
     lineHeight: 2,
-    fontSize: rem(1.4),
+    fontSize: remToPx(1.4),
     fontFamily: secondaryFont
     // ...responsiveFontSizes({
     //   sm: 52,
@@ -88,7 +88,7 @@ export const typography: TypographyOptions = {
   h2: {
     fontWeight: 800,
     lineHeight: 1.6,
-    fontSize: rem(1.3),
+    fontSize: remToPx(1.3),
     fontFamily: secondaryFont
     // ...responsiveFontSizes({
     //   sm: 40,
@@ -99,7 +99,7 @@ export const typography: TypographyOptions = {
   h3: {
     fontWeight: 700,
     lineHeight: 1.4,
-    fontSize: rem(1.2),
+    fontSize: remToPx(1.2),
     fontFamily: secondaryFont
     // ...responsiveFontSizes({
     //   sm: 26,
@@ -110,51 +110,51 @@ export const typography: TypographyOptions = {
   h4: {
     fontWeight: 600,
     lineHeight: 1.4,
-    fontSize: rem(1.15)
+    fontSize: remToPx(1.15)
     // ...responsiveFontSizes({ sm: 20, md: 24, lg: 24 })
   },
   h5: {
     fontWeight: 500,
     lineHeight: 1.4,
-    fontSize: rem(1.15)
+    fontSize: remToPx(1.15)
     // ...responsiveFontSizes({ sm: 19, md: 20, lg: 20 })
   },
   h6: {
     fontWeight: 400,
     lineHeight: 1.4,
-    fontSize: rem(1.15)
+    fontSize: remToPx(1.15)
     // ...responsiveFontSizes({ sm: 18, md: 18, lg: 18 })
   },
   subtitle1: {
     fontWeight: 400,
     lineHeight: 1.4,
     letterSpacing: 1,
-    fontSize: rem(0.9),
+    fontSize: remToPx(0.9),
     opacity: 0.5
   },
   subtitle2: {
     fontWeight: 400,
     lineHeight: 1.4,
-    fontSize: rem(0.8),
+    fontSize: remToPx(0.8),
     opacity: 0.35
   },
   body1: {
     fontWeight: 400,
     lineHeight: 1.2,
-    fontSize: rem(0.9)
+    fontSize: remToPx(0.9)
   },
   body2: {
     lineHeight: 1.2,
-    fontSize: rem(0.8)
+    fontSize: remToPx(0.8)
   },
   caption: {
     lineHeight: 1,
-    fontSize: rem(1)
+    fontSize: remToPx(1)
   },
   overline: {
     fontWeight: 700,
     lineHeight: 1,
-    fontSize: rem(1),
+    fontSize: remToPx(1),
     textTransform: "uppercase"
   },
   button: {
@@ -162,7 +162,7 @@ export const typography: TypographyOptions = {
     verticalAlign: "middle",
     lineHeight: 1,
     letterSpacing: 0.7,
-    fontSize: rem(1),
+    fontSize: remToPx(1),
     fontFamily: setFont(Fonts.SegoeUI),
     textTransform: "unset"
     // textTransform: "uppercase"

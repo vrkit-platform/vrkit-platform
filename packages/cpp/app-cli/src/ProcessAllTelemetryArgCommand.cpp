@@ -55,9 +55,17 @@ namespace IRacingTools::App::Commands {
     auto cmd = app->add_subcommand(
         "process-all-telemetry", "Process all available telemetry");
 
-    cmd->add_option("-i,--input", extraInputPaths_, "Additional input paths");
+    std::string userHomeDirStr {getenv("USERPROFILE")};
+    if (userHomeDirStr.empty() || !fs::is_directory(userHomeDirStr)) {
+      userHomeDirStr = getenv("HOME");
+    }
 
-    cmd->add_option("-o,--output", outputPath_, "Override the output path");
+
+    fs::path userHomeDir {userHomeDirStr};
+    fs::path iracingTelemDir = userHomeDir / "Documents" / "iRacing" / "Telemetry";
+    cmd->add_option("-i,--input", extraInputPaths_, "Additional input paths")->required(false)->default_val(std::vector<std::string>{iracingTelemDir.string()});
+
+    cmd->add_option("-o,--output", outputPath_, "Override the output path")->required(true);
 
     return cmd;
   }
@@ -116,6 +124,8 @@ namespace IRacingTools::App::Commands {
 
     L->info("Starting");
     manager->start();
+    L->info("Scanning all IBT files in paths");
+    tdService->scanAllFiles(extraInputPaths);
 
     {
       std::unique_lock lock(resultMutex);

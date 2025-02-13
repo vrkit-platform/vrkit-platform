@@ -1,5 +1,5 @@
 // REACT
-import React, { useCallback, useMemo } from "react"
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 
 // CLSX
 // 3FV
@@ -10,13 +10,18 @@ import Box from "@mui/material/Box"
 import { styled, useTheme } from "@mui/material/styles"
 
 // ICONS
-import CloseDashIcon from "@mui/icons-material/ExitToApp"
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
+import ReloadWindowIcon from "@mui/icons-material/RefreshOutlined"
+import DevToolsIcon from "@mui/icons-material/LogoDev"
+import IsDefaultDashIcon from "@mui/icons-material/Check"
+import ToggleEditorEnabledIcon from "@mui/icons-material/SpaceDashboard"
+import { faDesktop, faVrCardboard } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
 
 // OTHER
 import { asOption } from "@3fv/prelude-ts"
 import { get } from "lodash/fp"
 import { range } from "lodash"
-import { isDefined, toNumber } from "@3fv/guard"
+import { isArray, isDefined, toNumber } from "@3fv/guard"
 
 import { Page, PageProps } from "../../components/page"
 
@@ -29,6 +34,7 @@ import {
   Ellipsis,
   EllipsisBox,
   Fill,
+  flex,
   flexAlign,
   FlexAuto,
   FlexAutoBox,
@@ -39,8 +45,8 @@ import {
   FlexRowCenterBox,
   FlexScaleZero,
   FlexScaleZeroBox,
+  heightConstraint,
   margin,
-  OverflowAuto,
   OverflowHidden,
   padding,
   PositionRelative,
@@ -49,26 +55,33 @@ import {
 } from "@vrkit-platform/shared-ui"
 
 import classes from "./DashboardControllerPageClasses"
-import OpenLayoutEditorIcon from "@mui/icons-material/SpaceDashboard"
+
 import Button from "@mui/material/Button"
 import { useService } from "../../components/service-container"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 import { AppSettingsClient } from "../../services/app-settings-client"
 import { useAppSelector } from "../../services/store"
 import { PluginCompEntry, sharedAppSelectors } from "../../services/store/slices/shared-app"
-import { ErrorKind, isNotEmpty, isNotEmptyString, stopEvent } from "@vrkit-platform/shared"
+import { ErrorKind, isNotEmpty, isNotEmptyString, stopEvent, Triple } from "@vrkit-platform/shared"
 import { PluginOverlayIcon } from "../../components/plugins"
 import Alerts, { Alert } from "../../services/alerts/Alerts"
-import {
-  DashboardOverlayListItemMaxVisiblePluginCount,
-  dashboardsListViewClasses as classNames
-} from "../../components/dashboards/list-view"
-import { AppIcon } from "../../components/app-icon"
-import { Timestamp } from "@vrkit-platform/models"
+import { DashboardOverlayListItemMaxVisiblePluginCount } from "../../components/dashboards/list-view"
+import { AppFAIcon, AppIcon } from "../../components/app-icon"
+import { DashboardConfig, OverlayInfo, Timestamp } from "@vrkit-platform/models"
 import Paper from "@mui/material/Paper"
 import Moment from "react-moment"
 import Tooltip from "@mui/material/Tooltip"
 import Typography from "@mui/material/Typography"
+import { SimpleList, SimpleListItemProps } from "../../components/simple-list"
+import OverlayManagerClient from "vrkit-app-renderer/services/overlay-manager-client"
+import useMounted from "../../hooks/useMounted"
+
+import ButtonGroup, { buttonGroupClasses as muiButtonGroupClasses } from "@mui/material/ButtonGroup"
+import Popper from "@mui/material/Popper"
+import Grow from "@mui/material/Grow"
+import MenuList from "@mui/material/MenuList"
+import ClickAwayListener from "@mui/material/ClickAwayListener"
+import MenuItem from "@mui/material/MenuItem"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -81,11 +94,14 @@ const DashboardControllerPageRoot = styled(Box, {
   ...OverflowHidden,
   ...FlexColumn,
   ...flexAlign("stretch", "stretch"),
+  ...padding(theme.spacing(2), theme.spacing(2)),
+  gap: theme.spacing(2),
   [child(classes.header)]: {
     ...FlexColumn,
     ...FlexAuto,
     ...flexAlign("stretch", "center"),
-    ...padding(theme.spacing(2), theme.spacing(4)),
+    gap: theme.spacing(2),
+
     [child(classes.headerPaper)]: {
       ...FlexAuto,
       ...flexAlign("flex-start", "stretch"),
@@ -110,10 +126,7 @@ const DashboardControllerPageRoot = styled(Box, {
           ...theme.typography.h3,
           ...FlexAuto,
           ...Ellipsis,
-          fontSize: toNumber(theme.typography.h3.fontSize) * 1.25 // fontWeight:
-          // 100,
-          // opacity: 0.5,
-          // textAlign: "center"
+          fontSize: toNumber(theme.typography.h3.fontSize) * 1.25
         },
         [child(classes.headerInstructions)]: {
           ...FlexRowCenter,
@@ -143,7 +156,7 @@ const DashboardControllerPageRoot = styled(Box, {
               backgroundColor: theme.palette.primary.main,
               borderColor: Transparent,
               "&.colorError": {
-                backgroundColor: theme.palette.error.main,
+                backgroundColor: theme.palette.error.main
               }
             }
           }
@@ -155,27 +168,58 @@ const DashboardControllerPageRoot = styled(Box, {
     ...PositionRelative,
     ...FlexColumn,
     ...FlexScaleZero,
-    ...flexAlign("stretch", "stretch"),
-    ...OverflowAuto,
-    [child(classes.overlayRow)]: {
-      ...FlexRow,
-      ...OverflowHidden,
-      borderRadius: theme.shape.borderRadius,
+    ...flexAlign("stretch", "stretch"), // ...OverflowHidden,
+    [child(classes.overlaysPaper)]: {
+      ...FlexColumn,
+      //...FlexScaleZero,
+      ...flex(0,1,"auto"),
+      ...flexAlign("stretch", "stretch"), //  ...OverflowHidden,
+      [child(classes.overlaysList)]: {
+        overflowX: "hidden",
+        overflowY: "auto",
 
-      [child(classes.overlayDetails)]: {
-        ...Ellipsis,
-        ...FlexScaleZero,
-        ...OverflowHidden,
-        [child(classes.overlayActions)]: {
-          ...FlexRowCenter,
-          ...FlexAuto,
+        [child(classes.overlayRow)]: {
+          ...FlexRow,
           ...OverflowHidden,
-          ...padding(theme.spacing(0.25), theme.spacing(0.5)),
-          gap: theme.spacing(1),
-          [child(classes.overlayAction)]: {
+          minHeight: theme.dimen.appBarHeight,
+          ...flexAlign("center", "flex-start"),
+          ...padding(theme.spacing(1)),
+          borderBottom: `1px solid ${alpha(theme.palette.border.selected, 0.1)}`, // "&:last-child": {
+          //   borderTop: `1.5px solid
+          // ${theme.palette.border.selected}`
+          // },
+          // "&:not(:last-child)": {
+          //   borderBottom: `2px solid
+          // ${theme.palette.border.selected}` }, borderRadius:
+          // theme.shape.borderRadius,
+
+          [child(classes.overlayDetails)]: {
+            ...Ellipsis,
+            ...FlexScaleZero,
             ...OverflowHidden,
+            ...theme.typography.h4,
+            color: alpha(theme.palette.text.primary, 0.75)
+          },
+          [child(classes.overlayActions)]: {
             ...FlexRowCenter,
-            ...FlexAuto
+            ...FlexAuto,
+            ...OverflowHidden,
+            ...padding(theme.spacing(0.25), theme.spacing(0.5)),
+            gap: theme.spacing(1),
+            [child(classes.overlayAction)]: {
+              ...OverflowHidden,
+              ...FlexRowCenter,
+              ...FlexAuto,
+              ...padding(0),
+              "& > button": {
+                ...padding(0),
+                ...heightConstraint(rem(2)),
+                ...PositionRelative,
+                "& > svg": {
+                  ...Fill
+                }
+              }
+            }
           }
         }
       }
@@ -183,12 +227,281 @@ const DashboardControllerPageRoot = styled(Box, {
   }
 }))
 
+type MultiLayoutActionInfo = Triple<"VR" | "SCREEN", string, React.ReactNode>
+
+interface MultiLayoutButtonProps {
+  icon: React.ReactNode
+
+  actions: MultiLayoutActionInfo[]
+
+  onAction: (action: MultiLayoutActionInfo) => any
+
+  id?: string
+}
+
+function MultiLayoutButton({
+  icon,
+  onAction,
+  actions,
+  id: inId = "multi-layout-action-button",
+  ...other
+}: MultiLayoutButtonProps) {
+  const isMounted = useMounted(),
+    idRef = useRef<string>(null)
+
+  useLayoutEffect(() => {
+    if (!idRef.current) {
+      const elems = document.querySelectorAll(`#${inId}`)
+      idRef.current = `${inId}-${elems.length + 1}`
+    }
+  }, [isMounted])
+
+  const id = idRef.current,
+    theme = useTheme(),
+    [current, setCurrent] = useState<MultiLayoutActionInfo>(null),
+    [open, setOpen] = useState(false),
+    anchorRef = useRef<HTMLDivElement>(null),
+    handleMenuItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
+      stopEvent(event)
+      if (!actions.length) {
+        return
+      }
+
+      setCurrent(actions[index])
+      setOpen(false)
+      onAction(actions[index])
+    },
+    handleToggle = () => {
+      setOpen(prevOpen => !prevOpen)
+    },
+    handleClose = (event: Event) => {
+      if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
+        return
+      }
+
+      setOpen(false)
+    }
+
+  useEffect(() => {
+    if (!actions.length) {
+      return
+    }
+
+    setCurrent(actions[0])
+  }, [actions?.[0]])
+
+  return (
+    !!actions.length &&
+    isArray(current) && (
+      <>
+        <ButtonGroup
+          className={classes.overlayAction}
+          variant="outlined"
+          color={"primary"}
+          ref={anchorRef}
+          aria-label="Layout Specific Action"
+        >
+          <Button
+            size="medium"
+            data-action={current[0]}
+            onClick={handleToggle}
+            // startIcon={icon}
+          >
+            {icon}
+            {/*{current[1]}*/}
+          </Button>
+          {actions.length > 1 && (
+            <Button
+              size="medium"
+              aria-controls={open ? id : undefined}
+              aria-expanded={open ? "true" : undefined}
+              aria-label="Select alternative layout target"
+              aria-haspopup="menu"
+              sx={{
+                ...padding(theme.spacing(1.5), theme.spacing(0.5)),
+                [`&.${muiButtonGroupClasses.grouped}`]: {
+                  minWidth: 0,
+                  width: "auto"
+                }
+              }}
+              onClick={handleToggle}
+            >
+              <ArrowDropDownIcon />
+            </Button>
+          )}
+        </ButtonGroup>
+        {actions.length > 1 && (
+          <Popper
+            sx={{
+              zIndex: 1
+            }}
+            open={open}
+            anchorEl={anchorRef.current}
+            role={undefined}
+            transition
+            disablePortal
+          >
+            {({ TransitionProps, placement }) => (
+              <Grow
+                {...TransitionProps}
+                style={{
+                  transformOrigin: placement === "bottom" ? "center top" : "center bottom"
+                }}
+              >
+                <Paper>
+                  <ClickAwayListener onClickAway={handleClose}>
+                    <MenuList
+                      id={id}
+                      autoFocusItem
+                    >
+                      {actions
+                        // .filter(action => action !== current)
+                        .map((action, index) => (
+                          <MenuItem
+                            key={action[0]}
+                            selected={action[0] === current[0]}
+                            onClick={event => handleMenuItemClick(event, index)}
+                            sx={{
+                              ...FlexRow,
+                              ...flexAlign("center", "stretch"),
+                              gap: theme.spacing(1)
+                            }}
+                          >
+                            {action[2]}
+                            <Box>{action[1]}</Box>
+                          </MenuItem>
+                        ))}
+                    </MenuList>
+                  </ClickAwayListener>
+                </Paper>
+              </Grow>
+            )}
+          </Popper>
+        )}
+      </>
+    )
+  )
+}
+
+type OverlayControllerItemProps = SimpleListItemProps<
+  OverlayInfo,
+  {
+    config: DashboardConfig
+  }
+>
+
+function OverlayControllerItem({
+  className,
+  config,
+  item,
+  key,
+  onSelect,
+  selected,
+  ...other
+}: OverlayControllerItemProps) {
+  const overlayClient = useService(OverlayManagerClient),
+    handleOpenDevTools = useCallback(
+        ([layoutType]: MultiLayoutActionInfo) => {
+          log.info(`Handling layout type (${layoutType}) action`)
+          overlayClient.openDevTools(item.id, layoutType)
+        },
+      [overlayClient, item?.id]
+    ),
+      handleReloadWindow = useCallback(
+          ([layoutType]: MultiLayoutActionInfo) => {
+            log.info(`Handling reload window, layout type (${layoutType}) action`)
+            overlayClient.reloadWindow(item.id, layoutType)
+          },
+          [overlayClient, item?.id]
+      )
+  return (
+    <Box
+      key={key}
+      onClick={() => {
+        onSelect(item.id)
+      }}
+      className={clsx(className, classes.overlayRow, {
+        selected
+      })}
+      {...other}
+    >
+      <Box className={clsx(classes.overlayDetails)}>{item.name}</Box>
+      <Box className={clsx(classes.overlayActions)}>
+        <MultiLayoutButton
+          id={`layout-action-button-group-open-dev-tools-${item.id}`}
+          icon={<DevToolsIcon />}
+          actions={
+            [
+              config.vrEnabled && [
+                "VR",
+                "VR DevTools",
+                <AppFAIcon
+                  size="sm"
+                  icon={faVrCardboard}
+                />
+              ],
+              config.screenEnabled && [
+                "SCREEN",
+                "Screen DevTools",
+                <AppFAIcon
+                  size="sm"
+                  icon={faDesktop}
+                />
+              ]
+            ].filter(isArray) as MultiLayoutActionInfo[]
+          }
+          onAction={handleOpenDevTools}
+        />
+        <MultiLayoutButton
+            id={`layout-action-button-group-reload-window-${item.id}`}
+            icon={<ReloadWindowIcon />}
+            actions={
+              [
+                config.vrEnabled && [
+                  "VR",
+                  "Reload VR",
+                  <AppFAIcon
+                      size="sm"
+                      icon={faVrCardboard}
+                  />
+                ],
+                config.screenEnabled && [
+                  "SCREEN",
+                  "Reload Screen",
+                  <AppFAIcon
+                      size="sm"
+                      icon={faDesktop}
+                  />
+                ]
+              ].filter(isArray) as MultiLayoutActionInfo[]
+            }
+            onAction={handleReloadWindow}
+        />
+        {/*<Tooltip title={`Open Developer Tools for Overlay (${item.name})`}>*/}
+
+        {/*<Button*/}
+        {/*    size="medium"*/}
+        {/*    variant="outlined"*/}
+        {/*    color="inherit"*/}
+        {/*    className={clsx(classes.overlayAction)}*/}
+        {/*    onClick={handleOpenDevTools}*/}
+        {/*>*/}
+        {/*  <DevToolsIcon/>*/}
+        {/*  */}
+        {/*</Button>*/}
+        {/*</Tooltip>*/}
+      </Box>
+    </Box>
+  )
+}
+
 export interface DashboardControllerPageProps extends PageProps {}
 
 export function DashboardControllerPage(props: DashboardControllerPageProps) {
   const theme = useTheme(),
     { className, ...other } = props,
     config = useAppSelector(sharedAppSelectors.selectActiveDashboardConfig),
+    overlayClient = useService(OverlayManagerClient),
     dashClient = useService(DashboardManagerClient),
     settingsClient = useService(AppSettingsClient),
     defaultId = asOption(useAppSelector(sharedAppSelectors.selectDefaultDashboardConfigId))
@@ -237,6 +550,13 @@ export function DashboardControllerPage(props: DashboardControllerPageProps) {
         })
       }
     }, [config?.id, hasActive, dashClient]),
+    handleToggleEditorEnabled = useCallback(
+      (ev: React.SyntheticEvent<any>) => {
+        stopEvent(ev)
+        overlayClient.setEditorEnabled(!overlayClient.editorEnabled)
+      },
+      [overlayClient]
+    ),
     editLayout = Alert.usePromise(
       async () => {
         const idValid = isNotEmpty(config?.id)
@@ -288,9 +608,22 @@ export function DashboardControllerPage(props: DashboardControllerPageProps) {
       metadata={{
         title: "Dash Controller",
         appTitlebar: {
-          lightsEnabled: {
-            maximize: false
-          }
+          // lightsEnabled: {
+          //   maximize: false
+          // },
+          right: (
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              onClick={handleCloseDash}
+              sx={{
+                mr: 1
+              }}
+            >
+              CLOSE
+            </Button>
+          )
         }
       }}
     >
@@ -325,24 +658,31 @@ export function DashboardControllerPage(props: DashboardControllerPageProps) {
                   </Typography>
                 </FlexColumnBox>
                 <Box className={clsx(classes.headerButtons)}>
-                  <Button
-                    size="large"
-                    variant="outlined"
-                    color="inherit"
-                    className={clsx(classes.headerButton)}
-                    onClick={editLayout.execute}
-                  >
-                    <OpenLayoutEditorIcon />
-                  </Button>
-                  <Button
-                    size="large"
-                    variant="outlined"
-                    color="error"
-                    className={clsx(classes.headerButton, "colorError")}
-                    onClick={handleCloseDash}
-                  >
-                    <CloseDashIcon />
-                  </Button>
+                  <Tooltip title={config.screenEnabled ? "Edit Screen Layout" : "Screen Layout Not Enabled"}>
+                    <Button
+                      size="large"
+                      variant="outlined"
+                      color="inherit"
+                      className={clsx(classes.headerButton)}
+                      onClick={handleToggleEditorEnabled}
+                    >
+                      <ToggleEditorEnabledIcon />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title={config.vrEnabled ? "Edit VR Layout" : "VR Not Enabled"}>
+                    <Button
+                      size="large"
+                      variant="outlined"
+                      color="inherit"
+                      className={clsx(classes.headerButton)}
+                      onClick={editLayout.execute}
+                    >
+                      <AppFAIcon
+                        size="sm"
+                        icon={faVrCardboard}
+                      />
+                    </Button>
+                  </Tooltip>
                 </Box>
               </Box>
 
@@ -379,41 +719,36 @@ export function DashboardControllerPage(props: DashboardControllerPageProps) {
                       .getOrCall(() => Timestamp.toDate(Timestamp.now()))}
                   />
                 </EllipsisBox>
-                {isActive && <FlexAutoBox className={clsx(classNames.itemActiveBadge)}>ACTIVE</FlexAutoBox>}
-                {isDefault && <FlexAutoBox className={clsx(classNames.itemDefaultBadge)}>DEFAULT</FlexAutoBox>}
+                {isDefault && (
+                  <FlexAutoBox sx={{ ...FlexRowCenter }}>
+                    <IsDefaultDashIcon color="success" />
+                  </FlexAutoBox>
+                )}
               </Box>
             </Paper>
-            {/*<Box className={classes.headerInstructions}>*/}
-            {/*  Manage your dashboard from this window.*/}
-            {/*</Box>*/}
-            <Box className={classes.headerButtons}>
-              {/*<AppIconButton*/}
-              {/*    tooltip={"Layout Editor"}*/}
-              {/*    size="large"*/}
-              {/*    variant="contained"*/}
-              {/*    color="primary"*/}
-              {/*    className={clsx(classes.headerButton)}*/}
-              {/*    onClick={editLayout.execute}*/}
-              {/*>*/}
-              {/*  <OpenLayoutEditorIcon />*/}
-              {/*</AppIconButton>*/}
-              {/*<ButtonGroup>*/}
-              {/*  <Button onClick={editLayout.execute}>*/}
-              {/*    Launch VR Layout Editor*/}
-              {/*  </Button>    */}
-              {/*</ButtonGroup>*/}
-              {/*<Button*/}
-              {/*    size="large"*/}
-              {/*    variant="contained"*/}
-              {/*    color="primary"*/}
-              {/*    className={clsx(classes.headerButton)}*/}
-              {/*    onClick={editLayout.execute}*/}
-              {/*>*/}
-              {/*  <OpenLayoutEditorIcon />*/}
-              {/*</Button>*/}
-            </Box>
           </Box>
-          <Box className={classes.overlays}></Box>
+          <Box className={classes.overlays}>
+            <Typography
+              variant="h3"
+              sx={{
+                mb: theme.spacing(1)
+              }}
+            >
+              Overlays
+            </Typography>
+            <Paper
+              className={classes.overlaysPaper}
+              elevation={4}
+            >
+              <SimpleList<OverlayInfo, { config: DashboardConfig }>
+                className={classes.overlaysList}
+                itemComponent={OverlayControllerItem}
+                itemIdProp="id"
+                items={config.overlays}
+                itemExtraProps={{ config }}
+              />
+            </Paper>
+          </Box>
         </DashboardControllerPageRoot>
       </If>
     </Page>

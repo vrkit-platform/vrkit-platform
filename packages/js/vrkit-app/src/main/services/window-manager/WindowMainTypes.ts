@@ -137,11 +137,15 @@ export const BaseWindowConfigs: { [Role in WindowRole]: WindowCreateOptions<Wind
       devToolMode: "detach",
       browserWindowOptions: {
         modal: false,
-        width: 768,
-        minWidth: 768,
-        height: 768,
+        width: 512,
+        minWidth: 512,
+        maxWidth: 512,
+        height: 512,
         minHeight: 512,
-        resizable: true,
+        maxHeight: 512,
+        resizable: false,
+        maximizable: false,
+        fullscreenable: false,
         show: true
         // alwaysOnTop: true
       }
@@ -153,7 +157,10 @@ export const BaseWindowConfigs: { [Role in WindowRole]: WindowCreateOptions<Wind
     multiple: true,
     ...newFloatingWindowCreateOptions({
       browserWindowOptions: {
-        alwaysOnTop: true
+        alwaysOnTop: true,
+        maximizable: false,
+        fullscreenable: false,
+        
       }
     })
   })

@@ -2,11 +2,7 @@ import ButtonGroup, { buttonGroupClasses as muiButtonGroupClasses } from "@mui/m
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import { PluginInstall, PluginManifest } from "@vrkit-platform/models"
 import Semver from "semver"
-import {
-  arrayOf,
-  isEmpty,
-  isNotEmptyString, stopEvent
-} from "@vrkit-platform/shared"
+import { arrayOf, isEmpty, isNotEmptyString, stopEvent } from "@vrkit-platform/shared"
 import Button from "@mui/material/Button"
 import { capitalize } from "lodash"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
@@ -60,7 +56,7 @@ export function getPluginActions(
     if (installedPlugin.isDevEnabled || installedPlugin.isLink) {
       return ["development"]
     }
-    
+
     if (installedPlugin.isInternal) {
       return ["none"]
     }
@@ -93,27 +89,25 @@ export function createPluginManifestActionHandler(pluginManagerClient: PluginMan
       if (isNotEmptyString(idOverride)) {
         id = idOverride
       }
-      
+
       if (!id || isEmpty(id)) {
         Alert.error(`ID (${id}) is invalid, can not complete plugin action (${action})`)
         return
       }
-      
+
       await match(action)
-          .with("update", () => pluginManagerClient.updatePlugin(id))
-          .with("install", () => pluginManagerClient.installPlugin(id))
-          .with("uninstall", () => pluginManagerClient.uninstallPlugin(id))
-          .with("development", () => {
-            Alert.warning(
-                "This plugin is setup for local development, any actions will have to be done manually.")
-            return Promise.resolve()
-          })
-          .otherwise(() => Promise.reject(Error(`Unsupported action (${action})`)))
-      
+        .with("update", () => pluginManagerClient.updatePlugin(id))
+        .with("install", () => pluginManagerClient.installPlugin(id))
+        .with("uninstall", () => pluginManagerClient.uninstallPlugin(id))
+        .with("development", () => {
+          Alert.warning("This plugin is setup for local development, any actions will have to be done manually.")
+          return Promise.resolve()
+        })
+        .otherwise(() => Promise.reject(Error(`Unsupported action (${action})`)))
+
       log.info(`Plugin action finished (${action})`)
     } catch (err) {
-      Alert.error(`Plugin action ${action} was unsuccessful: ${err?.message}`, {
-      })
+      Alert.error(`Plugin action ${action} was unsuccessful: ${err?.message}`, {})
     }
   }
 }
@@ -151,10 +145,11 @@ export function PluginManifestActionsButton({
     [current, setCurrent] = useState<PluginManifestActionKind>(null),
     [open, setOpen] = useState(false),
     anchorRef = useRef<HTMLDivElement>(null),
-      isDevMode = actions.includes("development"),
+    isDevMode = actions.includes("development"),
     handleMenuItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
-      if (!isDevMode)
+      if (!isDevMode) {
         setCurrent(actions[index])
+      }
       setOpen(false)
     },
     handleToggle = () => {
@@ -164,10 +159,10 @@ export function PluginManifestActionsButton({
       if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
         return
       }
-      
+
       setOpen(false)
     }
-    
+
   useEffect(() => {
     setCurrent(isDevMode ? "development" : actions[0])
   }, [actions[0]])

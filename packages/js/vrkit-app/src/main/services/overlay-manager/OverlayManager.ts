@@ -10,7 +10,7 @@ import {
   electronRectangleToRectI,
   hasProps,
   isEqual,
-  isEqualSize,
+  isEqualSize, isNotEmptyString,
   isRectValid,
   isValidOverlayUniqueId,
   OverlayBrowserWindowType,
@@ -378,6 +378,51 @@ export class OverlayManager {
   private async handleSetEditorEnabled(_event: IpcMainInvokeEvent, editorEnabled: boolean): Promise<boolean> {
     return this.setEditorEnabled(editorEnabled)
   }
+  private async handleReloadWindow(_event: IpcMainInvokeEvent, overlayId: string, layoutType: "VR" | "SCREEN"): Promise<boolean> {
+    log.assert(isNotEmptyString(this.appState.dashboards.activeConfigId), `No open dashboard, can not show devtools`)
+    const overlayWindow = asOption(layoutType === "VR" ? this.vrOverlays : this.screenOverlays)
+        .map(items => items.find(ow => ow.config?.overlay?.id === overlayId))
+        .getOrThrow(`Unable to find window for overlay(id=${overlayId})`)
+    overlayWindow.browserWindow?.webContents.reloadIgnoringCache()
+    return true
+  }
+  
+  private async handleOpenDevTools(_event: IpcMainInvokeEvent, overlayId: string, layoutType: "VR" | "SCREEN"): Promise<boolean> {
+    log.assert(isNotEmptyString(this.appState.dashboards.activeConfigId), `No open dashboard, can not show devtools`)
+    const overlayWindow = asOption(layoutType === "VR" ? this.vrOverlays : this.screenOverlays)
+        .map(items => items.find(ow => ow.config?.overlay?.id === overlayId))
+        .getOrThrow(`Unable to find window for overlay(id=${overlayId})`),
+    webContents = overlayWindow.browserWindow?.webContents
+    log.info(`webContents.isDevToolsOpened()=${webContents.isDevToolsOpened()}`)
+    if (webContents.isDevToolsOpened()) {
+      log.info(`webContents.devToolsWebContents valid=${!!webContents.devToolsWebContents}`)
+      if (webContents.devToolsWebContents) {
+        
+        const devToolWindow = BrowserWindow.fromWebContents(webContents.devToolsWebContents)
+        if (devToolWindow) {
+          if (devToolWindow.isFocused()) {
+            log.info(`Already focused on overlay dev tools`)
+            return true
+          }
+          
+          log.info(`focus overlay dev tools`)
+          devToolWindow.focus()
+          webContents.devToolsWebContents.focus()
+          return true
+        }
+      }
+      
+      log.info(`closing overlay dev tools`)
+      webContents.closeDevTools()
+    }
+    log.info(`open new overlay dev tools`)
+    webContents.openDevTools({
+      mode: "detach",
+      title: `Overlay(layoutType=${layoutType},name=${overlayWindow.config.overlay.name},id=${overlayWindow.config.overlay.id})`,
+      activate: true
+    })
+    return true
+  }
 
   /**
    * Handler for a layout editor to change/set the VRLayout
@@ -437,7 +482,9 @@ export class OverlayManager {
         [OverlayManagerClientFnType.FETCH_CONFIG_ID, this.fetchOverlayConfigIdHandler.bind(this)],
         [OverlayManagerClientFnType.SET_VR_LAYOUT, this.handleSetVRLayout.bind(this)],
         [OverlayManagerClientFnType.SET_EDITOR_ENABLED, this.handleSetEditorEnabled.bind(this)],
-        [OverlayManagerClientFnType.CLOSE, this.closeHandler.bind(this)]
+        [OverlayManagerClientFnType.CLOSE, this.closeHandler.bind(this)],
+          [OverlayManagerClientFnType.OPEN_DEV_TOOLS, this.handleOpenDevTools.bind(this)],
+          [OverlayManagerClientFnType.RELOAD_WINDOW, this.handleReloadWindow.bind(this)],
       ),
       sessionEventHandlers = Array<Pair<SessionManagerEventType, (...args: any[]) => void>>([
         SessionManagerEventType.DATA_FRAME,

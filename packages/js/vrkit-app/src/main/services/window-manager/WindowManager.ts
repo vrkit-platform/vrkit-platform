@@ -326,7 +326,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       if (wi.browserWindowClosed) {
         continue
       }
-      
+
       wi.browserWindowClosed = true
 
       // HANDLE ROLE SPECIFIC CLOSE BEHAVIOR
@@ -339,7 +339,6 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         })
         .otherwise(Noop)
 
-      
       const bw = wi?.browserWindow
 
       if (bw && bw.isClosable()) {
@@ -437,6 +436,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         parentSize = parentWinInstance?.browserWindow?.getSize?.() ?? [],
         parentPos = parentWinInstance?.browserWindow?.getPosition?.() ?? [],
         size = pick(config.browserWindowOptions, ["width", "height"]),
+        isOffscreen = config?.browserWindowOptions?.webPreferences?.offscreen ?? false,
         bwOpts: Electron.BrowserWindowConstructorOptions = {
           ...config.browserWindowOptions,
           ...wsmWinOpts,
@@ -445,13 +445,14 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
             parent: parentWinInstance?.browserWindow,
             x: parentPos[0] + parentSize[0] / 2 - size.width / 2,
             y: parentPos[1] + parentSize[1] / 2 - size.height / 2
-          })
+          }),
+          show: !isOffscreen
         },
         bw = assign(winInstance, {
           type: config.type,
           role,
           config,
-          isOffscreen: bwOpts?.webPreferences?.offscreen ?? false,
+          isOffscreen,
           stateManager: wsm,
           browserWindow: new BrowserWindow(bwOpts),
           browserWindowClosed: false,

@@ -146,13 +146,12 @@ const DashboardEditorFormRoot = styled(Box, {
                 [child(classNames.overlayContentList)]: {
                   transition: theme.transitions.create([...FlexProperties]),
                   overflowX: "hidden",
-                  overflowY: "auto",
-                  ...flex(0, 0, "100%"),
-
+                  overflowY: "hidden",
+                  ...FlexAuto,
+                  
                   [child(classNames.overlayContentListItem)]: {
                     [hasCls(classNames.overlayContentListItemSelected)]: {}
                   },
-                  [hasCls(classNames.overlayContentListItemSelected)]: {}
                 }
               }
             }

@@ -56,3 +56,9 @@ export type MapKey<T> = T extends Map<infer K, any> ? K : never
 export type KeysStartingWith<T, Prefix extends string> = {
   [K in keyof T as K extends `${Prefix}${string}` ? K : never]: T[K];
 };
+
+export type ObjectKeysOfValueType<T, V> = {
+  [K in keyof T]: T[K] extends V ? K : never;
+}
+
+export type KeysWithValueType<T, V> = keyof ObjectKeysOfValueType<T,V>

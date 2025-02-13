@@ -17,14 +17,18 @@ import { GlobalCSSClassNames } from "../../renderer-constants"
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
 
-export interface ElectronDraggableSpacerProps extends BoxProps {}
+export interface ElectronDraggableSpacerProps extends BoxProps {
+  fillHeight?: boolean
+}
 
-export function ElectronDraggableSpacer({ className, sx, ...other }: ElectronDraggableSpacerProps) {
+export function ElectronDraggableSpacer({ className, fillHeight = false, sx = {}, ...other }: ElectronDraggableSpacerProps) {
   return (
     <Box
       className={clsx(GlobalCSSClassNames.electronWindowDraggable, className)}
       sx={{
-        ...flex(1, 5, 0)
+        ...flex(1, 5, 0),
+        ...sx,
+        ...(fillHeight && {height: "-webkit-fill-available"})
       }}
     />
   )

@@ -41,7 +41,7 @@ export interface AppTitlebarOverrides {
   center?: React.ReactNode
 
   right?: React.ReactNode
-  
+
   lightsEnabled?: Partial<Record<TrafficLightType, boolean>>
 }
 
@@ -90,7 +90,7 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         backgroundColor: "transparent",
         backgroundImage: "none",
         [child([appTitlebarClasses.left, appTitlebarClasses.right])]: {
-          flex: "1 1 auto",
+          flex: "1 1 auto"
         }
       }
     },
@@ -100,14 +100,13 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
       [child(appTitlebarClasses.top)]: {
         backgroundColor: theme.palette.background.appBar,
         backgroundImage: theme.palette.background.appBarGradient,
-        
+
         [child([appTitlebarClasses.left, appTitlebarClasses.right])]: {
-          flex: "0 0 340px",
-          
+          flex: "0 0 auto"
         }
       }
     },
-    
+
     [child(appTitlebarClasses.top)]: {
       ...heightConstraint(theme.dimen.appBarHeight),
       ...FlexRowCenter,
@@ -125,8 +124,7 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
           ...flexAlign("center", "flex-end")
         },
         [hasCls(appTitlebarClasses.left)]: {
-          ...flexAlign("center", "flex-start"),
-          // overflowX: "visible"
+          ...flexAlign("center", "flex-start") // overflowX: "visible"
         },
 
         [child(appTitlebarClasses.title)]: {
@@ -162,22 +160,27 @@ export function AppTitlebar({ className, transparent = false, ...other }: AppTit
     { appTitlebar } = pageMetadata,
     loc = useLocation(),
     title = asOption(pageMetadata.title)
-        .filter(isDefined)
-        .orCall(() => asOption(loc.pathname.split("/").filter(x => isNotEmptyString(x)))
-      .mapIf(
-        parts => parts[0] === WebRootPath.main,
-        (parts: string[]) => parts.slice(1)
+      .filter(isDefined)
+      .orCall(() =>
+        asOption(loc.pathname.split("/").filter(x => isNotEmptyString(x)))
+          .mapIf(
+            parts => parts[0] === WebRootPath.main,
+            (parts: string[]) => parts.slice(1)
+          )
+          .map(parts => capitalize(parts[0]))
       )
-      .map(parts => capitalize(parts[0])))
       .getOrElse(null),
-      
     theme = useTheme()
 
   return (
     <AppTitlebarRoot
-      className={clsx(appTitlebarClasses.root, {
-        [appTitlebarClasses.transparent]: transparent
-      },className)}
+      className={clsx(
+        appTitlebarClasses.root,
+        {
+          [appTitlebarClasses.transparent]: transparent
+        },
+        className
+      )}
       elevation={0}
       {...other}
     >
@@ -186,21 +189,30 @@ export function AppTitlebar({ className, transparent = false, ...other }: AppTit
           <Box className={clsx(appTitlebarClasses.left, GlobalCSSClassNames.electronWindowDraggable)}>
             <Logo />
             <If condition={isDefined(title)}>
-              {!isString(title) ? title : <Box className={clsx(appTitlebarClasses.title, GlobalCSSClassNames.electronWindowDraggable)}>
-                {title}
-              </Box>}
+              {!isString(title) ? (
+                title
+              ) : (
+                <Box className={clsx(appTitlebarClasses.title, GlobalCSSClassNames.electronWindowDraggable)}>
+                  {title}
+                </Box>
+              )}
             </If>
-            <ElectronDraggableSpacer />
+            <ElectronDraggableSpacer fillHeight />
           </Box>
           <Box className={clsx(appTitlebarClasses.center)}>
-            <ElectronDraggableSpacer />
+            <ElectronDraggableSpacer fillHeight />
             <If condition={!!appTitlebar?.center}>{appTitlebar?.center}</If>
-            
-            <ElectronDraggableSpacer />
+
+            <ElectronDraggableSpacer fillHeight />
           </Box>
           <Box className={clsx(appTitlebarClasses.right)}>
-            <ElectronDraggableSpacer />
-            <AppTitlebarTrafficLights lightsEnabled={appTitlebar?.lightsEnabled ?? {}}/>
+            <ElectronDraggableSpacer fillHeight />
+            <Choose>
+              <When condition={!!appTitlebar?.right}>{appTitlebar?.right}</When>
+              <Otherwise>
+                <AppTitlebarTrafficLights lightsEnabled={appTitlebar?.lightsEnabled ?? {}} />
+              </Otherwise>
+            </Choose>
           </Box>
         </AppToolbarRoot>
       </Box>

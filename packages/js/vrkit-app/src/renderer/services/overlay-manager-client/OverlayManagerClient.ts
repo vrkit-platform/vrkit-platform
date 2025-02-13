@@ -2,7 +2,11 @@ import { ipcRenderer, IpcRendererEvent } from "electron"
 import { getLogger } from "@3fv/logger-proxy"
 
 import { Inject, PostConstruct, Singleton } from "@3fv/ditsy"
-import { Bind, WindowRenderMode, WindowRole } from "@vrkit-platform/shared"
+import {
+  Bind, isNotEmptyString,
+  WindowRenderMode,
+  WindowRole
+} from "@vrkit-platform/shared"
 
 import { APP_STORE_ID, isDev } from "../../renderer-constants"
 
@@ -33,6 +37,7 @@ import { sharedAppSelectors } from "../store/slices/shared-app"
 import { overlayWindowActions } from "../store/slices/overlay-window"
 import "@vrkit-platform/plugin-sdk"
 import { match } from "ts-pattern"
+import Alert from "../alerts"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -310,6 +315,37 @@ export class OverlayManagerClient
       enabled
     )
   }
+  
+  @Bind
+  openDevTools(overlayId: string, layoutType: "VR" | "SCREEN") {
+    if (!isNotEmptyString(overlayId) || !isNotEmptyString(this.appStore.getState().shared.dashboards.activeConfigId)) {
+      return
+    }
+    ipcRenderer.invoke(
+        OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.OPEN_DEV_TOOLS),
+        overlayId,
+        layoutType
+    ).catch(err => {
+      log.error(`Failed to open dev tools for overlay window`, err)
+      Alert.onError(`Failed to open dev tools for overlay window`, {cause: err})
+    })
+  }
+  
+  @Bind
+  reloadWindow(overlayId: string, layoutType: "VR" | "SCREEN") {
+    if (!isNotEmptyString(overlayId) || !isNotEmptyString(this.appStore.getState().shared.dashboards.activeConfigId)) {
+      return
+    }
+    ipcRenderer.invoke(
+        OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.RELOAD_WINDOW),
+        overlayId,
+        layoutType
+    ).catch(err => {
+      log.error(`Failed to reload overlay window`, err)
+      Alert.onError(`Failed to reload overlay window`, {cause: err})
+    })
+  }
+  
   
   @Bind
   close(): Promise<void> {

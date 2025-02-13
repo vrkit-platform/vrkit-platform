@@ -29,9 +29,9 @@ const {{name}}Root = styled(Box, {
   label: "{{name}}Root"
 })(({theme: {dimen,palette, shape, customShadows, shadows, components, colors, transitions, typography, insetShadows, mixins, zIndex, spacing }}) => ({
   // root styles here
-  [hasCls({{camelCase name}}Classes.root)]: {
+  [hasCls(classes.root)]: {
     // child styled here
-    [child({{camelCase name}}Classes.content)]: {
+    [child(classes.content)]: {
       // child styled here
     }
   }
@@ -55,7 +55,7 @@ export function {{name}}(props:{{name}}Props) {
   const { className, ...other } = props
 
   return <{{name}}Root
-    className={clsx({{camelCase name}}Classes.root, {}, className)}
+    className={clsx(classes.root, {}, className)}
     {...other}
   >
     {/* Body */}

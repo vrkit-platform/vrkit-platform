@@ -5,10 +5,11 @@
 
 #include <IRacingTools/Models/LapTrajectory.pb.h>
 #include <IRacingTools/Models/TrackMap.pb.h>
+#include <IRacingTools/SDK/Utils/LockHelpers.h>
+#include <IRacingTools/SDK/Utils/Tracing.h>
+#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/SHM/SHM.h>
-#include <IRacingTools/SDK/Utils/LockHelpers.h>
-#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
 
 #include <spdlog/spdlog.h>
 
@@ -569,6 +570,8 @@ namespace IRacingTools::Shared::SHM {
 
   //const std::source_location& loc
   Snapshot SHMCachedReader::maybeGet() {
+    static std::int64_t sUpdatedAt{0};
+
     // TraceLoggingThreadActivity<gTraceProvider> activity;
     // TraceLoggingWriteStart(activity, "SHMCachedReader::MaybeGet()");
     if (!(*this)) {
@@ -579,11 +582,19 @@ namespace IRacingTools::Shared::SHM {
       return {nullptr};
     }
 
-    L->info("maybeGet: updating session");
+    std::int64_t now = TimeEpoch().count();
+    std::int64_t minUpdatedAt = now - MaxFrameIntervalMillis;
+    auto isCacheValid = sUpdatedAt >= minUpdatedAt;
+
+    if (L->should_log(spdlog::level::debug))
+      L->debug("maybeGet: updating session");
+
     this->updateSession();
 
     //ActiveConsumers::Set(consumerKind_);
-    L->info("maybeGet: swapchainIndex_={}",swapchainIndex_);
+    if (L->should_log(spdlog::level::debug))
+      L->debug("maybeGet: swapchainIndex_={}",swapchainIndex_);
+
     const auto swapchainIndex = swapchainIndex_;
     if (swapchainIndex >= clientTextures_.size()) [[unlikely]] {
       L->error("maybeGet: swapchainIndex_=={} >= clientTextures_.size() == {}",swapchainIndex_, clientTextures_.size());
@@ -629,9 +640,20 @@ namespace IRacingTools::Shared::SHM {
 
     auto snapshot = this->maybeGetUncached(gpuAdapterId_, textureCopier_, dest, consumerKind_);
     const auto state = snapshot.getState();
+    auto isSnapshotEmpty = state == Snapshot::State::Empty;
     // maybeGetActivity.StopWithResult(static_cast<int>(state));
 
-    if (state == Snapshot::State::Empty) {
+
+    if (isSnapshotEmpty) {
+      if (!isCacheValid) {
+        // TraceLoggingWriteStop(
+        //         activity,
+        //         "SHMCachedReader::MaybeGet()",
+        //         TraceLoggingValue("Using nullptr", "Result")
+        // );
+        return Snapshot{nullptr};
+      }
+
       const auto& cache = cache_.front();
       // TraceLoggingWriteStop(
       //   activity,
@@ -640,6 +662,8 @@ namespace IRacingTools::Shared::SHM {
       //   TraceLoggingValue(static_cast<unsigned int>(cache.getState()), "State"));
       return cache;
     }
+
+    sUpdatedAt = now;
 
     cache_.push_front(snapshot);
     cache_.resize(clientTextures_.size(), nullptr);

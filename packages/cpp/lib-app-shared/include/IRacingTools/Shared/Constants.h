@@ -10,18 +10,23 @@
 namespace IRacingTools::Shared {
 
 
-  constexpr unsigned int SHMSwapchainLength = 2;
+  constexpr std::uint32_t SHMSwapchainLength = 2;
   constexpr PixelSize MaxViewRenderSize{2048, 2048};
   constexpr PixelSize ErrorRenderSize{768, 1024};
-  constexpr unsigned char MaxViewCount = 16;
-  constexpr unsigned int FramesPerSecond = 90;
 
-  constexpr const char ProjectReverseDomainA[] {"com.irt"};
-  constexpr const wchar_t ProjectReverseDomainW[] {L"com.irt"};
+  constexpr std::uint8_t MaxViewCount = 8;
+  constexpr std::uint32_t FramesPerSecond = 90;
+
+  #define PROJECT_REVERSE_DOMAIN "com.irt"
+
+  constexpr std::int64_t MaxFrameIntervalMillis = 1000;
+
+  constexpr char ProjectReverseDomainA[] {PROJECT_REVERSE_DOMAIN};
+  constexpr wchar_t ProjectReverseDomainW[] {L"" PROJECT_REVERSE_DOMAIN};
 
 #if defined(_DEBUG) || defined(DEBUG)
-  constexpr const bool DebugEnabled = true;
+  constexpr bool DebugEnabled = true;
 #else
-  constexpr const bool DebugEnabled = false;
+  constexpr bool DebugEnabled = false;
 #endif
 }

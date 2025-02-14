@@ -58,11 +58,12 @@ set(DEP_LOG spdlog::spdlog)
 set(DEP_DIRECTX
   #  d2d1.lib
   #  dwrite.lib
-  windowscodecs.lib
+  System::windowscodecs
 
   #  dxgi.lib
   #  d3d10_1.lib
   #  d3d11.lib
+  System::advapi32
   System::Dcomp
   System::Gdi32
   System::Dwmapi
@@ -114,7 +115,6 @@ set(ALL_SDK_DEPS
   ${DEP_FMT}
   ${DEP_YAML}
   ${DEP_LOG}
-#  ${DEP_CLI_CMD}
 )
 
 set(DEP_GTEST_MAIN GTest::gtest_main GTest::gmock)

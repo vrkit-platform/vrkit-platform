@@ -33,14 +33,24 @@ namespace IRacingTools::Shared::SHM {
         FEEDER_ATTACHED = 1 << 0,
     };
 
+
+    /**
+     * @brief Represents the configuration settings for a shared memory containing an overlay frame.
+     *
+     * This class encapsulates parameters and properties required for configuring
+     * shared memory overlay frames used in inter-process communication or graphical overlays.
+     */
     struct SHMOverlayFrameConfig final {
         uint64_t overlayIdx{};
 
         PixelRect locationOnTexture{};
 
         bool vrEnabled{true};
+
         VR::VROverlayFrameRenderConfig vr{};
         Screen::ScreenOverlayFrameRenderConfig screen{};
+
+      std::int64_t updatedAt{0};
     };
 
     static_assert(std::is_standard_layout_v<SHMOverlayFrameConfig>);

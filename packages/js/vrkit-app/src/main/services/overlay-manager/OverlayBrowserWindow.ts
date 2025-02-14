@@ -30,7 +30,7 @@ import {
   WindowManager
 } from "../window-manager" // TypeScriptUnresolvedVariable
 import { match } from "ts-pattern"
-import { guard } from "@3fv/guard"
+import { getValue, guard } from "@3fv/guard"
 
 // TypeScriptUnresolvedVariable
 
@@ -68,20 +68,28 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
 
   readonly #uniqueId_: string
 
-  private previousInvalidateTime_: number = 0
+  #previousInvalidateTime_: number = 0
 
-  private closeDeferred_: Deferred<void> = null
+  #closeDeferred_: Deferred<void> = null
 
-  private wasMovedManually_: boolean = false
-
+  #wasMovedManually_: boolean = false
+  
+  get isBrowserWindowCloseable() {
+    return getValue(() => this.browserWindow?.isClosable() ?? false, false)
+  }
+  
+  get isBrowserWindowDestroyed() {
+    return getValue(() => this.browserWindow?.isDestroyed() ?? true, true)
+  }
+  
   get isBrowserWindowActive(): boolean {
-    return [!(this.browserWindow?.isDestroyed() ?? true), this.browserWindow?.isClosable() ?? false].every(
+    return [!this.isBrowserWindowDestroyed, this.isBrowserWindowCloseable].every(
       it => it === true
     )
   }
 
   get wasMovedManually(): boolean {
-    return this.wasMovedManually_
+    return this.#wasMovedManually_
   }
 
   get role(): OverlayWindowRole {
@@ -116,11 +124,11 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
   }
 
   get isClosing() {
-    return !!this.closeDeferred_
+    return !!this.#closeDeferred_
   }
 
   get isClosed() {
-    return this.isClosing && this.closeDeferred_.isSettled()
+    return this.isClosing && this.#closeDeferred_.isSettled()
   }
 
   get editorController() {
@@ -128,18 +136,18 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
   }
 
   setMovedManually(wasMovedManually: boolean) {
-    this.wasMovedManually_ = wasMovedManually
+    this.#wasMovedManually_ = wasMovedManually
   }
 
   /**
    * Close the window
    */
   close(): Promise<void> {
-    if (this.closeDeferred_) {
-      return this.closeDeferred_.promise
+    if (this.#closeDeferred_) {
+      return this.#closeDeferred_.promise
     }
 
-    const deferred = (this.closeDeferred_ = new Deferred())
+    const deferred = (this.#closeDeferred_ = new Deferred())
     this.stopInvalidateInterval()
 
     try {
@@ -207,15 +215,14 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
     return this.config.isScreen
   }
 
-  sendConfig() {
-    log.info(`Sending overlay config`, this.config?.overlay?.id)
-    this.browserWindow?.webContents?.send(
-      OverlayClientEventTypeToIPCName(OverlayManagerClientEventType.OVERLAY_CONFIG),
-      this.config
-    )
-  }
-
-  private async fetchConfigHandler(event: IpcMainInvokeEvent) {
+  
+  /**
+   * Handles the fetch configuration event.
+   * Retrieves the application's overlay configuration and placement data.
+   *
+   * @param {IpcMainInvokeEvent} _event - The IPC event used to invoke this handler.
+   */
+  private async fetchConfigHandler(_event: IpcMainInvokeEvent) {
     log.info(`FETCH_CONFIG_HANDLER`, this.config)
     return {
       overlay: OverlayInfo.toJson(this.config.overlay),
@@ -383,7 +390,7 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
    */
   invalidate(): void {
     const now = Date.now()
-    if (now - this.previousInvalidateTime_ < MaxFPSIntervalMillis) {
+    if (now - this.#previousInvalidateTime_ < MaxFPSIntervalMillis) {
       return
     }
 
@@ -392,7 +399,7 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
       return
     }
 
-    this.previousInvalidateTime_ = now
+    this.#previousInvalidateTime_ = now
     guard(
       () => this.browserWindow?.webContents?.invalidate(),
       err => {

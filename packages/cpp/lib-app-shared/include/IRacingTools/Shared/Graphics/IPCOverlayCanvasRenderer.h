@@ -307,6 +307,7 @@ namespace IRacingTools::Shared::Graphics {
      */
     void render() noexcept {
       static auto L = Logging::GetCategoryWithName("IPCOverlayCanvasRenderer");
+      static std::size_t sPreviousOverlayCount{0};
       if (isRendering_.test_and_set()) {
         L->debug("Two renders in the same instance");
         VRK_BREAK;
@@ -322,7 +323,9 @@ namespace IRacingTools::Shared::Graphics {
       auto renderCount = ++renderCount_;
 
       const auto overlayCount = producer_->getOverlayCount();
-
+      if (overlayCount != sPreviousOverlayCount) {
+        L->info("IPC SHM Frame Render >> Overlay Count Changed (previous={},current={})", sPreviousOverlayCount, overlayCount);
+      }
       const auto canvasSize = Spriting::GetBufferSize(overlayCount);
 
       // TraceLoggingWriteTagged(activity, "AcquireDXLock/start");
@@ -356,7 +359,8 @@ namespace IRacingTools::Shared::Graphics {
             .gazeTargetScale{},
             .opacity{},
           },
-          .screen = {.rect = overlayData->screenRect()}
+          .screen = {.rect = overlayData->screenRect()},
+          .updatedAt = TimeEpoch().count()
         };
 
         D3D11_BOX destRegion{

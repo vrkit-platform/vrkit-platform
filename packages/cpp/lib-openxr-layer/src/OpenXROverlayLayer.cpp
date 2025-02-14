@@ -145,7 +145,7 @@ namespace IRacingTools::OpenXR {
 
         XrSystemProperties systemProperties{.type = XR_TYPE_SYSTEM_PROPERTIES,};
         check_xrresult(next->xrGetSystemProperties(instance, system, &systemProperties));
-        maxLayerCount_ = systemProperties.graphicsProperties.maxLayerCount;
+        maxLayerCount_ = std::min<std::uint32_t>(MaxViewCount, systemProperties.graphicsProperties.maxLayerCount);
 
         L->debug("XR system: {}", std::string_view{systemProperties.systemName});
         // 'Max' appears to be a recommendation for the eyebox:
@@ -268,13 +268,14 @@ namespace IRacingTools::OpenXR {
         const auto overlayLayerCount = (vrOverlays.size() + frameEndInfo->layerCount) <= maxLayerCount_ ?
                                     vrOverlays.size() :
                                     (maxLayerCount_ - frameEndInfo->layerCount);
-        if (overlayLayerCount == 0) {
+        if (overlayLayerCount <= 0) {
             TraceLoggingWriteTagged(activity, "No active layers");
             return openXR_->xrEndFrame(session, frameEndInfo);
         }
         vrOverlays.resize(overlayLayerCount);
 
         auto config = snapshot.getConfig();
+        std::int64_t maxFrameMillis = TimeEpoch().count() - MaxFrameIntervalMillis;
 
         std::vector<const XrCompositionLayerBaseHeader*> nextLayers;
         nextLayers.reserve(frameEndInfo->layerCount + overlayLayerCount);
@@ -296,7 +297,11 @@ namespace IRacingTools::OpenXR {
 
         for (size_t overlayIdx = 0; overlayIdx < overlayLayerCount; ++overlayIdx) {
             const auto [layer, params] = vrOverlays.at(overlayIdx);
-
+            if (layer->updatedAt < maxFrameMillis) {
+              if (L->should_log(spdlog::level::debug))
+                L->debug("Ignoring layer ({}) as it has not been updated in {}ms", overlayIdx, maxFrameMillis - layer->updatedAt);
+              continue;
+            }
             cacheKeys.push_back(params.cacheKey);
             PixelRect destRect{
                 Graphics::Spriting::GetOffset(overlayIdx, snapshot.getOverlayCount()),
@@ -347,7 +352,7 @@ namespace IRacingTools::OpenXR {
             auto& layerPose = layout.pose;
             auto& layerSize = layout.size;
             pose.position = {layerPose.x, layerPose.eyeY, layerPose.z};
-            L->info("XR Frame Pose idx={},x={}", overlayIdx, pose.position.x);
+            //L->info("XR Frame Pose idx={},x={}", overlayIdx, pose.position.x);
             //auto pose = GetXrPosef(params.kneeboardPose);
             auto imageRect = destRect.staticCast<int, XrRect2Di>();
             addedXRLayers.push_back(
@@ -660,16 +665,18 @@ namespace IRacingTools::OpenXR {
         return XR_SUCCESS;
     }
 
-    /* PS >
+
+}
+
+/* PS >
      * [System.Diagnostics.Tracing.EventSource]::new("OpenKneeboard.OpenXR")
      * a4308f76-39c8-5a50-4ede-32d104a8a78d
      */
-    TRACELOGGING_DEFINE_PROVIDER(
-        gTraceProvider,
-        "IRT.OpenXR",
-        (0xa4308f76, 0x39c8, 0x5a50, 0x4e, 0xde, 0x32, 0xd1, 0x04, 0xa8, 0xa7, 0x8d)
-    );
-} // namespace OpenKneeboard
+TRACELOGGING_DEFINE_PROVIDER(
+    gTraceProvider,
+    "VRKit.OpenXR",
+    (0xa4308f76, 0x39c8, 0x5a50, 0x4e, 0xde, 0x32, 0xd1, 0x04, 0xa8, 0xa7, 0x8d)
+);
 
 using namespace IRacingTools::OpenXR;
 using namespace IRacingTools::Shared;
@@ -677,7 +684,7 @@ using namespace IRacingTools::Shared;
 BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved) {
     switch (dwReason) {
     case DLL_PROCESS_ATTACH:
-        // TraceLoggingRegister(gTraceProvider);
+        TraceLoggingRegister(gTraceProvider);
         // DPrintSettings::Set({
         //   .prefix = "OpenKneeboard-OpenXR",
         // });
@@ -689,7 +696,7 @@ BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved) {
         L->info("OpenXR Layer Attach {}", __FUNCTION__);
         break;
     case DLL_PROCESS_DETACH:
-        // TraceLoggingUnregister(gTraceProvider);
+        TraceLoggingUnregister(gTraceProvider);
         break;
     }
     return TRUE;

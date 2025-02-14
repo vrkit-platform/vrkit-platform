@@ -1,5 +1,6 @@
 set(
   SYSTEM_LIBRARIES
+  advapi32
   Comctl32
   D2d1
   D3d11
@@ -19,6 +20,7 @@ set(
   Shlwapi
   User32
   WindowsApp
+  windowscodecs
   Wtsapi32
 )
 

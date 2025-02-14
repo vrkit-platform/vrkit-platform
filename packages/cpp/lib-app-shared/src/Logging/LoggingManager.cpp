@@ -13,8 +13,11 @@ namespace IRacingTools::Shared::Logging {
     
     constexpr std::size_t LogFileMaxSize{1024u * 1024u * 1u};
 #ifdef _DEBUG
-    constexpr auto LogFlushOn = spdlog::level::debug;
+    // constexpr auto LogFlushOn = spdlog::level::debug;
+    constexpr auto LogLevel = spdlog::level::info;
+    constexpr auto LogFlushOn = spdlog::level::info;
 #else
+    constexpr auto LogLevel = spdlog::level::info;
     constexpr auto LogFlushOn = spdlog::level::info;
 #endif
 
@@ -69,7 +72,7 @@ namespace IRacingTools::Shared::Logging {
         logger = std::make_shared<spdlog::logger>(prettyName);
       }
 
-      logger->set_level(spdlog::level::level_enum::debug);
+      logger->set_level(LogLevel);
     }
     return loggers_[prettyName];
   }

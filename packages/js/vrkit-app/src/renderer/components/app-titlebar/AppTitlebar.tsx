@@ -125,9 +125,8 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
           ...flexAlign("center", "flex-end")
         },
         [hasCls(appTitlebarClasses.left)]: {
-          ...flexAlign("center", "flex-start") // overflowX: "visible"
+          ...flexAlign("center", "flex-start")
         },
-      
         [hasCls(appTitlebarClasses.centerAbsolute)]: {
           ...flex(1,1,"50%")
         },

@@ -19,9 +19,10 @@ import {
   FlexScaleZero,
   getContrastText,
   hasCls,
-  heightConstraint,
+  heightConstraint, notHasCls,
   OverflowHidden,
   padding,
+  PositionAbsolute,
   PositionRelative
 } from "@vrkit-platform/shared-ui"
 import { GlobalCSSClassNames, isNotEmptyString } from "../../renderer-constants"
@@ -39,9 +40,10 @@ export interface AppTitlebarOverrides {
   left?: React.ReactNode
 
   center?: React.ReactNode
+  centerAbsolute?: boolean
 
   right?: React.ReactNode
-
+  
   lightsEnabled?: Partial<Record<TrafficLightType, boolean>>
 }
 
@@ -70,6 +72,7 @@ const appTitlebarClasses = createClassNames(
   "bottom",
   "left",
   "center",
+  "centerAbsolute",
   "right",
   "title"
 )
@@ -118,15 +121,16 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         ...FlexRow,
         ...OverflowHidden,
         ...PositionRelative,
-        alignItems: "stretch",
-
         [hasCls(appTitlebarClasses.right)]: {
           ...flexAlign("center", "flex-end")
         },
         [hasCls(appTitlebarClasses.left)]: {
           ...flexAlign("center", "flex-start") // overflowX: "visible"
         },
-
+      
+        [hasCls(appTitlebarClasses.centerAbsolute)]: {
+          ...flex(1,1,"50%")
+        },
         [child(appTitlebarClasses.title)]: {
           // overflowY:"hidden",
           // overflowX: "visible",
@@ -145,7 +149,13 @@ const AppTitlebarRoot = styled<typeof AppBar>(AppBar)(({ theme }) => ({
         ...OverflowHidden,
         ...PositionRelative,
         ...flexAlign("stretch", "stretch"),
-        height: "auto"
+        height: "auto",
+        [hasCls([appTitlebarClasses.centerAbsolute])]: {
+          ...PositionAbsolute,
+          width: "auto",
+          transform: "translate(-50%, 20%)",
+          left: "50%"
+        }
       }
     },
     [child(appTitlebarClasses.bottom)]: {
@@ -170,7 +180,9 @@ export function AppTitlebar({ className, transparent = false, ...other }: AppTit
           .map(parts => capitalize(parts[0]))
       )
       .getOrElse(null),
-    theme = useTheme()
+    centerAbsoluteRule = {
+      [appTitlebarClasses.centerAbsolute]: appTitlebar?.centerAbsolute === true
+    }
 
   return (
     <AppTitlebarRoot
@@ -186,7 +198,7 @@ export function AppTitlebar({ className, transparent = false, ...other }: AppTit
     >
       <Box className={appTitlebarClasses.top}>
         <AppToolbarRoot>
-          <Box className={clsx(appTitlebarClasses.left, GlobalCSSClassNames.electronWindowDraggable)}>
+          <Box className={clsx(appTitlebarClasses.left, centerAbsoluteRule, GlobalCSSClassNames.electronWindowDraggable)}>
             <Logo />
             <If condition={isDefined(title)}>
               {!isString(title) ? (
@@ -199,13 +211,13 @@ export function AppTitlebar({ className, transparent = false, ...other }: AppTit
             </If>
             <ElectronDraggableSpacer fillHeight />
           </Box>
-          <Box className={clsx(appTitlebarClasses.center)}>
+          <Box className={clsx(appTitlebarClasses.center, centerAbsoluteRule)}>
             <ElectronDraggableSpacer fillHeight />
             <If condition={!!appTitlebar?.center}>{appTitlebar?.center}</If>
 
             <ElectronDraggableSpacer fillHeight />
           </Box>
-          <Box className={clsx(appTitlebarClasses.right)}>
+          <Box className={clsx(appTitlebarClasses.right, centerAbsoluteRule)}>
             <ElectronDraggableSpacer fillHeight />
             <Choose>
               <When condition={!!appTitlebar?.right}>{appTitlebar?.right}</When>

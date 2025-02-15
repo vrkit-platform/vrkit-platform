@@ -31,7 +31,7 @@ import { endsWith, get } from "lodash/fp"
 import Path from "path"
 import PQueue from "p-queue"
 import { newDashboardTrackMapMockConfig } from "./DefaultDashboardConfig"
-import { WindowManager } from "../window-manager"
+import { WindowMainInstance, WindowManager } from "../window-manager"
 import { MainSharedAppState } from "../store"
 import { action, runInAction, set, toJS } from "mobx"
 import { IDisposer } from "mobx-utils"
@@ -472,7 +472,7 @@ export class DashboardManager {
   }
 
   @Bind
-  private async onUIReady(win: BrowserWindow) {
+  private async onMainWindowReady(_windowInstance: WindowMainInstance) {
     if (!this.appState.appSettings.openDashboardOnLaunch) {
       log.info(`open dash on launch is not enabled`)
       return
@@ -531,7 +531,7 @@ export class DashboardManager {
       ] as DashFnPair[]
     ipcFnHandlers.forEach(([type, handler]) => ipcMain.handle(DashboardManagerFnTypeToIPCName(type), handler))
 
-    windowManager.on("UI_READY", this.onUIReady)
+    windowManager.once("MAIN_WINDOW_READY", this.onMainWindowReady)
 
     if (isDev) {
       Object.assign(global, {
@@ -547,7 +547,7 @@ export class DashboardManager {
         }
       ),
       () => {
-        windowManager.off("UI_READY", this.onUIReady)
+        windowManager.off("MAIN_WINDOW_READY", this.onMainWindowReady)
 
         if (this.stopObserving) {
           this.stopObserving()

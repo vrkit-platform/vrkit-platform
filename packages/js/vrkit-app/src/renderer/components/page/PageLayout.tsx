@@ -32,13 +32,14 @@ export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
   // noinspection UnnecessaryLocalVariableJS
   const rootPath = useWebPathRoot(),
     isNormalWindow = VRKitWindowConfig.type === "Normal",
+    isModal = VRKitWindowConfig.modal === true,
     isMain = rootPath === WebRootPath.main,
     isSettings = rootPath === WebRootPath.settings,
     isVRLayoutEditor = rootPath === WebRootPath.dashboardVRLayout,
     isSessionControlVisible = isMain,
     currentWindowRole = VRKitWindowConfig.role,
     modalDesktopWindows = useAppSelector(sharedAppSelectors.selectModalDesktopWindows),
-    isModalActive = modalDesktopWindows.some(it => !it.parentRole || it.parentRole === currentWindowRole)
+    isOtherModalActive = !isModal && modalDesktopWindows.some(it => !it.parentRole || it.parentRole === currentWindowRole)
   
 
   return (
@@ -80,7 +81,7 @@ export function PageLayout({ sx, children, ...other }: PageLayoutProps) {
       </If>
       <If condition={isNormalWindow}>
         <Backdrop
-          open={isModalActive}
+          open={isOtherModalActive}
           sx={{
             backdropFilter: `blur(6px)`,
             WebkitBackdropFilter: `blur(6px)`,

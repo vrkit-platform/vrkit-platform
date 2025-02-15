@@ -14,7 +14,7 @@ export class SignalFlag extends EventEmitter3Async<SignalFlagEvents> {
   /**
    * Value  of signal flag
    */
-  private value: boolean
+  #value_: boolean
   
   /**
    * Swap a value for the current value
@@ -37,9 +37,9 @@ export class SignalFlag extends EventEmitter3Async<SignalFlagEvents> {
    */
   @Bind
   set(newValue: boolean = true) {
-    const currentValue = this.value
+    const currentValue = this.#value_
     if (currentValue !== newValue) {
-      this.value = newValue
+      this.#value_ = newValue
       this.emit("changed", newValue, this)
       this.emit(newValue ? "used" : "unused", this)
     }
@@ -64,7 +64,7 @@ export class SignalFlag extends EventEmitter3Async<SignalFlagEvents> {
    */
   @Bind
   toggle() {
-    const oldValue = this.set(!this.value)
+    const oldValue = this.set(!this.#value_)
     return oldValue
   }
 
@@ -76,7 +76,7 @@ export class SignalFlag extends EventEmitter3Async<SignalFlagEvents> {
    * Gets whether is used
    */
   get inUse() {
-    return this.value === true
+    return this.#value_ === true
   }
 
 
@@ -84,7 +84,7 @@ export class SignalFlag extends EventEmitter3Async<SignalFlagEvents> {
    * Gets whether is unused
    */
   get isUnused() {
-    return this.value === true
+    return this.#value_ === true
   }
 
   /**

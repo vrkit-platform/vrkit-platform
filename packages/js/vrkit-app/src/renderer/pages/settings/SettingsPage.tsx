@@ -77,6 +77,7 @@ export function SettingsPage({ className, ...other }: SettingsPageProps) {
   return (
     <Page metadata={{
       appTitlebar: {
+        centerAbsolute: true,
         center: <SettingsTabbar selectedTabId={selectedTabId}
                                 setSelectedTabId={setSelectedTabId}/>
       }

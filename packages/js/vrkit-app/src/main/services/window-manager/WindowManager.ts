@@ -54,7 +54,7 @@ const log = getLogger(__filename)
 const { debug, trace, info, error, warn } = log
 
 export interface MainWindowEventArgs {
-  UI_READY: (win: BrowserWindow) => void
+  MAIN_WINDOW_READY: (windowInstance: WindowMainInstance) => void
 }
 
 @Singleton()
@@ -407,9 +407,9 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
           .map(first)
           .getOrThrow(`Unable to find a working parent for modal with role (${role})`)
       )
-      .with([true, P._], () =>
-        asOption(this.mainWindowInstance).getOrThrow(`Unable to find a working parent for modal`)
-      )
+      // .with([true, P._], () =>
+      //   asOption(this.mainWindowInstance).getOrThrow(`Unable to find a working parent for modal`)
+      // )
       .otherwise(() => null)
 
     log.assert(!modal || (modal && !!parentWinInstance), `Modal window config, but main window is not available`)
@@ -560,8 +560,9 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         if (!wi.isOffscreen) {
           win.show()
         }
-
-        this.emit("UI_READY", win)
+        
+        if (wi.role === WindowRole.Main)
+          this.emit("MAIN_WINDOW_READY", wi)
       })
       .on("close", () => {
         if (wi.browserWindowClosed) {
@@ -608,8 +609,6 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
               .filter(dir => Fsx.pathExistsSync(dir))
               .forEach(dir => win.webContents.addWorkSpace(dir))
           })
-      })
-      .on("devtools-opened", () => {
         this.updateZoom()
       })
       .setWindowOpenHandler(windowOpenHandler)

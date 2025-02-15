@@ -668,10 +668,11 @@ namespace IRacingTools::OpenXR {
 
 }
 
-/* PS >
-     * [System.Diagnostics.Tracing.EventSource]::new("OpenKneeboard.OpenXR")
-     * a4308f76-39c8-5a50-4ede-32d104a8a78d
-     */
+/**
+ * > PS:
+ * [System.Diagnostics.Tracing.EventSource]::new("OpenKneeboard.OpenXR")
+ * a4308f76-39c8-5a50-4ede-32d104a8a78d
+ */
 TRACELOGGING_DEFINE_PROVIDER(
     gTraceProvider,
     "VRKit.OpenXR",

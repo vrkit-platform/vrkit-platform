@@ -173,14 +173,12 @@ macro(SETUP_MOD_EXPORTS)
 endmacro()
 
 function(VRK_CONFIGURE_TARGET TARGET)
-  set_property(TARGET ${TARGET} PROPERTY
+  SET_PROPERTY(TARGET ${TARGET} PROPERTY
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
   SETUP_TARGET_COMPILE_DEFS(${TARGET})
 
-  message(NOTICE "CMAKE_BUILD_TYPE == ${CMAKE_BUILD_TYPE}")
-
-  target_compile_definitions(
+  TARGET_COMPILE_DEFINITIONS(
     ${TARGET}
     PRIVATE
     $<$<CONFIG:Debug>:DEBUG>

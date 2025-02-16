@@ -170,11 +170,13 @@ namespace IRacingTools::Shared::Services {
   }
 
   std::optional<SDK::GeneralError> TelemetryDataService::destroy() {
-    std::scoped_lock lock(stateMutex_);
-    if (state() >= State::Destroying)
-      return std::nullopt;
+    {
+      std::scoped_lock lock(stateMutex_);
+      if (state() >= State::Destroying)
+        return std::nullopt;
 
-    setState(State::Destroying);
+      setState(State::Destroying);
+    }
     reset(true);
     if (fileTaskQueue_) {
       fileTaskQueue_->destroy();
@@ -227,6 +229,9 @@ namespace IRacingTools::Shared::Services {
       if (client)
         client->close();
     });
+    if (client->hasNext())
+      client->next();
+
     std::shared_ptr<TrackLayoutMetadata> tlm{nullptr};
     {
       auto sessionInfo = client->getSessionInfo().lock();
@@ -422,6 +427,9 @@ namespace IRacingTools::Shared::Services {
     {
 
       std::scoped_lock lock(stateMutex_);
+      if (!dataFileHandler_ || state() >= ServiceState::Destroying) {
+        return std::unexpected(SDK::GeneralError(ErrorCode::General, "This service is being or has been destroyed"));
+      }
 
       // COPY CURRENT MAP
       auto newDataFiles = dataFiles_;

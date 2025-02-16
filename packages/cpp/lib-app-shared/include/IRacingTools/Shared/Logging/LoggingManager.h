@@ -34,20 +34,24 @@ namespace IRacingTools::Shared::Logging {
 
   enum class LogCategoryDefault {
     Global = 0,
-    Service = 1
+    Service = 1,
+    IRSDK = 2
   };
 
   constexpr std::size_t LogCategoryDefaultCount =
-      magic_enum::enum_count<LogCategoryDefault>();
+    magic_enum::enum_count<LogCategoryDefault>();
 
   constexpr LUT<LogCategoryDefault, std::string_view, LogCategoryDefaultCount>
-      LogCategoryDefaultMap = {
-          {LogCategoryDefault::Global, GlobalCategory},
-          {LogCategoryDefault::Service,
-           magic_enum::enum_name(LogCategoryDefault::Service).data()}};
+    LogCategoryDefaultMap = {
+      {LogCategoryDefault::Global, GlobalCategory},
+      {LogCategoryDefault::Service,
+       magic_enum::enum_name(LogCategoryDefault::Service).data()},
+      {LogCategoryDefault::IRSDK,
+       magic_enum::enum_name(LogCategoryDefault::IRSDK).data()}};
 
   class LoggingManager : public SDK::Utils::Singleton<LoggingManager> {
   public:
+
     LoggingManager() = delete;
     LoggingManager(LoggingManager &&) = delete;
     LoggingManager(LoggingManager &) = delete;
@@ -64,22 +68,24 @@ namespace IRacingTools::Shared::Logging {
     Logger getConsoleLogger();
 
   protected:
+
     explicit LoggingManager(token);
     friend Singleton;
 
   private:
+
     std::mutex mutex_{};
     std::map<std::string, Logger> loggers_{};
     Logger consoleLogger_{nullptr};
   };
 
 
-  template<typename T>
+  template <typename T>
   Logger GetCategoryWithType() {
     return LoggingManager::Get().getCategory(PrettyType<T>().name());
   };
 
-  template<LogCategoryDefault Cat>
+  template <LogCategoryDefault Cat>
   Logger GetCategory() {
     std::string name = LogCategoryDefaultMap[Cat];
     return LoggingManager::Get().getCategory(name);
@@ -98,12 +104,12 @@ namespace IRacingTools::Shared::Logging {
 
 } // namespace IRacingTools::Shared::Logging
 
-template<typename E>
+template <typename E>
 struct fmt::formatter<E, std::enable_if_t<std::is_enum_v<E>>>
     : fmt::formatter<std::string> {
   auto format(const E &enumValue, fmt::format_context &ctx) const
-      -> fmt::format_context::iterator {
+    -> fmt::format_context::iterator {
     return fmt::formatter<std::string>::format(
-        std::string(magic_enum::enum_name<E>(enumValue).data()), ctx);
+      std::string(magic_enum::enum_name<E>(enumValue).data()), ctx);
   }
 };

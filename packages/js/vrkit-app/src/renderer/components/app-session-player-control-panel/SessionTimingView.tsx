@@ -59,7 +59,7 @@ export function SessionTimingView({
             <EllipsisBox sx={{...FlexScaleZero}}>
               {match(sessionTiming.sessionSubType)
                   .when(isString, type => type.replace("SESSION_SUB_TYPE_",""))
-                  .otherwise(type => SessionSubType[type] ?? SessionSubType[type.toString()])
+                  .otherwise(type => SessionSubType[type] ?? SessionSubType[type?.toString?.()])
               }
             </EllipsisBox>
             <DurationView

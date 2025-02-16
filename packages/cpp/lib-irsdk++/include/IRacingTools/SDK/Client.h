@@ -32,9 +32,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <IRacingTools/SDK/SessionInfo/SessionInfoMessage.h>
 
-#include "DataHeader.h"
-#include "ErrorTypes.h"
-#include "Types.h"
+#include <IRacingTools/SDK/DataHeader.h>
+#include <IRacingTools/SDK/ErrorTypes.h>
+#include <IRacingTools/SDK/Types.h>
 
 // A C++ wrapper around the irsdk calls that takes care of reading a .ibt file
 namespace IRacingTools::SDK {

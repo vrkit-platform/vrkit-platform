@@ -2,7 +2,7 @@
 # SDK Source & headers
 file(GLOB_RECURSE sdkTestSources tests/*.cpp)
 file(GLOB_RECURSE sdkSources src/*.cpp)
-file(GLOB_RECURSE sdkHeaders ${sdkIncludeDir}/*.h)
+file(GLOB_RECURSE sdkHeaders include/*.h)
 file(GLOB_RECURSE sdkInternalHeaders src/*.h)
 
 # Create libraries

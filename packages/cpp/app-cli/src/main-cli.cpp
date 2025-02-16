@@ -6,9 +6,8 @@
 #include <IRacingTools/Shared/System/DisplayInfo.h>
 
 #include <CLI/CLI.hpp>
+#include <IRacingTools/SDK/LogInstance.h>
 #include <algorithm>
-
-#include <boost/di.hpp>
 
 #include "DashboardArgCommand.h"
 #include "GenerateTrackmapArgCommand.h"
@@ -28,9 +27,8 @@ using namespace IRacingTools::SDK;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::App::Commands;
 
-// namespace di = boost::di;
-
 int main(int argc, char **argv) {
+  // LogInstance::setDefaultLogger(LogInstance::Get())
   System::DisplayInfoSetup();
   System::GetAllDisplayInfo();
 

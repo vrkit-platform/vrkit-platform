@@ -1,4 +1,5 @@
 
+#include <IRacingTools/SDK/LogInstance.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/Utils/TypeIdHelpers.h>
@@ -22,6 +23,7 @@ namespace IRacingTools::Shared::Logging {
 #endif
 
     std::shared_ptr<spdlog::sinks::rotating_file_sink_mt> gFileSink{nullptr};
+    std::shared_ptr<spdlog::sinks::wincolor_stdout_sink_mt> gConsoleSink{nullptr};
     bool gFileSinkEnabled;
   }// namespace
 
@@ -36,7 +38,12 @@ namespace IRacingTools::Shared::Logging {
 
       gFileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(logFile.string(), LogFileMaxSize, 1u);
       gFileSink->set_level(Level::trace);
+    } else {
+      gConsoleSink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
     }
+
+    SDK::LogInstance::Get()
+      .setDefaultLogger(getCategory(std::string{LogCategoryDefaultMap[LogCategoryDefault::IRSDK]}));
   }
 
   /**
@@ -67,12 +74,11 @@ namespace IRacingTools::Shared::Logging {
       if (gFileSinkEnabled) {
         logger = std::make_shared<spdlog::logger>(prettyName, gFileSink);
         logger->flush_on(LogFlushOn);
-        loggers_[prettyName] = logger;
       } else {
-        logger = std::make_shared<spdlog::logger>(prettyName);
+        logger = std::make_shared<spdlog::logger>(prettyName,gConsoleSink);
       }
-
-      logger->set_level(LogLevel);
+      // logger->set_level(LogLevel);
+      loggers_[prettyName] = logger;
     }
     return loggers_[prettyName];
   }

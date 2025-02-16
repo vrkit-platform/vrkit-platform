@@ -325,7 +325,9 @@ namespace IRacingTools::Shared::Graphics {
       const auto overlayCount = producer_->getOverlayCount();
       if (overlayCount != sPreviousOverlayCount) {
         L->info("IPC SHM Frame Render >> Overlay Count Changed (previous={},current={})", sPreviousOverlayCount, overlayCount);
+        sPreviousOverlayCount = overlayCount;
       }
+
       const auto canvasSize = Spriting::GetBufferSize(overlayCount);
 
       // TraceLoggingWriteTagged(activity, "AcquireDXLock/start");

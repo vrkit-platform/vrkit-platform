@@ -205,7 +205,7 @@ namespace IRacingTools::App::Node {
 
     if (!resource) {
       if (!imageSize) {
-        L->info("Unable to create NativeOverlayWindowResources, size is invalid ({})", imageSize.toString());
+        L->info("Unable to create NativeOverlayWindowResources, size is invalid");
         return env.Null();
       }
       L->info("Creating NativeOverlayWindowResources (size={})", imageSize.toString());

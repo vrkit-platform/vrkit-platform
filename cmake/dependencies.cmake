@@ -122,7 +122,7 @@ set(DEP_GTEST GTest::gtest GTest::gmock)
 
 function(VRK_CONFIGURE_SDK_LIBS TARGET)
   target_link_libraries(${TARGET} PUBLIC ${ALL_SDK_DEPS})
-  target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
+#  target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
 endfunction()
 
 function(VRK_CONFIGURE_APP_LIBS TARGET)

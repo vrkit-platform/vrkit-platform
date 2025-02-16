@@ -1,33 +1,35 @@
+// ReSharper disable CppEvaluationInternalFailure
+
 /*
-Copyright (c) 2013, iRacing.com Motorsport Simulations, LLC.
-All rights reserved.
+  Copyright (c) 2013, iRacing.com Motorsport Simulations, LLC.
+  All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of iRacing.com Motorsport Simulations nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+      * Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+      * Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+      * Neither the name of iRacing.com Motorsport Simulations nor the
+        names of its contributors may be used to endorse or promote products
+        derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-/*
- The IRSDK is a simple api that lets clients access telemetry data from the 
+/**
+ The IRSDK is a simple api that lets clients access telemetry data from the
  iRacing simulator. It is broken down into several parts:
 
  - Live data
@@ -38,16 +40,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    file, without needing an external api.
 
    There are two different types of data that the telemetry outputs,
-   sessionInfo and variables: 
-   
+   sessionInfo and variables:
+
    Session info is for data that only needs to be updated every once in a
    while.  This data is output as a YAML formatted string.
 
    Variables, on the other hand, are output at a rate of 60 times a second.
    The varHeader struct defines each variable that the sim will output, while
    the varData struct gives details about the current line buffer that the vars
-   are being written into.  Each variable is packed into a binary array with 
-   an offset and length stored in the varHeader.  The number of variables 
+   are being written into.  Each variable is packed into a binary array with
+   an offset and length stored in the varHeader.  The number of variables
    available can change depending on the car or session loaded.  But once the
    sim is running the variable list is locked down and will not change during a
    session.
@@ -71,37 +73,73 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    After that the offsets in the DataHeader point to the sessionInfo string,
    the varHeader, and the varBuffer.
 
- - Remote Conrol
+ - Remote Control
    You can control the camera selections and playback of a replay tape, from
-   any external application by sending a windows message with the 
+   any external application by sending a windows message with the
    irsdk_broadcastMsg() function.
 */
 #pragma once
 
 #include <chrono>
+#include <regex>
 
 #include <magic_enum.hpp>
-#include <regex>
-#include <windows.h>
 
+#include <IRacingTools/SDK/Types.h>
 #include <IRacingTools/SDK/Utils/LUT.h>
-// #include <IRacingTools/Models/Session/SessionState.pb.h>
-
-#include "Utils/EnumHelpers.h"
 
 namespace IRacingTools::SDK {
+
+  /**
+   * Defines the identifier used to
+   * represent a client implementation instance
+   */
   using ClientId = std::string_view;
 
+  /**
+   * Alias to `std::optional`
+   */
   template <typename T>
   using Opt = std::optional<T>;
 
+  /**
+   * Unit of measure for `SessionTime` instances,
+   * internally.
+   *
+   * The actual `data` is processed as
+   * a double representing seconds, but this SDK
+   * uses the opinion that milliseconds have a lower-overhead
+   * as an integral number compared to `seconds` stored as a `double`
+   * where 6 digits of precision is available
+   */
   using SessionTime = std::chrono::milliseconds;
 
+  /**
+   * Status of the `LiveConnection` singleton, which
+   * encapsulates the connection to `iRacing`
+   */
   enum class ConnectionStatus : int {
     NotConnected = 0,
     Connected = 1
   };
 
+  /**
+   * Variable data types accessible
+   * through the memory-mapped data
+   * accessible in each data frame
+   *
+   * - 1 Byte = 8 bits
+   *   Char
+   *   Bool
+   *
+   * - 4 bytes = 32 bits
+   *   Int32
+   *   Bitmask
+   *   Float
+   *
+   * - 8 bytes = 64 bits
+   *   Double
+   */
   enum class VarDataType : int {
     // 1 byte
     Char = 0,
@@ -116,8 +154,15 @@ namespace IRacingTools::SDK {
     Double,
   };
 
+  /**
+   * The number of `VarDataType` values in the enumeration
+   */
   constexpr std::size_t VarDataTypeCount = magic_enum::enum_count<VarDataType>();
 
+  /**
+   * Lookup table mapping each `VarDataType`
+   * to the number of bytes it represents
+   */
   constexpr Utils::LUT<VarDataType, std::size_t, VarDataTypeCount> VarDataTypeSizeTable = {
     {
       {VarDataType::Char, 1},
@@ -129,9 +174,15 @@ namespace IRacingTools::SDK {
     },
   };
 
+  /**
+   * Array of the values in `VarDataTypeSizeTable`
+   */
   constexpr std::array<std::size_t, VarDataTypeCount> VarDataTypeBytes = VarDataTypeSizeTable.values();
 
-  // bit fields
+  /**
+   * Types of possible engine warnings
+   * with bitmask bitwise-and matching values
+   */
   enum class EngineWarning {
     WaterTemp = 0x01,
     FuelPressure = 0x02,
@@ -142,7 +193,10 @@ namespace IRacingTools::SDK {
     OilTemp = 0x40,
   };
 
-  // global flags
+  /**
+   * Types of possible flags
+   * with bitmask bitwise-and matching values
+   */
   enum class FlagType : uint32_t {
     // global flags
     Checkered = 0x00000001,
@@ -165,7 +219,7 @@ namespace IRacingTools::SDK {
     // drivers black flags
     Black = 0x00010000,
     Disqualify = 0x00020000,
-    Servicible = 0x00040000,
+    Serviceable = 0x00040000,
     // car is allowed service (not a flag)
     Furled = 0x00080000,
     Repair = 0x00100000,
@@ -177,24 +231,64 @@ namespace IRacingTools::SDK {
     StartGo = 0x80000000,
   };
 
+  /**
+   * Determines whether a specified flag is set within a given bitmask.
+   *
+   * @param bitmask The bitmask to check for the presence of the flag.
+   * @return True if the specified flag is set in the bitmask; otherwise, false.
+   */
   template <FlagType FT>
   bool IsFlagSet(uint32_t bitmask) {
     return magic_enum::enum_underlying(FT) & bitmask > 0;
   }
 
+
+  /**
+   * Checks if a specific flag is set in a given bitmask.
+   *
+   * @param bitmask The bitmask in which the flag will be checked.
+   * @param flag The flag to check within the bitmask.
+   * @return True if the flag is present and set in the bitmask; otherwise, false.
+   */
   inline bool IsFlagSet(uint32_t bitmask, FlagType flag) {
     return magic_enum::enum_underlying(flag) & bitmask > 0;
   }
 
-  // status
+  /**
+   * Current car[index] location on track
+   */
   enum class TrackLocation {
+    /**
+     * Basically this means a car is not yet, or no longer connected
+     */
     NotInWorld = -1,
+
+    /**
+     * Off track (grass, gravel, etc)
+     */
     OffTrack,
+
+    /**
+     * In pits
+     */
     InPitStall,
+
+    /**
+     * Approaching the pits (useful for warnings like "Watch your speed")
+     */
     ApproachingPits,
+
+    /**
+     * On track and running
+     */
     OnTrack
   };
 
+  /**
+   * Enum representing different types of track surfaces that can be encountered.
+   * Each surface type corresponds to specific physical or visual characteristics
+   * that influence car behavior and track conditions.
+   */
   enum class TrackSurface {
     SurfaceNotInWorld = -1,
     Undefined = 0,
@@ -227,6 +321,11 @@ namespace IRacingTools::SDK {
     Astroturf,
   };
 
+  /**
+   * Represents the various states a racing session can progress through.
+   * Each state corresponds to a specific phase of a session's lifecycle,
+   * allowing for tracking and operational decisions based on the current state.
+   */
   enum class SessionState {
     Invalid,
     GetInCar,
@@ -237,28 +336,62 @@ namespace IRacingTools::SDK {
     CoolDown
   };
 
+  /**
+   * Represents the positional relationship between the player's car
+   * and other cars on the track. Indicates whether other cars are
+   * present and their relative positions.
+   */
   enum class CarLeftRight {
+    /**
+     * Disabled/Off
+     */
     LROff,
+
+    /**
+     * no cars around us.
+     */
     LRClear,
-    // no cars around us.
+
+    /**
+     * there is a car to our left.
+     */
     LRCarLeft,
-    // there is a car to our left.
+
+    /**
+     * there is a car to our right.
+     */
     LRCarRight,
-    // there is a car to our right.
+
+    /**
+     * there are cars on each side.
+     */
     LRCarLeftRight,
-    // there are cars on each side.
+
+    /**
+     * there are two cars to our left.
+     */
     LR2CarsLeft,
-    // there are two cars to our left.
-    LR2CarsRight // there are two cars to our right.
+
+    /**
+     * there are two cars to our right.
+     */
+    LR2CarsRight
   };
 
+  /**
+   * Represents the state of the camera system, with each state
+   * defined as a unique bitmask. Multiple states can be combined
+   * using bitwise operations to describe the current camera configuration
+   * or behavior during a session.
+   */
   enum class CameraState {
-    IsSessionScreen = 0x0001,
     // the camera tool can only be activated if viewing the session screen (out of car)
-    IsScenicActive = 0x0002,
-    // the scenic camera is active (no focus car)
+    IsSessionScreen = 0x0001,
 
-    //these can be changed with a broadcast message
+    // the scenic camera is active (no focus car)
+    IsScenicActive = 0x0002,
+
+    // these can be changed with a broadcast message
     CamToolActive = 0x0004,
     UIHidden = 0x0008,
     UseAutoShotSelection = 0x0010,
@@ -268,7 +401,7 @@ namespace IRacingTools::SDK {
     UseMouseAimMode = 0x0100
   };
 
-  enum class PitSvTask {
+  enum class PitServiceTask {
     LFTireChange = 0x0001,
     RFTireChange = 0x0002,
     LRTireChange = 0x0004,
@@ -278,13 +411,18 @@ namespace IRacingTools::SDK {
     FastRepair = 0x0040
   };
 
-  enum class PitSvStatus {
-    // status
+  /**
+   * Represents the status of pit service operations and errors during a race session.
+   * Provides states for ongoing pit service processes as well as specific
+   * errors indicating incorrect car positioning or serviceability issues.
+   */
+  enum class PitServiceStatus {
+    // STATUS
     None = 0,
     InProgress,
     Complete,
 
-    // errors
+    // ERRORS
     TooFarLeft = 100,
     TooFarRight,
     TooFarForward,
@@ -293,6 +431,12 @@ namespace IRacingTools::SDK {
     CantFixThat,
   };
 
+  /**
+   * Represents the different pacing modes a race session
+   * can utilize. Each mode defines the arrangement and
+   * behavior of cars under pacing conditions, such as
+   * restarts or starting formations.
+   */
   enum class PaceMode {
     SingleFileStart = 0,
     DoubleFileStart,
@@ -301,16 +445,33 @@ namespace IRacingTools::SDK {
     NotPacing,
   };
 
+  /**
+   * Represents different types of pacing flags used during a race session,
+   * which determine specific instructions for cars under caution conditions.
+   */
   enum class PaceFlagType : uint32_t {
     EndOfLine = 0x01,
     FreePass = 0x02,
     WavedAround = 0x04,
   };
 
+  /**
+   * Checks if a specific pace flag is set within a given bitmask.
+   *
+   * @param bitmask The bitmask to be checked against.
+   * @param flag The pace flag to check for in the bitmask.
+   * @return True if the provided flag is set in the bitmask, otherwise false.
+   */
   inline bool IsPaceFlagSet(uint32_t bitmask, PaceFlagType flag) {
     return magic_enum::enum_underlying(flag) & bitmask > 0;
   }
 
+  /**
+   * Enumeration representing known variable names that are used
+   * to encapsulate various telemetry data points and game state
+   * information in `iRacing`. Each enumerator corresponds to a
+   * specific data field provided by the telemetry system.
+   */
   enum class KnownVarName {
     AirDensity = 0,
     AirPressure,
@@ -564,23 +725,27 @@ namespace IRacingTools::SDK {
     CarIdxTrackSurface,
   };
 
+  /**
+   * @brief An iterable list of `KnownVarName` values represented as their
+   * respective name
+   */
   constexpr auto KnownVarNames = magic_enum::enum_names<KnownVarName>();
 
   /**
-     * @brief Convert enum constant to string_view
-     *
-     * @param name Known variable name
-     * @return string_view of enum constant
-     */
-  constexpr std::string_view KnownVarNameToStringView(const KnownVarName& name) {
+   * @brief Convert enum constant to string_view
+   *
+   * @param name Known variable name
+   * @return string_view of enum constant
+   */
+  constexpr std::string_view KnownVarNameToStringView(const KnownVarName &name) {
     return magic_enum::enum_name(name);
   }
 
-
-  //----
-  // Remote control the sim by sending these windows messages
-  // camera and replay commands only work when you are out of your car,
-  // pit commands only work when in your car
+  /**
+   * Remote control the sim by sending these windows messages
+   * camera and replay commands only work when you are out of your car,
+   * pit commands only work when in your car
+   */
   enum class BroadcastMessage {
     CamSwitchPos = 0,
     // car position, group, camera
@@ -613,67 +778,108 @@ namespace IRacingTools::SDK {
     Last // unused placeholder
   };
 
+  /**
+   * Represents the modes available for executing chat commands
+   * within the application.
+   */
   enum class ChatCommandMode {
-    Macro = 0,
     // pass in a number from 1-15 representing the chat macro to launch
-    BeginChat,
+    Macro = 0,
+
     // Open up a new chat window
-    Reply,
+    BeginChat,
+
     // Reply to last private chat
+    Reply,
+
     Cancel // Close chat window
   };
 
-  enum class PitCommandMode // this only works when the driver is in the car
+  /**
+   * Enum class representing various pit command modes used to execute specific pit
+   * stop actions during a race. Each mode corresponds to a distinct operation related
+   * to pit services.
+   *
+   * > NOTE: this only works when the driver is in the car
+   */
+  enum class PitCommandMode
   {
-    Clear = 0,
     // Clear all pit checkboxes
+    Clear = 0,
+
+    // Clean the windshield, using one tear off
     WS,
-    // Clean the winshield, using one tear off
-    Fuel,
+
     // Add fuel, optionally specify the amount to add in liters or pass '0' to use existing amount
-    LF,
+    Fuel,
+
     // Change the left front tire, optionally specifying the pressure in KPa or pass '0' to use existing pressure
-    RF,
+    LF,
+
     // right front
-    LR,
+    RF,
+
     // left rear
-    RR,
+    LR,
+
     // right rear
-    ClearTires,
+    RR,
+
     // Clear tire pit checkboxes
-    FR,
+    ClearTires,
+
     // Request a fast repair
-    ClearWS,
+    FR,
+
     // Uncheck Clean the winshield checkbox
-    ClearFR,
+    ClearWS,
+
     // Uncheck request a fast repair
-    ClearFuel,
+    ClearFR,
+
     // Uncheck add fuel
+    ClearFuel,
+
   };
 
-  enum class TelemetryCommandMode // You can call this any time, but telemtry only records when driver is in there car
+  /**
+   * You can call this any time, but telemetry only records when driver is in there car
+   */
+  enum class TelemetryCommandMode
   {
-    Stop = 0,
     // Turn telemetry recording off
-    Start,
+    Stop = 0,
+
     // Turn telemetry recording on
-    Restart,
+    Start,
+
     // Write current file to disk and start a new one
+    Restart
   };
 
   enum class ReplayStateMode {
-    EraseTape = 0,
     // clear any data in the replay tape
+    EraseTape = 0,
+
     Last // unused place holder
   };
 
+  /**
+   * Defines the modes for reloading textures, determining
+   * the scope of texture reloading operations.
+   */
   enum class ReloadTexturesMode {
+    // reload all textures
     All = 0,
-    // reload all textuers
-    CarIdx // reload only textures for the specific carIdx
+
+    // reload only textures for the specific carIdx
+    CarIdx
   };
 
-  // Search replay tape for events
+  /**
+   * Enum representing various search modes for navigating
+   * through a replay in a simulation or replay system.
+   */
   enum class ReplaySearchMode {
     ToStart = 0,
     ToEnd,
@@ -688,6 +894,10 @@ namespace IRacingTools::SDK {
     Last // unused placeholder
   };
 
+  /**
+   * Represents the mode used to specify a position within
+   * a replay session in the simulation.
+   */
   enum class ReplayPositionMode {
     Begin = 0,
     Current,
@@ -695,15 +905,21 @@ namespace IRacingTools::SDK {
     Last // unused placeholder
   };
 
+  /**
+   * Modes for configuring force feedback (FFB) commands.
+   */
   enum class FFBCommandMode // You can call this any time
   {
-    MaxForce = 0,
     // Set the maximum force when mapping steering torque force to direct input units (float in Nm)
+    MaxForce = 0,
+
     Last // unused placeholder
   };
 
-  // CamSwitchPos or CamSwitchNum camera focus defines
-  // pass these in for the first parameter to select the 'focus at' types in the camera system.
+  /**
+   * CamSwitchPos or CamSwitchNum camera focus defines
+   * pass these in for the first parameter to select the 'focus at' types in the camera system.
+   */
   enum class CameraSwitchMode {
     FocusAtIncident = -3,
     FocusAtLeader = -2,
@@ -712,18 +928,28 @@ namespace IRacingTools::SDK {
     FocusAtDriver = 0
   };
 
+  /**
+   * Specifies various modes for video capture operations which include
+   * screenshot capture, video capture controls, and video timer display options.
+   */
   enum class VideoCaptureMode {
-    TriggerScreenShot = 0,
     // save a screenshot to disk
-    StartVideoCapture,
+    TriggerScreenShot = 0,
+
     // start capturing video
-    EndVideoCapture,
+    StartVideoCapture,
+
     // stop capturing video
-    ToggleVideoCapture,
+    EndVideoCapture,
+
     // toggle video capture on/off
-    ShowVideoTimer,
+    ToggleVideoCapture,
+
     // show video timer in upper left corner of display
-    HideVideoTimer,
+    ShowVideoTimer,
+
     // hide video timer
+    HideVideoTimer,
+
   };
 } // namespace IRacingTools::SDK

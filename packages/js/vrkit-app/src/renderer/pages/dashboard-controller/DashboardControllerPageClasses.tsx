@@ -19,7 +19,9 @@ export const dashboardControllerPageClasses = createClassNames(
   "overlayRow",
   "overlayDetails",
   "overlayActions",
-  "overlayAction"
+  "overlayAction",
+    
+    "multiLayoutButton"
 )
 
 export default dashboardControllerPageClasses

@@ -252,7 +252,7 @@ export const DashboardEditorForm = withFormik<DashboardEditorFormProps, Dashboar
     ),
     dashboardClient = useService(DashboardManagerClient),
     patchConfigAsync = useAsyncCallback(dashboardClient.updateDashboardConfig),
-    launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchLayoutEditor),
+    launchLayoutEditorAsync = useAsyncCallback(dashboardClient.launchVRLayoutEditor),
     [selectedOverlayId, setSelectedOverlayId] = useState<string>(config?.overlays?.[0]?.id ?? null),
     compEntryMap = useAppSelector(sharedAppSelectors.selectPluginComponentOverlayDefsMap),
     [compPickerOpen, setCompPickerOpen] = useState(false),

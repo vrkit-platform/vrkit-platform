@@ -10,11 +10,13 @@ import Box from "@mui/material/Box"
 import { styled, useTheme } from "@mui/material/styles"
 
 // ICONS
+import EditIcon from "@mui/icons-material/Edit"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import ReloadWindowIcon from "@mui/icons-material/RefreshOutlined"
 import DevToolsIcon from "@mui/icons-material/LogoDev"
+
 import IsDefaultDashIcon from "@mui/icons-material/Check"
-import ToggleEditorEnabledIcon from "@mui/icons-material/SpaceDashboard"
+// import { faObjectsColumn } from "@awesome.me/kit-79150a3eed/icons/"
 import { faDesktop, faVrCardboard } from "@awesome.me/kit-79150a3eed/icons/duotone/solid"
 
 // OTHER
@@ -46,17 +48,15 @@ import {
   FlexScaleZero,
   FlexScaleZeroBox,
   heightConstraint,
-  margin,
   OverflowHidden,
   padding,
   PositionRelative,
-  rem,
-  Transparent
+  rem
 } from "@vrkit-platform/shared-ui"
 
 import classes from "./DashboardControllerPageClasses"
 
-import Button from "@mui/material/Button"
+import Button, { ButtonProps } from "@mui/material/Button"
 import { useService } from "../../components/service-container"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 import { AppSettingsClient } from "../../services/app-settings-client"
@@ -82,6 +82,8 @@ import Grow from "@mui/material/Grow"
 import MenuList from "@mui/material/MenuList"
 import ClickAwayListener from "@mui/material/ClickAwayListener"
 import MenuItem from "@mui/material/MenuItem"
+import { match } from "ts-pattern"
+import { faObjectsColumn } from "@awesome.me/kit-79150a3eed/icons/sharp/light"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -138,29 +140,41 @@ const DashboardControllerPageRoot = styled(Box, {
         [child(classes.headerButtons)]: {
           ...FlexRowCenter,
           gap: theme.spacing(1),
-          [child(classes.headerButton)]: {
-            ...PositionRelative,
-            ...dimensionConstraints(rem(3)),
+          [`& > button`]: {
+            //.${classes.headerButton}
             ...padding(theme.spacing(1)),
-            ...margin(0),
-            transition: theme.transitions.create(["border-Color", "opacity", "background-color"]),
-            borderColor: alpha(theme.palette.primary.contrastText, 0.25),
-            backgroundColor: Transparent,
-            opacity: 0.5,
-            "& svg": {
-              ...Fill,
-              color: theme.palette.primary.contrastText
-            },
-            "&:hover": {
-              opacity: 1,
-              backgroundColor: theme.palette.primary.main,
-              borderColor: Transparent,
-              "&.colorError": {
-                backgroundColor: theme.palette.error.main
-              }
+            ...heightConstraint(rem(2.5)),
+            ...PositionRelative,
+            transition: theme.transitions.create("opacity"),
+            "& > svg": {
+              ...dimensionConstraints(rem(1)),
+              marginRight: theme.spacing(1)
             }
-          }
+          },
+          [child(classes.headerButton)]: {}
         }
+      }
+    }
+  },
+  [child(classes.multiLayoutButton)]: {
+    ...OverflowHidden,
+    ...FlexRowCenter,
+    ...FlexAuto,
+    ...padding(0),
+    "& > button": {
+      ...padding(0),
+      ...heightConstraint(rem(2)),
+      ...PositionRelative,
+      "& > svg": {
+        ...Fill
+      }
+    },
+
+    "&.contained": {
+      ...padding(0),
+      "& > button": {
+        ...padding(theme.spacing(1)),
+        ...heightConstraint(rem(2.5))
       }
     }
   },
@@ -170,9 +184,8 @@ const DashboardControllerPageRoot = styled(Box, {
     ...FlexScaleZero,
     ...flexAlign("stretch", "stretch"), // ...OverflowHidden,
     [child(classes.overlaysPaper)]: {
-      ...FlexColumn,
-      //...FlexScaleZero,
-      ...flex(0,1,"auto"),
+      ...FlexColumn, //...FlexScaleZero,
+      ...flex(0, 1, "auto"),
       ...flexAlign("stretch", "stretch"), //  ...OverflowHidden,
       [child(classes.overlaysList)]: {
         overflowX: "hidden",
@@ -185,13 +198,6 @@ const DashboardControllerPageRoot = styled(Box, {
           ...flexAlign("center", "flex-start"),
           ...padding(theme.spacing(1)),
           borderBottom: `1px solid ${alpha(theme.palette.border.selected, 0.1)}`, // "&:last-child": {
-          //   borderTop: `1.5px solid
-          // ${theme.palette.border.selected}`
-          // },
-          // "&:not(:last-child)": {
-          //   borderBottom: `2px solid
-          // ${theme.palette.border.selected}` }, borderRadius:
-          // theme.shape.borderRadius,
 
           [child(classes.overlayDetails)]: {
             ...Ellipsis,
@@ -207,18 +213,18 @@ const DashboardControllerPageRoot = styled(Box, {
             ...padding(theme.spacing(0.25), theme.spacing(0.5)),
             gap: theme.spacing(1),
             [child(classes.overlayAction)]: {
-              ...OverflowHidden,
-              ...FlexRowCenter,
-              ...FlexAuto,
-              ...padding(0),
-              "& > button": {
-                ...padding(0),
-                ...heightConstraint(rem(2)),
-                ...PositionRelative,
-                "& > svg": {
-                  ...Fill
-                }
-              }
+              // ...OverflowHidden,
+              // ...FlexRowCenter,
+              // ...FlexAuto,
+              // ...padding(0),
+              // "& > button": {
+              //   ...padding(0),
+              //   ...heightConstraint(rem(2)),
+              //   ...PositionRelative,
+              //   "& > svg": {
+              //     ...Fill
+              //   }
+              // }
             }
           }
         }
@@ -229,12 +235,14 @@ const DashboardControllerPageRoot = styled(Box, {
 
 type MultiLayoutActionInfo = Triple<"VR" | "SCREEN", string, React.ReactNode>
 
-interface MultiLayoutButtonProps {
+interface MultiLayoutButtonProps extends Pick<ButtonProps, "variant" | "color"> {
   icon: React.ReactNode
 
   actions: MultiLayoutActionInfo[]
 
   onAction: (action: MultiLayoutActionInfo) => any
+
+  disabled?: boolean
 
   id?: string
 }
@@ -243,6 +251,9 @@ function MultiLayoutButton({
   icon,
   onAction,
   actions,
+  disabled = false,
+  variant = "outlined",
+  color = "primary",
   id: inId = "multi-layout-action-button",
   ...other
 }: MultiLayoutButtonProps) {
@@ -261,26 +272,32 @@ function MultiLayoutButton({
     [current, setCurrent] = useState<MultiLayoutActionInfo>(null),
     [open, setOpen] = useState(false),
     anchorRef = useRef<HTMLDivElement>(null),
-    handleMenuItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
-      stopEvent(event)
-      if (!actions.length) {
-        return
-      }
+    handleMenuItemClick = useCallback(
+      (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
+        stopEvent(event)
+        if (!actions.length) {
+          return
+        }
 
-      setCurrent(actions[index])
-      setOpen(false)
-      onAction(actions[index])
-    },
-    handleToggle = () => {
+        setCurrent(actions[index])
+        setOpen(false)
+        onAction(actions[index])
+      },
+      [actions, onAction]
+    ),
+    handleToggle = useCallback(() => {
       setOpen(prevOpen => !prevOpen)
-    },
-    handleClose = (event: Event) => {
-      if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
-        return
-      }
+    }, []),
+    handleClose = useCallback(
+      (event: Event) => {
+        if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
+          return
+        }
 
-      setOpen(false)
-    }
+        setOpen(false)
+      },
+      [anchorRef.current]
+    )
 
   useEffect(() => {
     if (!actions.length) {
@@ -295,20 +312,19 @@ function MultiLayoutButton({
     isArray(current) && (
       <>
         <ButtonGroup
-          className={classes.overlayAction}
-          variant="outlined"
-          color={"primary"}
+          className={clsx(classes.multiLayoutButton, variant)}
+          variant={variant}
+          color={color}
           ref={anchorRef}
+          disabled={disabled}
           aria-label="Layout Specific Action"
         >
           <Button
             size="medium"
             data-action={current[0]}
             onClick={handleToggle}
-            // startIcon={icon}
           >
             {icon}
-            {/*{current[1]}*/}
           </Button>
           {actions.length > 1 && (
             <Button
@@ -354,23 +370,21 @@ function MultiLayoutButton({
                       id={id}
                       autoFocusItem
                     >
-                      {actions
-                        // .filter(action => action !== current)
-                        .map((action, index) => (
-                          <MenuItem
-                            key={action[0]}
-                            selected={action[0] === current[0]}
-                            onClick={event => handleMenuItemClick(event, index)}
-                            sx={{
-                              ...FlexRow,
-                              ...flexAlign("center", "stretch"),
-                              gap: theme.spacing(1)
-                            }}
-                          >
-                            {action[2]}
-                            <Box>{action[1]}</Box>
-                          </MenuItem>
-                        ))}
+                      {actions.map((action, index) => (
+                        <MenuItem
+                          key={action[0]}
+                          selected={action[0] === current[0]}
+                          onClick={event => handleMenuItemClick(event, index)}
+                          sx={{
+                            ...FlexRow,
+                            ...flexAlign("center", "stretch"),
+                            gap: theme.spacing(1)
+                          }}
+                        >
+                          {action[2]}
+                          <Box>{action[1]}</Box>
+                        </MenuItem>
+                      ))}
                     </MenuList>
                   </ClickAwayListener>
                 </Paper>
@@ -401,19 +415,19 @@ function OverlayControllerItem({
 }: OverlayControllerItemProps) {
   const overlayClient = useService(OverlayManagerClient),
     handleOpenDevTools = useCallback(
-        ([layoutType]: MultiLayoutActionInfo) => {
-          log.info(`Handling layout type (${layoutType}) action`)
-          overlayClient.openDevTools(item.id, layoutType)
-        },
+      ([layoutType]: MultiLayoutActionInfo) => {
+        log.info(`Handling layout type (${layoutType}) action`)
+        overlayClient.openDevTools(item.id, layoutType)
+      },
       [overlayClient, item?.id]
     ),
-      handleReloadWindow = useCallback(
-          ([layoutType]: MultiLayoutActionInfo) => {
-            log.info(`Handling reload window, layout type (${layoutType}) action`)
-            overlayClient.reloadWindow(item.id, layoutType)
-          },
-          [overlayClient, item?.id]
-      )
+    handleReloadWindow = useCallback(
+      ([layoutType]: MultiLayoutActionInfo) => {
+        log.info(`Handling reload window, layout type (${layoutType}) action`)
+        overlayClient.reloadWindow(item.id, layoutType)
+      },
+      [overlayClient, item?.id]
+    )
   return (
     <Box
       key={key}
@@ -453,29 +467,29 @@ function OverlayControllerItem({
           onAction={handleOpenDevTools}
         />
         <MultiLayoutButton
-            id={`layout-action-button-group-reload-window-${item.id}`}
-            icon={<ReloadWindowIcon />}
-            actions={
-              [
-                config.vrEnabled && [
-                  "VR",
-                  "Reload VR",
-                  <AppFAIcon
-                      size="sm"
-                      icon={faVrCardboard}
-                  />
-                ],
-                config.screenEnabled && [
-                  "SCREEN",
-                  "Reload Screen",
-                  <AppFAIcon
-                      size="sm"
-                      icon={faDesktop}
-                  />
-                ]
-              ].filter(isArray) as MultiLayoutActionInfo[]
-            }
-            onAction={handleReloadWindow}
+          id={`layout-action-button-group-reload-window-${item.id}`}
+          icon={<ReloadWindowIcon />}
+          actions={
+            [
+              config.vrEnabled && [
+                "VR",
+                "Reload VR",
+                <AppFAIcon
+                  size="sm"
+                  icon={faVrCardboard}
+                />
+              ],
+              config.screenEnabled && [
+                "SCREEN",
+                "Reload Screen",
+                <AppFAIcon
+                  size="sm"
+                  icon={faDesktop}
+                />
+              ]
+            ].filter(isArray) as MultiLayoutActionInfo[]
+          }
+          onAction={handleReloadWindow}
         />
         {/*<Tooltip title={`Open Developer Tools for Overlay (${item.name})`}>*/}
 
@@ -508,6 +522,7 @@ export function DashboardControllerPage(props: DashboardControllerPageProps) {
       .filter(isNotEmptyString)
       .getOrNull(),
     isDefault = defaultId === config?.id,
+    isEditorEnabled = useAppSelector(sharedAppSelectors.selectEditorEnabled),
     activeId = asOption(useAppSelector(sharedAppSelectors.selectActiveDashboardConfigId))
       .filter(isNotEmptyString)
       .getOrNull(),
@@ -536,28 +551,7 @@ export function DashboardControllerPage(props: DashboardControllerPageProps) {
           />
         )
       }),
-    handleSetAsDefault = useCallback(() => {
-      if (!isNotEmptyString(config?.id)) {
-        Alerts.onError(`Can not delete dashboard config, id is invalid`)
-        return
-      }
-
-      if (isDefault) {
-        Alerts.onError(`This dashboard is already the default`)
-      } else {
-        settingsClient.changeSettings({
-          defaultDashboardConfigId: config.id
-        })
-      }
-    }, [config?.id, hasActive, dashClient]),
-    handleToggleEditorEnabled = useCallback(
-      (ev: React.SyntheticEvent<any>) => {
-        stopEvent(ev)
-        overlayClient.setEditorEnabled(!overlayClient.editorEnabled)
-      },
-      [overlayClient]
-    ),
-    editLayout = Alert.usePromise(
+    launchVRLayoutEditor = Alert.usePromise(
       async () => {
         const idValid = isNotEmpty(config?.id)
         if (!idValid) {
@@ -565,16 +559,8 @@ export function DashboardControllerPage(props: DashboardControllerPageProps) {
           return
         }
 
-        if (!isActive) {
-          if (hasActive) {
-            info(`Closing active dashboard in order to start layout editor for ${config.id}`)
-            await dashClient.closeDashboard()
-          }
-          info(`Launching dashboard to start layout editor for ${config.id}`)
-          await dashClient.openDashboard(config.id)
-        }
         info(`Launching dashboard to start layout editor for ${config.id}`)
-        await dashClient.launchLayoutEditor(config.id)
+        await dashClient.launchVRLayoutEditor(config.id)
       },
       {
         loading: ctx => `Launching layout editor for dashboard (${config.name})`,
@@ -585,6 +571,35 @@ export function DashboardControllerPage(props: DashboardControllerPageProps) {
         success: () => `Launch dashboard layout editor`
       },
       [config?.id, isActive, hasActive, dashClient]
+    ),
+    handleToggleLayoutEditorEnabled = useCallback(
+      ([layoutType]: MultiLayoutActionInfo) => {
+        const handleError = (err: ErrorKind) => {
+          log.error(`Unable to launch VR layout editor`, err)
+        }
+
+        match(layoutType)
+          .with("SCREEN", () => {
+            overlayClient.setEditorEnabled(!overlayClient.editorEnabled)
+          })
+          .with("VR", () => {
+            if (launchVRLayoutEditor.executing) {
+              Alert.onWarning("Already starting the VR layout editor")
+              return
+            }
+
+            launchVRLayoutEditor.execute().catch(handleError)
+          })
+          .run()
+      },
+      [overlayClient]
+    ),
+    handleFinishEditing = useCallback(
+      (ev: React.SyntheticEvent<any>) => {
+        stopEvent(ev)
+        overlayClient.setEditorEnabled(false)
+      },
+      [overlayClient]
     ),
     handleCloseDash = useCallback(
       (ev: React.SyntheticEvent<any>) => {
@@ -658,31 +673,48 @@ export function DashboardControllerPage(props: DashboardControllerPageProps) {
                   </Typography>
                 </FlexColumnBox>
                 <Box className={clsx(classes.headerButtons)}>
-                  <Tooltip title={config.screenEnabled ? "Edit Screen Layout" : "Screen Layout Not Enabled"}>
+                  <Tooltip title="Finish editing">
                     <Button
-                      size="large"
-                      variant="outlined"
-                      color="inherit"
+                      onClick={handleFinishEditing}
+                      color="error"
+                      variant="contained"
+                      disabled={!isEditorEnabled}
+                      sx={{
+                        opacity: isEditorEnabled ? 1 : 0
+                      }}
                       className={clsx(classes.headerButton)}
-                      onClick={handleToggleEditorEnabled}
                     >
-                      <ToggleEditorEnabledIcon />
+                      <EditIcon /> DONE
                     </Button>
                   </Tooltip>
-                  <Tooltip title={config.vrEnabled ? "Edit VR Layout" : "VR Not Enabled"}>
-                    <Button
-                      size="large"
-                      variant="outlined"
-                      color="inherit"
-                      className={clsx(classes.headerButton)}
-                      onClick={editLayout.execute}
-                    >
-                      <AppFAIcon
-                        size="sm"
-                        icon={faVrCardboard}
-                      />
-                    </Button>
-                  </Tooltip>
+                  <MultiLayoutButton
+                    id={`layout-action-button-group-edit-layout-${config.id}`}
+                    icon={<AppFAIcon icon={faObjectsColumn} />}
+                    disabled={!!isEditorEnabled}
+                    variant="contained"
+                    color="primary"
+                    actions={
+                      [
+                        config.vrEnabled && [
+                          "VR",
+                          "VR Layout Editor",
+                          <AppFAIcon
+                            size="sm"
+                            icon={faVrCardboard}
+                          />
+                        ],
+                        config.screenEnabled && [
+                          "SCREEN",
+                          "Screen Layout Editor",
+                          <AppFAIcon
+                            size="sm"
+                            icon={faDesktop}
+                          />
+                        ]
+                      ].filter(isArray) as MultiLayoutActionInfo[]
+                    }
+                    onAction={handleToggleLayoutEditorEnabled}
+                  />
                 </Box>
               </Box>
 

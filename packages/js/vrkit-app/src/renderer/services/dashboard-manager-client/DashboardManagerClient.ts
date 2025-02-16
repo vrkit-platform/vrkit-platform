@@ -115,8 +115,8 @@ export class DashboardManagerClient {
   }
   
   @Bind
-  launchLayoutEditor(id: string): Promise<DashboardConfig> {
-    return ipcRenderer.invoke(DashboardManagerFnTypeToIPCName(DashboardManagerFnType.LAUNCH_DASHBOARD_LAYOUT_EDITOR), id)
+  launchVRLayoutEditor(id: string): Promise<DashboardConfig> {
+    return ipcRenderer.invoke(DashboardManagerFnTypeToIPCName(DashboardManagerFnType.LAUNCH_DASHBOARD_VR_LAYOUT_EDITOR), id)
   }
   
   

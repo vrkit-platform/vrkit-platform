@@ -145,9 +145,9 @@ namespace IRacingTools::SDK {
 
   bool LiveConnection::getNewData(char *data) {
     if (gIsInitialized || initialize()) {
-#ifdef _MSC_VER
-      _ASSERTE(nullptr != gDataHeader);
-#endif
+// #ifdef _MSC_VER
+//       _ASSERTE(nullptr != gDataHeader);
+// #endif
 
       // if sim is not active, then no new data
       if (!gDataHeader || gDataHeader->status != ConnectionStatus::Connected) {
@@ -224,9 +224,9 @@ namespace IRacingTools::SDK {
    *         false otherwise.
    */
   bool LiveConnection::waitForDataReady(int timeOut, char *data) {
-#ifdef _MSC_VER
-    _ASSERTE(timeOut >= 0);
-#endif
+// #ifdef _MSC_VER
+//     _ASSERTE(timeOut >= 0);
+// #endif
 
     if (gIsInitialized || initialize()) {
       // just to be sure, check before we sleep

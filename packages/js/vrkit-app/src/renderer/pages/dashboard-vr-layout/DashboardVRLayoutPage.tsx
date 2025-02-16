@@ -1,5 +1,5 @@
 import { Page, PageProps } from "../../components/page"
-import React, { useMemo } from "react"
+import React, { useCallback, useMemo } from "react"
 import { getLogger } from "@3fv/logger-proxy"
 import { lighten, styled } from "@mui/material/styles"
 import {
@@ -10,12 +10,11 @@ import {
   flexAlign,
   FlexAuto,
   FlexColumn,
-  FlexColumnCenter,
   FlexDefaults,
-  FlexRow, FlexRowCenter,
+  FlexRow,
+  FlexRowCenter,
   FlexScaleZero,
   OverflowHidden,
-  OverflowVisible,
   padding,
   PositionAbsolute,
   PositionRelative
@@ -27,6 +26,8 @@ import { RectI } from "@vrkit-platform/models"
 import { asOption } from "@3fv/prelude-ts"
 import dashboardVRLayoutPageClasses from "./DashboardVRLayoutPageClasses"
 import { EditorSurface } from "./EditorSurface"
+import Button from "@mui/material/Button"
+import { stopEvent } from "@vrkit-platform/shared"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -44,13 +45,12 @@ const DashboardVRLayoutPageRoot = styled(Box, {
   [child(classes.header)]: {
     ...FlexRowCenter,
     ...FlexAuto,
-    ...padding(theme.spacing(2),theme.spacing(4)),
+    ...padding(theme.spacing(2), theme.spacing(4)),
     [child(classes.headerInstructions)]: {
       ...theme.typography.h3,
       fontWeight: 100,
       opacity: 0.5,
-      textAlign: "center",
-      
+      textAlign: "center"
     }
   },
   [child(classes.surfaceContainer)]: {
@@ -59,34 +59,37 @@ const DashboardVRLayoutPageRoot = styled(Box, {
     ...FlexScaleZero,
     ...flexAlign("stretch", "stretch"),
     ...OverflowHidden,
-  [child(classes.surface)]: {
-    ...FlexScaleZero,
+    [child(classes.surface)]: {
+      ...FlexScaleZero,
       ...OverflowHidden,
-    ...PositionAbsolute,
-    border: `3px solid ${theme.palette.primary.main}`,
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: lighten(theme.palette.primary.main, 0.35),
-    [child(classes.item)]: {
-      ...PositionAbsolute, ...OverflowHidden,
-      border: `1px solid ${theme.palette.secondary.main}`,
-      backgroundColor: theme.palette.secondary.main,
+      ...PositionAbsolute,
+      border: `3px solid ${theme.palette.primary.main}`,
       borderRadius: theme.shape.borderRadius,
-      [child(classes.itemContent)]: {
-        ...FlexColumn, ...Fill, ...FlexDefaults.stretchSelf, ...OverflowHidden, ...flexAlign(
-            "stretch",
-            "flex-start"
-        ), [child(classes.itemContentHeader)]: {
-          ...OverflowHidden, ...FlexRow, ...flex(0, 1, "auto"), ...flexAlign(
-              "center",
-              "stretch"
-          ), ...padding(theme.spacing(0.25), theme.spacing(0.5)),
-          backgroundColor: alpha("#FFF", 0.2),
-          gap: theme.spacing(1),
-          
+      backgroundColor: lighten(theme.palette.primary.main, 0.35),
+      [child(classes.item)]: {
+        ...PositionAbsolute,
+        ...OverflowHidden,
+        border: `1px solid ${theme.palette.secondary.main}`,
+        backgroundColor: theme.palette.secondary.main,
+        borderRadius: theme.shape.borderRadius,
+        [child(classes.itemContent)]: {
+          ...FlexColumn,
+          ...Fill,
+          ...FlexDefaults.stretchSelf,
+          ...OverflowHidden,
+          ...flexAlign("stretch", "flex-start"),
+          [child(classes.itemContentHeader)]: {
+            ...OverflowHidden,
+            ...FlexRow,
+            ...flex(0, 1, "auto"),
+            ...flexAlign("center", "stretch"),
+            ...padding(theme.spacing(0.25), theme.spacing(0.5)),
+            backgroundColor: alpha("#FFF", 0.2),
+            gap: theme.spacing(1)
+          }
         }
       }
     }
-  }
   }
 }))
 
@@ -119,28 +122,50 @@ export function DashboardVRLayoutPage({ className, ...other }: DashboardVRLayout
               }),
 
       [size]
-    )
-  log.info("VR Layout Editor Content Size", size)
+    ),
+    handleClose = useCallback((ev: React.SyntheticEvent<any>) => {
+      stopEvent(ev)
+      window.close()
+    }, [])
+  
+  if (log.isDebugEnabled())
+    log.debug("VR Layout Editor Content Size", size)
+  
   return (
     <Page
       metadata={{
-        title: "VR Layout Editor"
+        title: "VR Layout Editor",
+        appTitlebar: {
+          right: (
+            <Button
+              variant="outlined"
+              color="error"
+              size="small"
+              onClick={handleClose}
+              sx={{
+                mr: 1
+              }}
+            >
+              DONE
+            </Button>
+          )
+        }
       }}
     >
-      <DashboardVRLayoutPageRoot >
+      <DashboardVRLayoutPageRoot>
         <Box className={classes.header}>
           <Box className={classes.headerInstructions}>
-            Drag and resize the overlays below.  <br/>
+            Drag and resize the overlays below. <br />
             Launch an OpenXR Application to see changes on HMD in real-time.
           </Box>
         </Box>
-        <Box className={classes.surfaceContainer} ref={contentRef}>
-        
-        
-        
-        <If condition={!!surfaceRect}>
-          <EditorSurface rect={surfaceRect} />
-        </If>
+        <Box
+          className={classes.surfaceContainer}
+          ref={contentRef}
+        >
+          <If condition={!!surfaceRect}>
+            <EditorSurface rect={surfaceRect} />
+          </If>
         </Box>
       </DashboardVRLayoutPageRoot>
     </Page>

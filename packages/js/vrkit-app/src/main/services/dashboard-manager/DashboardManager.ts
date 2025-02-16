@@ -450,12 +450,6 @@ export class DashboardManager {
           `A dashboard must be open with VR enabled in order to open the VR layout editor`
       )
       
-      const overlayManager = getOverlayManager()
-      
-      if (!overlayManager.editorEnabled) {
-        overlayManager.setEditorEnabled(true)
-      }
-      
       await this.executeDashboardWindowsCheck()
       
       if (this.vrLayoutWindowInstance) {
@@ -522,7 +516,7 @@ export class DashboardManager {
 
     const { windowManager, sessionManager } = this,
       ipcFnHandlers = [
-        [DashboardManagerFnType.LAUNCH_DASHBOARD_LAYOUT_EDITOR, this.launchDashboardVRLayoutEditorHandler.bind(this)],
+        [DashboardManagerFnType.LAUNCH_DASHBOARD_VR_LAYOUT_EDITOR, this.launchDashboardVRLayoutEditorHandler.bind(this)],
         [DashboardManagerFnType.OPEN_DASHBOARD, this.openDashboardHandler.bind(this)],
         [DashboardManagerFnType.CLOSE_DASHBOARD, this.closeDashboardHandler.bind(this)],
         [DashboardManagerFnType.CREATE_DASHBOARD_CONFIG, this.createDashboardConfigHandler.bind(this)],

@@ -138,32 +138,7 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
         dashClient.deleteDashboardConfig(config.id)
       }
     }, [config?.id, hasActive, dashClient]),
-      editLayout = Alert.usePromise(async () => {
-        const idValid = isNotEmpty(config?.id)
-        if (!idValid) {
-          Alerts.onError(!idValid ? `Dashboard ID is invalid` : `Dashboard must be open in order to edit the layout`)
-          return
-        }
-        
-        if (!isActive) {
-          if (hasActive) {
-            info(`Closing active dashboard in order to start layout editor for ${config.id}`)
-            await dashClient.closeDashboard()    
-          }
-          info(`Launching dashboard to start layout editor for ${config.id}`)
-          await dashClient.openDashboard(config.id)
-        }
-        info(`Launching dashboard to start layout editor for ${config.id}`)
-        await dashClient.launchLayoutEditor(config.id)
-      }, {
-        loading: ctx => `Launching layout editor for dashboard (${config.name})`,
-        error: (ctx) => {
-          log.error(`Failed to launch layout editor for dashboard ${config.id}`, ctx)
-          return `Unable to launch layout editor: ${ctx.err?.message}`
-        },
-        success: () => `Launch dashboard layout editor`
-      },[config?.id, isActive, hasActive, dashClient]),
-  
+    
   toggleOpen = useCallback(() => {
     
     if (hasActive) {
@@ -242,13 +217,6 @@ export function DashboardsListItem(props: DashboardsListItemProps) {
                   size="2xs"
                   icon={faRocketLaunch}
               />
-            </AppIconButton>
-            <AppIconButton
-                tooltip={"Layout Editor"}
-                className={clsx(classNames.itemAction)}
-                onClick={editLayout.execute}
-            >
-              <OpenLayoutEditorIcon />
             </AppIconButton>
             <AppIconButton
                 tooltip="Edit Settings"

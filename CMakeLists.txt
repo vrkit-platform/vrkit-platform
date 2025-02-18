@@ -34,14 +34,6 @@ set(openxrLibTargetStatic ${openxrLibTarget}_static)
 set(sharedAppLibTarget ${PROJECT_NAME}_shared_app_lib)
 set(sharedAppLibTargetStatic ${sharedAppLibTarget}_static)
 
-# Overlay tester
-set(overlayAppTarget ${PROJECT_NAME}_overlay_app)
-
-set(appServiceTarget ${PROJECT_NAME}_service)
-
-# `vrk_app` - maybe/someday
-set(appUIQTTarget ${appNamePrefix}_ui)
-
 # `vrk_tool` cli
 set(appCLITarget ${appNamePrefix}_tool)
 
@@ -49,6 +41,9 @@ set(appCLITarget ${appNamePrefix}_tool)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# DOXYGEN
+find_package(Doxygen REQUIRED)
 
 # CCACHE
 find_program(CCACHE_PROGRAM ccache)

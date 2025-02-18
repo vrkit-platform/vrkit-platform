@@ -674,18 +674,20 @@ export function DashboardControllerPage(props: DashboardControllerPageProps) {
                 </FlexColumnBox>
                 <Box className={clsx(classes.headerButtons)}>
                   <Tooltip title="Finish editing">
-                    <Button
-                      onClick={handleFinishEditing}
-                      color="error"
-                      variant="contained"
-                      disabled={!isEditorEnabled}
-                      sx={{
-                        opacity: isEditorEnabled ? 1 : 0
-                      }}
-                      className={clsx(classes.headerButton)}
-                    >
-                      <EditIcon /> DONE
-                    </Button>
+                    <span>
+                      <Button
+                        onClick={handleFinishEditing}
+                        color="error"
+                        variant="contained"
+                        disabled={!isEditorEnabled}
+                        sx={{
+                          opacity: isEditorEnabled ? 1 : 0
+                        }}
+                        className={clsx(classes.headerButton)}
+                      >
+                        <EditIcon /> DONE
+                      </Button>
+                    </span>
                   </Tooltip>
                   <MultiLayoutButton
                     id={`layout-action-button-group-edit-layout-${config.id}`}

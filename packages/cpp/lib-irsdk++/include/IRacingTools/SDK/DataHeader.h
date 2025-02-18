@@ -1,13 +1,12 @@
 #pragma once
 
 #include <magic_enum.hpp>
-#include <tchar.h>
 #include <windows.h>
 
-#include "ErrorTypes.h"
-#include "Resources.h"
-#include "Types.h"
-#include "VarData.h"
+#include <IRacingTools/SDK/ErrorTypes.h>
+#include <IRacingTools/SDK/Resources.h>
+#include <IRacingTools/SDK/Types.h>
+#include <IRacingTools/SDK/VarData.h>
 
 namespace IRacingTools::SDK {
     struct DataHeader {

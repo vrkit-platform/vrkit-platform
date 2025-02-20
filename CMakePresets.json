@@ -1,0 +1,70 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "ninja",
+      "displayName": "Ninja Configure Settings",
+      "description": "Sets build and install directories",
+      "binaryDir": "${sourceDir}/builds/${presetName}",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": {
+          "type": "FILEPATH",
+          "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        },
+        "SPDLOG_WCHAR_SUPPORT": "1",
+        "SPDLOG_WCHAR_TO_UTF8_SUPPORT": "1",
+        "VCPKG_ROOT": "$env{VCPKG_ROOT}",
+        "VCPKG_DEFAULT_TRIPLET": "$env{VCPKG_DEFAULT_TRIPLET}",
+        "VCPKG_TARGET_TRIPLET": "$env{VCPKG_DEFAULT_TRIPLET}",
+        "VCPKG_CRT_LINKAGE": "static",
+        "VCPKG_LIBRARY_LINKAGE": "static",
+        "VCPKG_INSTALL_OPTIONS": "--allow-unsupported"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "ninja-debug-preset",
+      "configurePreset": "ninja",
+      "configuration": "Debug"
+    },
+    {
+      "name": "ninja-release-preset",
+      "configurePreset": "ninja",
+      "configuration": "RelWithDebInfo"
+    }    
+  ],
+  "testPresets": [
+    {
+      "name": "ninja-debug-test-preset",
+      "configurePreset": "ninja",
+      "configuration": "Debug"
+    },
+    {
+      "name": "ninja-release-test-preset",
+      "configurePreset": "ninja",
+      "configuration": "RelWithDebInfo"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ninja-workflow",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ninja"
+        },
+        {
+          "type": "build",
+          "name": "ninja"
+        }
+      ]
+    }
+  ]
+}

@@ -23,15 +23,12 @@ target_link_libraries(${testTargetName} PUBLIC
 vrk_configure_test_libs(${testTargetName})
 
 set(DOXYGEN_PROJECT_NAME irsdk++)
-set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs/xml)
 set(DOXYGEN_RECURSIVE YES)
+set(DOXYGEN_XML_OUTPUT YES)
 
 doxygen_add_docs(
   ${sdkTarget}_docs
   ${CMAKE_CURRENT_LIST_DIR}/src
   ${CMAKE_CURRENT_LIST_DIR}/include
 )
-#doxygen_add_docs(
-#  doc                      # target name
-#  "${PROJECT_SOURCE_DIR}"  # sources to scan for docs
-#)

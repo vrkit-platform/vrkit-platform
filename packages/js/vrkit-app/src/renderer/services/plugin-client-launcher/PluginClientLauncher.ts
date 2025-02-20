@@ -66,8 +66,9 @@ export class PluginLoader {
     }
   }
 
-  private readonly setupDeferred_ = new Deferred<void>()
+  readonly #setupDeferred_ = new Deferred<void>()
 
+  // noinspection SpellCheckingInspection
   /**
    * Handles the custom require mechanism for loading plugin modules.
    *
@@ -96,7 +97,7 @@ export class PluginLoader {
    *
    * @throws `Error` if the provided module name is not a valid string.
    */
-  private pluginRequire(target: NodeJS.Require, _thisArg: any, ...args: any[]) {
+  private pluginRequire(target: NodeJS.Require, _thisArg: any, ...args: any[]):any {
     const moduleName = asOption(args[0])
         .mapIf(
           it => isArray(it) && !isString(it),
@@ -193,10 +194,10 @@ export class PluginLoader {
         log.debug(`Result from loading plugin (${manifestName})`, modExports, factory)
       }
 
-      this.setupDeferred_.resolve()
+      this.#setupDeferred_.resolve()
     } catch (err) {
       log.error(`Failed to setup plugin`, err)
-      this.setupDeferred_.reject(err)
+      this.#setupDeferred_.reject(err)
       throw err
     }
   }
@@ -281,7 +282,7 @@ export class PluginLoader {
   }
 
   whenReady() {
-    return this.setupDeferred_.promise
+    return this.#setupDeferred_.promise
   }
 
   async getComponent(

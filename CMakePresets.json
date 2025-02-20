@@ -32,12 +32,22 @@
     {
       "name": "ninja-debug-preset",
       "configurePreset": "ninja",
-      "configuration": "Debug"
+      "configuration": "Debug",
+      "targets": [
+        "irsdkcpp",
+        "vrkit_openxr_lib",
+        "vrkit_native_interop"
+      ]
     },
     {
       "name": "ninja-release-preset",
       "configurePreset": "ninja",
-      "configuration": "RelWithDebInfo"
+      "configuration": "RelWithDebInfo",
+      "targets": [
+        "irsdkcpp",
+        "vrkit_openxr_lib",
+        "vrkit_native_interop"
+      ]
     }    
   ],
   "testPresets": [
@@ -62,7 +72,7 @@
         },
         {
           "type": "build",
-          "name": "ninja"
+          "name": "ninja-release-preset"
         }
       ]
     }

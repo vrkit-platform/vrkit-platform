@@ -1,4 +1,4 @@
-name: MSBuild
+name: App Build
 
 on:
   workflow_dispatch:

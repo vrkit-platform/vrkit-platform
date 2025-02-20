@@ -10,6 +10,7 @@ dist
 /.vs
 /out
 /build
+/builds
 /vcpkg_installed
 .ipynb_checkpoints
 __pycache__

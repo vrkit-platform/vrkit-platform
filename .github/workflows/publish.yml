@@ -49,7 +49,7 @@ jobs:
           # Location of the vcpkg as submodule of the repository.
           vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
           vcpkgGitCommitId: '${{ matrix.vcpkgCommitId }}'
-          vcpkgJsonGlob: ['**/vcpkg.json']
+          vcpkgJsonGlob: '**/vcpkg.json'
 
           #          vcpkgGitCommitId: '47bf3d1ac192b3fa0feb6e6ac9c845de179eebe9'
           # Since the cache must be invalidated when content of the vcpkg.json file changes, let's
@@ -62,19 +62,21 @@ jobs:
       - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
         uses: lukka/run-cmake@v10
         with:
-          buildDirectory: ${{ env.buildDir }}
+          workflowPreset: 'ninja'
+
+          # buildDirectory: ${{ env.buildDir }}
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-          configurePresetAdditionalArgs:
-            - '-GNinja'
-            - '-DCMAKE_TOOLCHAIN_FILE=${{ runner.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake'
-            - '-DKANGARU_TEST=ON'
-            - '-DSPDLOG_WCHAR_SUPPORT=1'
-            - '-DSPDLOG_WCHAR_TO_UTF8_SUPPORT=1'
-            - '-DVCPKG_ROOT=${{ runner.workspace }}/vcpkg'
-            - '-DVCPKG_DEFAULT_TRIPLET=${{ matrix.triplet }}'
-            - '-DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}'
-            - '-DVCPKG_CRT_LINKAGE=static'
-            - '-DVCPKG_LIBRARY_LINKAGE=static'
-            - '-DVCPKG_INSTALL_OPTIONS="--allow-unsupported"'
+#          configurePresetAdditionalArgs:
+#            - '-GNinja'
+#            - '-DCMAKE_TOOLCHAIN_FILE=${{ runner.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake'
+#            - '-DKANGARU_TEST=ON'
+#            - '-DSPDLOG_WCHAR_SUPPORT=1'
+#            - '-DSPDLOG_WCHAR_TO_UTF8_SUPPORT=1'
+#            - '-DVCPKG_ROOT=${{ runner.workspace }}/vcpkg'
+#            - '-DVCPKG_DEFAULT_TRIPLET=${{ matrix.triplet }}'
+#            - '-DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}'
+#            - '-DVCPKG_CRT_LINKAGE=static'
+#            - '-DVCPKG_LIBRARY_LINKAGE=static'
+#            - '-DVCPKG_INSTALL_OPTIONS="--allow-unsupported"'
 
 

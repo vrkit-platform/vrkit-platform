@@ -62,8 +62,8 @@ jobs:
       - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
         uses: lukka/run-cmake@v10
         with:
-          workflowPreset: 'ninja'
-
+          configurePreset: 'ninja'
+          buildPreset: 'ninja-release-preset'
           # buildDirectory: ${{ env.buildDir }}
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
 #          configurePresetAdditionalArgs:

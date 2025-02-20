@@ -26,7 +26,7 @@ jobs:
     env:
       # Path to the solution file relative to the root of the project.
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
-      VCPKG_ROOT: ${{ runner.workspace }}/vcpkg
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
       # Configuration type to build.
       # You can convert this to a build matrix if you need coverage of multiple configuration types.
@@ -47,7 +47,7 @@ jobs:
           runVcpkgInstall: false
 
           # Location of the vcpkg as submodule of the repository.
-          vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
+          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           vcpkgGitCommitId: '${{ matrix.vcpkgCommitId }}'
           vcpkgJsonGlob: '**/vcpkg.json'
 

@@ -178,7 +178,8 @@ namespace IRacingTools::Shared {
     Models::RPC::Events::SessionEventType type) {
     auto data = sessionData();
     auto ev = std::make_shared<Models::RPC::Events::SessionEventData>();
-    ev->set_id(Common::NewUUID());
+    // TODO: Revisit ID generation
+    ev->set_id(std::to_string(TimeEpoch().count()));
     ev->set_type(type);
     ev->set_session_id(data->id());
     ev->set_session_type(Models::Session::SESSION_TYPE_LIVE);

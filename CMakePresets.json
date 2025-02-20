@@ -10,7 +10,7 @@
       "name": "ninja",
       "displayName": "Ninja Configure Settings",
       "description": "Sets build and install directories",
-      "binaryDir": "${sourceDir}/builds/${presetName}",
+      "binaryDir": "${sourceDir}/build/${presetName}",
       "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": {

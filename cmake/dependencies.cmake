@@ -30,9 +30,11 @@ endforeach()
 # include(${CMAKE_CURRENT_LIST_DIR}/qt.cmake NO_POLICY_SCOPE)
 
 # Boost
-find_package(Boost REQUIRED COMPONENTS system uuid)
-set(DEP_BOOST_DEFAULT Boost::system Boost::uuid)
-find_path(DEP_BOOST_DI_INCLUDES "boost/di.hpp")
+#find_package(Boost REQUIRED COMPONENTS system uuid)
+#set(DEP_BOOST_DEFAULT Boost::system Boost::uuid)
+find_package(Boost REQUIRED COMPONENTS system)
+set(DEP_BOOST_DEFAULT Boost::system)
+#find_path(DEP_BOOST_DI_INCLUDES "boost/di.hpp")
 
 # Other deps
 #target_link_libraries(${targetName} PRIVATE Microsoft::CppWinRT)
@@ -132,5 +134,5 @@ endfunction()
 
 function(VRK_CONFIGURE_TEST_LIBS TARGET)
   target_link_libraries(${TARGET} PUBLIC ${ALL_APP_DEPS} ${DEP_GTEST_MAIN})
-  target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
+#  target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
 endfunction()

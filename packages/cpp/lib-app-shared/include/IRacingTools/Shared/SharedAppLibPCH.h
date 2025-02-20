@@ -75,7 +75,7 @@
 #include <winrt/base.h>
 
 // Boost DI
-#include <boost/di.hpp>
+// #include <boost/di.hpp>
 
 // IRT Headers
 #include <IRacingTools/Shared/Constants.h>

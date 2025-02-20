@@ -87,5 +87,11 @@
       "name": "sqlite-orm",
       "version>=": "1.8.2#2"
     }
+  ],
+  "overrides": [
+    {
+      "name": "magic-enum",
+      "version": "0.9.5"
+    }
   ]
 }

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.21.1)
 
 # Windows SDK/Kit
 set(WINDOWS_SDK_VERSION "10.0.22621.0")

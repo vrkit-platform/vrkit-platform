@@ -160,6 +160,7 @@
     "compile:watch": "tsc -b tsconfig.json -w --preserveWatchOutput",
     "dev": "tsc-watch -b tsconfig.json  --preserveWatchOutput  --onFirstSuccess \"./scripts/dev.mjs\"",
     "postinstall": "patch-package && electron-builder.cmd install-app-deps && node ./scripts/postinstall.mjs",
+    "vrkit-app:publish-sdks": "node ./scripts/publish-sdk.mjs",
     "vrkit-app:version-bump": "node ./scripts/bump-platform-version.mjs",
     "vrkit-app:package": "cross-env NODE_ENV=production node ./scripts/build-packaged-app.mjs",
     "vrkit-app:dev": "yarn workspace vrkit-app run dev",

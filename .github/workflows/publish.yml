@@ -8,9 +8,6 @@ on:
     branches: [ "master" ]
 
 
-#permissions:
-#  contents: read
-
 jobs:
   build:
     defaults:
@@ -20,7 +17,7 @@ jobs:
     environment: build
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [  windows-latest ]
         include:
@@ -69,8 +66,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            "~/.choco-cache"
-          key: ${{ matrix.os }}-temp-cache
+            "C:/Users/runneradmin/.choco-cache"
+            "C:/Program Files/doxygen/bin"
+          key: choco-${{ matrix.os }}
 
       - name: Use Node v22
         uses: actions/setup-node@v4
@@ -138,3 +136,7 @@ jobs:
       - name: 'Package & Build Electron App'
         run: |
           yarn run vrkit-app:package
+
+      - name: 'Publish SDKs'
+        run: |
+          yarn run vrkit-app:publish-sdks

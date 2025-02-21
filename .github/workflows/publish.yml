@@ -50,16 +50,28 @@ jobs:
           path: "$($env:LOCALAPPDATA)\\choco-cache"
           key: ${{ matrix.os }}-temp-choco-cache
 
+      - name: Use Node v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: "Node Install Deps"
+        shell: bash
+        run: |
+          echo "registry=https://registry.npmjs.org/" > ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+          echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> ~/.npmrc
+          echo "@awesome.me:registry=https://npm.fontawesome.com/" >> ~/.npmrc
+          echo "@fortawesome:registry=https://npm.fontawesome.com/" >> ~/.npmrc
+          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> ~/.npmrc          
+          yarn
+
       - name: Set Choco cache path
         run: choco config set cacheLocation "$($env:LOCALAPPDATA)\choco-cache"
 
       - name: Install doxygen
         run: choco install doxygen.install
 
-      - name: Use Node v22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22.x'
 
       - name: get-cmake
         uses: lukka/get-cmake@v3.31.5
@@ -75,15 +87,6 @@ jobs:
           vcpkgGitCommitId: '${{ matrix.vcpkgCommitId }}'
           vcpkgJsonGlob: '**/vcpkg.json'
 
-      - name: "Node Install Deps"
-        shell: bash
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> ~/.npmrc
-          echo "@awesome.me:registry=https://npm.fontawesome.com/" >> ~/.npmrc
-          echo "@fortawesome:registry=https://npm.fontawesome.com/" >> ~/.npmrc
-          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> ~/.npmrc          
-          yarn
 
       - name: 'CMake Configure'
         uses: lukka/run-cmake@v10

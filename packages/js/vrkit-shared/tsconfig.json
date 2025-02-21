@@ -8,7 +8,11 @@
     "outDir": "lib"
   },
   "references": [{
+    "path": "../vrkit-native-interop"
+  },{
     "path": "../vrkit-models"
+  }, {
+    "path": "../vrkit-plugin-sdk"
   }],
   "include": ["src/**/*"]
 //  "exclude": ["**/*.spec.ts"]

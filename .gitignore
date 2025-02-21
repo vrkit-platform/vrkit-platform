@@ -30,7 +30,7 @@ node_modules
 /packages/js/vrkit-app/lib
 /packages/js/vrkit-app/dist
 /lib
-/*.lock
+#/*.lock
 /logs
 *.backup.json
 .vrkit-dev.local.json

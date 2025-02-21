@@ -141,7 +141,7 @@ jobs:
       - name: 'CMake Build'
         uses: lukka/run-cmake@v10
         with:
-          buildPreset: 'ninja-release-preset'
+          buildPreset: 'ninja-release'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
 
       - name: 'Package & Build Electron App'

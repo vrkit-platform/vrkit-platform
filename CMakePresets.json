@@ -30,7 +30,7 @@
   ],
   "buildPresets": [
     {
-      "name": "ninja-debug-preset",
+      "name": "ninja-debug",
       "configurePreset": "ninja",
       "configuration": "Debug",
       "targets": [
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "name": "ninja-release-with-debug-info-preset",
+      "name": "ninja-release-with-debug-info",
       "configurePreset": "ninja",
       "configuration": "RelWithDebInfo",
       "targets": [
@@ -50,7 +50,7 @@
       ]
     },
     {
-      "name": "ninja-release-preset",
+      "name": "ninja-release",
       "configurePreset": "ninja",
       "configuration": "Release",
       "targets": [
@@ -62,19 +62,19 @@
   ],
   "testPresets": [
     {
-      "name": "ninja-debug-test-preset",
+      "name": "ninja-debug-test",
       "configurePreset": "ninja",
       "configuration": "Debug"
     },
     {
-      "name": "ninja-release-test-preset",
+      "name": "ninja-release-test",
       "configurePreset": "ninja",
       "configuration": "RelWithDebInfo"
     }
   ],
   "workflowPresets": [
     {
-      "name": "ninja-workflow",
+      "name": "ninja-workflow-release",
       "steps": [
         {
           "type": "configure",
@@ -82,7 +82,7 @@
         },
         {
           "type": "build",
-          "name": "ninja-release-preset"
+          "name": "ninja-release"
         }
       ]
     }

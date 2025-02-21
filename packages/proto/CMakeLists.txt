@@ -59,13 +59,19 @@ foreach(target ${modelsTarget} ${modelsTargetStatic})
     COMMAND ${pwshExe} ARGS "${CMAKE_SOURCE_DIR}/scripts/protoc-ts.ps1" "${protoCompiler}"
   )
 
-  add_custom_command(
-    TARGET ${target}
-    COMMENT "Generate JSON Schema"
-    POST_BUILD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMAND ${pwshExe} ARGS "${CMAKE_SOURCE_DIR}/scripts/protoc-json-schema.ps1" "${protoCompiler}"
+  # CONFIGURE JSON SCHEMA GENERATION IF AVAILABLE
+  find_program(PROTOC_GEN_JSONSCHEMA_EXE NAMES protoc-gen-jsonschema protoc-gen-jsonschema.exe)
+  if (NOT PROTOC_GEN_JSONSCHEMA_EXE)
+    message(NOTICE "Unable to find protobuf generator for JSON schema, skipping generation...")
+  else()
+    add_custom_command(
+      TARGET ${target}
+      COMMENT "Generate JSON Schema"
+      POST_BUILD
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+      COMMAND ${pwshExe} ARGS "${CMAKE_SOURCE_DIR}/scripts/protoc-json-schema.ps1" "${protoCompiler}"
+    )
+  endif()
 
-  )
   target_compile_options(${target} PRIVATE "/permissive")
 endforeach()

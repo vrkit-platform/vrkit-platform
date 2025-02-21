@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Create cache directory
-        run: mkdir "$($env:HOME)\.choco-cache"
+        run: mkdir "$($env:USERPROFILE)\.choco-cache"
 
       - name: Cache Tools
         uses: actions/cache@v4
@@ -81,7 +81,7 @@ jobs:
           yarn install --frozen-lockfile
 
       - name: Set Choco cache path
-        run: choco config set cacheLocation "$($env:LOCALAPPDATA)\choco-cache"
+        run: choco config set cacheLocation "$($env:USERPROFILE)\.choco-cache"
 
       - name: Install doxygen
         run: choco install doxygen.install

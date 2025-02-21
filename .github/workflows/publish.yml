@@ -58,6 +58,7 @@ jobs:
       - name: "Node Install Deps"
         shell: bash
         run: |
+          echo "network-timeout 240000" > ~/.yarnrc
           echo "registry=https://registry.npmjs.org/" > ~/.npmrc
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
           echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> ~/.npmrc

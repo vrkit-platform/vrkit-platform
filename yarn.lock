@@ -7,22 +7,12 @@
   resolved "https://registry.yarnpkg.com/7zip-bin/-/7zip-bin-5.2.0.tgz#7a03314684dd6572b7dfa89e68ce31d60286854d"
   integrity sha512-ukTPVhqG4jNzMro2qA9HSCSSVJN3aN7tlb+hfqYCt3ER0yWroeA2VR38MNrOHLQ/cVj+DaIMad0kFCtWWowh/A==
 
-"@3fv/deferred@^1.2.10", "@3fv/deferred@^1.2.3":
-  version "1.2.10"
-  resolved "https://registry.yarnpkg.com/@3fv/deferred/-/deferred-1.2.10.tgz#9262699c74844d1e3bd2ae367d8c6945f420410d"
-  integrity sha512-PyZ9d5OmEwIilpSmjRrJNHQlILUeALaT1VJi08+llU+g5IfmOl+EH1ulV2Xf5Qm10+Tpua11HGP2gbOqQJjQsA==
+"@3fv/deferred@1.2.14", "@3fv/deferred@^1.2.10", "@3fv/deferred@^1.2.12", "@3fv/deferred@^1.2.14", "@3fv/deferred@^1.2.3":
+  version "1.2.14"
+  resolved "https://registry.yarnpkg.com/@3fv/deferred/-/deferred-1.2.14.tgz#d0add3cdb4a5ce464f0248b7523b0e459dc1ee1b"
+  integrity sha512-mDwDe3sxuONNCAJecWTFY9Gj9O3gat87iCg3Bm2t79U8wucESrAoBgpktaoh4I7avupb5jSjOPEWw2scEeO7Ow==
 
-"@3fv/deferred@^1.2.12":
-  version "1.2.12"
-  resolved "https://registry.yarnpkg.com/@3fv/deferred/-/deferred-1.2.12.tgz#12b14a83f890c8869ffbdd0a6b24ec0c4f93fde8"
-  integrity sha512-rs5ML274zzg0Goh/x5PaDjTJlqg68LJX5GSMfjriHEcSgwmZB1stz5+4TOCKMYuqBbPH8IToJPzL6TqbM0bPrQ==
-
-"@3fv/deferred@latest":
-  version "1.2.11"
-  resolved "https://registry.yarnpkg.com/@3fv/deferred/-/deferred-1.2.11.tgz#4ef31f41fb05d431a1bf85752f34139d5d39568b"
-  integrity sha512-6zn5IDUaokoJsIEmrdiNn0Fet7KElGw/4Jn/jLve/0Bd+Er/+Q8uvWZfy2fzZAz1CgPYwoGpEK2Z2ZDp3n/ZJg==
-
-"@3fv/ditsy@^1.0.13":
+"@3fv/ditsy@1.0.13", "@3fv/ditsy@^1.0.13":
   version "1.0.13"
   resolved "https://registry.yarnpkg.com/@3fv/ditsy/-/ditsy-1.0.13.tgz#c5fc6ec81b67a6443ecb01ad638de97032432224"
   integrity sha512-566HPdReaaVX5kb8hObRMcchm18ojBPKwjrzprGyYHNj0UcDmMwX0HnNXcfXJb33zUBLikgMNW2A7YCxNoagug==
@@ -35,42 +25,28 @@
     reflect-metadata "^0.1.13"
     ts-pattern "^1.1.0"
 
-"@3fv/electron-utility-process-manager@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@3fv/electron-utility-process-manager/-/electron-utility-process-manager-1.0.1.tgz#ec7a0f512ffe222c9514f6c5a65628dc8ddd8b8c"
-  integrity sha512-6OOVTfqKlPdv1E/YTl++ju69QxdP5yg+bnlzrFHFxsCa6u0Up8eMhCTel3ZRzI/GHelbfAh43v+Je7Z0JC62jA==
+"@3fv/electron-utility-process-manager@1.0.6", "@3fv/electron-utility-process-manager@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@3fv/electron-utility-process-manager/-/electron-utility-process-manager-1.0.6.tgz#dbbf6d927e09ed80526e7493f8b9912ce39e5ba4"
+  integrity sha512-GZFlp6Tai3Zal4xCUNszcrKdkaWj0Lf0dtAh3/PVVEzzwLDIkWOCPQq8vT8Qn60OyKY0uvd7RFNgXu3Y5FArww==
   dependencies:
-    "@3fv/deferred" latest
-    "@3fv/guard" latest
-    "@3fv/prelude-ts" latest
+    "@3fv/deferred" "^1.2.12"
+    "@3fv/guard" "^1.4.38"
+    "@3fv/prelude-ts" "^0.8.32"
     chalk "^5.3.0"
     debug "^4.3.6"
     lodash "^4.17.21"
     tracer "^1.3.0"
     ts-pattern "^5.5.0"
 
-"@3fv/guard@^1", "@3fv/guard@^1.4.16", "@3fv/guard@^1.4.30", "@3fv/guard@^1.4.35":
-  version "1.4.35"
-  resolved "https://registry.yarnpkg.com/@3fv/guard/-/guard-1.4.35.tgz#bc7dda8b8ff75e70e1f8e8da250b306a2369d74a"
-  integrity sha512-tDo1aKawqW1sT6fyMp4+m7cTYtISZ4r2YOz4Az2/F/EteSZvhB6vUCsEF8feM+NTpAPF4nrsCmlQrrAmKfkiPw==
-  dependencies:
-    lodash "^4.17.15"
-
-"@3fv/guard@^1.4.37", "@3fv/guard@latest":
-  version "1.4.37"
-  resolved "https://registry.yarnpkg.com/@3fv/guard/-/guard-1.4.37.tgz#0954fd9aa552e0de67a0002245412b3aee724396"
-  integrity sha512-5+P978ftKEoVw5IhXA1wIaNhGkzv1bR5CQo4qDVkccjfs08PrVnplmFyDoxAKZCMRbdZAyyCwc5j92jDGGQZgA==
-  dependencies:
-    lodash "^4.17.21"
-
-"@3fv/guard@^1.4.38":
+"@3fv/guard@1.4.39", "@3fv/guard@^1", "@3fv/guard@^1.4.16", "@3fv/guard@^1.4.35", "@3fv/guard@^1.4.37", "@3fv/guard@^1.4.38", "@3fv/guard@^1.4.39":
   version "1.4.39"
   resolved "https://registry.yarnpkg.com/@3fv/guard/-/guard-1.4.39.tgz#07143192c9786c7764725a8f38fd587d9d9d7197"
   integrity sha512-yWMyr9EWjnSbfyaafZfByjIu+Lbh9OBviSeTIv1tWN9F0qFtCw1nP9pZNQfpdgWcaDuR9gXbZjUnkt6wb5+YVA==
   dependencies:
     lodash "^4.17.21"
 
-"@3fv/logger-proxy@^1.0.71":
+"@3fv/logger-proxy@1.0.71", "@3fv/logger-proxy@^1.0.71":
   version "1.0.71"
   resolved "https://registry.yarnpkg.com/@3fv/logger-proxy/-/logger-proxy-1.0.71.tgz#a93b43422e378dbcc8c5ba91916c0e2a133a84b5"
   integrity sha512-inkkk/g0EQQuSMju0rL1CDh2GfkcLVqJkIbOeQRLETBBbBO9mWGPb30SyaEQRHdE3GNJ4dncUAhQXx42gjLGDw==
@@ -85,16 +61,7 @@
   optionalDependencies:
     electron "^30"
 
-"@3fv/prelude-ts@^0.8.19", "@3fv/prelude-ts@^0.8.29", "@3fv/prelude-ts@latest":
-  version "0.8.29"
-  resolved "https://registry.yarnpkg.com/@3fv/prelude-ts/-/prelude-ts-0.8.29.tgz#1973395696c51dc516e3aac9f723d9ab32ce08cd"
-  integrity sha512-hXHjgsVMmlUVknHT4a1LZj2o3CLf5CeFvhPYl19QkXLSz3mcJwKEk3rgCU0hWpW15u8qi3dEVGjNFHzfLh8kaA==
-  dependencies:
-    "@3fv/guard" "^1.4.30"
-    hamt_plus "^1.0.2"
-    list "^2.0.19"
-
-"@3fv/prelude-ts@^0.8.37":
+"@3fv/prelude-ts@0.8.37", "@3fv/prelude-ts@^0.8.19", "@3fv/prelude-ts@^0.8.29", "@3fv/prelude-ts@^0.8.32", "@3fv/prelude-ts@^0.8.37":
   version "0.8.37"
   resolved "https://registry.yarnpkg.com/@3fv/prelude-ts/-/prelude-ts-0.8.37.tgz#e33caba7598a1aa4189cd657f20305bc676d205e"
   integrity sha512-BmHtMi1eAdQ3w//P4wGFRSFqtxgNyWRmV8HPtWzFf9fXS7L+EuUK7iI7AEIS8+/fGjfkLxDPrg6K09PA/wYv9Q==
@@ -2736,11 +2703,6 @@
     redux "^5.0.1"
     redux-thunk "^3.1.0"
     reselect "^5.1.0"
-
-"@remix-run/router@1.19.0":
-  version "1.19.0"
-  resolved "https://registry.yarnpkg.com/@remix-run/router/-/router-1.19.0.tgz#745dbffbce67f05386d57ca22c51dfd85c979593"
-  integrity sha512-zDICCLKEwbVYTS6TjYaWtHXxkdoUvD/QXvyVZjGCsWz5vyH7aFeONlPffPdW+Y/t6KT0MgXb2Mfjun9YpWN1dA==
 
 "@remix-run/router@1.19.1":
   version "1.19.1"
@@ -13584,6 +13546,11 @@ react-innertext@^1.1.5:
   resolved "https://registry.yarnpkg.com/react-innertext/-/react-innertext-1.1.5.tgz#8147ac54db3f7067d95f49e2d2c05a720d27d8d0"
   integrity sha512-PWAqdqhxhHIv80dT9znP2KvS+hfkbRovFp4zFYHFFlOoQLRiawIic81gKb3U1wEyJZgMwgs3JoLtwryASRWP3Q==
 
+"react-is@^16.12.0 || ^17.0.0 || ^18.0.0", react-is@^18.0.0, react-is@^18.3.1:
+  version "18.3.1"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.3.1.tgz#e83557dc12eae63a99e003a46388b1dcbb44db7e"
+  integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
+
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
@@ -13593,11 +13560,6 @@ react-is@^17.0.1:
   version "17.0.2"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
-
-react-is@^18.0.0, react-is@^18.3.1:
-  version "18.3.1"
-  resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.3.1.tgz#e83557dc12eae63a99e003a46388b1dcbb44db7e"
-  integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
 
 react-is@^19.0.0:
   version "19.0.0"
@@ -13658,10 +13620,10 @@ react-redux@^9.1.2:
     "@types/use-sync-external-store" "^0.0.3"
     use-sync-external-store "^1.0.0"
 
-react-refresh@0.14.2, react-refresh@^0.14.2:
-  version "0.14.2"
-  resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.14.2.tgz#3833da01ce32da470f1f936b9d477da5c7028bf9"
-  integrity sha512-jCvmsr+1IUSMUyzOkRcvnVbX3ZYC6g9TDrDbFuFmRDq7PD4yaGbLKNQL6k2jnArV8hjYxh7hVhAZB6s9HDGpZA==
+react-refresh@0.14.2, react-refresh@0.16.0, react-refresh@^0.14.2:
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.16.0.tgz#e7d45625f05c9709466d09348a25d22f79b2ad23"
+  integrity sha512-FPvF2XxTSikpJxcr+bHut2H4gJ17+18Uy20D5/F+SKzFap62R3cM5wH6b8WN3LyGSYeQilLEcJcR1fjBSI2S1A==
 
 react-rnd@^10.4.14:
   version "10.4.14"
@@ -13672,28 +13634,13 @@ react-rnd@^10.4.14:
     react-draggable "4.4.6"
     tslib "2.6.2"
 
-react-router-dom@^6.26.0:
-  version "6.26.0"
-  resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-6.26.0.tgz#8debe13295c58605c04f93018d659a763245e58c"
-  integrity sha512-RRGUIiDtLrkX3uYcFiCIxKFWMcWQGMojpYZfcstc63A1+sSnVgILGIm9gNUA6na3Fm1QuPGSBQH2EMbAZOnMsQ==
-  dependencies:
-    "@remix-run/router" "1.19.0"
-    react-router "6.26.0"
-
-react-router-dom@^6.26.1:
+react-router-dom@6.26.1, react-router-dom@^6.26.1:
   version "6.26.1"
   resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-6.26.1.tgz#a408892b41767a49dc94b3564b0e7d8e3959f623"
   integrity sha512-veut7m41S1fLql4pLhxeSW3jlqs+4MtjRLj0xvuCEXsxusJCbs6I8yn9BxzzDX2XDgafrccY6hwjmd/bL54tFw==
   dependencies:
     "@remix-run/router" "1.19.1"
     react-router "6.26.1"
-
-react-router@6.26.0:
-  version "6.26.0"
-  resolved "https://registry.yarnpkg.com/react-router/-/react-router-6.26.0.tgz#d5af4c46835b202348ef2b7ddacd32a2db539fde"
-  integrity sha512-wVQq0/iFYd3iZ9H2l3N3k4PL8EEHcb0XlU2Na8nEwmiXgIUElEH6gaJDtUQxJ+JFzmIXaQjfdpcGWaM6IoQGxg==
-  dependencies:
-    "@remix-run/router" "1.19.0"
 
 react-router@6.26.1, react-router@^6.26.1:
   version "6.26.1"
@@ -13702,13 +13649,22 @@ react-router@6.26.1, react-router@^6.26.1:
   dependencies:
     "@remix-run/router" "1.19.1"
 
-react-test-renderer@19.0.0:
-  version "19.0.0"
-  resolved "https://registry.yarnpkg.com/react-test-renderer/-/react-test-renderer-19.0.0.tgz#ca6fa322c58d4bfa34635788fe242a8c3daa4c7d"
-  integrity sha512-oX5u9rOQlHzqrE/64CNr0HB0uWxkCQmZNSfozlYvwE71TLVgeZxVf0IjouGEr1v7r1kcDifdAJBeOhdhxsG/DA==
+react-shallow-renderer@^16.15.0:
+  version "16.15.0"
+  resolved "https://registry.yarnpkg.com/react-shallow-renderer/-/react-shallow-renderer-16.15.0.tgz#48fb2cf9b23d23cde96708fe5273a7d3446f4457"
+  integrity sha512-oScf2FqQ9LFVQgA73vr86xl2NaOIX73rh+YFqcOp68CWj56tSfgtGKrEbyhCj0rSijyG9M1CYprTh39fBi5hzA==
   dependencies:
-    react-is "^19.0.0"
-    scheduler "^0.25.0"
+    object-assign "^4.1.1"
+    react-is "^16.12.0 || ^17.0.0 || ^18.0.0"
+
+react-test-renderer@18.3.1, react-test-renderer@19.0.0:
+  version "18.3.1"
+  resolved "https://registry.yarnpkg.com/react-test-renderer/-/react-test-renderer-18.3.1.tgz#e693608a1f96283400d4a3afead6893f958b80b4"
+  integrity sha512-KkAgygexHUkQqtvvx/otwxtuFu5cVjfzTCtjXLH9boS19/Nbtg84zS7wIQn39G8IlrhThBpQsMKkq5ZHZIYFXA==
+  dependencies:
+    react-is "^18.3.1"
+    react-shallow-renderer "^16.15.0"
+    scheduler "^0.23.2"
 
 react-transition-group@^4.4.5:
   version "4.4.5"
@@ -14353,11 +14309,6 @@ scheduler@^0.23.2:
   integrity sha512-UOShsPwz7NrMUqhR6t0hWjFduvOzbtv7toDH1/hIrfRNIDBnnBWd0CwJTGvTpngVlmwGCdP9/Zl/tVrDqcuYzQ==
   dependencies:
     loose-envify "^1.1.0"
-
-scheduler@^0.25.0:
-  version "0.25.0"
-  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.25.0.tgz#336cd9768e8cceebf52d3c80e3dcf5de23e7e015"
-  integrity sha512-xFVuu11jh+xcO7JOAGJNOXld8/TcEHK/4CituBUeUb5hqxJLj9YuemAEuvm9gQ/+pgXYfbQuqAkiYu+u7YEsNA==
 
 schema-utils@^2.0.0, schema-utils@^2.0.1:
   version "2.7.1"

@@ -20,10 +20,10 @@
     "storybook:build": "storybook build"
   },
   "dependencies": {
-    "@3fv/deferred": "^1.2.12",
+    "@3fv/deferred": "^1.2.14",
     "@3fv/ditsy": "^1.0.13",
-    "@3fv/electron-utility-process-manager": "^1.0.1",
-    "@3fv/guard": "^1.4.35",
+    "@3fv/electron-utility-process-manager": "^1.0.6",
+    "@3fv/guard": "^1.4.39",
     "@3fv/logger-proxy": "^1.0.71",
     "@3fv/prelude-ts": "^0.8.37",
     "@awesome.me/kit-79150a3eed": "latest",

@@ -13,6 +13,9 @@ on:
 
 jobs:
   build:
+    defaults:
+      run:
+        shell: pwsh
     name: ${{ matrix.os }}-${{ github.workflow }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -71,7 +74,18 @@ jobs:
           vcpkgGitCommitId: '${{ matrix.vcpkgCommitId }}'
           vcpkgJsonGlob: '**/vcpkg.json'
 
-      - name: 'Run CMake with Ninja, install dependencies with vcpkg, build with CMake'
+      - name: 'CMake Configure'
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: 'ninja'
+          buildPreset: 'ninja-release-preset'
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+
+      - name: "Node Install Deps"
+        run: |
+          yarn
+
+      - name: 'CMake Build'
         uses: lukka/run-cmake@v10
         with:
           configurePreset: 'ninja'

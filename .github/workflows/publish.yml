@@ -17,6 +17,7 @@ jobs:
       run:
         shell: pwsh
     name: ${{ matrix.os }}-${{ github.workflow }}
+    environment: build
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -76,6 +77,9 @@ jobs:
 
       - name: "Node Install Deps"
         run: |
+          echo "@awesome.me:registry=https://npm.fontawesome.com/" > ~/.npmrc
+          echo "@fortawesome:registry=https://npm.fontawesome.com/" >> ~/.npmrc
+          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> ~/.npmrc          
           yarn
 
       - name: 'CMake Configure'

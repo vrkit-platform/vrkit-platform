@@ -141,7 +141,7 @@
     "react-router-dom": "6.26.1",
     
     "@3fv/deferred": "1.2.14",
-    "@3fv/ditsy": "1.0.13",
+    "@3fv/ditsy": "1.0.14",
     "@3fv/electron-utility-process-manager": "1.0.6",
     "@3fv/guard": "1.4.39",
     "@3fv/logger-proxy": "1.0.71",

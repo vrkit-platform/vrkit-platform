@@ -2,8 +2,8 @@ import React, { useCallback, useContext, useEffect, useState } from "react"
 import { Helmet } from "react-helmet-async"
 import { defaults } from "lodash"
 
-import { getLogger } from "../../../../../../../../../../3fv/logger-proxy"
-import type { BoxProps } from "@mui/material/Box"
+import { getLogger } from "@3fv/logger-proxy"
+
 import type { AppTitlebarOverrides } from "../../app-titlebar"
 import type { AppContentBarOverrides } from "../../app-content-bar"
 

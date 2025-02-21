@@ -23,7 +23,7 @@
   },
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@3fv/ditsy": "^1.0.13",
+    "@3fv/ditsy": "^1.0.14",
     "@3fv/logger-proxy": "^1.0.71",
     "@vrkit-platform/models": "1.1.4"
   },

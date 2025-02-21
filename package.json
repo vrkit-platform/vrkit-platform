@@ -139,14 +139,12 @@
     "react-test-renderer": "18.3.1",
     "react-refresh": "0.16.0",
     "react-router-dom": "6.26.1",
-    
     "@3fv/deferred": "1.2.14",
     "@3fv/ditsy": "1.0.14",
     "@3fv/electron-utility-process-manager": "1.0.6",
     "@3fv/guard": "1.4.39",
     "@3fv/logger-proxy": "1.0.71",
     "@3fv/prelude-ts": "0.8.37",
-    
     "@mui/icons-material": "5.16.12",
     "@mui/lab": "5.0.0-alpha.175",
     "@mui/material": "5.16.12",
@@ -171,5 +169,6 @@
   "version": "1.1.4",
   "workspaces": [
     "packages/js/*"
-  ]
+  ],
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

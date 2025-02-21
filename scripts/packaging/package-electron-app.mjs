@@ -172,6 +172,9 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
     win: {
       requestedExecutionLevel: "requireAdministrator",
       target: ["nsis"],
+      publish: [
+        "github"
+      ]
     },
     nsis: {
       deleteAppDataOnUninstall: true,
@@ -184,15 +187,23 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
       artifactName: "VRKit Platform Installer ${version}.${ext}",
       packElevateHelper: true,
       include: Path.join(nsisDir, "installer.nsh")
-      // include: "installer/win/nsis-installer.nsh"
-    }
+    },
+    
   }
 
+  // Security
+  const
+    ghToken = process.env.GITHUB_TOKEN,
+    ghTokenValid = typeof ghToken === "string" && ghToken.length,
+    ghTokenPublishEnabled = (process.env.GITHUB_ACTIONS?.length ?? 0 > 0) && ghTokenValid
+    
+  
   // Promise is returned
   const result = await builder({
     projectDir: appDir,
     targets: Platform.WINDOWS.createTarget(),
-    config: options
+    config: options,
+    publish: ghTokenPublishEnabled ? "always" : "never"
   }).catch(err => {
     log.error("Failed to build package", err)
     throw err

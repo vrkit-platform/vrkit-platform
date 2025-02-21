@@ -40,6 +40,26 @@ jobs:
       BUILD_CONFIGURATION: Release
 
     steps:
+      - name: "Configure NPM/YARN"
+        run: | 
+          echo "network-timeout 240000" >> ~/.yarnrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+          echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> ~/.npmrc
+          echo "@mui:registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "@awesome.me:registry=https://npm.fontawesome.com/" >> ~/.npmrc
+          echo "@fortawesome:registry=https://npm.fontawesome.com/" >> ~/.npmrc
+          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> ~/.npmrc
+          
+          echo "network-timeout 240000" > .yarnrc
+          echo "registry=https://registry.npmjs.org/" > .npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+          echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> .npmrc
+          echo "@mui:registry=https://registry.npmjs.org/" >> .npmrc
+          echo "@awesome.me:registry=https://npm.fontawesome.com/" >> .npmrc
+          echo "@fortawesome:registry=https://npm.fontawesome.com/" >> .npmrc
+          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> .npmrc
+
       - uses: actions/checkout@v4
 
       - name: Create cache directory
@@ -63,24 +83,7 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}
         run: |
-          echo "network-timeout 240000" >> ~/.yarnrc
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
-          echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> ~/.npmrc
-          echo "@mui:registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "@awesome.me:registry=https://npm.fontawesome.com/" >> ~/.npmrc
-          echo "@fortawesome:registry=https://npm.fontawesome.com/" >> ~/.npmrc
-          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> ~/.npmrc
-          
-          echo "network-timeout 240000" > .yarnrc
-          echo "registry=https://registry.npmjs.org/" > .npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
-          echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> .npmrc
-          echo "@mui:registry=https://registry.npmjs.org/" >> .npmrc
-          echo "@awesome.me:registry=https://npm.fontawesome.com/" >> .npmrc
-          echo "@fortawesome:registry=https://npm.fontawesome.com/" >> .npmrc
-          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> .npmrc
-          yarn install --frozen-lockfile
+          yarn install --frozen-lockfile --immutable
 
       - name: Set Choco cache path
         run: choco config set cacheLocation "$($env:USERPROFILE)\.choco-cache"

@@ -63,8 +63,8 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}
         run: |
-          echo "network-timeout 240000" > ~/.yarnrc
-          echo "registry=https://registry.npmjs.org/" > ~/.npmrc
+          echo "network-timeout 240000" >> ~/.yarnrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
           echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> ~/.npmrc
           echo "@mui:registry=https://registry.npmjs.org/" >> ~/.npmrc
@@ -96,18 +96,7 @@ jobs:
         run: |
           mkdir ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
 
-      - name: Run vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          # Just install vcpkg for now, do not install any ports in this step yet.
-          runVcpkgInstall: false
-
-          # Location of the vcpkg as submodule of the repository.
-          vcpkgDirectory: '${{ env.VCPKG_ROOT }}'
-          vcpkgGitCommitId: '${{ matrix.vcpkgCommitId }}'
-          vcpkgJsonGlob: '**/vcpkg.json'
-
-      - name: Restore vcpkg
+      - name: Restore vcpkg binaries
         uses: actions/cache@v4
         with:
           # The first path is the location of vcpkg: it contains the vcpkg executable and data files, as long as the
@@ -118,7 +107,18 @@ jobs:
 
           # The key is composed in a way that it gets properly invalidated whenever a different version of vcpkg is being used.
           key: |
-            ${{ hashFiles( 'vcpkg.json' )}}
+            vcpkg-bin-cache-${{ hashFiles( 'vcpkg.json' )}}
+
+      - name: Run vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          # Just install vcpkg for now, do not install any ports in this step yet.
+          runVcpkgInstall: false
+
+          # Location of the vcpkg as submodule of the repository.
+          vcpkgDirectory: '${{ env.VCPKG_ROOT }}'
+          vcpkgGitCommitId: '${{ matrix.vcpkgCommitId }}'
+          vcpkgJsonGlob: '**/vcpkg.json'
 
       - name: 'CMake Configure'
         uses: lukka/run-cmake@v10

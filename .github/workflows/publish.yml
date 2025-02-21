@@ -76,8 +76,11 @@ jobs:
           vcpkgJsonGlob: '**/vcpkg.json'
 
       - name: "Node Install Deps"
+        shell: bash
         run: |
-          echo "@awesome.me:registry=https://npm.fontawesome.com/" > ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> ~/.npmrc
+          echo "@awesome.me:registry=https://npm.fontawesome.com/" >> ~/.npmrc
           echo "@fortawesome:registry=https://npm.fontawesome.com/" >> ~/.npmrc
           echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> ~/.npmrc          
           yarn

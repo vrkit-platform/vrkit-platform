@@ -74,15 +74,15 @@ jobs:
           vcpkgGitCommitId: '${{ matrix.vcpkgCommitId }}'
           vcpkgJsonGlob: '**/vcpkg.json'
 
+      - name: "Node Install Deps"
+        run: |
+          yarn
+
       - name: 'CMake Configure'
         uses: lukka/run-cmake@v10
         with:
           configurePreset: 'ninja'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-
-      - name: "Node Install Deps"
-        run: |
-          yarn
 
       - name: 'CMake Build'
         uses: lukka/run-cmake@v10

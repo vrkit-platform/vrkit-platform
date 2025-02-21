@@ -13,9 +13,14 @@ jobs:
     defaults:
       run:
         shell: pwsh
+
     name: ${{ matrix.os }}-${{ github.workflow }}
     environment: build
     runs-on: ${{ matrix.os }}
+    concurrency:
+      cancel-in-progress: true
+      group: "vrkit-app-build"
+
     strategy:
       fail-fast: true
       matrix:
@@ -27,9 +32,9 @@ jobs:
     env:
       # Path to the solution file relative to the root of the project.
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
-      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_installed
-
+      VCPKG_ROOT: "c:/vcpkg"
+      VCPKG_DEFAULT_BINARY_CACHE: "c:/vcpkg_installed"
+      CHOCO_CACHE: "C:/Users/runneradmin/.choco-cache"
       # Configuration type to build.
       # You can convert this to a build matrix if you need coverage of multiple configuration types.
       # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
@@ -57,16 +62,22 @@ jobs:
           echo "@fortawesome:registry=https://npm.fontawesome.com/" >> .npmrc
           echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> .npmrc
 
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
       - uses: actions/checkout@v4
 
       - name: Create cache directory
-        run: mkdir "$($env:USERPROFILE)\.choco-cache"
+        run: mkdir "${{ env.CHOCO_CACHE }}"
 
       - name: Cache Tools
         uses: actions/cache@v4
         with:
           path: |
-            "C:/Users/runneradmin/.choco-cache"
+            "${{ env.CHOCO_CACHE }}"
             "C:/Program Files/doxygen/bin"
           key: choco-${{ matrix.os }}
 
@@ -84,7 +95,7 @@ jobs:
           yarn install --frozen-lockfile --immutable
 
       - name: Set Choco cache path
-        run: choco config set cacheLocation "$($env:USERPROFILE)\.choco-cache"
+        run: choco config set cacheLocation "${{ env.CHOCO_CACHE }}"
 
       - name: Install doxygen
         run: choco install doxygen.install
@@ -93,7 +104,7 @@ jobs:
       - name: get-cmake
         uses: lukka/get-cmake@v3.31.5
 
-      - name: Create vcpkg bin cache
+      - name: Create vcpkg dirs
         run: |
           mkdir ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
 

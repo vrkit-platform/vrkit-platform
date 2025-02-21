@@ -78,7 +78,6 @@ jobs:
         uses: lukka/run-cmake@v10
         with:
           configurePreset: 'ninja'
-          buildPreset: 'ninja-release-preset'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
 
       - name: "Node Install Deps"
@@ -88,7 +87,6 @@ jobs:
       - name: 'CMake Build'
         uses: lukka/run-cmake@v10
         with:
-          configurePreset: 'ninja'
           buildPreset: 'ninja-release-preset'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
 

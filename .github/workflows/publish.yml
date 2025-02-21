@@ -35,7 +35,27 @@ jobs:
       BUILD_CONFIGURATION: Debug
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Create cache directory
+        run: mkdir "$($env:LOCALAPPDATA)\choco-cache"
+
+      - name: Cache Tools
+        uses: actions/cache@v4
+        with:
+          path: "$($env:LOCALAPPDATA)\\choco-cache"
+          key: ${{ matrix.os }}-temp-choco-cache
+
+      - name: Set Choco cache path
+        run: choco config set cacheLocation "$($env:LOCALAPPDATA)\choco-cache"
+
+      - name: Install doxygen, nvm
+        run: choco install doxygen nvm
+
+      - name: Use Node v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
 
       - name: get-cmake
         uses: lukka/get-cmake@v3.31.5
@@ -56,6 +76,5 @@ jobs:
         with:
           configurePreset: 'ninja'
           buildPreset: 'ninja-release-preset'
-          # buildDirectory: '${{ github.workspace }}/build/release'
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
 

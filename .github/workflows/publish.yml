@@ -49,8 +49,8 @@ jobs:
       - name: Set Choco cache path
         run: choco config set cacheLocation "$($env:LOCALAPPDATA)\choco-cache"
 
-      - name: Install doxygen, nvm
-        run: choco install doxygen nvm
+      - name: Install doxygen
+        run: choco install doxygen
 
       - name: Use Node v22
         uses: actions/setup-node@v4

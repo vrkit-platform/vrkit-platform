@@ -1,6 +1,6 @@
 {
   "name": "@vrkit-platform/models",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "VRKit Platform Models",
   "license": "ISC",
   "private": false,
@@ -33,6 +33,6 @@
     "@protobuf-ts/plugin": "^2.9.4",
     "@3fv/logger-proxy": "^1.0.71",
     "typescript": "^5.5.4",
-    "vrkit-builder-tool": "1.1.4"
+    "vrkit-builder-tool": "1.1.5"
   }
 }

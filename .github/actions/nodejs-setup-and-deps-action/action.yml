@@ -45,9 +45,9 @@ runs:
     - name: Use Node v22
       uses: actions/setup-node@v4
       with:
-      node-version: '22'
-      cache: "yarn"
-      cache-dependency-path: '**/yarn.lock'
+        node-version: '22'
+        cache: "yarn"
+        cache-dependency-path: '**/yarn.lock'
 
     - name: "Node Install Deps"
       shell: bash

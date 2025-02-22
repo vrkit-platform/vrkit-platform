@@ -34,6 +34,9 @@ jobs:
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
       VCPKG_ROOT: "C:/vcpkg"
       VCPKG_DEFAULT_BINARY_CACHE: "C:/vcpkg_installed"
+      VCPKG_MAX_CONCURRENCY: 4
+
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
 
       CHOCO_CACHE: "C:/Users/runneradmin/.choco-cache"
 

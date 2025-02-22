@@ -18,7 +18,7 @@ jobs:
     environment: build
     runs-on: ${{ matrix.os }}
     concurrency:
-      cancel-in-progress: true
+      cancel-in-progress: false
       group: "vrkit-app-build"
 
     strategy:

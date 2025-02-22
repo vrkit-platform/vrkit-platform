@@ -77,7 +77,11 @@ include(cmake/example_target.cmake)
 include(cmake/hybrid_crt.cmake NO_POLICY_SCOPE)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+if(DEBUG)
 add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP> $<$<CXX_COMPILER_ID:MSVC>:/MTd>)
+else()
+add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP> $<$<CXX_COMPILER_ID:MSVC>:/MT>)
+endif()
 
 
 # Include test tools

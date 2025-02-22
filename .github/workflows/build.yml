@@ -1,0 +1,126 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: pwsh
+
+    name: ${{ matrix.os }}-${{ github.workflow }}
+    environment: build
+    runs-on: ${{ matrix.os }}
+    concurrency:
+      cancel-in-progress: true
+      group: "vrkit-app-build"
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [  windows-latest ]
+        include:
+          - os: windows-latest
+            triplet: x64-windows-static
+            vcpkgCommitId: '47bf3d1ac192b3fa0feb6e6ac9c845de179eebe9'
+    env:
+      # Path to the solution file relative to the root of the project.
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
+      VCPKG_ROOT: "C:/vcpkg"
+      VCPKG_DEFAULT_BINARY_CACHE: "C:/vcpkg_installed"
+      VCPKG_MAX_CONCURRENCY: 4
+
+      CMAKE_BUILD_PARALLEL_LEVEL: 4
+
+      CHOCO_CACHE: "C:/Users/runneradmin/.choco-cache"
+
+      BUILD_PLATFORM: x64
+      BUILD_CONFIGURATION: Release
+
+    steps:
+
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Node & Install Deps
+        uses: ./.github/actions/nodejs-setup-and-deps-action
+        with:
+          FONT_AWESOME_TOKEN: ${{ secrets.FONT_AWESOME_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create cache directory
+        run: mkdir "${{ env.CHOCO_CACHE }}"
+
+      - name: Cache Tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            "${{ env.CHOCO_CACHE }}"
+            "C:/Program Files/doxygen/bin"
+          key: choco-${{ matrix.os }}
+
+
+      - name: Set Choco cache path
+        run: choco config set cacheLocation "${{ env.CHOCO_CACHE }}"
+
+      - name: Install doxygen
+        run: choco install doxygen.install
+
+
+      - name: get-cmake
+        uses: lukka/get-cmake@v3.31.5
+
+      - name: Create vcpkg dirs
+        run: |
+          mkdir ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+
+      #      - name: Restore vcpkg binaries
+      #        uses: actions/cache@v4
+      #        with:
+      #          # The first path is the location of vcpkg: it contains the vcpkg executable and data files, as long as the
+      #          # built package archives (aka binary cache) which are located by VCPKG_DEFAULT_BINARY_CACHE env var.
+      #          # The other paths starting with '!' are exclusions: they contain termporary files generated during the build of the installed packages.
+      #          path: |
+      #            ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+      #
+      #          # The key is composed in a way that it gets properly invalidated whenever a different version of vcpkg is being used.
+      #          key: |
+      #            vcpkg-bin-cache-${{ hashFiles( 'vcpkg.json' )}}
+
+      - name: Run vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          # Just install vcpkg for now, do not install any ports in this step yet.
+          runVcpkgInstall: false
+
+          # Location of the vcpkg as submodule of the repository.
+          vcpkgDirectory: '${{ env.VCPKG_ROOT }}'
+          vcpkgGitCommitId: '${{ matrix.vcpkgCommitId }}'
+          vcpkgJsonGlob: '**/vcpkg.json'
+
+      - name: 'CMake Configure'
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: 'ninja'
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+
+      - name: 'CMake Build'
+        uses: lukka/run-cmake@v10
+        with:
+          buildPreset: 'ninja-release'
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+
+      - name: 'Package & Build Electron App'
+        run: |
+          yarn run vrkit-app:package

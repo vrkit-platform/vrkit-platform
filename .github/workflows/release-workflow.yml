@@ -56,6 +56,9 @@ jobs:
 
       - name: Setup Node & Install Deps
         uses: ./.github/actions/nodejs-setup-and-deps-action
+        with:
+          FONT_AWESOME_TOKEN: ${{ secrets.FONT_AWESOME_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Commit & Push changes
         uses: benkaiser/rebase-commit-push@v1.3

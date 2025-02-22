@@ -2,7 +2,13 @@ name: NodeJS Setup & Deps Action
 
 description: "NodeJS Setup & Deps Action"
 
-inputs: {}
+inputs:
+  NPM_TOKEN:
+    description: "NPM_TOKEN"
+    required: true
+  FONT_AWESOME_TOKEN:
+    description: "FONT_AWESOME_TOKEN"
+    required: true
 #  example_input:
 #    description: "An example input for the action"
 #    required: true
@@ -20,21 +26,21 @@ runs:
       run: |
         echo "network-timeout 240000" >> ~/.yarnrc
         echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-        echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+        echo "//registry.npmjs.org/:_authToken=${{ inputs.NPM_TOKEN }}" >> ~/.npmrc
         echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> ~/.npmrc
         echo "@mui:registry=https://registry.npmjs.org/" >> ~/.npmrc
         echo "@awesome.me:registry=https://npm.fontawesome.com/" >> ~/.npmrc
         echo "@fortawesome:registry=https://npm.fontawesome.com/" >> ~/.npmrc
-        echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> ~/.npmrc
+        echo "//npm.fontawesome.com/:_authToken=${{ inputs.FONT_AWESOME_TOKEN }}" >> ~/.npmrc
 
         echo "network-timeout 240000" > .yarnrc
         echo "registry=https://registry.npmjs.org/" > .npmrc
-        echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+        echo "//registry.npmjs.org/:_authToken=${{ inputs.NPM_TOKEN }}" >> .npmrc
         echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> .npmrc
         echo "@mui:registry=https://registry.npmjs.org/" >> .npmrc
         echo "@awesome.me:registry=https://npm.fontawesome.com/" >> .npmrc
         echo "@fortawesome:registry=https://npm.fontawesome.com/" >> .npmrc
-        echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> .npmrc
+        echo "//npm.fontawesome.com/:_authToken=${{ inputs.FONT_AWESOME_TOKEN }}" >> .npmrc
 
     - name: Use Node v22
       uses: actions/setup-node@v4

@@ -52,6 +52,9 @@ jobs:
 
       - name: Setup Node & Install Deps
         uses: ./.github/actions/nodejs-setup-and-deps-action
+        with:
+          FONT_AWESOME_TOKEN: ${{ secrets.FONT_AWESOME_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create cache directory
         run: mkdir "${{ env.CHOCO_CACHE }}"

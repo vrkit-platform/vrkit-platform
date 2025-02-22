@@ -178,7 +178,7 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
       }
     },
     nsis: {
-      deleteAppDataOnUninstall: true,
+      deleteAppDataOnUninstall: false,
       oneClick: false,
       perMachine: true,
       allowElevation: true,

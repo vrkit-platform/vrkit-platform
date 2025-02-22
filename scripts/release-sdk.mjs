@@ -5,9 +5,13 @@ import Fsx from "fs-extra"
 import * as semver from "semver"
 import { $, cd, echo, path as Path } from "zx"
 import { getOrCreateLogger } from "./setup-env/logger-setup.mjs"
+import { fatalError, isMainScript } from "./setup-env/process-helpers.mjs"
 import { rootDir } from "./setup-env/workflow-global.mjs"
 
 const log = getOrCreateLogger(import.meta.filename)
+
+// CHECK IF THIS SCRIPT WAS INVOKED DIRECTLY
+const shouldExecute = isMainScript(import.meta.url)
 
 cd(rootDir)
 
@@ -44,7 +48,11 @@ async function checkVersions() {
   return true
 }
 
-if (await checkVersions()) {
+export async function releaseSDK() {
+  if (!await checkVersions()) {
+    fatalError(`Versions already published`)
+  }
+  
   echo`Publishing packages`
   for (const pkgDir of pkgDirs) {
     const pkgFile = Path.relative(process.cwd(), Path.join(pkgDir, "package.json")),
@@ -55,6 +63,10 @@ if (await checkVersions()) {
       cwd: pkgDir
     })`yarn publish --non-interactive`
   }
-} else {
-  echo`Versions already published, skipping`
+}
+
+export default releaseSDK
+
+if (shouldExecute) {
+  releaseSDK()
 }

@@ -1,0 +1,68 @@
+name: Build
+
+on:
+  workflow_dispatch:
+#  push:
+#    branches: [ "develop" ]
+#  pull_request:
+#    branches: [ "develop" ]
+
+
+jobs:
+  build:
+    defaults:
+      run:
+        shell: pwsh
+
+    name: ${{ matrix.os }}-${{ github.workflow }}
+    environment: build
+    runs-on: ${{ matrix.os }}
+    concurrency:
+      cancel-in-progress: true
+      group: "vrkit-app-build"
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [  windows-latest ]
+        include:
+          - os: windows-latest
+            triplet: x64-windows-static
+            vcpkgCommitId: '47bf3d1ac192b3fa0feb6e6ac9c845de179eebe9'
+    env:
+      # Path to the solution file relative to the root of the project.
+      VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
+      VCPKG_ROOT: "C:/vcpkg"
+      VCPKG_DEFAULT_BINARY_CACHE: "C:/vcpkg_installed"
+
+      CHOCO_CACHE: "C:/Users/runneradmin/.choco-cache"
+
+      BUILD_PLATFORM: x64
+      BUILD_CONFIGURATION: Release
+
+    steps:
+
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - uses: actions/checkout@v4
+        with:
+          ref: "develop"
+          fetch-depth: 1
+          fetch-tags: true
+
+      - name: Setup Node & Install Deps
+        uses: ./.github/actions/nodejs-setup-and-deps-action
+
+      - name: Commit & Push changes
+        uses: benkaiser/rebase-commit-push@v1.3
+        with:
+          branch: master
+          rebase: true
+
+      - name: 'Release'
+        run: |
+          yarn run vrkit-app:release-version

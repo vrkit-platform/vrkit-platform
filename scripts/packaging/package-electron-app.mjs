@@ -172,9 +172,10 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
     win: {
       requestedExecutionLevel: "requireAdministrator",
       target: ["nsis"],
-      publish: [
-        "github"
-      ]
+      publish: {
+        provider: "github",
+        releaseType: "draft"
+      }
     },
     nsis: {
       deleteAppDataOnUninstall: true,
@@ -187,7 +188,7 @@ export async function packageElectronApp(log = getOrCreateLogger("electron-build
       artifactName: "VRKit Platform Installer ${version}.${ext}",
       packElevateHelper: true,
       include: Path.join(nsisDir, "installer.nsh")
-    },
+    }
     
   }
 

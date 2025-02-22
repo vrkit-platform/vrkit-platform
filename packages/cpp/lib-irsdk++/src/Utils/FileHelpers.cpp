@@ -20,9 +20,12 @@ namespace IRacingTools::SDK::Utils {
                     }
                 }
             };
-            if (recursive)
-            iterateFiles(fs::recursive_directory_iterator(path));
-            else iterateFiles(fs::directory_iterator(path));
+            
+            if (recursive) {
+                iterateFiles(fs::recursive_directory_iterator(path));
+            } else {
+                iterateFiles(fs::directory_iterator(path));
+            }
             // auto fileIterator = recursive ? fs::recursive_directory_iterator(path) : fs::directory_iterator(path);
             // for(auto& fileEntry : fileIterator) {
             //     auto& file = fileEntry.path();

@@ -13,10 +13,12 @@
       "binaryDir": "${sourceDir}/build/${presetName}",
       "generator": "Ninja",
       "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_TOOLCHAIN_FILE": {
           "type": "FILEPATH",
           "value": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
         },
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "SPDLOG_WCHAR_SUPPORT": "1",
         "SPDLOG_WCHAR_TO_UTF8_SUPPORT": "1",
         "VCPKG_ROOT": "$env{VCPKG_ROOT}",
@@ -26,12 +28,24 @@
         "VCPKG_LIBRARY_LINKAGE": "static",
         "VCPKG_INSTALL_OPTIONS": "--allow-unsupported"
       }
+    },
+
+      {
+        "name": "ninja-dev",
+        "displayName": "ninja-dev",
+        "description": "Sets build and install directories",
+        "binaryDir": "${sourceDir}/build/${presetName}",
+        "generator": "Ninja",
+        "cacheVariables": {
+          "CMAKE_BUILD_TYPE": "Debug"
+        }
+      
     }
   ],
   "buildPresets": [
     {
       "name": "ninja-debug",
-      "configurePreset": "ninja",
+      "configurePreset": "ninja-dev",
       "configuration": "Debug",
       "targets": [
         "irsdkcpp",

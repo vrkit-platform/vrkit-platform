@@ -18,9 +18,11 @@
     "-DVCPKG_LIBRARY_LINKAGE=static",
     // "-DVCPKG_INSTALL_OPTIONS=\"--allow-unsupported\""
   ],
+  "cmake.showSystemKits": true,
   "cmake.generator": "Ninja",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
   "C_Cpp.intelliSenseMemoryLimit": 8192,
-  "C_Cpp.intelliSenseCacheSize": 15120
+  "C_Cpp.intelliSenseCacheSize": 15120,
+  "cmake.ignoreKitEnv": false
 }

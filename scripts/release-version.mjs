@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// noinspection JSCheckFunctionSignatures
+// noinspection JSCheckFunctionSignatures,JSUnresolvedReference
 
 import assert from "assert"
 import Fsx from "fs-extra"
@@ -37,15 +37,26 @@ echo`VRKit Platform version v${pkgVersion} - Releasing`
 
 async function checkReleaseDraftValid() {
   echo`Checking Github Draft Release v${pkgVersion} exists`
-  const releaseInfoOutput = await $`gh api repos/jglanz/irsdk-interop/releases/tags/${versionTag}`,
-    releaseInfoJson = JSON.parse(releaseInfoOutput.stdout)
+  const releaseInfoOutput = await $`gh release list --json "name,isDraft,tagName" -q '[.[] | select(.name == "${pkgVersion}")]'`,
+    releaseInfoJsonStr = releaseInfoOutput.stdout,
+    releaseInfoJson = JSON.parse(releaseInfoJsonStr)
   
-  assert(releaseInfoJson.draft === true, `Release is not marked as a draft (${versionTag})`)
+  echo`Release Info for ${versionTag}:
+  
+  ${releaseInfoJsonStr}
+  
+  Validating isDraft === true`
+  assert(releaseInfoJson?.[0]?.isDraft === true, `Release is not marked as a draft (${versionTag})`)
+  
+  // const releaseInfoOutput = await $`gh api repos/jglanz/irsdk-interop/releases/tags/${versionTag}`,
+  //   releaseInfoJson = JSON.parse(releaseInfoOutput.stdout)
+  //
+  // assert(releaseInfoJson.draft === true, `Release is not marked as a draft (${versionTag})`)
 }
 
 async function releaseDraft() {
   echo`Updating Github Release v${pkgVersion} to production channel`
-  await $`gh release edit ${versionTag} --draft=false`
+  await $`gh release edit ${versionTag} --draft=false --latest`
 }
 
 async function rebaseDevelopToMaster() {

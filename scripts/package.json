@@ -5,6 +5,7 @@
   "dependencies": {
     "@3fv/deferred": "^1.2.14",
     "@3fv/guard": "^1.4.39",
+    "fs-extra": "^11.2.0",
     "lodash": "^4.17.21",
     "semver": "^7.6.3",
     "shelljs": "^0.8.5",

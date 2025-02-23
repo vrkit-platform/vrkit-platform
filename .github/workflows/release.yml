@@ -31,10 +31,10 @@ jobs:
           FONT_AWESOME_TOKEN: ${{ secrets.FONT_AWESOME_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-#      - name: Install Dependencies
-#        run: |
-#          cd ${{github.workspace}}/scripts
-#          yarn install
+      - name: Install Dependencies
+        run: |
+          cd ${{github.workspace}}
+          yarn install
 
       - name: 'Release'
         shell: pwsh

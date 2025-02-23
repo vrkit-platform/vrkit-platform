@@ -25,21 +25,24 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Use Node v22
-        uses: actions/setup-node@v4
+      - name: Setup Node & Install Deps
+        uses: ./.github/actions/nodejs-setup-and-deps-action
         with:
-          node-version: '22'
+          FONT_AWESOME_TOKEN: ${{ secrets.FONT_AWESOME_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Install Dependencies
-        run: |
-          cd ${{github.workspace}}/scripts
-          yarn install
+#      - name: Install Dependencies
+#        run: |
+#          cd ${{github.workspace}}/scripts
+#          yarn install
 
       - name: 'Release'
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
         run: |
           cd ${{github.workspace}}/scripts
           node release-version.mjs

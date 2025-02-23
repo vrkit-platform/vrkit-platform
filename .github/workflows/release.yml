@@ -7,7 +7,7 @@ jobs:
   build:
     defaults:
       run:
-        shell: bash
+        shell: pwsh
 
     name: "vrkit-release"
     environment: build
@@ -36,7 +36,7 @@ jobs:
           yarn install
 
       - name: 'Release'
-        shell: bash
+        shell: pwsh
         run: |
-          cd scripts
+          cd ${{github.workspace}}/scripts
           ./node_modules/.bin/cross-env GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}} node release-version.mjs

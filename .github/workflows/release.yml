@@ -37,6 +37,9 @@ jobs:
 
       - name: 'Release'
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd ${{github.workspace}}/scripts
-          ./node_modules/.bin/cross-env GITHUB_TOKEN=${{secrets.GITHUB_TOKEN}} node release-version.mjs
+          node release-version.mjs

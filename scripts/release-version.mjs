@@ -67,8 +67,9 @@ async function rebaseDevelopToMaster() {
   echo`Starting rebase of 'develop' onto 'master'`
   
   try {
-    
+    await gitExec`git fetch origin develop`
     await gitExec`git fetch origin master`
+    await gitExec`git checkout origin/develop`
     await gitExec`git checkout origin/master` // Switch to master branch
     await gitExec`git pull origin master` // Ensure master is up-to-date
     
@@ -91,7 +92,7 @@ async function rebaseDevelopToMaster() {
 async function pushMaster() {
   try {
     // Push the changes to master (with --force due to rebase)
-    await gitExec`git push origin master`
+    await gitExec`git push origin master --force`
   } catch (error) {
     fatalError(`Error during push: ${error.message}`)
   }

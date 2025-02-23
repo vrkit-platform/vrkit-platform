@@ -44,5 +44,8 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
         run: |
+          cd ${{github.workspace}}
+          yarn compile
+          
           cd ${{github.workspace}}/scripts
           node release-version.mjs

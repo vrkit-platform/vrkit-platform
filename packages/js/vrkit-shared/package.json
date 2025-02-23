@@ -1,6 +1,6 @@
 {
   "name": "@vrkit-platform/shared",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "VRKit Platform Shared Library",
   "license": "ISC",
   "private": false,
@@ -103,9 +103,9 @@
     "test:watch": "jest --no-cache --watchAll"
   },
   "dependencies": {
-    "@vrkit-platform/models": "1.1.5",
-    "vrkit-native-interop": "1.1.5",
-    "@vrkit-platform/plugin-sdk": "1.1.5"
+    "@vrkit-platform/models": "1.1.6",
+    "vrkit-native-interop": "1.1.6",
+    "@vrkit-platform/plugin-sdk": "1.1.6"
   },
   "devDependencies": {
     "type-fest": "^4.26.1",

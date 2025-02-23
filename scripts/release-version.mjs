@@ -23,7 +23,7 @@ const pkgFile = Path.join(rootDir, "package.json"),
   pkgVersion = pkgJson.version,
   versionTag = `v${pkgVersion}`
 
-echo`Releasing VRKit Platform version v${pkgVersion}`
+echo`VRKit Platform version v${pkgVersion} - Releasing`
 
 async function checkReleaseDraftValid() {
   echo`Checking Github Draft Release v${pkgVersion} exists`

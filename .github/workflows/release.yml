@@ -65,8 +65,18 @@ jobs:
         run: |
           cd ${{github.workspace}}
           
+          echo "Checking out develop"
+          git checkout --track origin/develop
+          
+          echo "Resetting on develop"
+          git reset --hard
+          
           echo "Checking out master"
-          git checkout origin/master
+          git checkout --track origin/master
+          
+          echo "Resetting on master"
+          git reset --hard
+          
           git rebase develop
           
           yarn compile

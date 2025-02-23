@@ -33,6 +33,10 @@ const pkgFile = Path.join(rootDir, "package.json"),
   pkgVersion = pkgJson.version,
   versionTag = `v${pkgVersion}`
 
+const gitExec = $({
+  cwd: rootDir
+})
+
 echo`VRKit Platform version v${pkgVersion} - Releasing`
 
 async function checkReleaseDraftValid() {
@@ -63,15 +67,18 @@ async function rebaseDevelopToMaster() {
   echo`Starting rebase of 'develop' onto 'master'`
   
   try {
-    await $`git checkout master` // Switch to master branch
-    await $`git pull origin master` // Ensure master is up-to-date
+    
+    await gitExec`git fetch origin master`
+    await gitExec`git checkout origin/master` // Switch to master branch
+    await gitExec`git pull origin master` // Ensure master is up-to-date
     
     // Rebase develop onto master
-    await $`git rebase develop`
+    await gitExec`git rebase develop`
     
     echo`Rebase completed and changes pushed to 'master'`
   } catch (error) {
     const cleanupResult = await $({
+      cwd: rootDir,
       nothrow: true
     })`git rebase --abort` // Abort the rebase in case of issues
     if (cleanupResult.exitCode !== 0) {
@@ -84,7 +91,7 @@ async function rebaseDevelopToMaster() {
 async function pushMaster() {
   try {
     // Push the changes to master (with --force due to rebase)
-    await $`git push origin master`
+    await gitExec`git push origin master`
   } catch (error) {
     fatalError(`Error during push: ${error.message}`)
   }
@@ -94,8 +101,8 @@ async function releaseVersion() {
   await checkReleaseDraftValid()
   await rebaseDevelopToMaster()
   await releaseSDK()
-  await releaseDraft()
   await pushMaster()
+  await releaseDraft()
 }
 
 releaseVersion()

@@ -15,6 +15,16 @@ const log = getOrCreateLogger(import.meta.filename)
 // CHECK IF THIS SCRIPT WAS INVOKED DIRECTLY
 const shouldExecute = isMainScript(import.meta.url)
 
+// UPDATE ENV
+const ghToken = process.env.GITHUB_TOKEN
+assert(typeof ghToken === "string" && ghToken.length > 0, `Invalid GITHUB_TOKEN env variable (${ghToken})`)
+
+process.env.GH_TOKEN = ghToken
+$.env = {
+  ...process.env,
+  GH_TOKEN: ghToken
+}
+
 cd(rootDir)
 
 const pkgFile = Path.join(rootDir, "package.json"),

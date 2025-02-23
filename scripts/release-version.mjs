@@ -77,10 +77,6 @@ async function releaseVersion() {
   await pushMaster()
 }
 
-
-
-if (shouldExecute) {
-  releaseVersion()
-}
+releaseVersion()
 
 export {}

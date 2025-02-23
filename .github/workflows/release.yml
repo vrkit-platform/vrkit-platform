@@ -34,6 +34,15 @@ jobs:
         run: |
           cd ${{github.workspace}}
           
+          echo "Make sure we are tracking"          
+          git branch --set-upstream-to=origin/master master
+          
+          echo "Pulling latest 'master'"
+          git pull          
+          
+          echo "Resetting on 'master'"
+          git reset --hard
+          
           echo "Checking out develop"
           git checkout --track origin/develop
           
@@ -41,7 +50,7 @@ jobs:
           git reset --hard
           
           echo "Checking out master"
-          git checkout --track origin/master
+          git checkout master
           
           echo "Resetting on master"
           git reset --hard

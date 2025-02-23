@@ -21,9 +21,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: "develop"
+          ref: "master"
           fetch-depth: 0
           fetch-tags: true
+
+      - name: 'Rebase w/o push'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        run: |
+          cd ${{github.workspace}}
+
+          echo "Checking out master"
+          git checkout origin/master
+          
+          echo "Fetching develop"
+          git fetch origin develop
+          
+          echo "Rebase 'master' onto 'develop'"
+          git rebase develop
+          echo "Rebased 'master' onto 'develop'"
 
       - name: Setup Node & Install Deps
         uses: ./.github/actions/nodejs-setup-and-deps-action
@@ -45,6 +64,11 @@ jobs:
 
         run: |
           cd ${{github.workspace}}
+          
+          echo "Checking out master"
+          git checkout origin/master
+          git rebase develop
+          
           yarn compile
           
           cd ${{github.workspace}}/scripts

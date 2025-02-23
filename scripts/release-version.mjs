@@ -63,31 +63,33 @@ async function releaseDraft() {
   await $`gh release edit ${versionTag} --draft=false --latest`
 }
 
-async function rebaseDevelopToMaster() {
-  echo`Starting rebase of 'develop' onto 'master'`
-  
-  try {
-    await gitExec`git fetch origin develop`
-    await gitExec`git fetch origin master`
-    await gitExec`git checkout origin/develop`
-    await gitExec`git checkout origin/master` // Switch to master branch
-    await gitExec`git pull origin master` // Ensure master is up-to-date
-    
-    // Rebase develop onto master
-    await gitExec`git rebase develop`
-    
-    echo`Rebase completed and changes pushed to 'master'`
-  } catch (error) {
-    const cleanupResult = await $({
-      cwd: rootDir,
-      nothrow: true
-    })`git rebase --abort` // Abort the rebase in case of issues
-    if (cleanupResult.exitCode !== 0) {
-      echo`ERROR: Failed to cleanup rebase, abort failed`
-    }
-    fatalError(`Error during rebase: ${error.message}`)
-  }
-}
+// async function rebaseDevelopToMaster() {
+//   echo`Starting rebase of 'develop' onto 'master'`
+//
+//   try {
+//     echo`Fetching latest JUST-IN-CASE`
+//     await gitExec`git fetch origin develop`
+//     await gitExec`git fetch origin master`
+//     //await gitExec`git checkout origin/develop`
+//     // echo``
+//     // await gitExec`git checkout origin/master` // Switch to master branch
+//
+//     // Rebase develop onto master
+//     echo`REBASE: Starting`
+//     await gitExec`git rebase develop`
+//     echo`REBASE: completed and changes pushed to 'master'`
+//
+//   } catch (error) {
+//     const cleanupResult = await $({
+//       cwd: rootDir,
+//       nothrow: true
+//     })`git rebase --abort` // Abort the rebase in case of issues
+//     if (cleanupResult.exitCode !== 0) {
+//       echo`ERROR: Failed to cleanup rebase, abort failed`
+//     }
+//     fatalError(`Error during rebase: ${error.message}`)
+//   }
+// }
 
 async function pushMaster() {
   try {
@@ -100,7 +102,7 @@ async function pushMaster() {
 
 async function releaseVersion() {
   await checkReleaseDraftValid()
-  await rebaseDevelopToMaster()
+  //await rebaseDevelopToMaster()
   await releaseSDK()
   await pushMaster()
   await releaseDraft()

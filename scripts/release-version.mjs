@@ -38,10 +38,43 @@ async function releaseDraft() {
   await $`gh release edit ${versionTag} --draft=false`
 }
 
+async function rebaseDevelopToMaster() {
+  echo`Starting rebase of 'develop' onto 'master'`
+  
+  try {
+    await $`git checkout master` // Switch to master branch
+    await $`git pull origin master` // Ensure master is up-to-date
+    
+    // Rebase develop onto master
+    await $`git rebase develop`
+    
+    echo`Rebase completed and changes pushed to 'master'`
+  } catch (error) {
+    const cleanupResult = await $({
+      nothrow: true
+    })`git rebase --abort` // Abort the rebase in case of issues
+    if (cleanupResult.exitCode !== 0) {
+      echo`ERROR: Failed to cleanup rebase, abort failed`
+    }
+    fatalError(`Error during rebase: ${error.message}`)
+  }
+}
+
+async function pushMaster() {
+  try {
+    // Push the changes to master (with --force due to rebase)
+    await $`git push origin master`
+  } catch (error) {
+    fatalError(`Error during push: ${error.message}`)
+  }
+}
+
 async function releaseVersion() {
   await checkReleaseDraftValid()
+  await rebaseDevelopToMaster()
   await releaseSDK()
   await releaseDraft()
+  await pushMaster()
 }
 
 

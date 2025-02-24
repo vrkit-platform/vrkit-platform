@@ -64,6 +64,27 @@ jobs:
         with:
           node-version: '22'
 
+      - name: "Configure NPM/YARN"
+        shell: pwsh
+        run: |
+          echo "network-timeout 240000" >> ~/.yarnrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
+          echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> ~/.npmrc
+          echo "@mui:registry=https://registry.npmjs.org/" >> ~/.npmrc
+          echo "@awesome.me:registry=https://npm.fontawesome.com/" >> ~/.npmrc
+          echo "@fortawesome:registry=https://npm.fontawesome.com/" >> ~/.npmrc
+          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> ~/.npmrc
+
+          echo "network-timeout 240000" > .yarnrc
+          echo "registry=https://registry.npmjs.org/" > .npmrc
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+          echo "script-shell=C:\\Program Files\\git\\bin\\bash.exe" >> .npmrc
+          echo "@mui:registry=https://registry.npmjs.org/" >> .npmrc
+          echo "@awesome.me:registry=https://npm.fontawesome.com/" >> .npmrc
+          echo "@fortawesome:registry=https://npm.fontawesome.com/" >> .npmrc
+          echo "//npm.fontawesome.com/:_authToken=${{ secrets.FONT_AWESOME_TOKEN }}" >> .npmrc
+
       - name: Install Dependencies
         working-directory: ${{github.workspace}}/scripts
         run: |
@@ -74,7 +95,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: ${{github.workspace}}/scripts
         run: |
           set -e

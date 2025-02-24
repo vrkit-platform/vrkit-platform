@@ -110,5 +110,8 @@ async function releaseVersion() {
 }
 
 releaseVersion()
+  .catch(err => {
+    console.error(`Error occurred: ${err?.message}`, err)
+    fatalError(err.message)
+  })
 
-export {}

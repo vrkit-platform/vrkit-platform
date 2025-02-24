@@ -5,6 +5,7 @@ import Fsx from "fs-extra"
 import * as semver from "semver"
 import { $, cd, echo, path as Path } from "zx"
 import { getOrCreateLogger } from "./setup-env/logger-setup.mjs"
+import { getPackagePublishInfo } from "./setup-env/npm-publish-helpers.mjs"
 import { fatalError, isMainScript } from "./setup-env/process-helpers.mjs"
 import { rootDir } from "./setup-env/workflow-global.mjs"
 
@@ -15,21 +16,20 @@ const shouldExecute = isMainScript(import.meta.url)
 
 cd(rootDir)
 
-const pkgFiles = Fsx.globSync(["packages/js/vrkit-{models,plugin-sdk}/package.json"], {
-    cwd: rootDir,
-    exclude: f => f.includes("node_modules")
-  }).map(f => Path.join(rootDir, f)),
-  pkgDirs = pkgFiles.map(f => Path.dirname(f))
+const pkgs = Object.values(getPackagePublishInfo())
 
-echo`Publishing vrkit platform modules & packages: \n${pkgDirs.join("\n")}`
+echo`Publishing vrkit platform modules & packages: \n${pkgs.map(({name}) => name).join("\n")}`
 
 async function checkVersions() {
   echo`Verifying that version numbers are unique`
-  for (const pkgDir of pkgDirs) {
-    echo`Checking ${pkgDir}`
-    const pkgFile = Path.relative(process.cwd(), Path.join(pkgDir, "package.json")),
-      pkgJson = Fsx.readJSONSync(pkgFile)
-
+  for (const pkg of pkgs) {
+    const
+      pkgDir = pkg.dir,
+      pkgFile = pkg.file,
+      pkgJson = pkg.json
+    
+    echo`Checking ${pkg.name} versions`
+    
     const output = await $({
       cwd: pkgDir
     })`npm show ${pkgJson.name} --json`
@@ -54,14 +54,21 @@ export async function releaseSDK() {
   }
   
   echo`Publishing packages`
-  for (const pkgDir of pkgDirs) {
-    const pkgFile = Path.relative(process.cwd(), Path.join(pkgDir, "package.json")),
-      pkgJson = Fsx.readJSONSync(pkgFile)
+  for (const pkg of pkgs) {
+    const
+      pkgDir = pkg.dir,
+      pkgFile = pkg.file,
+      pkgJson = pkg.json
     
-    echo`Publishing ${pkgJson.name} version ${pkgJson.version}`
-    await $({
+    const pkgExec = $({
       cwd: pkgDir
-    })`yarn publish --non-interactive`
+    })
+    
+    echo`Download ${pkgJson.name} version ${pkgJson.version} > ${pkg.releaseFilename}`
+    await pkgExec`gh release download ${pkg.tag} --clobber --output ${pkg.releaseFilename} --pattern '${pkg.releaseFilename}'`
+    
+    echo`Publishing ${pkgJson.name} version ${pkg.tag} > ${pkg.releaseFilename}`
+    await pkgExec`yarn publish ${pkg.releaseFilename} --non-interactive`
   }
 }
 

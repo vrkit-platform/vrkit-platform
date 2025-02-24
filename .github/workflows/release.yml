@@ -26,13 +26,13 @@ jobs:
           fetch-tags: true
 
       - name: 'Rebase w/o push'
-        shell: pwsh
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+        working-directory: ${{github.workspace}}
         run: |
-          cd ${{github.workspace}}
+          set -e
           
           echo "Make sure we are tracking"          
           git branch --set-upstream-to=origin/master master
@@ -59,27 +59,23 @@ jobs:
           git rebase develop
           echo "Rebased 'master' onto 'develop'"
 
-      - name: Setup Node & Install Deps
-        uses: ./.github/actions/nodejs-setup-and-deps-action
+      - name: Use Node v22
+        uses: actions/setup-node@v4
         with:
-          FONT_AWESOME_TOKEN: ${{ secrets.FONT_AWESOME_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          node-version: '22'
 
       - name: Install Dependencies
+        working-directory: ${{github.workspace}}/scripts
         run: |
-          cd ${{github.workspace}}
           yarn install
 
       - name: 'Release'
-        shell: pwsh
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+        working-directory: ${{github.workspace}}/scripts
         run: |
-          cd ${{github.workspace}}
-          yarn compile
-          
-          cd ${{github.workspace}}/scripts
+          set -e
           node release-version.mjs

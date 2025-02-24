@@ -3,9 +3,11 @@ import "./prod-env.mjs"
 import Path from "path"
 
 import { cd } from "zx"
+import packSDK from "./pack-sdk.mjs"
 
 import packageElectronApp from "./packaging/package-electron-app.mjs"
 import { getOrCreateLogger } from "./setup-env/logger-setup.mjs"
+import { inGithubActions } from "./setup-env/process-helpers.mjs"
 import { rootDir } from "./setup-env/workflow-global.mjs"
 import startWorkflow from "./setup-env/workflow-runner.mjs"
 
@@ -41,8 +43,13 @@ const prodFlow = {
       name: "package",
       parallel: false,
       tasks: [{ name: "package-electron-app", action: () => packageElectronApp() }]
+    },
+    inGithubActions() && {
+      name: "pack-sdks",
+      parallel: false,
+      tasks: [{ name: "pack-sdks-task", action: () => packSDK() }]
     }
-  ]
+  ].filter(Boolean)
 }
 
 startWorkflow(prodFlow)

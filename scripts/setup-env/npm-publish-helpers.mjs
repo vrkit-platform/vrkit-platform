@@ -33,7 +33,7 @@ const publicPackageFiles = Fsx.globSync(["packages/js/vrkit-{models,plugin-sdk}/
  * @return {string} The generated filename of the release asset.
  */
 function getReleaseFilename(pkgJson) {
-  return `vrkit-platform-${_.last(pkgJson.name.split("/"))}-v${pkgJson.version}.tgz`
+  return `vrkit-platform-${pkgJson.name.split("/")[1]}-v${pkgJson.version}.tgz`
 }
 
 /**

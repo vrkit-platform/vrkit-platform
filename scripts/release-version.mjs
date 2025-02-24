@@ -95,7 +95,7 @@ async function rebaseDevelopToMaster() {
 async function pushMaster() {
   try {
     // Push the changes to master (with --force due to rebase)
-    await gitExec`git push origin master --force`
+    await gitExec`git push --force`
   } catch (error) {
     fatalError(`Error during push: ${error.message}`)
   }

@@ -49,9 +49,9 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/jglanz/irsdk-interop#readme"
-Issues = "https://github.com/jglanz/irsdk-interop/issues"
-Source = "https://github.com/jglanz/irsdk-interop"
+Documentation = "https://github.com/vrkit-platform/vrkit-platform#readme"
+Issues = "https://github.com/vrkit-platform/vrkit-platform/issues"
+Source = "https://github.com/vrkit-platform/vrkit-platform"
 
 [tool.hatch.version]
 path = "packages/python/irsdk/__about__.py"

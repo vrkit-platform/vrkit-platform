@@ -4,7 +4,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/jglanz/irsdk-interop.git"
+    "url": "https://github.com/vrkit-platform/vrkit-platform.git"
   },
   "main": "packages/js/vrkit-app/dist/main/electron-main.js",
   "binary": {

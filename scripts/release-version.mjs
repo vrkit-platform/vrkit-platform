@@ -52,7 +52,7 @@ async function checkReleaseDraftValid() {
   Validating isDraft === true`
   assert(releaseInfoJson?.[0]?.isDraft === true, `Release is not marked as a draft (${versionTag})`)
   
-  // const releaseInfoOutput = await $`gh api repos/jglanz/irsdk-interop/releases/tags/${versionTag}`,
+  // const releaseInfoOutput = await $`gh api repos/vrkit-platform/vrkit-platform/releases/tags/${versionTag}`,
   //   releaseInfoJson = JSON.parse(releaseInfoOutput.stdout)
   //
   // assert(releaseInfoJson.draft === true, `Release is not marked as a draft (${versionTag})`)

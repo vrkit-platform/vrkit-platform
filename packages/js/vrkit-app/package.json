@@ -4,7 +4,7 @@
   "description": "vrkit-app",
   "license": "UNLICENSED",
   "author": "Jonathan Glanz",
-  "repository": "git@github.com:jglanz/irsdk-interop.git",
+  "repository": "git@github.com:vrkit-platform/vrkit-platform.git",
   "type": "commonjs",
   "main": "dist/prod/main/electron-main.js",
   "scripts": {

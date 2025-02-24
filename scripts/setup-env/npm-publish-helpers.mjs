@@ -1,5 +1,5 @@
 import { asOption } from "@3fv/prelude-ts"
-import * as Fsx from "fs-extra"
+import Fsx from "fs-extra"
 import { path as Path } from "zx"
 import { getOrCreateLogger } from "./logger-setup.mjs"
 import { rootDir } from "./workflow-global.mjs"

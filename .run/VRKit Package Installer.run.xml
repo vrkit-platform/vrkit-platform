@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="VRKit Package Installer" type="NodeJSConfigurationType" path-to-js-file="$ProjectFileDir$/scripts/build-packaged-app.mjs" working-dir="$PROJECT_DIR$">
+    <envs>
+      <env name="NODE_ENV" value="production" />
+    </envs>
+    <method v="2" />
+  </configuration>
+</component>

@@ -47,7 +47,7 @@ import Path from "path"
 import { createWindowOpenHandler } from "./WindowHelpers"
 import { WindowSizeDefault } from "./WindowConstants"
 import { get } from "lodash/fp"
-import { isMac } from "../../constants"
+import { isMac } from "../../main-constants"
 import { first, omit, pick } from "lodash"
 
 const log = getLogger(__filename)
@@ -580,7 +580,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       })
       .on("show", () => {
         win.webContents.setWindowOpenHandler(windowOpenHandler)
-        if (this.sharedAppState.devSettings.alwaysOpenDevTools) {
+        if (this.sharedAppState.devSettings.autoOpenDevToolsTrigger === "always") {
           const devToolsTitle = asOption(wi.config.initialRoute).filter(isNotEmptyString).getOrElse(wi.id)
           if (isFloatingWindow(wi) || wi.config.devToolMode) {
             win.webContents.openDevTools({

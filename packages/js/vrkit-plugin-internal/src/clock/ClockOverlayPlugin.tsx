@@ -10,9 +10,10 @@ import { useInterval } from "usehooks-ts"
 
 import { padStart } from "lodash"
 import clsx from "clsx"
-import { styled } from "@mui/material/styles"
+import { darken, styled } from "@mui/material/styles"
 import {
-  alpha, createClassNames,
+  alpha,
+  createClassNames,
   FillWidth,
   FlexAuto,
   FlexRow,
@@ -33,7 +34,7 @@ const ClockTimeViewRoot = styled(FlexRowCenterBox, { name: "ClockTimeView" })(({
   return {
     [hasCls(classNames.root)]: {
       borderRadius: rem(1),
-      backgroundColor: alpha(theme.palette.grey.A700, 0.9),
+      backgroundColor: alpha(darken(theme.palette.grey.A700,0.4), 0.9),
       color: theme.palette.getContrastText(theme.palette.grey.A700),
       ...FillWidth,
       ...FlexRowCenter,

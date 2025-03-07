@@ -3,27 +3,13 @@
 
 import assert from "assert"
 import Fsx from "fs-extra"
-import * as semver from "semver"
 import { $, cd, echo, path as Path } from "zx"
 import releaseSDK from "./release-sdk.mjs"
 import { getOrCreateLogger } from "./setup-env/logger-setup.mjs"
-import { fatalError, isMainScript } from "./setup-env/process-helpers.mjs"
+import { fatalError } from "./setup-env/process-helpers.mjs"
 import { rootDir } from "./setup-env/workflow-global.mjs"
 
 const log = getOrCreateLogger(import.meta.filename)
-
-// CHECK IF THIS SCRIPT WAS INVOKED DIRECTLY
-const shouldExecute = isMainScript(import.meta.url)
-
-// UPDATE ENV
-const ghToken = process.env.GITHUB_TOKEN
-assert(typeof ghToken === "string" && ghToken.length > 0, `Invalid GITHUB_TOKEN env variable (${ghToken})`)
-//
-// process.env.GH_TOKEN = ghToken
-// $.env = {
-//   ...process.env,
-//   GH_TOKEN: ghToken
-// }
 
 cd(rootDir)
 
@@ -45,51 +31,14 @@ async function checkReleaseDraftValid() {
     releaseInfoJsonStr = releaseInfoOutput.stdout,
     releaseInfoJson = JSON.parse(releaseInfoJsonStr)
   
-  echo`Release Info for ${versionTag}:
+  echo`Release Info for ${versionTag}:\n${releaseInfoJsonStr}`
   
-  ${releaseInfoJsonStr}
-  
-  Validating isDraft === true`
   assert(releaseInfoJson?.[0]?.isDraft === true, `Release is not marked as a draft (${versionTag})`)
-  
-  // const releaseInfoOutput = await $`gh api repos/vrkit-platform/vrkit-platform/releases/tags/${versionTag}`,
-  //   releaseInfoJson = JSON.parse(releaseInfoOutput.stdout)
-  //
-  // assert(releaseInfoJson.draft === true, `Release is not marked as a draft (${versionTag})`)
 }
 
 async function releaseDraft() {
   echo`Updating Github Release v${pkgVersion} to production channel`
   await $`gh release edit ${versionTag} --draft=false --latest`
-}
-
-// TODO: Verify functionality & then remove `rebaseDevelopToMaster`
-async function rebaseDevelopToMaster() {
-  echo`Starting rebase of 'develop' onto 'master'`
-
-  try {
-    echo`Fetching latest JUST-IN-CASE`
-    await gitExec`git fetch origin develop`
-    await gitExec`git fetch origin master`
-    //await gitExec`git checkout origin/develop`
-    // echo``
-    // await gitExec`git checkout origin/master` // Switch to master branch
-
-    // Rebase develop onto master
-    echo`REBASE: Starting`
-    await gitExec`git rebase develop`
-    echo`REBASE: completed and changes pushed to 'master'`
-
-  } catch (error) {
-    const cleanupResult = await $({
-      cwd: rootDir,
-      nothrow: true
-    })`git rebase --abort` // Abort the rebase in case of issues
-    if (cleanupResult.exitCode !== 0) {
-      echo`ERROR: Failed to cleanup rebase, abort failed`
-    }
-    fatalError(`Error during rebase: ${error.message}`)
-  }
 }
 
 async function pushMaster() {
@@ -103,7 +52,6 @@ async function pushMaster() {
 
 async function releaseVersion() {
   await checkReleaseDraftValid()
-  // await rebaseDevelopToMaster()
   await releaseSDK()
   await pushMaster()
   await releaseDraft()

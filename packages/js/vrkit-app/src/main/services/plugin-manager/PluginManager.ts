@@ -35,7 +35,7 @@ import { isDefined, isPromise } from "@3fv/guard"
 import FastGlob from "fast-glob"
 import { app, ipcMain, IpcMainInvokeEvent, net } from "electron"
 import { Deferred } from "@3fv/deferred"
-import { PluginManifestsURL } from "../../constants"
+import { PluginManifestsURL } from "../../main-constants"
 import PQueue from "p-queue"
 import Chokidar, { FSWatcher } from "chokidar"
 

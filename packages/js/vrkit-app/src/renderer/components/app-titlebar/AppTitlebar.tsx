@@ -179,9 +179,16 @@ export function AppTitlebar({ className, transparent = false, ...other }: AppTit
           .map(parts => capitalize(parts[0]))
       )
       .getOrElse(null),
+    isCenterAbsolute = appTitlebar?.centerAbsolute === true,
     centerAbsoluteRule = {
-      [appTitlebarClasses.centerAbsolute]: appTitlebar?.centerAbsolute === true
-    }
+      [appTitlebarClasses.centerAbsolute]: isCenterAbsolute
+    },
+    centerContent = <Box className={clsx(appTitlebarClasses.center, centerAbsoluteRule)}>
+      <ElectronDraggableSpacer fillHeight />
+      <If condition={!!appTitlebar?.center}>{appTitlebar?.center}</If>
+      <ElectronDraggableSpacer fillHeight />
+    </Box>
+    
 
   return (
     <AppTitlebarRoot
@@ -210,12 +217,7 @@ export function AppTitlebar({ className, transparent = false, ...other }: AppTit
             </If>
             <ElectronDraggableSpacer fillHeight />
           </Box>
-          <Box className={clsx(appTitlebarClasses.center, centerAbsoluteRule)}>
-            <ElectronDraggableSpacer fillHeight />
-            <If condition={!!appTitlebar?.center}>{appTitlebar?.center}</If>
-
-            <ElectronDraggableSpacer fillHeight />
-          </Box>
+          {!isCenterAbsolute && centerContent}
           <Box className={clsx(appTitlebarClasses.right, centerAbsoluteRule)}>
             <ElectronDraggableSpacer fillHeight />
             <Choose>
@@ -225,6 +227,7 @@ export function AppTitlebar({ className, transparent = false, ...other }: AppTit
               </Otherwise>
             </Choose>
           </Box>
+          {isCenterAbsolute && centerContent}
         </AppToolbarRoot>
       </Box>
 

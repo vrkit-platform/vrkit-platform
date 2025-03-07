@@ -9,10 +9,12 @@ export type NativeImageSeqSettings =
       outputPath?: string
     }
 
+export type AutoOpenDevToolsTrigger = "never" | "always"
+
 export interface DevSettings {
   imageSequenceCapture: NativeImageSeqSettings | false
 
-  alwaysOpenDevTools: boolean
+  autoOpenDevToolsTrigger: AutoOpenDevToolsTrigger
   
   workspaceSourcePaths: string[]
 }

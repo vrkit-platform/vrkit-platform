@@ -15,7 +15,7 @@ export function newDevSettings(overrideDevSettings: Partial<DevSettings> = {}): 
     parts = workingDir.split(/[\\\/]/),
     treePaths = Array<string>(),
     devSettings: DevSettings = {
-      alwaysOpenDevTools: false,
+      autoOpenDevToolsTrigger: "never",
       imageSequenceCapture: false,
       workspaceSourcePaths: []
     }

@@ -28,16 +28,12 @@ macro(SETUP_TARGET_COMPILE_DEFS targetName)
   if (MSVC)
     target_compile_options(${targetName}
       PRIVATE
+      /MP
+      $<$<CONFIG:Debug>:/MTd>
+      $<$<CONFIG:Release>:/MT>
       $<$<CONFIG:Debug>:/DEBUG:FASTLINK>
     )
   endif()
-#  if (DEBUG)
-#    target_compile_definitions(
-#      ${targetName}
-#      PRIVATE
-#      DEBUG
-#    )
-#  endif()
 endmacro()
 
 macro(SETUP_LIB_EXPORTS)

@@ -1,6 +1,6 @@
 import type {} from "@vrkit-platform/shared"
 import { app, crashReporter } from "electron"
-import { AppName, RemoteDebugPort } from "./constants"
+import { AppName, RemoteDebugPort } from "./main-constants"
 import Path from "path"
 import Fsx from "fs-extra"
 

@@ -32,7 +32,7 @@ import { broadcastToAllWindows, getAppThemeFromSystem, IObserveChange } from "..
 import { AppSettings } from "@vrkit-platform/models"
 import { ipcMain, IpcMainInvokeEvent } from "electron"
 import { serialize } from "serializr"
-import { AutoOpenDevToolsOverride } from "../../constants"
+import { AutoOpenDevToolsOverride } from "../../main-constants"
 import type { PartialDeep } from "type-fest"
 import { AppPaths, AppFiles, FileExtensions, type IAppPaths, type IAppStorage, type IAppFiles, type IFileExtensions } from "@vrkit-platform/shared/constants/node"
 import { newDevSettings } from "@vrkit-platform/shared/models/node"
@@ -58,7 +58,7 @@ export class MainSharedAppState implements ISharedAppState {
    */
   @observable appSettings: AppSettings = AppSettings.create()
 
-  @observable devSettings = newDevSettings(AutoOpenDevToolsOverride ? { alwaysOpenDevTools: true } : {})
+  @observable devSettings = newDevSettings(AutoOpenDevToolsOverride ? { autoOpenDevToolsTrigger: AutoOpenDevToolsOverride } : {})
 
   @observable plugins = newPluginsState()
 
@@ -84,15 +84,11 @@ export class MainSharedAppState implements ISharedAppState {
 
   @Bind
   private onChange(change: IObserveChange, path: string, root: any) {
-    //private onChange(change: IObjectDidChange, ...other:any[]) {
     if (this.shutdownInProgress) {
       warn("Shutdown in progress, ignoring change")
       return
     }
     info(`onChange (path=${path})`)
-    //info(`onChange`, change, "other args", other)
-
-    // this.broadcast()
   }
 
   private broadcast(leaf: ISharedAppStateLeaf) {

@@ -1,0 +1,27 @@
+{
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "source": {
+    "include": ["src"],
+    "includePattern": ".+\\.tsx?$",
+    "excludePattern": "(^|\\/|\\\\)_[a-zA-Z0-9]+|node_modules"
+  },
+  "plugins": [
+    "plugins/markdown",
+    "better-docs/typescript"
+  ],
+  "opts": {
+    "encoding": "utf8",
+    "destination": "./docs",
+    "recurse": true,
+    "verbose": true
+  },
+  "typescript": {
+    "moduleRoot": "./src",
+    "tsconfig": "./tsconfig.json",
+    "treatWarningsAsErrors": true,
+    "allowJs": false
+  }
+  
+}

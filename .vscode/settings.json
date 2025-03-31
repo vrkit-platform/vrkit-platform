@@ -2,7 +2,7 @@
   "cmake.buildDirectory": "${workspaceFolder}/build/debug-vscode-new",
   "cmake.allowCommentsInPresetsFile": true,
   "cmake.automaticReconfigure": false,
-  "cmake.parallelJobs": 20,
+  "cmake.parallelJobs": 60,
   "cmake.buildToolArgs": [    
   ],
   "cmake.configureArgs": [
@@ -10,16 +10,16 @@
     "-DCMAKE_PREFIX_PATH=\"C:\\Qt\\6.5.0;C:\\Qt\\6.5.0\\lib;C:\\Qt\\6.5.0\\lib\\cmake\"",
     "-DSPDLOG_WCHAR_SUPPORT=1",
     "-DSPDLOG_WCHAR_TO_UTF8_SUPPORT=1",
-    "-DCMAKE_TOOLCHAIN_FILE=y:\\code\\sim-racing\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
-    // "-DVCPKG_ROOT=Y:/code/sim-racing/vcpkg",
+    "-DCMAKE_TOOLCHAIN_FILE=${workspaceFolder}\\vcpkg\\scripts\\buildsystems\\vcpkg.cmake",
+    "-DVCPKG_ROOT=${workspaceFolder}/vcpkg",
     "-DVCPKG_DEFAULT_TRIPLET=x64-windows-static",
     "-DVCPKG_TARGET_TRIPLET=x64-windows-static",
     "-DVCPKG_CRT_LINKAGE=static",
     "-DVCPKG_LIBRARY_LINKAGE=static",
     // "-DVCPKG_INSTALL_OPTIONS=\"--allow-unsupported\""
   ],
+  "cmake.useVsDeveloperEnvironment": "always",
   "cmake.showSystemKits": true,
-  "cmake.generator": "Ninja",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
   "C_Cpp.intelliSenseMemoryLimit": 8192,

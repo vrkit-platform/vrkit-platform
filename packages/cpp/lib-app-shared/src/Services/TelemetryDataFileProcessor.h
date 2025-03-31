@@ -7,10 +7,9 @@
 #include <IRacingTools/Models/Pipeline.pb.h>
 #include <IRacingTools/Models/TelemetryDataFile.pb.h>
 
-#include <IRacingTools/SDK/Utils/Base64.h>
-#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
-#include <IRacingTools/SDK/Utils/RunnableThread.h>
-#include <IRacingTools/SDK/Utils/LUT.h>
+#include <IRacingSDK/Utils/CollectionHelpers.h>
+#include <IRacingSDK/Utils/RunnableThread.h>
+#include <IRacingSDK/Utils/LUT.h>
 
 #include <IRacingTools/Shared/FileWatcher.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>

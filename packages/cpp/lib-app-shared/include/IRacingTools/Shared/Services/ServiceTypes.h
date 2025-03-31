@@ -6,9 +6,9 @@
 #include <expected>
 #include <memory>
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
-#include <IRacingTools/SDK/ErrorTypes.h>
+#include <IRacingSDK/ErrorTypes.h>
 
 namespace IRacingTools::Shared::Services {
   namespace E = magic_enum;

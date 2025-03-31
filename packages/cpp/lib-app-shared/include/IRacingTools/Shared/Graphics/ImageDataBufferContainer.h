@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <IRacingTools/Shared/SHM/SHM.h>
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
@@ -85,7 +85,7 @@ namespace IRacingTools::Shared::Graphics {
       return true;
     }
 
-    std::expected<std::uint32_t, SDK::GeneralError> produce(const Byte* data, std::uint32_t len) {
+    std::expected<std::uint32_t, IRacingSDK::GeneralError> produce(const Byte* data, std::uint32_t len) {
       static auto L = Logging::GetCategoryWithName("ImageDataBufferContainer");
       BufferPtr writeBuffer;
       {

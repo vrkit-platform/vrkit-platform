@@ -17,7 +17,7 @@ export const RemoteDebugPort = 9229
 
 //isDev && process.argv.some(it => it.includes("no-devtools")) ? true : undefined
 export const AutoOpenDevToolsOverride:AutoOpenDevToolsTrigger = asOption(process.env.AUTO_OPEN_DEV_TOOLS_TRIGGER as AutoOpenDevToolsTrigger)
-  .filter(trigger => !isDev ? false : Array<AutoOpenDevToolsTrigger>("never", "always").includes(trigger))
+  .filter(trigger => !isDev ? false : Array<AutoOpenDevToolsTrigger>("never", "always", "only-floating", "only-normal").includes(trigger))
   .getOrElse("never")
 
 // "https://cdn.jsdelivr.net/gh/vrkit-platform/vrkit-plugin-manifest/plugins.json"

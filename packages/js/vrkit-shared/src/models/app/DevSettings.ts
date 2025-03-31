@@ -9,7 +9,7 @@ export type NativeImageSeqSettings =
       outputPath?: string
     }
 
-export type AutoOpenDevToolsTrigger = "never" | "always"
+export type AutoOpenDevToolsTrigger = "never" | "always" | "only-normal" | "only-floating"
 
 export interface DevSettings {
   imageSequenceCapture: NativeImageSeqSettings | false

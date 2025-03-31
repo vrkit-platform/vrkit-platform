@@ -42,15 +42,15 @@ namespace IRacingTools::Shared {
     virtual std::shared_ptr<Models::Session::SessionData> sessionData() override;
 
     virtual std::string sessionInfoStr() override;
-    virtual std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
+    virtual std::shared_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
 
     virtual bool isLive() const override;
 
     virtual SessionDataAccess& dataAccess() override;
     virtual SessionDataAccess* dataAccessPtr() override;
-    virtual SDK::ClientProvider * clientProvider() override;
+    virtual IRacingSDK::ClientProvider * clientProvider() override;
 
-    virtual const SDK::VarHeaders& getDataVariableHeaders() override;
+    virtual const IRacingSDK::VarHeaders& getDataVariableHeaders() override;
 
   protected:
     void runnable();

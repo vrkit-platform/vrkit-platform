@@ -9,7 +9,7 @@
 using namespace IRacingTools::Shared::FileSystem;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::Shared::Logging;
-using namespace IRacingTools::SDK;
+using namespace IRacingSDK;
 
 using namespace  std::chrono_literals;
 

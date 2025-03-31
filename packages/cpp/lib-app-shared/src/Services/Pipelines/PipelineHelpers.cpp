@@ -3,13 +3,12 @@
 #include <deque>
 #include <fstream>
 #include <iostream>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include <google/protobuf/util/json_util.h>
 
-#include <IRacingTools/SDK/Utils/Base64.h>
-#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
-#include <IRacingTools/SDK/Utils/RunnableThread.h>
+#include <IRacingSDK/Utils/CollectionHelpers.h>
+#include <IRacingSDK/Utils/RunnableThread.h>
 
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
@@ -19,7 +18,7 @@
 
 
 namespace IRacingTools::Shared::Services::Pipelines {
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK::Utils;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::Shared::Services;
   namespace {
@@ -37,7 +36,7 @@ namespace IRacingTools::Shared::Services::Pipelines {
 
     std::string pipelineId{""};
     std::string attemptId{""};
-    std::optional<SDK::GeneralError> error{std::nullopt};
+    std::optional<IRacingSDK::GeneralError> error{std::nullopt};
 
     /**
      * @brief Set the result error info
@@ -50,7 +49,7 @@ namespace IRacingTools::Shared::Services::Pipelines {
     template<typename... Args>
     auto setError(fmt::format_string<Args...> fmt, Args &&...args) {
       auto msg = fmt::format(fmt, std::forward<Args>(args)...);
-      error = SDK::GeneralError(ErrorCode::General, msg);
+      error = IRacingSDK::GeneralError(ErrorCode::General, msg);
       status = PipelineStatus::PIPELINE_STATUS_ERROR;
       return this;
     }
@@ -144,7 +143,7 @@ namespace IRacingTools::Shared::Services::Pipelines {
     return result;
   }
 
-  std::expected<std::vector<ExecutePipelineResult>, SDK::GeneralError>
+  std::expected<std::vector<ExecutePipelineResult>, IRacingSDK::GeneralError>
   ExecutePipelines(
       TelemetryDataService *service,
       const std::shared_ptr<TelemetryDataFile> &dataFile,

@@ -34,7 +34,7 @@ namespace IRacingTools::Shared::Services {
       virtual ~Route() = default;
 
       virtual bool accepts(const std::string &path);
-      virtual std::expected<Envelope, SDK::GeneralError>
+      virtual std::expected<Envelope, IRacingSDK::GeneralError>
       execute(const Envelope &messageIn, const Envelope& messageOut) = 0;
     };
 
@@ -48,7 +48,7 @@ namespace IRacingTools::Shared::Services {
     class TypedRoute : public Route {
     public:
       using Executor = std::function<
-          std::expected<std::shared_ptr<ResponseType>, SDK::GeneralError>(
+          std::expected<std::shared_ptr<ResponseType>, IRacingSDK::GeneralError>(
               const std::shared_ptr<RequestType> &,
               const std::shared_ptr<RPC::Envelope> &)>;
 
@@ -64,11 +64,11 @@ namespace IRacingTools::Shared::Services {
           : Route(matchExpression), executor_(executor) {
       }
 
-      virtual std::expected<Envelope, SDK::GeneralError>
+      virtual std::expected<Envelope, IRacingSDK::GeneralError>
       execute(const Envelope &messageIn, const Envelope& messageOut) override {
         auto req = std::make_shared<RequestType>();
         if (!messageIn->payload().UnpackTo(req.get())) {
-          return std::unexpected(SDK::GeneralError("Failed to unpack payload"));
+          return std::unexpected(IRacingSDK::GeneralError("Failed to unpack payload"));
         }
 
 
@@ -117,17 +117,17 @@ namespace IRacingTools::Shared::Services {
     /**
      * @brief Initialize the service
      */
-    virtual std::expected<bool, SDK::GeneralError> init() override;
+    virtual std::expected<bool, IRacingSDK::GeneralError> init() override;
 
     /**
      * @brief Must set running == true in overridden implementation
      */
-    virtual std::expected<bool, SDK::GeneralError> start() override;
+    virtual std::expected<bool, IRacingSDK::GeneralError> start() override;
 
     /**
      * @brief Must set running == false in overridden implementation
      */
-    virtual std::optional<SDK::GeneralError> destroy() override;
+    virtual std::optional<IRacingSDK::GeneralError> destroy() override;
 
     Envelope execute(const Envelope &messageIn);
 

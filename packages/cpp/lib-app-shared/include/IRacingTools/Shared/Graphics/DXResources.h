@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <IRacingTools/SDK/Utils/LockHelpers.h>
+#include <IRacingSDK/Utils/LockHelpers.h>
 
 #include "../SharedAppLibPCH.h"
 #include "DX113D.h"
@@ -27,7 +27,7 @@ namespace IRacingTools::Shared::Graphics {
    * - the SteamVR implementation (which uses its' own devices)
    * - the viewer
    */
-  class D3D11Resources : public SDK::Utils::Lockable {
+  class D3D11Resources : public IRacingSDK::Utils::Lockable {
   protected:
     D3D11Resources();
 

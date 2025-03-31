@@ -2,14 +2,14 @@
 #include <mutex>
 #include <windows.h>
 
-#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
+#include <IRacingSDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 
 namespace IRacingTools::Shared::Utils {
   namespace {
     auto L = Logging::GetCategoryWithName(__FILE__);
   }
-  std::expected<std::shared_ptr<Models::FileInfo>, SDK::GeneralError>
+  std::expected<std::shared_ptr<Models::FileInfo>, IRacingSDK::GeneralError>
   GetFileInfo(const fs::path &path) {
 
     auto info = std::make_shared<Models::FileInfo>();
@@ -20,7 +20,7 @@ namespace IRacingTools::Shared::Utils {
     return info;
   }
 
-  std::expected<std::shared_ptr<Models::FileInfo>, SDK::GeneralError>
+  std::expected<std::shared_ptr<Models::FileInfo>, IRacingSDK::GeneralError>
   GetFileInfo(
       const std::shared_ptr<Models::FileInfo> &fileInfo,
       std::optional<fs::path> path) {
@@ -33,14 +33,14 @@ namespace IRacingTools::Shared::Utils {
   }
 
 
-  std::expected<Models::FileInfo *, SDK::GeneralError>
+  std::expected<Models::FileInfo *, IRacingSDK::GeneralError>
   GetFileInfo(Models::FileInfo *fileInfo, std::optional<fs::path> path) {
     fs::path finalPath = path.value_or(fs::path(fileInfo->file()));
     if (!finalPath.is_absolute())
       finalPath = fs::absolute(finalPath);
 
     if (!fs::exists(finalPath) || fs::is_directory(finalPath)) {
-      return std::unexpected(SDK::GeneralError(
+      return std::unexpected(IRacingSDK::GeneralError(
           ErrorCode::NotFound,
           std::format(
               "Can not get file info for ({}), does not exist",
@@ -66,19 +66,19 @@ namespace IRacingTools::Shared::Utils {
     return fileInfo1->file() == fileInfo2->file();
   }
 
-  std::optional<SDK::GeneralError>
+  std::optional<IRacingSDK::GeneralError>
   UpdateFileInfoTimestamps(const std::shared_ptr<Models::FileInfo> &fileInfo) {
     return UpdateFileInfoTimestamps(fileInfo.get());
   }
 
-  std::optional<SDK::GeneralError>
+  std::optional<IRacingSDK::GeneralError>
   UpdateFileInfoTimestamps(Models::FileInfo *fileInfo) {
     fs::path path{fileInfo->file()};
     if (!path.is_absolute())
       path = fs::absolute(path);
 
     if (path.empty() || !fs::exists(path))
-      return SDK::GeneralError(
+      return IRacingSDK::GeneralError(
           ErrorCode::NotFound,
           std::format(
               "Invalid path >> {}",

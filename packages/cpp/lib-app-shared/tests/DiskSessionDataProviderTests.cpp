@@ -5,22 +5,22 @@
 #include <gtest/gtest.h>
 #include <ranges>
 
-#include <IRacingTools/SDK/Utils/LUT.h>
-#include <IRacingTools/SDK/Utils/Singleton.h>
-#include <IRacingTools/SDK/Utils/Traits.h>
+#include <IRacingSDK/Utils/LUT.h>
+#include <IRacingSDK/Utils/Singleton.h>
+#include <IRacingSDK/Utils/Traits.h>
 
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 
-#include <IRacingTools/SDK/ClientManager.h>
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
-#include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingSDK/ClientManager.h>
+#include <IRacingSDK/DiskClient.h>
+#include <IRacingSDK/DiskClientDataFrameProcessor.h>
+#include <IRacingSDK/VarHolder.h>
 #include <IRacingTools/Shared/DiskSessionDataProvider.h>
 
 
-using namespace IRacingTools::SDK;
-using namespace IRacingTools::SDK::Utils;
+using namespace IRacingSDK;
+using namespace IRacingSDK::Utils;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::Shared::Logging;
 
@@ -73,9 +73,9 @@ namespace {
         return fs::current_path() / "data" / "ibt" / "race-recordings" / raceName;
     }
 
-    std::shared_ptr<IRacingTools::SDK::DiskClient> CreateDiskClient(const std::string& filename) {
+    std::shared_ptr<IRacingSDK::DiskClient> CreateDiskClient(const std::string& filename) {
         auto file = ToIBTTestFile(filename);
-        auto client = std::make_shared<IRacingTools::SDK::DiskClient>(file, file.string(),IRacingTools::SDK::DiskClient::Extras{});
+        auto client = std::make_shared<IRacingSDK::DiskClient>(file, file.string(),IRacingSDK::DiskClient::Extras{});
         return client;
     }
 

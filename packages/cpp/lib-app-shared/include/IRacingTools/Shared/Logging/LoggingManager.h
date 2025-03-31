@@ -1,10 +1,10 @@
 #pragma once
 
-#include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
-#include <IRacingTools/SDK/Utils/LUT.h>
-#include <IRacingTools/SDK/Utils/Singleton.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/Utils/LUT.h>
+#include <IRacingSDK/Utils/Singleton.h>
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
-
+#include <IRacingTools/Shared/Utils/TypeIdHelpers.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -17,13 +17,14 @@
 #include <string_view>
 #include <tuple>
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include <spdlog/spdlog.h>
 
 
 namespace IRacingTools::Shared::Logging {
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK::Utils;
+  using namespace IRacingTools::Shared::Utils;
 
 
   namespace Level = spdlog::level;
@@ -49,7 +50,7 @@ namespace IRacingTools::Shared::Logging {
       {LogCategoryDefault::IRSDK,
        magic_enum::enum_name(LogCategoryDefault::IRSDK).data()}};
 
-  class LoggingManager : public SDK::Utils::Singleton<LoggingManager> {
+  class LoggingManager : public IRacingSDK::Utils::Singleton<LoggingManager> {
   public:
 
     LoggingManager() = delete;

@@ -1,7 +1,7 @@
 
 # SDK
-add_subdirectory(lib-irsdk++)
-add_subdirectory(example-apps)
+#add_subdirectory(lib-irsdk++)
+# add_subdirectory(example-apps)
 
 # Shared App Libs
 add_subdirectory(lib-app-shared)

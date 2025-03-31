@@ -1,6 +1,6 @@
 #include <IRacingTools/Shared/System/DisplayInfo.h>
 
-#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
+#include <IRacingSDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/Macros.h>
 
 namespace IRacingTools::Shared::System {
@@ -177,9 +177,9 @@ namespace IRacingTools::Shared::System {
                 displays.emplace_back(
                     DisplayInfo{
                         .index = displays.size(),
-                        .id = SDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceKey)),
-                        .name = SDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceName)),
-                        .path = SDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceString)),
+                        .id = IRacingSDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceKey)),
+                        .name = IRacingSDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceName)),
+                        .path = IRacingSDK::Utils::ToUtf8(std::wstring(displayDevice.DeviceString)),
                         .width = static_cast<std::size_t>(std::floor(static_cast<double>(mode.dmPelsWidth) / scale)),
                         .height = static_cast<std::size_t>(std::floor(static_cast<double>(mode.dmPelsHeight) / scale)),
                         .physicalWidth = mode.dmPelsWidth,
@@ -350,14 +350,14 @@ namespace IRacingTools::Shared::System {
     }
 
 
-    SDK::Expected<DisplayScreenInfo> DisplayScreenInfo::generate() {
+    IRacingSDK::Expected<DisplayScreenInfo> DisplayScreenInfo::generate() {
         auto displays = GetAllDisplayInfo();
 
         if (displays.has_value()) {
             return create(displays.value());
         }
 
-        return SDK::MakeUnexpected<SDK::GeneralError>(SDK::ErrorCode::General, "Unable to get displays");
+        return IRacingSDK::MakeUnexpected<IRacingSDK::GeneralError>(IRacingSDK::ErrorCode::General, "Unable to get displays");
     }
 
     std::string VRScreenInfo::toString() const {
@@ -426,7 +426,7 @@ namespace IRacingTools::Shared::System {
         return true;
     }
 
-    SDK::Expected<VRScreenInfo> VRScreenInfo::generate() {
+    IRacingSDK::Expected<VRScreenInfo> VRScreenInfo::generate() {
         return VRScreenInfo{.scale = 1.0, .width = 1, .height = 1};
     }
 }

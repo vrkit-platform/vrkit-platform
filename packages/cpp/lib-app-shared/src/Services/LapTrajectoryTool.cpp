@@ -5,7 +5,7 @@
 
 #include <fstream>
 #include <iostream>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 
 #include <google/protobuf/util/json_util.h>
@@ -14,8 +14,8 @@
 
 namespace IRacingTools::Shared::Services {
   using namespace IRacingTools::Shared::Logging;
-  using namespace IRacingTools::SDK;
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK;
+  using namespace IRacingSDK::Utils;
   using namespace spdlog;
 
   namespace {
@@ -25,12 +25,12 @@ namespace IRacingTools::Shared::Services {
 
   std::expected<std::shared_ptr<Models::LapTrajectory>, GeneralError>
   LapTrajectoryTool::createLapTrajectory(const std::filesystem::path &file, const CreateOptions& options) {
-    auto client = std::make_shared<SDK::DiskClient>(file, file.string());
+    auto client = std::make_shared<IRacingSDK::DiskClient>(file, file.string());
     return createLapTrajectory(client,options);
   }
 
   std::expected<std::shared_ptr<Models::LapTrajectory>, GeneralError>
-  LapTrajectoryTool::createLapTrajectory(const std::shared_ptr<SDK::DiskClient> &client, const CreateOptions& options) {
+  LapTrajectoryTool::createLapTrajectory(const std::shared_ptr<IRacingSDK::DiskClient> &client, const CreateOptions& options) {
     TelemetryFileHandler telemFile(client);
     auto lapsRes = telemFile.getLapData();
     if (!lapsRes) {

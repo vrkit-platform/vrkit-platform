@@ -8,9 +8,9 @@
     "access": "public"
   },
   "author": {
-    "email": "support@3form.ventures",
+    "email": "support@vrkit-platform.com",
     "name": "Jonathan Glanz",
-    "url": "https://github.com/3fv"
+    "url": "https://github.com/jglanz"
   },
   "main": "lib/index.js",
   "files": [

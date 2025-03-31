@@ -7,10 +7,10 @@
       "inheritEnvironments": [ "msvc_x64" ],
       "buildRoot": "${projectDir}\\build\\vs-${name}",
       "installRoot": "${projectDir}\\build\\vs-${name}-install",
-      "cmakeCommandArgs": "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DVCPKG_ROOT=Y:/code/sim-racing/vcpkg -DSPDLOG_WCHAR_SUPPORT=ON -DVCPKG_CRT_LINKAGE=static -DVCPKG_LIBRARY_LINKAGE=static -DVCPKG_DEFAULT_TRIPLET=x64-windows-static -DVCPKG_TARGET_TRIPLET=x64-windows-static",
+      "cmakeCommandArgs": "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DVCPKG_ROOT=${projectDir}/vcpkg -DSPDLOG_WCHAR_SUPPORT=ON -DVCPKG_CRT_LINKAGE=static -DVCPKG_LIBRARY_LINKAGE=static -DVCPKG_DEFAULT_TRIPLET=x64-windows-static -DVCPKG_TARGET_TRIPLET=x64-windows-static",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "cmakeToolchain": "Y:/code/sim-racing/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cmakeToolchain": "${projectDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "intelliSenseMode": "windows-msvc-x64"
     },
     {
@@ -20,10 +20,10 @@
       "inheritEnvironments": [ "msvc_x64" ],
       "buildRoot": "${projectDir}\\build\\vscode-${name}",
       "installRoot": "${projectDir}\\build\\vscode-${name}-install",
-      "cmakeCommandArgs": "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DVCPKG_ROOT=Y:/code/sim-racing/vcpkg -DSPDLOG_WCHAR_SUPPORT=ON -DVCPKG_CRT_LINKAGE=static -DVCPKG_LIBRARY_LINKAGE=static",
+      "cmakeCommandArgs": "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DVCPKG_ROOT=${projectDir}/vcpkg -DSPDLOG_WCHAR_SUPPORT=ON -DVCPKG_CRT_LINKAGE=static -DVCPKG_LIBRARY_LINKAGE=static",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "cmakeToolchain": "Y:/code/sim-racing/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cmakeToolchain": "${projectDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
       "intelliSenseMode": "windows-msvc-x64"
     }
   ]

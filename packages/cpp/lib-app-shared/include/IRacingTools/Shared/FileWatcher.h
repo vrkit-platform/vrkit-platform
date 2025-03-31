@@ -1,15 +1,15 @@
 #pragma once
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
-#include <IRacingTools/SDK/Utils/FileHelpers.h>
+#include <IRacingSDK/Utils/FileHelpers.h>
 
 #include <functional>
 #include <future>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <mutex>
 #include <regex>
 #include <string>
 #include <thread>
-#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
+#include <IRacingSDK/Utils/UnicodeHelpers.h>
 
 
 namespace IRacingTools::Shared::FileSystem {

@@ -6,7 +6,7 @@
 
 #include "../SharedAppLibPCH.h"
 
-#include <IRacingTools/SDK/Utils/Literals.h>
+#include <IRacingSDK/Utils/Literals.h>
 #include <IRacingTools/Shared/UI/BaseWindow.h>
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
 #include <IRacingTools/Shared/Graphics/DXResources.h>
@@ -29,7 +29,7 @@ namespace IRacingTools::Shared::UI {
         std::shared_ptr<Graphics::DXResources> dxr_{nullptr};
         std::shared_ptr<Graphics::DXWindowResources> dxwr_{nullptr};
 
-        std::optional<typename  SDK::Utils::EventEmitter<WindowClazz*,PixelSize, PixelSize>::UnsubscribeFn> onResizeUnsubscribe_{};
+        std::optional<typename  IRacingSDK::Utils::EventEmitter<WindowClazz*,PixelSize, PixelSize>::UnsubscribeFn> onResizeUnsubscribe_{};
 
         std::shared_ptr<Graphics::DXResources>& dxr() {
             return dxr_;

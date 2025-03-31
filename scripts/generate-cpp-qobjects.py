@@ -226,7 +226,7 @@ class {qname} : public QObject {{
   
   public:
   {var_defs}
-  explicit {qname}(const IRacingTools::SDK::SessionInfo::{clazz}& value = {{}}, QObject * parent = nullptr) : QObject(parent){ctor_defs}{{}};
+  explicit {qname}(const IRacingSDK::SessionInfo::{clazz}& value = {{}}, QObject * parent = nullptr) : QObject(parent){ctor_defs}{{}};
   
   signals:
     void changed();
@@ -278,9 +278,9 @@ class {qname} : public QObject {{
 #include <QtCore>
 #include <QList>
 #include "ModelTransform.h"
-#include <IRacingTools/SDK/SessionInfo/SessionInfoMessage.h>
+#include <IRacingSDK/SessionInfo/SessionInfoMessage.h>
 namespace {ns} {{
-    using namespace IRacingTools::SDK::SessionInfo;
+    using namespace IRacingSDK::SessionInfo;
     
     {clazz_defs}
 }}

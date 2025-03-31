@@ -26,7 +26,7 @@ namespace IRacingTools::Shared::Services::Pipelines {
 
     TrackMapPipelineExecutor();
 
-    virtual std::optional<SDK::GeneralError> execute(PipelineAttemptEditor& attempt,
+    virtual std::optional<IRacingSDK::GeneralError> execute(PipelineAttemptEditor& attempt,
                                       const std::shared_ptr<ServiceContainer> &serviceContainer,
                                       std::shared_ptr<TelemetryDataFile> data) override;
 

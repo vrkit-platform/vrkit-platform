@@ -4,7 +4,7 @@
 
 #include "SHMViewerArgCommand.h"
 
-#include <IRacingTools/SDK/Types.h>
+#include <IRacingSDK/Types.h>
 #include <IRacingTools/Shared/SHM/SHM.h>
 #include <IRacingTools/Shared/UI/ViewerWindow.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
@@ -15,8 +15,8 @@ namespace IRacingTools::App::Commands {
 
     using namespace IRacingTools::Shared::SHM;
 
-    using namespace IRacingTools::SDK::Utils;
-    using namespace IRacingTools::SDK;
+    using namespace IRacingSDK::Utils;
+    using namespace IRacingSDK;
     
     namespace {
         auto L = Logging::GetCategoryWithType<SHMViewerArgCommand>();

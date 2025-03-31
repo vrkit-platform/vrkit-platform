@@ -11,7 +11,7 @@
 using namespace IRacingTools::Shared::FileSystem;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::Shared::Logging;
-using namespace IRacingTools::SDK;
+using namespace IRacingSDK;
 
 using namespace  std::chrono_literals;
 
@@ -72,21 +72,22 @@ TEST_F(WriteReadBufferTests, ImageDataBuffer_single) {
     L->info("Read buffer received with {} bytes", size);
     return true;
   };
+  Graphics::BGRAImageDataBuffer::Buffer buf{};
+  buf.resize(imageDataBuf->size(), '0');
+  imageDataBuf->produce(buf.data(), imageDataBuf->size());
+
   std::thread readThread([&] {
     imageDataBuf->consume(consumeFn);
   });
 
   std::this_thread::sleep_for(100ms);
-  Graphics::BGRAImageDataBuffer::Buffer buf{};
-  buf.resize(imageDataBuf->size(), '0');
-  imageDataBuf->produce(buf.data(), imageDataBuf->size());
 
   readThread.join();
   EXPECT_EQ(readCount, 1);
 }
 
 
-
+// TODO: This test is NOT currently testing `swap`
 TEST_F(WriteReadBufferTests, ImageDataBuffer_swap) {
 
   auto imageDataBuf1 = std::make_shared<Graphics::BGRAImageDataBuffer>(400,400);
@@ -102,16 +103,16 @@ TEST_F(WriteReadBufferTests, ImageDataBuffer_swap) {
     L->info("Read buffer received with {} bytes", size);
     return true;
   };
-  std::thread readThread([&] {
-    imageDataBuf2->consume(consumeFn);
-  });
 
-  std::this_thread::sleep_for(100ms);
   Graphics::BGRAImageDataBuffer::Buffer buf{};
   buf.resize(imageDataBuf1->size(), '0');
   imageDataBuf1->produce(buf.data(), imageDataBuf1->size());
-  // imageDataBuf1->swap(imageDataBuf2);
 
+  std::thread readThread([&] {
+    imageDataBuf1->consume(consumeFn);
+  });
+
+  std::this_thread::sleep_for(100ms);
   readThread.join();
   EXPECT_EQ(readCount, 1);
 }

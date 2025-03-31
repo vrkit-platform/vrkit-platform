@@ -107,17 +107,17 @@ namespace IRacingTools::Shared {
             /**
              * @brief Initialize the service
              */
-            virtual std::expected<bool, SDK::GeneralError> init() override;
+            virtual std::expected<bool, IRacingSDK::GeneralError> init() override;
 
             /**
              * @brief Must set running == true in overridden implementation
              */
-            virtual std::expected<bool, SDK::GeneralError> start() override;
+            virtual std::expected<bool, IRacingSDK::GeneralError> start() override;
 
             /**
              * @brief Must set running == false in overridden implementation
              */
-            virtual std::optional<SDK::GeneralError> destroy() override;
+            virtual std::optional<IRacingSDK::GeneralError> destroy() override;
 
             struct {
                 EventEmitter<SessionManagerService*, const std::shared_ptr<SessionDataProvider>&> onChanged{};

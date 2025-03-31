@@ -1,12 +1,12 @@
 #include <IRacingTools/Shared/Graphics/DXResources.h>
-#include <IRacingTools/SDK/Utils/ScopeHelpers.h>
+#include <IRacingSDK/Utils/ScopeHelpers.h>
 #include <IRacingTools/Shared/Macros.h>
 
 #include <spdlog/spdlog.h>
 
 namespace IRacingTools::Shared::Graphics {
 
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK::Utils;
 
   struct D3D11Resources::Locks {
     std::recursive_mutex mutex_;

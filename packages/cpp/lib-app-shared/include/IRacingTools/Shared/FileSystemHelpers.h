@@ -56,7 +56,7 @@ namespace IRacingTools::Shared {
    * @return Either `FileTimestamps<Clock>` OR `SDK::GeneralError`
    */
   template<typename Clock = DefaultFileClock>
-  std::expected<FileTimestamps<Clock>, SDK::GeneralError>
+  std::expected<FileTimestamps<Clock>, IRacingSDK::GeneralError>
   GetFileTimestamps(std::variant<fs::path, std::FILE *, HANDLE> fileOrPathVar) {
     using TimePoint = typename FileTimestamps<Clock>::TimePoint;
 
@@ -69,7 +69,7 @@ namespace IRacingTools::Shared {
       }
     });
     FILETIME modifiedTime, createdTime;
-    std::optional<SDK::GeneralError> errorOpt{std::nullopt};
+    std::optional<IRacingSDK::GeneralError> errorOpt{std::nullopt};
     std::visit(
         [&](auto &&fileOrPath) {
           using T = std::decay_t<decltype(fileOrPath)>;
@@ -84,8 +84,8 @@ namespace IRacingTools::Shared {
                 nullptr);
 
             if (!fileHandle)
-              errorOpt = std::make_optional(SDK::GeneralError(
-                  SDK::ErrorCode::NotFound,
+              errorOpt = std::make_optional(IRacingSDK::GeneralError(
+                  IRacingSDK::ErrorCode::NotFound,
                   std::format("Unable to open {}", fileOrPath.string())));
             else
               closeHandle = true;
@@ -103,12 +103,12 @@ namespace IRacingTools::Shared {
 
     if (!fileHandle) {
       return std::unexpected(
-          SDK::GeneralError(SDK::ErrorCode::NotFound, "invalid file handle"));
+          IRacingSDK::GeneralError(IRacingSDK::ErrorCode::NotFound, "invalid file handle"));
     }
 
     if (!GetFileTime(fileHandle, &createdTime, nullptr, &modifiedTime)) {
-      return std::unexpected(SDK::GeneralError(
-          SDK::ErrorCode::General, "Unable to get file timestamps"));
+      return std::unexpected(IRacingSDK::GeneralError(
+          IRacingSDK::ErrorCode::General, "Unable to get file timestamps"));
     }
 
     auto createdAt = toDuration<std::chrono::seconds>(createdTime);
@@ -124,7 +124,7 @@ namespace IRacingTools::Shared {
   };
 
   template<HasFileInfo T>
-  std::expected<std::pair<bool, FileTimestamps<DefaultFileClock>>, SDK::GeneralError> CheckFileInfoModified(const std::shared_ptr<T>& msg, const std::optional<fs::path>& fileOverride = std::nullopt) {
+  std::expected<std::pair<bool, FileTimestamps<DefaultFileClock>>, IRacingSDK::GeneralError> CheckFileInfoModified(const std::shared_ptr<T>& msg, const std::optional<fs::path>& fileOverride = std::nullopt) {
 
     auto& fi = msg->file_info();
     fs::path file(fi.file());
@@ -133,7 +133,7 @@ namespace IRacingTools::Shared {
 
     auto res = GetFileTimestamps(file);
     if (!res) {
-      return std::unexpected(SDK::GeneralError(SDK::ErrorCode::General,
+      return std::unexpected(IRacingSDK::GeneralError(IRacingSDK::ErrorCode::General,
         std::format("Unable to get timestamps for ({}), failing the file: {}", file.string(), res.error().what())));
     }
 
@@ -217,7 +217,7 @@ namespace IRacingTools::Shared {
    * @param childPath iRacing documents childPath
    * @return appended iracing path
    */
-  std::expected<fs::path, SDK::NotFoundError>
+  std::expected<fs::path, IRacingSDK::NotFoundError>
   GetIRacingDocumentPath(std::optional<fs::path> childPath = std::nullopt);
 
   void CleanupTemporaryDirectories();

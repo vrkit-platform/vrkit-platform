@@ -19,7 +19,7 @@ if(POLICY CMP0091)
 endif()
 
 # Subprojects & Targets
-set(sdkTarget irsdkcpp)
+set(sdkTarget irsdkcpp::irsdkcpp)
 set(sdkTargetStatic ${sdkTarget}_static)
 
 set(modelsTarget ${PROJECT_NAME}_models)
@@ -79,11 +79,9 @@ include(cmake/hybrid_crt.cmake NO_POLICY_SCOPE)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # Include test tools
+enable_testing()
 include(CTest)
 include(GoogleTest)
-
-# SDK Include dir
-set(sdkIncludeDir ${CMAKE_SOURCE_DIR}/packages/cpp/irsdk++/include)
 
 add_subdirectory(packages/proto)
 add_subdirectory(packages/cpp)

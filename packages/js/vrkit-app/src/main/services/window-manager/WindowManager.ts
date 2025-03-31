@@ -79,6 +79,10 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
     })
   }
 
+  allWindows(): WindowMainInstance[] {
+    return this.#windows
+  }
+  
   has(id: string) {
     return !!this.get(id)
   }
@@ -580,7 +584,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       })
       .on("show", () => {
         win.webContents.setWindowOpenHandler(windowOpenHandler)
-        if (this.sharedAppState.devSettings.autoOpenDevToolsTrigger === "always") {
+        if (this.#shouldAutoOpenDevTools(wi)) {
           const devToolsTitle = asOption(wi.config.initialRoute).filter(isNotEmptyString).getOrElse(wi.id)
           if (isFloatingWindow(wi) || wi.config.devToolMode) {
             win.webContents.openDevTools({
@@ -614,5 +618,14 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
       .setWindowOpenHandler(windowOpenHandler)
 
     this.updateZoom()
+  }
+  
+  #shouldAutoOpenDevTools(wi:WindowMainInstance):boolean {
+    return match(this.sharedAppState.devSettings.autoOpenDevToolsTrigger)
+      .with("always", () => true)
+      .with("only-normal", () => wi.type === "Normal")
+      .with("only-floating", () => wi.type === "Floating")
+      .otherwise(() => false)
+    
   }
 }

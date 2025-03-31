@@ -2,12 +2,12 @@
 
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include <IRacingTools/Models/Pipeline.pb.h>
 
-#include <IRacingTools/SDK/Utils/LUT.h>
-#include <IRacingTools/SDK/Utils/Singleton.h>
+#include <IRacingSDK/Utils/LUT.h>
+#include <IRacingSDK/Utils/Singleton.h>
 
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/Services/Pipelines/PipelineExecutor.h>
@@ -39,7 +39,7 @@ namespace IRacingTools::Shared::Services::Pipelines {
    * @tparam Data 
    */
   template<PipelineType Type, typename Data>
-  class PipelineExecutorRegistry : public SDK::Utils::Singleton<PipelineExecutorRegistry<Type, Data>> {
+  class PipelineExecutorRegistry : public IRacingSDK::Utils::Singleton<PipelineExecutorRegistry<Type, Data>> {
   public:
 
     PipelineExecutorRegistry() = delete;
@@ -71,10 +71,10 @@ namespace IRacingTools::Shared::Services::Pipelines {
     /**
      * @brief Singleton constructor
      */
-    PipelineExecutorRegistry(SDK::Utils::Singleton<PipelineExecutorRegistry<Type, Data>>::token) {      
+    PipelineExecutorRegistry(IRacingSDK::Utils::Singleton<PipelineExecutorRegistry<Type, Data>>::token) {
     };
 
-    friend SDK::Utils::Singleton<PipelineExecutorRegistry<Type, Data>>;
+    friend IRacingSDK::Utils::Singleton<PipelineExecutorRegistry<Type, Data>>;
 
   private:
 

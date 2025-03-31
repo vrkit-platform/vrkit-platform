@@ -63,5 +63,11 @@ target_link_libraries(${testTargetName} PRIVATE
   ${sharedAppLibTargetStatic}
   ${sdkTargetStatic}
   ${modelsTargetStatic})
+
 vrk_configure_test_libs(${testTargetName})
 VRK_CONFIGURE_TARGET(${testTargetName})
+
+GTEST_ADD_TESTS(
+  TARGET ${testTargetName}
+  SOURCES ${sharedAppLibTestSources}
+)

@@ -1,11 +1,11 @@
 
 #pragma once
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include "../SharedAppLibPCH.h"
 
-#include <IRacingTools/SDK/Utils/Literals.h>
+#include <IRacingSDK/Utils/Literals.h>
 #include <IRacingTools/Shared/UI/BaseWindow.h>
 
 namespace IRacingTools::Shared::UI {

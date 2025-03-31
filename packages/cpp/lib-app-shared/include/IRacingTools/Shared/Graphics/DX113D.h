@@ -26,7 +26,7 @@
 #include <directxtk/SpriteBatch.h>
 
 #include "../Geometry2D.h"
-#include "DX3D.h"
+// #include "DX3D.h"
 
 
 namespace IRacingTools::Shared::Graphics {

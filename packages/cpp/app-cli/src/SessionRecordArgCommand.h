@@ -12,13 +12,13 @@
 #include <CLI/CLI.hpp>
 #include <fmt/core.h>
 
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/ClientManager.h>
+#include <IRacingSDK/DiskClient.h>
+#include <IRacingSDK/ClientManager.h>
 
 namespace IRacingTools::App::Commands {
 using namespace std::literals;
-using namespace IRacingTools::SDK::Utils;
-using namespace IRacingTools::SDK;
+using namespace IRacingSDK::Utils;
+using namespace IRacingSDK;
 
 
 

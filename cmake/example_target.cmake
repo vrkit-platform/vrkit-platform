@@ -6,11 +6,6 @@ function(ADD_EXAMPLE exampleDir)
   file(GLOB headerFiles ${exampleDir}/*.h)
 
   add_executable(${exampleTarget} ${sourceFiles} ${headerFiles})
-  target_include_directories(${exampleTarget}
-    BEFORE
-    PRIVATE
-    ${sdkIncludeDir}
-  )
   target_link_libraries(${exampleTarget} PRIVATE
     ${sdkTargetStatic}
     ${modelsTargetStatic}

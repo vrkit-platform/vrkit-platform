@@ -1,10 +1,9 @@
 
 #include <chrono>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
-#include <IRacingTools/SDK/Utils/Base64.h>
-#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
-#include <IRacingTools/SDK/Utils/RunnableThread.h>
+#include <IRacingSDK/Utils/CollectionHelpers.h>
+#include <IRacingSDK/Utils/RunnableThread.h>
 
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
@@ -13,11 +12,13 @@
 
 #include "TelemetryDataFileProcessor.h"
 
-#include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingSDK/DiskClient.h>
+#include <IRacingTools/Shared/Utils/Base64.h>
 #include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
 
 namespace IRacingTools::Shared::Services {
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK::Utils;
+  using namespace IRacingTools::Shared::Utils;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::Shared::Services::Pipelines;
   namespace {
@@ -96,7 +97,7 @@ namespace IRacingTools::Shared::Services {
     reset();
   }
 
-  std::expected<bool, SDK::GeneralError> TelemetryDataService::init() {
+  std::expected<bool, IRacingSDK::GeneralError> TelemetryDataService::init() {
     std::scoped_lock lock(stateMutex_);
 
     // READ THE UNDERLYING DATA FILE, THE RESULT (IF SUCCESSFUL) IS HANDLED BY
@@ -169,7 +170,7 @@ namespace IRacingTools::Shared::Services {
     return true;
   }
 
-  std::optional<SDK::GeneralError> TelemetryDataService::destroy() {
+  std::optional<IRacingSDK::GeneralError> TelemetryDataService::destroy() {
     {
       std::scoped_lock lock(stateMutex_);
       if (state() >= State::Destroying)
@@ -189,9 +190,9 @@ namespace IRacingTools::Shared::Services {
   /**
    * @brief Remove underlying data file & clear the map
    *
-   * @return std::optional<SDK::GeneralError>
+   * @return std::optional<IRacingSDK::GeneralError>
    */
-  std::optional<SDK::GeneralError>
+  std::optional<IRacingSDK::GeneralError>
   TelemetryDataService::clearTelemetryFileCache() {
     auto res = dataFileHandler_->clear();
     if (res) {
@@ -219,7 +220,7 @@ namespace IRacingTools::Shared::Services {
   }
   std::expected<std::shared_ptr<TrackLayoutMetadata>, GeneralError>
   TelemetryDataService::getTrackLayoutMetadata(const fs::path &file) {
-    auto client = std::make_shared<SDK::DiskClient>(file, file.string());
+    auto client = std::make_shared<IRacingSDK::DiskClient>(file, file.string());
     if (!client) {
       auto msg =
           std::format("Unable to create disk client ({})", file.string());
@@ -304,7 +305,7 @@ namespace IRacingTools::Shared::Services {
     
     return ListAllFilesRecursively(!overrideFilePaths ? filePaths_ : overrideFilePaths.value());
   }
-  std::optional<SDK::GeneralError>
+  std::optional<IRacingSDK::GeneralError>
   TelemetryDataService::load(bool reload) {
     std::scoped_lock lock(stateMutex_);
     if (!reload && !dataFiles_.empty())
@@ -313,7 +314,7 @@ namespace IRacingTools::Shared::Services {
     auto res = dataFileHandler_->read();
     // IF THERE WAS AN ERROR, THEN RETURN HERE
 
-    if (!res) { // && res.error().code() != SDK::ErrorCode::NotFound
+    if (!res) { // && res.error().code() != IRacingSDK::ErrorCode::NotFound
       if (res.error().code() == ErrorCode::NotFound)
         L->info("Creating new telemetry data file");
       else
@@ -323,12 +324,12 @@ namespace IRacingTools::Shared::Services {
     return std::nullopt;
   }
 
-  std::expected<std::shared_ptr<TelemetryDataService>, SDK::GeneralError>
+  std::expected<std::shared_ptr<TelemetryDataService>, IRacingSDK::GeneralError>
   TelemetryDataService::save() {
 
     auto res = dataFileHandler_->write(toList());
 
-    if (!res && res.error().code() != SDK::ErrorCode::NotFound)  {
+    if (!res && res.error().code() != IRacingSDK::ErrorCode::NotFound)  {
       return std::unexpected(res.error());
     }
 
@@ -344,7 +345,7 @@ namespace IRacingTools::Shared::Services {
   TelemetryDataService::toList() {
     std::scoped_lock lock(stateMutex_);
 
-    return SDK::Utils::ValuesOf(dataFiles_);
+    return IRacingSDK::Utils::ValuesOf(dataFiles_);
   }
 
   bool TelemetryDataService::exists(const std::string &nameOrAlias) {
@@ -401,7 +402,7 @@ namespace IRacingTools::Shared::Services {
     return nullptr;
   }
 
-  std::expected<const std::shared_ptr<TelemetryDataFile>, SDK::GeneralError>
+  std::expected<const std::shared_ptr<TelemetryDataFile>, IRacingSDK::GeneralError>
   TelemetryDataService::set(
       const std::shared_ptr<TelemetryDataFile> &dataFile,
       bool skipFileChangedEvent) {
@@ -412,7 +413,7 @@ namespace IRacingTools::Shared::Services {
 
     auto &dataFiles = res.value();
     if (dataFiles.empty())
-      return std::unexpected(SDK::GeneralError(
+      return std::unexpected(IRacingSDK::GeneralError(
           ErrorCode::General, "No valid data files returned"));
 
     return dataFiles[0];
@@ -420,7 +421,7 @@ namespace IRacingTools::Shared::Services {
 
   std::expected<
       const std::vector<std::shared_ptr<TelemetryDataFile>>,
-      SDK::GeneralError>
+      IRacingSDK::GeneralError>
   TelemetryDataService::set(
       const std::vector<std::shared_ptr<TelemetryDataFile>> &changedDataFiles,
       bool skipFileChangedEvent) {
@@ -428,7 +429,7 @@ namespace IRacingTools::Shared::Services {
 
       std::scoped_lock lock(stateMutex_);
       if (!dataFileHandler_ || state() >= ServiceState::Destroying) {
-        return std::unexpected(SDK::GeneralError(ErrorCode::General, "This service is being or has been destroyed"));
+        return std::unexpected(IRacingSDK::GeneralError(ErrorCode::General, "This service is being or has been destroyed"));
       }
 
       // COPY CURRENT MAP
@@ -445,7 +446,7 @@ namespace IRacingTools::Shared::Services {
       }
 
       // WRITE CHANGES TO DISK
-      auto res = dataFileHandler_->write(SDK::Utils::ValuesOf(newDataFiles));
+      auto res = dataFileHandler_->write(IRacingSDK::Utils::ValuesOf(newDataFiles));
 
       // CHECK ERROR
       if (!res.has_value()) {

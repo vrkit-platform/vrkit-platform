@@ -10,8 +10,8 @@
 
 #include "NativeGlobal.h"
 using namespace IRacingTools::Shared::Logging;
-using namespace IRacingTools::SDK;
-using namespace IRacingTools::SDK::Utils;
+using namespace IRacingSDK;
+using namespace IRacingSDK::Utils;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::Models;
 

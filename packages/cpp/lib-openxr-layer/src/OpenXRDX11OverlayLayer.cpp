@@ -30,12 +30,12 @@
 
 #include <IRacingTools/OpenXR/OpenXROverlayLayer.h>
 #include <IRacingTools/OpenXR/OpenXRNext.h>
-
+#include <IRacingTools/Shared/Tracing.h>
 #include <spdlog/spdlog.h>
 
 #include "loader_interfaces.h"
 
-#include <IRacingTools/SDK/Utils/Tracing.h>
+#include <IRacingSDK/Utils/Tracing.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 namespace IRacingTools::OpenXR::DX11 {

@@ -9,7 +9,7 @@
 
 // #include <boost/sml2>
 
-#include <IRacingTools/SDK/ErrorTypes.h>
+#include <IRacingSDK/ErrorTypes.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/Services/Service.h>

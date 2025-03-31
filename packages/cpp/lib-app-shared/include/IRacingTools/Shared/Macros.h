@@ -6,10 +6,11 @@
 
 
 #include "SharedAppLibPCH.h"
-#include <IRacingTools/SDK/Utils/Win32.h>
+#include <IRacingSDK/Utils/Win32.h>
 #include <cassert>
 #include <iostream>
 #include <ostream>
+#include <boost/preprocessor/seq/elem.hpp>
 // #include <source_location>
 
 
@@ -20,6 +21,11 @@
   #define VRK_BREAK
 #endif
 
+
+#define VRK_TUPLE_PROP(name, index) \
+  auto& name() {\
+    return std::get<index>(*this);\
+  }
 
 // template<class CharT>
 // struct std::formatter<winrt::hresult, CharT> : std::formatter<std::basic_string_view<CharT>, CharT> {
@@ -130,7 +136,7 @@ VRK_LOG_AND_THROW(message, ##__VA_ARGS__); \
     }
   }
 
-  namespace Win32 = IRacingTools::SDK::Utils::Win32;
+  namespace Win32 = IRacingSDK::Utils::Win32;
 
 } // namespace IRacingTools::Shared
 

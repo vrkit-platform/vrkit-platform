@@ -8,7 +8,7 @@
 #include <utility>
 
 
-#include <IRacingTools/SDK/Utils/ChronoHelpers.h>
+#include <IRacingSDK/Utils/ChronoHelpers.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/OpenXR/OpenXROverlayLayer.h>
 #include <IRacingTools/OpenXR/OpenXRNext.h>
@@ -17,7 +17,8 @@
 
 #include "loader_interfaces.h"
 
-#include <IRacingTools/SDK/Utils/Tracing.h>
+#include <IRacingSDK/Utils/Tracing.h>
+#include <IRacingTools/Shared/Tracing.h>
 #include <IRacingTools/Shared/Graphics/RayIntersectsRect.h>
 #include <IRacingTools/Shared/Graphics/Spriting.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
@@ -28,7 +29,7 @@
 
 namespace IRacingTools::OpenXR {
     using namespace std::chrono_literals;
-    using namespace IRacingTools::SDK;
+    using namespace IRacingSDK;
     using namespace IRacingTools::Shared;
 
     namespace {
@@ -141,7 +142,7 @@ namespace IRacingTools::OpenXR {
     )
         : openXR_(next) {
         L->debug("{}", __FUNCTION__);
-        VRK_TraceLoggingScope("OpenXRLayer::OpenXRLayer()");
+//        VRK_TraceLoggingScope("OpenXRLayer::OpenXRLayer()");
 
         XrSystemProperties systemProperties{.type = XR_TYPE_SYSTEM_PROPERTIES,};
         check_xrresult(next->xrGetSystemProperties(instance, system, &systemProperties));
@@ -685,7 +686,7 @@ using namespace IRacingTools::Shared;
 BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved) {
     switch (dwReason) {
     case DLL_PROCESS_ATTACH:
-        TraceLoggingRegister(gTraceProvider);
+        TraceLoggingRegister(IRacingTools::Shared::gTraceProvider);
         // DPrintSettings::Set({
         //   .prefix = "OpenKneeboard-OpenXR",
         // });
@@ -697,7 +698,7 @@ BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved) {
         L->info("OpenXR Layer Attach {}", __FUNCTION__);
         break;
     case DLL_PROCESS_DETACH:
-        TraceLoggingUnregister(gTraceProvider);
+        TraceLoggingUnregister(IRacingTools::Shared::gTraceProvider);
         break;
     }
     return TRUE;

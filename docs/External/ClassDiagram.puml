@@ -5,9 +5,9 @@
 namespace IRacingTools {
 	namespace Shared {
 		class DiskSessionDataProvider {
-			+DiskSessionDataProvider(const std::filesystem::path& file, SDK::ClientId clientId)
+			+DiskSessionDataProvider(const std::filesystem::path& file, IRacingSDK::ClientId clientId)
 			+~DiskSessionDataProvider()
-			-clientId_ : SDK::ClientId
+			-clientId_ : IRacingSDK::ClientId
 			+timing() : Timing
 			+isAvailable() : bool
 			+isControllable() : bool {query}
@@ -19,7 +19,7 @@ namespace IRacingTools {
 			+resume() : bool
 			+start() : bool
 			-file_ : std::filesystem::path
-			-diskClient_ : std::shared_ptr<SDK::DiskClient>
+			-diskClient_ : std::shared_ptr<IRacingSDK::DiskClient>
 			-dataAccess_ : std::unique_ptr<SessionDataAccess>
 			-checkConnection() : void
 			-fireDataUpdatedEvent() : void
@@ -87,9 +87,9 @@ namespace IRacingTools {
 			+DeclareVarHolder(CarIdxPaceLine)
 			+DeclareVarHolder(CarIdxPaceRow)
 			+DeclareVarHolder(CarIdxPaceFlags)
-			+SessionDataAccess(std::weak_ptr<SDK::Client> client)
-			+getClient() : std::shared_ptr<IRacingTools::SDK::Client>
-			-client_ : std::weak_ptr<IRacingTools::SDK::Client>
+			+SessionDataAccess(std::weak_ptr<IRacingSDK::Client> client)
+			+getClient() : std::shared_ptr<IRacingSDK::Client>
+			-client_ : std::weak_ptr<IRacingSDK::Client>
 		}
 
 		class SessionDataEvent {
@@ -121,7 +121,7 @@ namespace IRacingTools {
 			-dataAccess_ : SessionDataAccess*
 			+sessionTimeMillis() : int
 			+cars() : std::vector<SessionCarState>&
-			+sessionInfo() : std::weak_ptr<SDK::SessionInfo::SessionInfoMessage>
+			+sessionInfo() : std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage>
 			+refresh() : void
 		}
 
@@ -204,7 +204,7 @@ namespace IRacingTools {
 
 		class SessionDataUpdatedDataEvent::SessionCarState {
 			+toTuple() : SessionCarStateRecord
-			+driver : std::optional<SDK::SessionInfo::Driver>
+			+driver : std::optional<IRacingSDK::SessionInfo::Driver>
 		}
 
 		class SessionDataUpdatedDataEvent::SessionCarState::anon_struct_1 {

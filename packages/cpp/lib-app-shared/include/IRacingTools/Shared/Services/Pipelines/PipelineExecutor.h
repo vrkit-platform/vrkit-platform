@@ -2,13 +2,13 @@
 
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include <IRacingTools/Models/Pipeline.pb.h>
 
-#include <IRacingTools/SDK/Utils/LUT.h>
-#include <IRacingTools/SDK/Utils/Singleton.h>
-#include <IRacingTools/SDK/Utils/TupleHelpers.h>
+#include <IRacingSDK/Utils/LUT.h>
+#include <IRacingSDK/Utils/Singleton.h>
+#include <IRacingSDK/Utils/TupleHelpers.h>
 
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
@@ -17,7 +17,7 @@
 namespace IRacingTools::Shared::Services::Pipelines {
   using namespace Logging;
   using namespace Models;
-  using namespace SDK::Utils;
+  using namespace IRacingSDK::Utils;
   constexpr std::size_t PipelineTypeCount = magic_enum::enum_count<PipelineType>();
   constexpr auto PipelineTypes = magic_enum::enum_values<PipelineType>();
   // using PipelineTypesTupleType = std::tuple<decltype(PipelineType::PIPELINE_TYPE_TRACK_MAP)>;
@@ -56,7 +56,7 @@ namespace IRacingTools::Shared::Services::Pipelines {
     explicit PipelineExecutor(PipelineType type) : type_(type) {
     }
 
-    virtual std::optional<SDK::GeneralError> execute(PipelineAttemptEditor& attempt, const std::shared_ptr<ServiceContainer>& serviceContainer, Data...) = 0;
+    virtual std::optional<IRacingSDK::GeneralError> execute(PipelineAttemptEditor& attempt, const std::shared_ptr<ServiceContainer>& serviceContainer, Data...) = 0;
 
     virtual ~PipelineExecutor() = default;
 

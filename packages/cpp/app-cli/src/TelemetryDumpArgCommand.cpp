@@ -21,22 +21,22 @@
 #include <cstdio>
 #include <ctime>
 
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
-#include <IRacingTools/SDK/LiveConnection.h>
+#include <IRacingSDK/DiskClient.h>
+#include <IRacingSDK/DiskClientDataFrameProcessor.h>
+#include <IRacingSDK/LiveConnection.h>
 
 #include "TelemetryDumpArgCommand.h"
 
 #include <IRacingTools/Models/LapTrajectory.pb.h>
-#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
-#include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
-#include <IRacingTools/SDK/Utils/FileHelpers.h>
+#include <IRacingSDK/Utils/CollectionHelpers.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/Utils/FileHelpers.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 namespace IRacingTools::App::Commands {
-  using namespace IRacingTools::SDK;
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK;
+  using namespace IRacingSDK::Utils;
   using namespace IRacingTools::Shared::Logging;
 
   namespace {

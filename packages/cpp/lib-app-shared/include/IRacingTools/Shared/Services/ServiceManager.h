@@ -7,7 +7,7 @@
 #include <memory>
 #include <type_traits>
 
-#include <IRacingTools/SDK/ErrorTypes.h>
+#include <IRacingSDK/ErrorTypes.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/Services/Service.h>
 #include <IRacingTools/Shared/Services/ServiceContainer.h>
@@ -31,7 +31,7 @@ namespace IRacingTools::Shared::Services {
     /**
      * @brief Initialize the service
      */
-    std::optional<SDK::GeneralError>  init() {
+    std::optional<IRacingSDK::GeneralError>  init() {
       std::scoped_lock lock(stateMutex_);
 
       if (!ServiceStateTransitionCheck(state(), State::Initializing, true)) {
@@ -66,7 +66,7 @@ namespace IRacingTools::Shared::Services {
     /**
      * @brief Must set running == true in overridden implementation
      */
-    std::optional<SDK::GeneralError>  start() {
+    std::optional<IRacingSDK::GeneralError>  start() {
       // TODO: Implement dependency management and Multithreaded start
 
       std::scoped_lock lock(stateMutex_);
@@ -106,7 +106,7 @@ namespace IRacingTools::Shared::Services {
     /**
      * @brief Must set running == false in overridden implementation
      */
-    std::optional<SDK::GeneralError> destroy() {
+    std::optional<IRacingSDK::GeneralError> destroy() {
       std::scoped_lock lock(stateMutex_);
       if (!ServiceStateTransitionCheck(state(), State::Destroying, true)) {
         Log->warn("destroy() can only be called when new state > {}, currently state is {}. Skipping init()",
@@ -127,7 +127,7 @@ namespace IRacingTools::Shared::Services {
           Log->critical("Destroy service ({}) failed: {}", service->name(), err.what());
           throw err;
         } else if (service->state() < State::Destroyed) {
-          throw SDK::GeneralError(SDK::ErrorCode::General,
+          throw IRacingSDK::GeneralError(IRacingSDK::ErrorCode::General,
                                   std::format("Destroy did not return an error, but the service ({}) state is ({})",
                                               service->name(), E::enum_name(service->state()).data()));
         }
@@ -187,9 +187,9 @@ namespace IRacingTools::Shared::Services {
      * @brief Wait for all services to complete cleanly
      * 
      * @param waitEvenIfNotRunning 
-     * @return std::optional<SDK::GeneralError> 
+     * @return std::optional<IRacingSDK::GeneralError>
      */
-    std::optional<SDK::GeneralError> wait(bool waitEvenIfNotRunning = false) {
+    std::optional<IRacingSDK::GeneralError> wait(bool waitEvenIfNotRunning = false) {
       std::scoped_lock lock(stateMutex_);
       std::unique_lock changeLock(stateChangeMutex_);
       if (state() < State::Starting && !waitEvenIfNotRunning) {

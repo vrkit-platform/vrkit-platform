@@ -79,8 +79,8 @@
 
 // IRT Headers
 #include <IRacingTools/Shared/Constants.h>
-#include <IRacingTools/SDK/Utils/Singleton.h>
-#include <IRacingTools/SDK/Utils/SDKMacros.h>
-#include <IRacingTools/SDK/Utils/PropPreprocessors.h>
+#include <IRacingSDK/Utils/Singleton.h>
+#include <IRacingSDK/Utils/SDKMacros.h>
+#include <IRacingSDK/Utils/PropPreprocessors.h>
 
 namespace fs = std::filesystem;

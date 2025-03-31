@@ -13,7 +13,7 @@
     },
     {
       "name": "magic-enum",
-      "version>=": "0.9.5"
+      "version>=": "0.9.6"
     },
     {
       "name": "directxtk",
@@ -80,18 +80,30 @@
       "version>=": "14.2.4#2"
     },
     {
-      "name": "cli",
-      "version>=": "2.1.0"
-    },
-    {
       "name": "sqlite-orm",
       "version>=": "1.8.2#2"
+    },
+    {
+      "name": "irsdkcpp",
+      "version>=": "1.0.8"
     }
   ],
   "overrides": [
     {
-      "name": "magic-enum",
-      "version": "0.9.5"
+      "name": "directxtk",
+      "version": "2024-10-28#0"
+    },
+    {
+      "name": "cppwinrt",
+      "version": "2.0.240111.5"
+    },
+    {
+      "name": "directxmath",
+      "version": "2023-12-31"
+    },
+    {
+      "name": "effects11",
+      "version": "11.29#3"
     }
   ]
 }

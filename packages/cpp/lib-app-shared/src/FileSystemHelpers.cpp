@@ -3,11 +3,11 @@
 #include <format>
 #include <mutex>
 
-#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
+#include <IRacingSDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/Macros.h>
 
 namespace IRacingTools::Shared {
-    using namespace IRacingTools::SDK::Utils;
+    using namespace IRacingSDK::Utils;
 
     namespace {
 
@@ -193,7 +193,7 @@ namespace IRacingTools::Shared {
         return GetAppDataPath(Directories::TRACK_MAPS);
     }
 
-    std::expected<fs::path, SDK::NotFoundError> GetIRacingDocumentPath(std::optional<fs::path> childPath) {
+    std::expected<fs::path, IRacingSDK::NotFoundError> GetIRacingDocumentPath(std::optional<fs::path> childPath) {
         fs::path finalPath = GetDocumentsPath() / "iRacing";
         if (childPath.has_value())
             finalPath /= childPath.value();
@@ -205,7 +205,7 @@ namespace IRacingTools::Shared {
         );
 
         if (!exists) {
-            return std::unexpected(SDK::NotFoundError(SDK::ErrorCode::NotFound, fmt::format("iRacing Path ({}) does not exist", finalPath.string())));
+            return std::unexpected(IRacingSDK::NotFoundError(IRacingSDK::ErrorCode::NotFound, fmt::format("iRacing Path ({}) does not exist", finalPath.string())));
         }
 
         return finalPath;

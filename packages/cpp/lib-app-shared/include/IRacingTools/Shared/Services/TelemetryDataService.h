@@ -95,14 +95,14 @@ namespace IRacingTools::Shared::Services {
      * @param skipFileChangedEvent
      * @return
      */
-    std::expected<const std::shared_ptr<TelemetryDataFile>, SDK::GeneralError>
+    std::expected<const std::shared_ptr<TelemetryDataFile>, IRacingSDK::GeneralError>
     set(const std::shared_ptr<TelemetryDataFile> &dataFile, bool skipFileChangedEvent = false);
 
-    std::expected<const std::vector<std::shared_ptr<TelemetryDataFile>>, SDK::GeneralError>
+    std::expected<const std::vector<std::shared_ptr<TelemetryDataFile>>, IRacingSDK::GeneralError>
     set(const std::vector<std::shared_ptr<TelemetryDataFile>> &changedDataFiles, bool skipFileChangedEvent = false);
 
-    std::optional<SDK::GeneralError> load(bool reload = false);
-    std::expected<std::shared_ptr<TelemetryDataService>, SDK::GeneralError> save();
+    std::optional<IRacingSDK::GeneralError> load(bool reload = false);
+    std::expected<std::shared_ptr<TelemetryDataService>, IRacingSDK::GeneralError> save();
 
     std::optional<fs::path> findFile(const std::shared_ptr<TelemetryDataFile> &dataFile);
 
@@ -114,17 +114,17 @@ namespace IRacingTools::Shared::Services {
     /**
      * @brief Initialize the service
      */
-    virtual std::expected<bool, SDK::GeneralError> init() override;
+    virtual std::expected<bool, IRacingSDK::GeneralError> init() override;
 
     /**
      * @brief Must set running == true in overridden implementation
      */
-    virtual std::expected<bool, SDK::GeneralError> start() override;
+    virtual std::expected<bool, IRacingSDK::GeneralError> start() override;
 
     /**
      * @brief Must set running == false in overridden implementation
      */
-    virtual std::optional<SDK::GeneralError> destroy() override;
+    virtual std::optional<IRacingSDK::GeneralError> destroy() override;
 
     std::vector<fs::path> listTelemetryFiles(const std::optional<std::vector<std::filesystem::path>>& overrideFilePaths);
 
@@ -132,7 +132,7 @@ namespace IRacingTools::Shared::Services {
 
     void reset(bool skipPrepare = false);
 
-    std::optional<SDK::GeneralError> clearTelemetryFileCache();
+    std::optional<IRacingSDK::GeneralError> clearTelemetryFileCache();
 
     bool hasPendingTasks();
     std::size_t pendingTaskCount();

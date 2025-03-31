@@ -6,7 +6,7 @@
 
 #include "../SharedAppLibPCH.h"
 
-#include <IRacingTools/SDK/Utils/Literals.h>
+#include <IRacingSDK/Utils/Literals.h>
 #include <IRacingTools/Shared/Graphics/RenderTarget.h>
 #include <IRacingTools/Shared/Graphics/DXResources.h>
 #include <IRacingTools/Shared/Graphics/Types.h>
@@ -48,7 +48,7 @@ namespace IRacingTools::Shared::UI {
 
         ViewerSettings settings_{};
 
-        std::optional<typename SDK::Utils::EventEmitter<ViewerWindow*, PixelSize, PixelSize>::UnsubscribeFn>
+        std::optional<typename IRacingSDK::Utils::EventEmitter<ViewerWindow*, PixelSize, PixelSize>::UnsubscribeFn>
         onResizeUnsubscribe_{};
 
     public:

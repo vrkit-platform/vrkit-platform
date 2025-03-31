@@ -1,12 +1,12 @@
 
 #include "TrackMapGenerator.h"
 
-#include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingSDK/DiskClient.h>
 #include <chrono>
 #include <fstream>
 #include <functional>
 #include <iostream>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include <google/protobuf/util/json_util.h>
 
@@ -21,7 +21,7 @@
 
 
 namespace IRacingTools::Shared::Services {
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK::Utils;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::Shared::Services::Pipelines;
   using namespace IRacingTools::Shared::Utils;
@@ -102,7 +102,7 @@ namespace IRacingTools::Shared::Services {
         dataFile->track_layout_metadata());
 
     // CREATE DISK CLIENT
-    auto client = std::make_shared<SDK::DiskClient>(file, file.string());
+    auto client = std::make_shared<IRacingSDK::DiskClient>(file, file.string());
     auto clientDisposer = gsl::finally([&] {
       if (client)
         client->close();

@@ -6,17 +6,17 @@
 
 #include <IRacingTools/Models/LapTrajectory.pb.h>
 
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
-#include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
-#include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingSDK/DiskClient.h>
+#include <IRacingSDK/DiskClientDataFrameProcessor.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/VarHolder.h>
 
 #include <IRacingTools/Shared/Services/TelemetryFileHandler.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 
 namespace IRacingTools::Shared::Services {
-  using namespace IRacingTools::SDK;
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK;
+  using namespace IRacingSDK::Utils;
 
   class LapTrajectoryTool {  
   public:    
@@ -26,7 +26,7 @@ namespace IRacingTools::Shared::Services {
     };
 
     std::expected<std::shared_ptr<Models::LapTrajectory>, GeneralError> createLapTrajectory(const std::filesystem::path &file, const CreateOptions& options = {});
-    std::expected<std::shared_ptr<Models::LapTrajectory>, GeneralError> createLapTrajectory(const std::shared_ptr<SDK::DiskClient> &client, const CreateOptions& options = {});
+    std::expected<std::shared_ptr<Models::LapTrajectory>, GeneralError> createLapTrajectory(const std::shared_ptr<IRacingSDK::DiskClient> &client, const CreateOptions& options = {});
 
   
     

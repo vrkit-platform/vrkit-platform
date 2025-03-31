@@ -10,13 +10,13 @@
 #include <ctime>
 #include <windows.h>
 
-#include <IRacingTools/SDK/SessionInfo/ModelParser.h>
-#include <IRacingTools/SDK/LiveConnection.h>
-#include <IRacingTools/SDK/Utils/YamlParser.h>
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/LiveClient.h>
-#include <IRacingTools/SDK/Types.h>
-#include <IRacingTools/SDK/Utils/YamlParser.h>
+#include <IRacingSDK/SessionInfo/ModelParser.h>
+#include <IRacingSDK/LiveConnection.h>
+#include <IRacingSDK/Utils/YamlParser.h>
+#include <IRacingSDK/DiskClient.h>
+#include <IRacingSDK/LiveClient.h>
+#include <IRacingSDK/Types.h>
+#include <IRacingSDK/Utils/YamlParser.h>
 
 #include "SessionRecordArgCommand.h"
 
@@ -30,7 +30,7 @@
 namespace IRacingTools::App::Commands {
   namespace {
 
-    using namespace IRacingTools::SDK;
+    using namespace IRacingSDK;
 
     char *g_data = nullptr;
     int g_nData = 0;

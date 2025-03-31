@@ -8,15 +8,15 @@ namespace IRacingTools::Shared::Utils {
     auto L = LoggingManager::Get().getCategory(__FILE__);
   }
   
-  std::expected<std::string, SDK::GeneralError> GetSessionInfoTrackLayoutId(const SessionInfoMessage& sessionInfoMessage) {
+  std::expected<std::string, IRacingSDK::GeneralError> GetSessionInfoTrackLayoutId(const SessionInfoMessage& sessionInfoMessage) {
     return GetSessionInfoTrackLayoutId(&sessionInfoMessage);
   }
 
-  std::expected<std::string, SDK::GeneralError> GetSessionInfoTrackLayoutId(const std::shared_ptr<SessionInfoMessage>& sessionInfoMessage) {
+  std::expected<std::string, IRacingSDK::GeneralError> GetSessionInfoTrackLayoutId(const std::shared_ptr<SessionInfoMessage>& sessionInfoMessage) {
     return GetSessionInfoTrackLayoutId(sessionInfoMessage.get());
   }
 
-  std::expected<std::string, SDK::GeneralError>
+  std::expected<std::string, IRacingSDK::GeneralError>
   GetSessionInfoTrackLayoutId(const SessionInfoMessage *sessionInfoMessage) {
     auto res = GetSessionInfoTrackLayoutMetadata(sessionInfoMessage);
     if (!res) {
@@ -25,19 +25,19 @@ namespace IRacingTools::Shared::Utils {
 
     return res.value()->id();
   }
-  std::expected<std::shared_ptr<Models::TrackLayoutMetadata>, SDK::GeneralError>
+  std::expected<std::shared_ptr<Models::TrackLayoutMetadata>, IRacingSDK::GeneralError>
   GetSessionInfoTrackLayoutMetadata(
       const SessionInfoMessage &sessionInfoMessage) {
     return GetSessionInfoTrackLayoutMetadata(&sessionInfoMessage);
   }
 
-  std::expected<std::shared_ptr<Models::TrackLayoutMetadata>, SDK::GeneralError>
+  std::expected<std::shared_ptr<Models::TrackLayoutMetadata>, IRacingSDK::GeneralError>
   GetSessionInfoTrackLayoutMetadata(
       const std::shared_ptr<SessionInfoMessage> &sessionInfoMessage) {
     return GetSessionInfoTrackLayoutMetadata(sessionInfoMessage.get());
   }
 
-  std::expected<std::shared_ptr<Models::TrackLayoutMetadata>, SDK::GeneralError>
+  std::expected<std::shared_ptr<Models::TrackLayoutMetadata>, IRacingSDK::GeneralError>
   GetSessionInfoTrackLayoutMetadata(
       const SessionInfoMessage *sessionInfoMessage) {
 
@@ -50,13 +50,13 @@ namespace IRacingTools::Shared::Utils {
 
   }
 
-  std::expected<Models::TrackLayoutMetadata*, SDK::GeneralError> GetSessionInfoTrackLayoutMetadata(
+  std::expected<Models::TrackLayoutMetadata*, IRacingSDK::GeneralError> GetSessionInfoTrackLayoutMetadata(
     Models::TrackLayoutMetadata* trackLayoutMetadata,
     const SessionInfoMessage* sessionInfoMessage
   ) {
     if (!sessionInfoMessage) {
-      return std::unexpected(SDK::GeneralError(
-          SDK::ErrorCode::General, "NULL SessionInfoMessage"));
+      return std::unexpected(IRacingSDK::GeneralError(
+          IRacingSDK::ErrorCode::General, "NULL SessionInfoMessage"));
     }
     auto &winfo = sessionInfoMessage->weekendInfo;
     auto &trackId = winfo.trackID;
@@ -67,8 +67,8 @@ namespace IRacingTools::Shared::Utils {
       trackLayoutName = "NO_CONFIG_NAME";
 
     if (!trackId || trackName.empty() || trackLayoutName.empty()) {
-      return std::unexpected(SDK::GeneralError(
-          SDK::ErrorCode::General,
+      return std::unexpected(IRacingSDK::GeneralError(
+          IRacingSDK::ErrorCode::General,
           "To determine the track id, the `sessionInfo.weekendInfo` must have "
           "the following valid, non-empty, members "
           "`trackID`, `trackName`,  `trackConfigName`"));

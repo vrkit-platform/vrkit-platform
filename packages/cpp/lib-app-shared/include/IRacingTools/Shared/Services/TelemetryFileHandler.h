@@ -6,17 +6,17 @@
 
 #include <IRacingTools/Models/LapTrajectory.pb.h>
 
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
-#include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
-#include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingSDK/DiskClient.h>
+#include <IRacingSDK/DiskClientDataFrameProcessor.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/VarHolder.h>
 
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 
 namespace IRacingTools::Shared::Services {
-  using namespace IRacingTools::SDK;
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK;
+  using namespace IRacingSDK::Utils;
 
   // using Models::;
 
@@ -98,12 +98,12 @@ namespace IRacingTools::Shared::Services {
 
 
   private:
-    std::shared_ptr<SDK::DiskClient> client_;
+    std::shared_ptr<IRacingSDK::DiskClient> client_;
 
   public:
     explicit TelemetryFileHandler(const std::filesystem::path &file);
 
     explicit TelemetryFileHandler(
-        const std::shared_ptr<SDK::DiskClient> &client);
+        const std::shared_ptr<IRacingSDK::DiskClient> &client);
   };
 } // namespace IRacingTools::Shared::Services

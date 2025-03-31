@@ -3,7 +3,7 @@
 
 #include <algorithm>
 #include <filesystem>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <numbers>
 #include <type_traits>
 

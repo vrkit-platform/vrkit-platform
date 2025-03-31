@@ -4,7 +4,7 @@
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
-#include <IRacingTools/SDK/Utils/Singleton.h>
+#include <IRacingSDK/Utils/Singleton.h>
 
 #include <IRacingTools/Shared/Services/TelemetryDataService.h>
 // #include <IRacingTools/Shared/Services/TrackMapService.h>
@@ -15,11 +15,26 @@
 #include <napi.h>
 
 using namespace IRacingTools::Shared::Logging;
-using namespace IRacingTools::SDK;
-using namespace IRacingTools::SDK::Utils;
+using namespace IRacingSDK;
+using namespace IRacingSDK::Utils;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::Models;
 
+// #if defined(__cplusplus)
+// #define INITIALIZER(fn)                                                     \
+// static void __cdecl fn();                                                 \
+// struct napi_init_helper {                                                 \
+// napi_init_helper() { fn(); }                                            \
+// };                                                                        \
+// static napi_init_helper init_helper;                                      \
+// static void __cdecl fn()
+// #else
+// #pragma section(".CRT$XCU", read)
+// #define INITIALIZER(fn)                                                     \
+// static void __cdecl fn(void);                                             \
+// __declspec(dllexport, allocate(".CRT$XCU")) void(__cdecl * fn##_)(void) = \
+// fn;
+// #endif
 
 namespace IRacingTools::App::Node {
     using namespace Shared::Services;

@@ -1,6 +1,6 @@
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 
-#include <IRacingTools/SDK/Utils/Tracing.h>
+#include <IRacingSDK/Utils/Tracing.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Common/UUIDHelpers.h>
 

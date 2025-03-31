@@ -2,23 +2,32 @@
 import React, { useCallback, useMemo } from "react"
 
 // CLSX
+import clsx from "clsx"
+
 // 3FV
 import { getLogger } from "@3fv/logger-proxy"
 
-import type { BoxProps } from "@mui/material/Box"
 // MUI
-import Box from "@mui/material/Box"
+import Box, { type BoxProps } from "@mui/material/Box"
 import { useTheme } from "@mui/material/styles"
-import clsx from "clsx"
-import { AppFAIcon, AppIcon } from "../../app-icon"
+import AddIcon from "@mui/icons-material/Add"
+import Paper from "@mui/material/Paper"
+import Typography from "@mui/material/Typography"
+import Tooltip from "@mui/material/Tooltip"
+import Button, { type ButtonProps } from "@mui/material/Button"
+
+// VRKIT
 import { DashboardConfig, Timestamp } from "@vrkit-platform/models"
+import { isNotEmpty, isNotEmptyString } from "@vrkit-platform/shared"
+
+// COMPONENTS & SERVICES
+import { AppFAIcon, AppIcon } from "../../app-icon"
 import { useService } from "../../service-container"
 import { DashboardManagerClient } from "../../../services/dashboard-manager-client"
 import { AppSettingsClient } from "../../../services/app-settings-client"
 import { useAppSelector } from "../../../services/store"
 import { PluginCompEntry, sharedAppSelectors } from "../../../services/store/slices/shared-app"
-import { isNotEmpty, isNotEmptyString } from "@vrkit-platform/shared"
-import Alerts, { Alert } from "../../../services/alerts"
+import Alerts from "../../../services/alerts"
 import {
   Ellipsis,
   EllipsisBox,
@@ -33,21 +42,15 @@ import {
   FlexScaleZero,
   FlexScaleZeroBox,
   OverflowHidden,
-  padding,
-  rem
+  padding
 } from "@vrkit-platform/shared-ui"
 
-import Paper from "@mui/material/Paper"
-import Typography from "@mui/material/Typography"
 import { asOption } from "@3fv/prelude-ts"
 import { NavLink } from "react-router-dom"
 import { WebPaths } from "../../../routes/WebPaths"
-import AddIcon from "@mui/icons-material/Add"
-import OpenLayoutEditorIcon from '@mui/icons-material/SpaceDashboard'
-import DashboardIcon from '@mui/icons-material/Dashboard'
 import { faEdit, faRocketLaunch } from "@awesome.me/kit-79150a3eed/icons/sharp/solid"
-import Tooltip from "@mui/material/Tooltip"
-import Button, { ButtonProps } from "@mui/material/Button"
+
+
 import { get } from "lodash/fp"
 import { range } from "lodash"
 import Moment from "react-moment"

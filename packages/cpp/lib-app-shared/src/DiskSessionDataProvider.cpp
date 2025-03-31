@@ -10,9 +10,9 @@
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
 #include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
-#include <IRacingTools/SDK/Utils/ChronoHelpers.h>
-#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
-#include <IRacingTools/SDK/Utils/ThreadHelpers.h>
+#include <IRacingSDK/Utils/ChronoHelpers.h>
+#include <IRacingSDK/Utils/CollectionHelpers.h>
+#include <IRacingSDK/Utils/ThreadHelpers.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/Common/UUIDHelpers.h>
 #include <IRacingTools/Shared/DiskSessionDataProvider.h>
@@ -24,7 +24,7 @@
 
 namespace IRacingTools::Shared {
   using namespace std::chrono_literals;
-  using namespace IRacingTools::SDK;
+  using namespace IRacingSDK;
 
   namespace {
     auto L = Logging::GetCategoryWithType<DiskSessionDataProvider>();
@@ -110,7 +110,7 @@ namespace IRacingTools::Shared {
     return dataAccess_.get();
   }
 
-  SDK::ClientProvider *DiskSessionDataProvider::clientProvider() {
+  IRacingSDK::ClientProvider *DiskSessionDataProvider::clientProvider() {
     return diskClient_->getProvider().get();
   }
 
@@ -170,7 +170,7 @@ namespace IRacingTools::Shared {
       auto currentSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
       VRK_LOG_AND_FATAL_IF(!currentSessionTimeVal, "No session time");
       auto currentSessionTime = currentSessionTimeVal.value();
-      auto currentSessionTimeMillis = SDK::Utils::SessionTimeToMillis(currentSessionTime);
+      auto currentSessionTimeMillis = IRacingSDK::Utils::SessionTimeToMillis(currentSessionTime);
 
       process();
 
@@ -186,7 +186,7 @@ namespace IRacingTools::Shared {
         auto nextSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
         VRK_LOG_AND_FATAL_IF(!nextSessionTimeVal, "No next session time");
         auto nextSessionTime = nextSessionTimeVal.value();
-        auto nextSessionTimeMillis = SDK::Utils::SessionTimeToMillis(nextSessionTime);
+        auto nextSessionTimeMillis = IRacingSDK::Utils::SessionTimeToMillis(nextSessionTime);
 
         auto dataFrameIntervalMillis = std::chrono::milliseconds(nextSessionTimeMillis - currentSessionTimeMillis);
         auto nextTimeMillis = currentTimeMillis + dataFrameIntervalMillis;
@@ -242,7 +242,7 @@ namespace IRacingTools::Shared {
       auto sessionNum = sessionNumRes.value();
       if (!Win32::IsWindowsMagicNumber(sessionNum)) {
         auto sessionInfo = diskClient_->getSessionInfo().lock();
-        auto subSessionInfo = SDK::Utils::FindValue(
+        auto subSessionInfo = IRacingSDK::Utils::FindValue(
           sessionInfo->sessionInfo.sessions,
           [sessionNum](auto &subInfo) {
             return subInfo.sessionNum == sessionNum;
@@ -351,7 +351,7 @@ namespace IRacingTools::Shared {
     return diskClient_->getSessionTicks();
   }
 
-  std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> DiskSessionDataProvider::sessionInfo() {
+  std::shared_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> DiskSessionDataProvider::sessionInfo() {
     return diskClient_->getSessionInfo().lock();
   }
 
@@ -383,7 +383,7 @@ namespace IRacingTools::Shared {
     }
 
     thread_ = std::make_unique<std::thread>(&DiskSessionDataProvider::runnable, this);
-    SDK::Utils::SetThreadName(thread_.get(), std::format("DiskSessionDataProvider({})", file_.string()));
+    IRacingSDK::Utils::SetThreadName(thread_.get(), std::format("DiskSessionDataProvider({})", file_.string()));
 
     return running_;
   }
@@ -489,8 +489,8 @@ namespace IRacingTools::Shared {
 
         auto sessionLap = sessionLapVal.value_or(-1);
         if (sessionLap >= 0) {
-          std::int64_t timeMillis = SDK::Utils::SessionTimeToMillis(sessionTimeVal.value());
-          std::int64_t timeRemainMillis = SDK::Utils::SessionTimeToMillis(sessionTimeRemainVal.value());
+          std::int64_t timeMillis = IRacingSDK::Utils::SessionTimeToMillis(sessionTimeVal.value());
+          std::int64_t timeRemainMillis = IRacingSDK::Utils::SessionTimeToMillis(sessionTimeRemainVal.value());
 
           timing->set_session_sub_lap(sessionLap);
           timing->set_session_sub_lap_remaining(sessionLapsRemainVal.value());
@@ -521,7 +521,7 @@ namespace IRacingTools::Shared {
     return sessionData_;
   }
 
-  const SDK::VarHeaders &DiskSessionDataProvider::getDataVariableHeaders() {
+  const IRacingSDK::VarHeaders &DiskSessionDataProvider::getDataVariableHeaders() {
     return diskClient_->getVarHeaders();
   }
 

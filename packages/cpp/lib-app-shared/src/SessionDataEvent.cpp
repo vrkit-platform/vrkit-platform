@@ -13,7 +13,7 @@
 
 namespace IRacingTools::Shared {
   using namespace std::chrono_literals;
-  using namespace IRacingTools::SDK;
+  using namespace IRacingSDK;
 
   namespace {
     int SessionTimeToMillis(double sessionTime) {
@@ -38,7 +38,7 @@ namespace IRacingTools::Shared {
     return {index, lap, lapsCompleted, lapPercentComplete, estimatedTime, position.overall, position.clazz, driver};
   }
 
-  std::shared_ptr<SDK::ClientProvider> SessionDataAccess::getClientProvider() {
+  std::shared_ptr<IRacingSDK::ClientProvider> SessionDataAccess::getClientProvider() {
     return clientProvider_;
   }
 
@@ -63,7 +63,7 @@ namespace IRacingTools::Shared {
       sessionInfo = sessionInfo_.lock();
     }
 
-    auto drivers = sessionInfo ? sessionInfo->driverInfo.drivers : std::vector<SDK::SessionInfo::Driver>{};
+    auto drivers = sessionInfo ? sessionInfo->driverInfo.drivers : std::vector<IRacingSDK::SessionInfo::Driver>{};
     cars_.clear();
 
     sessionTimeMillis_ = SessionTimeToMillis(sessionTimeVar.getDouble());
@@ -71,7 +71,7 @@ namespace IRacingTools::Shared {
     for (int index = 0; index < Resources::MaxCars; index++) {
       auto trackSurface = IRVAR(CarIdxTrackSurface).getInt(index);
 
-      std::optional<SDK::SessionInfo::Driver> driver =
+      std::optional<IRacingSDK::SessionInfo::Driver> driver =
           drivers.size() > index ? std::make_optional(drivers[index]) : std::nullopt;
 
       auto lap = lapVar.getInt(index);
@@ -100,7 +100,7 @@ namespace IRacingTools::Shared {
     return sessionTimeMillis_;
   }
 
-  std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedDataEvent::sessionInfo() {
+  std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedDataEvent::sessionInfo() {
     return sessionInfo_;
   }
 
@@ -109,7 +109,7 @@ namespace IRacingTools::Shared {
       : SessionDataEvent(SessionDataEventType::UpdatedInfo), sessionInfo_(newSessionInfo) {
   }
 
-  std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedInfoEvent::sessionInfo() {
+  std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedInfoEvent::sessionInfo() {
     return sessionInfo_;
   }
 }// namespace IRacingTools::Shared

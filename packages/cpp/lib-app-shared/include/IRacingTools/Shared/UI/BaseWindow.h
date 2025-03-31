@@ -2,7 +2,7 @@
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 #include <IRacingTools/Shared/Geometry2D.h>
-#include <IRacingTools/SDK/Utils/EventEmitter.h>
+#include <IRacingSDK/Utils/EventEmitter.h>
 
 #include <spdlog/spdlog.h>
 
@@ -184,7 +184,7 @@ namespace IRacingTools::Shared::UI {
             }
 
             struct {
-                SDK::Utils::EventEmitter<WindowClazz*, PixelSize, PixelSize> onResize{};
+                IRacingSDK::Utils::EventEmitter<WindowClazz*, PixelSize, PixelSize> onResize{};
             } events;
 
         protected:

@@ -2,11 +2,11 @@
 // Created by jglanz on 1/28/2024.
 //
 
-#include <IRacingTools/SDK/LiveClient.h>
+#include <IRacingSDK/LiveClient.h>
 #include <cstdio>
 
-#include <IRacingTools/SDK/Utils/ChronoHelpers.h>
-#include <IRacingTools/SDK/Utils/ThreadHelpers.h>
+#include <IRacingSDK/Utils/ChronoHelpers.h>
+#include <IRacingSDK/Utils/ThreadHelpers.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/Common/UUIDHelpers.h>
 #include <IRacingTools/Shared/LiveSessionDataProvider.h>
@@ -16,8 +16,8 @@
 
 namespace IRacingTools::Shared {
   using namespace std::chrono_literals;
-  using namespace IRacingTools::SDK;
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK;
+  using namespace IRacingSDK::Utils;
 
   namespace {
     auto L = Logging::GetCategoryWithType<LiveSessionDataProvider>();
@@ -129,8 +129,8 @@ namespace IRacingTools::Shared {
 
           auto sessionLap = sessionLapVal.value_or(-1);
           if (sessionLap >= 0) {
-            std::int64_t timeMillis = SDK::Utils::SessionTimeToMillis(sessionTimeVal.value());
-            std::int64_t timeRemainMillis = SDK::Utils::SessionTimeToMillis(sessionTimeRemainVal.value());
+            std::int64_t timeMillis = IRacingSDK::Utils::SessionTimeToMillis(sessionTimeVal.value());
+            std::int64_t timeRemainMillis = IRacingSDK::Utils::SessionTimeToMillis(sessionTimeRemainVal.value());
 
             timing->set_session_sub_lap(sessionLap);
             timing->set_session_sub_lap_remaining(sessionLapsRemainVal.value());
@@ -206,11 +206,11 @@ namespace IRacingTools::Shared {
     return &dataAccess_;
   }
 
-  SDK::ClientProvider *LiveSessionDataProvider::clientProvider() {
+  IRacingSDK::ClientProvider *LiveSessionDataProvider::clientProvider() {
     return LiveClient::Get().getProvider().get();
   }
 
-  const SDK::VarHeaders &LiveSessionDataProvider::getDataVariableHeaders() {
+  const IRacingSDK::VarHeaders &LiveSessionDataProvider::getDataVariableHeaders() {
     return LiveClient::GetInstance().getVarHeaders();
   }
 
@@ -306,7 +306,7 @@ namespace IRacingTools::Shared {
     return std::string{res.value()};
   }
 
-  std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> LiveSessionDataProvider::sessionInfo() {
+  std::shared_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> LiveSessionDataProvider::sessionInfo() {
     auto weakInfo = LiveClient::GetInstance().getSessionInfo();
 
     return weakInfo.lock();

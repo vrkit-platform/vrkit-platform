@@ -4,7 +4,7 @@
 #include <mutex>
 #include <optional>
 
-#include <IRacingTools/SDK/ErrorTypes.h>
+#include <IRacingSDK/ErrorTypes.h>
 
 namespace IRacingTools::Shared::Utils {
   template <typename T, std::size_t Size>

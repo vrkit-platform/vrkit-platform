@@ -8,10 +8,10 @@
 #include <cstdio>
 #include <ctime>
 
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
-#include <IRacingTools/SDK/LiveConnection.h>
-#include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingSDK/DiskClient.h>
+#include <IRacingSDK/DiskClientDataFrameProcessor.h>
+#include <IRacingSDK/LiveConnection.h>
+#include <IRacingSDK/VarHolder.h>
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
@@ -19,7 +19,7 @@
 #include "LiveDataReplayArgCommand.h"
 
 #include <IRacingTools/Models/LapTrajectory.pb.h>
-#include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
@@ -30,8 +30,8 @@
 //#include <IRacingTools/Shared/Services/TrackMapService.h>
 
 namespace IRacingTools::App::Commands {
-  using namespace IRacingTools::SDK;
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK;
+  using namespace IRacingSDK::Utils;
   using namespace IRacingTools::Shared;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::Shared::Services;
@@ -188,7 +188,7 @@ namespace IRacingTools::App::Commands {
 
           VRK_LOG_AND_FATAL_IF(!currentSessionTimeVal, "No session time");
           auto currentSessionTime = currentSessionTimeVal.value();
-          auto currentSessionTimeMillis = SDK::Utils::SessionTimeToMillis(currentSessionTime);
+          auto currentSessionTimeMillis = IRacingSDK::Utils::SessionTimeToMillis(currentSessionTime);
 
 
           if (!nextDataFrame()) {
@@ -201,7 +201,7 @@ namespace IRacingTools::App::Commands {
           auto nextSessionTimeVal = diskClient.getVarDouble(KnownVarName::SessionTime);
           VRK_LOG_AND_FATAL_IF(!nextSessionTimeVal, "No next session time");
           auto nextSessionTime = nextSessionTimeVal.value();
-          auto nextSessionTimeMillis = SDK::Utils::SessionTimeToMillis(nextSessionTime);
+          auto nextSessionTimeMillis = IRacingSDK::Utils::SessionTimeToMillis(nextSessionTime);
 
           auto dataFrameIntervalMillis = std::chrono::milliseconds(nextSessionTimeMillis - currentSessionTimeMillis);
           auto nextTimeMillis = currentTimeMillis + dataFrameIntervalMillis;

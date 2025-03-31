@@ -1,6 +1,6 @@
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 
-#include <IRacingTools/SDK/SessionInfo/ModelParser.h>
+#include <IRacingSDK/SessionInfo/ModelParser.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Common/UUIDHelpers.h>
 

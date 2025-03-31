@@ -1,13 +1,13 @@
 
 #include <chrono>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <regex>
 
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/Services/RPCServerService.h>
 
 namespace IRacingTools::Shared::Services {
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK::Utils;
   using namespace IRacingTools::Shared::Logging;
 
   namespace {
@@ -36,7 +36,7 @@ namespace IRacingTools::Shared::Services {
   }
 
 
-  std::expected<bool, SDK::GeneralError> RPCServerService::init() {
+  std::expected<bool, IRacingSDK::GeneralError> RPCServerService::init() {
     std::scoped_lock lock(stateMutex_);
 
     return true;
@@ -61,7 +61,7 @@ namespace IRacingTools::Shared::Services {
     return true;
   }
 
-  std::optional<SDK::GeneralError> RPCServerService::destroy() {
+  std::optional<IRacingSDK::GeneralError> RPCServerService::destroy() {
     std::scoped_lock lock(stateMutex_);
     if (state() >= State::Destroying)
       return std::nullopt;

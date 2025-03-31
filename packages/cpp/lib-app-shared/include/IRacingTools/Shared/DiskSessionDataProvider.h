@@ -8,7 +8,7 @@
 
 #include <memory>
 #include <thread>
-#include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingSDK/DiskClient.h>
 #include <IRacingTools/Shared/SessionDataProvider.h>
 
 namespace IRacingTools::Shared {
@@ -49,7 +49,7 @@ namespace IRacingTools::Shared {
      */
     DiskSessionDataProvider(
       const std::filesystem::path& file,
-      SDK::ClientId clientId,
+      IRacingSDK::ClientId clientId,
       const std::optional<Options>& options = std::nullopt
     );
 
@@ -62,7 +62,7 @@ namespace IRacingTools::Shared {
 
     virtual SessionDataAccess* dataAccessPtr() override;
 
-    virtual SDK::ClientProvider* clientProvider() override;
+    virtual IRacingSDK::ClientProvider* clientProvider() override;
 
     virtual bool isLive() const override;
 
@@ -111,13 +111,13 @@ namespace IRacingTools::Shared {
     virtual std::optional<std::int32_t> sessionTickCount() override;
     virtual std::optional<std::int32_t> sessionTicks() override;
 
-    virtual std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
+    virtual std::shared_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
 
     virtual std::string sessionInfoStr() override;
 
     virtual std::shared_ptr<Models::Session::SessionData> sessionData() override;
 
-    virtual const SDK::VarHeaders& getDataVariableHeaders() override;
+    virtual const IRacingSDK::VarHeaders& getDataVariableHeaders() override;
 
     const Options& options();
 
@@ -147,8 +147,8 @@ namespace IRacingTools::Shared {
 
     const Models::Session::SessionTiming*updateSessionTiming();
 
-    SDK::ClientId clientId_;
-    std::shared_ptr<SDK::DiskClient> diskClient_;
+    IRacingSDK::ClientId clientId_;
+    std::shared_ptr<IRacingSDK::DiskClient> diskClient_;
     std::filesystem::path file_;
 
     std::unique_ptr<SessionDataAccess> dataAccess_;

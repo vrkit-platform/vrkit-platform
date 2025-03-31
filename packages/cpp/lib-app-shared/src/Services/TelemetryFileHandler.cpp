@@ -1,6 +1,6 @@
-#include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
-#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
-#include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingSDK/DiskClientDataFrameProcessor.h>
+#include <IRacingSDK/Utils/CollectionHelpers.h>
+#include <IRacingSDK/VarHolder.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 #include <IRacingTools/Shared/FileSystemHelpers.h>
@@ -9,15 +9,15 @@
 
 #include <fstream>
 #include <iostream>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 
 #include <google/protobuf/util/json_util.h>
 
 namespace IRacingTools::Shared::Services {
-  using namespace IRacingTools::SDK;
+  using namespace IRacingSDK;
   using namespace IRacingTools::Shared::Logging;
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK::Utils;
 
   namespace {
     auto L = GetCategoryWithType<TelemetryFileHandler>();
@@ -27,12 +27,12 @@ namespace IRacingTools::Shared::Services {
   } // namespace
 
   TelemetryFileHandler::TelemetryFileHandler(const std::filesystem::path &file)
-      : client_(std::make_shared<SDK::DiskClient>(file, file.string())) {
+      : client_(std::make_shared<IRacingSDK::DiskClient>(file, file.string())) {
     L->info("Created with {}", file.string());
   }
 
   TelemetryFileHandler::TelemetryFileHandler(
-      const std::shared_ptr<SDK::DiskClient> &client)
+      const std::shared_ptr<IRacingSDK::DiskClient> &client)
       : client_(client) {
     L->info(
         "Created with disk client {}", client->getFilePath().value().string());
@@ -49,20 +49,20 @@ namespace IRacingTools::Shared::Services {
     auto provider = client->getProvider();
 
     VarHolder sessionTimeVar(
-        IRacingTools::SDK::KnownVarName::SessionTime, provider.get());
-    VarHolder lapVar(IRacingTools::SDK::KnownVarName::Lap, provider.get());
+        IRacingSDK::KnownVarName::SessionTime, provider.get());
+    VarHolder lapVar(IRacingSDK::KnownVarName::Lap, provider.get());
     VarHolder lapTimeCurrentVar(
-        IRacingTools::SDK::KnownVarName::LapCurrentLapTime, provider.get());
+        IRacingSDK::KnownVarName::LapCurrentLapTime, provider.get());
     VarHolder lapDistPctVar(
-        IRacingTools::SDK::KnownVarName::LapDistPct, provider.get());
+        IRacingSDK::KnownVarName::LapDistPct, provider.get());
     VarHolder lapDistVar(
-        IRacingTools::SDK::KnownVarName::LapDist, provider.get());
+        IRacingSDK::KnownVarName::LapDist, provider.get());
     VarHolder incidentCountVar(
-        IRacingTools::SDK::KnownVarName::PlayerCarMyIncidentCount,
+        IRacingSDK::KnownVarName::PlayerCarMyIncidentCount,
         provider.get());
-    VarHolder latVar(IRacingTools::SDK::KnownVarName::Lat, provider.get());
-    VarHolder lonVar(IRacingTools::SDK::KnownVarName::Lon, provider.get());
-    VarHolder altVar(IRacingTools::SDK::KnownVarName::Alt, provider.get());
+    VarHolder latVar(IRacingSDK::KnownVarName::Lat, provider.get());
+    VarHolder lonVar(IRacingSDK::KnownVarName::Lon, provider.get());
+    VarHolder altVar(IRacingSDK::KnownVarName::Alt, provider.get());
 
     std::vector<DataFrame> frames{client->getSampleCount()};
     auto addCurrentFrameData =
@@ -159,7 +159,7 @@ namespace IRacingTools::Shared::Services {
 
     if (laps.empty()) {
       return std::unexpected(
-          SDK::GeneralError(ErrorCode::General, "No lap data found"));
+          IRacingSDK::GeneralError(ErrorCode::General, "No lap data found"));
     }
 
     auto &firstLap = laps[0];
@@ -176,7 +176,7 @@ namespace IRacingTools::Shared::Services {
 
     auto lapCount = laps.size();
     if (lapCount < 3) {
-      return std::unexpected(SDK::GeneralError(
+      return std::unexpected(IRacingSDK::GeneralError(
           ErrorCode::General,
           "At least 3 laps must exist in a telemetry file to be valid"));
     }

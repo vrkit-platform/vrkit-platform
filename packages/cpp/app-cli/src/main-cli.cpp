@@ -1,12 +1,12 @@
 //
 // Created by jglanz on 1/4/2024.
 //
-#include <IRacingTools/SDK/ClientManager.h>
+#include <IRacingSDK/ClientManager.h>
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 #include <IRacingTools/Shared/System/DisplayInfo.h>
 
 #include <CLI/CLI.hpp>
-#include <IRacingTools/SDK/LogInstance.h>
+#include <IRacingSDK/LogInstance.h>
 #include <algorithm>
 
 #include "DashboardArgCommand.h"
@@ -22,8 +22,8 @@
 
 using namespace std::literals;
 
-using namespace IRacingTools::SDK::Utils;
-using namespace IRacingTools::SDK;
+using namespace IRacingSDK::Utils;
+using namespace IRacingSDK;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::App::Commands;
 

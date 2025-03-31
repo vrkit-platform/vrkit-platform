@@ -9,9 +9,9 @@
 #include <memory>
 #include <thread>
 
-#include <IRacingTools/SDK/Types.h>
-#include <IRacingTools/SDK/Utils/EventEmitter.h>
-#include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingSDK/Types.h>
+#include <IRacingSDK/Utils/EventEmitter.h>
+#include <IRacingSDK/VarHolder.h>
 
 
 namespace IRacingTools::Shared {
@@ -41,12 +41,12 @@ namespace IRacingTools::Shared {
   class SessionDataUpdatedInfoEvent : public SessionDataEvent {
   public:
     SessionDataUpdatedInfoEvent() = delete;
-    explicit SessionDataUpdatedInfoEvent(std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> newSessionInfo);
+    explicit SessionDataUpdatedInfoEvent(std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> newSessionInfo);
     virtual ~SessionDataUpdatedInfoEvent() = default;
 
-    std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo();
+    std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo();
   private:
-    std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo_{};    
+    std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo_{};
   };
   
   /**
@@ -59,10 +59,10 @@ namespace IRacingTools::Shared {
    * estimatedTime        float
    * position.overall     int
    * position.clazz       int
-   * driver               std::optional<SDK::SessionInfo::Driver>
+   * driver               std::optional<IRacingSDK::SessionInfo::Driver>
    */
   using SessionCarStateRecord =
-      std::tuple<int, int, int, float, float, int, int, std::optional<SDK::SessionInfo::Driver> &>;
+      std::tuple<int, int, int, float, float, int, int, std::optional<IRacingSDK::SessionInfo::Driver> &>;
 
   /**
    * @brief Data update event triggered on every new
@@ -84,7 +84,7 @@ namespace IRacingTools::Shared {
         int clazz{};
       } position{};
 
-      std::optional<SDK::SessionInfo::Driver> driver;
+      std::optional<IRacingSDK::SessionInfo::Driver> driver;
 
       SessionCarStateRecord toTuple();
     };
@@ -99,12 +99,12 @@ namespace IRacingTools::Shared {
 
     const std::vector<SessionCarState> &cars();
 
-    std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo();
+    std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo();
 
 
   private:
     SessionDataAccess *dataAccess_;
-    std::weak_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo_{};
+    std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo_{};
     std::vector<SessionCarState> cars_{};
     int sessionTimeMillis_{-1};
   };

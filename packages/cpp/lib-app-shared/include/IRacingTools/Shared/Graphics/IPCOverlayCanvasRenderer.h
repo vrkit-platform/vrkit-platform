@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include <IRacingTools/SDK/Utils/RunnableThread.h>
+#include <IRacingSDK/Utils/RunnableThread.h>
 #include <IRacingTools/Shared/SHM/SHM.h>
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
@@ -139,7 +139,7 @@ namespace IRacingTools::Shared::Graphics {
 
   private:
 
-    void consumerRunnable(SDK::Utils::FnIndefiniteThread* t) {
+    void consumerRunnable(IRacingSDK::Utils::FnIndefiniteThread* t) {
       if (isDestroyed_) {
         t->stop();
         return;
@@ -156,7 +156,7 @@ namespace IRacingTools::Shared::Graphics {
 
     std::array<TextureResources, SHMSwapchainLength> ipcSwapchain_{};
 
-    SDK::Utils::FnIndefiniteThread consumerThread_;
+    IRacingSDK::Utils::FnIndefiniteThread consumerThread_;
     ProducerPtr producer_;
     std::shared_ptr<DXResources> dxr_;
     std::shared_ptr<SHM::Writer> writer_;

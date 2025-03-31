@@ -1,5 +1,5 @@
 
-#include <IRacingTools/SDK/LogInstance.h>
+#include <IRacingSDK/LogInstance.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/Utils/TypeIdHelpers.h>
@@ -42,7 +42,7 @@ namespace IRacingTools::Shared::Logging {
       gConsoleSink = std::make_shared<spdlog::sinks::wincolor_stdout_sink_mt>();
     }
 
-    SDK::LogInstance::Get()
+    IRacingSDK::LogInstance::Get()
       .setDefaultLogger(getCategory(std::string{LogCategoryDefaultMap[LogCategoryDefault::IRSDK]}));
   }
 
@@ -63,7 +63,7 @@ namespace IRacingTools::Shared::Logging {
       }
     }
 
-    auto res = Utils::GetPrettyTypeId(name, {"IRacingTools::","VRK::","VRKit::","VRRK::","VRRKit::"});
+    auto res = Utils::GetPrettyTypeId(name, {"IRacingSDK::","IRacingTools::","VRK::","VRKit::","VRRK::","VRRKit::"});
     if (res) {
       auto &typeId = res.value();
       prettyName = typeId.fullname;

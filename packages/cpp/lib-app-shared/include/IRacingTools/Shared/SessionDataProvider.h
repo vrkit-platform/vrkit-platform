@@ -8,7 +8,7 @@
 
 #include <IRacingTools/Models/Session/SessionState.pb.h>
 #include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
-#include <IRacingTools/SDK/Utils/EventEmitter.h>
+#include <IRacingSDK/Utils/EventEmitter.h>
 #include <IRacingTools/Shared/SessionDataEvent.h>
 
 
@@ -17,7 +17,7 @@ namespace IRacingTools::Shared {
    * @brief IRacing Data Service
    */
   //, std::shared_ptr<SessionDataEvent>
-  class SessionDataProvider : public SDK::Utils::EventEmitter<
+  class SessionDataProvider : public IRacingSDK::Utils::EventEmitter<
       Models::RPC::Events::SessionEventType, std::shared_ptr<Models::RPC::Events::SessionEventData>> {
   public:
 
@@ -31,7 +31,7 @@ namespace IRacingTools::Shared {
 
     virtual SessionDataAccess* dataAccessPtr() = 0;
 
-    virtual SDK::ClientProvider* clientProvider() = 0;
+    virtual IRacingSDK::ClientProvider* clientProvider() = 0;
 
     virtual bool isAvailable() = 0;
 
@@ -70,10 +70,10 @@ namespace IRacingTools::Shared {
 
     virtual std::string sessionInfoStr() = 0;
 
-    virtual std::shared_ptr<SDK::SessionInfo::SessionInfoMessage> sessionInfo() = 0;
+    virtual std::shared_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo() = 0;
 
-    virtual const SDK::VarHeaders& getDataVariableHeaders() = 0;
+    virtual const IRacingSDK::VarHeaders& getDataVariableHeaders() = 0;
 
-    //virtual std::vector<SDK::VarData*> getDataVariableHeaders() = 0;
+    //virtual std::vector<IRacingSDK::VarData*> getDataVariableHeaders() = 0;
   };
 } // namespace IRacingTools::Shared

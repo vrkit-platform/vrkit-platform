@@ -20,8 +20,7 @@
 
 #include <IRacingTools/Shared/Graphics/DX113D.h>
 #include <IRacingTools/Shared/Macros.h>
-#include <IRacingTools/SDK/Utils/ScopeHelpers.h>
-
+#include <IRacingSDK/Utils/ScopeHelpers.h>
 
 namespace IRacingTools::Shared::Graphics {
 

@@ -22,7 +22,7 @@
 
 #include "SharedAppLibPCH.h"
 #include <IRacingTools/Models/TrackMap.pb.h>
-#include <IRacingTools/SDK/ErrorTypes.h>
+#include <IRacingSDK/ErrorTypes.h>
 #include <array>
 #include <cmath>
 #include <compare>
@@ -434,11 +434,11 @@ namespace IRacingTools::Shared {
   }
 
   template<typename T>
-  constexpr std::expected<T, SDK::NotFoundError>
+  constexpr std::expected<T, IRacingSDK::NotFoundError>
   Closest(const std::vector<T> &vec, T value) {
     auto const it = std::lower_bound(vec.begin(), vec.end(), value);
     if (it == vec.end()) {
-      return SDK::MakeUnexpected<SDK::NotFoundError>(
+      return IRacingSDK::MakeUnexpected<IRacingSDK::NotFoundError>(
           "Unable to find lower bound for value ({})", value);
     }
 
@@ -446,7 +446,7 @@ namespace IRacingTools::Shared {
   }
 
   template<typename K, typename V>
-  constexpr std::expected<K, SDK::NotFoundError>
+  constexpr std::expected<K, IRacingSDK::NotFoundError>
   ClosestKey(const std::map<K, V> &map, K value) {
     auto const it = std::lower_bound(
         map.begin(),
@@ -456,7 +456,7 @@ namespace IRacingTools::Shared {
           return entry.first < currentValue;
         });
     if (it == map.end()) {
-      return SDK::MakeUnexpected<SDK::NotFoundError>(
+      return IRacingSDK::MakeUnexpected<IRacingSDK::NotFoundError>(
           "Unable to find lower bound for value ({})", value);
     }
 
@@ -464,7 +464,7 @@ namespace IRacingTools::Shared {
   }
 
   template<typename K, typename V>
-  constexpr std::expected<V, SDK::NotFoundError>
+  constexpr std::expected<V, IRacingSDK::NotFoundError>
   ClosestValue(const std::map<K, V> &map, K value) {
     auto const it = std::lower_bound(
         map.begin(),
@@ -474,7 +474,7 @@ namespace IRacingTools::Shared {
           return entry.first < currentValue;
         });
     if (it == map.end()) {
-      return SDK::MakeUnexpected<SDK::NotFoundError>(
+      return IRacingSDK::MakeUnexpected<IRacingSDK::NotFoundError>(
           "Unable to find lower bound for value ({})", value);
     }
 

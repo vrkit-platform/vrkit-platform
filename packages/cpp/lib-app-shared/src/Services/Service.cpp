@@ -10,7 +10,7 @@ namespace IRacingTools::Shared::Services {
     assert(state() != State::Running);
   }
 
-  std::expected<bool, SDK::GeneralError> Service::init() {
+  std::expected<bool, IRacingSDK::GeneralError> Service::init() {
     std::scoped_lock lock(stateMutex_);
     assert(state() == State::Created);
     spdlog::debug("Service::init default");
@@ -18,7 +18,7 @@ namespace IRacingTools::Shared::Services {
     return true;
   }
 
-  std::expected<bool, SDK::GeneralError> Service::start() {
+  std::expected<bool, IRacingSDK::GeneralError> Service::start() {
     std::scoped_lock lock(stateMutex_);
     spdlog::debug("Service::start default");
     setState(State::Running);
@@ -27,7 +27,7 @@ namespace IRacingTools::Shared::Services {
   }
 
 
-  std::optional<SDK::GeneralError> Service::destroy() {
+  std::optional<IRacingSDK::GeneralError> Service::destroy() {
     std::scoped_lock lock(stateMutex_);
     spdlog::debug("Service::destroy default");
     if (state() >= State::Destroyed)

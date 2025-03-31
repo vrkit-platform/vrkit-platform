@@ -5,26 +5,26 @@
 #pragma once
 #include <memory>
 
-#include <IRacingTools/SDK/Client.h>
-#include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingSDK/Client.h>
+#include <IRacingSDK/VarHolder.h>
 
 namespace IRacingTools::Shared {
-    class SessionDataAccess : public SDK::ClientProvider {
-        std::shared_ptr<SDK::ClientProvider> clientProvider_;
+    class SessionDataAccess : public IRacingSDK::ClientProvider {
+        std::shared_ptr<IRacingSDK::ClientProvider> clientProvider_;
 
         public:
             SessionDataAccess() = delete;
 
-            explicit SessionDataAccess(std::shared_ptr<SDK::ClientProvider> clientProvider) : clientProvider_(std::move(clientProvider)) {};
+            explicit SessionDataAccess(std::shared_ptr<IRacingSDK::ClientProvider> clientProvider) : clientProvider_(std::move(clientProvider)) {};
 
             SessionDataAccess(const SessionDataAccess&) = delete;
 
             SessionDataAccess(SessionDataAccess&&) = delete;
 
-        virtual std::shared_ptr<SDK::ClientProvider> getClientProvider();
-        virtual std::shared_ptr<SDK::Client> getClient() override;
+        virtual std::shared_ptr<IRacingSDK::ClientProvider> getClientProvider();
+        virtual std::shared_ptr<IRacingSDK::Client> getClient() override;
 
-#define DeclareVarHolder(Name) SDK::VarHolder Name {#Name, this}
+#define DeclareVarHolder(Name) IRacingSDK::VarHolder Name {#Name, this}
             DeclareVarHolder(PitsOpen); // (bool) True if pit stop is allowed, basically true if caution lights not out
             DeclareVarHolder(RaceLaps); // (int) Laps completed in race
             DeclareVarHolder(SessionFlags); // (int) FlagType, bitfield

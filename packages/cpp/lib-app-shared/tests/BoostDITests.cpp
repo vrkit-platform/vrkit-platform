@@ -1,7 +1,7 @@
 #include <fmt/core.h>
 #include <gtest/gtest.h>
 
-#include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
@@ -9,8 +9,8 @@
 //#include <IRacingTools/Shared/Services/TelemetryDataService.h>
 
 using namespace IRacingTools::Shared::Logging;
-using namespace IRacingTools::SDK;
-using namespace IRacingTools::SDK::Utils;
+using namespace IRacingSDK;
+using namespace IRacingSDK::Utils;
 using namespace IRacingTools::Shared;
 
 using namespace IRacingTools::Shared::Services;

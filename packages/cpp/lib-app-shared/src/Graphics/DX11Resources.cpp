@@ -9,8 +9,7 @@
 #include <IRacingTools/Shared/Graphics/DX11Resources.h>
 #include <IRacingTools/Shared/Macros.h>
 
-#include "IRacingTools/SDK/Utils/ScopeHelpers.h"
-#include "spdlog/spdlog.h"
+#include <IRacingSDK/Utils/ScopeHelpers.h>
 
 
 namespace IRacingTools::Shared::Graphics {

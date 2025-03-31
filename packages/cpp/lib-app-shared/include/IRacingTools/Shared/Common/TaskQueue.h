@@ -9,7 +9,7 @@
 #include <thread>
 #include <type_traits>
 #include <vector>
-#include <IRacingTools/SDK/Utils/ThreadHelpers.h>
+#include <IRacingSDK/Utils/ThreadHelpers.h>
 
 namespace IRacingTools::Shared::Common {
 
@@ -73,7 +73,7 @@ namespace IRacingTools::Shared::Common {
 
       for (auto i = 0; i < options_.threadCount.value(); i++) {
         threads_.emplace_back(&TaskQueue::runnable, this);
-        SDK::Utils::SetThreadName(&threads_.back(), std::format("TaskQueue-Thread-{}", i));
+        IRacingSDK::Utils::SetThreadName(&threads_.back(), std::format("TaskQueue-Thread-{}", i));
       }
     }
 

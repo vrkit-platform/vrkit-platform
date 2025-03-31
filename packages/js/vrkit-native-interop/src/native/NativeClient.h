@@ -8,7 +8,7 @@
 #include <IRacingTools/Models/rpc/Events/CommonEventTypes.pb.h>
 #include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
 
-#include <IRacingTools/SDK/Utils/Singleton.h>
+#include <IRacingSDK/Utils/Singleton.h>
 
 
 #include <IRacingTools/Shared/Services/TelemetryDataService.h>
@@ -22,8 +22,8 @@
 #include <napi.h>
 #include "NativeGlobal.h"
 using namespace IRacingTools::Shared::Logging;
-using namespace IRacingTools::SDK;
-using namespace IRacingTools::SDK::Utils;
+using namespace IRacingSDK;
+using namespace IRacingSDK::Utils;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::Models;
 

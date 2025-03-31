@@ -12,14 +12,14 @@ set(DEP_PACKAGES
   OpenXR
 #  reproc
 #  reproc++
-  cli
   protobuf
   effects11
   CLI11
   GTest
   yaml-cpp
   magic_enum
-  nlohmann_json)
+  nlohmann_json
+  irsdkcpp)
 foreach(depPkgName ${DEP_PACKAGES})
   find_package(${depPkgName} CONFIG REQUIRED)
 endforeach()
@@ -133,6 +133,6 @@ function(VRK_CONFIGURE_APP_LIBS TARGET)
 endfunction()
 
 function(VRK_CONFIGURE_TEST_LIBS TARGET)
-  target_link_libraries(${TARGET} PUBLIC ${ALL_APP_DEPS} ${DEP_GTEST_MAIN})
+  target_link_libraries(${TARGET} PRIVATE ${ALL_APP_DEPS} ${DEP_GTEST})
 #  target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
 endfunction()

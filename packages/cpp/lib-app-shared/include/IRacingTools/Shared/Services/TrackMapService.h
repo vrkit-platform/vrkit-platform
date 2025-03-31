@@ -12,7 +12,7 @@
 #include <IRacingTools/Models/TrackMap.pb.h>
 #include <IRacingTools/Models/TrackMapFile.pb.h>
 
-#include <IRacingTools/SDK/Utils/LUT.h>
+#include <IRacingSDK/Utils/LUT.h>
 
 #include <IRacingTools/Shared/Common/TaskQueue.h>
 #include <IRacingTools/Shared/FileWatcher.h>
@@ -102,10 +102,10 @@ namespace IRacingTools::Shared::Services {
      * @param tmFile
      * @return
      */
-    std::expected<const std::shared_ptr<TrackMapFile>, SDK::GeneralError>
+    std::expected<const std::shared_ptr<TrackMapFile>, IRacingSDK::GeneralError>
     set(const std::shared_ptr<TrackMapFile> &tmFile);
 
-    std::expected<const std::shared_ptr<TrackMapFile>, SDK::GeneralError>
+    std::expected<const std::shared_ptr<TrackMapFile>, IRacingSDK::GeneralError>
     set(const std::string &trackLayoutId,
         const std::shared_ptr<TrackMapFile> &tmFile);
 
@@ -117,17 +117,17 @@ namespace IRacingTools::Shared::Services {
     /**
      * @brief Initialize the service
      */
-    virtual std::expected<bool, SDK::GeneralError> init() override;
+    virtual std::expected<bool, IRacingSDK::GeneralError> init() override;
 
     /**
      * @brief Must set running == true in overridden implementation
      */
-    virtual std::expected<bool, SDK::GeneralError> start() override;
+    virtual std::expected<bool, IRacingSDK::GeneralError> start() override;
 
     /**
      * @brief Must set running == false in overridden implementation
      */
-    virtual std::optional<SDK::GeneralError> destroy() override;
+    virtual std::optional<IRacingSDK::GeneralError> destroy() override;
 
    //std::expected<std::shared_ptr<RPC::Messages::ListMessage>, GeneralError> rpcList(const std::shared_ptr<Models::RPC::Messages::ListMessage>& request, const std::shared_ptr<RPC::Envelope> & envelope);
 
@@ -137,15 +137,15 @@ namespace IRacingTools::Shared::Services {
 
     void reset(bool skipPrepare = false);
 
-    std::optional<SDK::GeneralError> clearTrackMapCache();
+    std::optional<IRacingSDK::GeneralError> clearTrackMapCache();
 
     fs::path getFilePath();
 
     std::vector<std::shared_ptr<TrackMapFile>> toFileList();
 
-    std::expected<std::shared_ptr<TrackMapService>, SDK::GeneralError> save();
+    std::expected<std::shared_ptr<TrackMapService>, IRacingSDK::GeneralError> save();
 
-    std::optional<SDK::GeneralError> load(bool reload = false);
+    std::optional<IRacingSDK::GeneralError> load(bool reload = false);
     bool hasPendingTasks();
     std::size_t pendingTaskCount();
 

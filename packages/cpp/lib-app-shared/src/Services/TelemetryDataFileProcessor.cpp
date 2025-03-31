@@ -2,13 +2,13 @@
 #include <chrono>
 #include <deque>
 #include <fstream>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include <google/protobuf/util/json_util.h>
 
-#include <IRacingTools/SDK/Utils/Base64.h>
-#include <IRacingTools/SDK/Utils/RunnableThread.h>
+#include <IRacingSDK/Utils/RunnableThread.h>
 
+#include <IRacingTools/Shared/Utils/Base64.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
@@ -17,13 +17,13 @@
 #include "TelemetryDataFileProcessor.h"
 
 namespace IRacingTools::Shared::Services {
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK::Utils;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::Shared::Services::Pipelines;
   namespace {
     auto L = GetCategoryWithName("TelemetryDataFileProcessor");
 
-    std::expected<std::shared_ptr<TelemetryDataFile>, SDK::GeneralError>
+    std::expected<std::shared_ptr<TelemetryDataFile>, IRacingSDK::GeneralError>
     CreateTelemetryDataFile(
         TelemetryDataService *service, const fs::path &file) {
       auto fileEncoded = Base64::encode(file.string());

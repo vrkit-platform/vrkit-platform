@@ -5,7 +5,7 @@
 #pragma once
 
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <IRacingTools/Shared/SHM/SHM.h>
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
@@ -16,11 +16,11 @@
 namespace IRacingTools::Shared::Graphics {
 
   template <typename... Args>
-  std::unexpected<SDK::GeneralError> createImageDataBufferError(fmt::format_string<Args...> fmt, Args&&... args) {
+  std::unexpected<IRacingSDK::GeneralError> createImageDataBufferError(fmt::format_string<Args...> fmt, Args&&... args) {
     static auto L = Logging::GetCategoryWithName("ImageDataBuffer");
     auto msg = fmt::format(fmt, std::forward<Args>(args)...);
     L->error(msg);
-    return std::unexpected(SDK::GeneralError{msg});
+    return std::unexpected(IRacingSDK::GeneralError{msg});
   }
 
 
@@ -40,7 +40,7 @@ namespace IRacingTools::Shared::Graphics {
    */
   template <ImageFormatChannels FormatChannels>
   class ImageDataBuffer : public std::enable_shared_from_this<ImageDataBuffer<FormatChannels>>,
-                          public SDK::Utils::Lockable {
+                          public IRacingSDK::Utils::Lockable {
 
 
 
@@ -195,7 +195,7 @@ namespace IRacingTools::Shared::Graphics {
     }
 
 
-    std::expected<std::uint32_t, SDK::GeneralError> produce(ProduceFn fn) {
+    std::expected<std::uint32_t, IRacingSDK::GeneralError> produce(ProduceFn fn) {
       std::scoped_lock lock(*this);
       if (!isValid()) {
         return createImageDataBufferError("Cannot write to buffer, it is not valid");
@@ -208,7 +208,7 @@ namespace IRacingTools::Shared::Graphics {
       return res;
     }
 
-    std::expected<std::uint32_t, SDK::GeneralError> produce(const Byte* src, std::uint32_t size) {
+    std::expected<std::uint32_t, IRacingSDK::GeneralError> produce(const Byte* src, std::uint32_t size) {
       return produce(
         [&](Byte* dst, std::uint32_t dstSize, ImageDataBuffer*) -> std::uint32_t {
           if (dstSize < size) {
@@ -222,7 +222,7 @@ namespace IRacingTools::Shared::Graphics {
       );
     }
 
-    std::expected<std::uint32_t, SDK::GeneralError> produce(const Buffer& buf) {
+    std::expected<std::uint32_t, IRacingSDK::GeneralError> produce(const Buffer& buf) {
       return produce(buf.data(), buf.size());
     }
 
@@ -230,7 +230,7 @@ namespace IRacingTools::Shared::Graphics {
       setStatus(Status::Destroyed);
     }
 
-    std::expected<std::uint32_t, SDK::GeneralError> consume(ConsumeFn fn) {
+    std::expected<std::uint32_t, IRacingSDK::GeneralError> consume(ConsumeFn fn) {
       std::scoped_lock lock(*this);
 
       if (!hasData()) {

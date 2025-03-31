@@ -2,7 +2,7 @@
 #include <fmt/core.h>
 #include <gtest/gtest.h>
 
-#include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Common/UUIDHelpers.h>
 
@@ -11,8 +11,8 @@
 #include <IRacingTools/Shared/Services/RPCServerService.h>
 
 using namespace IRacingTools::Shared::Logging;
-using namespace IRacingTools::SDK;
-using namespace IRacingTools::SDK::Utils;
+using namespace IRacingSDK;
+using namespace IRacingSDK::Utils;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::Models;
 

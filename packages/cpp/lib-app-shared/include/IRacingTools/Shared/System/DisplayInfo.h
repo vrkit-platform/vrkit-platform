@@ -9,7 +9,7 @@
 #include <optional>
 #include <string>
 #include <IRacingTools/Models/ScreenConfig.pb.h>
-#include <IRacingTools/SDK/ErrorTypes.h>
+#include <IRacingSDK/ErrorTypes.h>
 
 namespace IRacingTools::Shared::System {
     /**
@@ -89,7 +89,7 @@ namespace IRacingTools::Shared::System {
          * @return Returns an Expected object containing the generated ScreenInfo object if successful,
          *         or an Unexpected object containing an error message if unsuccessful.
          */
-        static SDK::Expected<DisplayScreenInfo> generate();
+        static IRacingSDK::Expected<DisplayScreenInfo> generate();
     };
 
     struct VRScreenInfo {
@@ -114,7 +114,7 @@ namespace IRacingTools::Shared::System {
          * @return Returns an Expected object containing the generated ScreenInfo object if successful,
          *         or an Unexpected object containing an error message if unsuccessful.
          */
-        static SDK::Expected<VRScreenInfo> generate();
+        static IRacingSDK::Expected<VRScreenInfo> generate();
     };
 
     template <std::derived_from<std::ostream> S>

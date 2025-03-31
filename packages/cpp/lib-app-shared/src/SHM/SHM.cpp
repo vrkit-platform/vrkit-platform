@@ -5,9 +5,9 @@
 
 #include <IRacingTools/Models/LapTrajectory.pb.h>
 #include <IRacingTools/Models/TrackMap.pb.h>
-#include <IRacingTools/SDK/Utils/LockHelpers.h>
-#include <IRacingTools/SDK/Utils/Tracing.h>
-#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
+#include <IRacingSDK/Utils/LockHelpers.h>
+#include <IRacingSDK/Utils/Tracing.h>
+#include <IRacingSDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
 #include <IRacingTools/Shared/SHM/SHM.h>
 
@@ -29,7 +29,7 @@ namespace IRacingTools::Shared::SHM {
   };
 
 
-  class Impl : public SDK::Utils::Lockable {
+  class Impl : public IRacingSDK::Utils::Lockable {
   protected:
 
     winrt::handle fileHandle_;
@@ -448,7 +448,7 @@ namespace IRacingTools::Shared::SHM {
   SHMReader::SHMReader() {
     // VRK_TraceLoggingScope("SHM::Reader::Reader()");
     const auto path = SHMPath();
-    L->info("Initializing SHM reader with path {}", SDK::Utils::ToUtf8(path));
+    L->info("Initializing SHM reader with path {}", IRacingSDK::Utils::ToUtf8(path));
 
     this->p = std::make_shared<Impl>();
     if (!p->isValid()) {

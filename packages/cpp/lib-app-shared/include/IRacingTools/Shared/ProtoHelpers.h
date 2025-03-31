@@ -6,12 +6,12 @@
 
 
 #include <google/protobuf/util/json_util.h>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include <IRacingTools/Models/FileInfo.pb.h>
-#include <IRacingTools/SDK/ErrorTypes.h>
-#include <IRacingTools/SDK/Utils/EventEmitter.h>
-#include <IRacingTools/SDK/Utils/FileHelpers.h>
+#include <IRacingSDK/ErrorTypes.h>
+#include <IRacingSDK/Utils/EventEmitter.h>
+#include <IRacingSDK/Utils/FileHelpers.h>
 
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
@@ -20,14 +20,14 @@
 #define VRK_PROTO_CMP(O1, O2, MEMBER) O1.MEMBER() == O2.MEMBER()
 
 namespace IRacingTools::Shared::Utils {
-  using namespace ::IRacingTools::SDK;
+  using namespace ::IRacingSDK;
   using FileInfoClock = std::chrono::system_clock;
-  std::expected<std::shared_ptr<Models::FileInfo>, SDK::GeneralError> GetFileInfo(const fs::path& path);
+  std::expected<std::shared_ptr<Models::FileInfo>, IRacingSDK::GeneralError> GetFileInfo(const fs::path& path);
 
   /**
    * @copydoc GetFileInfo
    */
-  std::expected<std::shared_ptr<Models::FileInfo>, SDK::GeneralError> GetFileInfo(const std::shared_ptr<Models::FileInfo>& fileInfo, std::optional<fs::path> path = std::nullopt);
+  std::expected<std::shared_ptr<Models::FileInfo>, IRacingSDK::GeneralError> GetFileInfo(const std::shared_ptr<Models::FileInfo>& fileInfo, std::optional<fs::path> path = std::nullopt);
   /**
    * @brief Populate an instance of `Models::FileInfo` based on the provided
    * path
@@ -36,7 +36,7 @@ namespace IRacingTools::Shared::Utils {
    * @param path
    * @return `FileInfo*` or `GeneralError`
    */
-  std::expected<Models::FileInfo*, SDK::GeneralError> GetFileInfo(Models::FileInfo* fileInfo, std::optional<fs::path> path = std::nullopt);
+  std::expected<Models::FileInfo*, IRacingSDK::GeneralError> GetFileInfo(Models::FileInfo* fileInfo, std::optional<fs::path> path = std::nullopt);
 
 
   bool FileInfoPathMatch(const Models::FileInfo* fileInfo1, const Models::FileInfo* fileInfo2);
@@ -49,16 +49,16 @@ namespace IRacingTools::Shared::Utils {
    * @param fileInfo shared pointer to `Models::FileInfo`
    * @return if an error occurs then its return, otherwise `std::nullopt`
    */
-  std::optional<SDK::GeneralError> UpdateFileInfoTimestamps(const std::shared_ptr<Models::FileInfo>& fileInfo);
+  std::optional<IRacingSDK::GeneralError> UpdateFileInfoTimestamps(const std::shared_ptr<Models::FileInfo>& fileInfo);
 
   /**
    * @copydoc UpdateFileInfoTimestamps(const std::shared_ptr<Models::FileInfo>&)
    */
-  std::optional<SDK::GeneralError> UpdateFileInfoTimestamps(Models::FileInfo * fileInfo);
+  std::optional<IRacingSDK::GeneralError> UpdateFileInfoTimestamps(Models::FileInfo * fileInfo);
 
   template<typename MessageClazz>
   std::optional<MessageClazz> ReadMessageFromFile(const std::filesystem::path &path) {
-    auto res = SDK::Utils::ReadFile(path);
+    auto res = IRacingSDK::Utils::ReadFile(path);
     if (!res.has_value()) {
       return std::nullopt;
     }
@@ -78,7 +78,7 @@ namespace IRacingTools::Shared::Utils {
     std::vector<uint8_t> msgData;
     msgData.resize(msg.ByteSizeLong());
     msg.SerializeToArray(msgData.data(), msgData.size());
-    auto res = SDK::Utils::WriteFile(path, msgData);
+    auto res = IRacingSDK::Utils::WriteFile(path, msgData);
     if (!res.has_value()) {
       return false;
     }
@@ -103,8 +103,8 @@ namespace IRacingTools::Shared::Utils {
      * @brief Event emitters
      */
     struct {
-      SDK::Utils::EventEmitter<std::vector<std::shared_ptr<MessageClazz>> &> onRead{};
-      SDK::Utils::EventEmitter<const std::vector<std::shared_ptr<MessageClazz>> &> onWrite{};
+      IRacingSDK::Utils::EventEmitter<std::vector<std::shared_ptr<MessageClazz>> &> onRead{};
+      IRacingSDK::Utils::EventEmitter<const std::vector<std::shared_ptr<MessageClazz>> &> onWrite{};
     } events{};
 
     virtual fs::path file() {
@@ -124,10 +124,10 @@ namespace IRacingTools::Shared::Utils {
       L->info("Loading messages from ({}), exists={}", file_.string(), fileExists);
 
       if (!fileExists)
-        return std::unexpected(SDK::GeneralError(ErrorCode::NotFound, "File not found"));
+        return std::unexpected(IRacingSDK::GeneralError(ErrorCode::NotFound, "File not found"));
 
       std::vector<std::shared_ptr<MessageClazz>> msgs;
-      auto jsonLinesRes = SDK::Utils::ReadTextFile(file_);
+      auto jsonLinesRes = IRacingSDK::Utils::ReadTextFile(file_);
       assert(jsonLinesRes.has_value());
 
       std::istringstream jsonLinesStream(jsonLinesRes.value());
@@ -185,7 +185,7 @@ namespace IRacingTools::Shared::Utils {
         data << msgStr << "\n";
       }
 
-      auto writeRes = SDK::Utils::WriteTextFile(file_, data.str());
+      auto writeRes = IRacingSDK::Utils::WriteTextFile(file_, data.str());
       if (!writeRes) {
         return std::unexpected(
             GeneralError(ErrorCode::General, fmt::format("Failed to write error: {}", writeRes.error().what())));

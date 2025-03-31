@@ -3,11 +3,11 @@
 #include <format>
 #include <mutex>
 
-#include <IRacingTools/SDK/Utils/UnicodeHelpers.h>
+#include <IRacingSDK/Utils/UnicodeHelpers.h>
 #include <IRacingTools/Shared/Macros.h>
 
 namespace IRacingTools::Shared {
-    using namespace IRacingTools::SDK::Utils;
+    using namespace IRacingSDK::Utils;
 
     FileSystem::FileWatcher::FileWatcher(std::wstring path, UnderpinningRegex pattern, Callback callback, bool autostart): path_(fs::absolute(path)),
         pattern_(pattern),

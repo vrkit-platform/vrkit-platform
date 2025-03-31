@@ -9,15 +9,15 @@
 #include <cstdio>
 #include <ctime>
 
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
-#include <IRacingTools/SDK/LiveConnection.h>
-#include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingSDK/DiskClient.h>
+#include <IRacingSDK/DiskClientDataFrameProcessor.h>
+#include <IRacingSDK/LiveConnection.h>
+#include <IRacingSDK/VarHolder.h>
 
 #include "ProcessAllTelemetryArgCommand.h"
 
 #include <IRacingTools/Models/LapTrajectory.pb.h>
-#include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
@@ -28,8 +28,8 @@
 #include <IRacingTools/Shared/Services/TrackMapService.h>
 
 namespace IRacingTools::App::Commands {
-  using namespace IRacingTools::SDK;
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK;
+  using namespace IRacingSDK::Utils;
   using namespace IRacingTools::Shared;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::Shared::Services;

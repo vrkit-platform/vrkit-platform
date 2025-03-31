@@ -3,12 +3,12 @@
 // // #include <boost/di.hpp>
 //
 // #include <IRacingTools/Shared/SharedAppLibPCH.h>
-// #include <IRacingTools/SDK/Utils/Singleton.h>
+// #include <IRacingSDK/Utils/Singleton.h>
 //
 //
 // namespace IRacingTools::Shared::Services {
 //
-//     class DefaultObjectFactory : public SDK::Utils::Singleton<DefaultObjectFactory> {
+//     class DefaultObjectFactory : public IRacingSDK::Utils::Singleton<DefaultObjectFactory> {
 //
 //         public:
 //         // static constexpr std::initializer_list Bindings = {

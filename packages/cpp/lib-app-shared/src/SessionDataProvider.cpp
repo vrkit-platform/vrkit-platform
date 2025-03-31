@@ -8,7 +8,7 @@
 
 namespace IRacingTools::Shared {
   using namespace std::chrono_literals;
-  using namespace IRacingTools::SDK;
+  using namespace IRacingSDK;
 
 
   bool SessionDataProvider::seek(std::size_t sampleIndex) {

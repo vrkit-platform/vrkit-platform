@@ -1,9 +1,8 @@
 
 #include <chrono>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
-#include <IRacingTools/SDK/Utils/Base64.h>
-#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
+#include <IRacingSDK/Utils/CollectionHelpers.h>
 
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 #include <IRacingTools/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
@@ -14,7 +13,7 @@
 #include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
 
 namespace IRacingTools::Shared::Services {
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK::Utils;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::Shared::Services::Pipelines;
   namespace {
@@ -31,7 +30,7 @@ namespace IRacingTools::Shared::Services {
   }
 
 
-  std::expected<bool, SDK::GeneralError> SessionManagerService::init() {
+  std::expected<bool, IRacingSDK::GeneralError> SessionManagerService::init() {
     std::scoped_lock lock(stateMutex_);
 
     return true;
@@ -52,7 +51,7 @@ namespace IRacingTools::Shared::Services {
     return true;
   }
 
-  std::optional<SDK::GeneralError> SessionManagerService::destroy() {
+  std::optional<IRacingSDK::GeneralError> SessionManagerService::destroy() {
     std::scoped_lock lock(stateMutex_);
     if (state() >= State::Destroying)
       return std::nullopt;

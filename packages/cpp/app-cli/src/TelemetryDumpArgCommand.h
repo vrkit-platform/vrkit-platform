@@ -12,8 +12,8 @@
 
 namespace IRacingTools::App::Commands {
     using namespace std::literals;
-    using namespace IRacingTools::SDK::Utils;
-    using namespace IRacingTools::SDK;
+    using namespace IRacingSDK::Utils;
+    using namespace IRacingSDK;
 
 
     class TelemetryDumpArgCommand : public ArgCommand {

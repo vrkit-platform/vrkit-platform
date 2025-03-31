@@ -21,10 +21,10 @@
 #include <cstdio>
 #include <ctime>
 
-#include <IRacingTools/SDK/LiveConnection.h>
-#include <IRacingTools/SDK/DiskClient.h>
-#include <IRacingTools/SDK/DiskClientDataFrameProcessor.h>
-#include <IRacingTools/SDK/VarHolder.h>
+#include <IRacingSDK/LiveConnection.h>
+#include <IRacingSDK/DiskClient.h>
+#include <IRacingSDK/DiskClientDataFrameProcessor.h>
+#include <IRacingSDK/VarHolder.h>
 
 #include "GenerateTrackmapArgCommand.h"
 
@@ -34,8 +34,8 @@
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
 
 namespace IRacingTools::App::Commands {
-    using namespace IRacingTools::SDK;
-    using namespace IRacingTools::SDK::Utils;
+    using namespace IRacingSDK;
+    using namespace IRacingSDK::Utils;
     using namespace IRacingTools::Shared;
     using namespace IRacingTools::Shared::Logging;    
     

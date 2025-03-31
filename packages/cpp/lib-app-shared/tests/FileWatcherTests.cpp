@@ -1,4 +1,5 @@
-#include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/Utils/FileHelpers.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/FileWatcher.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
@@ -7,8 +8,8 @@
 #include <gtest/gtest.h>
 
 using namespace IRacingTools::Shared::Logging;
-using namespace IRacingTools::SDK;
-using namespace IRacingTools::SDK::Utils;
+using namespace IRacingSDK;
+using namespace IRacingSDK::Utils;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::Shared::FileSystem;
 using namespace  std::chrono_literals;
@@ -52,7 +53,7 @@ TEST_F(FileWatcherTests, watch) {
     auto file1 = tmpPath / "test.dat";
     spdlog::info("FileUtilTests file1 ({})", file1.string());
 
-    auto res = Utils::WriteTextFile(file1, "test123");
+    auto res = IRacingSDK::Utils::WriteTextFile(file1, "test123");
     EXPECT_TRUE(res.has_value()) << "Failed to write file1";
 
     std::this_thread::sleep_for(1s);

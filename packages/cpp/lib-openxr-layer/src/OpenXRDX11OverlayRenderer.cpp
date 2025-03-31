@@ -1,14 +1,15 @@
 #define XR_USE_GRAPHICS_API_D3D11
 
+#include <IRacingSDK/Utils/Tracing.h>
 #include <IRacingTools/OpenXR/OpenXRDX11OverlayRenderer.h>
-#include <IRacingTools/SDK/Utils/Tracing.h>
 #include <IRacingTools/Shared/Graphics/DX113D.h>
+#include <IRacingTools/Shared/Tracing.h>
 
 #include <spdlog/spdlog.h>
 
 
 namespace IRacingTools::OpenXR::DX11 {
-    
+    using namespace IRacingTools::Shared;
     SwapchainBufferResources::SwapchainBufferResources(
       ID3D11Device* device,
       ID3D11Texture2D* texture,
@@ -37,7 +38,7 @@ namespace IRacingTools::OpenXR::DX11 {
       const SHM::Snapshot& snapshot,
       const std::span<SHM::LayerSprite>& layers,
       RenderMode renderMode) {
-        VRK_TraceLoggingScope("D3D11::OpenXRDX11Renderer::RenderLayers()"); // NOLINT(*-pro-type-member-init)
+//        VRK_TraceLoggingScope("D3D11::OpenXRDX11Renderer::RenderLayers()"); // NOLINT(*-pro-type-member-init)
 
         auto source
           = snapshot.getTexture<SHM::DX11::Texture>()->getD3D11ShaderResourceView();

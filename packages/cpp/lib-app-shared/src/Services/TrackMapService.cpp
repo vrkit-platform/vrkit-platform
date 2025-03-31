@@ -1,15 +1,14 @@
-#include <IRacingTools/SDK/DiskClient.h>
+#include <IRacingSDK/DiskClient.h>
 #include <chrono>
 #include <fstream>
 #include <functional>
 #include <iostream>
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include <google/protobuf/util/json_util.h>
 
-#include <IRacingTools/SDK/Utils/Base64.h>
-#include <IRacingTools/SDK/Utils/CollectionHelpers.h>
-#include <IRacingTools/SDK/Utils/RunnableThread.h>
+#include <IRacingSDK/Utils/CollectionHelpers.h>
+#include <IRacingSDK/Utils/RunnableThread.h>
 
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/FileSystemHelpers.h>
@@ -26,7 +25,7 @@
 // #include <IRacingTools/Shared/Services/RPCServerService.h>
 
 namespace IRacingTools::Shared::Services {
-  using namespace IRacingTools::SDK::Utils;
+  using namespace IRacingSDK::Utils;
   using namespace IRacingTools::Shared::Logging;
   using namespace IRacingTools::Shared::Services::Pipelines;
   using namespace IRacingTools::Shared::Utils;
@@ -124,7 +123,7 @@ namespace IRacingTools::Shared::Services {
     reset();
   }
 
-  std::expected<bool, SDK::GeneralError> TrackMapService::init() {
+  std::expected<bool, IRacingSDK::GeneralError> TrackMapService::init() {
     auto onReadHandler =
         [&](
         const std::vector<
@@ -180,7 +179,7 @@ namespace IRacingTools::Shared::Services {
     return true;
   }
 
-  std::expected<bool, SDK::GeneralError> TrackMapService::start() {
+  std::expected<bool, IRacingSDK::GeneralError> TrackMapService::start() {
     std::scoped_lock lock(stateMutex_);
 
     if (state() >= State::Starting)
@@ -195,7 +194,7 @@ namespace IRacingTools::Shared::Services {
     return true;
   }
 
-  std::optional<SDK::GeneralError> TrackMapService::destroy() {
+  std::optional<IRacingSDK::GeneralError> TrackMapService::destroy() {
     std::scoped_lock lock(stateMutex_);
     if (state() >= State::Destroying)
       return std::nullopt;
@@ -231,9 +230,9 @@ namespace IRacingTools::Shared::Services {
   /**
    * @brief Remove underlying data file & clear the map
    *
-   * @return std::optional<SDK::GeneralError>
+   * @return std::optional<IRacingSDK::GeneralError>
    */
-  std::optional<SDK::GeneralError> TrackMapService::clearTrackMapCache() {
+  std::optional<IRacingSDK::GeneralError> TrackMapService::clearTrackMapCache() {
     dataFiles_.clear();
 
     return std::nullopt;
@@ -304,12 +303,12 @@ namespace IRacingTools::Shared::Services {
     return files_[trackLayoutId];
   }
 
-  std::expected<const std::shared_ptr<TrackMapFile>, SDK::GeneralError>
+  std::expected<const std::shared_ptr<TrackMapFile>, IRacingSDK::GeneralError>
   TrackMapService::set(const std::shared_ptr<TrackMapFile> &tmFile) {
     return set(tmFile->track_layout_metadata().id(), tmFile);
   }
 
-  std::expected<const std::shared_ptr<TrackMapFile>, SDK::GeneralError>
+  std::expected<const std::shared_ptr<TrackMapFile>, IRacingSDK::GeneralError>
   TrackMapService::set(
       const std::string &trackLayoutId,
       const std::shared_ptr<TrackMapFile> &tmFile) {
@@ -324,7 +323,7 @@ namespace IRacingTools::Shared::Services {
       newFiles[trackLayoutId] = tmFile;
 
       // WRITE CHANGES TO DISK
-      auto res = fileHandler_->write(SDK::Utils::ValuesOf(newFiles));
+      auto res = fileHandler_->write(IRacingSDK::Utils::ValuesOf(newFiles));
 
       // CHECK ERROR
       if (!res.has_value()) {
@@ -340,14 +339,14 @@ namespace IRacingTools::Shared::Services {
     return tmFile;
   }
 
-  std::optional<SDK::GeneralError>
+  std::optional<IRacingSDK::GeneralError>
   TrackMapService::load(bool reload) {
     std::scoped_lock lock(stateMutex_);
     if (!reload && !files_.empty())
       return std::nullopt;
 
     auto res = fileHandler_->read();
-    if (!res && res.error().code() != SDK::ErrorCode::NotFound) {
+    if (!res && res.error().code() != IRacingSDK::ErrorCode::NotFound) {
       return res.error();
     }
 
@@ -362,14 +361,14 @@ namespace IRacingTools::Shared::Services {
     return dataFileTaskQueue_->pendingTaskCount();
   }
 
-  std::expected<std::shared_ptr<TrackMapService>, SDK::GeneralError>
+  std::expected<std::shared_ptr<TrackMapService>, IRacingSDK::GeneralError>
   TrackMapService::save() {
 
     auto res = fileHandler_->write(toFileList());
 
     if (!res) {
       return std::unexpected(
-          SDK::GeneralError(SDK::ErrorCode::General, "Unknown"));
+          IRacingSDK::GeneralError(IRacingSDK::ErrorCode::General, "Unknown"));
     }
 
     return shared_from_this();
@@ -378,7 +377,7 @@ namespace IRacingTools::Shared::Services {
   std::vector<std::shared_ptr<TrackMapFile>> TrackMapService::toFileList() {
     std::scoped_lock lock(stateMutex_);
 
-    return SDK::Utils::ValuesOf(files_);
+    return IRacingSDK::Utils::ValuesOf(files_);
   }
 
 } // namespace IRacingTools::Shared::Services

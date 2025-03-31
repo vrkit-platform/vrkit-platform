@@ -4,10 +4,24 @@
 #include <optional>
 #include <regex>
 
-#include <IRacingTools/SDK/Utils/ConsoleHelpers.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
+#include <boost/type_index.hpp>
 
 namespace IRacingTools::Shared::Utils {
-  using namespace SDK::Utils;
+  using namespace IRacingSDK::Utils;
+
+
+  template<typename T>
+  struct PrettyType {
+      std::string name() {
+         auto& info = boost::typeindex::type_id_with_cvr<T>().type_info();
+         auto id = boost::typeindex::type_id_with_cvr<T>();
+         std::string prettyName = id.pretty_name();
+         std::string name = id.name();
+         return name;
+       };
+     };
+
 
   constexpr auto OmitTemplateDefault = true;
 

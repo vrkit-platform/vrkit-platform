@@ -18,6 +18,8 @@ if(POLICY CMP0091)
   cmake_policy(SET CMP0091 NEW)
 endif()
 
+OPTION(VRKIT_IRSDKCPP_LOCAL "Use local workspace folder IRSDKCPP" OFF)
+
 # Subprojects & Targets
 set(sdkTarget irsdkcpp::irsdkcpp)
 set(sdkTargetStatic ${sdkTarget}_static)
@@ -71,7 +73,7 @@ add_compile_definitions(SPDLOG_WCHAR_TO_UTF8_SUPPORT SPDLOG_WCHAR_SUPPORT SPDLOG
 include(cmake/system.cmake)
 include(cmake/embed_resource.cmake)
 include(cmake/targets.cmake)
-include(cmake/fs.cmake)
+include(cmake/fs.cmake NO_POLICY_SCOPE)
 include(cmake/dependencies.cmake NO_POLICY_SCOPE)
 include(cmake/example_target.cmake)
 include(cmake/hybrid_crt.cmake NO_POLICY_SCOPE)

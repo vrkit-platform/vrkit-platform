@@ -18,7 +18,7 @@
 #include "ServiceDaemonArgCommand.h"
 #include "SessionRecordArgCommand.h"
 #include "TelemetryDumpArgCommand.h"
-
+#include "NamedPipeServerArgCommand.h"
 
 using namespace std::literals;
 
@@ -27,7 +27,8 @@ using namespace IRacingSDK;
 using namespace IRacingTools::Shared;
 using namespace IRacingTools::App::Commands;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   // LogInstance::setDefaultLogger(LogInstance::Get())
   System::DisplayInfoSetup();
   System::GetAllDisplayInfo();
@@ -42,7 +43,17 @@ int main(int argc, char **argv) {
   app.set_version_flag("--version", appVersion);
 
   auto cmds =
-    ArgCommand::build<LiveDataReplayArgCommand, TelemetryDumpArgCommand, ProcessAllTelemetryArgCommand, DashboardArgCommand, GenerateTrackmapArgCommand, SessionRecordArgCommand, SHMFeederArgCommand, SHMViewerArgCommand, ServiceDaemonArgCommand>(&app);
+      ArgCommand::build<
+          NamedPipeServerArgCommand,
+          LiveDataReplayArgCommand,
+          TelemetryDumpArgCommand,
+          ProcessAllTelemetryArgCommand,
+          DashboardArgCommand,
+          GenerateTrackmapArgCommand,
+          SessionRecordArgCommand,
+          SHMFeederArgCommand,
+          SHMViewerArgCommand,
+          ServiceDaemonArgCommand>(&app);
 
   CLI11_PARSE(app, argc, argv);
 

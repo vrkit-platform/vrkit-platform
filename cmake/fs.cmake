@@ -1,3 +1,5 @@
+file(REAL_PATH "${CMAKE_CURRENT_LIST_DIR}/../.." workspaceRoot)
+SET(irsdkcppPath "${workspaceRoot}/irsdk++")
 
 macro(LIST_SUBDIRS result parentDir)
   file(GLOB childDirs RELATIVE ${parentDir} ${parentDir}/*)

@@ -19,10 +19,27 @@ set(DEP_PACKAGES
   yaml-cpp
   magic_enum
   nlohmann_json
-  irsdkcpp)
+  )
+
 foreach(depPkgName ${DEP_PACKAGES})
   find_package(${depPkgName} CONFIG REQUIRED)
 endforeach()
+
+IF(VRKIT_IRSDKCPP_LOCAL AND EXISTS "${irsdkcppPath}")
+  MESSAGE(NOTICE "IRSDKCPP ROOT ${irsdkcppPath} FOUND")
+
+  ADD_SUBDIRECTORY("${irsdkcppPath}" "${CMAKE_BINARY_DIR}/external/irsdkcpp")
+#  include(ExternalProject)
+#  ExternalProject_Add(
+#    irsdkcpp
+#    SOURCE_DIR "${irsdkcppPath}"
+#    CMAKE_ARGS
+#  )
+#  find_package(irsdkcpp REQUIRED)
+ELSE()
+  MESSAGE(NOTICE "IRSDKCPP ROOT ${irsdkcppPath} NOT FOUND")
+  find_package(irsdkcpp CONFIG REQUIRED)
+ENDIF()
 
 
 

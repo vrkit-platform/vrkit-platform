@@ -3,8 +3,8 @@ export {Shutdown, IsNativeOverlaySupported, GetNativeExports} from "./NativeBind
 export * from "./NativeSessionPlayer"
 export * from "./SessionPlayer"
 
-export * from "./NativeClient"
-export * from "./Client"
+// export * from "./NativeClient"
+// export * from "./Client"
 
 export * from "./NativeOverlayManager"
 

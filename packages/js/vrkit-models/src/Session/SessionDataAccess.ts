@@ -41,7 +41,7 @@ export class SessionDataAccess<VarNames extends string> {
   
   static readonly ErrorValues: {[K in SessionDataAccessValueKind]: SessionDataAccessValueMappedType[K]} = {
     Number: -2,
-    Bool: null
+    Bool: false
   }
   
   static readonly DefaultValues: {[K in SessionDataAccessValueKind]: SessionDataAccessValueMappedType[K]} = {

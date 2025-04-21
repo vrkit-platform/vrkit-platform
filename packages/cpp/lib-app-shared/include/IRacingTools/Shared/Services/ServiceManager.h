@@ -27,6 +27,9 @@ namespace IRacingTools::Shared::Services {
     using ServiceTypesTuple = std::tuple<ServiceTypes...>;
     static constexpr std::size_t ServiceCount = std::tuple_size_v<ServiceTypesTuple>;
 
+      struct {
+        EventEmitter<State, State> onStateChange{};
+      } events{};
 
     /**
      * @brief Initialize the service
@@ -147,17 +150,19 @@ namespace IRacingTools::Shared::Services {
      * @return State - previous/old state
      */
     State setState(State newState) {
-      bool changed;
       State oldState;
       {
         std::scoped_lock lock(stateMutex_);
         oldState = state_.exchange(newState);
-        changed = oldState != newState;
+        bool changed = oldState != newState;
         ServiceStateTransitionCheck(newState, oldState);
 
         if (changed) {
-          std::scoped_lock changeLock(stateChangeMutex_);
-          stateChangedCondition_.notify_all();
+          {
+            std::scoped_lock changeLock(stateChangeMutex_);
+            stateChangedCondition_.notify_all();
+          }
+          events.onStateChange.publish(newState, oldState);
         }
       }
       

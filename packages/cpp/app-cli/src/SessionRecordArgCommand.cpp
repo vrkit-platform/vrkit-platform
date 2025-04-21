@@ -222,8 +222,11 @@ namespace IRacingTools::App::Commands {
 
         printf("\n\nVariable Headers:\n\n");
         for (int i = 0; i < header->numVars; i++) {
-          const VarDataHeader *rec = LiveConnection::GetInstance().getVarHeaderEntry(i);
-          printf("%s, %s, %s\n", rec->name, rec->desc, rec->unit);
+          auto res = LiveConnection::GetInstance().getVarHeaderEntry(i);
+          if (!res)
+            continue;
+
+          printf("%s, %s, %s\n", res->name, res->desc, res->unit);
         }
         printf("\n\n");
       }
@@ -232,42 +235,44 @@ namespace IRacingTools::App::Commands {
     void logDataToDisplay(const DataHeader *header, const char *data) {
       if (header && data) {
         for (int i = 0; i < header->numVars; i++) {
-          const VarDataHeader *rec = LiveConnection::GetInstance().getVarHeaderEntry(i);
+          VarDataHeaderPtr res = LiveConnection::GetInstance().getVarHeaderEntry(i);
+          if (!res)
+            continue;
 
-          printf("%s[", rec->name);
+          printf("%s[", res->name);
 
           // only dump the first 4 entrys in an array to save space
           // for now ony carsTrkPct and carsTrkLoc output more than 4 entrys
           int count = 1;
-          if (rec->type != VarDataType::Char)
-            count = std::min<int>(4, rec->count);
+          if (res->type != VarDataType::Char)
+            count = std::min<int>(4, res->count);
 
           for (int j = 0; j < count; j++) {
-            switch (rec->type) {
+            switch (res->type) {
               case VarDataType::Char:
-                printf("%s", (char *) (data + rec->offset));
+                printf("%s", const_cast<char*>(data + res->offset));
                 break;
               case VarDataType::Bool:
-                printf("%d", ((bool *) (data + rec->offset))[j]);
+                printf("%d", const_cast<char*>(data + res->offset)[j]);
                 break;
               case VarDataType::Int32:
-                printf("%d", ((int *) (data + rec->offset))[j]);
+                printf("%d", reinterpret_cast<int *>(const_cast<char*>(data + res->offset))[j]);
                 break;
               case VarDataType::Bitmask:
-                printf("0x%08x", ((int *) (data + rec->offset))[j]);
+                printf("0x%08x", ((int *) (data + res->offset))[j]);
                 break;
               case VarDataType::Float:
-                printf("%0.2f", ((float *) (data + rec->offset))[j]);
+                printf("%0.2f", ((float *) (data + res->offset))[j]);
                 break;
               case VarDataType::Double:
-                printf("%0.2f", ((double *) (data + rec->offset))[j]);
+                printf("%0.2f", ((double *) (data + res->offset))[j]);
                 break;
             }
 
             if (j + 1 < count)
               printf("; ");
           }
-          if (rec->type != VarDataType::Char && count < rec->count)
+          if (res->type != VarDataType::Char && count < res->count)
             printf("; ...");
 
           printf("]");

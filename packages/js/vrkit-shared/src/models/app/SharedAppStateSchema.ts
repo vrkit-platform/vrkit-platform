@@ -3,7 +3,7 @@ import type { ISharedAppState } from "./SharedAppState"
 import type { DashboardsState } from "../dashboards"
 import { Identity } from "../../utils"
 
-import { AppSettings, DashboardConfig, SessionData } from "@vrkit-platform/models"
+import { AppSettings, DashboardConfig, SessionMetadata } from "@vrkit-platform/models"
 import type { SessionDetail, SessionsState } from "../sessions"
 import { toJS } from "mobx"
 import { OverlaysStateSchema } from "../overlays"
@@ -36,8 +36,8 @@ export const SessionDetailSchema = createSimpleSchema<SessionDetail>({
     v => v
   ),
   data: custom(
-    v => (!v ? {} : SessionData.toJson(toJS(v))),
-    v => (!v ? {} : SessionData.fromJson(v))
+    v => (!v ? {} : SessionMetadata.toJson(toJS(v))),
+    v => (!v ? {} : SessionMetadata.fromJson(v))
   ) // timeAndDuration: custom(
   //   v => toJS(!v ? {} : isPlainObject(v) ? v : omit(toJS(v), ["sampleIndex",
   // "sampleCount","currentTimeMillis"])), v => toJS(!v ? {} : isPlainObject(v)

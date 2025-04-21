@@ -39,7 +39,7 @@ namespace IRacingTools::Shared {
     virtual std::optional<std::int32_t> sessionTicks() override;
     virtual std::optional<std::int32_t> sessionTickCount() override;
 
-    virtual std::shared_ptr<Models::Session::SessionData> sessionData() override;
+    virtual std::shared_ptr<Models::Session::SessionMetadata> sessionData() override;
 
     virtual std::string sessionInfoStr() override;
     virtual std::shared_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
@@ -85,7 +85,7 @@ namespace IRacingTools::Shared {
     std::atomic_bool isConnected_{false};
     DWORD lastUpdatedTime_{0};
     
-    std::shared_ptr<Models::Session::SessionData> sessionData_{};
+    std::shared_ptr<Models::Session::SessionMetadata> sessionData_{};
   };
 
 

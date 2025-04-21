@@ -130,7 +130,7 @@ namespace IRacingTools::App::Node {
         std::mutex destroyMutex_{};
         std::optional<std::filesystem::path> filePath_{std::nullopt};
 
-        std::shared_ptr<Models::Session::SessionData> sessionData_{};
+        std::shared_ptr<Models::Session::SessionMetadata> sessionData_{};
         std::shared_ptr<SessionDataProvider> dataProvider_{};
         std::atomic_bool destroyed_{false};
 

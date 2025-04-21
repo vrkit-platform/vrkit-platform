@@ -1,9 +1,8 @@
 // import "jest"
 import { jest } from "@jest/globals"
 
-import { Client } from "../Client"
 import { Shutdown } from "../NativeBinding"
-import { ClientEventType, SessionEventType } from "@vrkit-platform/models"
+import { SessionEventType } from "@vrkit-platform/models"
 import { GetLiveVRKitSessionPlayer, SessionPlayer } from "../SessionPlayer"
 import Fixtures from "./DataFixtures"
 import { getLogger } from "@3fv/logger-proxy"
@@ -32,29 +31,34 @@ afterAll(async () => {
 test("SessionPlayer.open", async () => {
   const ibtFile = Fixtures.resolveFile(Fixtures.Files.ibt.IndyCar.RoadAmerica)
   //log.info("Opening IBT File: ", ibtFile)
-  let player:SessionPlayer = null;
+  let player:SessionPlayer = null as any;
   
   await expect(async () => {
-    player = await SessionPlayer.Create(ibtFile)
+    player = SessionPlayer.Create(ibtFile)
     return player
   }).resolves.not.toThrow()
   
-  const data = player.sessionData
-  expect(data.fileInfo.file).toEqual(ibtFile)
+  const data = player.sessionData!!
+  expect(data.fileInfo!!.file).toEqual(ibtFile)
   expect(data.timing).toBeDefined()
   
   const sessionTimeHeader = player.getDataVariableHeader("SessionTime")
   expect(sessionTimeHeader).toBeDefined()
   expect(sessionTimeHeader?.name).toEqual("SessionTime")
   
-  const sessionTimeVar = player.getDataVariable(sessionTimeHeader.name)
+  const sessionTimeVar = player.getDataVariable(sessionTimeHeader!!.name)
   const sampleIndexes = Array<[number, number]>()
   player.on(SessionEventType.DATA_FRAME, (player: SessionPlayer, ev) => {
     const
-        evData = ev.payload,
-        {sampleIndex, sampleCount} = evData.sessionData.timing
+        evData = ev.payload
     
-    const sessionTime = sessionTimeVar.getDouble()
+    if (evData.payload.oneofKind !== "sessionData")
+      return
+    
+    const
+        {sampleIndex, sampleCount} = evData.payload.sessionData.timing!!
+    
+    const sessionTime = sessionTimeVar!!.getDouble()
     // log.info("Session time", sessionTime, "Sample received", sampleIndex,"of", sampleCount)
     
     expect(sampleIndexes.some(([otherSampleIndex]) => otherSampleIndex === sampleIndex)).toBeFalsy()
@@ -103,15 +107,19 @@ test.skip("SessionPlayer.live", async () => {
     expect(sessionTimeHeader).toBeDefined()
     expect(sessionTimeHeader?.name).toEqual("SessionTime")
     
-    const sessionTimeVar = player.getDataVariable(sessionTimeHeader.name)
+    const sessionTimeVar = player.getDataVariable(sessionTimeHeader!!.name)
     const sampleIndexes = Array<[number, number]>()
     player.on(SessionEventType.DATA_FRAME, (player, ev) => {
       try {
-        const evData = ev.payload, {
+        const evData = ev.payload
+        if (evData.payload.oneofKind !== "sessionData") {
+          return
+        }
+        const {
           sampleIndex, sampleCount
-        } = evData.sessionData.timing
+        } = evData.payload.sessionData.timing!!
         
-        const sessionTime = sessionTimeVar.getDouble()
+        const sessionTime = sessionTimeVar!!.getDouble()
         const hasDuplicates = sampleIndexes.some(([otherSampleIndex]) =>
             otherSampleIndex ===  sampleIndex)
         
@@ -143,53 +151,53 @@ test.skip("SessionPlayer.live", async () => {
     player.close()
   } finally {
     player.destroy()
-    player = null
+    player = null as any
   }
 })
 
-
-test.skip("VRKit Native Event", async () => {
-  
-  const client = await Client.Create()
-  let data:any = null
-  const testPromise = new Promise<any>((resolve, reject) => {
-    let triggered = false
-    
-    let timer = setTimeout(() => {
-      if (triggered)
-        return
-      
-      triggered = true
-      reject(Error("Expired"))
-    }, 2000)
-    
-    client.on(ClientEventType.TEST, eventData => {
-      if (triggered) {
-        return;
-      }
-      
-      triggered = true
-      clearTimeout(timer)
-      expect(eventData.type).toEqual(ClientEventType.TEST)
-      
-      resolve(data = eventData)
-    })
-  })
-  
-  
-  
-  try {
-    client.testNativeEventEmit()
-  } catch (err) {
-    console.error("Error while running testNativeEventEmit native side", err)
-  }
-  
-  await expect(testPromise).resolves.toBeDefined()
-  
-  expect(data?.type).toEqual(ClientEventType.TEST)
-  
-  client.destroy()
-  
-  
-})
-
+//
+// test.skip("VRKit Native Event", async () => {
+//
+//   const client = await Client.Create()
+//   let data:any = null
+//   const testPromise = new Promise<any>((resolve, reject) => {
+//     let triggered = false
+//
+//     let timer = setTimeout(() => {
+//       if (triggered)
+//         return
+//
+//       triggered = true
+//       reject(Error("Expired"))
+//     }, 2000)
+//
+//     client.on(ClientEventType.TEST, eventData => {
+//       if (triggered) {
+//         return;
+//       }
+//
+//       triggered = true
+//       clearTimeout(timer)
+//       expect(eventData.type).toEqual(ClientEventType.TEST)
+//
+//       resolve(data = eventData)
+//     })
+//   })
+//
+//
+//
+//   try {
+//     client.testNativeEventEmit()
+//   } catch (err) {
+//     console.error("Error while running testNativeEventEmit native side", err)
+//   }
+//
+//   await expect(testPromise).resolves.toBeDefined()
+//
+//   expect(data?.type).toEqual(ClientEventType.TEST)
+//
+//   client.destroy()
+//
+//
+// })
+//

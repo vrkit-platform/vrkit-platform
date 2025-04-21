@@ -68,7 +68,7 @@ enum SessionStatus {
   SESSION_STATUS_ERROR = 10;
 }
 
-message SessionData {
+message SessionMetadata {
 
   string id = 1;
   SessionType type = 2;

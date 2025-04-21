@@ -1,0 +1,80 @@
+syntax = "proto3";
+import "google/protobuf/any.proto";
+import "RPC/Events/SessionEvent.proto";
+
+package IRacingTools.Models.RPC.DataServer;
+
+message IPCDataServerClientMetadata {
+  string id = 1;
+  string name = 2;
+  uint32 pid = 5;
+  uint32 connection_id = 10;
+}
+
+message IPCDataServerState {
+  int32 active_session_id = 1;
+
+  map<uint32, IPCDataServerClientMetadata> client_map = 10;
+  map<string, uint32> connection_client_map = 11;
+
+}
+
+message IPCDataServerHeaders {
+    repeated RPC.Events.SessionDataVarHeader headers = 1;
+}
+
+message IPCDataServerSetSubscriptions {
+  repeated RPC.Events.SessionEventType event_types = 1;
+  repeated string data_var_header_names = 10;
+}
+
+message IPCDataServerMessage {
+  enum Type {
+    TYPE_EVENT = 0;
+    TYPE_SET_CLIENT_METADATA = 1;
+    TYPE_GET_DATA_HEADERS = 2;
+    TYPE_SET_SUBSCRIPTIONS = 3;
+  }
+
+  Type type = 1;
+
+  string client_id = 2;
+  uint32 connection_id = 3;
+
+  google.protobuf.Any payload = 10;
+}
+
+//
+//message PongMessage {
+//  uint32 ping_count = 1;
+//}
+//
+//message ListMessage {
+//
+//  // TARGET TO BE QUERIED; THIS CAN BE ANYTHING I.E. `dashboards`, `overlays`, ETC
+//  //  AS LONG AS YOUR ROUTE KNOWS WHAT TO LOOK FOR, ANY VALUE WORKS
+//  string subject = 1;
+//
+//  // POTENTIALLY A FILTERING QUERY
+//  string query = 2;
+//
+//  // ARGUMENTS FOR QUERY
+//  //map<string, string> parameters = 5;
+//
+//  // RESULT OR REQUEST
+//  bool is_result = 10;
+//  int32 results_page = 11;
+//
+//  // IF `results_per_page == -1` ALL RESULTS SHOULD BE RETURNED
+//  int32 results_per_page = 12;
+//  uint32 results_count = 13;
+//
+//  // `ANY[]` WITH RESULTS TO BE UNPACKED
+//  repeated google.protobuf.Any results = 20;
+//
+//  // ANY ERROR
+//  string error_details = 60;
+//
+//
+//  // map<string,string> parameters = 20;
+//}

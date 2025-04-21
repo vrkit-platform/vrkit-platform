@@ -58,14 +58,6 @@ target_link_libraries(${targetName}
   ${DEP_LOG}
   ${DEP_YAML}
 
-  #  ${DEP_PROTOBUF}
-  #  ${DEP_JSON}
-  #  ${DEP_MAGICENUM}
-  #  ${DEP_FMT}
-  #  ${DEP_QT_CORE}
-  #  ${DEP_GSL}
-  #  ${DEP_BOOST_DEFAULT}
-
 )
 
 add_dependencies(${targetName} ${openxrLibTarget})

@@ -68,10 +68,6 @@ export interface SessionManagerClientEventArgs {
     client: SessionManagerClient,
     dataVars: SessionDataVariable[]
   ) => void
-  [SessionManagerEventType.TIMING_CHANGED]: (
-      client: SessionManagerClient,
-      timing: SessionTiming
-  ) => void
 }
 
 type SessionEventHandlerPair = Pair<
@@ -95,13 +91,13 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
     dataVars: SessionDataVariable[]
   ) {}
   
-  private onSessionManagerTimingChangedEvent(
-      _event: IpcRendererEvent,
-      sessionId: string,
-      timing: SessionTiming
-  ) {
-    this.emit(SessionManagerEventType.TIMING_CHANGED, this, timing)
-  }
+  // private onSessionManagerTimingChangedEvent(
+  //     _event: IpcRendererEvent,
+  //     sessionId: string,
+  //     timing: SessionTiming
+  // ) {
+  //   this.emit(SessionManagerEventType.TIMING_CHANGED, this, timing)
+  // }
   
   /**
    * Cleanup resources on unload
@@ -130,10 +126,6 @@ export class SessionManagerClient extends EventEmitter3<SessionManagerClientEven
       [
         SessionManagerEventType.DATA_FRAME,
         this.onSessionManagerDataFrameEvent.bind(this)
-      ],
-      [
-        SessionManagerEventType.TIMING_CHANGED,
-        this.onSessionManagerTimingChangedEvent.bind(this)
       ]
     )
     

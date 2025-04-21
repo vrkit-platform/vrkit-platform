@@ -1,621 +1,17 @@
 #include <IRacingTools/Shared/IPC/NamedPipeServer.h>
-#include <IRacingTools/Shared/IPC/Win32Helpers.h>
+#include <IRacingTools/Shared/Utils/Win32Helpers.h>
 
 #include <algorithm>
 #include <format>
 #include <ranges>
 
 namespace IRacingTools::Shared::IPC {
-  namespace {
-    template <class... Args>
-    std::unexpected<std::runtime_error> LogAndReturnRuntimeError(
-      const std::format_string<Args...> fmt,
-      Args&&... args
-    ) {
-      auto msg = std::format(fmt, std::forward<Args>(args)...);
-      spdlog::error(msg);
-      return std::unexpected<std::runtime_error>(msg);
-    }
-
-  }
-
-  Message::Message(const std::uint32_t& connectionId, std::size_t packetSize): connectionId_(connectionId),
-                                                                               packetSize_(packetSize) {
-  }
-
-  std::uint32_t Message::id() {
-    return header_.id;
-  }
-
-  std::uint32_t Message::sourceId() {
-    return header_.sourceId;
-  }
-
-  std::uint32_t Message::connectionId() const {
-    return connectionId_;
-  }
-
-  bool Message::hasError() {
-    return error_.has_value();
-  }
-
-  Message* Message::setError(const std::string& msg) {
-    error_ = std::make_optional<std::runtime_error>(msg);
-    return this;
-  }
-
-  bool Message::isHeaderProcessed() {
-    if (headerProcessed_ && (header_.size <= 0 || header_.id <= 0)) {
-      headerProcessed_ = false;
-    }
-    return headerProcessed_;
-  }
-
-  bool Message::isHeaderWritten() {
-    return headerWritten_;
-  }
-
-  void Message::setHeaderWritten() {
-    headerWritten_ = true;
-  }
-
-  bool Message::allDataRead() {
-    return isHeaderProcessed() && allDataRead_;
-  }
-
-  std::expected<bool, std::exception> Message::onRead(std::size_t bytesRead) {
-    auto pos = buffer_.writePosition() + bytesRead;
-    if (pos > buffer_.size()) {
-      return LogAndReturnRuntimeError(
-        "Buffer size ({}) for message is too small given new bytesRead({}), {} is too large",
-        buffer_.size(),
-        bytesRead,
-        pos
-      );
-    }
-
-    buffer_.setWritePosition(pos);
-    if (buffer_.availableToRead() == header_.size) {
-      allDataRead_ = true;
-    }
-
-    return allDataRead_;
-  }
-
-  std::expected<bool, std::exception> Message::onWrite(std::size_t bytesWritten) {
-    buffer_.setReadPosition(buffer_.readPosition() + bytesWritten);
-    if (buffer_.availableToRead() == 0) {
-      allDataWritten_ = true;
-    }
-
-    return allDataWritten_;
-  }
-
-  std::expected<bool, std::exception> Message::processHeader() {
-    if (header_.size <= 0 || header_.id <= 0) {
-      reset();
-      return false;
-    }
-
-    headerProcessed_ = true;
-
-    buffer_.reset();
-    buffer_.resize(header_.size);
-
-    return true;
-  }
-
-  MessageHeader* Message::resetHeader() {
-    header_.id = 0;
-    header_.sourceId = 0;
-    header_.size = 0;
-    return &header_;
-  }
-
-  std::size_t Message::packetSize() const {
-    return packetSize_;
-  }
-
-  std::size_t Message::size() {
-    return header_.size;
-  }
-
-  std::optional<std::exception> Message::error() const {
-    return error_;
-  }
-
-  std::expected<bool, std::exception> Message::setHeader(const MessageHeader& newHeader) {
-    header_ = newHeader;
-    return processHeader();
-  }
-
-  MessageHeader* Message::header() {
-    return &header_;
-  }
-
-  const MessageHeader* Message::header() const {
-    return &header_;
-  }
-
-  Message* Message::reset() {
-    error_ = std::nullopt;
-    resetHeader();
-    headerProcessed_ = false;
-    headerWritten_ = false;
-    allDataRead_ = false;
-    allDataWritten_ = false;
-    buffer_.reset();
-    return this;
-  }
-
-  MessageDataPacket Message::getNextReadPacket() {
-    return {buffer_.writeData(), buffer_.availableToWrite()};
-  }
-
-  MessageDataPacket Message::getNextWritePacket() {
-    return {buffer_.readData(), buffer_.availableToRead()};
-  }
-
-  DynamicByteBuffer::ValueType* Message::data() {
-    return buffer_.data();
-  }
-
-  const DynamicByteBuffer::ValueType* Message::data() const {
-    return buffer_.data();
-  }
-
-  std::expected<bool, std::exception> Message::setData(
-    const DynamicByteBuffer::ValueType* data,
-    DynamicByteBuffer::SizeType length
-  ) {
-    buffer_.write(data, length);
-    return true;
-  }
-
-  NamedPipeIO::NamedPipeIO(std::uint32_t connectionId, Role role): id(connectionId),
-                                                                   role(role) {
-    std::memset(&overlapped, 0, sizeof(OVERLAPPED));
-    overlapped.hEvent = CreateManualResetEvent();
-  }
-
-  std::string NamedPipeIO::toString() {
-    return std::format("NamedPipeIO(connectionId={},role={})", id, std::string{magic_enum::enum_name(role)});
-  }
-
-  std::expected<bool, std::exception> NamedPipeConnection::connect() {
-    connectIO_.hasPendingIO = false;
-    connected_ = false;
-
-    // Start an overlapped connection for this pipe instance.
-    BOOL connected = ConnectNamedPipe(pipeHandle_, &connectIO_.overlapped);
-
-    // Overlapped ConnectNamedPipe should return zero.
-    if (connected) {
-      spdlog::error("ConnectNamedPipe already connected: {}", GetLastErrorAsString());
-      connected_ = true;
-      return true;
-    }
-
-    auto res = GetLastError();
-    auto resName = GetLastErrorAsString();
-    spdlog::info("CONNECT ({})", resName);
-    switch (res) {
-      // The overlapped connection in progress.
-      case ERROR_IO_PENDING:
-        connectIO_.hasPendingIO = true;
-        break;
-
-      // Client is already connected, so signal an event.
-
-      case ERROR_PIPE_CONNECTED: {
-        connected_ = true;
-        if (!SetEvent(connectIO_.overlapped.hEvent)) {
-          spdlog::warn("CONNECT: Unable to set event");
-        }
-        break;
-      }
-      // If an error occurs during the connect operation...
-      default: {
-        auto msg = std::format("ConnectNamedPipe failed with {}", resName);
-        spdlog::error(msg);
-        return std::unexpected<std::runtime_error>(msg);
-      }
-    }
-
-    return !connectIO_.hasPendingIO;
-  }
-
-  MessageFactory::MessageFactory(NamedPipeServer* server, std::uint32_t connectionId) : server(server),
-    connectionId(connectionId) {
-
-  }
-
-  Message* MessageFactory::operator()() {
-    return new Message(connectionId, server->packetSize());
-  }
-
-  NamedPipeConnection::NamedPipeConnection(NamedPipeServer* server, HANDLE pipeHandle, std::size_t packetSize):
-    server_(server),
-    packetSize_(packetSize),
-    pipeHandle_(pipeHandle),
-    messageFactory_(server, id_),
-    messagePool_(messageFactory_) {
-
-
-  }
-
-  void NamedPipeConnection::destroy() {
-    if (pipeHandle_ != INVALID_HANDLE_VALUE) {
-      DisconnectNamedPipe(pipeHandle_);
-      pipeHandle_ = nullptr;
-    }
-  }
-
-  std::size_t NamedPipeConnection::packetSize() const {
-    return packetSize_;
-  }
-
-  NamedPipeConnection::~NamedPipeConnection() {
-    static std::mutex destructMutex_{};
-
-    destroy();
-    {
-      std::lock_guard lock(destructMutex_);
-      if (writeMessageQueuedEvent_) {
-        CloseHandle(writeMessageQueuedEvent_);
-        writeMessageQueuedEvent_ = nullptr;
-      }
-    }
-  }
-
-  std::vector<NamedPipePendingEvent> NamedPipeConnection::pendingEvents() {
-    std::vector<NamedPipePendingEvent> events;
-    for (auto io : allIO()) {
-      if (io->hasPendingIO) {
-        events.emplace_back(shared_from_this(), io);
-      }
-    }
-
-    return events;
-  }
-
-  std::vector<NamedPipeIO*> NamedPipeConnection::allIO() {
-    return {&connectIO_, &readIO_, &writeIO_};
-  }
-
-  std::uint32_t NamedPipeConnection::id() const {
-    return id_;
-  }
-
-  HANDLE NamedPipeConnection::pipeHandle() {
-    return pipeHandle_;
-  }
-
-  NamedPipeIO& NamedPipeConnection::readIO() {
-    return readIO_;
-  }
-
-  NamedPipeIO& NamedPipeConnection::writeIO() {
-    return writeIO_;
-  }
-
-  NamedPipeIO& NamedPipeConnection::connectIO() {
-    return connectIO_;
-  }
-
-  bool NamedPipeConnection::isConnected() {
-    if (connected_) {
-      // assert(!connectIO_.hasPendingIO && "connectIO_.hasPendingIO is true?");
-      return true;
-    }
-
-    return false;
-  }
-
-  bool NamedPipeConnection::isReadPending() {
-    return readIO_.hasPendingIO;
-  }
-
-  std::expected<bool, std::exception> NamedPipeConnection::writeMessage(
-    std::uint32_t id,
-    std::uint32_t sourceId,
-    const DynamicByteBuffer::ValueType* data,
-    std::uint32_t size
-  ) {
-    if (!data || !size) {
-      return LogAndReturnRuntimeError(
-        "Invalid data={},size{}, can not write message",
-        reinterpret_cast<const void*>(data),
-        size
-      );
-    }
-
-    // The ObjectPool implementation is thread-safe, so while copying/filling the message,
-    // there is no need for an additional lock
-    auto msg = messagePool_.acquire();
-    msg->reset();
-    auto headerRes = msg->setHeader({.id = id, .sourceId = sourceId, .clientId = 0, .size = size});
-
-    if (!headerRes.has_value() || !headerRes.value()) {
-      // The message acquired from the pool, will be automatically return
-      // on destruct/delete.  No action required
-      msg->reset();
-      return std::unexpected(headerRes.error());
-    }
-
-
-    auto dataRes = msg->setData(data, size);
-    if (!dataRes) {
-      msg->reset();
-      return std::unexpected(dataRes.error());
-    }
-    bool setWriteMessageEvent = true;
-    {
-      std::lock_guard lock(writeMessageQueueMutex_);
-      // setWriteMessageEvent = writeMessageQueue_.empty();
-      writeMessageQueue_.push_back(msg);
-    }
-
-    if (setWriteMessageEvent) {
-      spdlog::info("SetEvent(writeMessageQueuedEvent_)");
-      server_->ioThreadNotify();
-    }
-
-    return true;
-
-
-  }
-
-  /**
-   * Start a read operation
-   *
-   * @return if an error occurs, `std::unexpected<std::exception>`, otherwise `true` if a new read was queued or `false` if not connected or if a pending read was already scheduled
-   */
-  std::expected<bool, std::exception> NamedPipeConnection::startRead() {
-    if (!isConnected()) {
-      return false;
-    }
-
-    auto& io = readIO_;
-
-    // If already pending, return
-    if (io.hasPendingIO) {
-      return false;
-    }
-
-    // Acquire message from pool here
-    if (!readMessage_) {
-      readMessage_ = messagePool_.acquire();
-      readMessage_->reset();
-    }
-
-    DWORD bytesReadCount{0};
-    bool success;
-    if (readMessage_->isHeaderProcessed()) {
-      auto [readData, readDataSize] = readMessage_->getNextReadPacket();
-      success = ::ReadFile(
-        pipeHandle_,
-        readData,
-        std::min<std::size_t>(readDataSize, packetSize()),
-        &bytesReadCount,
-        &io.overlapped
-      );
-    } else {
-      success = ::ReadFile(pipeHandle_, readMessage_->header(), MessageHeaderSize, &bytesReadCount, &io.overlapped);
-    }
-
-    auto readRes = GetLastError();
-    auto readResName = GetLastErrorAsString(readRes);
-    if (success) {
-      io.hasPendingIO = false;
-      if (bytesReadCount > 0) {
-        spdlog::info("Read complete message (bytesReadCount={})", bytesReadCount);
-        auto onReadRes = onRead(bytesReadCount);
-        if (!onReadRes.has_value()) {
-          spdlog::error("startRead immediate data, res has error");
-          return std::unexpected(onReadRes.error());
-        }
-
-        return startRead();
-      }
-
-      auto msg = std::format("No bytes read, but success == true, should disconnect ({}):{}", readRes, readResName);
-      spdlog::warn(msg);
-      return std::unexpected<std::runtime_error>(msg);
-    }
-
-    if (readRes == ERROR_MORE_DATA) {
-      io.hasPendingIO = false;
-      return startRead();
-    }
-
-    if (readRes == ERROR_IO_PENDING) {
-      io.hasPendingIO = true;
-      return true;
-    }
-
-    auto msg = std::format("Read failed, should disconnect ({}):{}", readRes, readResName);
-    spdlog::error(msg);
-    return std::unexpected<std::runtime_error>(msg);
-  }
-
-  std::expected<bool, std::exception> NamedPipeConnection::startWrite() {
-    if (!isConnected()) {
-      return false;
-    }
-
-    auto& io = writeIO_;
-
-    // If already pending, return
-    if (io.hasPendingIO) {
-      return false;
-    }
-
-    // Acquire message from pool here
-    if (!writeMessage_) {
-      {
-        std::lock_guard lock(writeMessageQueueMutex_);
-        if (writeMessageQueue_.empty()) {
-          return false;
-        }
-
-        writeMessage_ = writeMessageQueue_.front();
-        writeMessageQueue_.pop_front();
-      }
-
-    }
-
-    DWORD byteWriteCount{0};
-    bool success;
-    if (writeMessage_->isHeaderWritten()) {
-      auto [writeData, writeDataSize] = writeMessage_->getNextWritePacket();
-      success = ::WriteFile(
-        pipeHandle_,
-        writeData,
-        std::min<std::size_t>(writeDataSize, packetSize()),
-        &byteWriteCount,
-        &io.overlapped
-      );
-    } else {
-      success = ::WriteFile(pipeHandle_, writeMessage_->header(), MessageHeaderSize, &byteWriteCount, &io.overlapped);
-      // writeMessage_->setHeaderWritten();
-    }
-
-    auto writeRes = GetLastError();
-    auto writeResName = GetLastErrorAsString(writeRes);
-    if (success) {
-      io.hasPendingIO = false;
-      if (byteWriteCount > 0) {
-        spdlog::info("Write complete message (byteWriteCount={})", byteWriteCount);
-        auto onWriteRes = onWrite(byteWriteCount);
-        if (!onWriteRes.has_value()) {
-          spdlog::error("startWrite immediate data, res has error");
-          return std::unexpected(onWriteRes.error());
-        }
-
-        return startWrite();
-      }
-
-      if (writeRes != ERROR_MORE_DATA && writeRes != ERROR_IO_PENDING) return LogAndReturnRuntimeError(
-        "No bytes written, but success == true, should disconnect ({}):{}",
-        writeRes,
-        writeResName
-      );
-
-      return false;
-    }
-
-    if (writeRes == ERROR_IO_PENDING || writeRes == ERROR_MORE_DATA) {
-      io.hasPendingIO = true;
-      return true;
-    }
-
-    return LogAndReturnRuntimeError("Write failed, should disconnect ({}):{}", writeRes, writeResName);
-  }
-
-  bool NamedPipeConnection::setConnected(bool connected) {
-    auto wasConnected = connected_.exchange(connected);
-    connectIO_.hasPendingIO = false;
-    return wasConnected;
-  }
-
-  LPOVERLAPPED NamedPipeConnection::readOverlapped() {
-    return &readIO_.overlapped;
-  }
-
-  LPOVERLAPPED NamedPipeConnection::writeOverlapped() {
-    return &writeIO_.overlapped;
-  }
-
-
-  std::expected<bool, std::exception> NamedPipeConnection::onRead(std::size_t bytesRead) {
-    if (!readMessage_) {
-      return std::unexpected<std::runtime_error>("readMessage is a nullptr");
-    }
-
-    readIO_.hasPendingIO = false;
-    auto msg = readMessage_;
-
-    if (!msg->isHeaderProcessed()) {
-      if (MessageHeaderSize != bytesRead)
-        return LogAndReturnRuntimeError(
-          "bytes read for header should always be {} bytes, but {} bytes read",
-          MessageHeaderSize,
-          bytesRead
-        );
-
-      auto processedRes = msg->processHeader();
-      if (!processedRes) {
-        return std::unexpected(processedRes.error());
-      }
-
-      auto processed = processedRes.value();
-      if (!processed) {
-        return LogAndReturnRuntimeError("Invalid header read from {} bytes", bytesRead);
-      }
-
-      return false;
-    }
-
-    auto readCompletedRes = msg->onRead(bytesRead);
-    if (!readCompletedRes) {
-      return std::unexpected(readCompletedRes.error());
-    }
-
-    auto readCompleted = readCompletedRes.value();
-    if (readCompleted) {
-      spdlog::info("Message ({}) is fully read and can now be distributed", msg->id());
-      server_->emitMessage(msg);
-      readMessage_ = messagePool_.acquire();
-      readMessage_->reset();
-      return true;
-    }
-
-    return false;
-  }
-
-  std::expected<bool, std::exception> NamedPipeConnection::onWrite(std::size_t bytesWritten) {
-    if (!writeMessage_) {
-      return std::unexpected<std::runtime_error>("writeMessage is a nullptr");
-    }
-
-    writeIO_.hasPendingIO = false;
-    auto msg = writeMessage_;
-
-    if (!msg->isHeaderWritten()) {
-      if (MessageHeaderSize != bytesWritten)
-        return LogAndReturnRuntimeError(
-          "bytes written for header should always be {} bytes, but {} bytes write",
-          MessageHeaderSize,
-          bytesWritten
-        );
-
-      msg->setHeaderWritten();
-
-      return false;
-    }
-
-    auto writeCompletedRes = msg->onWrite(bytesWritten);
-    if (!writeCompletedRes) {
-      return std::unexpected(writeCompletedRes.error());
-    }
-
-    auto writeCompleted = writeCompletedRes.value();
-    if (writeCompleted) {
-      spdlog::info("Message ({}) is fully written to the connection pipe", msg->id());
-      writeMessage_ = nullptr;
-      return true;
-    }
-
-    return false;
-  }
-
+namespace {
+  auto L = Logging::GetCategoryWithType<NamedPipeServer>();
+}
   NamedPipeServerOptions::NamedPipeServerOptions(const std::optional<NamedPipeServerOptions>& overrideOptions) {
     if (overrideOptions) {
       auto options = overrideOptions.value();
-      if (!options.pipeName.empty()) {
-        pipeName = options.pipeName;
-      }
 
       if (options.maxConnections > 0) {
         maxConnections = options.maxConnections;
@@ -627,15 +23,25 @@ namespace IRacingTools::Shared::IPC {
     }
   }
 
+  std::shared_ptr<NamedPipeServer> NamedPipeServer::Create(
+    const std::string& pipeName,
+    NamedPipeMessageHandler messageHandler,
+    const std::optional<NamedPipeServerOptions>& overrideOptions
+  ) {
+    return std::make_shared<NamedPipeServer>(NamedPipeServer::Private{}, pipeName, messageHandler, overrideOptions);
+  }
+
   NamedPipeServer::NamedPipeServer(
-    MessageHandler messageHandler,
+    Private,
+    const std::string& pipeName,
+    NamedPipeMessageHandler messageHandler,
     const std::optional<NamedPipeServerOptions>& overrideOptions
   ) : messageHandler_(messageHandler),
       options_(overrideOptions),
-      pipePath_(CreateNamedPipePath(options_.pipeName)) {
+      pipePath_(CreateNamedPipePath(pipeName)) {
 
     assert(options_.packetSize >= MessageHeaderSize);
-    spdlog::info("NamedPipeServer({}) Created", pipePath_);
+    L->info("NamedPipeServer({}) Created", pipePath_);
   }
 
   NamedPipeServer::~NamedPipeServer() {
@@ -645,7 +51,7 @@ namespace IRacingTools::Shared::IPC {
       std::lock_guard lock(mutex_);
       if (stopEventHandle_) CloseHandle(stopEventHandle_);
     }
-    spdlog::info("NamedPipeServer({}) Destroyed", pipePath_);
+    L->info("NamedPipeServer({}) Destroyed", pipePath_);
   }
 
   std::size_t NamedPipeServer::packetSize() const {
@@ -656,27 +62,35 @@ namespace IRacingTools::Shared::IPC {
     auto connection = getConnection(connectionId);
     std::scoped_lock lock(mutex_);
     if (!connection) {
-      spdlog::error("No connection has id={}", connectionId);
+      L->warn("No connection has id={}", connectionId);
       return;
     }
 
     auto eraseCount = std::erase_if(
       connections_,
-      [connectionId](auto& connection) {
-        return connection->id() == connectionId;
+      [connectionId](auto& it) {
+        return it->id() == connectionId;
       }
     );
 
-    spdlog::info("Removed ({}) connections id={}", eraseCount, connectionId);
+    L->debug("Removed ({}) connections id={}", eraseCount, connectionId);
   }
 
+  void NamedPipeServer::closeConnection(const ConnectionPtr& connection) {
+    closeConnection(connection->id());
+    events.onDisconnect.publish(connection->id(), connection);
+  }
+
+  /**
+   * @inherit
+   */
   bool NamedPipeServer::start(bool wait) {
     {
       std::scoped_lock lock(mutex_);
 
       if (ioThread_ || isRunning() || running_.exchange(true)) {
         if (ioThread_) {
-          spdlog::warn("NamedPipeServer can not be re-started");
+          L->warn("NamedPipeServer can not be re-started");
         }
         return false;
       }
@@ -705,7 +119,7 @@ namespace IRacingTools::Shared::IPC {
     {
       std::scoped_lock lock(mutex_);
       if (!running_.exchange(false)) {
-        spdlog::warn("NamedPipeServer is invalid or not running, can not stop");
+        L->warn("NamedPipeServer is invalid or not running, can not stop");
       }
 
       emitCondition_.notify_all();
@@ -749,14 +163,13 @@ namespace IRacingTools::Shared::IPC {
       );
     }
 
-    spdlog::info("waitUntilStopped completed");
+    L->info("waitUntilStopped completed");
   }
 
   std::shared_ptr<NamedPipeConnection> NamedPipeServer::getConnection(std::uint32_t connectionId) {
     std::scoped_lock lock(mutex_);
     for (auto& connection : connections_) {
-      if (connection->id() == connectionId)
-         return connection;
+      if (connection->id() == connectionId) return connection;
     }
 
 
@@ -801,11 +214,9 @@ namespace IRacingTools::Shared::IPC {
     std::uint32_t size
   ) {
     auto connection = getConnection(connectionId);
-    if (!connection)
-      return LogAndReturnRuntimeError("Connection({}) NOT_FOUND", connectionId);
+    if (!connection) return LogAndReturnRuntimeError("Connection({}) NOT_FOUND", connectionId);
 
-    if (connection->isConnected())
-      return LogAndReturnRuntimeError("Connection({}) NOT_CONNECTED", connectionId);
+    if (connection->isConnected()) return LogAndReturnRuntimeError("Connection({}) NOT_CONNECTED", connectionId);
 
     return connection->writeMessage(id, sourceId, data, size);
   }
@@ -856,7 +267,7 @@ namespace IRacingTools::Shared::IPC {
       if (shouldCreateConnection()) {
         auto res = createNewConnection();
         if (!res) {
-          spdlog::error("createNewConnection Failed: {}", res.error().what());
+          L->error("createNewConnection Failed: {}", res.error().what());
           break;
         }
       }
@@ -871,13 +282,13 @@ namespace IRacingTools::Shared::IPC {
       for (auto& connection : connections_) {
         // Ensure that if connected, a read is pending
         if (auto res = connection->startRead(); !res.has_value()) {
-          spdlog::error("startRead failed: {}", res.error().what());
-          closeConnection(connection->id());
+          L->error("startRead failed: {}", res.error().what());
+          closeConnection(connection);
           continue;
         }
 
         if (auto res = connection->startWrite(); !res.has_value()) {
-          spdlog::error("startWrite failed: {}", res.error().what());
+          L->error("startWrite failed: {}", res.error().what());
           closeConnection(connection->id());
           continue;
         }
@@ -901,13 +312,12 @@ namespace IRacingTools::Shared::IPC {
         );
       }
 
-      if (!allPendingEventHandles.size())
-        continue;
+      if (!allPendingEventHandles.size()) continue;
 
       // ALWAYS ADD THE IO THREAD NOTIFY EVENT AT THE VERY END
       allPendingEventHandles.push_back(ioThreadNotifyEvent_);
 
-      spdlog::info(
+      L->info(
         "Waiting for an event (pendingEvents={},pendingEventHandles={},connections={})",
         allPendingEvents.size(),
         allPendingEventHandles.size(),
@@ -927,13 +337,13 @@ namespace IRacingTools::Shared::IPC {
 
       auto idx = waitRes - WAIT_OBJECT_0;
       if (idx == allPendingEventHandles.size() - 1) {
-        spdlog::info("ioThreadNotifyEvent_ was triggered");
+        L->info("ioThreadNotifyEvent_ was triggered");
         resetIOThreadNotifyEvent();
         continue;
       }
 
       if (idx >= allPendingEvents.size()) {
-        spdlog::error("Unknown Error (waitRes={},idx={})", waitRes, idx);
+        L->error("Unknown Error (waitRes={},idx={})", waitRes, idx);
         break;
       }
 
@@ -946,7 +356,7 @@ namespace IRacingTools::Shared::IPC {
 
       DWORD byteCount{0};
       auto success = GetOverlappedResult(connection->pipeHandle(), overlappedPtr, &byteCount, FALSE);
-      spdlog::info("GetOverlappedResult(success={},byteCount={})", success, byteCount);
+      L->info("GetOverlappedResult(success={},byteCount={})", success, byteCount);
       auto err = GetLastError();
       if (!success) {
         switch (err) {
@@ -956,26 +366,27 @@ namespace IRacingTools::Shared::IPC {
             closeConnection(connection->id());
             break;
           default:
-            spdlog::error("ERROR: GetOverlappedResult({}): {}", GetLastError(), GetLastErrorAsString());
+            L->error("ERROR: GetOverlappedResult({}): {}", GetLastError(), GetLastErrorAsString());
             return;
         }
 
       }
       switch (role) {
         case NamedPipeIO::Role::Connect: {
-          spdlog::info("Connect(byteCount={})", byteCount);
+          L->info("Connect(byteCount={})", byteCount);
           connection->setConnected(true);
+          events.onConnect.publish(connection->id(), connection);
           break;
         };
         case NamedPipeIO::Role::Read: {
           // TODO: Populate message
-          spdlog::info("Read(byteCount={})", byteCount);
+          L->info("Read(byteCount={})", byteCount);
           connection->onRead(byteCount);
           break;
         };
         case NamedPipeIO::Role::Write: {
           // TODO: Pop message and start sending next if available
-          spdlog::info("Write(byteCount={})", byteCount);
+          L->info("Write(byteCount={})", byteCount);
           connection->onWrite(byteCount);
           break;
         };
@@ -991,11 +402,11 @@ namespace IRacingTools::Shared::IPC {
         break;
       }
 
-      std::shared_ptr<Message> msg{nullptr};
+      std::shared_ptr<NamedPipeMessage> msg{nullptr};
       {
         auto msgOpt = nextEmitMessage();
         if (!msgOpt) {
-          spdlog::warn("No available message, likely shutdown or disconnected");
+          L->warn("No available message, likely shutdown or disconnected");
           continue;
         }
 
@@ -1004,7 +415,7 @@ namespace IRacingTools::Shared::IPC {
 
       auto connection = getConnection(msg->connectionId());
       if (!connection) {
-        spdlog::error("Unable to find active connection for id({})", msg->connectionId());
+        L->error("Unable to find active connection for id({})", msg->connectionId());
         continue;
       }
 
@@ -1014,7 +425,7 @@ namespace IRacingTools::Shared::IPC {
     running_.exchange(false);
   }
 
-  void NamedPipeServer::emitMessage(const std::shared_ptr<Message>& message) {
+  void NamedPipeServer::emitMessage(const std::shared_ptr<NamedPipeMessage>& message) {
     {
       std::lock_guard<std::mutex> lock(emitMutex_);
       emitMessageQueue_.push_back(message);
@@ -1064,7 +475,7 @@ namespace IRacingTools::Shared::IPC {
       return std::unexpected<std::runtime_error>("Failed to create named pipe instance.");
     }
 
-    auto connection = std::make_shared<NamedPipeConnection>(this, pipeHandle, packetSize());
+    auto connection = NamedPipeConnection::Create(this, pipeHandle, packetSize());
     auto res = connection->connect();
     if (!res.has_value()) return std::unexpected(res.error());
 

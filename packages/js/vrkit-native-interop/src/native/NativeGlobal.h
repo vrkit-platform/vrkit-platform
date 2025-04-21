@@ -2,13 +2,10 @@
 
 #pragma once
 
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
-
 #include <IRacingSDK/Utils/Singleton.h>
 
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
 #include <IRacingTools/Shared/Services/TelemetryDataService.h>
-// #include <IRacingTools/Shared/Services/TrackMapService.h>
-
 #include <IRacingTools/Shared/Services/ServiceManager.h>
 #include <IRacingTools/Shared/Services/RPCServerService.h>
 

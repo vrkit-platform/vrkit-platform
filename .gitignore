@@ -35,6 +35,8 @@ irsdk_session*/
 
 node_modules
 
+/external
+
 /lib
 /logs
 *.backup.json

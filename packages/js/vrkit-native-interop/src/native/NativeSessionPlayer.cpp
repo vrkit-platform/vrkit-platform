@@ -94,7 +94,7 @@ namespace IRacingTools::App::Node {
         argError(argCount == kArgCount && !info[kArgIdxFile].IsString() && !info[kArgIdxFile].IsNull(), kCtorArgError);
 
         // CREATE SESSION STATE
-        sessionData_ = std::make_shared<Models::Session::SessionData>();
+        sessionData_ = std::make_shared<Models::Session::SessionMetadata>();
 
         id_ = info[kArgIdxId].As<Napi::String>().Utf8Value();
         if (argCount == kArgCount && info[kArgIdxFile].IsString()) {
@@ -259,7 +259,7 @@ namespace IRacingTools::App::Node {
      * @brief Get current session data state/instance
      *
      * @param info napi callback info
-     * @return Plain JS object from `Models::Session::SessionData`
+     * @return Plain JS object from `Models::Session::SessionMetadata`
      */
     Napi::Value NativeSessionPlayer::jsGetSessionData(const Napi::CallbackInfo& info) {
         auto env = info.Env();
@@ -271,8 +271,8 @@ namespace IRacingTools::App::Node {
         if (!encodeRes.ok()) {
             auto errCodeName = std::string{magic_enum::enum_name(encodeRes.code()).data()};
             auto errMessage = std::string{encodeRes.message()};
-            L->error("Unable to encode SessionData ({}): {}", errCodeName, errMessage);
-            auto terrObj = TypeError::New(env, "Unable to encode `SessionData` to JSON");
+            L->error("Unable to encode SessionMetadata ({}): {}", errCodeName, errMessage);
+            auto terrObj = TypeError::New(env, "Unable to encode `SessionMetadata` to JSON");
 
             auto errObj = Napi::Object::New(env);
             errObj.Set("code", errCodeName);

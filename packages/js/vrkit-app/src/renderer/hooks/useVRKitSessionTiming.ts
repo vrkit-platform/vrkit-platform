@@ -14,16 +14,17 @@ export function useVRKitSessionTiming() {
   const client = useService(SessionManagerClient),
     [sessionTiming, setSessionTiming] = useState<SessionTiming>(null)
   
-  useEffect(() => {
-    const handleTimingChanged = (_client: SessionManagerClient, timing: SessionTiming) => {
-      if (timing)
-        setSessionTiming(timing)
-    }
-    client.on(SessionManagerEventType.TIMING_CHANGED, handleTimingChanged)
-    return () => {
-      client.off(SessionManagerEventType.TIMING_CHANGED, handleTimingChanged)
-    }
-  }, [client])
+  // TODO: Fix with new event system
+  // useEffect(() => {
+  //   const handleTimingChanged = (_client: SessionManagerClient, timing: SessionTiming) => {
+  //     if (timing)
+  //       setSessionTiming(timing)
+  //   }
+  //   client.on(SessionManagerEventType.TIMING_CHANGED, handleTimingChanged)
+  //   return () => {
+  //     client.off(SessionManagerEventType.TIMING_CHANGED, handleTimingChanged)
+  //   }
+  // }, [client])
   
   
   

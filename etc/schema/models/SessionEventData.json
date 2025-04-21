@@ -64,7 +64,95 @@
             ],
             "title": "File Info"
         },
-        "IRacingTools.Models.Session.SessionData": {
+        "IRacingTools.Models.RPC.Events.SessionDataFrame": {
+            "properties": {
+                "dataValues": {
+                    "additionalProperties": {
+                        "$ref": "#/definitions/IRacingTools.Models.RPC.Events.SessionDataFrame.Value",
+                        "additionalProperties": true,
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {}
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Session Data Frame"
+        },
+        "IRacingTools.Models.RPC.Events.SessionDataFrame.Value": {
+            "properties": {
+                "boolValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "int32Value": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "floatValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "doubleValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Value"
+        },
+        "IRacingTools.Models.Session.SessionMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -267,7 +355,7 @@
                     "type": "object"
                 }
             ],
-            "title": "Session Data"
+            "title": "Session Metadata"
         },
         "IRacingTools.Models.Session.SessionTiming": {
             "properties": {
@@ -576,7 +664,7 @@
                         0,
                         "SESSION_EVENT_TYPE_AVAILABLE",
                         1,
-                        "SESSION_EVENT_TYPE_INFO_CHANGED",
+                        "SESSION_EVENT_TYPE_METADATA_CHANGED",
                         2,
                         "SESSION_EVENT_TYPE_DATA_FRAME",
                         3,
@@ -637,7 +725,17 @@
                     ]
                 },
                 "sessionData": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionData",
+                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionMetadata",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "sessionDataFrame": {
+                    "$ref": "#/definitions/IRacingTools.Models.RPC.Events.SessionDataFrame",
                     "additionalProperties": true,
                     "oneOf": [
                         {

@@ -23,11 +23,11 @@ export function GetEnumLabel<E extends {[k: string | number]: string | number}, 
     )
   }
   
-  let label: string = typeof value === "string" ? value : null
+  let label: string | null = typeof value === "string" ? value : null
   if (typeof value === "number") {
     label = type[value] as string
   }
   
-  label = prefixBag.reduce((label, nextPrefix) => label.startsWith(nextPrefix) ? label.substring(nextPrefix.length) : label, label)
+  label = prefixBag.reduce((label, nextPrefix) => label?.startsWith(nextPrefix) ? label.substring(nextPrefix.length) : label, label)
   return label
 }

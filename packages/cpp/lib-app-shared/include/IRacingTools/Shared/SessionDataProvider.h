@@ -66,7 +66,7 @@ namespace IRacingTools::Shared {
      *
      * @return current timing ref
      */
-    virtual std::shared_ptr<Models::Session::SessionData> sessionData() = 0;
+    virtual std::shared_ptr<Models::Session::SessionMetadata> sessionData() = 0;
 
     virtual std::string sessionInfoStr() = 0;
 

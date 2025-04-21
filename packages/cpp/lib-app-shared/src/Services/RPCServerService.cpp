@@ -73,11 +73,11 @@ namespace IRacingTools::Shared::Services {
   }
   RPCServerService::Envelope
   RPCServerService::execute(const Envelope &messageIn) {
-    auto requestPath = messageIn->request_path();
+    auto requestPath = messageIn->path();
 
     auto messageOut = std::make_shared<Models::RPC::Envelope>();
     messageOut->set_id(messageIn->id());
-    messageOut->set_request_path(messageIn->request_path());
+    messageOut->set_path(messageIn->path());
     messageOut->set_kind(RPC::Envelope::KIND_RESPONSE);
     messageOut->set_status(RPC::Envelope::STATUS_IN_PROGRESS);
 

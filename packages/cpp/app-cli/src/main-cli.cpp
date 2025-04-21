@@ -18,7 +18,7 @@
 #include "ServiceDaemonArgCommand.h"
 #include "SessionRecordArgCommand.h"
 #include "TelemetryDumpArgCommand.h"
-#include "NamedPipeServerArgCommand.h"
+#include "IPCDataServerArgCommand.h"
 
 using namespace std::literals;
 
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 
   auto cmds =
       ArgCommand::build<
-          NamedPipeServerArgCommand,
+          IPCDataServerArgCommand,
           LiveDataReplayArgCommand,
           TelemetryDumpArgCommand,
           ProcessAllTelemetryArgCommand,

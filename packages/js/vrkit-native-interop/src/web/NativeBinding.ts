@@ -6,7 +6,6 @@ import { getLogger } from "@3fv/logger-proxy"
 import * as Fs from "node:fs"
 import { Deferred } from "@3fv/deferred"
 import type { NativeSessionPlayerCtor } from "./NativeSessionPlayer"
-import type { NativeClientCtor } from "./NativeClient"
 import type { NativeOverlayManagerCtor } from "./NativeOverlayManager"
 
 const log = getLogger(__filename)
@@ -15,7 +14,7 @@ const log = getLogger(__filename)
  * Container for holding native exports
  */
 const gNativeLib = {
-  exports: null as NativeExports
+  exports: null as any as NativeExports
 }
 
 /**
@@ -45,10 +44,10 @@ function findNativeModulePaths(): string[] {
  */
 function ReleaseNativeExports(): void {
   if (gNativeLib.exports) {
-    delete gNativeLib.exports
+    delete (gNativeLib as any).exports
   }
 
-  gNativeLib.exports = null
+  gNativeLib.exports = null as any
 
   if (typeof require !== "undefined") {
     findNativeModulePaths().forEach(targetPath =>
@@ -63,7 +62,7 @@ function ReleaseNativeExports(): void {
   }
 }
 
-let isNativeSupportedDeferred: Deferred<boolean> = null
+let isNativeSupportedDeferred: Deferred<boolean> = null as any
 
 export async function IsNativeOverlaySupported(): Promise<boolean> {
   if (isNativeSupportedDeferred)
@@ -134,11 +133,7 @@ export async function Shutdown() {
  * Native library exports
  */
 export interface NativeExports {
-  /**
-   * Native node module client
-   */
-  NativeClient: NativeClientCtor
-
+  
   NativeSessionPlayer: NativeSessionPlayerCtor
 
   NativeOverlayManager: NativeOverlayManagerCtor

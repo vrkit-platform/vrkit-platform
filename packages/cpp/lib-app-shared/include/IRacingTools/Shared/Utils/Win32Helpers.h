@@ -3,7 +3,7 @@
 #include <string>
 
 
-namespace IRacingTools::Shared::IPC {
+namespace IRacingTools::Shared {
   std::string GetLastErrorAsString(DWORD err = GetLastError());
   HANDLE CreateManualResetEvent();
 }

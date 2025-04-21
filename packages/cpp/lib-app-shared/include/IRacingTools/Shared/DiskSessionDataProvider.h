@@ -115,7 +115,7 @@ namespace IRacingTools::Shared {
 
     virtual std::string sessionInfoStr() override;
 
-    virtual std::shared_ptr<Models::Session::SessionData> sessionData() override;
+    virtual std::shared_ptr<Models::Session::SessionMetadata> sessionData() override;
 
     virtual const IRacingSDK::VarHeaders& getDataVariableHeaders() override;
 
@@ -168,6 +168,6 @@ namespace IRacingTools::Shared {
 
     Options options_;
 
-    std::shared_ptr<Models::Session::SessionData> sessionData_{};
+    std::shared_ptr<Models::Session::SessionMetadata> sessionData_{};
   };
 } // namespace IRacingTools::Shared

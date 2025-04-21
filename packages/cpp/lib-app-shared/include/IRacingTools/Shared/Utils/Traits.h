@@ -1,9 +1,8 @@
 #pragma once
 
-#include <thread>
 #include <type_traits>
 
-namespace IRacingTools::Shared::IPC {
+namespace IRacingTools::Shared::Utils {
 
   template <typename, typename = void>
   constexpr bool is_container{};

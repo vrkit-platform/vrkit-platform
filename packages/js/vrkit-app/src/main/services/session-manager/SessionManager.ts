@@ -32,7 +32,7 @@ import {
 } from "vrkit-native-interop"
 import { isDefined, isFunction, isString } from "@3fv/guard"
 import {
-  SessionData,
+  SessionMetadata,
   SessionDataVariableValueMap,
   SessionEventData,
   SessionEventType,
@@ -63,10 +63,6 @@ export interface SessionManagerEventArgs {
     sessionId: string,
     timing: SessionTiming,
     dataVarValues: SessionDataVariableValueMap
-  ) => void
-  [SessionManagerEventType.TIMING_CHANGED]: (
-      sessionId: string,
-      timing: SessionTiming
   ) => void
 }
 
@@ -170,23 +166,6 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
   
   
   @Bind
-  private onEventSessionTimingChanged(
-      player: SessionPlayer,
-      data: SessionPlayerEventDataDefault
-  ) {
-    const timing = asOption(data?.payload?.sessionTiming)
-        .map(it => SessionTiming.toJson(it) as any as SessionTiming)
-        .getOrNull()
-    
-    //log.debug("TIMING_CHANGED", timing)
-    
-    this.windowManager.sendToMainWindow(
-        SessionManagerEventTypeToIPCName(SessionManagerEventType.TIMING_CHANGED),
-        player.id, timing)
-    this.emit(SessionManagerEventType.TIMING_CHANGED, player.id, timing)
-  }
-  
-  @Bind
   private onEventDataFrame(
     player: SessionPlayer,
     data: SessionPlayerEventDataDefault,
@@ -198,7 +177,8 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       return
     }
 
-    asOption(data.payload?.sessionData?.timing).ifSome(timing => {
+    asOption(data.payload.payload)
+        .map(it => it.oneofKind === "sessionData" ? ((it as any).sessionData as SessionMetadata)!!.timing!! : null).ifSome(timing => {
       container.setDataFrame(timing, dataVarValues)
       // const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession"
         //   ,
@@ -267,13 +247,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
 
     const container = new SessionPlayerContainer(sessionId, player)
     player.on(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
-    player.on(SessionEventType.INFO_CHANGED, this.onEventSessionInfoChanged)
-    player.on(SessionEventType.TIMING_CHANGED, this.onEventSessionTimingChanged)
+    player.on(SessionEventType.METADATA_CHANGED, this.onEventSessionInfoChanged)
     player.on(SessionEventType.DATA_FRAME, this.onEventDataFrame)
     container.disposers.push(() => {
       player.off(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
-      player.off(SessionEventType.INFO_CHANGED, this.onEventSessionInfoChanged)
-      player.off(SessionEventType.TIMING_CHANGED, this.onEventSessionTimingChanged)
+      player.off(SessionEventType.METADATA_CHANGED, this.onEventSessionInfoChanged)
       player.off(SessionEventType.DATA_FRAME, this.onEventDataFrame)
     })
 
@@ -399,13 +377,13 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       }
     }
 
-    return asOption(evData).match({
-      Some: ({ sessionData: data }): SessionDetail => ({
+    return asOption(evData?.payload).match({
+      Some: ({ sessionData: data }: any): SessionDetail => ({
         id: data.id,
         isAvailable: player.isAvailable,
         info: player.sessionInfo,
-        data: SessionData.create(data as any)
-      }),
+        data: SessionMetadata.create(data as any)
+      }) as any,
       None: (): SessionDetail => ({
         id: player.id,
         isAvailable: player.isAvailable,

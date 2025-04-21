@@ -1,6 +1,6 @@
-#include <IRacingTools/Shared/IPC/Win32Helpers.h>
+#include <IRacingTools/Shared/Utils/Win32Helpers.h>
 
-namespace IRacingTools::Shared::IPC {
+namespace IRacingTools::Shared {
   std::string GetLastErrorAsString(DWORD err) {
 
     if (err == 0) {

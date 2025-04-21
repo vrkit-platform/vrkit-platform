@@ -14,12 +14,24 @@
                         }
                     ]
                 },
+                "sourceId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
                 "kind": {
                     "enum": [
                         "KIND_REQUEST",
                         0,
                         "KIND_RESPONSE",
-                        1
+                        1,
+                        "KIND_EVENT",
+                        2
                     ],
                     "oneOf": [
                         {
@@ -58,7 +70,7 @@
                     ],
                     "title": "Status"
                 },
-                "requestPath": {
+                "path": {
                     "oneOf": [
                         {
                             "type": "null"

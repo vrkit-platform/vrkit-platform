@@ -4,7 +4,6 @@
 #include <IRacingTools/Shared/FileSystemHelpers.h>
 #include <IRacingTools/Shared/Common/UUIDHelpers.h>
 
-#include "NativeClient.h"
 #include "NativeGlobal.h"
 #include "NativeOverlayManager.h"
 #include "NativeSessionPlayer.h"
@@ -31,7 +30,6 @@ namespace {
 
 static Napi::Object Init(Napi::Env env, Napi::Object exports) {
     NativeSystemAddon::Init(env, exports);
-    NativeClient::Init(env, exports);
     NativeSessionPlayer::Init(env, exports);
     NativeSessionDataVariable::Init(env, exports);
     NativeOverlayManager::Init(env, exports);

@@ -45,7 +45,8 @@ target_link_libraries(
   ${openxrLibTarget}
   PRIVATE
   ${sdkTargetStatic}
-  ${modelsTargetStatic}
+#  ${modelsTargetStatic}
+  ${modelsTarget}
   ${sharedAppLibTargetStatic}
 )
 

@@ -1,4 +1,4 @@
-import { SessionData, SessionTiming, SessionType } from "@vrkit-platform/models"
+import { SessionMetadata, SessionTiming, SessionType } from "@vrkit-platform/models"
 import type { SessionPlayerId } from "vrkit-native-interop"
 import type {
   SessionInfoMessage
@@ -25,7 +25,7 @@ export interface SessionDetail {
 
   isAvailable?: boolean
 
-  data?: SessionData
+  data?: SessionMetadata
   
   info?: SessionInfoMessage
 }
@@ -63,7 +63,6 @@ export type SessionManagerStateSessionKey = keyof Pick<
 >
 
 export enum SessionManagerEventType {
-  TIMING_CHANGED = "TIMING_CHANGED",
   DATA_FRAME = "DATA_FRAME"
 }
 

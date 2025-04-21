@@ -99,7 +99,7 @@ TEST_F(DiskSessionDataProviderTests, session_info_updates) {
 
     std::atomic_int32_t sessionInfoChangeCount = 0;
     auto onEventHandler = [&subscriber, &sessionInfoChangeCount] (SessionEventType type, std::shared_ptr<SessionEventData> data) {
-        if (type != SessionEventType::SESSION_EVENT_TYPE_INFO_CHANGED)
+        if (type != SessionEventType::SESSION_EVENT_TYPE_METADATA_CHANGED)
             return;
         subscriber.onEvent(type, data);
         ++sessionInfoChangeCount;

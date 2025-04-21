@@ -2,7 +2,7 @@
 // noinspection ES6UnusedImports
 import { asOption, Either, Option } from "@3fv/prelude-ts"
 import {
-  SessionData,
+  SessionMetadata,
   SessionDataVariable,
   SessionDataVariableHeader,
   SessionEventType,
@@ -30,7 +30,7 @@ export type NativeSessionPlayerEventCallback = (
 ) => void
 
 export interface NativeSessionPlayer {
-  readonly sessionData: SessionData
+  readonly sessionData: SessionMetadata
   
   readonly sessionTiming: SessionTiming
   

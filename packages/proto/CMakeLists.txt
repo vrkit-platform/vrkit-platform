@@ -74,4 +74,5 @@ foreach(target ${modelsTarget} ${modelsTargetStatic})
   endif()
 
   target_compile_options(${target} PRIVATE "/permissive")
+  VRK_CONFIGURE_TARGET(${target})
 endforeach()

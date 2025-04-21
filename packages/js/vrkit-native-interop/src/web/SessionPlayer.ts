@@ -1,12 +1,12 @@
 // var addon = require('bindings')('SayHello');
 // noinspection ES6UnusedImports
-import { asOption, Either, Option } from "@3fv/prelude-ts"
+import { asOption, Either } from "@3fv/prelude-ts"
 import YAML from "yaml"
 import type { IMessageType } from "@protobuf-ts/runtime"
 import { guard, isDefined } from "@3fv/guard"
 import EventEmitter3 from "eventemitter3"
 import {
-  SessionData,
+  SessionMetadata,
   SessionDataVariable,
   SessionDataVariableHeader,
   SessionDataVariableMap,
@@ -50,12 +50,7 @@ export type SessionPlayerEventArgMap = {
 export type SessionPlayerEventDataDefault = SessionPlayerEventData<typeof SessionEventData>
 
 export interface SessionPlayerEventArgs extends SessionPlayerEventArgMap {
-  [SessionEventType.INFO_CHANGED]:(
-      player:SessionPlayer,
-      data:SessionPlayerEventDataDefault
-  ) => void
-  
-  [SessionEventType.TIMING_CHANGED]:(
+  [SessionEventType.METADATA_CHANGED]:(
       player:SessionPlayer,
       data:SessionPlayerEventDataDefault
   ) => void
@@ -162,7 +157,7 @@ export class SessionPlayer extends EventEmitter3<SessionPlayerEventArgs, Session
     // }
     
     const data:SessionPlayerEventData<any> = {
-      type, payload: null
+      type, payload: null as any
     }
     
     try {
@@ -193,7 +188,7 @@ export class SessionPlayer extends EventEmitter3<SessionPlayerEventArgs, Session
    */
   private constructor(readonly file:string | null = null) {
     super()
-    this.id = isNotEmpty(file) ? file : LiveSessionId
+    this.id = isNotEmpty(file) ? file!! : LiveSessionId
     
   }
   
@@ -265,7 +260,7 @@ export class SessionPlayer extends EventEmitter3<SessionPlayerEventArgs, Session
             `Unable to find header for "${name}"`))
   }
   
-  getDataVariableHeader(name:string):SessionDataVariableHeader {
+  getDataVariableHeader(name:string):SessionDataVariableHeader | null {
     return asOption(this.getDataVariableHeaders(name))
         .map(headers => headers[0])
         .getOrNull()
@@ -293,11 +288,11 @@ export class SessionPlayer extends EventEmitter3<SessionPlayerEventArgs, Session
             })
             .getOrCall(() => {
               log.error(`Unable to get data var "${name}"`)
-              return null
+              return null!!
             }))).filter(isDefined)
   }
   
-  getDataVariable(name:string):SessionDataVariable {
+  getDataVariable(name:string):SessionDataVariable | null{
     return asOption(this.getDataVariables(name))
         .map(vars => vars[0])
         .getOrNull()
@@ -325,20 +320,23 @@ export class SessionPlayer extends EventEmitter3<SessionPlayerEventArgs, Session
    * Destroy this client & underlying `this.nativeClient`
    */
   destroy() {
-    this.nativePlayer?.destroy()
-    delete this.nativePlayer
+    if (this.nativePlayer) {
+      this.nativePlayer!!.destroy()
+      // @ts-ignore
+      delete this.nativePlayer
+    }
   }
   
   get sessionTiming() {
     return this.nativePlayer.sessionTiming
   }
   
-  get sessionData():SessionData {
-    return Either.try(() => SessionData.fromJson(this.nativePlayer.sessionData as any))
+  get sessionData():SessionMetadata {
+    return Either.try(() => SessionMetadata.fromJson(this.nativePlayer.sessionData as any))
         .match({
           Left: err => {
             log.error(`Unable to get session data`, err)
-            return null
+            return null as any
           }, Right: identity
         })
   }
@@ -373,7 +371,7 @@ export function isLivePlayer(player:SessionPlayer) {
   return player.id === LiveSessionId
 }
 
-let liveVRKitSessionPlayer:SessionPlayer = null
+let liveVRKitSessionPlayer:SessionPlayer = null as any
 
 export function GetLiveVRKitSessionPlayer():SessionPlayer {
   if (liveVRKitSessionPlayer) {

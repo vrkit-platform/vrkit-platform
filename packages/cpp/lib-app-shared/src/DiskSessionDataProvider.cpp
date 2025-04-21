@@ -54,7 +54,7 @@ namespace IRacingTools::Shared {
       diskClient.isFileOpen(),
       diskClient.getSampleCount());
 
-    sessionData_ = std::make_shared<Models::Session::SessionData>();
+    sessionData_ = std::make_shared<Models::Session::SessionMetadata>();
 
     auto sampleCount = diskClient_->getSampleCount();
 
@@ -292,8 +292,8 @@ namespace IRacingTools::Shared {
   }
 
   void DiskSessionDataProvider::fireInfoChangedEvent() {
-    auto ev = createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_INFO_CHANGED);
-    publish(Models::RPC::Events::SESSION_EVENT_TYPE_INFO_CHANGED, ev);
+    auto ev = createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED);
+    publish(Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED, ev);
   }
 
   void DiskSessionDataProvider::fireDataUpdatedEvent() {
@@ -322,11 +322,11 @@ namespace IRacingTools::Shared {
     ev->set_session_id(data->id());
     ev->set_session_type(Models::Session::SESSION_TYPE_DISK);
 
-    if (type != Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED) {
+    // if (type != Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED) {
       ev->mutable_session_data()->CopyFrom(*data);
-    } else {
-      ev->mutable_session_timing()->CopyFrom(data->timing());
-    }
+    // } else {
+      // ev->mutable_session_timing()->CopyFrom(data->timing());
+    // }
     return ev;
   }
 
@@ -500,9 +500,9 @@ namespace IRacingTools::Shared {
           timing->set_session_sub_time_total(timeRemainMillis + timeMillis);
         }
 
-        publish(
-          Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED,
-          createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED));
+        // publish(
+        //   Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED,
+        //   createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED));
       }
     }
     return &sessionData_->timing();
@@ -516,7 +516,7 @@ namespace IRacingTools::Shared {
     return diskClient_->getSampleCount();
   }
 
-  std::shared_ptr<Models::Session::SessionData> DiskSessionDataProvider::sessionData() {
+  std::shared_ptr<Models::Session::SessionMetadata> DiskSessionDataProvider::sessionData() {
     std::scoped_lock lock(diskClientMutex_);
     return sessionData_;
   }

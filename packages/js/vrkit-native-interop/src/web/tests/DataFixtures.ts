@@ -1,6 +1,7 @@
 import Path from "path"
 import { asOption } from "@3fv/prelude-ts"
 import * as Fs from "node:fs"
+import { isString } from "@3fv/guard"
 
 const IBTFiles = {
   IndyCar: {
@@ -15,7 +16,7 @@ function splitFileParts(path: string) {
 const dirParts = splitFileParts(__dirname)
 const fileParts = splitFileParts(IBTFiles.IndyCar.RoadAmerica)
 
-let baseDir = null
+let baseDir: string | null = null
 
 while (dirParts.length) {
   const dir = Path.join(...dirParts)
@@ -41,7 +42,9 @@ export namespace Fixtures {
   }
   
   export function resolveFile(file: string) {
-    return asOption(Path.resolve(baseDir, ...splitFileParts(file)))
+    return asOption(baseDir)
+        .filter(isString)
+        .map(dir => Path.resolve(dir, ...splitFileParts(file)))
         .filter(Fs.existsSync)
         .getOrThrow(`Unable to resolve file "${file}"`)
     

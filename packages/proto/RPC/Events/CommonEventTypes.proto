@@ -2,12 +2,3 @@ syntax = "proto3";
 
 package IRacingTools.Models.RPC.Events;
 
-enum ClientEventType {
-  CLIENT_EVENT_TYPE_UNKNOWN = 0;
-  CLIENT_EVENT_TYPE_TEST = 1;
-}
-
-message TestEventData {
-  string message = 2;
-}
-

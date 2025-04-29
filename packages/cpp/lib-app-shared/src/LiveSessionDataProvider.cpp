@@ -48,12 +48,14 @@ namespace IRacingTools::Shared {
       L->info("SessionInfoUpdated (updateCount={})", client.getSessionInfoUpdateCount().value());
       publish(
         Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED,
-        createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED));
+        clientProvider(),
+        shared_from_this());
     }
 
     publish(
       Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME,
-      createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME));
+      clientProvider(),
+      shared_from_this());
   }
 
   void LiveSessionDataProvider::process() {
@@ -139,7 +141,7 @@ namespace IRacingTools::Shared {
       }
       // publish(
       //   Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED,
-      //   createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED));
+      //   getSessionEventData(Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED));
     } else {
       timing->set_ticks(0);
       timing->set_tick_count(-1);
@@ -160,8 +162,9 @@ namespace IRacingTools::Shared {
     // IF IT DID, UPDATE SUBSCRIBERS
     isConnected_ = isConnected;
     publish(
-      Models::RPC::Events::SESSION_EVENT_TYPE_AVAILABLE,
-      createEventData(Models::RPC::Events::SESSION_EVENT_TYPE_AVAILABLE));
+      Models::RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED,
+      clientProvider(),
+      shared_from_this());
   }
 
   std::int64_t LiveSessionDataProvider::waitForDataDuration() {
@@ -169,21 +172,15 @@ namespace IRacingTools::Shared {
   }
 
 
-  std::shared_ptr<Models::RPC::Events::SessionEventData> LiveSessionDataProvider::createEventData(
+  std::shared_ptr<Models::RPC::Events::SessionEventData> LiveSessionDataProvider::getSessionEventData(
     Models::RPC::Events::SessionEventType type) {
-    auto data = sessionData();
+    auto data = getSessionMetadata();
     auto ev = std::make_shared<Models::RPC::Events::SessionEventData>();
-    // TODO: Revisit ID generation
-    ev->set_id(std::to_string(TimeEpoch().count()));
+
     ev->set_type(type);
     ev->set_session_id(data->id());
     ev->set_session_type(Models::Session::SESSION_TYPE_LIVE);
-
-    // if (type != Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED) {
-      ev->mutable_session_data()->CopyFrom(*data);
-    // } else {
-      // ev->mutable_session_timing()->CopyFrom(data->timing());
-    // }
+    ev->mutable_session_metadata()->CopyFrom(*data);
 
     return ev;
   }
@@ -201,8 +198,8 @@ namespace IRacingTools::Shared {
     return &dataAccess_;
   }
 
-  IRacingSDK::ClientProvider *LiveSessionDataProvider::clientProvider() {
-    return LiveClient::Get().getProvider().get();
+  std::shared_ptr<IRacingSDK::ClientProvider> LiveSessionDataProvider::clientProvider() {
+    return LiveClient::Get().getProvider();
   }
 
   const IRacingSDK::VarHeaders &LiveSessionDataProvider::getDataVariableHeaders() {
@@ -284,8 +281,23 @@ namespace IRacingTools::Shared {
     return std::nullopt;
   }
 
-  std::shared_ptr<Models::Session::SessionMetadata> LiveSessionDataProvider::sessionData() {
+  std::shared_ptr<Models::Session::SessionMetadata> LiveSessionDataProvider::getSessionMetadata(bool includeSessionInfoYaml) {
+    if (includeSessionInfoYaml && sessionData_ && isAvailable()) {
+      auto res = LiveClient::GetInstance().getSessionInfoStr();
+      if (!res) {
+        L->warn("Session info string not available: {}", res.error().what());
+      } else {
+        sessionData_->set_session_info_yaml(res.value());
+      }
+    }
     return sessionData_;
+  }
+
+  const Models::Session::SessionTiming LiveSessionDataProvider::getSessionTiming() {
+    auto metadata = getSessionMetadata();
+    if (!metadata)
+      return Models::Session::SessionTiming();
+    return metadata->timing();
   }
 
   std::string LiveSessionDataProvider::sessionInfoStr() {

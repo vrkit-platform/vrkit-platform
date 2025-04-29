@@ -5,62 +5,25 @@ package IRacingTools.Models.RPC.Events;
 
 enum SessionEventType {
   SESSION_EVENT_TYPE_UNKNOWN = 0;
-  SESSION_EVENT_TYPE_AVAILABLE = 1;
+  SESSION_EVENT_TYPE_SESSION_CHANGED = 1;
   SESSION_EVENT_TYPE_METADATA_CHANGED = 2;
   SESSION_EVENT_TYPE_DATA_FRAME = 3;
-  SESSION_EVENT_TYPE_TIMING_CHANGED = 4;
 }
 
-enum SessionDataVarType {
-  SESSION_DATA_VAR_TYPE_CHAR = 0;
-  SESSION_DATA_VAR_TYPE_BOOL = 1;
-  SESSION_DATA_VAR_TYPE_INT32 = 2;
-  SESSION_DATA_VAR_TYPE_BITMASK = 3;
-  SESSION_DATA_VAR_TYPE_FLOAT = 4;
-  SESSION_DATA_VAR_TYPE_DOUBLE = 5;
+message SessionChangedEvent {
+  bool is_available = 1;
+  optional uint32 session_id = 2;
+  optional Session.SessionMetadata session_metadata = 10;
 }
-
-message SessionDataVarHeader {
-  int32 index = 1;
-  int32 count = 2;
-  SessionDataVarType type = 3;
-
-  string name = 5;
-}
-
-message SessionDataFrame {
-
-  message Value {
-    oneof data {
-      uint32 char_value = 1;
-      bool bool_value = 2;
-      int32 int32_value = 3;
-      uint32 bitmask_value = 4;
-      float float_value = 5;
-      double double_value = 6;
-
-    };
-  }
-
-  message VarValues {
-    int32 header_index = 1;
-    int32 count = 2;
-    SessionDataVarType type = 3;
-    repeated Value slot = 5;
-  }
-
-  map<int32, VarValues> data_values = 10;
-};
 
 message SessionEventData {
-  string id = 1;
-  SessionEventType type = 2;
+  SessionEventType type = 1;
   string session_id = 10;
   Session.SessionType session_type = 11;
 
   oneof payload {
-    Session.SessionTiming session_timing = 51;
-    Session.SessionMetadata session_data = 52;
-    SessionDataFrame session_data_frame = 53;
+    SessionChangedEvent session_changed_event = 50;
+    Session.SessionMetadata session_metadata = 52;
+    Session.SessionDataFrame session_data_frame = 53;
   };
 }

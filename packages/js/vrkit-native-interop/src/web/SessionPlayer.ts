@@ -55,7 +55,7 @@ export interface SessionPlayerEventArgs extends SessionPlayerEventArgMap {
       data:SessionPlayerEventDataDefault
   ) => void
   
-  [SessionEventType.AVAILABLE]:(
+  [SessionEventType.SESSION_CHANGED]:(
       player:SessionPlayer,
       data:SessionPlayerEventDataDefault
   ) => void

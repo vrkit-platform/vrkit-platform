@@ -36,7 +36,8 @@ import {
   SessionDataVariableValueMap,
   SessionEventData,
   SessionEventType,
-  SessionTiming
+  SessionTiming,
+  GetSessionEventPayloadType, IsSessionDataFrameType
 } from "@vrkit-platform/models"
 import { first, flatten, isEmpty, uniq } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
@@ -177,8 +178,9 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       return
     }
 
-    asOption(data.payload.payload)
-        .map(it => it.oneofKind === "sessionData" ? ((it as any).sessionData as SessionMetadata)!!.timing!! : null).ifSome(timing => {
+    asOption(data.payload?.payload)
+        .map(it => GetSessionEventPayloadType("sessionDataFrame", it)?.sessionDataFrame?.timing)
+        .ifSome(timing => {
       container.setDataFrame(timing, dataVarValues)
       // const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession"
         //   ,
@@ -246,11 +248,11 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
     this.configureDataVarNames(player)
 
     const container = new SessionPlayerContainer(sessionId, player)
-    player.on(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
+    player.on(SessionEventType.SESSION_CHANGED, this.onEventSessionStateChange)
     player.on(SessionEventType.METADATA_CHANGED, this.onEventSessionInfoChanged)
     player.on(SessionEventType.DATA_FRAME, this.onEventDataFrame)
     container.disposers.push(() => {
-      player.off(SessionEventType.AVAILABLE, this.onEventSessionStateChange)
+      player.off(SessionEventType.SESSION_CHANGED, this.onEventSessionStateChange)
       player.off(SessionEventType.METADATA_CHANGED, this.onEventSessionInfoChanged)
       player.off(SessionEventType.DATA_FRAME, this.onEventDataFrame)
     })

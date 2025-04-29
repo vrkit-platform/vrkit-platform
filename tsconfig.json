@@ -23,6 +23,9 @@
       "path": "./packages/js/vrkit-shared-ui"
     },
     {
+      "path": "./packages/js/vrkit-dev-tools-cli"
+    },
+    {
       "path": "./packages/js/vrkit-plugin-internal"
     },
   ],

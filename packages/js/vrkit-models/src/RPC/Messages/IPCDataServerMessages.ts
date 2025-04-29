@@ -11,14 +11,16 @@ import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
 import { Any } from "../../google/protobuf/any";
+import { SessionEventType } from "../Events/SessionEvent";
+import { SessionDataVarHeader } from "../../Session/SessionState";
 /**
  * @generated from protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerClientMetadata
  */
 export interface IPCDataServerClientMetadata {
     /**
-     * @generated from protobuf field: string id = 1;
+     * @generated from protobuf field: uint32 id = 1;
      */
-    id: string;
+    id: number;
     /**
      * @generated from protobuf field: string name = 2;
      */
@@ -27,116 +29,110 @@ export interface IPCDataServerClientMetadata {
      * @generated from protobuf field: uint32 pid = 5;
      */
     pid: number;
-    /**
-     * @generated from protobuf field: uint32 connection_id = 10;
-     */
-    connectionId: number;
 }
 /**
- * @generated from protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerState
+ * @generated from protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerSessionDataVarHeaders
  */
-export interface IPCDataServerState {
+export interface IPCDataServerSessionDataVarHeaders {
     /**
-     * @generated from protobuf field: bool session_connected = 1;
+     * @generated from protobuf field: repeated IRacingTools.Models.Session.SessionDataVarHeader headers = 1;
      */
-    sessionConnected: boolean;
-    /**
-     * @generated from protobuf field: int32 session_id = 2;
-     */
-    sessionId: number;
-    /**
-     * @generated from protobuf field: uint32 pid = 3;
-     */
-    pid: number;
-    /**
-     * @generated from protobuf field: string name = 5;
-     */
-    name: string;
-    /**
-     * @generated from protobuf field: map<string, IRacingTools.Models.RPC.DataServer.IPCDataServerClientMetadata> clients = 10;
-     */
-    clients: {
-        [key: string]: IPCDataServerClientMetadata;
-    };
+    headers: SessionDataVarHeader[];
 }
 /**
- * @generated from protobuf message IRacingTools.Models.RPC.DataServer.PongMessage
+ * @generated from protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerSetSubscriptions
  */
-export interface PongMessage {
+export interface IPCDataServerSetSubscriptions {
     /**
-     * @generated from protobuf field: uint32 ping_count = 1;
+     * @generated from protobuf field: repeated IRacingTools.Models.RPC.Events.SessionEventType event_types = 1;
      */
-    pingCount: number;
+    eventTypes: SessionEventType[];
+    /**
+     * @generated from protobuf field: repeated string data_var_header_names = 10;
+     */
+    dataVarHeaderNames: string[];
 }
 /**
- * @generated from protobuf message IRacingTools.Models.RPC.DataServer.ListMessage
+ * @generated from protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerError
  */
-export interface ListMessage {
+export interface IPCDataServerError {
     /**
-     * TARGET TO BE QUERIED; THIS CAN BE ANYTHING I.E. `dashboards`, `overlays`, ETC
-     *  AS LONG AS YOUR ROUTE KNOWS WHAT TO LOOK FOR, ANY VALUE WORKS
-     *
-     * @generated from protobuf field: string subject = 1;
+     * @generated from protobuf field: string code = 1;
      */
-    subject: string;
+    code: string;
     /**
-     * POTENTIALLY A FILTERING QUERY
-     *
-     * @generated from protobuf field: string query = 2;
+     * @generated from protobuf field: string message = 2;
      */
-    query: string;
-    // ARGUMENTS FOR QUERY
-    // map<string, string> parameters = 5;
-
+    message: string;
     /**
-     * RESULT OR REQUEST
-     *
-     * @generated from protobuf field: bool is_result = 10;
+     * @generated from protobuf field: string stack_trace = 3;
      */
-    isResult: boolean;
+    stackTrace: string;
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerMessage
+ */
+export interface IPCDataServerMessage {
     /**
-     * @generated from protobuf field: int32 results_page = 11;
+     * @generated from protobuf field: IRacingTools.Models.RPC.DataServer.IPCDataServerMessage.Type type = 1;
      */
-    resultsPage: number;
+    type: IPCDataServerMessage_Type;
     /**
-     * IF `results_per_page == -1` ALL RESULTS SHOULD BE RETURNED
-     *
-     * @generated from protobuf field: int32 results_per_page = 12;
+     * @generated from protobuf field: optional IRacingTools.Models.RPC.Events.SessionEventType event_type = 2;
      */
-    resultsPerPage: number;
+    eventType?: SessionEventType;
     /**
-     * @generated from protobuf field: uint32 results_count = 13;
+     * @generated from protobuf field: bool is_error = 8;
      */
-    resultsCount: number;
+    isError: boolean;
     /**
-     * `ANY[]` WITH RESULTS TO BE UNPACKED
-     *
-     * @generated from protobuf field: repeated google.protobuf.Any results = 20;
+     * @generated from protobuf field: optional IRacingTools.Models.RPC.DataServer.IPCDataServerError error = 9;
      */
-    results: Any[];
+    error?: IPCDataServerError;
     /**
-     * ANY ERROR
-     *
-     * @generated from protobuf field: string error_details = 60;
+     * @generated from protobuf field: google.protobuf.Any payload = 10;
      */
-    errorDetails: string;
+    payload?: Any;
+}
+/**
+ * @generated from protobuf enum IRacingTools.Models.RPC.DataServer.IPCDataServerMessage.Type
+ */
+export enum IPCDataServerMessage_Type {
+    /**
+     * @generated from protobuf enum value: TYPE_EVENT = 0;
+     */
+    EVENT = 0,
+    /**
+     * @generated from protobuf enum value: TYPE_SET_CLIENT_METADATA = 1;
+     */
+    SET_CLIENT_METADATA = 1,
+    /**
+     * @generated from protobuf enum value: TYPE_GET_SESSION_METADATA = 3;
+     */
+    GET_SESSION_METADATA = 3,
+    /**
+     * @generated from protobuf enum value: TYPE_GET_SESSION_DATA_HEADERS = 4;
+     */
+    GET_SESSION_DATA_HEADERS = 4,
+    /**
+     * @generated from protobuf enum value: TYPE_SET_SUBSCRIPTIONS = 5;
+     */
+    SET_SUBSCRIPTIONS = 5
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class IPCDataServerClientMetadata$Type extends MessageType<IPCDataServerClientMetadata> {
     constructor() {
         super("IRacingTools.Models.RPC.DataServer.IPCDataServerClientMetadata", [
-            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 1, name: "id", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
             { no: 2, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "pid", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
-            { no: 10, name: "connection_id", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
+            { no: 5, name: "pid", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
         ]);
     }
     create(value?: PartialMessage<IPCDataServerClientMetadata>): IPCDataServerClientMetadata {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.id = "";
+        message.id = 0;
         message.name = "";
         message.pid = 0;
-        message.connectionId = 0;
         if (value !== undefined)
             reflectionMergePartial<IPCDataServerClientMetadata>(this, message, value);
         return message;
@@ -146,17 +142,14 @@ class IPCDataServerClientMetadata$Type extends MessageType<IPCDataServerClientMe
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string id */ 1:
-                    message.id = reader.string();
+                case /* uint32 id */ 1:
+                    message.id = reader.uint32();
                     break;
                 case /* string name */ 2:
                     message.name = reader.string();
                     break;
                 case /* uint32 pid */ 5:
                     message.pid = reader.uint32();
-                    break;
-                case /* uint32 connection_id */ 10:
-                    message.connectionId = reader.uint32();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -170,18 +163,15 @@ class IPCDataServerClientMetadata$Type extends MessageType<IPCDataServerClientMe
         return message;
     }
     internalBinaryWrite(message: IPCDataServerClientMetadata, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string id = 1; */
-        if (message.id !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.id);
+        /* uint32 id = 1; */
+        if (message.id !== 0)
+            writer.tag(1, WireType.Varint).uint32(message.id);
         /* string name = 2; */
         if (message.name !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.name);
         /* uint32 pid = 5; */
         if (message.pid !== 0)
             writer.tag(5, WireType.Varint).uint32(message.pid);
-        /* uint32 connection_id = 10; */
-        if (message.connectionId !== 0)
-            writer.tag(10, WireType.Varint).uint32(message.connectionId);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -193,46 +183,26 @@ class IPCDataServerClientMetadata$Type extends MessageType<IPCDataServerClientMe
  */
 export const IPCDataServerClientMetadata = new IPCDataServerClientMetadata$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class IPCDataServerState$Type extends MessageType<IPCDataServerState> {
+class IPCDataServerSessionDataVarHeaders$Type extends MessageType<IPCDataServerSessionDataVarHeaders> {
     constructor() {
-        super("IRacingTools.Models.RPC.DataServer.IPCDataServerState", [
-            { no: 1, name: "session_connected", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 2, name: "session_id", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
-            { no: 3, name: "pid", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
-            { no: 5, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 10, name: "clients", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "message", T: () => IPCDataServerClientMetadata } }
+        super("IRacingTools.Models.RPC.DataServer.IPCDataServerSessionDataVarHeaders", [
+            { no: 1, name: "headers", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => SessionDataVarHeader }
         ]);
     }
-    create(value?: PartialMessage<IPCDataServerState>): IPCDataServerState {
+    create(value?: PartialMessage<IPCDataServerSessionDataVarHeaders>): IPCDataServerSessionDataVarHeaders {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.sessionConnected = false;
-        message.sessionId = 0;
-        message.pid = 0;
-        message.name = "";
-        message.clients = {};
+        message.headers = [];
         if (value !== undefined)
-            reflectionMergePartial<IPCDataServerState>(this, message, value);
+            reflectionMergePartial<IPCDataServerSessionDataVarHeaders>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: IPCDataServerState): IPCDataServerState {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: IPCDataServerSessionDataVarHeaders): IPCDataServerSessionDataVarHeaders {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* bool session_connected */ 1:
-                    message.sessionConnected = reader.bool();
-                    break;
-                case /* int32 session_id */ 2:
-                    message.sessionId = reader.int32();
-                    break;
-                case /* uint32 pid */ 3:
-                    message.pid = reader.uint32();
-                    break;
-                case /* string name */ 5:
-                    message.name = reader.string();
-                    break;
-                case /* map<string, IRacingTools.Models.RPC.DataServer.IPCDataServerClientMetadata> clients */ 10:
-                    this.binaryReadMap10(message.clients, reader, options);
+                case /* repeated IRacingTools.Models.Session.SessionDataVarHeader headers */ 1:
+                    message.headers.push(SessionDataVarHeader.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -245,42 +215,10 @@ class IPCDataServerState$Type extends MessageType<IPCDataServerState> {
         }
         return message;
     }
-    private binaryReadMap10(map: IPCDataServerState["clients"], reader: IBinaryReader, options: BinaryReadOptions): void {
-        let len = reader.uint32(), end = reader.pos + len, key: keyof IPCDataServerState["clients"] | undefined, val: IPCDataServerState["clients"][any] | undefined;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case 1:
-                    key = reader.string();
-                    break;
-                case 2:
-                    val = IPCDataServerClientMetadata.internalBinaryRead(reader, reader.uint32(), options);
-                    break;
-                default: throw new globalThis.Error("unknown map entry field for field IRacingTools.Models.RPC.DataServer.IPCDataServerState.clients");
-            }
-        }
-        map[key ?? ""] = val ?? IPCDataServerClientMetadata.create();
-    }
-    internalBinaryWrite(message: IPCDataServerState, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* bool session_connected = 1; */
-        if (message.sessionConnected !== false)
-            writer.tag(1, WireType.Varint).bool(message.sessionConnected);
-        /* int32 session_id = 2; */
-        if (message.sessionId !== 0)
-            writer.tag(2, WireType.Varint).int32(message.sessionId);
-        /* uint32 pid = 3; */
-        if (message.pid !== 0)
-            writer.tag(3, WireType.Varint).uint32(message.pid);
-        /* string name = 5; */
-        if (message.name !== "")
-            writer.tag(5, WireType.LengthDelimited).string(message.name);
-        /* map<string, IRacingTools.Models.RPC.DataServer.IPCDataServerClientMetadata> clients = 10; */
-        for (let k of globalThis.Object.keys(message.clients)) {
-            writer.tag(10, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k);
-            writer.tag(2, WireType.LengthDelimited).fork();
-            IPCDataServerClientMetadata.internalBinaryWrite(message.clients[k], writer, options);
-            writer.join().join();
-        }
+    internalBinaryWrite(message: IPCDataServerSessionDataVarHeaders, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated IRacingTools.Models.Session.SessionDataVarHeader headers = 1; */
+        for (let i = 0; i < message.headers.length; i++)
+            SessionDataVarHeader.internalBinaryWrite(message.headers[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -288,30 +226,39 @@ class IPCDataServerState$Type extends MessageType<IPCDataServerState> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerState
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerSessionDataVarHeaders
  */
-export const IPCDataServerState = new IPCDataServerState$Type();
+export const IPCDataServerSessionDataVarHeaders = new IPCDataServerSessionDataVarHeaders$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class PongMessage$Type extends MessageType<PongMessage> {
+class IPCDataServerSetSubscriptions$Type extends MessageType<IPCDataServerSetSubscriptions> {
     constructor() {
-        super("IRacingTools.Models.RPC.DataServer.PongMessage", [
-            { no: 1, name: "ping_count", kind: "scalar", T: 13 /*ScalarType.UINT32*/ }
+        super("IRacingTools.Models.RPC.DataServer.IPCDataServerSetSubscriptions", [
+            { no: 1, name: "event_types", kind: "enum", repeat: 1 /*RepeatType.PACKED*/, T: () => ["IRacingTools.Models.RPC.Events.SessionEventType", SessionEventType, "SESSION_EVENT_TYPE_"] },
+            { no: 10, name: "data_var_header_names", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<PongMessage>): PongMessage {
+    create(value?: PartialMessage<IPCDataServerSetSubscriptions>): IPCDataServerSetSubscriptions {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.pingCount = 0;
+        message.eventTypes = [];
+        message.dataVarHeaderNames = [];
         if (value !== undefined)
-            reflectionMergePartial<PongMessage>(this, message, value);
+            reflectionMergePartial<IPCDataServerSetSubscriptions>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: PongMessage): PongMessage {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: IPCDataServerSetSubscriptions): IPCDataServerSetSubscriptions {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* uint32 ping_count */ 1:
-                    message.pingCount = reader.uint32();
+                case /* repeated IRacingTools.Models.RPC.Events.SessionEventType event_types */ 1:
+                    if (wireType === WireType.LengthDelimited)
+                        for (let e = reader.int32() + reader.pos; reader.pos < e;)
+                            message.eventTypes.push(reader.int32());
+                    else
+                        message.eventTypes.push(reader.int32());
+                    break;
+                case /* repeated string data_var_header_names */ 10:
+                    message.dataVarHeaderNames.push(reader.string());
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -324,10 +271,17 @@ class PongMessage$Type extends MessageType<PongMessage> {
         }
         return message;
     }
-    internalBinaryWrite(message: PongMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* uint32 ping_count = 1; */
-        if (message.pingCount !== 0)
-            writer.tag(1, WireType.Varint).uint32(message.pingCount);
+    internalBinaryWrite(message: IPCDataServerSetSubscriptions, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated IRacingTools.Models.RPC.Events.SessionEventType event_types = 1; */
+        if (message.eventTypes.length) {
+            writer.tag(1, WireType.LengthDelimited).fork();
+            for (let i = 0; i < message.eventTypes.length; i++)
+                writer.int32(message.eventTypes[i]);
+            writer.join();
+        }
+        /* repeated string data_var_header_names = 10; */
+        for (let i = 0; i < message.dataVarHeaderNames.length; i++)
+            writer.tag(10, WireType.LengthDelimited).string(message.dataVarHeaderNames[i]);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -335,65 +289,40 @@ class PongMessage$Type extends MessageType<PongMessage> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.RPC.DataServer.PongMessage
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerSetSubscriptions
  */
-export const PongMessage = new PongMessage$Type();
+export const IPCDataServerSetSubscriptions = new IPCDataServerSetSubscriptions$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class ListMessage$Type extends MessageType<ListMessage> {
+class IPCDataServerError$Type extends MessageType<IPCDataServerError> {
     constructor() {
-        super("IRacingTools.Models.RPC.DataServer.ListMessage", [
-            { no: 1, name: "subject", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "query", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 10, name: "is_result", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 11, name: "results_page", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
-            { no: 12, name: "results_per_page", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
-            { no: 13, name: "results_count", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
-            { no: 20, name: "results", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => Any },
-            { no: 60, name: "error_details", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        super("IRacingTools.Models.RPC.DataServer.IPCDataServerError", [
+            { no: 1, name: "code", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "message", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "stack_trace", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<ListMessage>): ListMessage {
+    create(value?: PartialMessage<IPCDataServerError>): IPCDataServerError {
         const message = globalThis.Object.create((this.messagePrototype!));
-        message.subject = "";
-        message.query = "";
-        message.isResult = false;
-        message.resultsPage = 0;
-        message.resultsPerPage = 0;
-        message.resultsCount = 0;
-        message.results = [];
-        message.errorDetails = "";
+        message.code = "";
+        message.message = "";
+        message.stackTrace = "";
         if (value !== undefined)
-            reflectionMergePartial<ListMessage>(this, message, value);
+            reflectionMergePartial<IPCDataServerError>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: ListMessage): ListMessage {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: IPCDataServerError): IPCDataServerError {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string subject */ 1:
-                    message.subject = reader.string();
+                case /* string code */ 1:
+                    message.code = reader.string();
                     break;
-                case /* string query */ 2:
-                    message.query = reader.string();
+                case /* string message */ 2:
+                    message.message = reader.string();
                     break;
-                case /* bool is_result */ 10:
-                    message.isResult = reader.bool();
-                    break;
-                case /* int32 results_page */ 11:
-                    message.resultsPage = reader.int32();
-                    break;
-                case /* int32 results_per_page */ 12:
-                    message.resultsPerPage = reader.int32();
-                    break;
-                case /* uint32 results_count */ 13:
-                    message.resultsCount = reader.uint32();
-                    break;
-                case /* repeated google.protobuf.Any results */ 20:
-                    message.results.push(Any.internalBinaryRead(reader, reader.uint32(), options));
-                    break;
-                case /* string error_details */ 60:
-                    message.errorDetails = reader.string();
+                case /* string stack_trace */ 3:
+                    message.stackTrace = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -406,31 +335,16 @@ class ListMessage$Type extends MessageType<ListMessage> {
         }
         return message;
     }
-    internalBinaryWrite(message: ListMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string subject = 1; */
-        if (message.subject !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.subject);
-        /* string query = 2; */
-        if (message.query !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.query);
-        /* bool is_result = 10; */
-        if (message.isResult !== false)
-            writer.tag(10, WireType.Varint).bool(message.isResult);
-        /* int32 results_page = 11; */
-        if (message.resultsPage !== 0)
-            writer.tag(11, WireType.Varint).int32(message.resultsPage);
-        /* int32 results_per_page = 12; */
-        if (message.resultsPerPage !== 0)
-            writer.tag(12, WireType.Varint).int32(message.resultsPerPage);
-        /* uint32 results_count = 13; */
-        if (message.resultsCount !== 0)
-            writer.tag(13, WireType.Varint).uint32(message.resultsCount);
-        /* repeated google.protobuf.Any results = 20; */
-        for (let i = 0; i < message.results.length; i++)
-            Any.internalBinaryWrite(message.results[i], writer.tag(20, WireType.LengthDelimited).fork(), options).join();
-        /* string error_details = 60; */
-        if (message.errorDetails !== "")
-            writer.tag(60, WireType.LengthDelimited).string(message.errorDetails);
+    internalBinaryWrite(message: IPCDataServerError, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string code = 1; */
+        if (message.code !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.code);
+        /* string message = 2; */
+        if (message.message !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.message);
+        /* string stack_trace = 3; */
+        if (message.stackTrace !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.stackTrace);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -438,6 +352,82 @@ class ListMessage$Type extends MessageType<ListMessage> {
     }
 }
 /**
- * @generated MessageType for protobuf message IRacingTools.Models.RPC.DataServer.ListMessage
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerError
  */
-export const ListMessage = new ListMessage$Type();
+export const IPCDataServerError = new IPCDataServerError$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class IPCDataServerMessage$Type extends MessageType<IPCDataServerMessage> {
+    constructor() {
+        super("IRacingTools.Models.RPC.DataServer.IPCDataServerMessage", [
+            { no: 1, name: "type", kind: "enum", T: () => ["IRacingTools.Models.RPC.DataServer.IPCDataServerMessage.Type", IPCDataServerMessage_Type, "TYPE_"] },
+            { no: 2, name: "event_type", kind: "enum", opt: true, T: () => ["IRacingTools.Models.RPC.Events.SessionEventType", SessionEventType, "SESSION_EVENT_TYPE_"] },
+            { no: 8, name: "is_error", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
+            { no: 9, name: "error", kind: "message", T: () => IPCDataServerError },
+            { no: 10, name: "payload", kind: "message", T: () => Any }
+        ]);
+    }
+    create(value?: PartialMessage<IPCDataServerMessage>): IPCDataServerMessage {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.type = 0;
+        message.isError = false;
+        if (value !== undefined)
+            reflectionMergePartial<IPCDataServerMessage>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: IPCDataServerMessage): IPCDataServerMessage {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* IRacingTools.Models.RPC.DataServer.IPCDataServerMessage.Type type */ 1:
+                    message.type = reader.int32();
+                    break;
+                case /* optional IRacingTools.Models.RPC.Events.SessionEventType event_type */ 2:
+                    message.eventType = reader.int32();
+                    break;
+                case /* bool is_error */ 8:
+                    message.isError = reader.bool();
+                    break;
+                case /* optional IRacingTools.Models.RPC.DataServer.IPCDataServerError error */ 9:
+                    message.error = IPCDataServerError.internalBinaryRead(reader, reader.uint32(), options, message.error);
+                    break;
+                case /* google.protobuf.Any payload */ 10:
+                    message.payload = Any.internalBinaryRead(reader, reader.uint32(), options, message.payload);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: IPCDataServerMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* IRacingTools.Models.RPC.DataServer.IPCDataServerMessage.Type type = 1; */
+        if (message.type !== 0)
+            writer.tag(1, WireType.Varint).int32(message.type);
+        /* optional IRacingTools.Models.RPC.Events.SessionEventType event_type = 2; */
+        if (message.eventType !== undefined)
+            writer.tag(2, WireType.Varint).int32(message.eventType);
+        /* bool is_error = 8; */
+        if (message.isError !== false)
+            writer.tag(8, WireType.Varint).bool(message.isError);
+        /* optional IRacingTools.Models.RPC.DataServer.IPCDataServerError error = 9; */
+        if (message.error)
+            IPCDataServerError.internalBinaryWrite(message.error, writer.tag(9, WireType.LengthDelimited).fork(), options).join();
+        /* google.protobuf.Any payload = 10; */
+        if (message.payload)
+            Any.internalBinaryWrite(message.payload, writer.tag(10, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.DataServer.IPCDataServerMessage
+ */
+export const IPCDataServerMessage = new IPCDataServerMessage$Type();

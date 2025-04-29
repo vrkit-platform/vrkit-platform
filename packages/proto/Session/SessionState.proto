@@ -90,3 +90,45 @@ message SessionMetadata {
   string session_info_json = 90;
   string session_info_yaml = 91;
 }
+
+enum SessionDataVarType {
+  SESSION_DATA_VAR_TYPE_CHAR = 0;
+  SESSION_DATA_VAR_TYPE_BOOL = 1;
+  SESSION_DATA_VAR_TYPE_INT32 = 2;
+  SESSION_DATA_VAR_TYPE_BITMASK = 3;
+  SESSION_DATA_VAR_TYPE_FLOAT = 4;
+  SESSION_DATA_VAR_TYPE_DOUBLE = 5;
+}
+
+message SessionDataVarHeader {
+  int32 index = 1;
+  int32 count = 2;
+  SessionDataVarType type = 3;
+
+  string name = 5;
+}
+
+message SessionDataFrame {
+
+  message Value {
+    oneof data {
+      uint32 char_value = 1;
+      bool bool_value = 2;
+      int32 int32_value = 3;
+      uint32 bitmask_value = 4;
+      float float_value = 5;
+      double double_value = 6;
+
+    };
+  }
+
+  message VarValues {
+    int32 index = 1;
+    int32 count = 2;
+    SessionDataVarType type = 3;
+    repeated Value slot = 5;
+  }
+
+  SessionTiming timing = 1;
+  map<int32, VarValues> data_values = 10;
+};

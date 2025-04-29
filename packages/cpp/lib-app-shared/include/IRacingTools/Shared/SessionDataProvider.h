@@ -18,7 +18,9 @@ namespace IRacingTools::Shared {
    */
   //, std::shared_ptr<SessionDataEvent>
   class SessionDataProvider : public IRacingSDK::Utils::EventEmitter<
-      Models::RPC::Events::SessionEventType, std::shared_ptr<Models::RPC::Events::SessionEventData>> {
+      Models::RPC::Events::SessionEventType,
+      const std::shared_ptr<IRacingSDK::ClientProvider>&,
+      const std::shared_ptr<SessionDataProvider>&> {
   public:
 
     using SessionDataProviderPtr = std::shared_ptr<SessionDataProvider>;
@@ -31,7 +33,9 @@ namespace IRacingTools::Shared {
 
     virtual SessionDataAccess* dataAccessPtr() = 0;
 
-    virtual IRacingSDK::ClientProvider* clientProvider() = 0;
+    virtual std::shared_ptr<IRacingSDK::ClientProvider> clientProvider() = 0;
+
+    virtual std::shared_ptr<Models::RPC::Events::SessionEventData> getSessionEventData(Models::RPC::Events::SessionEventType type) = 0;
 
     virtual bool isAvailable() = 0;
 
@@ -66,7 +70,9 @@ namespace IRacingTools::Shared {
      *
      * @return current timing ref
      */
-    virtual std::shared_ptr<Models::Session::SessionMetadata> sessionData() = 0;
+    virtual std::shared_ptr<Models::Session::SessionMetadata> getSessionMetadata(bool includeSessionInfoYaml = false) = 0;
+
+    virtual const Models::Session::SessionTiming getSessionTiming() = 0;
 
     virtual std::string sessionInfoStr() = 0;
 

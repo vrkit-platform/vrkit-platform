@@ -68,6 +68,9 @@
   }, {
     "name" : "grpc",
     "version>=" : "1.70.1"
+  }, {
+    "name" : "icu",
+    "version>=" : "74.2#5"
   } ],
   "overrides" : [ {
     "name" : "directxtk",

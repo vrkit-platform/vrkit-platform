@@ -20,7 +20,9 @@
 
 #include "IPCDataServerArgCommand.h"
 
-#include <IRacingTools/Shared/Services/IPCDataServerService.h>
+#include <IRacingTools/Shared/DiskSessionDataProvider.h>
+#include <IRacingTools/Shared/LiveSessionDataProvider.h>
+#include <IRacingTools/Shared/Services/IRacingIPCServer.h>
 #include <IRacingTools/Shared/Services/ServiceManager.h>
 #include <yaml-cpp/yaml.h>
 
@@ -38,7 +40,7 @@ namespace IRacingTools::App::Commands {
 
   namespace {
     auto L = Logging::GetCategoryWithType<IPCDataServerArgCommand>();
-    using ServiceManagerType = ServiceManager<IPCDataServerService>;
+    using ServiceManagerType = ServiceManager<IRacingIPCServer>;
 
     std::shared_ptr<ServiceManagerType> gServiceManager{nullptr};
 
@@ -81,8 +83,19 @@ namespace IRacingTools::App::Commands {
         signaled.notify_all();
       }
     });
-    manager->init();
 
+    manager->init();
+    auto ipcServer = manager->getService<IRacingIPCServer>();
+    if (useLive) {
+      ipcServer->setDataProvider(std::make_shared<LiveSessionDataProvider>());
+    } else {
+auto diskProvider = std::make_shared<DiskSessionDataProvider>(ibtPath, ibtPath);
+      ipcServer->setDataProvider(diskProvider);
+      // if (!diskProvider->start()) {
+      //   L->error("Unable to start DiskSessionDataProvider ({}), exiting", ibtPath);
+      //   return 1;
+      // }
+    }
     std::signal(SIGINT, SignalHandler);
     manager->start();
 
@@ -95,29 +108,6 @@ namespace IRacingTools::App::Commands {
         });
       }
     }
-
-    // auto serverInstance = NamedPipeServer::Create(
-    //   IPC_DATA_SERVER_PIPE_NAME,
-    //   [&](
-    //   std::size_t size,
-    //   const BYTE* data,
-    //   auto header,
-    //   std::shared_ptr<NamedPipeConnection> connection,
-    //   std::shared_ptr<NamedPipeServer> _server
-    // ) {
-    //     std::string payload(reinterpret_cast<const char*>(data), size);
-    //     spdlog::info(
-    //       "Connection({}).onMessage(clientId={},messageId={},messageSourceId={}): {}",
-    //       connection->id(),
-    //       header->clientId,
-    //       header->id,
-    //       header->sourceId,
-    //       payload
-    //     );
-    //   }
-    // );
-    //
-    // serverInstance->start(true);
 
     return 0;
   }

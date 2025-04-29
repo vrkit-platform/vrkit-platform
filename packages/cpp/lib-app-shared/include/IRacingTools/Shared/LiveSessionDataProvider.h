@@ -14,79 +14,95 @@
 
 namespace IRacingTools::Shared {
 
-  class LiveSessionDataProvider final : public SessionDataProvider {
+  class LiveSessionDataProvider final : public SessionDataProvider,
+                                        public std::enable_shared_from_this<LiveSessionDataProvider> {
 
-  public:
-    LiveSessionDataProvider();
+    public:
 
-    virtual ~LiveSessionDataProvider() override;
+      LiveSessionDataProvider();
 
-    bool isAvailable() override;
-    bool start() override;
+      virtual ~LiveSessionDataProvider() override;
 
-    bool isRunning() override;
+      bool isAvailable() override;
 
-    void stop() override;
+      bool start() override;
 
-    virtual bool isControllable() const override {
-      return false;
-    };
+      bool isRunning() override;
 
-    virtual bool isPaused() override;
-    virtual bool pause() override;
-    virtual bool resume() override;
+      void stop() override;
 
-    virtual std::optional<std::int32_t> sessionTicks() override;
-    virtual std::optional<std::int32_t> sessionTickCount() override;
+      virtual bool isControllable() const override {
+        return false;
+      };
 
-    virtual std::shared_ptr<Models::Session::SessionMetadata> sessionData() override;
+      virtual bool isPaused() override;
 
-    virtual std::string sessionInfoStr() override;
-    virtual std::shared_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
+      virtual bool pause() override;
 
-    virtual bool isLive() const override;
+      virtual bool resume() override;
 
-    virtual SessionDataAccess& dataAccess() override;
-    virtual SessionDataAccess* dataAccessPtr() override;
-    virtual IRacingSDK::ClientProvider * clientProvider() override;
+      virtual std::optional<std::int32_t> sessionTicks() override;
 
-    virtual const IRacingSDK::VarHeaders& getDataVariableHeaders() override;
+      virtual std::optional<std::int32_t> sessionTickCount() override;
 
-  protected:
-    void runnable();
+      virtual std::shared_ptr<Models::Session::SessionMetadata> getSessionMetadata(bool includeSessionInfoYaml = false) override;
+      virtual const Models::Session::SessionTiming getSessionTiming() override;
 
-  private:
-    /**
-     * @brief Initialize, this internal & invoked from the runnable call
-     */
-    void init();
+      virtual std::shared_ptr<Models::RPC::Events::SessionEventData> getSessionEventData(
+        Models::RPC::Events::SessionEventType type
+      ) override;
 
-    /**
-     * @brief Called on each data sample/record/entry
-     */
-    void process();
+      virtual std::string sessionInfoStr() override;
 
-    void updateSessionTiming();
-    void processData();
+      virtual std::shared_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo() override;
 
-    // void processDataUpdate();
+      virtual bool isLive() const override;
 
-    void checkConnection();
+      virtual SessionDataAccess& dataAccess() override;
 
-    std::int64_t waitForDataDuration();
+      virtual SessionDataAccess* dataAccessPtr() override;
 
-    std::shared_ptr<Models::RPC::Events::SessionEventData> createEventData(Models::RPC::Events::SessionEventType type);
+      virtual std::shared_ptr<IRacingSDK::ClientProvider> clientProvider() override;
 
-    SessionDataAccess dataAccess_;
-    std::unique_ptr<std::thread> thread_{nullptr};
-    std::mutex threadMutex_{};
+      virtual const IRacingSDK::VarHeaders& getDataVariableHeaders() override;
 
-    std::atomic_bool running_{false};
-    std::atomic_bool isConnected_{false};
-    DWORD lastUpdatedTime_{0};
-    
-    std::shared_ptr<Models::Session::SessionMetadata> sessionData_{};
+    protected:
+
+      void runnable();
+
+    private:
+
+      /**
+       * @brief Initialize, this internal & invoked from the runnable call
+       */
+      void init();
+
+      /**
+       * @brief Called on each data sample/record/entry
+       */
+      void process();
+
+      void updateSessionTiming();
+
+      void processData();
+
+      // void processDataUpdate();
+
+      void checkConnection();
+
+      std::int64_t waitForDataDuration();
+
+
+      SessionDataAccess dataAccess_;
+      std::unique_ptr<std::thread> thread_{nullptr};
+      std::mutex threadMutex_{};
+
+      std::atomic_bool running_{false};
+      std::atomic_bool isConnected_{false};
+      DWORD lastUpdatedTime_{0};
+
+      std::shared_ptr<Models::Session::SessionMetadata> sessionData_{};
   };
 
 
-}// namespace IRacingTools::Shared
+} // namespace IRacingTools::Shared

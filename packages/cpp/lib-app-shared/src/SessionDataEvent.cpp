@@ -21,15 +21,15 @@ namespace IRacingTools::Shared {
     }
   }// namespace
 
-  SessionDataEvent::SessionDataEvent(SessionDataEventType type) : type_(type) {
+  SessionDataEvent::SessionDataEvent(Models::RPC::Events::SessionEventType type) : type_(type) {
   }
 
 
-  SessionDataEventType SessionDataEvent::type() {
+  Models::RPC::Events::SessionEventType SessionDataEvent::type() {
     return type_;
   }
 
-  SessionDataUpdatedDataEvent::SessionDataUpdatedDataEvent(SessionDataEventType type, SessionDataAccess *dataAccess)
+  SessionDataUpdatedDataEvent::SessionDataUpdatedDataEvent(Models::RPC::Events::SessionEventType type, SessionDataAccess *dataAccess)
       : SessionDataEvent(type), dataAccess_(dataAccess) {
     refresh();
   }
@@ -103,13 +103,13 @@ namespace IRacingTools::Shared {
   std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedDataEvent::sessionInfo() {
     return sessionInfo_;
   }
-
-  SessionDataUpdatedInfoEvent::SessionDataUpdatedInfoEvent(
-      std::weak_ptr<SessionInfo::SessionInfoMessage> newSessionInfo)
-      : SessionDataEvent(SessionDataEventType::UpdatedInfo), sessionInfo_(newSessionInfo) {
-  }
-
-  std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedInfoEvent::sessionInfo() {
-    return sessionInfo_;
-  }
+  //
+  // SessionDataUpdatedInfoEvent::SessionDataUpdatedInfoEvent(
+  //     std::weak_ptr<SessionInfo::SessionInfoMessage> newSessionInfo)
+  //     : SessionDataEvent(Models::RPC::Events::SessionEventType::UpdatedInfo), sessionInfo_(newSessionInfo) {
+  // }
+  //
+  // std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> SessionDataUpdatedInfoEvent::sessionInfo() {
+  //   return sessionInfo_;
+  // }
 }// namespace IRacingTools::Shared

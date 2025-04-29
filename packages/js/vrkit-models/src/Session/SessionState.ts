@@ -139,6 +139,110 @@ export interface SessionMetadata {
     sessionInfoYaml: string;
 }
 /**
+ * @generated from protobuf message IRacingTools.Models.Session.SessionDataVarHeader
+ */
+export interface SessionDataVarHeader {
+    /**
+     * @generated from protobuf field: int32 index = 1;
+     */
+    index: number;
+    /**
+     * @generated from protobuf field: int32 count = 2;
+     */
+    count: number;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionDataVarType type = 3;
+     */
+    type: SessionDataVarType;
+    /**
+     * @generated from protobuf field: string name = 5;
+     */
+    name: string;
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.Session.SessionDataFrame
+ */
+export interface SessionDataFrame {
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionTiming timing = 1;
+     */
+    timing?: SessionTiming;
+    /**
+     * @generated from protobuf field: map<int32, IRacingTools.Models.Session.SessionDataFrame.VarValues> data_values = 10;
+     */
+    dataValues: {
+        [key: number]: SessionDataFrame_VarValues;
+    };
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.Session.SessionDataFrame.Value
+ */
+export interface SessionDataFrame_Value {
+    /**
+     * @generated from protobuf oneof: data
+     */
+    data: {
+        oneofKind: "charValue";
+        /**
+         * @generated from protobuf field: uint32 char_value = 1;
+         */
+        charValue: number;
+    } | {
+        oneofKind: "boolValue";
+        /**
+         * @generated from protobuf field: bool bool_value = 2;
+         */
+        boolValue: boolean;
+    } | {
+        oneofKind: "int32Value";
+        /**
+         * @generated from protobuf field: int32 int32_value = 3;
+         */
+        int32Value: number;
+    } | {
+        oneofKind: "bitmaskValue";
+        /**
+         * @generated from protobuf field: uint32 bitmask_value = 4;
+         */
+        bitmaskValue: number;
+    } | {
+        oneofKind: "floatValue";
+        /**
+         * @generated from protobuf field: float float_value = 5;
+         */
+        floatValue: number;
+    } | {
+        oneofKind: "doubleValue";
+        /**
+         * @generated from protobuf field: double double_value = 6;
+         */
+        doubleValue: number;
+    } | {
+        oneofKind: undefined;
+    };
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.Session.SessionDataFrame.VarValues
+ */
+export interface SessionDataFrame_VarValues {
+    /**
+     * @generated from protobuf field: int32 index = 1;
+     */
+    index: number;
+    /**
+     * @generated from protobuf field: int32 count = 2;
+     */
+    count: number;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionDataVarType type = 3;
+     */
+    type: SessionDataVarType;
+    /**
+     * @generated from protobuf field: repeated IRacingTools.Models.Session.SessionDataFrame.Value slot = 5;
+     */
+    slot: SessionDataFrame_Value[];
+}
+/**
  * Enum representing the sub-types of a session. This distinguishes
  * specific parts of a session, such as practice, qualifying, or race phases.
  *
@@ -249,6 +353,35 @@ export enum SessionStatus {
      * @generated from protobuf enum value: SESSION_STATUS_ERROR = 10;
      */
     ERROR = 10
+}
+/**
+ * @generated from protobuf enum IRacingTools.Models.Session.SessionDataVarType
+ */
+export enum SessionDataVarType {
+    /**
+     * @generated from protobuf enum value: SESSION_DATA_VAR_TYPE_CHAR = 0;
+     */
+    CHAR = 0,
+    /**
+     * @generated from protobuf enum value: SESSION_DATA_VAR_TYPE_BOOL = 1;
+     */
+    BOOL = 1,
+    /**
+     * @generated from protobuf enum value: SESSION_DATA_VAR_TYPE_INT32 = 2;
+     */
+    INT32 = 2,
+    /**
+     * @generated from protobuf enum value: SESSION_DATA_VAR_TYPE_BITMASK = 3;
+     */
+    BITMASK = 3,
+    /**
+     * @generated from protobuf enum value: SESSION_DATA_VAR_TYPE_FLOAT = 4;
+     */
+    FLOAT = 4,
+    /**
+     * @generated from protobuf enum value: SESSION_DATA_VAR_TYPE_DOUBLE = 5;
+     */
+    DOUBLE = 5
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class SessionTiming$Type extends MessageType<SessionTiming> {
@@ -557,3 +690,319 @@ class SessionMetadata$Type extends MessageType<SessionMetadata> {
  * @generated MessageType for protobuf message IRacingTools.Models.Session.SessionMetadata
  */
 export const SessionMetadata = new SessionMetadata$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SessionDataVarHeader$Type extends MessageType<SessionDataVarHeader> {
+    constructor() {
+        super("IRacingTools.Models.Session.SessionDataVarHeader", [
+            { no: 1, name: "index", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 2, name: "count", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 3, name: "type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionDataVarType", SessionDataVarType, "SESSION_DATA_VAR_TYPE_"] },
+            { no: 5, name: "name", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<SessionDataVarHeader>): SessionDataVarHeader {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.index = 0;
+        message.count = 0;
+        message.type = 0;
+        message.name = "";
+        if (value !== undefined)
+            reflectionMergePartial<SessionDataVarHeader>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SessionDataVarHeader): SessionDataVarHeader {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int32 index */ 1:
+                    message.index = reader.int32();
+                    break;
+                case /* int32 count */ 2:
+                    message.count = reader.int32();
+                    break;
+                case /* IRacingTools.Models.Session.SessionDataVarType type */ 3:
+                    message.type = reader.int32();
+                    break;
+                case /* string name */ 5:
+                    message.name = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SessionDataVarHeader, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int32 index = 1; */
+        if (message.index !== 0)
+            writer.tag(1, WireType.Varint).int32(message.index);
+        /* int32 count = 2; */
+        if (message.count !== 0)
+            writer.tag(2, WireType.Varint).int32(message.count);
+        /* IRacingTools.Models.Session.SessionDataVarType type = 3; */
+        if (message.type !== 0)
+            writer.tag(3, WireType.Varint).int32(message.type);
+        /* string name = 5; */
+        if (message.name !== "")
+            writer.tag(5, WireType.LengthDelimited).string(message.name);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.Session.SessionDataVarHeader
+ */
+export const SessionDataVarHeader = new SessionDataVarHeader$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SessionDataFrame$Type extends MessageType<SessionDataFrame> {
+    constructor() {
+        super("IRacingTools.Models.Session.SessionDataFrame", [
+            { no: 1, name: "timing", kind: "message", T: () => SessionTiming },
+            { no: 10, name: "data_values", kind: "map", K: 5 /*ScalarType.INT32*/, V: { kind: "message", T: () => SessionDataFrame_VarValues } }
+        ]);
+    }
+    create(value?: PartialMessage<SessionDataFrame>): SessionDataFrame {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.dataValues = {};
+        if (value !== undefined)
+            reflectionMergePartial<SessionDataFrame>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SessionDataFrame): SessionDataFrame {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* IRacingTools.Models.Session.SessionTiming timing */ 1:
+                    message.timing = SessionTiming.internalBinaryRead(reader, reader.uint32(), options, message.timing);
+                    break;
+                case /* map<int32, IRacingTools.Models.Session.SessionDataFrame.VarValues> data_values */ 10:
+                    this.binaryReadMap10(message.dataValues, reader, options);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    private binaryReadMap10(map: SessionDataFrame["dataValues"], reader: IBinaryReader, options: BinaryReadOptions): void {
+        let len = reader.uint32(), end = reader.pos + len, key: keyof SessionDataFrame["dataValues"] | undefined, val: SessionDataFrame["dataValues"][any] | undefined;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case 1:
+                    key = reader.int32();
+                    break;
+                case 2:
+                    val = SessionDataFrame_VarValues.internalBinaryRead(reader, reader.uint32(), options);
+                    break;
+                default: throw new globalThis.Error("unknown map entry field for field IRacingTools.Models.Session.SessionDataFrame.data_values");
+            }
+        }
+        map[key ?? 0] = val ?? SessionDataFrame_VarValues.create();
+    }
+    internalBinaryWrite(message: SessionDataFrame, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* IRacingTools.Models.Session.SessionTiming timing = 1; */
+        if (message.timing)
+            SessionTiming.internalBinaryWrite(message.timing, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* map<int32, IRacingTools.Models.Session.SessionDataFrame.VarValues> data_values = 10; */
+        for (let k of globalThis.Object.keys(message.dataValues)) {
+            writer.tag(10, WireType.LengthDelimited).fork().tag(1, WireType.Varint).int32(parseInt(k));
+            writer.tag(2, WireType.LengthDelimited).fork();
+            SessionDataFrame_VarValues.internalBinaryWrite(message.dataValues[k as any], writer, options);
+            writer.join().join();
+        }
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.Session.SessionDataFrame
+ */
+export const SessionDataFrame = new SessionDataFrame$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SessionDataFrame_Value$Type extends MessageType<SessionDataFrame_Value> {
+    constructor() {
+        super("IRacingTools.Models.Session.SessionDataFrame.Value", [
+            { no: 1, name: "char_value", kind: "scalar", oneof: "data", T: 13 /*ScalarType.UINT32*/ },
+            { no: 2, name: "bool_value", kind: "scalar", oneof: "data", T: 8 /*ScalarType.BOOL*/ },
+            { no: 3, name: "int32_value", kind: "scalar", oneof: "data", T: 5 /*ScalarType.INT32*/ },
+            { no: 4, name: "bitmask_value", kind: "scalar", oneof: "data", T: 13 /*ScalarType.UINT32*/ },
+            { no: 5, name: "float_value", kind: "scalar", oneof: "data", T: 2 /*ScalarType.FLOAT*/ },
+            { no: 6, name: "double_value", kind: "scalar", oneof: "data", T: 1 /*ScalarType.DOUBLE*/ }
+        ]);
+    }
+    create(value?: PartialMessage<SessionDataFrame_Value>): SessionDataFrame_Value {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.data = { oneofKind: undefined };
+        if (value !== undefined)
+            reflectionMergePartial<SessionDataFrame_Value>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SessionDataFrame_Value): SessionDataFrame_Value {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* uint32 char_value */ 1:
+                    message.data = {
+                        oneofKind: "charValue",
+                        charValue: reader.uint32()
+                    };
+                    break;
+                case /* bool bool_value */ 2:
+                    message.data = {
+                        oneofKind: "boolValue",
+                        boolValue: reader.bool()
+                    };
+                    break;
+                case /* int32 int32_value */ 3:
+                    message.data = {
+                        oneofKind: "int32Value",
+                        int32Value: reader.int32()
+                    };
+                    break;
+                case /* uint32 bitmask_value */ 4:
+                    message.data = {
+                        oneofKind: "bitmaskValue",
+                        bitmaskValue: reader.uint32()
+                    };
+                    break;
+                case /* float float_value */ 5:
+                    message.data = {
+                        oneofKind: "floatValue",
+                        floatValue: reader.float()
+                    };
+                    break;
+                case /* double double_value */ 6:
+                    message.data = {
+                        oneofKind: "doubleValue",
+                        doubleValue: reader.double()
+                    };
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SessionDataFrame_Value, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* uint32 char_value = 1; */
+        if (message.data.oneofKind === "charValue")
+            writer.tag(1, WireType.Varint).uint32(message.data.charValue);
+        /* bool bool_value = 2; */
+        if (message.data.oneofKind === "boolValue")
+            writer.tag(2, WireType.Varint).bool(message.data.boolValue);
+        /* int32 int32_value = 3; */
+        if (message.data.oneofKind === "int32Value")
+            writer.tag(3, WireType.Varint).int32(message.data.int32Value);
+        /* uint32 bitmask_value = 4; */
+        if (message.data.oneofKind === "bitmaskValue")
+            writer.tag(4, WireType.Varint).uint32(message.data.bitmaskValue);
+        /* float float_value = 5; */
+        if (message.data.oneofKind === "floatValue")
+            writer.tag(5, WireType.Bit32).float(message.data.floatValue);
+        /* double double_value = 6; */
+        if (message.data.oneofKind === "doubleValue")
+            writer.tag(6, WireType.Bit64).double(message.data.doubleValue);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.Session.SessionDataFrame.Value
+ */
+export const SessionDataFrame_Value = new SessionDataFrame_Value$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class SessionDataFrame_VarValues$Type extends MessageType<SessionDataFrame_VarValues> {
+    constructor() {
+        super("IRacingTools.Models.Session.SessionDataFrame.VarValues", [
+            { no: 1, name: "index", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 2, name: "count", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 3, name: "type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionDataVarType", SessionDataVarType, "SESSION_DATA_VAR_TYPE_"] },
+            { no: 5, name: "slot", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => SessionDataFrame_Value }
+        ]);
+    }
+    create(value?: PartialMessage<SessionDataFrame_VarValues>): SessionDataFrame_VarValues {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.index = 0;
+        message.count = 0;
+        message.type = 0;
+        message.slot = [];
+        if (value !== undefined)
+            reflectionMergePartial<SessionDataFrame_VarValues>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: SessionDataFrame_VarValues): SessionDataFrame_VarValues {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* int32 index */ 1:
+                    message.index = reader.int32();
+                    break;
+                case /* int32 count */ 2:
+                    message.count = reader.int32();
+                    break;
+                case /* IRacingTools.Models.Session.SessionDataVarType type */ 3:
+                    message.type = reader.int32();
+                    break;
+                case /* repeated IRacingTools.Models.Session.SessionDataFrame.Value slot */ 5:
+                    message.slot.push(SessionDataFrame_Value.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: SessionDataFrame_VarValues, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* int32 index = 1; */
+        if (message.index !== 0)
+            writer.tag(1, WireType.Varint).int32(message.index);
+        /* int32 count = 2; */
+        if (message.count !== 0)
+            writer.tag(2, WireType.Varint).int32(message.count);
+        /* IRacingTools.Models.Session.SessionDataVarType type = 3; */
+        if (message.type !== 0)
+            writer.tag(3, WireType.Varint).int32(message.type);
+        /* repeated IRacingTools.Models.Session.SessionDataFrame.Value slot = 5; */
+        for (let i = 0; i < message.slot.length; i++)
+            SessionDataFrame_Value.internalBinaryWrite(message.slot[i], writer.tag(5, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.Session.SessionDataFrame.VarValues
+ */
+export const SessionDataFrame_VarValues = new SessionDataFrame_VarValues$Type();

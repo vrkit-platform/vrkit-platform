@@ -64,7 +64,11 @@
       "@vrkit-platform/shared-ui/styles":
       [  "./packages/js/vrkit-shared-ui/src/styles"],
       "@vrkit-platform/shared-ui/*":
-      [  "./packages/js/vrkit-shared-ui/src/*"]
+      [  "./packages/js/vrkit-shared-ui/src/*"],
+      "@vrkit-platform/dev-tools-cli":
+      [  "./packages/js/vrkit-dev-tools-cli"],
+      "@vrkit-platform/dev-tools-cli/*":
+      [  "./packages/js/vrkit-dev-tools-cli/src/*"]
     }
   }
 }

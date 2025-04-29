@@ -118,11 +118,11 @@ namespace IRacingTools::App::Node {
               );
             }
 
-            sessionData_ = dataProvider_->sessionData();
+            sessionData_ = dataProvider_->getSessionMetadata();
         } else {
             // Live player
             dataProvider_ = std::make_shared<LiveSessionDataProvider>();
-            sessionData_ = dataProvider_->sessionData();
+            sessionData_ = dataProvider_->getSessionMetadata();
         }
 
         auto context = new Reference<Napi::Value>(Persistent(info.This()));
@@ -265,7 +265,7 @@ namespace IRacingTools::App::Node {
         auto env = info.Env();
 
         // TODO: THIS WILL NOT PERFORM, REIMPLEMENT WITH `ObjectWrap<SessionInfo>` IF NEEDED
-        auto sessionData = dataProvider_->sessionData();
+        auto sessionData = dataProvider_->getSessionMetadata();
         std::string sessionDataJson{};
         auto encodeRes = google::protobuf::json::MessageToJsonString(*sessionData, &sessionDataJson);
         if (!encodeRes.ok()) {

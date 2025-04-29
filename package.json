@@ -83,6 +83,7 @@
     "iohook-raub": "^0.1.1",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "json5": "^2.2.3",
     "keyboard-css": "^1.2.4",
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.9.0",
@@ -168,7 +169,8 @@
     "vrkit-app:package": "cross-env NODE_ENV=production node ./scripts/build-packaged-app.mjs",
     "vrkit-app:dev": "yarn workspace vrkit-app run dev",
     "vrkit-app:start": "yarn workspace vrkit-app run start",
-    "vrkit-app:start-brk": "yarn workspace vrkit-app run start:brk"
+    "vrkit-app:start-brk": "yarn workspace vrkit-app run start:brk",
+    "plop": "node node_modules/plop/bin/plop.js"
   },
   "version": "1.1.6",
   "workspaces": [

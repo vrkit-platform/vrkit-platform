@@ -5,12 +5,12 @@ const { pkg } = PlopContext,
   { version } = pkg
 
 module.exports = {
-  description: "Add a new package to the mono-repo",
+  description: "Add a new TypeScript package to the mono-repo",
   prompts: [
     {
       type: "input",
       name: "name",
-      message: "New package name",
+      message: "New TypeScript package name",
       validate: input => /^[a-z0-9\-,]+$/.test(input)
     },
     {
@@ -38,8 +38,8 @@ module.exports = {
       },
 
       // abortOnFail: true,
-      base: `${rootDir}/tools/plop/templates/new-package`,
-      templateFiles: `${rootDir}/tools/plop/templates/new-package/**/*.hbs`,
+      // base: `${rootDir}/tools/plop/templates/new-ts-package`,
+      templateFiles: `${rootDir}/tools/plop/templates/new-ts-package/**/*.hbs`,
       destination: `${rootDir}/packages/js/{{name}}/`
     },
 

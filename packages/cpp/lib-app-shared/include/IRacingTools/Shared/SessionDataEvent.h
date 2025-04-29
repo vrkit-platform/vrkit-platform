@@ -20,34 +20,34 @@ namespace IRacingTools::Shared {
   class SessionDataUpdatedDataEvent;
   class SessionDataAccess;
   
-  enum class SessionDataEventType { UpdatedData, UpdatedInfo, Session, Available };
+  //enum class SessionDataEventType { UpdatedData, UpdatedInfo, Session, Available };
 
   class SessionDataEvent {
 
   public:
     SessionDataEvent() = delete;
     virtual ~SessionDataEvent() = default;
-    explicit SessionDataEvent(SessionDataEventType type);
+    explicit SessionDataEvent(Models::RPC::Events::SessionEventType type);
 
-    SessionDataEventType type();
+    Models::RPC::Events::SessionEventType type();
 
 
   protected:
-    SessionDataEventType type_;
+    Models::RPC::Events::SessionEventType type_;
   };
 
   
 
-  class SessionDataUpdatedInfoEvent : public SessionDataEvent {
-  public:
-    SessionDataUpdatedInfoEvent() = delete;
-    explicit SessionDataUpdatedInfoEvent(std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> newSessionInfo);
-    virtual ~SessionDataUpdatedInfoEvent() = default;
-
-    std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo();
-  private:
-    std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo_{};
-  };
+  // class SessionDataUpdatedInfoEvent : public SessionDataEvent {
+  // public:
+  //   SessionDataUpdatedInfoEvent() = delete;
+  //   explicit SessionDataUpdatedInfoEvent(std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> newSessionInfo);
+  //   virtual ~SessionDataUpdatedInfoEvent() = default;
+  //
+  //   std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo();
+  // private:
+  //   std::weak_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> sessionInfo_{};
+  // };
   
   /**
    * @brief Flattened tuple per car
@@ -90,7 +90,7 @@ namespace IRacingTools::Shared {
     };
 
     SessionDataUpdatedDataEvent() = delete;
-    explicit SessionDataUpdatedDataEvent(SessionDataEventType type, SessionDataAccess *dataAccess);
+    explicit SessionDataUpdatedDataEvent(Models::RPC::Events::SessionEventType type, SessionDataAccess *dataAccess);
     virtual ~SessionDataUpdatedDataEvent() = default;
 
     void refresh();

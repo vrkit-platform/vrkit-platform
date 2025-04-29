@@ -1,5 +1,4 @@
 #include <chrono>
-#include <fmt/core.h>
 #include <gsl/util>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -98,9 +97,15 @@ TEST_F(DiskSessionDataProviderTests, session_info_updates) {
     auto client = std::static_pointer_cast<DiskClient>(provider->clientProvider()->getClient());
 
     std::atomic_int32_t sessionInfoChangeCount = 0;
-    auto onEventHandler = [&subscriber, &sessionInfoChangeCount] (SessionEventType type, std::shared_ptr<SessionEventData> data) {
+    auto onEventHandler = [&subscriber, &sessionInfoChangeCount] (
+        SessionEventType type,
+        auto& sessionClientProvider,
+        const std::shared_ptr<SessionDataProvider>& sessionDataProvider) {
+
         if (type != SessionEventType::SESSION_EVENT_TYPE_METADATA_CHANGED)
             return;
+
+        std::shared_ptr<SessionEventData> data = sessionDataProvider->getSessionEventData(type);
         subscriber.onEvent(type, data);
         ++sessionInfoChangeCount;
     };

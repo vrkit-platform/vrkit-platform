@@ -1,0 +1,48 @@
+{
+  "name": "@vrkit-platform/dev-tools-cli",
+  "version": "1.1.6",
+  "description": "VRKit Platform Dev Tools CLI",
+  "license": "ISC",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "email": "support@3form.ventures",
+    "name": "Jonathan Glanz",
+    "url": "https://github.com/3fv"
+  },
+  "type": "commonjs",
+  "main": "dist/bundled-entry.js",
+  "files": [
+    "lib",
+    "dist"
+  ],
+  "scripts": {
+    "build:watch": "tsc -p tsconfig.json -w",
+    "bundle": "cross-env node esbuild.config.mjs",
+    "run:irc-client": "yarn run bundle && node dist/bundled-entry.js irc-client"
+  },
+  "dependencies": {
+  
+  },
+  "devDependencies": {
+    "@3fv/ditsy": "^1.0.14",
+    "@3fv/deferred": "^1.2.14",
+    "@3fv/guard": "^1.4.39",
+    "@3fv/prelude-ts": "^0.8.37",
+    "@vrkit-platform/models": "1.1.6",
+    "@vrkit-platform/shared": "1.1.6",
+    "@protobuf-ts/runtime":  "^2.9.6",
+    "vrkit-native-interop": "1.1.6",
+    "yargs": "^17.7.2",
+    "@protobuf-ts/plugin":  "^2.9.6",
+    "@types/node": "^22",
+    "@types/yargs": "^17.0.33",
+    "@3fv/logger-proxy": "^1.0.71",
+    "better-docs": "^2.7.3",
+    "jsdoc": "^4.0.4",
+    "typescript": "^5.5.4",
+    "vrkit-builder-tool": "1.1.6"
+  }
+}

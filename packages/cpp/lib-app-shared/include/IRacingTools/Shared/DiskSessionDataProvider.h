@@ -12,7 +12,7 @@
 #include <IRacingTools/Shared/SessionDataProvider.h>
 
 namespace IRacingTools::Shared {
-  class DiskSessionDataProvider : public SessionDataProvider {
+  class DiskSessionDataProvider : public SessionDataProvider, public std::enable_shared_from_this<DiskSessionDataProvider> {
   public:
 
     struct Options {
@@ -62,7 +62,7 @@ namespace IRacingTools::Shared {
 
     virtual SessionDataAccess* dataAccessPtr() override;
 
-    virtual IRacingSDK::ClientProvider* clientProvider() override;
+    virtual std::shared_ptr<IRacingSDK::ClientProvider> clientProvider() override;
 
     virtual bool isLive() const override;
 
@@ -115,7 +115,10 @@ namespace IRacingTools::Shared {
 
     virtual std::string sessionInfoStr() override;
 
-    virtual std::shared_ptr<Models::Session::SessionMetadata> sessionData() override;
+    virtual std::shared_ptr<Models::Session::SessionMetadata> getSessionMetadata(bool includeSessionInfoYaml = false) override;
+      virtual const Models::Session::SessionTiming getSessionTiming() override;
+
+    virtual std::shared_ptr<Models::RPC::Events::SessionEventData> getSessionEventData(Models::RPC::Events::SessionEventType type) override;
 
     virtual const IRacingSDK::VarHeaders& getDataVariableHeaders() override;
 
@@ -135,13 +138,13 @@ namespace IRacingTools::Shared {
 
     void checkConnection();
 
-    std::shared_ptr<Models::RPC::Events::SessionEventData> createEventData(Models::RPC::Events::SessionEventType type);
 
-    void updateSessionData();
 
-    void updateSessionInfo();
+    void updateSessionDataFrame();
 
-    void fireInfoChangedEvent();
+    void updateSessionMetadata();
+
+    void fireMetadataChangedEvent();
 
     void fireDataUpdatedEvent();
 
@@ -168,6 +171,6 @@ namespace IRacingTools::Shared {
 
     Options options_;
 
-    std::shared_ptr<Models::Session::SessionMetadata> sessionData_{};
+    std::shared_ptr<Models::Session::SessionMetadata> sessionMetadata_{};
   };
 } // namespace IRacingTools::Shared

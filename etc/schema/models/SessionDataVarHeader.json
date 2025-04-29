@@ -1,0 +1,78 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/SessionDataVarHeader",
+    "definitions": {
+        "SessionDataVarHeader": {
+            "properties": {
+                "index": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "count": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "type": {
+                    "enum": [
+                        "SESSION_DATA_VAR_TYPE_CHAR",
+                        0,
+                        "SESSION_DATA_VAR_TYPE_BOOL",
+                        1,
+                        "SESSION_DATA_VAR_TYPE_INT32",
+                        2,
+                        "SESSION_DATA_VAR_TYPE_BITMASK",
+                        3,
+                        "SESSION_DATA_VAR_TYPE_FLOAT",
+                        4,
+                        "SESSION_DATA_VAR_TYPE_DOUBLE",
+                        5
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Data Var Type"
+                },
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Session Data Var Header"
+        }
+    }
+}

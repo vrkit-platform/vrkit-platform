@@ -1,0 +1,63 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/IPCDataServerSetSubscriptions",
+    "definitions": {
+        "IPCDataServerSetSubscriptions": {
+            "properties": {
+                "eventTypes": {
+                    "items": {
+                        "enum": [
+                            "SESSION_EVENT_TYPE_UNKNOWN",
+                            0,
+                            "SESSION_EVENT_TYPE_SESSION_CHANGED",
+                            1,
+                            "SESSION_EVENT_TYPE_METADATA_CHANGED",
+                            2,
+                            "SESSION_EVENT_TYPE_DATA_FRAME",
+                            3
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "array"
+                        }
+                    ],
+                    "title": "Session Event Type"
+                },
+                "dataVarHeaderNames": {
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "IPC Data Server Set Subscriptions"
+        }
+    }
+}

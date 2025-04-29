@@ -1,0 +1,34 @@
+{
+  "name": "@vrkit-platform/{{name}}",
+  "version": "{{version}}",
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": {
+    "email": "support@3form.ventures",
+    "name": "Jonathan Glanz",
+    "url": "https://github.com/3fv"
+  },
+
+  "files": [
+    "lib"
+  ],
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
+  },
+  "scripts": {
+    "build:watch": "tsc -p tsconfig.json -w"
+  },
+  "types": "lib/index.d.ts",
+  "dependencies": {
+    "@vrkit-platform/shared": "{{version}}",
+    "@vrkit-platform/models": "{{version}}",
+    "vrkit-native-interop": "{{version}}"
+  }
+}

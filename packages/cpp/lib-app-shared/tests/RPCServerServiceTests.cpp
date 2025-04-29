@@ -52,7 +52,7 @@ TEST_F(RPCServerServiceTests, SimpleRouteSync) {
   manager->start();
   auto sampleRouteExecutor = [&] (const std::shared_ptr<SizeI> & request,
               const std::shared_ptr<RPC::Envelope> & envelope) -> std::expected<std::shared_ptr<SizeI>, GeneralError> {
-    L->info("Processing request path: {}", envelope->request_path());
+    L->info("Processing request path: {}", envelope->path());
     auto response = std::make_shared<SizeI>();
     response->set_width(request->width() * 2);
     response->set_height(request->height() * 2);
@@ -66,7 +66,7 @@ TEST_F(RPCServerServiceTests, SimpleRouteSync) {
 
   auto messageIn = std::make_shared<IRacingTools::Models::RPC::Envelope>();
   messageIn->set_id(NewUUID());
-  messageIn->set_request_path("/sample");
+  messageIn->set_path("/sample");
   messageIn->set_kind(RPC::Envelope::KIND_REQUEST);
 
   SizeI sampleRouteRequest {};
@@ -88,7 +88,7 @@ TEST_F(RPCServerServiceTests, SimpleRouteSync) {
 
 
   messageIn->set_id(NewUUID());
-  messageIn->set_request_path("/sample2");
+  messageIn->set_path("/sample2");
 
   messageOut = rpcService->execute(messageIn);
 

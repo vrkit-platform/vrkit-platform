@@ -8,6 +8,7 @@ dist
 /packages/js/*/dist
 /packages/js/vrkit-builder-tool/src/*/package.json
 *.tsbuildinfo
+.repl*
 /.jupyter
 /.idea
 /.vs

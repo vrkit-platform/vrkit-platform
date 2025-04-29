@@ -64,11 +64,21 @@
             ],
             "title": "File Info"
         },
-        "IRacingTools.Models.RPC.Events.SessionDataFrame": {
+        "IRacingTools.Models.Session.SessionDataFrame": {
             "properties": {
+                "timing": {
+                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionTiming",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
                 "dataValues": {
                     "additionalProperties": {
-                        "$ref": "#/definitions/IRacingTools.Models.RPC.Events.SessionDataFrame.Value",
+                        "$ref": "#/definitions/IRacingTools.Models.Session.SessionDataFrame.VarValues",
                         "additionalProperties": true,
                         "oneOf": [
                             {
@@ -98,8 +108,18 @@
             ],
             "title": "Session Data Frame"
         },
-        "IRacingTools.Models.RPC.Events.SessionDataFrame.Value": {
+        "IRacingTools.Models.Session.SessionDataFrame.Value": {
             "properties": {
+                "charValue": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
                 "boolValue": {
                     "oneOf": [
                         {
@@ -111,6 +131,16 @@
                     ]
                 },
                 "int32Value": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "bitmaskValue": {
                     "oneOf": [
                         {
                             "type": "null"
@@ -151,6 +181,81 @@
                 }
             ],
             "title": "Value"
+        },
+        "IRacingTools.Models.Session.SessionDataFrame.VarValues": {
+            "properties": {
+                "index": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "count": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "type": {
+                    "enum": [
+                        "SESSION_DATA_VAR_TYPE_CHAR",
+                        0,
+                        "SESSION_DATA_VAR_TYPE_BOOL",
+                        1,
+                        "SESSION_DATA_VAR_TYPE_INT32",
+                        2,
+                        "SESSION_DATA_VAR_TYPE_BITMASK",
+                        3,
+                        "SESSION_DATA_VAR_TYPE_FLOAT",
+                        4,
+                        "SESSION_DATA_VAR_TYPE_DOUBLE",
+                        5
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Data Var Type"
+                },
+                "slot": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "items": {
+                                "$ref": "#/definitions/IRacingTools.Models.Session.SessionDataFrame.Value"
+                            },
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Var Values"
         },
         "IRacingTools.Models.Session.SessionMetadata": {
             "properties": {
@@ -648,28 +753,16 @@
         },
         "SessionEventData": {
             "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
                 "type": {
                     "enum": [
                         "SESSION_EVENT_TYPE_UNKNOWN",
                         0,
-                        "SESSION_EVENT_TYPE_AVAILABLE",
+                        "SESSION_EVENT_TYPE_SESSION_CHANGED",
                         1,
                         "SESSION_EVENT_TYPE_METADATA_CHANGED",
                         2,
                         "SESSION_EVENT_TYPE_DATA_FRAME",
-                        3,
-                        "SESSION_EVENT_TYPE_TIMING_CHANGED",
-                        4
+                        3
                     ],
                     "oneOf": [
                         {
@@ -714,17 +807,7 @@
                     ],
                     "title": "Session Type"
                 },
-                "sessionTiming": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionTiming",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "sessionData": {
+                "sessionMetadata": {
                     "$ref": "#/definitions/IRacingTools.Models.Session.SessionMetadata",
                     "additionalProperties": true,
                     "oneOf": [
@@ -735,7 +818,7 @@
                     ]
                 },
                 "sessionDataFrame": {
-                    "$ref": "#/definitions/IRacingTools.Models.RPC.Events.SessionDataFrame",
+                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionDataFrame",
                     "additionalProperties": true,
                     "oneOf": [
                         {

@@ -25,26 +25,16 @@ FOREACH(depPkgName ${DEP_PACKAGES})
   FIND_PACKAGE(${depPkgName} CONFIG REQUIRED)
 ENDFOREACH()
 
-# QT
-# include(${CMAKE_CURRENT_LIST_DIR}/qt.cmake NO_POLICY_SCOPE)
+FIND_PACKAGE(ICU REQUIRED COMPONENTS uc i18n data)
 
 # Boost
-#find_package(Boost REQUIRED COMPONENTS system uuid)
-#set(DEP_BOOST_DEFAULT Boost::system Boost::uuid)
 FIND_PACKAGE(Boost REQUIRED COMPONENTS system)
 SET(DEP_BOOST_DEFAULT Boost::system)
-#find_path(DEP_BOOST_DI_INCLUDES "boost/di.hpp")
-
-# Other deps
-#target_link_libraries(${targetName} PRIVATE Microsoft::CppWinRT)
-#target_link_libraries(${targetName} PRIVATE WIL::WIL)
-#find_library(DEP_BOOST_IPC_LIB Boost::interprocess REQUIRED)
-#find_package(Boost REQUIRED COMPONENTS interprocess)
 
 # TinyORM Dep
 #include(${CMAKE_CURRENT_LIST_DIR}/external/tiny_orm.cmake NO_POLICY_SCOPE)
 
-#set(DEP_WXWIDGETS wx::core wx::base)
+SET(DEP_ICU ICU::uc ICU::i18n ICU::data)
 SET(DEP_CLI11 CLI11::CLI11)
 SET(DEP_YAML yaml-cpp::yaml-cpp)
 SET(DEP_PROTOBUF protobuf::libprotobuf)
@@ -56,13 +46,7 @@ SET(DEP_LOG spdlog::spdlog)
 #set(DEP_WINRT Microsoft::CppWinRT)
 
 SET(DEP_DIRECTX
-  #  d2d1.lib
-  #  dwrite.lib
   System::windowscodecs
-
-  #  dxgi.lib
-  #  d3d10_1.lib
-  #  d3d11.lib
   System::advapi32
   System::Dcomp
   System::Gdi32
@@ -75,14 +59,9 @@ SET(DEP_DIRECTX
   System::D3d12
   System::Shcore
   System::WindowsApp
-  #  Microsoft::D3DX9
-  #  Microsoft::D3DX10
-  #  Microsoft::D3DX11
   Microsoft::Effects11
   Microsoft::DirectXMath
-  #  directxtk.lib
   Microsoft::DirectXTK
-
 )
 
 SET(DEP_FMT fmt::fmt)
@@ -96,6 +75,7 @@ SET(ALL_APP_DEPS
   ${DEP_JSON}
   ${DEP_MAGICENUM}
   ${DEP_DIRECTX}
+  ${DEP_ICU}
   #  ${DEP_IMGUI}
   ${DEP_FMT}
   ${DEP_LOG}
@@ -114,6 +94,7 @@ SET(ALL_SDK_DEPS
   ${DEP_FMT}
   ${DEP_YAML}
   ${DEP_LOG}
+  ${DEP_ICU}
 )
 
 SET(DEP_GTEST_MAIN GTest::gtest_main GTest::gmock)
@@ -158,7 +139,6 @@ ENDIF()
 
 FUNCTION(VRK_CONFIGURE_SDK_LIBS TARGET)
   TARGET_LINK_LIBRARIES(${TARGET} PUBLIC ${ALL_SDK_DEPS})
-  #  target_include_directories(${TARGET} PUBLIC ${DEP_BOOST_DI_INCLUDES})
 ENDFUNCTION()
 
 FUNCTION(VRK_CONFIGURE_APP_LIBS TARGET)

@@ -10,17 +10,17 @@ const registerReactHelpers = require("./tools/plop/helpers/plop-react-helpers")
 const registerStringHelpers =  require("./tools/plop/helpers/plop-string-helpers")
 // const registerReduxHelpers = require("./tools/plop/helpers/plop-redux-helpers")
 // const registerNestHelpers =  require("./tools/plop/helpers/plop-nest-helpers")
-// const registerPkgHelpers =  require("./tools/plop/helpers/plop-pkg-helpers")
+const registerPkgHelpers =  require("./tools/plop/helpers/plop-pkg-helpers")
 // const registerNamingHelpers =  require("./tools/plop/helpers/plop-naming-helpers")
 
 module.exports = function plopfile(plop) {
   
   // registerReduxHelpers(plop)
-  // registerSharedActions(plop)
+  registerSharedActions(plop)
   registerReactHelpers(plop)
   registerStringHelpers(plop)
   // registerNestHelpers(plop)
-  // registerPkgHelpers(plop)
+  registerPkgHelpers(plop)
   // registerNamingHelpers(plop)
 
   const addGenerator = (name, configFilename = name) =>
@@ -55,7 +55,7 @@ module.exports = function plopfile(plop) {
         }
       })
 
-  // addGenerator("new-package")
+  addGenerator("new-ts-package")
   // addGenerator("new-api-client-package")
 	// addGenerator("nest-module")
   // addGenerator("service")

@@ -15,7 +15,7 @@ const MESSAGE_HEADER_LENGTH =
   4 + // CLIENT_ID
   4 // MESSAGE SIZE
 
-// const PIPE_NAME = "vrkit_iracing_data_server"
+// const PIPE_NAME = "vrkit_iracing_ipc_server"
 // const PIPE_PATH = "\\\\.\\pipe\\" + PIPE_NAME
 
 export function ToPipePath(pipeName: string): string {
@@ -96,7 +96,8 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
   }
 
   private onData(newBuffer: Buffer) {
-    info(`onData(newBuffer=${newBuffer.length})`)
+    if (log.isDebugEnabled())
+      debug(`onData(newBuffer=${newBuffer.length})`)
     let readBuffer = (this.readBuffer = this.readBuffer?.length
       ? Buffer.concat([this.readBuffer, newBuffer], this.readBuffer.length + newBuffer.length)
       : newBuffer)
@@ -107,7 +108,8 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
         readTotalSize = readDataSize + MESSAGE_HEADER_LENGTH
 
       if (readBuffer.length < readTotalSize) {
-        debug(`onData: NOT ENOUGH (${readBuffer.length}<${readTotalSize})`)
+        if (log.isDebugEnabled())
+          debug(`onData: NOT ENOUGH (${readBuffer.length}<${readTotalSize})`)
         break
       }
 
@@ -121,8 +123,9 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
       // REMOVE THE HEADER
       this.readHeader = null!
     }
-
-    debug(`onData(remainingData=${readBuffer.length})`)
+    
+    if (log.isDebugEnabled())
+      debug(`onData(remainingData=${readBuffer.length})`)
   }
 
   disconnect() {
@@ -223,10 +226,7 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
 
   private onMessage(readHeader: NamedPipeMessageHeader, readData: Uint8Array): void {
     this.emit("message", this, readHeader, readData)
-    // const msg = this.readDecoder.decode(readData)
-    // info(`READ
-    // MESSAGE(id=${readHeader.id},sourceId=${readHeader.sourceId},clientId=${readHeader.clientId},size=${readHeader.size}):
-    // ${msg}`)
+    
   }
 }
 

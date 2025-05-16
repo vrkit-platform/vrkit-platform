@@ -148,8 +148,14 @@ namespace IRacingTools::App::Node {
             }
         );
 
-        dataProvider_->subscribe([&] (auto type, auto data) {
-            jsSessionPlayerEventFn_.NonBlockingCall(new NativeSessionPlayerJSEvent(type, data));
+        dataProvider_->subscribe([&] (auto type, auto clientProvider, auto dataProvider) {
+          auto data = dataProvider->getSessionEventData(type);
+          if (!data) {
+            L->warn("Unable to get session event data for type {}", std::string{magic_enum::enum_name(type)});
+            return;
+          }
+
+          jsSessionPlayerEventFn_.NonBlockingCall(new NativeSessionPlayerJSEvent(type, data));
                 //jsSessionPlayerEventFn_.BlockingCall(new NativeSessionPlayerJSEvent(type, data));
         });
     }

@@ -4,13 +4,12 @@
 
 #include <IRacingTools/Shared/SharedAppLibPCH.h>
 
-
+#include <IRacingSDK/Utils/Singleton.h>
+#include <IRacingSDK/VarHolder.h>
 
 #include <IRacingTools/Models/rpc/Messages/SimpleMessages.pb.h>
 #include <IRacingTools/Models/rpc/Events/CommonEventTypes.pb.h>
 #include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
-
-#include <IRacingSDK/Utils/Singleton.h>
 
 #include <IRacingTools/Shared/SessionDataProvider.h>
 #include <IRacingTools/Shared/Services/TelemetryDataService.h>
@@ -22,6 +21,7 @@
 #include <IRacingTools/Shared/Services/RPCServerService.h>
 
 #include <napi.h>
+
 #include "NativeGlobal.h"
 using namespace IRacingTools::Shared::Logging;
 using namespace IRacingSDK;

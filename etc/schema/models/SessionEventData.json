@@ -64,6 +64,50 @@
             ],
             "title": "File Info"
         },
+        "IRacingTools.Models.RPC.Events.SessionChangedEvent": {
+            "properties": {
+                "isAvailable": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "sessionId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "sessionMetadata": {
+                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionMetadata",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Session Changed Event"
+        },
         "IRacingTools.Models.Session.SessionDataFrame": {
             "properties": {
                 "timing": {
@@ -266,6 +310,16 @@
                         },
                         {
                             "type": "string"
+                        }
+                    ]
+                },
+                "sessionId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
                         }
                     ]
                 },
@@ -806,6 +860,16 @@
                         }
                     ],
                     "title": "Session Type"
+                },
+                "sessionChangedEvent": {
+                    "$ref": "#/definitions/IRacingTools.Models.RPC.Events.SessionChangedEvent",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
                 },
                 "sessionMetadata": {
                     "$ref": "#/definitions/IRacingTools.Models.Session.SessionMetadata",

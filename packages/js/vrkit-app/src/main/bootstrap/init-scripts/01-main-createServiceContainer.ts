@@ -1,8 +1,6 @@
 import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import {
-  setServiceContainer, shutdownServiceContainer
-} from "../../ServiceContainer"
+import { setServiceContainer, shutdownServiceContainer } from "../../ServiceContainer"
 import { NativeThemeManager } from "../../services/native-theme"
 import { ActionRegistry, once } from "@vrkit-platform/shared"
 import { AppSettingsService } from "../../services/app-settings"
@@ -14,7 +12,7 @@ import SharedAppState, { createSharedAppStateStore } from "../../services/store"
 import { DashboardManager } from "../../services/dashboard-manager"
 import { PluginManager } from "../../services/plugin-manager"
 import OpenXRConfigurator from "../../services/openxr-configurator"
-import { FileSystemManager } from "@vrkit-platform/shared/services/node"
+import { FileSystemManager, IRacingIPCClientManager } from "@vrkit-platform/shared/services/node"
 import { ElectronMainMenuManager } from "../../services/electron-menu"
 import { SystemIntegrationManager } from "../../services/system-integration"
 
@@ -35,6 +33,7 @@ const createServiceContainer = once(async function createServiceContainer() {
     .bindClass(DashboardManager)
     .bindClass(OverlayManager)
     .bindClass(PluginManager)
+    .bindClass(IRacingIPCClientManager)
     .bindAsyncFactory(SharedAppState, createSharedAppStateStore)
     .resolveAll()
 

@@ -1,12 +1,12 @@
 import { guard, isDefined, isString } from "@3fv/guard"
 import {
   Any,
-  IPCDataServerClientMetadata,
-  IPCDataServerError,
-  IPCDataServerMessage,
-  IPCDataServerMessage_Type,
-  IPCDataServerSessionDataVarHeaders,
-  IPCDataServerSetSubscriptions,
+  IRacingIPCClientMetadata,
+  IRacingIPCError,
+  IRacingIPCMessage,
+  IRacingIPCMessage_Type,
+  IRacingIPCSessionDataVarHeaders,
+  IRacingIPCSetSubscriptions, SessionChangedEvent,
   SessionDataFrame,
   SessionEventType,
   SessionMetadata
@@ -24,7 +24,7 @@ import { isDev } from "../constants"
 const log = getLogger(__filename),
   { debug, trace, info, error, warn } = log
 
-export class IRacingIPCRuntimeError extends Error implements IPCDataServerError {
+export class IRacingIPCRuntimeError extends Error implements IRacingIPCError {
   constructor(
     public readonly message: string,
     public readonly code: string = null!,
@@ -52,24 +52,24 @@ export const IRacingIPCSessionEventMap: Record<number, MessageType<any>> = {
 }
 
 export interface IRacingIPCRequestResponseMapType {
-  [IPCDataServerMessage_Type.SET_CLIENT_METADATA]: {
-    request: IPCDataServerClientMetadata
-    response: IPCDataServerClientMetadata
+  [IRacingIPCMessage_Type.SET_CLIENT_METADATA]: {
+    request: IRacingIPCClientMetadata
+    response: IRacingIPCClientMetadata
   }
 
-  [IPCDataServerMessage_Type.GET_SESSION_METADATA]: {
+  [IRacingIPCMessage_Type.GET_SESSION_METADATA]: {
     request: SessionMetadata
     response: SessionMetadata
   }
 
-  [IPCDataServerMessage_Type.SET_SUBSCRIPTIONS]: {
-    request: IPCDataServerSetSubscriptions
-    response: IPCDataServerSetSubscriptions
+  [IRacingIPCMessage_Type.SET_SUBSCRIPTIONS]: {
+    request: IRacingIPCSetSubscriptions
+    response: IRacingIPCSetSubscriptions
   }
 
-  [IPCDataServerMessage_Type.GET_SESSION_DATA_HEADERS]: {
-    request: IPCDataServerSessionDataVarHeaders
-    response: IPCDataServerSessionDataVarHeaders
+  [IRacingIPCMessage_Type.GET_SESSION_DATA_HEADERS]: {
+    request: IRacingIPCSessionDataVarHeaders
+    response: IRacingIPCSessionDataVarHeaders
   }
 }
 
@@ -80,26 +80,26 @@ export const IRacingIPCRequestResponseMap: Record<
     response: MessageType<any>
   }
 > = {
-  [IPCDataServerMessage_Type.SET_CLIENT_METADATA]: {
-    request: IPCDataServerClientMetadata,
-    response: IPCDataServerClientMetadata
+  [IRacingIPCMessage_Type.SET_CLIENT_METADATA]: {
+    request: IRacingIPCClientMetadata,
+    response: IRacingIPCClientMetadata
   },
-  [IPCDataServerMessage_Type.GET_SESSION_METADATA]: {
+  [IRacingIPCMessage_Type.GET_SESSION_METADATA]: {
     request: null!,
     response: SessionMetadata
   },
-  [IPCDataServerMessage_Type.SET_SUBSCRIPTIONS]: {
-    request: IPCDataServerSetSubscriptions,
-    response: IPCDataServerSetSubscriptions
+  [IRacingIPCMessage_Type.SET_SUBSCRIPTIONS]: {
+    request: IRacingIPCSetSubscriptions,
+    response: IRacingIPCSetSubscriptions
   },
-  [IPCDataServerMessage_Type.GET_SESSION_DATA_HEADERS]: {
-    request: IPCDataServerSessionDataVarHeaders,
-    response: IPCDataServerSessionDataVarHeaders
+  [IRacingIPCMessage_Type.GET_SESSION_DATA_HEADERS]: {
+    request: IRacingIPCSessionDataVarHeaders,
+    response: IRacingIPCSessionDataVarHeaders
   }
 }
 
-// export type IPCDataServerRequestResponseMapType = typeof
-// IPCDataServerRequestResponseMap
+// export type IRacingIPCRequestResponseMapType = typeof
+// IRacingIPCRequestResponseMap
 export type IRacingIPCRequestResponseMapKey = keyof IRacingIPCRequestResponseMapType
 
 class PendingRequestResponse<RequestMessage extends {}, ResponseMessage extends {}> {
@@ -107,11 +107,11 @@ class PendingRequestResponse<RequestMessage extends {}, ResponseMessage extends 
 
   constructor(
     public readonly id: number,
-    public readonly type: IPCDataServerMessage_Type,
+    public readonly type: IRacingIPCMessage_Type,
     public readonly requestMessage: RequestMessage,
     public readonly requestMessageType: MessageType<RequestMessage>,
     public readonly responseMessageType: MessageType<ResponseMessage>,
-    public readonly transportMessage = IPCDataServerMessage.create({
+    public readonly transportMessage = IRacingIPCMessage.create({
       type,
       payload: Any.pack(requestMessage, requestMessageType)
     }),
@@ -134,7 +134,7 @@ class PendingRequestResponse<RequestMessage extends {}, ResponseMessage extends 
     return this.deferred.isFulfilled() ? this.deferred.value : null!
   }
 
-  checkError(message: IPCDataServerMessage): boolean {
+  checkError(message: IRacingIPCMessage): boolean {
     if (!message.isError && !message.error) {
       return false
     }
@@ -163,7 +163,7 @@ class PendingRequestResponse<RequestMessage extends {}, ResponseMessage extends 
     return this.promise
   }
 
-  resolve(message: IPCDataServerMessage): Promise<ResponseMessage> {
+  resolve(message: IRacingIPCMessage): Promise<ResponseMessage> {
     if (this.checkError(message)) {
       return this.deferred.promise
     }
@@ -176,20 +176,20 @@ class PendingRequestResponse<RequestMessage extends {}, ResponseMessage extends 
 
 interface IRacingIPCSessionEventArgs {
   [SessionEventType.DATA_FRAME]: (dataFrame: SessionDataFrame) => any
-
+  [SessionEventType.SESSION_CHANGED]: (metadata: SessionChangedEvent) => any
   [SessionEventType.METADATA_CHANGED]: (metadata: SessionMetadata) => any
 }
 
 export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> {
-  private static MessageIdCounter: number = 0
-
-  private namedPipeClient: NamedPipeClient = null!
-
-  private namedPipeConnectDeferred: Deferred<NamedPipeClient> = null!
-
-  private readonly pendingRequestResponseMap = new Map<number, PendingRequestResponse<any, any>>()
-
-  private makeOnConnect(deferred: Deferred<NamedPipeClient>) {
+  protected static MessageIdCounter: number = 0
+  
+  protected namedPipeClient: NamedPipeClient = null!
+  
+  protected namedPipeConnectDeferred: Deferred<NamedPipeClient> = null!
+  
+  protected readonly pendingRequestResponseMap = new Map<number, PendingRequestResponse<any, any>>()
+  
+  protected makeOnConnect(deferred: Deferred<NamedPipeClient>) {
     return (client: NamedPipeClient) => {
       info(`iRacing client service connected (${client.clientId})`)
       if (deferred.isSettled()) {
@@ -200,11 +200,11 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
       deferred.resolve(client)
     }
   }
-
-  private onMessage(_client: NamedPipeClient, readHeader: NamedPipeMessageHeader, readData: Uint8Array) {
+  
+  protected onMessage(_client: NamedPipeClient, readHeader: NamedPipeMessageHeader, readData: Uint8Array) {
     try {
-      const msg = IPCDataServerMessage.fromBinary(readData)
-      if (msg.type === IPCDataServerMessage_Type.EVENT) {
+      const msg = IRacingIPCMessage.fromBinary(readData)
+      if (msg.type === IRacingIPCMessage_Type.EVENT) {
         const eventType = match(msg.eventType as string | number)
           .with(P.string, it => SessionEventType[it] as SessionEventType)
           .otherwise(identity) as SessionEventType
@@ -240,7 +240,7 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
 
     const deferred = (this.namedPipeConnectDeferred = new Deferred<NamedPipeClient>())
     try {
-      this.namedPipeClient = await asOption(new NamedPipeClient("vrkit_iracing_data_server"))
+      this.namedPipeClient = await asOption(new NamedPipeClient("vrkit_iracing_ipc_server"))
         .ifSome(client => {
           client.on("connect", this.makeOnConnect(deferred))
           client.on("message", this.onMessage.bind(this))
@@ -283,7 +283,7 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
     const id = ++IRacingIPCClient.MessageIdCounter
     const requestMessageType = IRacingIPCRequestResponseMap[type].request as MessageType<RequestMessage>
     const responseMessageType = IRacingIPCRequestResponseMap[type].response as MessageType<ResponseMessage>
-    const transportMessage = IPCDataServerMessage.create({
+    const transportMessage = IRacingIPCMessage.create({
       type,
       payload: !requestMessageType ? null! : Any.pack(requestMessage, requestMessageType)
     })
@@ -300,7 +300,7 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
     this.pendingRequestResponseMap.set(id, pendingRequestResponse)
 
     try {
-      await this.namedPipeClient.write(id, IPCDataServerMessage.toBinary(transportMessage))
+      await this.namedPipeClient.write(id, IRacingIPCMessage.toBinary(transportMessage))
       return await pendingRequestResponse.promise
     } catch (err) {
       // noinspection ES6MissingAwait
@@ -330,17 +330,12 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
     
     if (isDev) {
       Object.assign(global, {
-        iRacingIPCClient: this,
         irc: this
       })
     }
-    
-    if (typeof window !== "undefined") {
-      window.addEventListener("beforeunload", this[Symbol.dispose].bind(this))
-    }
   }
 
-  private onDisconnect() {
+  protected onDisconnect() {
     this.disconnect()
   }
 

@@ -37,7 +37,7 @@ import {
   SessionEventData,
   SessionEventType,
   SessionTiming,
-  GetSessionEventPayloadType, IsSessionDataFrameType
+  GetSessionEventPayloadType
 } from "@vrkit-platform/models"
 import { first, flatten, isEmpty, uniq } from "lodash"
 import { asOption } from "@3fv/prelude-ts"
@@ -178,25 +178,25 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       return
     }
 
-    asOption(data.payload?.payload)
-        .map(it => GetSessionEventPayloadType("sessionDataFrame", it)?.sessionDataFrame?.timing)
-        .ifSome(timing => {
-      container.setDataFrame(timing, dataVarValues)
-      // const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession"
-        //   ,
-        // timeAndDuration = toSessionTimeAndDuration(timing)
-
-      //if (!isEqual(timeAndDuration, toJS(this.state[stateKey].timeAndDuration))) {
-      //   this.patchState({
-      //     [stateKey]: {
-      //       ...this.state[stateKey],
-      //       timeAndDuration
-      //     }
-      //   })
-      //}
-      // TODO: Implement value based SessionDataVariable interface & emit
-      this.emit(SessionManagerEventType.DATA_FRAME, player.id, timing, dataVarValues)
-    })
+    // asOption(data.payload?.payload)
+    //     .map(it => GetSessionEventPayloadType("sessionDataFrame", it)?.sessionDataFrame?.timing)
+    //     .ifSome(timing => {
+    //   container.setDataFrame(timing, dataVarValues)
+    //   // const stateKey: SessionManagerStateSessionKey = isLivePlayer(player) ? "liveSession" : "diskSession"
+    //     //   ,
+    //     // timeAndDuration = toSessionTimeAndDuration(timing)
+    //
+    //   //if (!isEqual(timeAndDuration, toJS(this.state[stateKey].timeAndDuration))) {
+    //   //   this.patchState({
+    //   //     [stateKey]: {
+    //   //       ...this.state[stateKey],
+    //   //       timeAndDuration
+    //   //     }
+    //   //   })
+    //   //}
+    //   // TODO: Implement value based SessionDataVariable interface & emit
+    //   this.emit(SessionManagerEventType.DATA_FRAME, player.id, timing, dataVarValues)
+    // })
   }
 
   /**

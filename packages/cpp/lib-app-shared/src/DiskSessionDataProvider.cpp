@@ -3,21 +3,19 @@
 //
 
 
-#include <cstdio>
 #include <iostream>
 #include <utility>
 
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
-
-#include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
 #include <IRacingSDK/Utils/ChronoHelpers.h>
 #include <IRacingSDK/Utils/CollectionHelpers.h>
 #include <IRacingSDK/Utils/ThreadHelpers.h>
+
+#include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
+#include <IRacingTools/Shared/SharedAppLibPCH.h>
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/DiskSessionDataProvider.h>
 #include <IRacingTools/Shared/Macros.h>
 #include <IRacingTools/Shared/ProtoHelpers.h>
-#include <IRacingTools/Shared/SessionDataAccess.h>
 #include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
 #include <spdlog/spdlog.h>
 
@@ -38,10 +36,10 @@ namespace IRacingTools::Shared {
       diskClient_(
         fs::is_directory(file) ?
           DiskClient::CreateForRaceRecording(file.string()) :
-          std::make_shared<DiskClient>(file, std::string(clientId), DiskClient::Extras{})),
+          std::make_shared<DiskClient>(file, std::string(clientId), DiskClient::Extras())),
       file_(diskClient_->getFilePath().value()),
 
-      dataAccess_(std::make_unique<SessionDataAccess>(diskClient_->getProvider())),
+
       options_(options.value_or(Options{})) {
     std::scoped_lock lock(diskClientMutex_);
 
@@ -84,29 +82,14 @@ namespace IRacingTools::Shared {
       file_.string());
 
     auto subSessions = sessionInfo->sessionInfo.sessions;
+    sessionMetadata_->set_session_id(sessionInfo->weekendInfo.sessionID);
     sessionMetadata_->set_sub_count(subSessions.size());
 
-    // L->warn("HACK: Skipping to SessionNum == 2 (RACE)");
-    // if (!seekToSessionNum(2)) {
-    //     L->error("HACK: ERROR: Failed Skipping to SessionNum == 2 (RACE)");
-    // }
   }
 
 
   DiskSessionDataProvider::~DiskSessionDataProvider() {
     DiskSessionDataProvider::stop();
-  }
-
-  /**
-   * @brief Retrieve `SessionDataAccess` context
-   * @return `SessionDataAccess` context
-   */
-  SessionDataAccess &DiskSessionDataProvider::dataAccess() {
-    return *dataAccess_;
-  }
-
-  SessionDataAccess *DiskSessionDataProvider::dataAccessPtr() {
-    return dataAccess_.get();
   }
 
   std::shared_ptr<IRacingSDK::ClientProvider> DiskSessionDataProvider::clientProvider() {
@@ -161,6 +144,7 @@ namespace IRacingTools::Shared {
       }
 
       if (isFirst && !nextDataFrame()) {
+        L->error("Failed to read first data frame");
         break;
       }
 
@@ -224,7 +208,7 @@ namespace IRacingTools::Shared {
   }
 
   void DiskSessionDataProvider::updateSessionMetadata() {
-    if (auto res = diskClient_->updateSessionInfo(nullptr, true); res.has_value() && res.value() == true) {
+    if (auto res = diskClient_->updateSessionInfo(nullptr, true); res.has_value() && res.value()) {
       L->info("SESSION INFO CHANGED, Firing event");
       fireMetadataChangedEvent();
     }
@@ -292,12 +276,11 @@ namespace IRacingTools::Shared {
   }
 
   void DiskSessionDataProvider::fireMetadataChangedEvent() {
-    auto ev = getSessionEventData(Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED);
+
     publish(Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED, clientProvider(), shared_from_this());
   }
 
   void DiskSessionDataProvider::fireDataUpdatedEvent() {
-    auto ev = getSessionEventData(Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME);
     publish(Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME, clientProvider(), shared_from_this());
   }
 
@@ -308,27 +291,39 @@ namespace IRacingTools::Shared {
 
     //****Note, put your connection handling here
     isAvailable_ = isAvailable;
-    publish(
-      Models::RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED,
-      clientProvider(),
-      shared_from_this()
-      );
+    fireSessionChangedEvent();
   }
 
   std::shared_ptr<Models::RPC::Events::SessionEventData> DiskSessionDataProvider::getSessionEventData(
     Models::RPC::Events::SessionEventType type) {
-    static std::array<Models::RPC::Events::SessionEventType, 2> sMetadataIncludeTypes {
-      Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED,
-      Models::RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED
-    };
+//    static std::array<Models::RPC::Events::SessionEventType, 2> sMetadataIncludeTypes {
+//      Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED,
+//      Models::RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED
+//    };
     auto metadata = sessionMetadata_;
     auto ev = std::make_shared<Models::RPC::Events::SessionEventData>();
     ev->set_type(type);
     ev->set_session_id(metadata->id());
     ev->set_session_type(Models::Session::SESSION_TYPE_DISK);
 
-    if (std::ranges::contains(sMetadataIncludeTypes, type)) {
-      ev->mutable_session_metadata()->CopyFrom(*metadata);
+    switch(type) {
+      case Models::RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED: {
+        auto data = ev->mutable_session_changed_event();
+        data->set_is_available(isAvailable_);
+        data->set_session_id(metadata->session_id());
+        data->mutable_session_metadata()->CopyFrom(*metadata);
+        break;
+      }
+      case Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED: {
+        ev->mutable_session_metadata()->CopyFrom(*metadata);
+        break;
+      }
+      case Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME: {
+        break;
+      }
+      default:
+        L->warn("Unknown event type {}", std::string{magic_enum::enum_name(type)});
+        return nullptr;
     }
 
     return ev;
@@ -424,8 +419,8 @@ namespace IRacingTools::Shared {
     return true;
   }
 
-  bool DiskSessionDataProvider::seekToSessionNum(std::int32_t sessionNum) {
-    return isAvailable() && diskClient_->seekToSessionNum(sessionNum);
+  bool DiskSessionDataProvider::seekToSubSession(std::int32_t subSessionNum) {
+    return isAvailable() && diskClient_->seekToSessionNum(subSessionNum);
   }
 
   bool DiskSessionDataProvider::isAvailable() {
@@ -433,7 +428,7 @@ namespace IRacingTools::Shared {
   }
 
 
-  const Models::Session::SessionTiming *DiskSessionDataProvider::updateSessionTiming() {
+  bool DiskSessionDataProvider::updateSessionTiming() {
     std::scoped_lock lock(diskClientMutex_);
 
     auto timing = sessionMetadata_->mutable_timing();
@@ -457,26 +452,28 @@ namespace IRacingTools::Shared {
         found = true;
       } else {
         for (auto &sessionSub : sessionInfo->sessionInfo.sessions) {
-          if (sessionSub.sessionNum == sessionNum) {
-            std::regex timingTypeExp{"^(\\d+\\s*?|unlimited)$"};
-            std::smatch timingTypeMatch;
-            if (std::regex_search(sessionSub.sessionLaps, timingTypeMatch, timingTypeExp)) {
-              found = true;
-              auto str = timingTypeMatch[1].str();
-              std::int32_t lapCount = str == "unlimited" ? -1 : std::stoi(str);
-              auto timingType = lapCount > 0 ?
-                Models::Session::SESSION_SUB_TIMING_TYPE_LAPS :
-                Models::Session::SESSION_SUB_TIMING_TYPE_TIMED;
-              timing->set_session_sub_type(sessionSub.sessionName == "PRACTICE" ? Models::Session::SESSION_SUB_TYPE_PRACTICE : sessionSub.sessionName == "QUALIFY" ? Models::Session::SESSION_SUB_TYPE_QUALIFY :
-                                             sessionSub.sessionName == "RACE"                                                                                      ? Models::Session::SESSION_SUB_TYPE_RACE :
-                                                                                                                                                                     Models::Session::SESSION_SUB_TYPE_UNKNOWN);
-              timing->set_session_sub_num(sessionSub.sessionNum);
-              timing->set_session_sub_timing_type(timingType);
-              timing->set_session_sub_lap_count(lapCount);
-            } else {
-              continue;
-            }
+          if (sessionSub.sessionNum != sessionNum) {
+            continue;
           }
+
+          std::regex timingTypeExp{"^(\\d+\\s*?|unlimited)$"};
+          std::smatch timingTypeMatch;
+          if (std::regex_search(sessionSub.sessionLaps, timingTypeMatch, timingTypeExp)) {
+            found = true;
+            auto str = timingTypeMatch[1].str();
+            std::int32_t lapCount = str == "unlimited" ? -1 : std::stoi(str);
+            auto timingType = lapCount > 0 ?
+              Models::Session::SESSION_SUB_TIMING_TYPE_LAPS :
+              Models::Session::SESSION_SUB_TIMING_TYPE_TIMED;
+            timing->set_session_sub_type(sessionSub.sessionName == "PRACTICE" ? Models::Session::SESSION_SUB_TYPE_PRACTICE : sessionSub.sessionName == "QUALIFY" ? Models::Session::SESSION_SUB_TYPE_QUALIFY :
+                                           sessionSub.sessionName == "RACE"                                                                                      ? Models::Session::SESSION_SUB_TYPE_RACE :
+                                                                                                                                                                   Models::Session::SESSION_SUB_TYPE_UNKNOWN);
+            timing->set_session_sub_num(sessionSub.sessionNum);
+            timing->set_session_sub_timing_type(timingType);
+            timing->set_session_sub_lap_count(lapCount);
+            break;
+          }
+
         }
 
         timing->set_session_sub_count(sessionInfo->sessionInfo.sessions.size());
@@ -484,9 +481,7 @@ namespace IRacingTools::Shared {
 
       if (!found) {
         L->warn("Unable to update session timing info.  Sub session num ({}) not found or invalid", sessionNum);
-
       } else {
-
         auto sessionLapVal = diskClient_->getVarInt(KnownVarName::Lap);
         auto sessionLapsRemainVal = diskClient_->getVarInt(KnownVarName::SessionLapsRemain);
         auto sessionTimeVal = diskClient_->getVarDouble(KnownVarName::SessionTime);
@@ -504,13 +499,9 @@ namespace IRacingTools::Shared {
           timing->set_session_sub_time_remaining(timeRemainMillis);
           timing->set_session_sub_time_total(timeRemainMillis + timeMillis);
         }
-
-        // publish(
-        //   Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED,
-        //   getSessionEventData(Models::RPC::Events::SESSION_EVENT_TYPE_TIMING_CHANGED));
       }
     }
-    return &sessionMetadata_->timing();
+    return found;
   }
 
   std::size_t DiskSessionDataProvider::sampleIndex() {
@@ -551,5 +542,14 @@ namespace IRacingTools::Shared {
 
   void DiskSessionDataProvider::setOptions(const Options &newOptions) {
     options_ = newOptions;
+  }
+
+  void DiskSessionDataProvider::fireSessionChangedEvent()
+  {
+    publish(
+        Models::RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED,
+        clientProvider(),
+        shared_from_this()
+    );
   }
 } // namespace IRacingTools::Shared

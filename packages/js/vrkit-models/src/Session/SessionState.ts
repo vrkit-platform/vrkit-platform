@@ -90,7 +90,11 @@ export interface SessionMetadata {
      */
     id: string;
     /**
-     * @generated from protobuf field: IRacingTools.Models.Session.SessionType type = 2;
+     * @generated from protobuf field: int32 session_id = 2;
+     */
+    sessionId: number;
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionType type = 3;
      */
     type: SessionType;
     /**
@@ -555,7 +559,8 @@ class SessionMetadata$Type extends MessageType<SessionMetadata> {
     constructor() {
         super("IRacingTools.Models.Session.SessionMetadata", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionType", SessionType, "SESSION_TYPE_"] },
+            { no: 2, name: "session_id", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
+            { no: 3, name: "type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionType", SessionType, "SESSION_TYPE_"] },
             { no: 5, name: "status", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionStatus", SessionStatus, "SESSION_STATUS_"] },
             { no: 6, name: "sub_count", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
             { no: 7, name: "sub_id", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
@@ -572,6 +577,7 @@ class SessionMetadata$Type extends MessageType<SessionMetadata> {
     create(value?: PartialMessage<SessionMetadata>): SessionMetadata {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
+        message.sessionId = 0;
         message.type = 0;
         message.status = 0;
         message.subCount = 0;
@@ -593,7 +599,10 @@ class SessionMetadata$Type extends MessageType<SessionMetadata> {
                 case /* string id */ 1:
                     message.id = reader.string();
                     break;
-                case /* IRacingTools.Models.Session.SessionType type */ 2:
+                case /* int32 session_id */ 2:
+                    message.sessionId = reader.int32();
+                    break;
+                case /* IRacingTools.Models.Session.SessionType type */ 3:
                     message.type = reader.int32();
                     break;
                 case /* IRacingTools.Models.Session.SessionStatus status */ 5:
@@ -644,9 +653,12 @@ class SessionMetadata$Type extends MessageType<SessionMetadata> {
         /* string id = 1; */
         if (message.id !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.id);
-        /* IRacingTools.Models.Session.SessionType type = 2; */
+        /* int32 session_id = 2; */
+        if (message.sessionId !== 0)
+            writer.tag(2, WireType.Varint).int32(message.sessionId);
+        /* IRacingTools.Models.Session.SessionType type = 3; */
         if (message.type !== 0)
-            writer.tag(2, WireType.Varint).int32(message.type);
+            writer.tag(3, WireType.Varint).int32(message.type);
         /* IRacingTools.Models.Session.SessionStatus status = 5; */
         if (message.status !== 0)
             writer.tag(5, WireType.Varint).int32(message.status);

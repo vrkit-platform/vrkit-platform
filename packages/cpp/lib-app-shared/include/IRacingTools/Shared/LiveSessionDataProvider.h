@@ -9,7 +9,6 @@
 #include <memory>
 #include <thread>
 
-#include <IRacingTools/Shared/SessionDataAccess.h>
 #include <IRacingTools/Shared/SessionDataProvider.h>
 
 namespace IRacingTools::Shared {
@@ -58,10 +57,6 @@ namespace IRacingTools::Shared {
 
       virtual bool isLive() const override;
 
-      virtual SessionDataAccess& dataAccess() override;
-
-      virtual SessionDataAccess* dataAccessPtr() override;
-
       virtual std::shared_ptr<IRacingSDK::ClientProvider> clientProvider() override;
 
       virtual const IRacingSDK::VarHeaders& getDataVariableHeaders() override;
@@ -93,7 +88,6 @@ namespace IRacingTools::Shared {
       std::int64_t waitForDataDuration();
 
 
-      SessionDataAccess dataAccess_;
       std::unique_ptr<std::thread> thread_{nullptr};
       std::mutex threadMutex_{};
 

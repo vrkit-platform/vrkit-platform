@@ -9,19 +9,22 @@
 #include <IRacingTools/Shared/Chrono.h>
 #include <IRacingTools/Shared/LiveSessionDataProvider.h>
 #include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/SessionDataAccess.h>
 
 
-namespace IRacingTools::Shared {
+
+namespace IRacingTools::Shared
+{
   using namespace std::chrono_literals;
   using namespace IRacingSDK;
   using namespace IRacingSDK::Utils;
 
-  namespace {
+  namespace
+  {
     auto L = Logging::GetCategoryWithType<LiveSessionDataProvider>();
   }
 
-  void LiveSessionDataProvider::runnable() {
+  void LiveSessionDataProvider::runnable()
+  {
     init();
     while (true) {
       if (!running_)
@@ -33,7 +36,8 @@ namespace IRacingTools::Shared {
   /**
    * @brief Initialize the live session data provider
    */
-  void LiveSessionDataProvider::init() {
+  void LiveSessionDataProvider::init()
+  {
     std::scoped_lock lock(threadMutex_);
   }
 
@@ -41,24 +45,31 @@ namespace IRacingTools::Shared {
    * @brief Process newly received data frame
    *
    */
-  void LiveSessionDataProvider::processData() {
+  void LiveSessionDataProvider::processData()
+  {
     auto &client = LiveClient::GetInstance();
 
     if (client.wasSessionInfoUpdated()) {
       L->info("SessionInfoUpdated (updateCount={})", client.getSessionInfoUpdateCount().value());
+
       publish(
-        Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED,
-        clientProvider(),
-        shared_from_this());
+          Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED,
+          clientProvider(),
+          shared_from_this()
+      );
+
     }
 
     publish(
-      Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME,
-      clientProvider(),
-      shared_from_this());
+        Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME,
+        clientProvider(),
+        shared_from_this()
+    );
+
   }
 
-  void LiveSessionDataProvider::process() {
+  void LiveSessionDataProvider::process()
+  {
     static auto &client = LiveClient::GetInstance();
     updateSessionTiming();
 
@@ -69,7 +80,8 @@ namespace IRacingTools::Shared {
     }
   }
 
-  void LiveSessionDataProvider::updateSessionTiming() {
+  void LiveSessionDataProvider::updateSessionTiming()
+  {
     static auto &client = LiveClient::GetInstance();
 
     auto timing = sessionData_->mutable_timing();
@@ -86,11 +98,12 @@ namespace IRacingTools::Shared {
       bool found = false;
       if (sessionInfo && sessionNumVal) {
         auto sessionNum = sessionNumVal.value();
-        if (sessionNum == timing->session_sub_num() && timing->session_sub_timing_type() != Models::Session::SESSION_SUB_TIMING_TYPE_UNKNOWN) {
+        if (sessionNum == timing->session_sub_num() &&
+            timing->session_sub_timing_type() != Models::Session::SESSION_SUB_TIMING_TYPE_UNKNOWN) {
           // SESSION NUM UN-CHANGED, NO NEED TO UPDATE SESSION SUB INFO
           found = true;
         } else {
-          for (auto &sessionSub : sessionInfo->sessionInfo.sessions) {
+          for (auto &sessionSub: sessionInfo->sessionInfo.sessions) {
             if (sessionSub.sessionNum == sessionNum) {
               std::regex timingTypeExp{"^(\\d+\\s*?|unlimited)$"};
               std::smatch timingTypeMatch;
@@ -99,14 +112,15 @@ namespace IRacingTools::Shared {
                 auto str = timingTypeMatch[1].str();
                 std::int32_t lapCount = str == "unlimited" ? -1 : std::stoi(str);
                 auto timingType = lapCount > 0 ?
-                  Models::Session::SESSION_SUB_TIMING_TYPE_LAPS :
-                  Models::Session::SESSION_SUB_TIMING_TYPE_TIMED;
+                                  Models::Session::SESSION_SUB_TIMING_TYPE_LAPS :
+                                  Models::Session::SESSION_SUB_TIMING_TYPE_TIMED;
                 timing->set_session_sub_type(
-                  sessionSub.sessionName == "PRACTICE" ?
+                    sessionSub.sessionName == "PRACTICE" ?
                     Models::Session::SESSION_SUB_TYPE_PRACTICE :
                     sessionSub.sessionName == "QUALIFY" ? Models::Session::SESSION_SUB_TYPE_QUALIFY :
-                    sessionSub.sessionName == "RACE"    ? Models::Session::SESSION_SUB_TYPE_RACE :
-                                                          Models::Session::SESSION_SUB_TYPE_UNKNOWN);
+                    sessionSub.sessionName == "RACE" ? Models::Session::SESSION_SUB_TYPE_RACE :
+                    Models::Session::SESSION_SUB_TYPE_UNKNOWN
+                );
                 timing->set_session_sub_num(sessionSub.sessionNum);
                 timing->set_session_sub_timing_type(timingType);
                 timing->set_session_sub_lap_count(lapCount);
@@ -152,7 +166,8 @@ namespace IRacingTools::Shared {
   }
 
 
-  void LiveSessionDataProvider::checkConnection() {
+  void LiveSessionDataProvider::checkConnection()
+  {
     auto isConnected = LiveClient::GetInstance().isConnected();
 
     // CHECK IF CONNECTION CHANGED
@@ -162,58 +177,78 @@ namespace IRacingTools::Shared {
     // IF IT DID, UPDATE SUBSCRIBERS
     isConnected_ = isConnected;
     publish(
-      Models::RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED,
-      clientProvider(),
-      shared_from_this());
+        Models::RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED,
+        clientProvider(),
+        shared_from_this()
+    );
+
   }
 
-  std::int64_t LiveSessionDataProvider::waitForDataDuration() {
+  std::int64_t LiveSessionDataProvider::waitForDataDuration()
+  {
     return isConnected_ ? LiveClient::ActiveUpdateIntervalMillis : LiveClient::InactiveUpdateIntervalMillis;
   }
 
 
   std::shared_ptr<Models::RPC::Events::SessionEventData> LiveSessionDataProvider::getSessionEventData(
-    Models::RPC::Events::SessionEventType type) {
-    auto data = getSessionMetadata();
+      Models::RPC::Events::SessionEventType type)
+  {
+    auto metadata = getSessionMetadata();
     auto ev = std::make_shared<Models::RPC::Events::SessionEventData>();
 
     ev->set_type(type);
-    ev->set_session_id(data->id());
+    ev->set_session_id(metadata->id());
     ev->set_session_type(Models::Session::SESSION_TYPE_LIVE);
-    ev->mutable_session_metadata()->CopyFrom(*data);
+    switch(type) {
+      case Models::RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED: {
+        auto data = ev->mutable_session_changed_event();
+        data->set_is_available(isConnected_);
+        data->set_session_id(metadata->session_id());
+        data->mutable_session_metadata()->CopyFrom(*metadata);
+        break;
+      }
+      case Models::RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED: {
+        ev->mutable_session_metadata()->CopyFrom(*metadata);
+        break;
+      }
+      case Models::RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME: {
+        break;
+      }
+      default:
+        L->warn("Unknown event type {}", std::string{magic_enum::enum_name(type)});
+        return nullptr;
+    }
 
     return ev;
   }
 
 
-  bool LiveSessionDataProvider::isLive() const {
+  bool LiveSessionDataProvider::isLive() const
+  {
     return true;
   }
 
-  SessionDataAccess &LiveSessionDataProvider::dataAccess() {
-    return dataAccess_;
-  }
 
-  SessionDataAccess *LiveSessionDataProvider::dataAccessPtr() {
-    return &dataAccess_;
-  }
-
-  std::shared_ptr<IRacingSDK::ClientProvider> LiveSessionDataProvider::clientProvider() {
+  std::shared_ptr<IRacingSDK::ClientProvider> LiveSessionDataProvider::clientProvider()
+  {
     return LiveClient::Get().getProvider();
   }
 
-  const IRacingSDK::VarHeaders &LiveSessionDataProvider::getDataVariableHeaders() {
+  const IRacingSDK::VarHeaders &LiveSessionDataProvider::getDataVariableHeaders()
+  {
     return LiveClient::GetInstance().getVarHeaders();
   }
 
-  bool LiveSessionDataProvider::isRunning() {
+  bool LiveSessionDataProvider::isRunning()
+  {
     return running_.load();
   }
 
   /**
    * @brief Clean up resources
    */
-  LiveSessionDataProvider::~LiveSessionDataProvider() {
+  LiveSessionDataProvider::~LiveSessionDataProvider()
+  {
     stop();
   }
 
@@ -222,7 +257,8 @@ namespace IRacingTools::Shared {
    *
    * @return true if either `start` was successful - OR - if the provider was already running
    */
-  bool LiveSessionDataProvider::start() {
+  bool LiveSessionDataProvider::start()
+  {
     std::scoped_lock lock(threadMutex_);
     if (running_.exchange(true) || thread_) {
       return true;
@@ -234,7 +270,8 @@ namespace IRacingTools::Shared {
   }
 
 
-  void LiveSessionDataProvider::stop() {
+  void LiveSessionDataProvider::stop()
+  {
     {
       std::scoped_lock lock(threadMutex_);
       if (!running_.exchange(false) || !thread_)
@@ -249,8 +286,8 @@ namespace IRacingTools::Shared {
   }
 
   LiveSessionDataProvider::LiveSessionDataProvider() :
-      SessionDataProvider(),
-      dataAccess_(LiveClient::GetPtr()->getProvider()) {
+      SessionDataProvider()
+  {
     sessionData_ = std::make_shared<Models::Session::SessionMetadata>();
     auto timing = sessionData_->mutable_timing();
     timing->set_is_live(true);
@@ -261,27 +298,34 @@ namespace IRacingTools::Shared {
     sessionData_->set_status(Models::Session::SESSION_STATUS_READY);
   }
 
-  bool LiveSessionDataProvider::isAvailable() {
+  bool LiveSessionDataProvider::isAvailable()
+  {
     return isConnected_;
   }
 
-  bool LiveSessionDataProvider::isPaused() {
+  bool LiveSessionDataProvider::isPaused()
+  {
     return false;
   }
 
-  bool LiveSessionDataProvider::resume() {
+  bool LiveSessionDataProvider::resume()
+  {
     return false;
   }
 
-  std::optional<std::int32_t> LiveSessionDataProvider::sessionTicks() {
+  std::optional<std::int32_t> LiveSessionDataProvider::sessionTicks()
+  {
     return LiveClient::GetInstance().getSessionTicks();
   }
 
-  std::optional<std::int32_t> LiveSessionDataProvider::sessionTickCount() {
+  std::optional<std::int32_t> LiveSessionDataProvider::sessionTickCount()
+  {
     return std::nullopt;
   }
 
-  std::shared_ptr<Models::Session::SessionMetadata> LiveSessionDataProvider::getSessionMetadata(bool includeSessionInfoYaml) {
+  std::shared_ptr<Models::Session::SessionMetadata>
+  LiveSessionDataProvider::getSessionMetadata(bool includeSessionInfoYaml)
+  {
     if (includeSessionInfoYaml && sessionData_ && isAvailable()) {
       auto res = LiveClient::GetInstance().getSessionInfoStr();
       if (!res) {
@@ -293,14 +337,16 @@ namespace IRacingTools::Shared {
     return sessionData_;
   }
 
-  const Models::Session::SessionTiming LiveSessionDataProvider::getSessionTiming() {
+  const Models::Session::SessionTiming LiveSessionDataProvider::getSessionTiming()
+  {
     auto metadata = getSessionMetadata();
     if (!metadata)
       return Models::Session::SessionTiming();
     return metadata->timing();
   }
 
-  std::string LiveSessionDataProvider::sessionInfoStr() {
+  std::string LiveSessionDataProvider::sessionInfoStr()
+  {
     if (!isAvailable())
       return "";
 
@@ -313,13 +359,15 @@ namespace IRacingTools::Shared {
     return std::string{res.value()};
   }
 
-  std::shared_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> LiveSessionDataProvider::sessionInfo() {
+  std::shared_ptr<IRacingSDK::SessionInfo::SessionInfoMessage> LiveSessionDataProvider::sessionInfo()
+  {
     auto weakInfo = LiveClient::GetInstance().getSessionInfo();
 
     return weakInfo.lock();
   }
 
-  bool LiveSessionDataProvider::pause() {
+  bool LiveSessionDataProvider::pause()
+  {
     return false;
   }
 } // namespace IRacingTools::Shared

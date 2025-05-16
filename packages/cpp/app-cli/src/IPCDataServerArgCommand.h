@@ -17,7 +17,7 @@ namespace IRacingTools::App::Commands {
   using namespace IRacingSDK;
 
 
-  class IPCDataServerArgCommand : public ArgCommand {
+  class IRacingIPCArgCommand : public ArgCommand {
     public:
 
       int execute() override;

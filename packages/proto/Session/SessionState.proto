@@ -5,6 +5,13 @@ import "TrackLayoutMetadata.proto";
 
 package IRacingTools.Models.Session;
 
+enum SessionPlaybackState {
+  SESSION_PLAYBACK_STATE_UNKNOWN = 0;
+  SESSION_PLAYBACK_STATE_PLAYING = 1;
+  SESSION_PLAYBACK_STATE_PAUSED = 2;
+  SESSION_PLAYBACK_STATE_STOPPED = 3;
+}
+
 // Enum representing the sub-types of a session. This distinguishes
 // specific parts of a session, such as practice, qualifying, or race phases.
 enum SessionSubType {
@@ -71,7 +78,9 @@ enum SessionStatus {
 message SessionMetadata {
 
   string id = 1;
-  SessionType type = 2;
+  int32 session_id = 2;
+
+  SessionType type = 3;
 
   SessionStatus status = 5;
 
@@ -87,8 +96,9 @@ message SessionMetadata {
 
   SessionCarStatus car_status = 30;
 
-  string session_info_json = 90;
-  string session_info_yaml = 91;
+  optional SessionPlaybackState playback_state = 31;
+  optional string session_info_json = 90;
+  optional string session_info_yaml = 91;
 }
 
 enum SessionDataVarType {

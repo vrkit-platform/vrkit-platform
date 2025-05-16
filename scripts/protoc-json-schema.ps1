@@ -15,6 +15,17 @@ Write-Output "Using root: $rootDir"
 #cd $rootDir
 
 $env:PATH = $env:USERPROFILE + "\go\bin;" + $env:PATH
+if (-not (Get-Command "protoc-gen-jsonschema.exe" -ErrorAction SilentlyContinue)) {
+    if (Get-Command "go.exe" -ErrorAction SilentlyContinue) {
+        go install github.com/3fv/protoc-gen-jsonschema/cmd/protoc-gen-jsonschema@latest
+    }
+
+    if (-not (Get-Command "protoc-gen-jsonschema.exe" -ErrorAction SilentlyContinue)) {
+        Write-Host "protoc-gen-jsonschema.exe not found in PATH. Please install it and ensure it's available."
+        Exit 1
+    }
+}
+
 Write-Output "Building json-schema protos in $rootDir"
 $protoFiles = (Get-ChildItem -r -File $rootDir/packages/proto  -Filter '*.proto').FullName
 

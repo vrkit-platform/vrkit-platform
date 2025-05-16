@@ -50,6 +50,12 @@ export interface SessionEventData {
      * @generated from protobuf oneof: payload
      */
     payload: {
+        oneofKind: "sessionChangedEvent";
+        /**
+         * @generated from protobuf field: IRacingTools.Models.RPC.Events.SessionChangedEvent session_changed_event = 50;
+         */
+        sessionChangedEvent: SessionChangedEvent;
+    } | {
         oneofKind: "sessionMetadata";
         /**
          * @generated from protobuf field: IRacingTools.Models.Session.SessionMetadata session_metadata = 52;
@@ -154,6 +160,7 @@ class SessionEventData$Type extends MessageType<SessionEventData> {
             { no: 1, name: "type", kind: "enum", T: () => ["IRacingTools.Models.RPC.Events.SessionEventType", SessionEventType, "SESSION_EVENT_TYPE_"] },
             { no: 10, name: "session_id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 11, name: "session_type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionType", SessionType, "SESSION_TYPE_"] },
+            { no: 50, name: "session_changed_event", kind: "message", oneof: "payload", T: () => SessionChangedEvent },
             { no: 52, name: "session_metadata", kind: "message", oneof: "payload", T: () => SessionMetadata },
             { no: 53, name: "session_data_frame", kind: "message", oneof: "payload", T: () => SessionDataFrame }
         ]);
@@ -181,6 +188,12 @@ class SessionEventData$Type extends MessageType<SessionEventData> {
                     break;
                 case /* IRacingTools.Models.Session.SessionType session_type */ 11:
                     message.sessionType = reader.int32();
+                    break;
+                case /* IRacingTools.Models.RPC.Events.SessionChangedEvent session_changed_event */ 50:
+                    message.payload = {
+                        oneofKind: "sessionChangedEvent",
+                        sessionChangedEvent: SessionChangedEvent.internalBinaryRead(reader, reader.uint32(), options, (message.payload as any).sessionChangedEvent)
+                    };
                     break;
                 case /* IRacingTools.Models.Session.SessionMetadata session_metadata */ 52:
                     message.payload = {
@@ -215,6 +228,9 @@ class SessionEventData$Type extends MessageType<SessionEventData> {
         /* IRacingTools.Models.Session.SessionType session_type = 11; */
         if (message.sessionType !== 0)
             writer.tag(11, WireType.Varint).int32(message.sessionType);
+        /* IRacingTools.Models.RPC.Events.SessionChangedEvent session_changed_event = 50; */
+        if (message.payload.oneofKind === "sessionChangedEvent")
+            SessionChangedEvent.internalBinaryWrite(message.payload.sessionChangedEvent, writer.tag(50, WireType.LengthDelimited).fork(), options).join();
         /* IRacingTools.Models.Session.SessionMetadata session_metadata = 52; */
         if (message.payload.oneofKind === "sessionMetadata")
             SessionMetadata.internalBinaryWrite(message.payload.sessionMetadata, writer.tag(52, WireType.LengthDelimited).fork(), options).join();

@@ -18,7 +18,7 @@
 #include <IRacingSDK/Types.h>
 #include <IRacingSDK/Utils/YamlParser.h>
 
-#include "IPCDataServerArgCommand.h"
+#include "IRacingIPCArgCommand.h"
 
 #include <IRacingTools/Shared/DiskSessionDataProvider.h>
 #include <IRacingTools/Shared/LiveSessionDataProvider.h>
@@ -39,7 +39,7 @@ namespace IRacingTools::App::Commands {
   using namespace IRacingSDK;
 
   namespace {
-    auto L = Logging::GetCategoryWithType<IPCDataServerArgCommand>();
+    auto L = Logging::GetCategoryWithType<IRacingIPCArgCommand>();
     using ServiceManagerType = ServiceManager<IRacingIPCServer>;
 
     std::shared_ptr<ServiceManagerType> gServiceManager{nullptr};
@@ -54,7 +54,7 @@ namespace IRacingTools::App::Commands {
   } // namespace
 
 
-  CLI::App* IPCDataServerArgCommand::createCommand(CLI::App* app) {
+  CLI::App* IRacingIPCArgCommand::createCommand(CLI::App* app) {
     auto cmd = app->add_subcommand("ipc-data-server", "Run NamedPipeServer, solely for debugging");
     cmd->add_option("--ibt", ibtPath_, "IBT File to use for iRacing Data")->required(false);
     cmd->add_flag("--live", useLive_, "Live Connection to iRacing Data")->required(false);
@@ -64,7 +64,7 @@ namespace IRacingTools::App::Commands {
 
 
 
-  int IPCDataServerArgCommand::execute() {
+  int IRacingIPCArgCommand::execute() {
     auto& ibtPath = ibtPath_;
     auto& useLive = useLive_;
     bool invalidConfig = (useLive && !ibtPath.empty()) ||(!useLive && !ibtPath.empty() && !fs::exists(ibtPath));

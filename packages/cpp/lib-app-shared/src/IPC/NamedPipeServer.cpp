@@ -317,12 +317,13 @@ namespace {
       // ALWAYS ADD THE IO THREAD NOTIFY EVENT AT THE VERY END
       allPendingEventHandles.push_back(ioThreadNotifyEvent_);
 
-      L->info(
-        "Waiting for an event (pendingEvents={},pendingEventHandles={},connections={})",
-        allPendingEvents.size(),
-        allPendingEventHandles.size(),
-        connections_.size()
-      );
+      if (L->should_log(spdlog::level::debug))
+        L->debug(
+          "Waiting for an event (pendingEvents={},pendingEventHandles={},connections={})",
+          allPendingEvents.size(),
+          allPendingEventHandles.size(),
+          connections_.size()
+        );
 
       auto waitRes = WaitForMultipleObjects(
         allPendingEventHandles.size(),

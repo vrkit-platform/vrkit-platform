@@ -49,20 +49,20 @@ namespace IRacingTools::Shared::Services {
     auto provider = client->getProvider();
 
     VarHolder sessionTimeVar(
-        IRacingSDK::KnownVarName::SessionTime, provider.get());
-    VarHolder lapVar(IRacingSDK::KnownVarName::Lap, provider.get());
+        IRacingSDK::KnownVarName::SessionTime, provider);
+    VarHolder lapVar(IRacingSDK::KnownVarName::Lap, provider);
     VarHolder lapTimeCurrentVar(
-        IRacingSDK::KnownVarName::LapCurrentLapTime, provider.get());
+        IRacingSDK::KnownVarName::LapCurrentLapTime, provider);
     VarHolder lapDistPctVar(
-        IRacingSDK::KnownVarName::LapDistPct, provider.get());
+        IRacingSDK::KnownVarName::LapDistPct, provider);
     VarHolder lapDistVar(
-        IRacingSDK::KnownVarName::LapDist, provider.get());
+        IRacingSDK::KnownVarName::LapDist, provider);
     VarHolder incidentCountVar(
         IRacingSDK::KnownVarName::PlayerCarMyIncidentCount,
-        provider.get());
-    VarHolder latVar(IRacingSDK::KnownVarName::Lat, provider.get());
-    VarHolder lonVar(IRacingSDK::KnownVarName::Lon, provider.get());
-    VarHolder altVar(IRacingSDK::KnownVarName::Alt, provider.get());
+        provider);
+    VarHolder latVar(IRacingSDK::KnownVarName::Lat, provider);
+    VarHolder lonVar(IRacingSDK::KnownVarName::Lon, provider);
+    VarHolder altVar(IRacingSDK::KnownVarName::Alt, provider);
 
     std::vector<DataFrame> frames{client->getSampleCount()};
     auto addCurrentFrameData =

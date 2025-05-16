@@ -1,11 +1,11 @@
-#include <IRacingTools/Models/RPC/Messages/IPCDataServerMessages.pb.h>
+#include <IRacingTools/Models/RPC/Messages/IRacingIPCMessages.pb.h>
 #include <IRacingTools/Shared/LiveSessionDataProvider.h>
 #include <IRacingTools/Shared/Services/IRacingIPCServer.h>
 #include <IRacingTools/Shared/Utils/ErrorHelpers.h>
 #include <IRacingTools/Shared/Utils/ModelHelpers.h>
 
 namespace IRacingTools::Shared::Services {
-  using namespace Models::RPC::DataServer;
+  using namespace Models::RPC::IR;
 
   namespace {
     auto L = Logging::GetCategoryWithType<IRacingIPCServer>();
@@ -73,10 +73,10 @@ namespace IRacingTools::Shared::Services {
         const std::shared_ptr<IRacingSDK::ClientProvider>& sessionClientProvider,
         const std::shared_ptr<SessionDataProvider>& dataProvider,
         const IRacingIPCServer::ClientPtr& client,
-        const RPC::DataServer::IPCDataServerMessage& requestMessage,
-        RPC::DataServer::IPCDataServerMessage& responseMessage
+        const RPC::IR::IRacingIPCMessage& requestMessage,
+        RPC::IR::IRacingIPCMessage& responseMessage
       ) {
-        L->info("Populating session metadata message for client {}", client->id);
+        L->debug("Populating session metadata message for client {}", client->id);
         auto sessionMetadata = dataProvider->getSessionMetadata(true);
         if (!sessionMetadata) {
           L->error("Unable to get session metadata");
@@ -92,10 +92,10 @@ namespace IRacingTools::Shared::Services {
         const std::shared_ptr<IRacingSDK::ClientProvider>& sessionClientProvider,
         const std::shared_ptr<SessionDataProvider>& dataProvider,
         const IRacingIPCServer::ClientPtr& client,
-        const RPC::DataServer::IPCDataServerMessage& requestMessage,
-        RPC::DataServer::IPCDataServerMessage& responseMessage
+        const RPC::IR::IRacingIPCMessage& requestMessage,
+        RPC::IR::IRacingIPCMessage& responseMessage
       ) {
-        IPCDataServerSessionDataVarHeaders sessionDataVarHeaders{};
+        IRacingIPCSessionDataVarHeaders sessionDataVarHeaders{};
         auto sessionClient = sessionClientProvider->getClient();
         if (!sessionClient) {
           L->error("Unable to get session client");
@@ -125,10 +125,10 @@ namespace IRacingTools::Shared::Services {
         const std::shared_ptr<IRacingSDK::ClientProvider>& sessionClientProvider,
         const std::shared_ptr<SessionDataProvider>& dataProvider,
         const IRacingIPCServer::ClientPtr& client,
-        const RPC::DataServer::IPCDataServerMessage& requestMessage,
-        RPC::DataServer::IPCDataServerMessage& responseMessage
+        const RPC::IR::IRacingIPCMessage& requestMessage,
+        RPC::IR::IRacingIPCMessage& responseMessage
       ) {
-        auto setSubsRequest = std::make_shared<IPCDataServerSetSubscriptions>();
+        auto setSubsRequest = std::make_shared<IRacingIPCSetSubscriptions>();
         if (!requestMessage.payload().UnpackTo(setSubsRequest.get())) {
           L->error("Unable to unpack SetSubscriptions message, clientId={}", client->id);
           return std::unexpected(IRacingSDK::GeneralError("Unable to unpack SetSubscriptions message"));
@@ -162,10 +162,10 @@ namespace IRacingTools::Shared::Services {
         const std::shared_ptr<IRacingSDK::ClientProvider>&,
         const std::shared_ptr<SessionDataProvider>&,
         const IRacingIPCServer::ClientPtr& client,
-        const RPC::DataServer::IPCDataServerMessage& requestMessage,
-        RPC::DataServer::IPCDataServerMessage&
+        const RPC::IR::IRacingIPCMessage& requestMessage,
+        RPC::IR::IRacingIPCMessage&
       ) {
-        auto clientMetadata = std::make_shared<IPCDataServerClientMetadata>();
+        auto clientMetadata = std::make_shared<IRacingIPCClientMetadata>();
         if (!requestMessage.payload().UnpackTo(clientMetadata.get())) {
           L->error("Unable to unpack client metadata message, clientId={}", client->id);
           return std::unexpected(IRacingSDK::GeneralError("Unable to unpack client metadata message"));
@@ -182,7 +182,7 @@ namespace IRacingTools::Shared::Services {
         const std::shared_ptr<IRacingSDK::ClientProvider>& sessionClientProvider,
         const std::shared_ptr<SessionDataProvider>& sessionDataProvider,
         const IRacingIPCServer::ClientPtr& client,
-        RPC::DataServer::IPCDataServerMessage& msg
+        RPC::IR::IRacingIPCMessage& msg
       ) {
         L->debug("Populating session data frame message for client {}", client->id);
         Session::SessionDataFrame dataFrame{};
@@ -247,7 +247,8 @@ namespace IRacingTools::Shared::Services {
           }
           (*dataVarValues)[headerIndex] = varValues;
         }
-        L->info("DataFrame: {}", dataFrame.DebugString());
+        if (L->should_log(spdlog::level::debug))
+          L->debug("DataFrame: {}", dataFrame.DebugString());
         msg.set_event_type(RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME);
         msg.mutable_payload()->PackFrom(dataFrame);
         return true;
@@ -257,7 +258,7 @@ namespace IRacingTools::Shared::Services {
 
   IRacingIPCServer::Client::Client(const IPC::NamedPipeServer::ConnectionPtr& connection) : id(connection->id()),
     connectionRef(connection) {
-    L->info("Created Client(id={})", id);
+    L->debug("Created Client(id={})", id);
   }
 
   IPC::NamedPipeServer::ConnectionPtr IRacingIPCServer::Client::getConnection() {
@@ -280,16 +281,16 @@ namespace IRacingTools::Shared::Services {
     };
 
     clientMessageRequestHandlerMap_ = {
-      {IPCDataServerMessage::TYPE_SET_CLIENT_METADATA, &RequestHandlers::OnSetClientMetadata},
-      {IPCDataServerMessage::TYPE_GET_SESSION_METADATA, &RequestHandlers::OnGetSessionMetadata},
-      {IPCDataServerMessage::TYPE_GET_SESSION_DATA_HEADERS, &RequestHandlers::OnGetSessionDataHeaders},
-      {IPCDataServerMessage::TYPE_SET_SUBSCRIPTIONS, &RequestHandlers::OnSetSubscriptions},
+      {IRacingIPCMessage::TYPE_SET_CLIENT_METADATA, &RequestHandlers::OnSetClientMetadata},
+      {IRacingIPCMessage::TYPE_GET_SESSION_METADATA, &RequestHandlers::OnGetSessionMetadata},
+      {IRacingIPCMessage::TYPE_GET_SESSION_DATA_HEADERS, &RequestHandlers::OnGetSessionDataHeaders},
+      {IRacingIPCMessage::TYPE_SET_SUBSCRIPTIONS, &RequestHandlers::OnSetSubscriptions},
     };
   }
 
   std::expected<bool, IRacingSDK::GeneralError> IRacingIPCServer::init() {
     namedPipeServer_ = IPC::NamedPipeServer::Create(
-      IPC_DATA_SERVER_PIPE_NAME,
+      IRACING_IPC_SERVER_PIPE_NAME,
       [&](
       std::size_t size,
       const IPC::NamedPipeServer::MessageDataType data,
@@ -305,8 +306,8 @@ namespace IRacingTools::Shared::Services {
           header->sourceId,
           size
         );
-        RPC::DataServer::IPCDataServerMessage requestMessage{};
-        RPC::DataServer::IPCDataServerMessage responseMessage{};
+        RPC::IR::IRacingIPCMessage requestMessage{};
+        RPC::IR::IRacingIPCMessage responseMessage{};
         auto clientMap = clientMap_.readonly();
         auto connectionId = connection->id();
         auto client = clientMap->contains(connectionId) ? clientMap->at(connectionId) : nullptr;
@@ -330,7 +331,7 @@ namespace IRacingTools::Shared::Services {
          */
         auto sendResponseError = [&](const std::string& errorStr) {
           L->error(errorStr);
-          IPCDataServerError errorMsg{};
+          IRacingIPCError errorMsg{};
           errorMsg.set_code(std::string{magic_enum::enum_name(ErrorCode::General)});
           errorMsg.set_message(errorStr);
           responseMessage.set_is_error(true);
@@ -530,7 +531,7 @@ namespace IRacingTools::Shared::Services {
 
   void IRacingIPCServer::setClientMetadata(
     std::uint32_t id,
-    const std::shared_ptr<RPC::DataServer::IPCDataServerClientMetadata>& metadata
+    const std::shared_ptr<RPC::IR::IRacingIPCClientMetadata>& metadata
   ) {
     auto clientMap = clientMap_.mutate();
     if (!clientMap->contains(id)) {
@@ -541,7 +542,7 @@ namespace IRacingTools::Shared::Services {
     clientMap->at(id)->metadata = metadata;
   }
 
-  std::shared_ptr<RPC::DataServer::IPCDataServerClientMetadata> IRacingIPCServer::getClientMetadata(
+  std::shared_ptr<RPC::IR::IRacingIPCClientMetadata> IRacingIPCServer::getClientMetadata(
     std::uint32_t id
   ) {
     auto clientMap = clientMap_.readonly();
@@ -558,13 +559,6 @@ namespace IRacingTools::Shared::Services {
     const std::shared_ptr<IRacingSDK::ClientProvider>& sessionClientProvider,
     const std::shared_ptr<SessionDataProvider>& dataProvider
   ) {
-    // std::scoped_lock lock(namedPipeServerMutex_);
-    // if (!namedPipeServer_) {
-    //   L->warn("Named pipe server has not yet started");
-    //   return;
-    // }
-
-    // namedPipeServer_->wr
     std::vector<std::pair<ClientPtr, IPC::NamedPipeServer::ConnectionPtr>> clientConnections{};
     {
       auto clientMap = clientMap_.mutate();
@@ -606,8 +600,8 @@ namespace IRacingTools::Shared::Services {
 
     auto metadata = dataProvider->getSessionMetadata();
 
-    IPCDataServerMessage msg{};
-    msg.set_type(IPCDataServerMessage::TYPE_EVENT);
+    IRacingIPCMessage msg{};
+    msg.set_type(IRacingIPCMessage::TYPE_EVENT);
     if (eventType == RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED || (eventType ==
       RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED && metadata)) {
       if (!metadata) {

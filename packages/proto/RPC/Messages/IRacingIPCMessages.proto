@@ -3,36 +3,53 @@ import "google/protobuf/any.proto";
 import "RPC/Events/SessionEvent.proto";
 import "Session/SessionState.proto";
 
-package IRacingTools.Models.RPC.DataServer;
+package IRacingTools.Models.RPC.IR;
 
-message IPCDataServerClientMetadata {
+message IRacingIPCClientMetadata {
   uint32 id = 1;
   string name = 2;
   uint32 pid = 5;
 }
 
-message IPCDataServerSessionDataVarHeaders {
+
+
+message IRacingIPCSetSession {
+  Session.SessionType type = 1;
+
+  optional string file = 2;
+}
+
+message IRacingIPCSetSessionPlaybackState {
+  Session.SessionPlaybackState state = 1;
+}
+
+
+message IRacingIPCSessionDataVarHeaders {
     repeated Session.SessionDataVarHeader headers = 1;
 }
 
-message IPCDataServerSetSubscriptions {
+message IRacingIPCSetSubscriptions {
   repeated RPC.Events.SessionEventType event_types = 1;
   repeated string data_var_header_names = 10;
 }
 
-message IPCDataServerError {
+message IRacingIPCError {
   string code = 1;
   string message = 2;
   string stack_trace = 3;
 }
 
-message IPCDataServerMessage {
+message IRacingIPCMessage {
   enum Type {
     TYPE_EVENT = 0;
     TYPE_SET_CLIENT_METADATA = 1;
-    TYPE_GET_SESSION_METADATA = 3;
-    TYPE_GET_SESSION_DATA_HEADERS = 4;
-    TYPE_SET_SUBSCRIPTIONS = 5;
+
+    TYPE_SET_SESSION = 2;
+    TYPE_SET_SESSION_STATE= 3;
+    TYPE_GET_SESSION_METADATA = 4;
+    TYPE_GET_SESSION_DATA_HEADERS = 5;
+
+    TYPE_SET_SUBSCRIPTIONS = 10;
   }
 
   Type type = 1;
@@ -40,7 +57,7 @@ message IPCDataServerMessage {
 
   bool is_error = 8;
 
-  optional IPCDataServerError error = 9;
+  optional IRacingIPCError error = 9;
 
   google.protobuf.Any payload = 10;
 

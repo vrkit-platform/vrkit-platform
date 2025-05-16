@@ -4,7 +4,10 @@ import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
 
 import { setContainerResolver } from "../../utils"
-import { APP_STORE_ID, isDev } from "../../renderer-constants"
+import {
+  APP_STORE_ID, IRacingIPCClientManager,
+  isDev
+} from "../../renderer-constants"
 import { FileSystemManager } from "@vrkit-platform/shared/services/node"
 import TrackManager from "../../services/track-manager"
 import OverlayManagerClient from "../../services/overlay-manager-client"
@@ -43,7 +46,9 @@ async function createContainer(): Promise<Container> {
       .bindClass(TrackManager)
       .bindClass(DashboardManagerClient)
       .bindClass(OverlayManagerClient)
+      .bindClass(IRacingIPCClientManager)
       .bindClass(PluginClientLauncher)
+      
       .resolveAll()
 
     // container = await container.resolveAll()

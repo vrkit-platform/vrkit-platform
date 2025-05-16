@@ -9,7 +9,7 @@
 #include <IRacingTools/Models/Session/SessionState.pb.h>
 #include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
 #include <IRacingSDK/Utils/EventEmitter.h>
-#include <IRacingTools/Shared/SessionDataEvent.h>
+#include <IRacingSDK/Client.h>
 
 
 namespace IRacingTools::Shared {
@@ -18,20 +18,18 @@ namespace IRacingTools::Shared {
    */
   //, std::shared_ptr<SessionDataEvent>
   class SessionDataProvider : public IRacingSDK::Utils::EventEmitter<
-      Models::RPC::Events::SessionEventType,
+      const Models::RPC::Events::SessionEventType &,
       const std::shared_ptr<IRacingSDK::ClientProvider>&,
       const std::shared_ptr<SessionDataProvider>&> {
+
   public:
+
 
     using SessionDataProviderPtr = std::shared_ptr<SessionDataProvider>;
 
     using Ptr = std::shared_ptr<SessionDataProvider>;
 
     virtual ~SessionDataProvider() = default;
-
-    virtual SessionDataAccess& dataAccess() = 0;
-
-    virtual SessionDataAccess* dataAccessPtr() = 0;
 
     virtual std::shared_ptr<IRacingSDK::ClientProvider> clientProvider() = 0;
 

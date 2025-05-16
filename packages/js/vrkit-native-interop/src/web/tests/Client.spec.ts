@@ -113,9 +113,9 @@ test.skip("SessionPlayer.live", async () => {
     player.on(SessionEventType.DATA_FRAME, (player, ev) => {
       try {
         const evData = ev.payload
-        if (evData.payload.oneofKind !== "sessionDataFrame") {
-          return
-        }
+        // if (evData.payload.oneofKind !== "sessionDataFrame") {
+        //   return
+        // }
         // const {
         //   sampleIndex, sampleCount
         // } = evData.payload.sessionDataFrame!!

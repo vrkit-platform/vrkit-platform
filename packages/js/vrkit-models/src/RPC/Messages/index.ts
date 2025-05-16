@@ -1,2 +1,2 @@
-export * from "./IPCDataServerMessages"
+export * from "./IRacingIPCMessages"
 export * from "./SimpleMessages"

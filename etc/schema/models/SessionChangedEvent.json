@@ -76,6 +76,16 @@
                         }
                     ]
                 },
+                "sessionId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
                 "type": {
                     "enum": [
                         "SESSION_TYPE_LIVE",

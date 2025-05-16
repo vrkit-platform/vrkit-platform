@@ -58,10 +58,6 @@ namespace IRacingTools::Shared {
      */
     virtual ~DiskSessionDataProvider() override;
 
-    virtual SessionDataAccess& dataAccess() override;
-
-    virtual SessionDataAccess* dataAccessPtr() override;
-
     virtual std::shared_ptr<IRacingSDK::ClientProvider> clientProvider() override;
 
     virtual bool isLive() const override;
@@ -88,10 +84,10 @@ namespace IRacingTools::Shared {
 
     /**
      * @brief
-     * @param sessionNum SessionInfo["SessionNum"] described in YAML to skip stream to
+     * @param subSessionNum SessionInfo["SessionNum"] described in YAML to skip stream to
      * @return success or failure true/false
      */
-    bool seekToSessionNum(std::int32_t sessionNum);
+    bool seekToSubSession(std::int32_t subSessionNum);
 
     virtual bool isControllable() const override {
       return true;
@@ -147,14 +143,13 @@ namespace IRacingTools::Shared {
     void fireMetadataChangedEvent();
 
     void fireDataUpdatedEvent();
-
-    const Models::Session::SessionTiming*updateSessionTiming();
+    void fireSessionChangedEvent();
+    bool updateSessionTiming();
 
     IRacingSDK::ClientId clientId_;
     std::shared_ptr<IRacingSDK::DiskClient> diskClient_;
     std::filesystem::path file_;
 
-    std::unique_ptr<SessionDataAccess> dataAccess_;
 
     std::unique_ptr<std::thread> thread_{nullptr};
     std::mutex threadMutex_{};

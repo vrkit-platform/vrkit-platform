@@ -536,6 +536,30 @@
                     ],
                     "title": "Session Car Status"
                 },
+                "playbackState": {
+                    "enum": [
+                        "SESSION_PLAYBACK_STATE_UNKNOWN",
+                        0,
+                        "SESSION_PLAYBACK_STATE_PLAYING",
+                        1,
+                        "SESSION_PLAYBACK_STATE_PAUSED",
+                        2,
+                        "SESSION_PLAYBACK_STATE_STOPPED",
+                        3
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Playback State"
+                },
                 "sessionInfoJson": {
                     "oneOf": [
                         {

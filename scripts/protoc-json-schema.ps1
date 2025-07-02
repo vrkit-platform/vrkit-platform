@@ -17,6 +17,7 @@ Write-Output "Using root: $rootDir"
 $env:PATH = $env:USERPROFILE + "\go\bin;" + $env:PATH
 if (-not (Get-Command "protoc-gen-jsonschema.exe" -ErrorAction SilentlyContinue)) {
     if (Get-Command "go.exe" -ErrorAction SilentlyContinue) {
+        Write-Host "go.exe is available, attempting to install protoc-gen-jsonschema"
         go install github.com/3fv/protoc-gen-jsonschema/cmd/protoc-gen-jsonschema@latest
     }
 

@@ -407,8 +407,6 @@ def generate_nodes(args):
         tupleNames.append(clazz)
 
         # clazz, nodes, props, templateArgs
-        # TODO: Populate templates
-        # tempBag = {'clazz': clazz}
         tempTypes = ""
         tempNodes = ""
         tempProps = ""

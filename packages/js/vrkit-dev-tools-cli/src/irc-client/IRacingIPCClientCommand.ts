@@ -12,16 +12,19 @@ const log = getLogger(__filename),
 // const log = console,
 //     { debug, trace, info, error, warn } = log
 
-export const IRCClientCommand: CommandModule = {
+export const IRacingIPCClientCommand: CommandModule = {
   command: "irc-client",
   describe: "Start the iRacing IPC client",
   handler: async yargs => {
+    process.on("uncaughtException", err => {
+      console.error("Uncaught Exception:", err)
+    })
     const
-      irc = new IRacingIPCClient(),
+      irc = new IRacingIPCClient("vrkit_iracing_ipc_server"),
       historyFile = Path.join(process.cwd(), ".repl-history-irc-client")
     
     info(`Using history file: ${historyFile}`)
-    irc.on(SessionEventType.DATA_FRAME, (dataFrame: SessionDataFrame) => {
+    irc.on(SessionEventType.DATA_FRAME, (_, dataFrame: SessionDataFrame) => {
       info("Received data frame:", dataFrame)
     })
     
@@ -55,4 +58,4 @@ export const IRCClientCommand: CommandModule = {
   }
 }
 
-export default IRCClientCommand
+export default IRacingIPCClientCommand

@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="VRKit: Debug Native &amp; JS" type="CompoundRunConfigurationType">
     <toRun name="VRKit: Main" type="ChromiumRemoteDebugType" />
-    <toRun name="VRKit: Electron Main (BRK)" targetId="CMakeBuildProfile:DebugClionNinja" type="CMakeRunConfiguration" />
+    <toRun name="VRKit: Electron Main (NATIVE_DEBUG_ENABLED) (BRK)" type="CMakeRunConfiguration" />
     <method v="2" />
   </configuration>
 </component>

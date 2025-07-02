@@ -12,7 +12,7 @@ import SharedAppState, { createSharedAppStateStore } from "../../services/store"
 import { DashboardManager } from "../../services/dashboard-manager"
 import { PluginManager } from "../../services/plugin-manager"
 import OpenXRConfigurator from "../../services/openxr-configurator"
-import { FileSystemManager, IRacingIPCClientManager } from "@vrkit-platform/shared/services/node"
+import { FileSystemManager } from "@vrkit-platform/shared/services/node"
 import { ElectronMainMenuManager } from "../../services/electron-menu"
 import { SystemIntegrationManager } from "../../services/system-integration"
 
@@ -33,7 +33,7 @@ const createServiceContainer = once(async function createServiceContainer() {
     .bindClass(DashboardManager)
     .bindClass(OverlayManager)
     .bindClass(PluginManager)
-    .bindClass(IRacingIPCClientManager)
+    //.bindClass(IRacingIPCClientManager)
     .bindAsyncFactory(SharedAppState, createSharedAppStateStore)
     .resolveAll()
 

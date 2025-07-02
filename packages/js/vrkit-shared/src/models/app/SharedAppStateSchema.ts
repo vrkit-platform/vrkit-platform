@@ -31,6 +31,7 @@ export const SessionDetailSchema = createSimpleSchema<SessionDetail>({
   type: primitive(),
   filePath: primitive(),
   isAvailable: primitive(),
+  namedPipePath: primitive(),
   info: custom(
     v => toJS(v),
     v => v

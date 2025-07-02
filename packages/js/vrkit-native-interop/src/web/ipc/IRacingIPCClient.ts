@@ -1,12 +1,15 @@
-import { guard, isDefined, isString } from "@3fv/guard"
+import { v4 as UUIDV4 } from "uuid"
+import { guard, isDefined, isNumber, isString } from "@3fv/guard"
 import {
   Any,
   IRacingIPCClientMetadata,
+  IRacingIPCDataProviderId,
   IRacingIPCError,
   IRacingIPCMessage,
-  IRacingIPCMessage_Type,
+  IRacingIPCMessageType,
   IRacingIPCSessionDataVarHeaders,
-  IRacingIPCSetSubscriptions, SessionChangedEvent,
+  IRacingIPCSetSubscriptions,
+  SessionChangedEvent,
   SessionDataFrame,
   SessionEventType,
   SessionMetadata
@@ -52,22 +55,22 @@ export const IRacingIPCSessionEventMap: Record<number, MessageType<any>> = {
 }
 
 export interface IRacingIPCRequestResponseMapType {
-  [IRacingIPCMessage_Type.SET_CLIENT_METADATA]: {
+  [IRacingIPCMessageType.TYPE_SET_CLIENT_METADATA]: {
     request: IRacingIPCClientMetadata
     response: IRacingIPCClientMetadata
   }
 
-  [IRacingIPCMessage_Type.GET_SESSION_METADATA]: {
+  [IRacingIPCMessageType.TYPE_GET_SESSION_METADATA]: {
     request: SessionMetadata
     response: SessionMetadata
   }
 
-  [IRacingIPCMessage_Type.SET_SUBSCRIPTIONS]: {
+  [IRacingIPCMessageType.TYPE_SET_SUBSCRIPTIONS]: {
     request: IRacingIPCSetSubscriptions
     response: IRacingIPCSetSubscriptions
   }
 
-  [IRacingIPCMessage_Type.GET_SESSION_DATA_HEADERS]: {
+  [IRacingIPCMessageType.TYPE_GET_SESSION_DATA_HEADERS]: {
     request: IRacingIPCSessionDataVarHeaders
     response: IRacingIPCSessionDataVarHeaders
   }
@@ -80,20 +83,24 @@ export const IRacingIPCRequestResponseMap: Record<
     response: MessageType<any>
   }
 > = {
-  [IRacingIPCMessage_Type.SET_CLIENT_METADATA]: {
+  [IRacingIPCMessageType.TYPE_SET_CLIENT_METADATA]: {
     request: IRacingIPCClientMetadata,
     response: IRacingIPCClientMetadata
   },
-  [IRacingIPCMessage_Type.GET_SESSION_METADATA]: {
+  [IRacingIPCMessageType.TYPE_GET_DATA_PROVIDER_ID]: {
+    request: null!,
+    response: IRacingIPCDataProviderId
+  },
+  [IRacingIPCMessageType.TYPE_GET_SESSION_METADATA]: {
     request: null!,
     response: SessionMetadata
   },
-  [IRacingIPCMessage_Type.SET_SUBSCRIPTIONS]: {
+  [IRacingIPCMessageType.TYPE_SET_SUBSCRIPTIONS]: {
     request: IRacingIPCSetSubscriptions,
-    response: IRacingIPCSetSubscriptions
+    response: null!
   },
-  [IRacingIPCMessage_Type.GET_SESSION_DATA_HEADERS]: {
-    request: IRacingIPCSessionDataVarHeaders,
+  [IRacingIPCMessageType.TYPE_GET_SESSION_DATA_HEADERS]: {
+    request: null!, //IRacingIPCSessionDataVarHeaders,
     response: IRacingIPCSessionDataVarHeaders
   }
 }
@@ -107,7 +114,7 @@ class PendingRequestResponse<RequestMessage extends {}, ResponseMessage extends 
 
   constructor(
     public readonly id: number,
-    public readonly type: IRacingIPCMessage_Type,
+    public readonly type: IRacingIPCMessageType,
     public readonly requestMessage: RequestMessage,
     public readonly requestMessageType: MessageType<RequestMessage>,
     public readonly responseMessageType: MessageType<ResponseMessage>,
@@ -126,6 +133,10 @@ class PendingRequestResponse<RequestMessage extends {}, ResponseMessage extends 
     return this.deferred.isRejected()
   }
 
+  get isSettled() {
+    return this.deferred.isSettled()
+  }
+
   get promise(): Promise<ResponseMessage> {
     return this.deferred.promise
   }
@@ -138,9 +149,18 @@ class PendingRequestResponse<RequestMessage extends {}, ResponseMessage extends 
     if (!message.isError && !message.error) {
       return false
     }
-    const err = asOption(message.error)
-      .map(msg => new IRacingIPCRuntimeError(msg.message, msg.code, msg.stackTrace))
-      .getOrNull()
+
+    const errDetail = !message.payload ? null : Any.unpack<IRacingIPCError>(message.payload!, IRacingIPCError, {}),
+      err = asOption(errDetail)
+        .map(
+          detail =>
+            new IRacingIPCRuntimeError(
+              detail!.message ?? "Unknown",
+              detail!.code ?? "-1",
+              detail!.stackTrace ?? "<no-stack>"
+            )
+        )
+        .getOrCall(() => new IRacingIPCRuntimeError("NO ERROR MESSAGE", "-1", "<no-stack>"))
 
     if (this.deferred.isSettled()) {
       throw new IRacingIPCRuntimeError("Deferred is already settled")
@@ -167,28 +187,57 @@ class PendingRequestResponse<RequestMessage extends {}, ResponseMessage extends 
     if (this.checkError(message)) {
       return this.deferred.promise
     }
-    this.responseMessage = Any.unpack(message.payload!, this.responseMessageType, {})
-
-    this.deferred.resolve(this.responseMessage)
+    
+    if (!this.responseMessageType) {
+      debug(`Response message type is not defined for request type: ${this.type}, message:`, message)
+      this.deferred.resolve(null!)
+    } else if (!message.payload) {
+      error(`Response message payload is empty`, message, this.responseMessageType, this)
+      this.deferred.reject(new IRacingIPCRuntimeError("Response message payload is empty or response message type is not defined"))
+    } else  {
+      this.responseMessage =
+          Any.unpack(message.payload!, this.responseMessageType, {})
+      this.deferred.resolve(this.responseMessage)
+    }
     return this.promise
   }
 }
 
-interface IRacingIPCSessionEventArgs {
-  [SessionEventType.DATA_FRAME]: (dataFrame: SessionDataFrame) => any
-  [SessionEventType.SESSION_CHANGED]: (metadata: SessionChangedEvent) => any
-  [SessionEventType.METADATA_CHANGED]: (metadata: SessionMetadata) => any
+export enum IRacingIPCClientEventType {
+  CONNECTED = "CONNECTED",
+  DISCONNECTED = "DISCONNECTED",
+  ERROR = "ERROR"
 }
 
-export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> {
+export interface IRacingIPCClientEventArgs {
+  [IRacingIPCClientEventType.CONNECTED]: (client: IRacingIPCClient) => any
+  [IRacingIPCClientEventType.DISCONNECTED]: (client: IRacingIPCClient) => any
+  [IRacingIPCClientEventType.ERROR]: (client: IRacingIPCClient, err: Error) => any
+  
+  [SessionEventType.DATA_FRAME]: (client: IRacingIPCClient, dataFrame: SessionDataFrame) => any
+
+  [SessionEventType.SESSION_CHANGED]: (client: IRacingIPCClient, metadata: SessionChangedEvent) => any
+
+  [SessionEventType.METADATA_CHANGED]: (client: IRacingIPCClient, metadata: SessionMetadata) => any
+}
+
+export type IRacingIPCClientEventKeys = keyof IRacingIPCClientEventArgs
+
+export const IRacingIPCClientEventTypes =
+    Array<any>(
+        ...Object.values(IRacingIPCClientEventType),
+        ...Object.values(SessionEventType).filter(isNumber)
+    ) as IRacingIPCClientEventKeys[]
+
+export class IRacingIPCClient extends EventEmitter3<IRacingIPCClientEventArgs> {
   protected static MessageIdCounter: number = 0
-  
+
   protected namedPipeClient: NamedPipeClient = null!
-  
+
   protected namedPipeConnectDeferred: Deferred<NamedPipeClient> = null!
-  
+
   protected readonly pendingRequestResponseMap = new Map<number, PendingRequestResponse<any, any>>()
-  
+
   protected makeOnConnect(deferred: Deferred<NamedPipeClient>) {
     return (client: NamedPipeClient) => {
       info(`iRacing client service connected (${client.clientId})`)
@@ -198,13 +247,15 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
       }
 
       deferred.resolve(client)
+      
+      this.emit(IRacingIPCClientEventType.CONNECTED, this)
     }
   }
-  
+
   protected onMessage(_client: NamedPipeClient, readHeader: NamedPipeMessageHeader, readData: Uint8Array) {
     try {
       const msg = IRacingIPCMessage.fromBinary(readData)
-      if (msg.type === IRacingIPCMessage_Type.EVENT) {
+      if (msg.type === IRacingIPCMessageType.TYPE_EVENT) {
         const eventType = match(msg.eventType as string | number)
           .with(P.string, it => SessionEventType[it] as SessionEventType)
           .otherwise(identity) as SessionEventType
@@ -214,9 +265,13 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
           warn(`Handling for event type: ${msg.eventType} is not implemented`, msg)
           return
         }
+        if (!msg.payload) {
+          warn(`Event message payload is empty for event type (${msg.eventType}), was expecting(${eventMessageType.typeName})`, msg)
+          return
+        }
         const eventMessage = Any.unpack(msg.payload!, eventMessageType)
 
-        return this.emit(eventType as keyof IRacingIPCSessionEventArgs, eventMessage)
+        return this.emit(eventType as keyof IRacingIPCClientEventArgs, this, eventMessage)
       }
 
       if (!this.pendingRequestResponseMap.has(readHeader.sourceId)) {
@@ -226,12 +281,17 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
 
       asOption(this.pendingRequestResponseMap.get(readHeader.sourceId)).ifSome(pending => {
         pending.resolve(msg)
-        this.pendingRequestResponseMap.delete(readHeader.sourceId)
+        // this.pendingRequestResponseMap.delete(readHeader.sourceId)
       })
     } catch (err) {
       error("Failed to parse message", err)
     }
   }
+  
+  /**
+   * Randomly generated client ID for the iRacing IPC client.
+   */
+  readonly clientId = UUIDV4()
 
   async connect(): Promise<NamedPipeClient> {
     if (this.namedPipeConnectDeferred) {
@@ -240,9 +300,10 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
 
     const deferred = (this.namedPipeConnectDeferred = new Deferred<NamedPipeClient>())
     try {
-      this.namedPipeClient = await asOption(new NamedPipeClient("vrkit_iracing_ipc_server"))
+      this.namedPipeClient = await asOption(new NamedPipeClient(this.pipePath))
         .ifSome(client => {
           client.on("connect", this.makeOnConnect(deferred))
+          client.on("error", this.onError.bind(this))
           client.on("message", this.onMessage.bind(this))
           client.on("end", this.onDisconnect.bind(this))
         })
@@ -279,32 +340,43 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
     ResponseMessage extends
       IRacingIPCRequestResponseMapType[Type]["response"] = IRacingIPCRequestResponseMapType[Type]["response"]
   >(type: Type, requestMessage: RequestMessage): Promise<ResponseMessage> {
-    await this.connect()
-    const id = ++IRacingIPCClient.MessageIdCounter
-    const requestMessageType = IRacingIPCRequestResponseMap[type].request as MessageType<RequestMessage>
-    const responseMessageType = IRacingIPCRequestResponseMap[type].response as MessageType<ResponseMessage>
-    const transportMessage = IRacingIPCMessage.create({
-      type,
-      payload: !requestMessageType ? null! : Any.pack(requestMessage, requestMessageType)
-    })
-
-    const pendingRequestResponse = new PendingRequestResponse(
-      id,
-      type,
-      requestMessage,
-      requestMessageType,
-      responseMessageType,
-      transportMessage
-    )
-
-    this.pendingRequestResponseMap.set(id, pendingRequestResponse)
-
     try {
-      await this.namedPipeClient.write(id, IRacingIPCMessage.toBinary(transportMessage))
-      return await pendingRequestResponse.promise
+      await this.connect()
+      const id = ++IRacingIPCClient.MessageIdCounter
+      const requestMessageType = IRacingIPCRequestResponseMap[type].request as MessageType<RequestMessage>
+      const responseMessageType = IRacingIPCRequestResponseMap[type].response as MessageType<ResponseMessage>
+      const transportMessage = IRacingIPCMessage.create({
+        type,
+        payload: !requestMessageType ? Any.create()! : Any.pack(requestMessage, requestMessageType)
+      })
+
+      const pendingRequestResponse = new PendingRequestResponse(
+        id,
+        type,
+        requestMessage,
+        requestMessageType,
+        responseMessageType,
+        transportMessage
+      )
+
+      try {
+        this.pendingRequestResponseMap.set(id, pendingRequestResponse)
+
+        await this.namedPipeClient.write(id, IRacingIPCMessage.toBinary(transportMessage))
+        const resPromise = pendingRequestResponse.promise
+        const result = await resPromise
+        info(`Received response for request ID: ${id}, type: ${type}`, result)
+        return result as ResponseMessage
+      } catch (err) {
+        console.error(`Failed to receive response from iRacing IPC server`, err)
+        if (!pendingRequestResponse.isSettled) {
+          // noinspection ES6MissingAwait
+          pendingRequestResponse.reject(err)
+        }
+        throw err
+      }
     } catch (err) {
-      // noinspection ES6MissingAwait
-      pendingRequestResponse.reject(err)
+      console.error(`Failed request to iRacing IPC server`, err)
       throw err
     }
   }
@@ -325,20 +397,44 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCSessionEventArgs> 
    * Service constructor
    *
    */
-  constructor() {
+  constructor(
+      readonly pipePath: string
+  ) {
     super()
-    
+
     if (isDev) {
       Object.assign(global, {
-        irc: this
+        ipc_client: this
       })
     }
   }
-
+  
+  /**
+   * Handles the error event of the named pipe client.
+   * This method logs the error and emits an error event.
+   *
+   * @param client
+   * @param err
+   * @protected
+   */
+  protected onError(client: NamedPipeClient, err:Error) {
+    info(`Named pipe client error with path (${client.pipeName})`, err)
+    //guard(() => this.disconnect())
+    this.emit(IRacingIPCClientEventType.ERROR, this, err)
+  }
+  
+  /**
+   * Handles the disconnection event of the named pipe client.
+   *
+   * @protected
+   */
   protected onDisconnect() {
     this.disconnect()
   }
-
+  
+  /**
+   * Disconnects the named pipe client and cleans up resources.
+   */
   disconnect(): void {
     try {
       const deferred = this.namedPipeConnectDeferred

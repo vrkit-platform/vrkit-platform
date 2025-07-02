@@ -1,12 +1,17 @@
-import appStore,{AppSelector} from "./AppStore"
+import type { AppStore, AppSelector } from "./AppStore"
 import type { Unsubscribe } from "@reduxjs/toolkit"
 
 export function observeAppStore<T>(
   selector: AppSelector<T>,
   onChange: (value: T) => any,
-  skipImmediateInvoke: boolean = false
+  skipImmediateInvoke: boolean = false,
+  appStore: AppStore = null
 ): Unsubscribe {
-  let currentState
+  if (!appStore) {
+    appStore = require("./AppStore").appStore as AppStore
+  }
+  
+  let currentState: T | null = null
 
   function handleChange() {
     let nextState = selector(appStore.getState())
@@ -21,5 +26,6 @@ export function observeAppStore<T>(
   if (!skipImmediateInvoke) {
     handleChange()
   }
+
   return unsubscribe
 }

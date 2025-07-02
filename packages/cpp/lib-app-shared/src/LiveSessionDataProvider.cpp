@@ -252,6 +252,10 @@ namespace IRacingTools::Shared
     stop();
   }
 
+  const std::string LiveSessionDataProvider::id() {
+    return id_;
+  }
+
   /**
    * @brief Start processing live data if available
    *

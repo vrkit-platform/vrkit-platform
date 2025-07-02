@@ -1,5 +1,5 @@
 import Bind from "bindings"
-import {app} from "electron"
+//import {app} from "electron"
 import * as Path from "node:path"
 import { asOption, Option } from "@3fv/prelude-ts"
 import { getLogger } from "@3fv/logger-proxy"
@@ -70,6 +70,7 @@ export async function IsNativeOverlaySupported(): Promise<boolean> {
   
   isNativeSupportedDeferred = new Deferred<boolean>()
   try {
+    const { app } = require("electron") as typeof import("electron")
     const gpuInfo = await app.getGPUInfo("complete") as any
     isNativeSupportedDeferred.resolve((
             gpuInfo?.auxAttributes?.supportsD3dSharedImages ?? false

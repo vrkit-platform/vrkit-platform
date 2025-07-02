@@ -11,7 +11,9 @@ message IRacingIPCClientMetadata {
   uint32 pid = 5;
 }
 
-
+message IRacingIPCDataProviderId {
+  string id = 1;
+}
 
 message IRacingIPCSetSession {
   Session.SessionType type = 1;
@@ -39,20 +41,24 @@ message IRacingIPCError {
   string stack_trace = 3;
 }
 
+enum IRacingIPCMessageType {
+  TYPE_EVENT = 0;
+  TYPE_SET_CLIENT_METADATA = 1;
+
+  TYPE_SET_SESSION = 2;
+  TYPE_SET_SESSION_STATE= 3;
+  TYPE_GET_SESSION_METADATA = 4;
+  TYPE_GET_SESSION_DATA_HEADERS = 5;
+
+  TYPE_SET_SUBSCRIPTIONS = 10;
+
+  TYPE_GET_DATA_PROVIDER_ID = 20;
+}
+
+
 message IRacingIPCMessage {
-  enum Type {
-    TYPE_EVENT = 0;
-    TYPE_SET_CLIENT_METADATA = 1;
 
-    TYPE_SET_SESSION = 2;
-    TYPE_SET_SESSION_STATE= 3;
-    TYPE_GET_SESSION_METADATA = 4;
-    TYPE_GET_SESSION_DATA_HEADERS = 5;
-
-    TYPE_SET_SUBSCRIPTIONS = 10;
-  }
-
-  Type type = 1;
+  IRacingIPCMessageType type = 1;
   optional RPC.Events.SessionEventType event_type = 2;
 
   bool is_error = 8;

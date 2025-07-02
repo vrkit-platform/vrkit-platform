@@ -68,6 +68,25 @@ namespace IRacingTools::Shared::Services {
 
     namespace RequestHandlers {
 
+      std::expected<bool, IRacingSDK::GeneralError> OnGetDataProviderId(
+        const std::shared_ptr<IRacingIPCServer>& server,
+        const std::shared_ptr<IRacingSDK::ClientProvider>& sessionClientProvider,
+        const std::shared_ptr<SessionDataProvider>& dataProvider,
+        const IRacingIPCServer::ClientPtr& client,
+        const RPC::IR::IRacingIPCMessage& requestMessage,
+        RPC::IR::IRacingIPCMessage& responseMessage
+      ) {
+        L->info("Populating IRacingIPCGetDataProviderId message for client {}", client->id);
+        if (!dataProvider) {
+          return LogAndReturnGeneralError("dataProvider is not set");
+        }
+
+        IRacingIPCDataProviderId dataProviderIdMessage;
+        dataProviderIdMessage.set_id(dataProvider->id());
+        responseMessage.mutable_payload()->PackFrom(dataProviderIdMessage);
+        return true;
+      }
+
       std::expected<bool, IRacingSDK::GeneralError> OnGetSessionMetadata(
         const std::shared_ptr<IRacingIPCServer>& server,
         const std::shared_ptr<IRacingSDK::ClientProvider>& sessionClientProvider,
@@ -77,6 +96,10 @@ namespace IRacingTools::Shared::Services {
         RPC::IR::IRacingIPCMessage& responseMessage
       ) {
         L->debug("Populating session metadata message for client {}", client->id);
+        if (!dataProvider) {
+          return LogAndReturnGeneralError("dataProvider is not set");
+        }
+
         auto sessionMetadata = dataProvider->getSessionMetadata(true);
         if (!sessionMetadata) {
           L->error("Unable to get session metadata");
@@ -95,6 +118,10 @@ namespace IRacingTools::Shared::Services {
         const RPC::IR::IRacingIPCMessage& requestMessage,
         RPC::IR::IRacingIPCMessage& responseMessage
       ) {
+        if (!dataProvider) {
+          return LogAndReturnGeneralError("dataProvider is not set");
+        }
+
         IRacingIPCSessionDataVarHeaders sessionDataVarHeaders{};
         auto sessionClient = sessionClientProvider->getClient();
         if (!sessionClient) {
@@ -128,6 +155,10 @@ namespace IRacingTools::Shared::Services {
         const RPC::IR::IRacingIPCMessage& requestMessage,
         RPC::IR::IRacingIPCMessage& responseMessage
       ) {
+        if (!dataProvider) {
+          return LogAndReturnGeneralError("dataProvider is not set");
+        }
+
         auto setSubsRequest = std::make_shared<IRacingIPCSetSubscriptions>();
         if (!requestMessage.payload().UnpackTo(setSubsRequest.get())) {
           L->error("Unable to unpack SetSubscriptions message, clientId={}", client->id);
@@ -184,6 +215,9 @@ namespace IRacingTools::Shared::Services {
         const IRacingIPCServer::ClientPtr& client,
         RPC::IR::IRacingIPCMessage& msg
       ) {
+        if (!sessionDataProvider) {
+          return LogAndReturnGeneralError("dataProvider is not set");
+        }
         L->debug("Populating session data frame message for client {}", client->id);
         Session::SessionDataFrame dataFrame{};
         dataFrame.mutable_timing()->CopyFrom(sessionDataProvider->getSessionTiming());
@@ -247,8 +281,7 @@ namespace IRacingTools::Shared::Services {
           }
           (*dataVarValues)[headerIndex] = varValues;
         }
-        if (L->should_log(spdlog::level::debug))
-          L->debug("DataFrame: {}", dataFrame.DebugString());
+        if (L->should_log(spdlog::level::debug)) L->debug("DataFrame: {}", dataFrame.DebugString());
         msg.set_event_type(RPC::Events::SESSION_EVENT_TYPE_DATA_FRAME);
         msg.mutable_payload()->PackFrom(dataFrame);
         return true;
@@ -265,114 +298,57 @@ namespace IRacingTools::Shared::Services {
     return connectionRef.lock();
   }
 
-  IRacingIPCServer::IRacingIPCServer(const std::shared_ptr<ServiceContainer>& serviceContainer)
-    : IRacingIPCServer(serviceContainer, Options{}) {
+  IRacingIPCServer::IRacingIPCServer(const std::shared_ptr<SessionDataProvider>& dataProvider)
+    : IRacingIPCServer(dataProvider, Options{}) {
 
   }
 
-  IRacingIPCServer::IRacingIPCServer(
-    const std::shared_ptr<ServiceContainer>& serviceContainer,
-    const Options& options
-  )
-    : Service(serviceContainer, PrettyType<IRacingIPCServer>{}.name()),
-      options_(options) {
+  IRacingIPCServer::IRacingIPCServer(const std::shared_ptr<SessionDataProvider>& dataProvider, const Options& options)
+    : dataProvider_(dataProvider),
+      dataProviderUnsubscribe_(
+        dataProvider->subscribe(
+          [this](
+          Models::RPC::Events::SessionEventType eventType,
+          const std::shared_ptr<IRacingSDK::ClientProvider>& sessionClientProvider,
+          const std::shared_ptr<SessionDataProvider>& sessionDataProvider
+        ) {
+            onSessionEvent(eventType, sessionClientProvider, sessionDataProvider);
+          }
+        )
+      ),
+      options_(options),
+      namedPipeServerName_(IPC::NextNamedPipeServerName(IRACING_IPC_SERVER_PIPE_NAME)),
+      namedPipeServer_(
+        IPC::NamedPipeServer::Create(
+          namedPipeServerName_,
+          std::bind(
+            &IRacingIPCServer::handleNamedPipeMessage,
+            this,
+            std::placeholders::_1,
+            std::placeholders::_2,
+            std::placeholders::_3,
+            std::placeholders::_4,
+            std::placeholders::_5
+          )
+        )
+      ) {
+
+#pragma region All event & request handlers
     clientMessageEventHandlerMap_ = {
       {RPC::Events::SessionEventType::SESSION_EVENT_TYPE_DATA_FRAME, &EventHandlers::OnSessionDataFrame}
     };
 
+
     clientMessageRequestHandlerMap_ = {
-      {IRacingIPCMessage::TYPE_SET_CLIENT_METADATA, &RequestHandlers::OnSetClientMetadata},
-      {IRacingIPCMessage::TYPE_GET_SESSION_METADATA, &RequestHandlers::OnGetSessionMetadata},
-      {IRacingIPCMessage::TYPE_GET_SESSION_DATA_HEADERS, &RequestHandlers::OnGetSessionDataHeaders},
-      {IRacingIPCMessage::TYPE_SET_SUBSCRIPTIONS, &RequestHandlers::OnSetSubscriptions},
+      {IRacingIPCMessageType::TYPE_SET_CLIENT_METADATA, &RequestHandlers::OnSetClientMetadata},
+      {IRacingIPCMessageType::TYPE_GET_DATA_PROVIDER_ID, &RequestHandlers::OnGetDataProviderId},
+      {IRacingIPCMessageType::TYPE_GET_SESSION_METADATA, &RequestHandlers::OnGetSessionMetadata},
+      {IRacingIPCMessageType::TYPE_GET_SESSION_DATA_HEADERS, &RequestHandlers::OnGetSessionDataHeaders},
+      {IRacingIPCMessageType::TYPE_SET_SUBSCRIPTIONS, &RequestHandlers::OnSetSubscriptions},
     };
-  }
+#pragma endregion
 
-  std::expected<bool, IRacingSDK::GeneralError> IRacingIPCServer::init() {
-    namedPipeServer_ = IPC::NamedPipeServer::Create(
-      IRACING_IPC_SERVER_PIPE_NAME,
-      [&](
-      std::size_t size,
-      const IPC::NamedPipeServer::MessageDataType data,
-      auto header,
-      std::shared_ptr<IPC::NamedPipeConnection> connection,
-      std::shared_ptr<IPC::NamedPipeServer> server
-    ) {
-        L->debug(
-          "Connection({}).onMessage(clientId={},messageId={},messageSourceId={},size={})",
-          connection->id(),
-          header->clientId,
-          header->id,
-          header->sourceId,
-          size
-        );
-        RPC::IR::IRacingIPCMessage requestMessage{};
-        RPC::IR::IRacingIPCMessage responseMessage{};
-        auto clientMap = clientMap_.readonly();
-        auto connectionId = connection->id();
-        auto client = clientMap->contains(connectionId) ? clientMap->at(connectionId) : nullptr;
-        if (!client) {
-          L->error("Client({}) is not registered", connectionId);
-          return;
-        }
-
-        /**
-         * Send response message to client
-         */
-        auto sendResponse = [&] {
-          auto writeRes = WriteMessageToConnection(&responseMessage, client, header->id);
-          if (!writeRes) {
-            L->error("Failed to send response message to client(id={}): {}", client->id, writeRes.error().what());
-          }
-        };
-
-        /**
-         * Send error response
-         */
-        auto sendResponseError = [&](const std::string& errorStr) {
-          L->error(errorStr);
-          IRacingIPCError errorMsg{};
-          errorMsg.set_code(std::string{magic_enum::enum_name(ErrorCode::General)});
-          errorMsg.set_message(errorStr);
-          responseMessage.set_is_error(true);
-          responseMessage.mutable_payload()->PackFrom(errorMsg);
-          sendResponse();
-        };
-
-        if (!requestMessage.ParseFromArray(data, size)) {
-          sendResponseError(std::format("Failed to parse request message from client(id={})", client->id));
-          return;
-        }
-
-        auto messageType = requestMessage.type();
-        responseMessage.set_type(messageType);
-
-        if (!clientMessageRequestHandlerMap_.contains(messageType)) {
-          sendResponseError(
-            std::format("Unable to find handler for message type {}", std::string{magic_enum::enum_name(messageType)})
-          );
-          return;
-        }
-
-        auto requestRes = clientMessageRequestHandlerMap_[messageType](
-          shared_from_this(),
-          dataProvider_->clientProvider(),
-          dataProvider_,
-          client,
-          requestMessage,
-          responseMessage
-        );
-        if (!requestRes) {
-          sendResponseError(std::format("Failed to handle request message: {}", requestRes.error().what()));
-          return;
-        }
-
-        L->debug("Successfully handled request message: {}", std::string{magic_enum::enum_name(messageType)});
-        sendResponse();
-        L->debug("Successfully sent response message: {}", std::string{magic_enum::enum_name(messageType)});
-      }
-    );
-
+#pragma region Named Pipe Server Event Handlers
     namedPipeServer_->events.onConnect.subscribe(
       [&](IPC::NamedPipeServer::ConnectionId id, IPC::NamedPipeServer::ConnectionPtr connection) {
         auto clientMap = clientMap_.mutate();
@@ -397,80 +373,101 @@ namespace IRacingTools::Shared::Services {
         clientMap->erase(id);
       }
     );
-    return true;
+#pragma endregion
   }
 
-  std::expected<bool, IRacingSDK::GeneralError> IRacingIPCServer::start() {
-    if (!namedPipeServer_) {
-      return LogAndReturnGeneralError("Named pipe server not initialized");
-    }
-
-    // Start the named pipe server with a callback that processes messages
-    namedPipeServer_->start();
-
-    return true;
-  }
-
-  std::expected<bool, IRacingSDK::GeneralError> IRacingIPCServer::start(
-    const std::shared_ptr<SessionDataProvider>& dataProvider
+  void IRacingIPCServer::handleNamedPipeMessage(
+    std::size_t size,
+    IPC::NamedPipeServer::MessageDataType data,
+    const IPC::NamedPipeMessageHeader* header,
+    std::shared_ptr<IPC::NamedPipeConnection> connection,
+    std::shared_ptr<IPC::NamedPipeServer> server
   ) {
-    auto res = setDataProvider(dataProvider);
-    if (!res) {
-      return std::unexpected(res.error());
-    }
-
-    return start();
-  }
-
-  void IRacingIPCServer::removeDataProvider() {
-    std::scoped_lock lock(dataMutex_);
-    if (!dataProvider_) {
+    L->debug(
+      "Connection({}).onMessage(clientId={},messageId={},messageSourceId={},size={})",
+      connection->id(),
+      header->clientId,
+      header->id,
+      header->sourceId,
+      size
+    );
+    RPC::IR::IRacingIPCMessage requestMessage{};
+    RPC::IR::IRacingIPCMessage responseMessage{};
+    auto clientMap = clientMap_.readonly();
+    auto connectionId = connection->id();
+    auto client = clientMap->contains(connectionId) ? clientMap->at(connectionId) : nullptr;
+    if (!client) {
+      L->error("Client({}) is not registered", connectionId);
       return;
     }
 
-    dataProvider_->stop();
+    /**
+     * Send response message to client
+     */
+    auto sendResponse = [&] {
+      auto writeRes = WriteMessageToConnection(&responseMessage, client, header->id);
+      if (!writeRes) {
+        L->error("Failed to send response message to client(id={}): {}", client->id, writeRes.error().what());
+      }
+    };
 
-    if (dataProviderUnsubscribe_) {
-      dataProviderUnsubscribe_.value()();
-      dataProviderUnsubscribe_.reset();
+    /**
+     * Send error response
+     */
+    auto sendResponseError = [&](const std::string& errorStr) {
+      L->error(errorStr);
+      IRacingIPCError errorMsg{};
+      errorMsg.set_code(std::string{magic_enum::enum_name(ErrorCode::General)});
+      errorMsg.set_message(errorStr);
+      responseMessage.set_is_error(true);
+      responseMessage.mutable_payload()->PackFrom(errorMsg);
+      sendResponse();
+    };
+
+    if (!requestMessage.ParseFromArray(data, size)) {
+      sendResponseError(std::format("Failed to parse request message from client(id={})", client->id));
+      return;
     }
 
-    dataProvider_.reset();
+    auto messageType = requestMessage.type();
+    responseMessage.set_type(messageType);
+
+    if (!clientMessageRequestHandlerMap_.contains(messageType)) {
+      sendResponseError(
+        std::format("Unable to find handler for message type {}", std::string{magic_enum::enum_name(messageType)})
+      );
+      return;
+    }
+
+    auto requestRes = clientMessageRequestHandlerMap_[messageType](
+      shared_from_this(),
+      dataProvider_->clientProvider(),
+      dataProvider_,
+      client,
+      requestMessage,
+      responseMessage
+    );
+    if (!requestRes) {
+      sendResponseError(std::format("Failed to handle request message: {}", requestRes.error().what()));
+      return;
+    }
+
+    L->info("Successfully handled request message: {}", std::string{magic_enum::enum_name(messageType)});
+    sendResponse();
+    L->info("Successfully sent response message: {}", std::string{magic_enum::enum_name(messageType)});
   }
 
-  std::expected<bool, IRacingSDK::GeneralError> IRacingIPCServer::setDataProvider(
-    const std::shared_ptr<SessionDataProvider>& dataProvider
-  ) {
-    std::scoped_lock lock(dataMutex_);
-    if (!dataProvider) {
-      return LogAndReturnGeneralError("No data provider specified");
-    }
-
-    if (dataProvider->isLive() && dataProvider_ && dataProvider_->isLive()) {
-      return LogAndReturnGeneralError(
-        "LiveSessionDataProvider is already set & active, only a DiskSessionDataProvider can replace it"
+  std::expected<bool, IRacingSDK::GeneralError> IRacingIPCServer::start() {
+    // Start the named pipe server with a callback that processes messages
+    if (!namedPipeServer_->start()) {
+      return std::unexpected(
+        IRacingSDK::GeneralError::create<IRacingSDK::GeneralError>(
+          ErrorCode::General,
+          "Failed to start named pipe server with name: {}",
+          namedPipeServerName_
+        )
       );
     }
-
-    removeDataProvider();
-
-    dataProvider_ = dataProvider;
-
-    dataProviderUnsubscribe_ = dataProvider_->subscribe(
-      [this](
-      Models::RPC::Events::SessionEventType eventType,
-      const std::shared_ptr<IRacingSDK::ClientProvider>& sessionClientProvider,
-      const std::shared_ptr<SessionDataProvider>& dataProvider
-    ) {
-        onSessionEvent(eventType, sessionClientProvider, dataProvider);
-      }
-    );
-
-    if (!dataProvider_->start()) {
-      removeDataProvider();
-      return LogAndReturnGeneralError("Failed to start new datasource");
-    }
-
     return true;
   }
 
@@ -480,7 +477,8 @@ namespace IRacingTools::Shared::Services {
       namedPipeServer_.reset();
     }
 
-    removeDataProvider();
+    dataProviderUnsubscribe_();
+    dataProvider_.reset();
 
     return std::nullopt;
   }
@@ -542,9 +540,7 @@ namespace IRacingTools::Shared::Services {
     clientMap->at(id)->metadata = metadata;
   }
 
-  std::shared_ptr<RPC::IR::IRacingIPCClientMetadata> IRacingIPCServer::getClientMetadata(
-    std::uint32_t id
-  ) {
+  std::shared_ptr<RPC::IR::IRacingIPCClientMetadata> IRacingIPCServer::getClientMetadata(std::uint32_t id) {
     auto clientMap = clientMap_.readonly();
     if (!clientMap->contains(id)) {
       L->warn("Client(id={}) not found, unable to get metadata", id);
@@ -601,7 +597,7 @@ namespace IRacingTools::Shared::Services {
     auto metadata = dataProvider->getSessionMetadata();
 
     IRacingIPCMessage msg{};
-    msg.set_type(IRacingIPCMessage::TYPE_EVENT);
+    msg.set_type(IRacingIPCMessageType::TYPE_EVENT);
     if (eventType == RPC::Events::SESSION_EVENT_TYPE_METADATA_CHANGED || (eventType ==
       RPC::Events::SESSION_EVENT_TYPE_SESSION_CHANGED && metadata)) {
       if (!metadata) {
@@ -618,7 +614,23 @@ namespace IRacingTools::Shared::Services {
           "Invoking client message event handler for event type {}",
           std::string{magic_enum::enum_name<RPC::Events::SessionEventType>(eventType)}
         );
-        clientMessageEventHandlerMap_[eventType](eventType, sessionClientProvider, dataProvider, client, msg);
+        auto res = clientMessageEventHandlerMap_[eventType](
+          eventType,
+          sessionClientProvider,
+          dataProvider,
+          client,
+          msg
+        );
+        if (!res) {
+          L->error(
+            "Failed to handle event type {} for client(id={}): {}",
+            std::string{magic_enum::enum_name<RPC::Events::SessionEventType>(eventType)},
+            client->id,
+            res.error().what()
+          );
+          // TODO: Should we break/continue/ignore the error?
+          // continue;
+        }
       } else {
         L->debug(
           "Client message event handler for event type {} not found, skipping",
@@ -630,8 +642,6 @@ namespace IRacingTools::Shared::Services {
       // WRITE DATA HERE
       L->debug("Writing message to client(id={})", client->id);
 
-      // TODO: Modify connection->writeMessage to accept either a protobuf or data length & a lambda, which will
-      //   receive a pooled buffer to write the message to
       std::vector<char> msgBuffer(msg.ByteSizeLong());
       msg.SerializeToArray(msgBuffer.data(), msgBuffer.size());
       auto writeRes = connection->writeMessage(
@@ -645,6 +655,10 @@ namespace IRacingTools::Shared::Services {
         L->error("Failed to send message to client(id={}): {}", client->id, writeRes.error().what());
       }
     }
+  }
+
+  std::string IRacingIPCServer::getNamedPipePath() const {
+    return namedPipeServerName_;
   }
 
 } // namespace IRacingTools::Shared::Services

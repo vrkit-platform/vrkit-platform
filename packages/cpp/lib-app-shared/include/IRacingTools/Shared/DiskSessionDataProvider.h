@@ -58,6 +58,8 @@ namespace IRacingTools::Shared {
      */
     virtual ~DiskSessionDataProvider() override;
 
+    virtual const std::string id() override;
+
     virtual std::shared_ptr<IRacingSDK::ClientProvider> clientProvider() override;
 
     virtual bool isLive() const override;

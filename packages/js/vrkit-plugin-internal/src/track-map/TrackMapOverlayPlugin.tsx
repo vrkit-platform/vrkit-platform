@@ -2,13 +2,13 @@ import type { IPluginComponentProps } from "@vrkit-platform/plugin-sdk"
 import React, { useEffect, useState } from "react"
 import TrackMapOverlayCanvasRenderer from "./TrackMapOverlayCanvasRenderer"
 
-let renderer: TrackMapOverlayCanvasRenderer = null
+let renderer: TrackMapOverlayCanvasRenderer = null!
 
 function TrackMapOverlayPlugin(props: IPluginComponentProps) {
   const { client, width, height } = props,
     inActiveSession = client.inActiveSession(),
     weekendInfo = client.getSessionInfo()?.weekendInfo,
-    [canvasRef, setCanvasRef] = useState<HTMLCanvasElement>(null)
+    [canvasRef, setCanvasRef] = useState<HTMLCanvasElement>(null!)
 
   useEffect(() => {
     if (!inActiveSession || !weekendInfo) {
@@ -26,7 +26,7 @@ function TrackMapOverlayPlugin(props: IPluginComponentProps) {
     return () => {
       if (renderer) {
         renderer.destroy()
-        renderer = null
+        renderer = null!
       }
     }
   }, [canvasRef, renderer, width, height, inActiveSession, weekendInfo])
@@ -35,13 +35,13 @@ function TrackMapOverlayPlugin(props: IPluginComponentProps) {
     return () => {
       if (renderer) {
         renderer.destroy()
-        renderer = null
+        renderer = null!
       }
-      setCanvasRef(null)
+      setCanvasRef(null!)
     }
   }, [])
 //inActiveSession && weekendInfo ?
-  return <canvas ref={ref => setCanvasRef(ref)} />
+  return <canvas ref={ref => setCanvasRef(ref!)} />
 }
 
 export default TrackMapOverlayPlugin as React.ComponentType<IPluginComponentProps>

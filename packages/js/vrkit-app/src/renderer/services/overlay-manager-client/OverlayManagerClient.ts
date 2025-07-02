@@ -28,9 +28,10 @@ import {
 } from "@vrkit-platform/shared"
 import { PluginClientEventType, type SessionInfoMessage } from "@vrkit-platform/plugin-sdk"
 import {
-  OverlayConfig,
+  OverlayConfig, SessionDataFrame,
   SessionDataVariableValueMap,
-  SessionTiming, VRLayout
+  SessionTiming,
+  VRLayout
 } from "@vrkit-platform/models"
 import type { AppStore } from "../store"
 import { sharedAppSelectors } from "../store/slices/shared-app"
@@ -96,17 +97,15 @@ export class OverlayManagerClient
    *
    * @param _event - The IPC renderer event triggering this callback.
    * @param sessionId - The ID of the session associated with the data frame.
-   * @param timing - Timing information for the session.
-   * @param dataVarValues - A map of data variable values for the session.
+   * @param dataFrame
    * @return void
    */
   private onDataFrameEvent(
     _event: IpcRendererEvent,
     sessionId: string,
-    timing: SessionTiming,
-    dataVarValues: SessionDataVariableValueMap
+    dataFrame: SessionDataFrame
   ) {
-    this.emit(PluginClientEventType.DATA_FRAME, sessionId, timing, dataVarValues)
+    this.emit(PluginClientEventType.DATA_FRAME, sessionId, dataFrame)
   }
   
   /**

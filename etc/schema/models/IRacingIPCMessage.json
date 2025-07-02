@@ -10,12 +10,18 @@
                         0,
                         "TYPE_SET_CLIENT_METADATA",
                         1,
-                        "TYPE_GET_SESSION_METADATA",
+                        "TYPE_SET_SESSION",
+                        2,
+                        "TYPE_SET_SESSION_STATE",
                         3,
-                        "TYPE_GET_SESSION_DATA_HEADERS",
+                        "TYPE_GET_SESSION_METADATA",
                         4,
+                        "TYPE_GET_SESSION_DATA_HEADERS",
+                        5,
                         "TYPE_SET_SUBSCRIPTIONS",
-                        5
+                        10,
+                        "TYPE_GET_DATA_PROVIDER_ID",
+                        20
                     ],
                     "oneOf": [
                         {
@@ -28,7 +34,7 @@
                             "type": "null"
                         }
                     ],
-                    "title": "Type"
+                    "title": "I Racing IPC Message Type"
                 },
                 "eventType": {
                     "enum": [

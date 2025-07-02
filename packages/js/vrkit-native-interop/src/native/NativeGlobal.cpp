@@ -18,14 +18,12 @@ namespace IRacingTools::App::Node {
     }
 
     void NativeGlobal::destroy() {
-        manager_->destroy();
+
     }
 
-    NativeGlobal::NativeGlobal(token) : manager_(std::make_shared<NativeSystemManager>()) {
+    NativeGlobal::NativeGlobal(token)  {
         WindowsSetHighPriorityProcess();
 
-        manager_->init();
-        manager_->start();
 #if 0
     // Testing only
     auto pingRouteExecutor = [&](

@@ -80,7 +80,6 @@ def make_prop_from(key, value):
     elif isinstance(value,list):
         data_type = DataType.list
 
-        # TODO: implement get_data_type, which if a dict and a matching member set is found
         if len(value):
             list_item_value = value[0]
             if isinstance(list_item_value, dict):

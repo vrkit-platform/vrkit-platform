@@ -17,7 +17,7 @@ async function run() {
       // prod: false,
       // production: false,
       // jsxDev: true,
-      
+      platform: "node",
       external: [
         ...builtins
       ],

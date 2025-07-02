@@ -134,13 +134,17 @@ export interface SessionMetadata {
      */
     carStatus: SessionCarStatus;
     /**
-     * @generated from protobuf field: string session_info_json = 90;
+     * @generated from protobuf field: optional IRacingTools.Models.Session.SessionPlaybackState playback_state = 31;
      */
-    sessionInfoJson: string;
+    playbackState?: SessionPlaybackState;
     /**
-     * @generated from protobuf field: string session_info_yaml = 91;
+     * @generated from protobuf field: optional string session_info_json = 90;
      */
-    sessionInfoYaml: string;
+    sessionInfoJson?: string;
+    /**
+     * @generated from protobuf field: optional string session_info_yaml = 91;
+     */
+    sessionInfoYaml?: string;
 }
 /**
  * @generated from protobuf message IRacingTools.Models.Session.SessionDataVarHeader
@@ -245,6 +249,27 @@ export interface SessionDataFrame_VarValues {
      * @generated from protobuf field: repeated IRacingTools.Models.Session.SessionDataFrame.Value slot = 5;
      */
     slot: SessionDataFrame_Value[];
+}
+/**
+ * @generated from protobuf enum IRacingTools.Models.Session.SessionPlaybackState
+ */
+export enum SessionPlaybackState {
+    /**
+     * @generated from protobuf enum value: SESSION_PLAYBACK_STATE_UNKNOWN = 0;
+     */
+    UNKNOWN = 0,
+    /**
+     * @generated from protobuf enum value: SESSION_PLAYBACK_STATE_PLAYING = 1;
+     */
+    PLAYING = 1,
+    /**
+     * @generated from protobuf enum value: SESSION_PLAYBACK_STATE_PAUSED = 2;
+     */
+    PAUSED = 2,
+    /**
+     * @generated from protobuf enum value: SESSION_PLAYBACK_STATE_STOPPED = 3;
+     */
+    STOPPED = 3
 }
 /**
  * Enum representing the sub-types of a session. This distinguishes
@@ -570,8 +595,9 @@ class SessionMetadata$Type extends MessageType<SessionMetadata> {
             { no: 20, name: "track_layout_metadata", kind: "message", T: () => TrackLayoutMetadata },
             { no: 21, name: "file_info", kind: "message", T: () => FileInfo },
             { no: 30, name: "car_status", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionCarStatus", SessionCarStatus, "SESSION_CAR_STATUS_"] },
-            { no: 90, name: "session_info_json", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 91, name: "session_info_yaml", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 31, name: "playback_state", kind: "enum", opt: true, T: () => ["IRacingTools.Models.Session.SessionPlaybackState", SessionPlaybackState, "SESSION_PLAYBACK_STATE_"] },
+            { no: 90, name: "session_info_json", kind: "scalar", opt: true, T: 9 /*ScalarType.STRING*/ },
+            { no: 91, name: "session_info_yaml", kind: "scalar", opt: true, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<SessionMetadata>): SessionMetadata {
@@ -585,8 +611,6 @@ class SessionMetadata$Type extends MessageType<SessionMetadata> {
         message.subNum = 0;
         message.subType = 0;
         message.carStatus = 0;
-        message.sessionInfoJson = "";
-        message.sessionInfoYaml = "";
         if (value !== undefined)
             reflectionMergePartial<SessionMetadata>(this, message, value);
         return message;
@@ -632,10 +656,13 @@ class SessionMetadata$Type extends MessageType<SessionMetadata> {
                 case /* IRacingTools.Models.Session.SessionCarStatus car_status */ 30:
                     message.carStatus = reader.int32();
                     break;
-                case /* string session_info_json */ 90:
+                case /* optional IRacingTools.Models.Session.SessionPlaybackState playback_state */ 31:
+                    message.playbackState = reader.int32();
+                    break;
+                case /* optional string session_info_json */ 90:
                     message.sessionInfoJson = reader.string();
                     break;
-                case /* string session_info_yaml */ 91:
+                case /* optional string session_info_yaml */ 91:
                     message.sessionInfoYaml = reader.string();
                     break;
                 default:
@@ -686,11 +713,14 @@ class SessionMetadata$Type extends MessageType<SessionMetadata> {
         /* IRacingTools.Models.Session.SessionCarStatus car_status = 30; */
         if (message.carStatus !== 0)
             writer.tag(30, WireType.Varint).int32(message.carStatus);
-        /* string session_info_json = 90; */
-        if (message.sessionInfoJson !== "")
+        /* optional IRacingTools.Models.Session.SessionPlaybackState playback_state = 31; */
+        if (message.playbackState !== undefined)
+            writer.tag(31, WireType.Varint).int32(message.playbackState);
+        /* optional string session_info_json = 90; */
+        if (message.sessionInfoJson !== undefined)
             writer.tag(90, WireType.LengthDelimited).string(message.sessionInfoJson);
-        /* string session_info_yaml = 91; */
-        if (message.sessionInfoYaml !== "")
+        /* optional string session_info_yaml = 91; */
+        if (message.sessionInfoYaml !== undefined)
             writer.tag(91, WireType.LengthDelimited).string(message.sessionInfoYaml);
         let u = options.writeUnknownFields;
         if (u !== false)

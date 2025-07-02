@@ -25,7 +25,7 @@ import {
   PositionAbsolute,
   PositionRelative
 } from "@vrkit-platform/shared-ui"
-import { GlobalCSSClassNames, isNotEmptyString } from "../../renderer-constants"
+import { GlobalCSSClassNames } from "../../renderer-constants"
 import { usePageMetadata } from "../page"
 import { Logo } from "../../components/logo"
 import AppTitlebarTrafficLights, { TrafficLightType } from "./traffic-lights"
@@ -35,6 +35,7 @@ import { WebRootPath } from "../../routes/WebPaths"
 import { capitalize } from "lodash"
 import { isDefined, isString } from "@3fv/guard"
 import ElectronDraggableSpacer from "./ElectronDraggableSpacer"
+import { isNotEmptyString } from "@vrkit-platform/shared"
 
 export interface AppTitlebarOverrides {
   left?: React.ReactNode

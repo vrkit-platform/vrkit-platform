@@ -13,6 +13,8 @@ import { MessageType } from "@protobuf-ts/runtime";
 import { Any } from "../../google/protobuf/any";
 import { SessionEventType } from "../Events/SessionEvent";
 import { SessionDataVarHeader } from "../../Session/SessionState";
+import { SessionPlaybackState } from "../../Session/SessionState";
+import { SessionType } from "../../Session/SessionState";
 /**
  * @generated from protobuf message IRacingTools.Models.RPC.IR.IRacingIPCClientMetadata
  */
@@ -29,6 +31,37 @@ export interface IRacingIPCClientMetadata {
      * @generated from protobuf field: uint32 pid = 5;
      */
     pid: number;
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.RPC.IR.IRacingIPCDataProviderId
+ */
+export interface IRacingIPCDataProviderId {
+    /**
+     * @generated from protobuf field: string id = 1;
+     */
+    id: string;
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.RPC.IR.IRacingIPCSetSession
+ */
+export interface IRacingIPCSetSession {
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionType type = 1;
+     */
+    type: SessionType;
+    /**
+     * @generated from protobuf field: optional string file = 2;
+     */
+    file?: string;
+}
+/**
+ * @generated from protobuf message IRacingTools.Models.RPC.IR.IRacingIPCSetSessionPlaybackState
+ */
+export interface IRacingIPCSetSessionPlaybackState {
+    /**
+     * @generated from protobuf field: IRacingTools.Models.Session.SessionPlaybackState state = 1;
+     */
+    state: SessionPlaybackState;
 }
 /**
  * @generated from protobuf message IRacingTools.Models.RPC.IR.IRacingIPCSessionDataVarHeaders
@@ -74,9 +107,9 @@ export interface IRacingIPCError {
  */
 export interface IRacingIPCMessage {
     /**
-     * @generated from protobuf field: IRacingTools.Models.RPC.IR.IRacingIPCMessage.Type type = 1;
+     * @generated from protobuf field: IRacingTools.Models.RPC.IR.IRacingIPCMessageType type = 1;
      */
-    type: IRacingIPCMessage_Type;
+    type: IRacingIPCMessageType;
     /**
      * @generated from protobuf field: optional IRacingTools.Models.RPC.Events.SessionEventType event_type = 2;
      */
@@ -95,29 +128,41 @@ export interface IRacingIPCMessage {
     payload?: Any;
 }
 /**
- * @generated from protobuf enum IRacingTools.Models.RPC.IR.IRacingIPCMessage.Type
+ * @generated from protobuf enum IRacingTools.Models.RPC.IR.IRacingIPCMessageType
  */
-export enum IRacingIPCMessage_Type {
+export enum IRacingIPCMessageType {
     /**
      * @generated from protobuf enum value: TYPE_EVENT = 0;
      */
-    EVENT = 0,
+    TYPE_EVENT = 0,
     /**
      * @generated from protobuf enum value: TYPE_SET_CLIENT_METADATA = 1;
      */
-    SET_CLIENT_METADATA = 1,
+    TYPE_SET_CLIENT_METADATA = 1,
     /**
-     * @generated from protobuf enum value: TYPE_GET_SESSION_METADATA = 3;
+     * @generated from protobuf enum value: TYPE_SET_SESSION = 2;
      */
-    GET_SESSION_METADATA = 3,
+    TYPE_SET_SESSION = 2,
     /**
-     * @generated from protobuf enum value: TYPE_GET_SESSION_DATA_HEADERS = 4;
+     * @generated from protobuf enum value: TYPE_SET_SESSION_STATE = 3;
      */
-    GET_SESSION_DATA_HEADERS = 4,
+    TYPE_SET_SESSION_STATE = 3,
     /**
-     * @generated from protobuf enum value: TYPE_SET_SUBSCRIPTIONS = 5;
+     * @generated from protobuf enum value: TYPE_GET_SESSION_METADATA = 4;
      */
-    SET_SUBSCRIPTIONS = 5
+    TYPE_GET_SESSION_METADATA = 4,
+    /**
+     * @generated from protobuf enum value: TYPE_GET_SESSION_DATA_HEADERS = 5;
+     */
+    TYPE_GET_SESSION_DATA_HEADERS = 5,
+    /**
+     * @generated from protobuf enum value: TYPE_SET_SUBSCRIPTIONS = 10;
+     */
+    TYPE_SET_SUBSCRIPTIONS = 10,
+    /**
+     * @generated from protobuf enum value: TYPE_GET_DATA_PROVIDER_ID = 20;
+     */
+    TYPE_GET_DATA_PROVIDER_ID = 20
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class IRacingIPCClientMetadata$Type extends MessageType<IRacingIPCClientMetadata> {
@@ -182,6 +227,154 @@ class IRacingIPCClientMetadata$Type extends MessageType<IRacingIPCClientMetadata
  * @generated MessageType for protobuf message IRacingTools.Models.RPC.IR.IRacingIPCClientMetadata
  */
 export const IRacingIPCClientMetadata = new IRacingIPCClientMetadata$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class IRacingIPCDataProviderId$Type extends MessageType<IRacingIPCDataProviderId> {
+    constructor() {
+        super("IRacingTools.Models.RPC.IR.IRacingIPCDataProviderId", [
+            { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<IRacingIPCDataProviderId>): IRacingIPCDataProviderId {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.id = "";
+        if (value !== undefined)
+            reflectionMergePartial<IRacingIPCDataProviderId>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: IRacingIPCDataProviderId): IRacingIPCDataProviderId {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* string id */ 1:
+                    message.id = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: IRacingIPCDataProviderId, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* string id = 1; */
+        if (message.id !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.id);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.IR.IRacingIPCDataProviderId
+ */
+export const IRacingIPCDataProviderId = new IRacingIPCDataProviderId$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class IRacingIPCSetSession$Type extends MessageType<IRacingIPCSetSession> {
+    constructor() {
+        super("IRacingTools.Models.RPC.IR.IRacingIPCSetSession", [
+            { no: 1, name: "type", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionType", SessionType, "SESSION_TYPE_"] },
+            { no: 2, name: "file", kind: "scalar", opt: true, T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<IRacingIPCSetSession>): IRacingIPCSetSession {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.type = 0;
+        if (value !== undefined)
+            reflectionMergePartial<IRacingIPCSetSession>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: IRacingIPCSetSession): IRacingIPCSetSession {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* IRacingTools.Models.Session.SessionType type */ 1:
+                    message.type = reader.int32();
+                    break;
+                case /* optional string file */ 2:
+                    message.file = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: IRacingIPCSetSession, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* IRacingTools.Models.Session.SessionType type = 1; */
+        if (message.type !== 0)
+            writer.tag(1, WireType.Varint).int32(message.type);
+        /* optional string file = 2; */
+        if (message.file !== undefined)
+            writer.tag(2, WireType.LengthDelimited).string(message.file);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.IR.IRacingIPCSetSession
+ */
+export const IRacingIPCSetSession = new IRacingIPCSetSession$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class IRacingIPCSetSessionPlaybackState$Type extends MessageType<IRacingIPCSetSessionPlaybackState> {
+    constructor() {
+        super("IRacingTools.Models.RPC.IR.IRacingIPCSetSessionPlaybackState", [
+            { no: 1, name: "state", kind: "enum", T: () => ["IRacingTools.Models.Session.SessionPlaybackState", SessionPlaybackState, "SESSION_PLAYBACK_STATE_"] }
+        ]);
+    }
+    create(value?: PartialMessage<IRacingIPCSetSessionPlaybackState>): IRacingIPCSetSessionPlaybackState {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.state = 0;
+        if (value !== undefined)
+            reflectionMergePartial<IRacingIPCSetSessionPlaybackState>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: IRacingIPCSetSessionPlaybackState): IRacingIPCSetSessionPlaybackState {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* IRacingTools.Models.Session.SessionPlaybackState state */ 1:
+                    message.state = reader.int32();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: IRacingIPCSetSessionPlaybackState, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* IRacingTools.Models.Session.SessionPlaybackState state = 1; */
+        if (message.state !== 0)
+            writer.tag(1, WireType.Varint).int32(message.state);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message IRacingTools.Models.RPC.IR.IRacingIPCSetSessionPlaybackState
+ */
+export const IRacingIPCSetSessionPlaybackState = new IRacingIPCSetSessionPlaybackState$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class IRacingIPCSessionDataVarHeaders$Type extends MessageType<IRacingIPCSessionDataVarHeaders> {
     constructor() {
@@ -359,7 +552,7 @@ export const IRacingIPCError = new IRacingIPCError$Type();
 class IRacingIPCMessage$Type extends MessageType<IRacingIPCMessage> {
     constructor() {
         super("IRacingTools.Models.RPC.IR.IRacingIPCMessage", [
-            { no: 1, name: "type", kind: "enum", T: () => ["IRacingTools.Models.RPC.IR.IRacingIPCMessage.Type", IRacingIPCMessage_Type, "TYPE_"] },
+            { no: 1, name: "type", kind: "enum", T: () => ["IRacingTools.Models.RPC.IR.IRacingIPCMessageType", IRacingIPCMessageType] },
             { no: 2, name: "event_type", kind: "enum", opt: true, T: () => ["IRacingTools.Models.RPC.Events.SessionEventType", SessionEventType, "SESSION_EVENT_TYPE_"] },
             { no: 8, name: "is_error", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
             { no: 9, name: "error", kind: "message", T: () => IRacingIPCError },
@@ -379,7 +572,7 @@ class IRacingIPCMessage$Type extends MessageType<IRacingIPCMessage> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* IRacingTools.Models.RPC.IR.IRacingIPCMessage.Type type */ 1:
+                case /* IRacingTools.Models.RPC.IR.IRacingIPCMessageType type */ 1:
                     message.type = reader.int32();
                     break;
                 case /* optional IRacingTools.Models.RPC.Events.SessionEventType event_type */ 2:
@@ -406,7 +599,7 @@ class IRacingIPCMessage$Type extends MessageType<IRacingIPCMessage> {
         return message;
     }
     internalBinaryWrite(message: IRacingIPCMessage, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* IRacingTools.Models.RPC.IR.IRacingIPCMessage.Type type = 1; */
+        /* IRacingTools.Models.RPC.IR.IRacingIPCMessageType type = 1; */
         if (message.type !== 0)
             writer.tag(1, WireType.Varint).int32(message.type);
         /* optional IRacingTools.Models.RPC.Events.SessionEventType event_type = 2; */

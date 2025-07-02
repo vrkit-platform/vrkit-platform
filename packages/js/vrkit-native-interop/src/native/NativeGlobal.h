@@ -10,6 +10,7 @@
 #include <IRacingTools/Shared/Services/RPCServerService.h>
 
 #include <napi.h>
+#include <IRacingTools/Shared/Services/IRacingIPCServer.h>
 
 using namespace IRacingTools::Shared::Logging;
 using namespace IRacingSDK;
@@ -37,8 +38,9 @@ namespace IRacingTools::App::Node {
     using namespace Shared::Services;
 
     // using NativeSystemManager = ServiceManager<RPCServerService, TelemetryDataService, TrackMapService>;
-    using NativeSystemManager = ServiceManager<RPCServerService>;
-    using NativeSystemManagerPtr = std::shared_ptr<NativeSystemManager>;
+    //using NativeSystemManager = ServiceManager<RPCServerService>;
+    // using NativeSystemManager = ServiceManager<IRacingIPCServer>;
+    // using NativeSystemManagerPtr = std::shared_ptr<NativeSystemManager>;
 
     /**
      * @brief Global (cross-thread) system manager/holder
@@ -51,15 +53,15 @@ namespace IRacingTools::App::Node {
 
         void destroy();
 
-        NativeSystemManagerPtr serviceManager() const {
-            return manager_;
-        }
+        // NativeSystemManagerPtr serviceManager() const {
+        //     return manager_;
+        // }
 
     private:
         friend Singleton;
         explicit NativeGlobal(token);
 
-        const NativeSystemManagerPtr manager_;
+        // const NativeSystemManagerPtr manager_;
     };
     
     class NativeSystemAddon {

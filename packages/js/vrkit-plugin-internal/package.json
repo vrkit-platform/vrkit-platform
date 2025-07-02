@@ -16,6 +16,8 @@
   "dependencies": {},
   "peerDependencies": {
     "@3fv/ditsy": "^1.0.14",
+    "@3fv/prelude-ts": "^0.8.37",
+    "ts-pattern": "^5.7.1",
     "@mui/styled-engine": "^5.16.12",
     "@vrkit-platform/models": ">=1.1.6",
     "@vrkit-platform/plugin-sdk": ">=1.1.6",
@@ -34,6 +36,8 @@
     "typescript": "^5.5.4",
     "vrkit-builder-tool": "1.1.6",
     "@3fv/ditsy": "^1.0.14",
+    "@3fv/prelude-ts": "^0.8.37",
+    "ts-pattern": "^5.7.1",
     "@vrkit-platform/models": "1.1.6",
     "@vrkit-platform/plugin-sdk": "1.1.6",
     "react": "18.3.1",

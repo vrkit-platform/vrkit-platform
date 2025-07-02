@@ -5,7 +5,7 @@ import { getLogger } from "@3fv/logger-proxy"
 
 import { setContainerResolver } from "../../utils"
 import {
-  APP_STORE_ID, IRacingIPCClientManager,
+  APP_STORE_ID,
   isDev
 } from "../../renderer-constants"
 import { FileSystemManager } from "@vrkit-platform/shared/services/node"
@@ -15,6 +15,7 @@ import SharedAppStateClient
   from "vrkit-app-renderer/services/shared-app-state-client"
 import { DashboardManagerClient } from "../../services/dashboard-manager-client"
 import { PluginClientLauncher } from "../../services/plugin-client-launcher"
+import { IRacingIPCClientManager } from "../../services/iracing-ipc"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log

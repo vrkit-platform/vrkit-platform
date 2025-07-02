@@ -4,7 +4,7 @@ import type { Path as TwoPath } from "two.js/src/path"
 import type { Vector as TwoVector } from "two.js/src/vector"
 import type { Shape as TwoShape } from "two.js/src/shape"
 import Two from "two.js"
-import type { OverlayBaseSettings, OverlayInfo, SessionDataVariableValueMap, TrackMap } from "@vrkit-platform/models"
+import type { OverlayBaseSettings, OverlayInfo, SessionDataFrame, TrackMap } from "@vrkit-platform/models"
 import { IPluginClient, PluginClientEventType, SessionInfoMessage } from "@vrkit-platform/plugin-sdk"
 import { assign, Bind, Noop, ScaleTrackMapToFit } from "@vrkit-platform/shared"
 // @ts-ignore
@@ -93,7 +93,7 @@ class TrackMapOverlayCanvasRenderer {
    *
    * @private
    */
-  private state: SceneState = null
+  private state: SceneState = null!
 
   /**
    * Patch the state
@@ -136,7 +136,7 @@ class TrackMapOverlayCanvasRenderer {
    * @param settings
    * @private
    */
-  private makeRenderCars(settings: OverlayBaseSettings = null): RenderCarsFn {
+  private makeRenderCars(settings: OverlayBaseSettings = null!): RenderCarsFn {
     const fps = settings?.fps ?? 60
     return throttle(
       (carsData: CarData[]) => {
@@ -163,7 +163,7 @@ class TrackMapOverlayCanvasRenderer {
                 }
 
                 marker.shape?.remove()
-                return null as CarMarker
+                return null! as CarMarker
               })
               .filter(isDefined),
             { carMarkers } = this.patchSceneState({
@@ -176,8 +176,8 @@ class TrackMapOverlayCanvasRenderer {
                 (carMarkers[carMarkers.length] = {
                   idx: carData.idx,
                   data: carData,
-                  vector: null,
-                  shape: null
+                  vector: null!,
+                  shape: null!
                 })
             )
 
@@ -262,8 +262,8 @@ class TrackMapOverlayCanvasRenderer {
         ),
         scaledSize = pick(scaledTrackMap.scaledSize, ["width", "height"]),
         scaledOffset = {
-          x: Math.floor((width - scaledSize.width) / 2),
-          y: Math.floor((height - scaledSize.height) / 2)
+          x: Math.floor((width - scaledSize.width!) / 2),
+          y: Math.floor((height - scaledSize.height!) / 2)
         },
         trackPathAnchors = scaledTrackMap.path.map(
           coord => new Two.Anchor(scaledOffset.x + coord.x, scaledOffset.y + coord.y)
@@ -280,7 +280,7 @@ class TrackMapOverlayCanvasRenderer {
             fill: "transparent"
           })
 
-          two.add(tp)
+          two!.add(tp)
         }
       })
 
@@ -338,13 +338,52 @@ class TrackMapOverlayCanvasRenderer {
     return this.state.carDataMap
   }
 
+  getDataHeaderIndex(dataVarName: string): number {
+    const headers = this.state.client.getSessionDataHeaders()
+    return headers.find(header => header.name.toLowerCase() === dataVarName.toLowerCase())?.index ?? null!
+  }
+
+  getDataValue(dataFrame: SessionDataFrame, dataVarName: string, slot: number = 0) {
+    const dataVarIndex = this.getDataHeaderIndex(dataVarName)
+    if (dataVarIndex === null || dataVarIndex < 0) {
+      log.warn(`Data variable "${dataVarName}" not found`)
+      return null
+    }
+
+    return asOption(dataFrame.dataValues[dataVarIndex]?.slot?.[slot]?.data).match({
+      Some: value => {
+        switch (value.oneofKind) {
+          case "boolValue":
+            return value.boolValue
+          case "charValue":
+            return value.charValue
+          case "doubleValue":
+            return value.doubleValue
+          case "floatValue":
+            return value.floatValue
+          case "int32Value":
+            return value.int32Value
+          case "bitmaskValue":
+            return value.bitmaskValue
+          default:
+            log.warn(`Unsupported data type for "${dataVarName}"`, value)
+            return null
+        }
+      },
+      None: () => {
+        log.warn(`Data variable "${dataVarName}" not found in data frame`)
+        return null
+      }
+    })
+  }
+
   /**
    * Update the state (position, lap, lap times, etc) triggered via a data frame
    *
-   * @param dataVarValues
    * @private
+   * @param dataFrame
    */
-  private updateCars(dataVarValues: SessionDataVariableValueMap) {
+  private updateCars(dataFrame: SessionDataFrame) {
     try {
       if (!this.isInitialized) {
         log.warn("Not initialized yet")
@@ -359,11 +398,11 @@ class TrackMapOverlayCanvasRenderer {
       const pendingCarData = Array<CarData>()
       this.carDataMap.forEach((data, idx) => {
         Object.assign(data, {
-          lap: dataVarValues["CarIdxLap"].values[idx] ?? -1,
-          lapCompleted: dataVarValues["CarIdxLapCompleted"].values[idx] ?? -1,
-          lapPercentComplete: dataVarValues["CarIdxLapDistPct"].values[idx] ?? -1,
-          position: dataVarValues["CarIdxPosition"].values[idx] ?? -1,
-          classPosition: dataVarValues["CarIdxClassPosition"].values[idx] ?? -1
+          lap: this.getDataValue(dataFrame, "CarIdxLap", idx) ?? -1,
+          lapCompleted: this.getDataValue(dataFrame, "CarIdxLapCompleted", idx) ?? -1,
+          lapPercentComplete: this.getDataValue(dataFrame, "CarIdxLapDistPct", idx) ?? -1,
+          position: this.getDataValue(dataFrame, "CarIdxPosition", idx) ?? -1,
+          classPosition: this.getDataValue(dataFrame, "CarIdxClassPosition", idx) ?? -1
         })
 
         if (data.lap > -1) {
@@ -381,17 +420,15 @@ class TrackMapOverlayCanvasRenderer {
    * Handler for DATA_FRAME events
    *
    * @param sessionId
-   * @param timing
-   * @param dataVarValues
+   * @param dataFrame
    * @private
    */
-  @Bind
-  private onDataFrame(sessionId, timing, dataVarValues) {
-    if (!this.isInitialized || !dataVarValues) {
+  @Bind private onDataFrame(sessionId, dataFrame: SessionDataFrame) {
+    if (!this.isInitialized || !dataFrame) {
       return
     }
     try {
-      this.updateCars(dataVarValues)
+      this.updateCars(dataFrame)
     } catch (err) {
       log.error(`Unable to process data frame`, err)
     }
@@ -404,8 +441,7 @@ class TrackMapOverlayCanvasRenderer {
    * @param info
    * @private
    */
-  @Bind
-  private onSessionInfo(sessionId, info) {
+  @Bind private onSessionInfo(sessionId, info) {
     try {
       this.updateSessionInfo(info)
     } catch (err) {
@@ -432,7 +468,7 @@ class TrackMapOverlayCanvasRenderer {
           overlayInfo: client.getOverlayInfo(),
           sessionInfo: client.getSessionInfo()
         }),
-        weekendInfo = sessionInfo.weekendInfo,
+        weekendInfo = sessionInfo!.weekendInfo,
         { trackID: trackId, trackName, trackConfigName } = pick(weekendInfo, "trackID", "trackName", "trackConfigName"),
         trackLayoutId = `${trackId}::${trackName}::${
           !trackConfigName || trackConfigName === "null" ? "NO_CONFIG_NAME" : trackConfigName
@@ -520,8 +556,8 @@ class TrackMapOverlayCanvasRenderer {
       client.off(PluginClientEventType.DATA_FRAME)
 
       this.clear()
-      this.initializeDeferred = null
-      this.state = null
+      this.initializeDeferred = null!
+      this.state = null!
     } catch (err) {
       log.error("Failed to destroy", err)
     }

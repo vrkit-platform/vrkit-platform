@@ -86,6 +86,10 @@ function CreateNativeSessionPlayer(
 export class SessionPlayer extends EventEmitter3<SessionPlayerEventArgs, SessionPlayer> {
   readonly id:string
   
+  get namedPipePath(): string {
+    return this.nativePlayer.namedPipePath
+  }
+  
   private nativePlayer:NativeSessionPlayer
   
   private dataVariableHeaderCount = -1
@@ -331,8 +335,8 @@ export class SessionPlayer extends EventEmitter3<SessionPlayerEventArgs, Session
     return this.nativePlayer.sessionTiming
   }
   
-  get sessionData():SessionMetadata {
-    return Either.try(() => SessionMetadata.fromJson(this.nativePlayer.sessionData as any))
+  get sessionMetadata():SessionMetadata {
+    return Either.try(() => SessionMetadata.fromJson(this.nativePlayer.sessionMetadata as any))
         .match({
           Left: err => {
             log.error(`Unable to get session data`, err)

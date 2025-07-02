@@ -30,7 +30,7 @@ export type NativeSessionPlayerEventCallback = (
 ) => void
 
 export interface NativeSessionPlayer {
-  readonly sessionData: SessionMetadata
+  readonly sessionMetadata: SessionMetadata
   
   readonly sessionTiming: SessionTiming
   
@@ -41,6 +41,8 @@ export interface NativeSessionPlayer {
   readonly sessionTickCount: number
   
   readonly isAvailable: boolean
+  
+  readonly namedPipePath: string
   
   readonly id: string
   

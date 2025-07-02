@@ -18,7 +18,6 @@
 #include <tuple>
 
 #include <magic_enum/magic_enum.hpp>
-
 #include <spdlog/spdlog.h>
 
 
@@ -39,45 +38,48 @@ namespace IRacingTools::Shared::Logging {
     IRSDK = 2
   };
 
-  constexpr std::size_t LogCategoryDefaultCount =
-    magic_enum::enum_count<LogCategoryDefault>();
+  constexpr std::size_t LogCategoryDefaultCount = magic_enum::enum_count<LogCategoryDefault>();
 
+  // ReSharper disable once CppEvaluationInternalFailure
   constexpr LUT<LogCategoryDefault, std::string_view, LogCategoryDefaultCount>
-    LogCategoryDefaultMap = {
-      {LogCategoryDefault::Global, GlobalCategory},
-      {LogCategoryDefault::Service,
-       magic_enum::enum_name(LogCategoryDefault::Service).data()},
-      {LogCategoryDefault::IRSDK,
-       magic_enum::enum_name(LogCategoryDefault::IRSDK).data()}};
+  LogCategoryDefaultMap = {
+    {LogCategoryDefault::Global, GlobalCategory},
+    {LogCategoryDefault::Service, magic_enum::enum_name(LogCategoryDefault::Service).data()},
+    {LogCategoryDefault::IRSDK, magic_enum::enum_name(LogCategoryDefault::IRSDK).data()}
+  };
 
   class LoggingManager : public IRacingSDK::Utils::Singleton<LoggingManager> {
-  public:
+    public:
 
-    LoggingManager() = delete;
-    LoggingManager(LoggingManager &&) = delete;
-    LoggingManager(LoggingManager &) = delete;
-    LoggingManager(const LoggingManager &) = delete;
+      LoggingManager() = delete;
 
-    /**
-     * @brief Get Logging Category with a user provided name
-     *
-     * @param name
-     * @return Logger
-     */
-    Logger getCategory(const std::string &name = std::string{GlobalCategory});
+      LoggingManager(LoggingManager&&) = delete;
 
-    Logger getConsoleLogger();
+      LoggingManager(LoggingManager&) = delete;
 
-  protected:
+      LoggingManager(const LoggingManager&) = delete;
 
-    explicit LoggingManager(token);
-    friend Singleton;
+      /**
+       * @brief Get Logging Category with a user provided name
+       *
+       * @param name
+       * @return Logger
+       */
+      Logger getCategory(const std::string& name = std::string{GlobalCategory});
 
-  private:
+      Logger getConsoleLogger();
 
-    std::mutex mutex_{};
-    std::map<std::string, Logger> loggers_{};
-    Logger consoleLogger_{nullptr};
+    protected:
+
+      explicit LoggingManager(token);
+
+      friend Singleton;
+
+    private:
+
+      std::mutex mutex_{};
+      std::map<std::string, Logger> loggers_{};
+      Logger consoleLogger_{nullptr};
   };
 
 
@@ -88,7 +90,8 @@ namespace IRacingTools::Shared::Logging {
 
   template <LogCategoryDefault Cat>
   Logger GetCategory() {
-    std::string name = LogCategoryDefaultMap[Cat];
+    // ReSharper disable once CppEvaluationInternalFailure
+    std::string name{LogCategoryDefaultMap[Cat]};
     return LoggingManager::Get().getCategory(name);
   };
 
@@ -98,19 +101,32 @@ namespace IRacingTools::Shared::Logging {
    * @param name
    * @return Logger
    */
-  inline Logger GetCategoryWithName(const std::string &name) {
+  inline Logger GetCategoryWithName(const std::string& name) {
     return LoggingManager::Get().getCategory(name);
+  };
+
+  /**
+   * @brief Get logging category with file name.
+   *
+   * @param filename name of the file to use as a category, usually `__FILE__`
+   * @return Logger instance with the category name derived from the file name
+   */
+  inline Logger GetCategoryWithFile(const std::string& filename) {
+    std::string name = filename;
+    auto idx = name.find_last_of(".");
+    if (idx != std::string::npos) {
+      name = name.substr(0, idx);
+    }
+
+    return GetCategoryWithName(name);
   };
 
 
 } // namespace IRacingTools::Shared::Logging
 
 template <typename E>
-struct fmt::formatter<E, std::enable_if_t<std::is_enum_v<E>>>
-    : fmt::formatter<std::string> {
-  auto format(const E &enumValue, fmt::format_context &ctx) const
-    -> fmt::format_context::iterator {
-    return fmt::formatter<std::string>::format(
-      std::string(magic_enum::enum_name<E>(enumValue).data()), ctx);
+struct fmt::formatter<E, std::enable_if_t<std::is_enum_v<E>>> : fmt::formatter<std::string> {
+  auto format(const E& enumValue, fmt::format_context& ctx) const -> fmt::format_context::iterator {
+    return fmt::formatter<std::string>::format(std::string(magic_enum::enum_name<E>(enumValue).data()), ctx);
   }
 };

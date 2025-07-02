@@ -62,3 +62,5 @@ export type ObjectKeysOfValueType<T, V> = {
 }
 
 export type KeysWithValueType<T, V> = keyof ObjectKeysOfValueType<T,V>
+
+export type EnumValues<T> = T[keyof T]

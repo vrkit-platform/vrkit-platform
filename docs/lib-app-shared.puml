@@ -1,6 +1,3 @@
-
-
-```puml
 @startuml
 
 
@@ -1917,5 +1914,3 @@ IRacingTools.Shared.SHM.Writer +-- IRacingTools.Shared.SHM.Writer::NextFrameInfo
 
 
 @enduml
-
-```

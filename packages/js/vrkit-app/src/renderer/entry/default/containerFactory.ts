@@ -3,7 +3,7 @@
 import { Deferred } from "@3fv/deferred"
 import { Container } from "@3fv/ditsy"
 import { getLogger } from "@3fv/logger-proxy"
-import { ActionRegistry, IRacingIPCClientManager } from "@vrkit-platform/shared"
+import { ActionRegistry } from "@vrkit-platform/shared"
 import { WebActionManager } from "../../services/actions-web"
 import SessionManagerClient from "../../services/session-manager-client"
 
@@ -18,6 +18,7 @@ import AppSettingsClient from "../../services/app-settings-client"
 import { OverlayManagerClient } from "../../services/overlay-manager-client"
 import { Alert, APP_ALERTS_ID } from "../../services/alerts"
 import { PluginManagerClient } from "../../services/plugin-manager-client"
+import { IRacingIPCClientManager } from "vrkit-app-renderer/services/iracing-ipc"
 
 const log = getLogger(__filename)
 const { debug, info, trace, warn, error } = log

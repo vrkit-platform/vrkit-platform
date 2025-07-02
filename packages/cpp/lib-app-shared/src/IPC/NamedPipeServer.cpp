@@ -58,6 +58,10 @@ namespace {
     return options_.packetSize;
   }
 
+  std::string NamedPipeServer::pipePath() const {
+    return pipePath_;
+  }
+
   void NamedPipeServer::closeConnection(std::uint32_t connectionId) {
     auto connection = getConnection(connectionId);
     std::scoped_lock lock(mutex_);

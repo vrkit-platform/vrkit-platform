@@ -92,6 +92,10 @@ namespace IRacingTools::Shared {
     DiskSessionDataProvider::stop();
   }
 
+  const std::string DiskSessionDataProvider::id() {
+    return file_.string();
+  }
+
   std::shared_ptr<IRacingSDK::ClientProvider> DiskSessionDataProvider::clientProvider() {
     return diskClient_->getProvider();
   }

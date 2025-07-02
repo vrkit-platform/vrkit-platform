@@ -32,35 +32,6 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
-class SessionPlayerContainer {
-  readonly disposers = Array<() => void>()
-
-  private timing_: SessionTiming = null
-
-  private dataVars_: SessionDataVariable[] = []
-
-  get timing() {
-    return this.timing_
-  }
-
-  get dataVars() {
-    return this.dataVars_
-  }
-
-  constructor(
-    readonly id: SessionPlayerId,
-    readonly player: SessionPlayer
-  ) {}
-
-  dispose() {
-    this.disposers.forEach(disposer => disposer())
-  }
-
-  setDataFrame(timing: SessionTiming, dataVars: SessionDataVariable[]): void {
-    this.timing_ = timing
-    this.dataVars_ = dataVars
-  }
-}
 
 export interface SessionManagerClientEventArgs {
   
@@ -75,10 +46,6 @@ type SessionEventHandlerPair = Pair<
     (event: IpcRendererEvent, ...args: any[]) => any
 >
 
-type OverlayEventHandlerPair = Pair<
-    OverlayManagerClientEventType,
-    (event: IpcRendererEvent, ...args: any[]) => any
->
 
 @Singleton()
 export class SessionManagerClient extends EventEmitter3<SessionManagerClientEventArgs> {

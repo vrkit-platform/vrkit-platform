@@ -379,18 +379,22 @@ export class SessionManager extends EventEmitter3<SessionManagerEventArgs> {
       }
     }
 
-    return asOption(evData?.payload).match({
-      Some: ({ sessionData: data }: any): SessionDetail => ({
+    return asOption(evData?.payload)
+        .map(({ sessionMetadata: data }: any) => data)
+        .match({
+      Some: (data): SessionDetail => ({
         id: data.id,
         isAvailable: player.isAvailable,
+        namedPipePath: player.namedPipePath,
         info: player.sessionInfo,
         data: SessionMetadata.create(data as any)
       }) as any,
       None: (): SessionDetail => ({
         id: player.id,
         isAvailable: player.isAvailable,
+        namedPipePath: player.namedPipePath,
         info: player.sessionInfo,
-        data: !player.sessionData ? null : player.sessionData
+        data: !player.sessionMetadata ? null : player.sessionMetadata
       })
     })
   }

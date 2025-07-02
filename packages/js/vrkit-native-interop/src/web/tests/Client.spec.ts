@@ -38,7 +38,7 @@ test("SessionPlayer.open", async () => {
     return player
   }).resolves.not.toThrow()
   
-  const data = player.sessionData!!
+  const data = player.sessionMetadata!!
   expect(data.fileInfo!!.file).toEqual(ibtFile)
   expect(data.timing).toBeDefined()
   

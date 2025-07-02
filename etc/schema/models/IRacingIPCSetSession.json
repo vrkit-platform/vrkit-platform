@@ -1,0 +1,50 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/IRacingIPCSetSession",
+    "definitions": {
+        "IRacingIPCSetSession": {
+            "properties": {
+                "type": {
+                    "enum": [
+                        "SESSION_TYPE_LIVE",
+                        0,
+                        "SESSION_TYPE_DISK",
+                        1
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Type"
+                },
+                "file": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "I Racing IPC Set Session"
+        }
+    }
+}

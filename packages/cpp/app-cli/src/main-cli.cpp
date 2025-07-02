@@ -18,7 +18,6 @@
 #include "ServiceDaemonArgCommand.h"
 #include "SessionRecordArgCommand.h"
 #include "TelemetryDumpArgCommand.h"
-#include "IRacingIPCArgCommand.h"
 
 using namespace std::literals;
 
@@ -44,7 +43,6 @@ int main(int argc, char **argv)
 
   auto cmds =
       ArgCommand::build<
-          IRacingIPCArgCommand,
           LiveDataReplayArgCommand,
           TelemetryDumpArgCommand,
           ProcessAllTelemetryArgCommand,

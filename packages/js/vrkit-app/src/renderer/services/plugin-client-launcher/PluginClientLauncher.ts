@@ -9,14 +9,19 @@ import {
   IPluginClientEventArgs,
   IPluginComponentFactory,
   IPluginComponentProps,
+  PluginClientEventType,
   TPluginComponentType
 } from "@vrkit-platform/plugin-sdk"
 import {
+  IRacingIPCMessageType,
+  IRacingIPCSetSubscriptions,
   OverlayConfig,
   OverlayKind,
   PluginComponentDefinition,
   PluginInstall,
-  PluginUserSettingValue
+  PluginUserSettingValue,
+  SessionDataFrame, SessionDataVarHeader,
+  SessionEventType
 } from "@vrkit-platform/models"
 import OverlayManagerClient from "../overlay-manager-client"
 import { asOption } from "@3fv/prelude-ts"
@@ -33,6 +38,14 @@ import JSON5 from "json5"
 import { PackageJson } from "type-fest"
 import { Deferred } from "@3fv/deferred"
 import { overlayWindowActions } from "../store/slices/overlay-window"
+import { IRacingIPCClientManager } from "../iracing-ipc"
+import {
+  IRacingIPCClient,
+  IRacingIPCClientEventArgs,
+  IRacingIPCClientEventKeys,
+  IRacingIPCClientEventType,
+  IRacingIPCClientEventTypes
+} from "vrkit-native-interop"
 
 // noinspection TypeScriptUnresolvedVariable
 const log = getLogger(__filename)
@@ -97,7 +110,7 @@ export class PluginLoader {
    *
    * @throws `Error` if the provided module name is not a valid string.
    */
-  private pluginRequire(target: NodeJS.Require, _thisArg: any, ...args: any[]):any {
+  private pluginRequire(target: NodeJS.Require, _thisArg: any, ...args: any[]): any {
     const moduleName = asOption(args[0])
         .mapIf(
           it => isArray(it) && !isString(it),
@@ -169,7 +182,9 @@ export class PluginLoader {
 
       assert(await Fsx.pathExists(pkgMainFile), `Main file specified in ${pkgJsonFile} does not exist @ ${pkgMainFile}`)
 
-      if (log.isDebugEnabled()) log.debug(`Reading plugin installation bundle @ ${pkgMainFile}`)
+      if (log.isDebugEnabled()) {
+        log.debug(`Reading plugin installation bundle @ ${pkgMainFile}`)
+      }
 
       // ENABLED THEN WATCH FOR CHANGES
       if (install.isDevEnabled) {
@@ -224,21 +239,24 @@ export class PluginLoader {
     log.info(`File watcher change event: ${file}`)
     window.location.reload()
   }
-  
+
   /**
-   * Constructor for initializing the plugin system and setting up custom module resolution.
+   * Constructor for initializing the plugin system and setting up custom
+   * module resolution.
    *
-   * @param {PluginClientLauncher} manager - The plugin client launcher responsible for managing plugin clients.
-   * @param {Container} serviceContainer - The service container providing dependencies and services.
-   * @param {PluginInstall} install - The plugin installation details used to configure the environment.
+   * @param {PluginClientLauncher} manager - The plugin client launcher
+   *     responsible for managing plugin clients.
+   * @param {Container} serviceContainer - The service container providing
+   *     dependencies and services.
+   * @param {PluginInstall} install - The plugin installation details used to
+   *     configure the environment.
    */
   constructor(
     readonly manager: PluginClientLauncher,
     readonly serviceContainer: Container,
     readonly install: PluginInstall
   ) {
-    const
-      requireProxy = new Proxy(Module.prototype.require.bind(module), {
+    const requireProxy = new Proxy(Module.prototype.require.bind(module), {
         apply: this.pluginRequire.bind(this)
       }),
       globalRequire = {
@@ -318,6 +336,47 @@ export class PluginClientLauncher {
     loaders: new Map<string, PluginLoader>()
   }
 
+  private pluginInstallCached_: PluginInstall = null
+
+  private ipcClientId: string = null
+  
+  private sessionDataHeaders: SessionDataVarHeader[] = []
+
+  get pluginsState() {
+    return this.appStore.getState().shared?.plugins
+  }
+
+  get pluginInstall() {
+    if (this.pluginInstallCached_) {
+      return this.pluginInstallCached_
+    }
+
+    const config = this.getConfig()
+    const { kind, componentId } = config.overlay
+    this.pluginInstallCached_ =
+      kind !== OverlayKind.PLUGIN
+        ? null
+        : asOption(this.pluginsState)
+            .map(
+              state =>
+                Object.values(state.plugins).find(pluginInstall =>
+                  componentId.startsWith(pluginInstall.id)
+                ) as PluginInstall
+            )
+            .getOrThrow(`Unable to find PluginInstall for componentId ${componentId}`)
+    return this.pluginInstallCached_
+  }
+
+  get pluginComponentDef() {
+    const install = this.pluginInstall
+    if (!install) {
+      return null
+    }
+
+    const { componentId } = this.getConfig().overlay
+    return install.manifest?.components?.find(({ id }) => id === componentId) ?? null
+  }
+
   private readonly builtinPluginLoaders_: Record<OverlayKind, TComponentLoader> = {
     [OverlayKind.PLUGIN]: async (install: PluginInstall, componentDef: PluginComponentDefinition) => {
       const { loaders } = this.state_
@@ -364,10 +423,10 @@ export class PluginClientLauncher {
 
         getSessionInfo: () => {
           return sharedAppSelectors.selectActiveSessionInfo(this.appStore.getState())
-        }, // getSessionTimeAndDuration: () => {
-        //   return
-        // sharedAppSelectors.selectActiveSessionTimeAndDuration(this.appStore.getState())
-        // },
+        },
+        getSessionDataHeaders: () => {
+          return this.sessionDataHeaders
+        },
         getLapTrajectory: (trackLayoutId: string) => {
           return this.trackManager.getLapTrajectory(trackLayoutId)
         },
@@ -391,14 +450,84 @@ export class PluginClientLauncher {
     })
   }
 
+  private async setupIPCClient(ipcClient: IRacingIPCClient = this.ipcClientManager.client) {
+    try {
+      if (this.ipcClientId === ipcClient.clientId) {
+        info(`Already setup IPC client with id ${ipcClient.clientId}, skipping`)
+        return
+      }
+
+      const { pluginInstall, pluginComponentDef: compDef } = this,
+        sessionDataHeadersRes = await ipcClient.request(IRacingIPCMessageType.TYPE_GET_SESSION_DATA_HEADERS, null),
+        sessionDataHeaders = sessionDataHeadersRes.headers
+
+      assert(!!pluginInstall, `No pluginInstall available for IPC client setup`)
+      assert(!!compDef, `No plugin component definition available for IPC client setup`)
+      assert(isNotEmpty(sessionDataHeaders), `No data headers available for current session`)
+
+      // TODO: Cache the session data headers & make them available in the plugin client
+      //   Once implemented, the retrofit should be functional
+      
+      this.ipcClientId = ipcClient.clientId
+      this.sessionDataHeaders = sessionDataHeaders
+      
+      const componentDataVarNames = compDef.overlayIracingSettings?.dataVariablesUsed ?? [],
+        dataVarNames = componentDataVarNames.filter(varName => {
+          if (!sessionDataHeaders.some(header => header.name === varName)) {
+            warn(`Data variable ${varName} is not available in current session data headers`, sessionDataHeaders)
+            return false
+          }
+          return true
+        }),
+        setSubs = IRacingIPCSetSubscriptions.create({
+          eventTypes: [
+            SessionEventType.SESSION_CHANGED,
+            SessionEventType.DATA_FRAME,
+            SessionEventType.METADATA_CHANGED
+          ],
+          dataVarHeaderNames: dataVarNames
+        })
+
+      info(`Sending IPC set subscriptions`, setSubs)
+      const setSubRes = await ipcClient.request(IRacingIPCMessageType.TYPE_SET_SUBSCRIPTIONS, setSubs)
+      info(`Set subscriptions response`, setSubRes)
+    } catch (err) {
+      error(`Failed to setup IPC client`, err)
+    }
+  }
+
+  private onIPCEvent<Type extends IRacingIPCClientEventKeys>(
+    type: Type,
+    ...args: Parameters<IRacingIPCClientEventArgs[Type]>
+  ) {
+    debug(`Received IPC event ${type}`, ...args)
+    const ipcClient = args[0]
+    switch (type) {
+      case IRacingIPCClientEventType.CONNECTED:
+        this.setupIPCClient(ipcClient)
+        break
+      case SessionEventType.DATA_FRAME:
+        const sessionId = this.appStore.getState().shared.sessions.activeSessionId
+        
+        if (isNotEmpty(sessionId)) {
+          const dataFrame = args[1] as SessionDataFrame
+          // info(`Received data frame (sessionId=${sessionId})`, args)
+          this.client.emit(PluginClientEventType.DATA_FRAME, sessionId, dataFrame)
+        }
+
+        break
+      default:
+        debug(`Unhandled IPC event type: ${type}`, ...args)
+    }
+  }
+
   /**
    * Cleanup resources on unload
    *
    * @param event
    * @private
    */
-  @Bind
-  private unload(event: Event = null) {
+  @Bind private unload(event: Event = null) {
     debug(`Unloading overlay manager client`)
 
     window["getVRKitPluginClient"] = undefined
@@ -411,7 +540,20 @@ export class PluginClientLauncher {
   @PostConstruct() // @ts-ignore
   // tslint:disable-next-line
   protected async init(): Promise<void> {
+    const clientManager = this.ipcClientManager
+
     window.addEventListener("beforeunload", this.unload)
+
+    IRacingIPCClientEventTypes.forEach(ev => {
+      clientManager.on(ev, (...args) => {
+        this.onIPCEvent(ev, ...args)
+      })
+    })
+
+    const client = clientManager.client
+    if (client) {
+      await this.setupIPCClient(client)
+    }
 
     this.initDev()
 
@@ -429,18 +571,7 @@ export class PluginClientLauncher {
     }
 
     const { kind, componentId } = config.overlay,
-      pluginsState = this.appStore.getState().shared?.plugins,
-      pluginInstall =
-        kind !== OverlayKind.PLUGIN
-          ? null
-          : asOption(pluginsState)
-              .map(
-                state =>
-                  Object.values(state.plugins).find(pluginInstall =>
-                    componentId.startsWith(pluginInstall.id)
-                  ) as PluginInstall
-              )
-              .getOrThrow(`Unable to find PluginInstall for componentId ${componentId}`),
+      { pluginInstall } = this,
       componentDef =
         kind !== OverlayKind.PLUGIN ? null : pluginInstall?.manifest?.components?.find(({ id }) => id === componentId)
 
@@ -482,16 +613,14 @@ export class PluginClientLauncher {
    *
    */
   constructor(
-    @InjectContainer()
-    readonly serviceContainer: Container,
-    @Inject(APP_STORE_ID)
-    readonly appStore: AppStore,
+    @InjectContainer() readonly serviceContainer: Container,
+    @Inject(APP_STORE_ID) readonly appStore: AppStore,
     readonly client: OverlayManagerClient,
-    readonly trackManager: TrackManager
+    readonly trackManager: TrackManager,
+    readonly ipcClientManager: IRacingIPCClientManager
   ) {}
 
-  @Bind
-  getConfig(): OverlayConfig {
+  @Bind getConfig(): OverlayConfig {
     return this.client.overlayConfig
   }
 

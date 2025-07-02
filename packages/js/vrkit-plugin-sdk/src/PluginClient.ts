@@ -1,8 +1,10 @@
-import type {
+import {
   LapTrajectory,
   OverlayInfo,
   PluginComponentDefinition,
-  PluginManifest, PluginUserSettingValue,
+  PluginManifest,
+  PluginUserSettingValue,
+  SessionDataFrame, SessionDataVarHeader,
   SessionDataVariableValueMap,
   SessionTiming,
   TrackMap
@@ -25,8 +27,7 @@ export type PluginClientEventKind = `${PluginClientEventType}`
 export interface IPluginClientEventArgs {
   [PluginClientEventType.DATA_FRAME]: (
     sessionId: string,
-    timing: SessionTiming,
-    dataVarValues: SessionDataVariableValueMap
+    dataFrame: SessionDataFrame
   ) => void
   [PluginClientEventType.SESSION_ID_CHANGED]: (sessionId: string, info: SessionInfoMessage) => void
   [PluginClientEventType.SESSION_INFO_CHANGED]: (sessionId: string, info: SessionInfoMessage) => void
@@ -50,6 +51,8 @@ export interface IPluginClient {
   getUserSettingValue(id: string): PluginUserSettingValue
   
   getSessionInfo(): SessionInfoMessage
+  
+  getSessionDataHeaders(): SessionDataVarHeader[]
   
   getLapTrajectory(trackLayoutId: string): Promise<LapTrajectory>
   

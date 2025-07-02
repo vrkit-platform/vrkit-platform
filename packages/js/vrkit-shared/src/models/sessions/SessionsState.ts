@@ -16,15 +16,18 @@ export function toSessionTimeAndDuration(timing: SessionTiming) {
   return omit(toJS(timing), ["sampleIndex", "sampleCount", "ticks", "tickCount"])
 }
 
+
 export interface SessionDetail {
   id?: string
-
+  
   type?: SessionType
 
   filePath?: string
 
   isAvailable?: boolean
-
+  
+  namedPipePath?: string
+  
   data?: SessionMetadata
   
   info?: SessionInfoMessage

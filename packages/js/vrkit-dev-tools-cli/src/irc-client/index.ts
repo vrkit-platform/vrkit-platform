@@ -1,5 +1,5 @@
-import IRCClientCommand from "./IRCClientCommand.js"
+import IRacingIPCClientCommand from "./IRacingIPCClientCommand.js"
 
-export * from "./IRCClientCommand.js"
+export * from "./IRacingIPCClientCommand.js"
 
-export default IRCClientCommand
+export default IRacingIPCClientCommand

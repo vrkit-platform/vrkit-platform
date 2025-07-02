@@ -17,9 +17,9 @@ const MESSAGE_HEADER_LENGTH =
 
 // const PIPE_NAME = "vrkit_iracing_ipc_server"
 // const PIPE_PATH = "\\\\.\\pipe\\" + PIPE_NAME
-
+export const PIPE_PATH_PREFIX = "\\\\.\\pipe\\"
 export function ToPipePath(pipeName: string): string {
-  return "\\\\.\\pipe\\" + pipeName
+  return pipeName.startsWith(PIPE_PATH_PREFIX) ? pipeName : PIPE_PATH_PREFIX + pipeName
 }
 
 export class NamedPipeMessageHeader {
@@ -50,6 +50,7 @@ export class NamedPipeMessageHeader {
 }
 
 export interface NamedPipeClientEventMap {
+  error: (client: NamedPipeClient, error: Error) => any
   connect: (client: NamedPipeClient) => any
 
   message: (client: NamedPipeClient, readHeader: NamedPipeMessageHeader, readData: Uint8Array) => any
@@ -70,8 +71,6 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
 
   private readBuffer: Buffer = null!
 
-  private readDecoder = new TextDecoder("ascii")
-
   constructor(
     public readonly pipeName: string,
     public readonly clientId: number = ++NamedPipeClient.ClientIdCounter
@@ -80,24 +79,46 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
     this.pipePath = ToPipePath(pipeName)
   }
 
-  private onConnect() {
+  /**
+   * Handles the event when the client successfully connects.
+   * This method ensures that the connection promise is resolved
+   * and emits a "connect" event to notify listeners.
+   *
+   * @return {void} This method does not return a value.
+   */
+  private onConnect(): void {
     debug("Client: onConnect")
     const deferred = this.connectDeferred!
-    log.assert(
-        deferred && !deferred!.isSettled(),
-      "onConnect: connectDeferred is already settled"
-    )
+    log.assert(deferred && !deferred!.isSettled(), "onConnect: connectDeferred is already settled")
     deferred.resolve(this)
     this.emit("connect", this)
-    // this.sendMessages()
-    //     .catch(err => {
-    //       error("Failed to send messages", err)
-    //     })
   }
 
+  /**
+   * Handles the error event for the named pipe client.
+   * This method logs the error, emits an "error" event,
+   * and rejects the connection promise if it is still pending.
+   *
+   * @param err
+   * @private
+   */
+  private onError(err: Error) {
+    error(`NamedPipeClient.onError: ${err.message}`, err)
+    this.disconnect(err)
+    this.emit("error", this, err)
+  }
+
+  /**
+   * Handle incoming data from the named pipe client.
+   * This method processes the incoming data, checks if there is enough data to
+   * read a complete message, and emits the message if a complete message is
+   * available.
+   *
+   * @param newBuffer
+   * @private
+   */
   private onData(newBuffer: Buffer) {
-    if (log.isDebugEnabled())
-      debug(`onData(newBuffer=${newBuffer.length})`)
+    if (log.isDebugEnabled()) debug(`onData(newBuffer=${newBuffer.length})`)
     let readBuffer = (this.readBuffer = this.readBuffer?.length
       ? Buffer.concat([this.readBuffer, newBuffer], this.readBuffer.length + newBuffer.length)
       : newBuffer)
@@ -108,8 +129,7 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
         readTotalSize = readDataSize + MESSAGE_HEADER_LENGTH
 
       if (readBuffer.length < readTotalSize) {
-        if (log.isDebugEnabled())
-          debug(`onData: NOT ENOUGH (${readBuffer.length}<${readTotalSize})`)
+        if (log.isDebugEnabled()) debug(`onData: NOT ENOUGH (${readBuffer.length}<${readTotalSize})`)
         break
       }
 
@@ -123,23 +143,39 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
       // REMOVE THE HEADER
       this.readHeader = null!
     }
-    
-    if (log.isDebugEnabled())
-      debug(`onData(remainingData=${readBuffer.length})`)
+
+    if (log.isDebugEnabled()) debug(`onData(remainingData=${readBuffer.length})`)
   }
 
-  disconnect() {
+  /**
+   * Disconnects the named pipe client.
+   */
+  disconnect(err: Error | null = null): void {
     const client = this.client
     if (!client) {
       return
     }
-
+    const { connectDeferred } = this
+    if (connectDeferred && !connectDeferred.isSettled()) {
+      guard(() => connectDeferred.reject(err ?? Error("Client disconnected")))
+    }
+    
+    this.connectDeferred = null
+    
     info(`Disconnecting client ${this.clientId}`)
     guard(() => this.client.end())
     this.client = null!
   }
 
-  private onDisconnect() {
+  /**
+   * Handles the disconnection event of the named pipe client.
+   * This method cleans up the connection, rejects any pending connection
+   * promises, and emits an "end" event to notify listeners that the client has
+   * disconnected.
+   *
+   * @return {void} This method does not return a value.
+   */
+  private onDisconnect(): void {
     info(`onDisconnect`)
 
     this.disconnect()
@@ -149,7 +185,10 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
     this.connectDeferred = null
     this.emit("end", this)
   }
-
+  
+  /**
+   * Connects to the named pipe server.
+   */
   async connect(): Promise<NamedPipeClient> {
     if (this.connectDeferred) {
       return this.connectDeferred.promise
@@ -164,6 +203,7 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
     try {
       this.client = net
         .connect(this.pipePath, this.onConnect.bind(this))
+        .on("error", this.onError.bind(this))
         .on("data", this.onData.bind(this))
         .on("end", this.onDisconnect.bind(this))
 
@@ -203,30 +243,10 @@ export class NamedPipeClient extends EventEmitter3<NamedPipeClientEventMap> {
         }
       })
     })
-    // const packetSize = 8192 //20
-    // const packetCount = Math.ceil(data.length / packetSize)
-    // for (let packetIdx = 0; packetIdx < packetCount; packetIdx++) {
-    //   // assert.ok(this.client.writable)
-    //   const packetStart = MessageHeaderLength + (packetIdx * packetSize),
-    //       packetEnd = Math.min(packetStart + packetSize, msgBuf.length)
-    //   await new Promise((resolve, reject) => {
-    //     this.client.write(msgBuf.subarray(MessageHeaderLength), err => {
-    //       if (err) {
-    //         reject(err)
-    //       } else {
-    //         resolve(null)
-    //       }
-    //     })
-    //   })
-    //   //await new Promise(resolve => setTimeout(resolve, 500))
-    // }
-
-    // client.end()
   }
 
   private onMessage(readHeader: NamedPipeMessageHeader, readData: Uint8Array): void {
     this.emit("message", this, readHeader, readData)
-    
   }
 }
 

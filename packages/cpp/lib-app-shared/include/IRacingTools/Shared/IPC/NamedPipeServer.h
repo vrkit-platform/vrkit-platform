@@ -40,7 +40,7 @@ namespace IRacingTools::Shared::IPC {
    */
   using NamedPipeMessageHandler = std::function<void(
     std::size_t size,
-    const NamedPipeMessageDataType data,
+    NamedPipeMessageDataType data,
     const NamedPipeMessageHeader* header,
     std::shared_ptr<NamedPipeConnection> connection,
     std::shared_ptr<NamedPipeServer> server
@@ -204,6 +204,7 @@ namespace IRacingTools::Shared::IPC {
      */
     std::size_t packetSize() const;
 
+    std::string pipePath() const;
     /**
      * @brief Closes and removes a specific connection
      *

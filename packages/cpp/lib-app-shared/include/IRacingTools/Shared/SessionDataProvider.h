@@ -35,7 +35,9 @@ namespace IRacingTools::Shared {
 
     virtual std::shared_ptr<Models::RPC::Events::SessionEventData> getSessionEventData(Models::RPC::Events::SessionEventType type) = 0;
 
-    virtual bool isAvailable() = 0;
+    virtual const std::string id() = 0;
+
+      virtual bool isAvailable() = 0;
 
     virtual bool start() = 0;
 

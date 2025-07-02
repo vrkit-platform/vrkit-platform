@@ -24,4 +24,4 @@ export enum AppDialogType {
 
 export type AppDialogTypeKind = AppDialogType | `${AppDialogType}`
 
-export * from "@vrkit-platform/shared"
+// export * from "@vrkit-platform/shared"

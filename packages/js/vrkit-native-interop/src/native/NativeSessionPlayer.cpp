@@ -53,11 +53,12 @@ namespace IRacingTools::App::Node {
                 InstanceMethod<&NativeSessionPlayer::jsGetDataVariableHeaders>("getDataVariableHeaders"),
 
                 InstanceAccessor<&NativeSessionPlayer::jsGetId>("id"),
+                InstanceAccessor<&NativeSessionPlayer::jsGetNamedPipePath>("namedPipePath"),
                 InstanceAccessor<&NativeSessionPlayer::jsIsLive>("isLive"),
                 InstanceAccessor<&NativeSessionPlayer::jsIsAvailable>("isAvailable"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetFileInfo>("fileInfo"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetSessionInfoYAMLStr>("sessionInfoYAMLStr"),
-                InstanceAccessor<&NativeSessionPlayer::jsGetSessionData>("sessionData"),
+                InstanceAccessor<&NativeSessionPlayer::jsGetSessionMetadata>("sessionMetadata"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetSessionTiming>("sessionTiming"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetSessionTicks>("sessionTicks"),
                 InstanceAccessor<&NativeSessionPlayer::jsGetSessionTickCount>("sessionTickCount")
@@ -125,6 +126,17 @@ namespace IRacingTools::App::Node {
             sessionData_ = dataProvider_->getSessionMetadata();
         }
 
+        ipcServer_ = std::make_shared<IRacingIPCServer>(dataProvider_);
+        if (auto res = ipcServer_->start(); !res.has_value() || !res.value()) {
+            if (!res.has_value()) {
+                L->error("Unable to start IPC server for session player: {}", res.error().what());
+                throw Napi::Error::New(env, std::format("Unable to start IPC server for session player: {}", res.error().what()));
+            } else {
+                L->error("Unable to start IPC server for session player (has_error=false): {}", res.value());
+                throw Napi::Error::New(env, "Unable to start IPC server for session player (has_error=false)");
+            }
+        }
+
         auto context = new Reference<Napi::Value>(Persistent(info.This()));
 
         jsSessionPlayerEventFn_ = SessionPlayerEventFn::New(
@@ -177,6 +189,9 @@ namespace IRacingTools::App::Node {
             return;
         }
 
+        L->debug("Cleaning up IPC Server");
+        ipcServer_->destroy();
+
         L->debug("Cleaning up data provider");
         this->dataProvider_->stop();
         this->dataProvider_.reset();
@@ -204,6 +219,11 @@ namespace IRacingTools::App::Node {
     Napi::Value NativeSessionPlayer::jsGetId(const Napi::CallbackInfo& info) {
         return Napi::String::New(info.Env(), id_);
     }
+
+    Napi::Value NativeSessionPlayer::jsGetNamedPipePath(const Napi::CallbackInfo& info) {
+        return Napi::String::New(info.Env(), ipcServer_->getNamedPipePath());
+    }
+
     Napi::Value NativeSessionPlayer::jsGetDataVariable(const Napi::CallbackInfo& info) {
         // TODO: Create new `Napi::Object` using defined class `NativeSessionDataVariable`
         auto env = info.Env();
@@ -267,7 +287,7 @@ namespace IRacingTools::App::Node {
      * @param info napi callback info
      * @return Plain JS object from `Models::Session::SessionMetadata`
      */
-    Napi::Value NativeSessionPlayer::jsGetSessionData(const Napi::CallbackInfo& info) {
+    Napi::Value NativeSessionPlayer::jsGetSessionMetadata(const Napi::CallbackInfo& info) {
         auto env = info.Env();
 
         // TODO: THIS WILL NOT PERFORM, REIMPLEMENT WITH `ObjectWrap<SessionInfo>` IF NEEDED
@@ -294,7 +314,7 @@ namespace IRacingTools::App::Node {
     }
 
     Napi::Value NativeSessionPlayer::jsGetSessionTiming(const Napi::CallbackInfo& info) {
-        if (auto data = jsGetSessionData(info); data.IsObject()) return data.As<Napi::Object>().Get("timing");
+        if (auto data = jsGetSessionMetadata(info); data.IsObject()) return data.As<Napi::Object>().Get("timing");
         return {};
     }
 
@@ -310,7 +330,7 @@ namespace IRacingTools::App::Node {
 
     Napi::Value
     NativeSessionPlayer::jsGetFileInfo(const Napi::CallbackInfo& info) {
-        if (auto data = jsGetSessionData(info); data.IsObject()) return data.As<Napi::Object>().Get("fileInfo");
+        if (auto data = jsGetSessionMetadata(info); data.IsObject()) return data.As<Napi::Object>().Get("fileInfo");
         return {};
     }
 

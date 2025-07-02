@@ -12,14 +12,15 @@ async function renderOverlayRoot(root: ReactDOM.Root) {
 
   window["VRKitWindowConfig"] = windowConfig
 
-  const container = await resolveContainer().promise
-
+  const containerDeferred = resolveContainer()
+  await containerDeferred.promise
+  
   const AppContainer = await importDefault(import("./OverlayWindowAppContainer"))
   const AppInitializationContainer = await importDefault(import("../../components/app-initialization-container"))
 
   function Root() {
     return (
-      <AppInitializationContainer resolveContainer={resolveContainer}>
+      <AppInitializationContainer resolveContainer={containerDeferred}>
         <AppContainer />
       </AppInitializationContainer>
     )

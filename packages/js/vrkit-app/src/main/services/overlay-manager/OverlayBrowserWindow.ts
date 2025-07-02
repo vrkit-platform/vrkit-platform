@@ -3,7 +3,7 @@ import { BrowserWindowConstructorOptions, IpcMainInvokeEvent } from "electron"
 import { OverlayConfig, OverlayInfo, OverlayPlacement, RectI } from "@vrkit-platform/models"
 import { Deferred } from "@3fv/deferred"
 import {
-  assign,
+  assign, isEmpty,
   OverlayBrowserWindowType,
   OverlayClientEventTypeToIPCName,
   overlayInfoToUniqueId,
@@ -31,6 +31,7 @@ import {
 } from "../window-manager" // TypeScriptUnresolvedVariable
 import { match } from "ts-pattern"
 import { getValue, guard } from "@3fv/guard"
+import { isNativeDebugEnabled } from "vrkit-native-interop"
 
 // TypeScriptUnresolvedVariable
 
@@ -268,11 +269,20 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
       this.#invalidateInterval_ = setInterval(() => {
         this.invalidate()
       }, MaxFPSIntervalMillis)
-
+      
+      // const baseWindowOpts: Partial<BrowserWindowConstructorOptions> = {
+      //   webPreferences: {}
+      // }
       const baseWindowOpts: Partial<BrowserWindowConstructorOptions> = match(isVR)
-        .with(true, () => ({ webPreferences: { offscreen: true } }))
+        .with(true, () => ({
+          webPreferences: {
+            offscreen: true
+          }
+        }))
         .otherwise(() => ({
-          webPreferences: { transparent: true },
+          webPreferences: {
+            transparent: true
+          },
           transparent: true,
           alwaysOnTop: true
         }))
@@ -367,9 +377,10 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
   }
 
   private setIgnoreMouseEvents(ignore: boolean): void {
+    // TODO: Fix this
     if (ignore) {
       this.browserWindow?.setIgnoreMouseEvents(true, {
-        forward: true
+        forward: !isNativeDebugEnabled
       })
     } else {
       this.browserWindow?.setIgnoreMouseEvents(false)

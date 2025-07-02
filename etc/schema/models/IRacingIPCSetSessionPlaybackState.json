@@ -1,0 +1,44 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$ref": "#/definitions/IRacingIPCSetSessionPlaybackState",
+    "definitions": {
+        "IRacingIPCSetSessionPlaybackState": {
+            "properties": {
+                "state": {
+                    "enum": [
+                        "SESSION_PLAYBACK_STATE_UNKNOWN",
+                        0,
+                        "SESSION_PLAYBACK_STATE_PLAYING",
+                        1,
+                        "SESSION_PLAYBACK_STATE_PAUSED",
+                        2,
+                        "SESSION_PLAYBACK_STATE_STOPPED",
+                        3
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Playback State"
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "I Racing IPC Set Session Playback State"
+        }
+    }
+}

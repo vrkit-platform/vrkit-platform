@@ -201,7 +201,7 @@ namespace IRacingTools::Shared::IPC {
     }
 
     if (setWriteMessageEvent) {
-      spdlog::info("SetEvent(writeMessageQueuedEvent_)");
+      spdlog::debug("SetEvent(writeMessageQueuedEvent_)");
       server_->ioThreadNotify();
     }
 
@@ -330,7 +330,7 @@ namespace IRacingTools::Shared::IPC {
     if (success) {
       io.hasPendingIO = false;
       if (byteWriteCount > 0) {
-        spdlog::info("Write complete message (byteWriteCount={})", byteWriteCount);
+        spdlog::debug("Write complete message (byteWriteCount={})", byteWriteCount);
         auto onWriteRes = onWrite(byteWriteCount);
         if (!onWriteRes.has_value()) {
           spdlog::error("startWrite immediate data, res has error");
@@ -409,7 +409,7 @@ namespace IRacingTools::Shared::IPC {
 
     auto readCompleted = readCompletedRes.value();
     if (readCompleted) {
-      spdlog::info("NamedPipeMessage ({}) is fully read and can now be distributed", msg->id());
+      spdlog::debug("NamedPipeMessage ({}) is fully read and can now be distributed", msg->id());
       server_->emitMessage(msg);
       readMessage_ = messagePool_.acquire();
       readMessage_->reset();
@@ -447,7 +447,7 @@ namespace IRacingTools::Shared::IPC {
 
     auto writeCompleted = writeCompletedRes.value();
     if (writeCompleted) {
-      spdlog::info("NamedPipeMessage ({}) is fully written to the connection pipe", msg->id());
+      spdlog::debug("NamedPipeMessage ({}) is fully written to the connection pipe", msg->id());
       writeMessage_ = nullptr;
       return true;
     }

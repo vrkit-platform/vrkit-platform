@@ -611,8 +611,8 @@ export class OverlayManager {
    * @param windowId
    * @private
    */
-  private createOnCloseHandler(overlayUniqueId: string, windowId: number): Function {
-    return (_event: Electron.Event) => {
+  private createOnCloseHandler(overlayUniqueId: string, windowId: number) {
+    return (_event: Electron.Event = null!) => {
       this.sessionManager.unregisterComponentDataVars(overlayUniqueId)
 
       if (log.isDebugEnabled()) {
@@ -641,7 +641,7 @@ export class OverlayManager {
       .getOrNull()
 
     return (image: NativeImage) => {
-      const buf = image.getBitmap(),
+      const buf = image.toBitmap(),
         nativeImageSize = image.getSize(),
         vrLayout = toJS(win.placement.vrLayout),
         screenRect = asOption(win.browserWindow)
@@ -721,8 +721,8 @@ export class OverlayManager {
    * @param win
    * @private
    */
-  private createOnBoundsChangedHandler(targetPlacement: OverlayPlacement, win: BrowserWindow): Function {
-    return (_event: Electron.Event) => {
+  private createOnBoundsChangedHandler(targetPlacement: OverlayPlacement, win: BrowserWindow) {
+    return (_event: Electron.Event = null!) => {
       asOption(this.overlayWindows_.find(ow => ow.browserWindowId === win.id)).ifSome(ow => {
         this.updateScreenOverlayWindowBounds(ow)
       })

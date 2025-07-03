@@ -1,21 +1,35 @@
-import type { IPluginComponentProps } from "@vrkit-platform/plugin-sdk"
+import {
+  IPluginComponentProps, useVRKitPluginClientSessionInfo
+} from "@vrkit-platform/plugin-sdk"
 import React, { useEffect, useState } from "react"
 import TrackMapOverlayCanvasRenderer from "./TrackMapOverlayCanvasRenderer"
 
 let renderer: TrackMapOverlayCanvasRenderer = null!
+function cleanRenderer() {
+  if (renderer) {
+    renderer.destroy()
+    renderer = null!
+  }
+}
 
 function TrackMapOverlayPlugin(props: IPluginComponentProps) {
   const { client, width, height } = props,
     inActiveSession = client.inActiveSession(),
-    weekendInfo = client.getSessionInfo()?.weekendInfo,
+    [sessionId,metadata,sessionInfo] = useVRKitPluginClientSessionInfo(),
+    weekendInfo = sessionInfo?.weekendInfo,
+    
     [canvasRef, setCanvasRef] = useState<HTMLCanvasElement>(null!)
-
+  console.info(`SessionId=${metadata?.sessionId}`)
+  useEffect(cleanRenderer, [metadata?.sessionId])
   useEffect(() => {
     if (!inActiveSession || !weekendInfo) {
       return
     }
     
     if (canvasRef) {
+      // if (renderer?.sessionId !== metadata?.sessionId) {
+      //   cleanRenderer()
+      // }
       if (!renderer) {
         renderer = new TrackMapOverlayCanvasRenderer(canvasRef, width, height)
       } else {
@@ -23,20 +37,12 @@ function TrackMapOverlayPlugin(props: IPluginComponentProps) {
       }
     }
 
-    return () => {
-      if (renderer) {
-        renderer.destroy()
-        renderer = null!
-      }
-    }
-  }, [canvasRef, renderer, width, height, inActiveSession, weekendInfo])
+    return cleanRenderer
+  }, [canvasRef, width, height, inActiveSession, weekendInfo])
 
   useEffect(() => {
     return () => {
-      if (renderer) {
-        renderer.destroy()
-        renderer = null!
-      }
+      cleanRenderer()
       setCanvasRef(null!)
     }
   }, [])

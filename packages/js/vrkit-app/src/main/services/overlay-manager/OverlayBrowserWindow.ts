@@ -442,7 +442,6 @@ export class OverlayBrowserWindow extends EventEmitter3<OverlayBrowserWindowEven
         this.#windowInstance_ = winInstance
 
         bw.setTitle(this.uniqueId)
-
         bw.webContents.ipc.handle(
           OverlayManagerClientFnTypeToIPCName(OverlayManagerClientFnType.FETCH_CONFIG),
           this.fetchConfigHandler.bind(this)

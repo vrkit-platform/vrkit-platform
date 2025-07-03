@@ -3,6 +3,7 @@ import { PluginClientEventType } from "../../../PluginClient"
 import type { SessionInfoMessage } from "../../../SessionInfoTypes"
 import { useVRKitPluginClient } from "./useVRKitPluginClient"
 import { useVRKitPluginClientEvent } from "./useVRKitPluginClientEvent"
+import type { SessionMetadata } from "@vrkit-platform/models"
 
 const log = console
 
@@ -11,11 +12,11 @@ const log = console
  */
 export function useVRKitPluginClientSessionInfo() {
   const client = useVRKitPluginClient(),
-    [sessionInfo, setSessionInfo] = useState<SessionInfoMessage>(null),
+    [data, setData] = useState<[number,SessionMetadata,SessionInfoMessage]>([null,null,null]),
     handleSessionChange = useCallback(
-      (_sessionId: string, _info: SessionInfoMessage) => {
-        if (client)
-          setSessionInfo(client.getSessionInfo())
+      (sessionId: number, metadata:SessionMetadata, info: SessionInfoMessage) => {
+        log.info(`useVRKitPluginClientSessionInfo() changed: ${sessionId}`, metadata, info)
+        setData([sessionId, metadata, info])
       },
       [client]
     )
@@ -27,10 +28,10 @@ export function useVRKitPluginClientSessionInfo() {
   ).map(type => useVRKitPluginClientEvent(type, handleSessionChange))
   
   useEffect(() => {
-      if (!sessionInfo) {
-        setSessionInfo(client.getSessionInfo())
+      if (!data) {
+        setData([client.getSessionId(), client.getSessionMetadata(), client.getSessionInfo()])
       }
   }, [])
   
-  return sessionInfo
+  return data
 }

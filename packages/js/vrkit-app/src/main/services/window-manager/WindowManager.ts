@@ -440,7 +440,7 @@ export class WindowManager extends EventEmitter3<MainWindowEventArgs> {
         parentSize = parentWinInstance?.browserWindow?.getSize?.() ?? [],
         parentPos = parentWinInstance?.browserWindow?.getPosition?.() ?? [],
         size = pick(config.browserWindowOptions, ["width", "height"]),
-        isOffscreen = config?.browserWindowOptions?.webPreferences?.offscreen ?? false,
+        isOffscreen = !!config?.browserWindowOptions?.webPreferences?.offscreen ?? false,
         bwOpts: Electron.BrowserWindowConstructorOptions = {
           ...config.browserWindowOptions,
           ...wsmWinOpts,

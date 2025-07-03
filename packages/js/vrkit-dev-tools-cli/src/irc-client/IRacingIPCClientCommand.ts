@@ -20,7 +20,7 @@ export const IRacingIPCClientCommand: CommandModule = {
       console.error("Uncaught Exception:", err)
     })
     const
-      irc = new IRacingIPCClient("vrkit_iracing_ipc_server"),
+      irc = new IRacingIPCClient("vrkit_iracing_ipc_server_0"),
       historyFile = Path.join(process.cwd(), ".repl-history-irc-client")
     
     info(`Using history file: ${historyFile}`)

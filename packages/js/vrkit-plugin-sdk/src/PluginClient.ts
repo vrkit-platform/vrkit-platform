@@ -4,8 +4,9 @@ import {
   PluginComponentDefinition,
   PluginManifest,
   PluginUserSettingValue,
-  SessionDataFrame, SessionDataVarHeader,
-  SessionDataVariableValueMap,
+  SessionDataFrame,
+  SessionDataVarHeader,
+  SessionDataVariableValueMap, SessionMetadata,
   SessionTiming,
   TrackMap
 } from "@vrkit-platform/models"
@@ -26,13 +27,14 @@ export type PluginClientEventKind = `${PluginClientEventType}`
 
 export interface IPluginClientEventArgs {
   [PluginClientEventType.DATA_FRAME]: (
-    sessionId: string,
+    sessionId: number,
     dataFrame: SessionDataFrame
   ) => void
-  [PluginClientEventType.SESSION_ID_CHANGED]: (sessionId: string, info: SessionInfoMessage) => void
-  [PluginClientEventType.SESSION_INFO_CHANGED]: (sessionId: string, info: SessionInfoMessage) => void
+  
+  [PluginClientEventType.SESSION_ID_CHANGED]: (sessionId: number, metadata: SessionMetadata, info: SessionInfoMessage) => void
+  [PluginClientEventType.SESSION_INFO_CHANGED]: (sessionId: number, metadata: SessionMetadata, info: SessionInfoMessage) => void
   [PluginClientEventType.SESSION_TIMING_CHANGED]: (
-      sessionId: string,
+      sessionId: number,
       timing: SessionTiming
   ) => void
 }
@@ -49,6 +51,10 @@ export interface IPluginClient {
   getOverlayInfo(): OverlayInfo
   
   getUserSettingValue(id: string): PluginUserSettingValue
+  
+  getSessionId(): number
+  
+  getSessionMetadata(): SessionMetadata
   
   getSessionInfo(): SessionInfoMessage
   
@@ -70,7 +76,7 @@ export type IPluginComponentFactory = (
 ) => Promise<TPluginComponentType>
 
 export interface IPluginComponentProps {
-  sessionId?: string
+  sessionId?: number
   client: IPluginClient
   
   width: number

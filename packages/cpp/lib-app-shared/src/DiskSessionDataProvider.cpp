@@ -447,6 +447,9 @@ namespace IRacingTools::Shared {
 
 
     auto sessionInfo = diskClient_->getSessionInfo().lock();
+    if (sessionInfo)
+      sessionMetadata_->set_session_id(sessionInfo->weekendInfo.sessionID);
+
     auto sessionNumVal = diskClient_->getVarDouble(KnownVarName::SessionNum);
     bool found = false;
     if (sessionInfo && sessionNumVal) {

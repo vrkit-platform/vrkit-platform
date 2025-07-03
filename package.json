@@ -15,7 +15,7 @@
   "cmake-js": {
     "arch": "x64",
     "runtime": "electron",
-    "runtimeVersion": "31.3.0"
+    "runtimeVersion": "34.5.8"
   },
   "dependencies": {
     "yargs": "^17.7.2"
@@ -32,7 +32,8 @@
     "@protobuf-ts/plugin":  "^2.9.6",
     "@svgr/webpack": "^8.1.0",
     "@swc/jest": "^0.2.36",
-    "swc-loader": "0.2.6",
+    "swc-loader": "^0.2.6",
+    "@swc/core": "^1.7.10",
     "swc-plugin-jsx-control-statements": "0.6.0",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@testing-library/jest-dom": "^6.6.3",
@@ -66,7 +67,7 @@
     "detect-port": "^1.6.1",
     "ejs": "^3.1.10",
     "ejs-loader": "^0.5.0",
-    "electron": "31.3.0",
+    "electron": "34.5.8",
     "electron-builder": "^24.13.3",
     "electron-debug": "^4.0.0",
     "electron-devtools-installer": "^3.2.0",
@@ -134,13 +135,15 @@
     "yaml": "^2.5.0"
   },
   "resolutions": {
-    "electron": "31.3.0",
+    "electron": "34.5.8",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-test-renderer": "18.3.1",
     "react-refresh": "0.16.0",
     "react-router-dom": "6.26.1",
     "ts-pattern": "5.7.1",
+    "swc-loader": "0.2.6",
+    "@swc/core": "1.7.10",
     "@3fv/deferred": "1.2.14",
     "@3fv/ditsy": "1.0.14",
     "@3fv/electron-utility-process-manager": "1.0.6",

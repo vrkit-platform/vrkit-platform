@@ -47,7 +47,7 @@ export class NativeImageSequenceCapture {
               this.tempDir,
               `${this.name}-${size.width}x${size.height}-${idx.toString().padStart(3,'0')}.${this.format}`
           ),
-          buf = this.format === "png" ? image.toPNG() : image.getBitmap()
+          buf = this.format === "png" ? image.toPNG() : image.toBitmap()
       
       await Fs.promises.writeFile(file, buf)
       log.info(`Wrote ${file}`)

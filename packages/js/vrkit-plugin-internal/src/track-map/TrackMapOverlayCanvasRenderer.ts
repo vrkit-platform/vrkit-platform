@@ -4,7 +4,12 @@ import type { Path as TwoPath } from "two.js/src/path"
 import type { Vector as TwoVector } from "two.js/src/vector"
 import type { Shape as TwoShape } from "two.js/src/shape"
 import Two from "two.js"
-import type { OverlayBaseSettings, OverlayInfo, SessionDataFrame, TrackMap } from "@vrkit-platform/models"
+import type {
+  OverlayBaseSettings,
+  OverlayInfo,
+  SessionDataFrame, SessionMetadata,
+  TrackMap
+} from "@vrkit-platform/models"
 import { IPluginClient, PluginClientEventType, SessionInfoMessage } from "@vrkit-platform/plugin-sdk"
 import { assign, Bind, Noop, ScaleTrackMapToFit } from "@vrkit-platform/shared"
 // @ts-ignore
@@ -423,8 +428,8 @@ class TrackMapOverlayCanvasRenderer {
    * @param dataFrame
    * @private
    */
-  @Bind private onDataFrame(sessionId, dataFrame: SessionDataFrame) {
-    if (!this.isInitialized || !dataFrame) {
+  @Bind private onDataFrame(sessionId:number, dataFrame: SessionDataFrame) {
+    if (!this.isInitialized || !dataFrame || !this.state) {
       return
     }
     try {
@@ -438,14 +443,27 @@ class TrackMapOverlayCanvasRenderer {
    * Handler for session info events
    *
    * @param sessionId
+   * @param metadata
    * @param info
    * @private
    */
-  @Bind private onSessionInfo(sessionId, info) {
+  @Bind private onSessionInfo(sessionId: number, metadata: SessionMetadata, info: SessionInfoMessage) {
     try {
       this.updateSessionInfo(info)
     } catch (err) {
-      log.error(info)
+      log.error(`Error occurred`, sessionId, metadata, info, err)
+    }
+  }
+  
+  @Bind private onSessionId(sessionId: number, metadata: SessionMetadata, info: SessionInfoMessage) {
+    try {
+      const {state} = this
+      if (!state || !state.width || !state.height)
+        return
+      log.info(`Session ID changed`, sessionId, metadata, info)
+      this.reset(state.width,state.height)
+    } catch (err) {
+      log.error(`Error occurred`, sessionId, metadata, info, err)
     }
   }
 
@@ -482,6 +500,7 @@ class TrackMapOverlayCanvasRenderer {
       this.createScene()
 
       // ATTACH LISTENERS
+      client.on(PluginClientEventType.SESSION_ID_CHANGED, this.onSessionId)
       client.on(PluginClientEventType.SESSION_INFO_CHANGED, this.onSessionInfo)
       client.on(PluginClientEventType.DATA_FRAME, this.onDataFrame)
 
@@ -530,9 +549,11 @@ class TrackMapOverlayCanvasRenderer {
       this.clear()
 
       const client = getVRKitPluginClient()
-      client.off(PluginClientEventType.SESSION_INFO_CHANGED)
-      client.off(PluginClientEventType.DATA_FRAME)
-
+      client.off(PluginClientEventType.SESSION_ID_CHANGED, this.onSessionId)
+      client.off(PluginClientEventType.SESSION_INFO_CHANGED, this.onSessionInfo)
+      client.off(PluginClientEventType.DATA_FRAME, this.onDataFrame)
+      
+      
       this.initializeDeferred = new Deferred()
 
       this.state = newSceneState(width, height)
@@ -552,11 +573,18 @@ class TrackMapOverlayCanvasRenderer {
   destroy() {
     try {
       const client = getVRKitPluginClient()
-      client.off(PluginClientEventType.SESSION_INFO_CHANGED)
-      client.off(PluginClientEventType.DATA_FRAME)
+      client.off(PluginClientEventType.SESSION_ID_CHANGED, this.onSessionId)
+      client.off(PluginClientEventType.SESSION_INFO_CHANGED, this.onSessionInfo)
+      client.off(PluginClientEventType.DATA_FRAME, this.onDataFrame)
 
+      if (this.initializeDeferred && !this.initializeDeferred.isSettled()) {
+        this.initializeDeferred.reject(Error("Destroyed before initialization completed"))
+        this.initializeDeferred = null!
+      }
+      
       this.clear()
-      this.initializeDeferred = null!
+      
+      
       this.state = null!
     } catch (err) {
       log.error("Failed to destroy", err)

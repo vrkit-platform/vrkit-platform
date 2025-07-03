@@ -64,6 +64,7 @@ function newNormalWindowCreateOptions(optConfig: Partial<WindowConfig> = {}) {
       backgroundColor: "black",
       show: false,
       titleBarStyle: "hidden",
+      
       ...windowOptionDefaults()
     },
     url: resolveHtmlPath("index.html")
@@ -80,6 +81,7 @@ function newFloatingWindowCreateOptions(optConfig: Partial<WindowConfig> = {}) {
     browserWindowOptions: {
       show: false,
       frame: false,
+      hasShadow: false,
       backgroundColor: "#00000000",
       ...windowOptionDefaults()
     },
@@ -160,7 +162,10 @@ export const BaseWindowConfigs: { [Role in WindowRole]: WindowCreateOptions<Wind
         alwaysOnTop: true,
         maximizable: false,
         fullscreenable: false,
-        
+        frame: false,
+        // hasShadow: false,
+        // titleBarOverlay: false,
+        titleBarStyle: "hidden",
       }
     })
   })

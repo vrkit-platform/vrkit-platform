@@ -20,8 +20,9 @@ import {
   PluginComponentDefinition,
   PluginInstall,
   PluginUserSettingValue,
-  SessionDataFrame, SessionDataVarHeader,
-  SessionEventType
+  SessionDataFrame,
+  SessionDataVarHeader,
+  SessionEventType, SessionMetadata
 } from "@vrkit-platform/models"
 import OverlayManagerClient from "../overlay-manager-client"
 import { asOption } from "@3fv/prelude-ts"
@@ -420,9 +421,14 @@ export class PluginClientLauncher {
         getUserSettingValue: (id: string): PluginUserSettingValue => {
           return this.getConfig()?.overlay?.userSettingValues?.[id]
         },
-
+        getSessionId: () => {
+          return sharedAppSelectors.selectActiveSessionId(this.appStore.getState())
+        },
         getSessionInfo: () => {
           return sharedAppSelectors.selectActiveSessionInfo(this.appStore.getState())
+        },
+        getSessionMetadata: () => {
+          return sharedAppSelectors.selectActiveSession(this.appStore.getState())?.data
         },
         getSessionDataHeaders: () => {
           return this.sessionDataHeaders
@@ -502,20 +508,39 @@ export class PluginClientLauncher {
   ) {
     debug(`Received IPC event ${type}`, ...args)
     const ipcClient = args[0]
+    const sessionId = sharedAppSelectors.selectActiveSessionId(this.appStore.getState())
     switch (type) {
       case IRacingIPCClientEventType.CONNECTED:
         this.setupIPCClient(ipcClient)
         break
       case SessionEventType.DATA_FRAME:
-        const sessionId = this.appStore.getState().shared.sessions.activeSessionId
-        
-        if (isNotEmpty(sessionId)) {
+        if (sessionId > 0) {
           const dataFrame = args[1] as SessionDataFrame
           // info(`Received data frame (sessionId=${sessionId})`, args)
           this.client.emit(PluginClientEventType.DATA_FRAME, sessionId, dataFrame)
         }
 
         break
+      case SessionEventType.METADATA_CHANGED: {
+        const sessionMetadata = args[1] as SessionMetadata
+        this.client.emit(
+            PluginClientEventType.SESSION_INFO_CHANGED,
+            sessionId,
+            sessionMetadata,
+            this.pluginClient.getSessionInfo()
+        )
+        break
+      }
+      case SessionEventType.SESSION_CHANGED: {
+        const sessionMetadata = args[1] as SessionMetadata
+        this.client.emit(
+            PluginClientEventType.SESSION_ID_CHANGED,
+            sessionId,
+            sessionMetadata,
+            this.pluginClient.getSessionInfo()
+        )
+        break
+      }
       default:
         debug(`Unhandled IPC event type: ${type}`, ...args)
     }

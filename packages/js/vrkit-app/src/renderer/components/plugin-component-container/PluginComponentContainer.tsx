@@ -12,7 +12,7 @@ import { getLogger } from "@3fv/logger-proxy"
 import { ClassNamesKey, createClassNames } from "@vrkit-platform/shared-ui"
 import { IPluginComponentProps, PluginClientEventType, type SessionInfoMessage } from "@vrkit-platform/plugin-sdk"
 import { Bind } from "@vrkit-platform/shared"
-import { Theme } from "../../theme"
+import { SessionMetadata } from "@vrkit-platform/models"
 
 const log = getLogger(__filename)
 const { info, debug, warn, error } = log
@@ -30,7 +30,7 @@ export interface PluginComponentContainerProps extends IPluginComponentProps {
 }
 
 export interface PluginComponentContainerState {
-  sessionId?: string
+  sessionId?: number
 }
 
 /**
@@ -44,7 +44,7 @@ export class PluginComponentContainer extends React.Component<
   PluginComponentContainerState
 > {
   @Bind
-  private onSessionIdChanged(sessionId: string, info: SessionInfoMessage) {
+  private onSessionIdChanged(sessionId: number, metadata: SessionMetadata, info: SessionInfoMessage) {
     log.info(`onSessionIdChanged(${sessionId})`)
     this.setState(prevState => ({
       ...prevState,

@@ -94,6 +94,9 @@ namespace IRacingTools::Shared
       timing->set_sample_index(client.getSampleIndex());
 
       auto sessionInfo = client.getSessionInfo().lock();
+      if (sessionInfo)
+        sessionData_->set_session_id(sessionInfo->weekendInfo.sessionID);
+
       auto sessionNumVal = client.getVarDouble(KnownVarName::SessionNum);
       bool found = false;
       if (sessionInfo && sessionNumVal) {

@@ -20,11 +20,11 @@ export function useVRKitPluginClientEvent<T extends PluginClientEventType>(
   type: T,
   handler: IPluginClientEventArgs[T]
 ) {
-  const [listenerState, setListenerState] = useState<VRKitPluginClientEventListenerState<T>>({
+  const [listenerState, setListenerState] = useState<VRKitPluginClientEventListenerState<T>>(() => ({
       attached: false,
       type,
       handler
-    }),
+    })),
     client = useVRKitPluginClient()
 
   useEffect(() => {

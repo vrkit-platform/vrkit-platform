@@ -604,6 +604,7 @@ namespace IRacingTools::Shared::Services {
         L->warn("METADATA_CHANGED event occurred, but metadata is null");
         return;
       }
+      msg.set_event_type(eventType);
       msg.mutable_payload()->PackFrom(*metadata.get());
     }
 

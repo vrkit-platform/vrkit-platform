@@ -152,7 +152,7 @@
     "@types/winreg": "^1.2.36",
     "commander": "^12.1.0",
     "css-loader": "^7.1.2",
-    "electron": "31.3.0",
+    "electron": "34.5.8",
     "electron-builder": "^24.13.3",
     "electron-rebuild": "^3.2.9",
     "format-package": "^7.0.0",
@@ -178,6 +178,6 @@
     "yauzl": "^3.2.0"
   },
   "resolutions": {
-    "electron": "31.3.0"
+    "electron": "34.5.8"
   }
 }

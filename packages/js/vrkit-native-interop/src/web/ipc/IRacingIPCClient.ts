@@ -51,7 +51,8 @@ export interface IRacingIPCSessionEventMapType {
 
 export const IRacingIPCSessionEventMap: Record<number, MessageType<any>> = {
   [SessionEventType.DATA_FRAME]: SessionDataFrame,
-  [SessionEventType.METADATA_CHANGED]: SessionMetadata
+  [SessionEventType.METADATA_CHANGED]: SessionMetadata,
+  [SessionEventType.SESSION_CHANGED]: SessionMetadata
 }
 
 export interface IRacingIPCRequestResponseMapType {
@@ -257,7 +258,7 @@ export class IRacingIPCClient extends EventEmitter3<IRacingIPCClientEventArgs> {
       const msg = IRacingIPCMessage.fromBinary(readData)
       if (msg.type === IRacingIPCMessageType.TYPE_EVENT) {
         const eventType = match(msg.eventType as string | number)
-          .with(P.string, it => SessionEventType[it] as SessionEventType)
+          .with(P.string, it => (SessionEventType[it] ?? it) as SessionEventType)
           .otherwise(identity) as SessionEventType
 
         const eventMessageType = IRacingIPCSessionEventMap[eventType]

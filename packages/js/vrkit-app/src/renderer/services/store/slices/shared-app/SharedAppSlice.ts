@@ -215,7 +215,7 @@ const slice = createSlice({
     selectActiveSessionType: createSessionsSelector((state: SessionsState) => state.activeSessionType),
     selectActiveSession: createActiveSessionSelector(Identity),
     selectActiveSessionData: createActiveSessionSelector(session => session?.data),
-    selectActiveSessionId: createActiveSessionSelector(session => session?.id),
+    selectActiveSessionId: createActiveSessionSelector(session => session?.info?.weekendInfo?.sessionID),
     // selectActiveSessionTimeAndDuration: createActiveSessionSelector(session => session?.timeAndDuration),
     selectActiveSessionInfo: createActiveSessionSelector(session => session?.info),
     selectActiveSessionWeekendInfo: createActiveSessionSelector(session => session?.info?.weekendInfo),

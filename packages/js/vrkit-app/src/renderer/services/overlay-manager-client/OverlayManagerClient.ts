@@ -46,6 +46,7 @@ const log = getLogger(__filename)
 // noinspection JSUnusedLocalSymbols
 const { debug, trace, info, error, warn } = log
 
+
 @Singleton()
 export class OverlayManagerClient
   extends EventEmitter3<OverlayManagerClientEventArgs>
@@ -53,7 +54,7 @@ export class OverlayManagerClient
 {
   private readonly disposers_ = new Disposables()
   private cache_ = {
-    sessionId: "",
+    sessionId: null as number,
     sessionInfo: null as SessionInfoMessage,
     sessionTiming: null as SessionTiming
   }
@@ -102,7 +103,7 @@ export class OverlayManagerClient
    */
   private onDataFrameEvent(
     _event: IpcRendererEvent,
-    sessionId: string,
+    sessionId: number,
     dataFrame: SessionDataFrame
   ) {
     this.emit(PluginClientEventType.DATA_FRAME, sessionId, dataFrame)
@@ -119,10 +120,12 @@ export class OverlayManagerClient
   @Bind
   private onAppStoreStateChange() {
     const rootState = this.appStore.getState(),
-      [sessionId, sessionInfo] = [
+      [sessionId, sessionInfo, session] = [
         sharedAppSelectors.selectActiveSessionId(rootState),
-        sharedAppSelectors.selectActiveSessionInfo(rootState)
+        sharedAppSelectors.selectActiveSessionInfo(rootState),
+        sharedAppSelectors.selectActiveSession(rootState)
       ],
+        sessionMetadata = session?.data,
       cache = this.cache_,
 
       evType: PluginClientEventType = match(sessionId)
@@ -132,10 +135,11 @@ export class OverlayManagerClient
     
     Object.assign(cache, {
       sessionId,
-      sessionInfo
+      sessionInfo,
+      sessionMetadata
     })
 
-    this.emit(evType, sessionId, sessionInfo)
+    this.emit(evType, sessionId, sessionMetadata, sessionInfo)
   
   }
   

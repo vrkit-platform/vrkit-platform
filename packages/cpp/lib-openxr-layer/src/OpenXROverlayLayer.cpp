@@ -9,28 +9,28 @@
 
 
 #include <IRacingSDK/Utils/ChronoHelpers.h>
-#include <IRacingTools/Shared/Chrono.h>
-#include <IRacingTools/OpenXR/OpenXROverlayLayer.h>
-#include <IRacingTools/OpenXR/OpenXRNext.h>
+#include <VRKit/Shared/Chrono.h>
+#include <VRKit/OpenXR/OpenXROverlayLayer.h>
+#include <VRKit/OpenXR/OpenXRNext.h>
 
 #include <spdlog/spdlog.h>
 
 #include "loader_interfaces.h"
 
 #include <IRacingSDK/Utils/Tracing.h>
-#include <IRacingTools/Shared/Tracing.h>
-#include <IRacingTools/Shared/Graphics/RayIntersectsRect.h>
-#include <IRacingTools/Shared/Graphics/Spriting.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Tracing.h>
+#include <VRKit/Shared/Graphics/RayIntersectsRect.h>
+#include <VRKit/Shared/Graphics/Spriting.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
 #include <openxr/openxr_reflection.h>
 
 
-namespace IRacingTools::OpenXR {
+namespace VRKit::OpenXR {
     using namespace std::chrono_literals;
     using namespace IRacingSDK;
-    using namespace IRacingTools::Shared;
+    using namespace VRKit::Shared;
 
     namespace {
         auto L = Logging::GetCategoryWithType<OpenXROverlayLayer>();
@@ -680,13 +680,13 @@ TRACELOGGING_DEFINE_PROVIDER(
     (0xa4308f76, 0x39c8, 0x5a50, 0x4e, 0xde, 0x32, 0xd1, 0x04, 0xa8, 0xa7, 0x8d)
 );
 
-using namespace IRacingTools::OpenXR;
-using namespace IRacingTools::Shared;
+using namespace VRKit::OpenXR;
+using namespace VRKit::Shared;
 
 BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved) {
     switch (dwReason) {
     case DLL_PROCESS_ATTACH:
-        TraceLoggingRegister(IRacingTools::Shared::gTraceProvider);
+        TraceLoggingRegister(VRKit::Shared::gTraceProvider);
         // DPrintSettings::Set({
         //   .prefix = "OpenKneeboard-OpenXR",
         // });
@@ -698,7 +698,7 @@ BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved) {
         L->info("OpenXR Layer Attach {}", __FUNCTION__);
         break;
     case DLL_PROCESS_DETACH:
-        TraceLoggingUnregister(IRacingTools::Shared::gTraceProvider);
+        TraceLoggingUnregister(VRKit::Shared::gTraceProvider);
         break;
     }
     return TRUE;
@@ -710,7 +710,7 @@ XrResult __declspec(dllexport) XRAPI_CALL VRK_xrNegotiateLoaderApiLayerInterface
     const char* layerName,
     XrNegotiateApiLayerRequest* apiLayerRequest
 ) {
-    using namespace IRacingTools::OpenXR;
+    using namespace VRKit::OpenXR;
     L->debug("{}", __FUNCTION__);
 
     if (layerName != OpenXRLayerName) {
@@ -722,8 +722,8 @@ XrResult __declspec(dllexport) XRAPI_CALL VRK_xrNegotiateLoaderApiLayerInterface
 
     apiLayerRequest->layerInterfaceVersion = XR_CURRENT_LOADER_API_LAYER_VERSION;
     apiLayerRequest->layerApiVersion = XR_CURRENT_API_VERSION;
-    apiLayerRequest->getInstanceProcAddr = &IRacingTools::OpenXR::xrGetInstanceProcAddr;
+    apiLayerRequest->getInstanceProcAddr = &VRKit::OpenXR::xrGetInstanceProcAddr;
     apiLayerRequest->createApiLayerInstance = &xrCreateApiLayerInstance;
     return XR_SUCCESS;
 }
-} // namespace IRacingTools::Shared
+} // namespace VRKit::Shared

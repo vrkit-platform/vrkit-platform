@@ -2,7 +2,132 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/OverlayInfo",
     "definitions": {
-        "IRacingTools.Models.OverlayBaseSettings": {
+        "OverlayInfo": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "kind": {
+                    "enum": [
+                        "OVERLAY_KIND_PLUGIN",
+                        0,
+                        "OVERLAY_KIND_EDITOR_INFO",
+                        99
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Overlay Kind"
+                },
+                "componentId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "description": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "dataVarNames": {
+                    "items": {
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "array"
+                        }
+                    ]
+                },
+                "userSettingValues": {
+                    "additionalProperties": {
+                        "$ref": "#/definitions/VRKit.Models.PluginUserSettingValue",
+                        "additionalProperties": true,
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {}
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ],
+                    "description": "repeated PluginUserSettingValue user_setting_values = 30;"
+                },
+                "settings": {
+                    "$ref": "#/definitions/VRKit.Models.OverlayBaseSettings",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Overlay Info"
+        },
+        "VRKit.Models.OverlayBaseSettings": {
             "properties": {
                 "fps": {
                     "oneOf": [
@@ -26,7 +151,7 @@
             ],
             "title": "Overlay Base Settings"
         },
-        "IRacingTools.Models.PluginUserSettingValue": {
+        "VRKit.Models.PluginUserSettingValue": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -147,131 +272,6 @@
                 }
             ],
             "title": "Plugin User Setting Value"
-        },
-        "OverlayInfo": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "kind": {
-                    "enum": [
-                        "OVERLAY_KIND_PLUGIN",
-                        0,
-                        "OVERLAY_KIND_EDITOR_INFO",
-                        99
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Overlay Kind"
-                },
-                "componentId": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "description": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "dataVarNames": {
-                    "items": {
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "string"
-                            }
-                        ]
-                    },
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "array"
-                        }
-                    ]
-                },
-                "userSettingValues": {
-                    "additionalProperties": {
-                        "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingValue",
-                        "additionalProperties": true,
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {}
-                        ]
-                    },
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "object"
-                        }
-                    ],
-                    "description": "repeated PluginUserSettingValue user_setting_values = 30;"
-                },
-                "settings": {
-                    "$ref": "#/definitions/IRacingTools.Models.OverlayBaseSettings",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Overlay Info"
         }
     }
 }

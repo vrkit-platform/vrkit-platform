@@ -20,10 +20,10 @@
 
 
 #include <IRacingSDK/Utils/Tracing.h>
-#include <IRacingTools/Shared/Macros.h>
-#include <IRacingTools/Shared/SHM/SHMDX11.h>
+#include <VRKit/Shared/Macros.h>
+#include <VRKit/Shared/SHM/SHMDX11.h>
 
-namespace IRacingTools::Shared::SHM::DX11 {
+namespace VRKit::Shared::SHM::DX11 {
 
 Texture::Texture(
   const PixelSize& dimensions,

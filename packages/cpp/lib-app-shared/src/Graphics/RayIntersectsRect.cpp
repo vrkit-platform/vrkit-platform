@@ -17,11 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
  */
-#include <IRacingTools/Shared/Graphics/RayIntersectsRect.h>
+#include <VRKit/Shared/Graphics/RayIntersectsRect.h>
 
 using namespace DirectX::SimpleMath;
 
-namespace IRacingTools::Shared::Graphics {
+namespace VRKit::Shared::Graphics {
 
 bool RayIntersectsRect(
   const Vector3& rayOrigin,

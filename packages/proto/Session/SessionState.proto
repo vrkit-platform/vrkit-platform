@@ -3,7 +3,7 @@ import "google/protobuf/timestamp.proto";
 import "FileInfo.proto";
 import "TrackLayoutMetadata.proto";
 
-package IRacingTools.Models.Session;
+package VRKit.Models.Session;
 
 enum SessionPlaybackState {
   SESSION_PLAYBACK_STATE_UNKNOWN = 0;

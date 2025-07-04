@@ -19,9 +19,9 @@
  */
 
 
-#include <IRacingTools/OpenXR/OpenXRNext.h>
+#include <VRKit/OpenXR/OpenXRNext.h>
 
-namespace IRacingTools::OpenXR {
+namespace VRKit::OpenXR {
 
 OpenXRNext::OpenXRNext(XrInstance instance, PFN_xrGetInstanceProcAddr getNext) {
   this->xrGetInstanceProcAddr_ = getNext;

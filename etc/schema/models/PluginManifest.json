@@ -2,7 +2,115 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/PluginManifest",
     "definitions": {
-        "IRacingTools.Models.PluginAuthor": {
+        "PluginManifest": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "version": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "author": {
+                    "$ref": "#/definitions/VRKit.Models.PluginAuthor",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "description": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "updatedAt": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "overview": {
+                    "$ref": "#/definitions/VRKit.Models.PluginOverview",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "components": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "items": {
+                                "$ref": "#/definitions/VRKit.Models.PluginComponentDefinition"
+                            },
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Plugin Manifest",
+            "description": "* Defines a plugins contents"
+        },
+        "VRKit.Models.PluginAuthor": {
             "properties": {
                 "name": {
                     "oneOf": [
@@ -67,7 +175,7 @@
             "title": "Plugin Author",
             "description": "* Owner (contact info) of plugin"
         },
-        "IRacingTools.Models.PluginComponentDefinition": {
+        "VRKit.Models.PluginComponentDefinition": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -118,7 +226,7 @@
                     ]
                 },
                 "uiResource": {
-                    "$ref": "#/definitions/IRacingTools.Models.UIResource",
+                    "$ref": "#/definitions/VRKit.Models.UIResource",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -128,7 +236,7 @@
                     ]
                 },
                 "overview": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginOverview",
+                    "$ref": "#/definitions/VRKit.Models.PluginOverview",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -176,7 +284,7 @@
                     "description": "* Common parameters irrespective of game or component type"
                 },
                 "overlayCommonSettings": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginComponentDefinition.OverlayCommonSettings",
+                    "$ref": "#/definitions/VRKit.Models.PluginComponentDefinition.OverlayCommonSettings",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -186,7 +294,7 @@
                     ]
                 },
                 "overlayIracingSettings": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings",
+                    "$ref": "#/definitions/VRKit.Models.PluginComponentDefinition.OverlayIRacingSettings",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -198,7 +306,7 @@
                 },
                 "userSettings": {
                     "additionalProperties": {
-                        "$ref": "#/definitions/IRacingTools.Models.PluginUserSetting",
+                        "$ref": "#/definitions/VRKit.Models.PluginUserSetting",
                         "additionalProperties": true,
                         "oneOf": [
                             {
@@ -228,7 +336,7 @@
             ],
             "title": "Plugin Component Definition"
         },
-        "IRacingTools.Models.PluginComponentDefinition.OverlayCommonSettings": {
+        "VRKit.Models.PluginComponentDefinition.OverlayCommonSettings": {
             "properties": {
                 "fps": {
                     "oneOf": [
@@ -242,7 +350,7 @@
                     "description": "FPS OVERRIDING USER/APP CONFIGURED \u003c 1: USER/APP ARE USED TO CONFIGURE, DEFAULT VALUE (0) USES THE INTERNAL DEFAULT OF 10FPS"
                 },
                 "initialSize": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -298,7 +406,7 @@
             "title": "Overlay Common Settings",
             "description": "* Common Overlay specific settings"
         },
-        "IRacingTools.Models.PluginComponentDefinition.OverlayIRacingSettings": {
+        "VRKit.Models.PluginComponentDefinition.OverlayIRacingSettings": {
             "properties": {
                 "dataVariablesUsed": {
                     "items": {
@@ -353,7 +461,7 @@
             "title": "Overlay I Racing Settings",
             "description": "* IRacing Overlay specific settings"
         },
-        "IRacingTools.Models.PluginOverview": {
+        "VRKit.Models.PluginOverview": {
             "properties": {
                 "content": {
                     "oneOf": [
@@ -445,7 +553,7 @@
                         },
                         {
                             "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.UIImageResource"
+                                "$ref": "#/definitions/VRKit.Models.UIImageResource"
                             },
                             "type": "array"
                         }
@@ -463,7 +571,7 @@
             ],
             "title": "Plugin Overview"
         },
-        "IRacingTools.Models.PluginUserSetting": {
+        "VRKit.Models.PluginUserSetting": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -524,7 +632,7 @@
                     "title": "Plugin User Setting Type"
                 },
                 "defaultValue": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingValue",
+                    "$ref": "#/definitions/VRKit.Models.PluginUserSettingValue",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -534,7 +642,7 @@
                     ]
                 },
                 "userValue": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingValue",
+                    "$ref": "#/definitions/VRKit.Models.PluginUserSettingValue",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -560,7 +668,7 @@
                         },
                         {
                             "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingChoice"
+                                "$ref": "#/definitions/VRKit.Models.PluginUserSettingChoice"
                             },
                             "type": "array"
                         }
@@ -578,7 +686,7 @@
             ],
             "title": "Plugin User Setting"
         },
-        "IRacingTools.Models.PluginUserSettingChoice": {
+        "VRKit.Models.PluginUserSettingChoice": {
             "properties": {
                 "value": {
                     "oneOf": [
@@ -622,7 +730,7 @@
             ],
             "title": "Plugin User Setting Choice"
         },
-        "IRacingTools.Models.PluginUserSettingValue": {
+        "VRKit.Models.PluginUserSettingValue": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -744,7 +852,7 @@
             ],
             "title": "Plugin User Setting Value"
         },
-        "IRacingTools.Models.SizeI": {
+        "VRKit.Models.SizeI": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -778,7 +886,7 @@
             ],
             "title": "Size I"
         },
-        "IRacingTools.Models.UIColorResource": {
+        "VRKit.Models.UIColorResource": {
             "properties": {
                 "format": {
                     "enum": [
@@ -856,7 +964,7 @@
             ],
             "title": "UI Color Resource"
         },
-        "IRacingTools.Models.UIImageResource": {
+        "VRKit.Models.UIImageResource": {
             "properties": {
                 "format": {
                     "enum": [
@@ -901,7 +1009,7 @@
                     ]
                 },
                 "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -932,10 +1040,10 @@
             ],
             "title": "UI Image Resource"
         },
-        "IRacingTools.Models.UIResource": {
+        "VRKit.Models.UIResource": {
             "properties": {
                 "color": {
-                    "$ref": "#/definitions/IRacingTools.Models.UIColorResource",
+                    "$ref": "#/definitions/VRKit.Models.UIColorResource",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -945,7 +1053,7 @@
                     ]
                 },
                 "icon": {
-                    "$ref": "#/definitions/IRacingTools.Models.UIImageResource",
+                    "$ref": "#/definitions/VRKit.Models.UIImageResource",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -965,114 +1073,6 @@
                 }
             ],
             "title": "UI Resource"
-        },
-        "PluginManifest": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "version": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "author": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginAuthor",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "description": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "updatedAt": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "createdAt": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "overview": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginOverview",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "components": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.PluginComponentDefinition"
-                            },
-                            "type": "array"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Plugin Manifest",
-            "description": "* Defines a plugins contents"
         }
     }
 }

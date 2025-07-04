@@ -1,7 +1,7 @@
-#include <IRacingTools/Shared/Graphics/WriteReadBuffer.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Graphics/WriteReadBuffer.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
-namespace IRacingTools::Shared::Graphics {
+namespace VRKit::Shared::Graphics {
   namespace {
     auto L = Logging::GetCategoryWithType<WriteReadBuffer>();
   }
@@ -157,4 +157,4 @@ namespace IRacingTools::Shared::Graphics {
     writeBuffer_.resize(config_.bufferSize());
     readBuffer_.resize(config_.bufferSize());
   }
-} // namespace IRacingTools::Shared::Graphics
+} // namespace VRKit::Shared::Graphics

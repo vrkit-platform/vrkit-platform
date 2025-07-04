@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package IRacingTools.Models;
+package VRKit.Models;
 
 import "FileInfo.proto";
 import "TrackLayoutMetadata.proto";

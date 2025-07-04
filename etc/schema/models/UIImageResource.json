@@ -2,40 +2,6 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/UIImageResource",
     "definitions": {
-        "IRacingTools.Models.SizeI": {
-            "properties": {
-                "width": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "height": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Size I"
-        },
         "UIImageResource": {
             "properties": {
                 "format": {
@@ -81,7 +47,7 @@
                     ]
                 },
                 "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -111,6 +77,40 @@
                 }
             ],
             "title": "UI Image Resource"
+        },
+        "VRKit.Models.SizeI": {
+            "properties": {
+                "width": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "height": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Size I"
         }
     }
 }

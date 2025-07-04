@@ -2,7 +2,7 @@ syntax = "proto3";
 import "OverlayTypes.proto";
 import "Actions.proto";
 
-package IRacingTools.Models;
+package VRKit.Models;
 
 enum ThemeType {
   AUTO = 0;

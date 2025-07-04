@@ -1,7 +1,7 @@
-#include <IRacingTools/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
-#include <IRacingTools/Shared/Services/Pipelines/TrackMapPipelineExecutor.h>
+#include <VRKit/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
+#include <VRKit/Shared/Services/Pipelines/TrackMapPipelineExecutor.h>
 
-namespace IRacingTools::Shared::Services::Pipelines {
+namespace VRKit::Shared::Services::Pipelines {
   namespace {
     std::atomic_bool gSetupComplete{false};
     std::mutex gSetupMutex{};
@@ -17,4 +17,4 @@ namespace IRacingTools::Shared::Services::Pipelines {
     PipelineExecutorRegistry<PIPELINE_TYPE_TRACK_MAP, std::shared_ptr<TelemetryDataFile>>::Get().setFactory(
         TrackMapPipelineExecutor::Factory);
   };
-}// namespace IRacingTools::Shared::Services
+}// namespace VRKit::Shared::Services

@@ -3,7 +3,7 @@ message(NOTICE "Protobuf INCLUDE_DIRS= ${Protobuf_INCLUDE_DIRS}")
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-set(PROTO_INCLUDE_DEST ${CMAKE_CURRENT_BINARY_DIR}/IRacingTools/Models)
+set(PROTO_INCLUDE_DEST ${CMAKE_CURRENT_BINARY_DIR}/VRKit/Models)
 file(MAKE_DIRECTORY ${PROTO_INCLUDE_DEST})
 file(GLOB_RECURSE PROTO_FILES *.proto)
 protobuf_generate(

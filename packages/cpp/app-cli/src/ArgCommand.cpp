@@ -4,7 +4,7 @@
 
 #include "ArgCommand.h"
 
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
   CLI::App *ArgCommand::setup(CLI::App *app) {
     auto cmd = createCommand(app);
     cmd->callback([&]() {

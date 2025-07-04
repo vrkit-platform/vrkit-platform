@@ -1,6 +1,6 @@
 
-#include <IRacingTools/Shared/Services/Service.h>
+#include <VRKit/Shared/Services/Service.h>
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
     
-} // namespace IRacingTools::Shared::Geometry
+} // namespace VRKit::Shared::Geometry

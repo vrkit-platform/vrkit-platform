@@ -2,13 +2,13 @@
 #pragma once
 
 #include <napi.h>
-#include <IRacingTools/Shared/VRTypes.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/VRTypes.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
 
-namespace IRacingTools::App::Node::Utils {
+namespace VRKit::App::Node::Utils {
   using namespace Napi;
-  using namespace IRacingTools::Shared;
+  using namespace VRKit::Shared;
 
   template<typename T>
     auto NumberToNative(Napi::Env& env, const Napi::Number& n, T defaultValue) -> T {

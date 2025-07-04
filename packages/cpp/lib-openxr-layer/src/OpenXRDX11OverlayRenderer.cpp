@@ -1,15 +1,15 @@
 #define XR_USE_GRAPHICS_API_D3D11
 
 #include <IRacingSDK/Utils/Tracing.h>
-#include <IRacingTools/OpenXR/OpenXRDX11OverlayRenderer.h>
-#include <IRacingTools/Shared/Graphics/DX113D.h>
-#include <IRacingTools/Shared/Tracing.h>
+#include <VRKit/OpenXR/OpenXRDX11OverlayRenderer.h>
+#include <VRKit/Shared/Graphics/DX113D.h>
+#include <VRKit/Shared/Tracing.h>
 
 #include <spdlog/spdlog.h>
 
 
-namespace IRacingTools::OpenXR::DX11 {
-    using namespace IRacingTools::Shared;
+namespace VRKit::OpenXR::DX11 {
+    using namespace VRKit::Shared;
     SwapchainBufferResources::SwapchainBufferResources(
       ID3D11Device* device,
       ID3D11Texture2D* texture,

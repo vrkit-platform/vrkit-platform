@@ -1,7 +1,7 @@
-#include <IRacingTools/Shared/Macros.h>
-#include <IRacingTools/Shared/Graphics/DXWindowResources.h>
+#include <VRKit/Shared/Macros.h>
+#include <VRKit/Shared/Graphics/DXWindowResources.h>
 
-namespace IRacingTools::Shared::Graphics {
+namespace VRKit::Shared::Graphics {
 
     DXWindowResources::DXWindowResources(HWND windowHandle, const std::shared_ptr<DXResources>& dxr) :
     windowHandle_(windowHandle),

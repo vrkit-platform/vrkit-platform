@@ -2,35 +2,35 @@
 
 #pragma once
 
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
 
 #include <IRacingSDK/Utils/Singleton.h>
 #include <IRacingSDK/VarHolder.h>
 
-#include <IRacingTools/Models/rpc/Messages/SimpleMessages.pb.h>
-#include <IRacingTools/Models/rpc/Events/CommonEventTypes.pb.h>
-#include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
+#include <VRKit/Models/rpc/Messages/SimpleMessages.pb.h>
+#include <VRKit/Models/rpc/Events/CommonEventTypes.pb.h>
+#include <VRKit/Models/rpc/Events/SessionEvent.pb.h>
 
-#include <IRacingTools/Shared/SessionDataProvider.h>
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
-#include <IRacingTools/Shared/Services/TrackMapService.h>
+#include <VRKit/Shared/SessionDataProvider.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
+#include <VRKit/Shared/Services/TrackMapService.h>
 
-#include <IRacingTools/Shared/Services/ServiceManager.h>
+#include <VRKit/Shared/Services/ServiceManager.h>
 
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Services/RPCServerService.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Services/RPCServerService.h>
 
 #include <napi.h>
 
 #include "NativeGlobal.h"
-using namespace IRacingTools::Shared::Logging;
+using namespace VRKit::Shared::Logging;
 using namespace IRacingSDK;
 using namespace IRacingSDK::Utils;
-using namespace IRacingTools::Shared;
-using namespace IRacingTools::Models;
+using namespace VRKit::Shared;
+using namespace VRKit::Models;
 
 
-namespace IRacingTools::App::Node {
+namespace VRKit::App::Node {
     using namespace Shared::Services;
 
 

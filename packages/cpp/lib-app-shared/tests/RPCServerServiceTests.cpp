@@ -3,20 +3,20 @@
 #include <gtest/gtest.h>
 
 #include <IRacingSDK/Utils/ConsoleHelpers.h>
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Common/UUIDHelpers.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Common/UUIDHelpers.h>
 
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Services/ServiceManager.h>
-#include <IRacingTools/Shared/Services/RPCServerService.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Services/ServiceManager.h>
+#include <VRKit/Shared/Services/RPCServerService.h>
 
-using namespace IRacingTools::Shared::Logging;
+using namespace VRKit::Shared::Logging;
 using namespace IRacingSDK;
 using namespace IRacingSDK::Utils;
-using namespace IRacingTools::Shared;
-using namespace IRacingTools::Models;
+using namespace VRKit::Shared;
+using namespace VRKit::Models;
 
-using namespace IRacingTools::Shared::Services;
+using namespace VRKit::Shared::Services;
 
 namespace fs = std::filesystem;
 
@@ -64,7 +64,7 @@ TEST_F(RPCServerServiceTests, SimpleRouteSync) {
   auto rpcService = manager->getService<RPCServerService>();
   rpcService->addRoute(sampleRoute);
 
-  auto messageIn = std::make_shared<IRacingTools::Models::RPC::Envelope>();
+  auto messageIn = std::make_shared<VRKit::Models::RPC::Envelope>();
   messageIn->set_id(NewUUID());
   messageIn->set_path("/sample");
   messageIn->set_kind(RPC::Envelope::KIND_REQUEST);

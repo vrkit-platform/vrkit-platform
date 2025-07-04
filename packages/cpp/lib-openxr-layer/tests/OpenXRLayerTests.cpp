@@ -1,8 +1,8 @@
-#include <IRacingTools/Shared/TrackMapGeometry.h>
+#include <VRKit/Shared/TrackMapGeometry.h>
 #include <fmt/core.h>
 #include <gtest/gtest.h>
 
-using namespace IRacingTools::Shared;
+using namespace VRKit::Shared;
 
 namespace {
 constexpr Geometry::Coordinate kCoordinate_NYC = {40.7468831, -73.994756};

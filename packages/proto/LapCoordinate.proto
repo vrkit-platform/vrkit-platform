@@ -1,5 +1,5 @@
 syntax = "proto3";
-package IRacingTools.Models;
+package VRKit.Models;
 
 message LapCoordinate {
   uint32 lap_time = 1;

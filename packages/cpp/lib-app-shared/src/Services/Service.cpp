@@ -1,7 +1,7 @@
 
-#include <IRacingTools/Shared/Services/Service.h>
+#include <VRKit/Shared/Services/Service.h>
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
   Service::~Service() {
     {
         std::scoped_lock lock(stateMutex_);
@@ -64,4 +64,4 @@ namespace IRacingTools::Shared::Services {
   Service::Service(const std::shared_ptr<ServiceContainer>& serviceContainer, const std::string &name) :
     serviceContainer_(serviceContainer), name_(name) {
   }
-}// namespace IRacingTools::Shared::Services
+}// namespace VRKit::Shared::Services

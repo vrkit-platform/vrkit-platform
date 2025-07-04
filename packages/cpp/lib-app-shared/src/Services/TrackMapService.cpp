@@ -10,25 +10,25 @@
 #include <IRacingSDK/Utils/CollectionHelpers.h>
 #include <IRacingSDK/Utils/RunnableThread.h>
 
-#include <IRacingTools/Shared/Chrono.h>
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/ProtoHelpers.h>
-#include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
-#include <IRacingTools/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
-#include <IRacingTools/Shared/Services/TrackMapService.h>
-#include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
+#include <VRKit/Shared/Chrono.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/ProtoHelpers.h>
+#include <VRKit/Shared/Services/LapTrajectoryTool.h>
+#include <VRKit/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
+#include <VRKit/Shared/Services/TrackMapService.h>
+#include <VRKit/Shared/Utils/SessionInfoHelpers.h>
 
 #include "TrackMapGenerator.h"
 
-// #include <IRacingTools/Shared/Services/RPCServerService.h>
+// #include <VRKit/Shared/Services/RPCServerService.h>
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
   using namespace IRacingSDK::Utils;
-  using namespace IRacingTools::Shared::Logging;
-  using namespace IRacingTools::Shared::Services::Pipelines;
-  using namespace IRacingTools::Shared::Utils;
+  using namespace VRKit::Shared::Logging;
+  using namespace VRKit::Shared::Services::Pipelines;
+  using namespace VRKit::Shared::Utils;
 
   namespace {
     auto L = GetCategoryWithType<TrackMapService>();
@@ -127,7 +127,7 @@ namespace IRacingTools::Shared::Services {
     auto onReadHandler =
         [&](
         const std::vector<
-          std::shared_ptr<IRacingTools::Models::TrackMapFile>> &files) {
+          std::shared_ptr<VRKit::Models::TrackMapFile>> &files) {
       std::scoped_lock lock(stateMutex_);
       dataFiles_.clear();
       files_.clear();
@@ -380,4 +380,4 @@ namespace IRacingTools::Shared::Services {
     return IRacingSDK::Utils::ValuesOf(files_);
   }
 
-} // namespace IRacingTools::Shared::Services
+} // namespace VRKit::Shared::Services

@@ -1,7 +1,7 @@
 syntax = "proto3";
 import "Session/SessionState.proto";
 
-package IRacingTools.Models.RPC.Events;
+package VRKit.Models.RPC.Events;
 
 enum SessionEventType {
   SESSION_EVENT_TYPE_UNKNOWN = 0;

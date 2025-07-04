@@ -1,11 +1,11 @@
-#include <IRacingTools/Shared/IPC/NamedPipeServer.h>
-#include <IRacingTools/Shared/IPC/NamedPipeHelpers.h>
+#include <VRKit/Shared/IPC/NamedPipeServer.h>
+#include <VRKit/Shared/IPC/NamedPipeHelpers.h>
 
 #include <algorithm>
 #include <format>
 #include <ranges>
 
-namespace IRacingTools::Shared::IPC {
+namespace VRKit::Shared::IPC {
   NamedPipeMessage::NamedPipeMessage(const std::uint32_t& connectionId, std::size_t packetSize):
     connectionId_(connectionId),
     packetSize_(packetSize) {

@@ -1,13 +1,13 @@
-#include <IRacingTools/Shared/IPC/NamedPipeHelpers.h>
-#include <IRacingTools/Shared/IPC/NamedPipeMessage.h>
-#include <IRacingTools/Shared/IPC/NamedPipeServer.h>
-#include <IRacingTools/Shared/Utils/Win32Helpers.h>
+#include <VRKit/Shared/IPC/NamedPipeHelpers.h>
+#include <VRKit/Shared/IPC/NamedPipeMessage.h>
+#include <VRKit/Shared/IPC/NamedPipeServer.h>
+#include <VRKit/Shared/Utils/Win32Helpers.h>
 
 #include <algorithm>
 #include <format>
 #include <ranges>
 
-namespace IRacingTools::Shared::IPC {
+namespace VRKit::Shared::IPC {
   NamedPipeIO::NamedPipeIO(std::uint32_t connectionId, Role role): id(connectionId),
                                                                    role(role) {
     std::memset(&overlapped, 0, sizeof(OVERLAPPED));

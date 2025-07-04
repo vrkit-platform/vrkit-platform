@@ -1,7 +1,7 @@
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
-#include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Services/LapTrajectoryTool.h>
+#include <VRKit/Shared/Utils/SessionInfoHelpers.h>
 
 #include <fstream>
 #include <iostream>
@@ -12,8 +12,8 @@
 
 
 
-namespace IRacingTools::Shared::Services {
-  using namespace IRacingTools::Shared::Logging;
+namespace VRKit::Shared::Services {
+  using namespace VRKit::Shared::Logging;
   using namespace IRacingSDK;
   using namespace IRacingSDK::Utils;
   using namespace spdlog;
@@ -119,4 +119,4 @@ namespace IRacingTools::Shared::Services {
   }
 
 
-}// namespace IRacingTools::Shared::Services
+}// namespace VRKit::Shared::Services

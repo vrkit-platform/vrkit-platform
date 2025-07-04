@@ -2,7 +2,7 @@ syntax = "proto3";
 import "Geometry.proto";
 import "PluginManifest.proto";
 
-package IRacingTools.Models;
+package VRKit.Models;
 
 enum OverlayAnchor {
   OVERLAY_ANCHOR_CENTER = 0;

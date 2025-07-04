@@ -1,6 +1,6 @@
-#include <IRacingTools/Shared/Utils/TypeIdHelpers.h>
+#include <VRKit/Shared/Utils/TypeIdHelpers.h>
 
-namespace IRacingTools::Shared::Utils {
+namespace VRKit::Shared::Utils {
   std::string PrettyTypeId::toString() const {
     return std::format("ns={},nsCount={},templateString={},basename={},name={},fullname={}", nsString, ns.size(),
                        templateString, basename, name, fullname);
@@ -48,4 +48,4 @@ namespace IRacingTools::Shared::Utils {
       return std::nullopt;
     }
   }
-} // namespace IRacingTools::Shared::Utils
+} // namespace VRKit::Shared::Utils

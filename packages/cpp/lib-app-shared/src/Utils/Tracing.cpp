@@ -1,6 +1,6 @@
-#include <IRacingTools/Shared/Tracing.h>
+#include <VRKit/Shared/Tracing.h>
 
-namespace IRacingTools::Shared {
+namespace VRKit::Shared {
   TRACELOGGING_DEFINE_PROVIDER(
       gTracingProvider,                     // Handle to the provider
       "VRKIT.CPP",                   // Unique provider name

@@ -1,22 +1,22 @@
 #pragma once
 
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
 
 #include <memory>
 
-#include <IRacingTools/Models/Pipeline.pb.h>
-#include <IRacingTools/Models/TelemetryDataFile.pb.h>
+#include <VRKit/Models/Pipeline.pb.h>
+#include <VRKit/Models/TelemetryDataFile.pb.h>
 
 #include <IRacingSDK/Utils/CollectionHelpers.h>
 #include <IRacingSDK/Utils/RunnableThread.h>
 #include <IRacingSDK/Utils/LUT.h>
 
-#include <IRacingTools/Shared/FileWatcher.h>
-#include <IRacingTools/Shared/ProtoHelpers.h>
-#include <IRacingTools/Shared/Services/Service.h>
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
+#include <VRKit/Shared/FileWatcher.h>
+#include <VRKit/Shared/ProtoHelpers.h>
+#include <VRKit/Shared/Services/Service.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
 
   using namespace Models;
 
@@ -26,4 +26,4 @@ namespace IRacingTools::Shared::Services {
   ProcessResult ProcessTelemetryDataFile(
     const std::shared_ptr<TelemetryDataService> & service, const fs::path& file, std::shared_ptr<TelemetryDataFile> dataFile);
 
-} // namespace IRacingTools::Shared::Services
+} // namespace VRKit::Shared::Services

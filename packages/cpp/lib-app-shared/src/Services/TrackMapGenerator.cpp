@@ -10,21 +10,21 @@
 
 #include <google/protobuf/util/json_util.h>
 
-#include <IRacingTools/Shared/Chrono.h>
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/ProtoHelpers.h>
-#include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
-#include <IRacingTools/Shared/Services/TrackMapService.h>
-#include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
+#include <VRKit/Shared/Chrono.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/ProtoHelpers.h>
+#include <VRKit/Shared/Services/LapTrajectoryTool.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
+#include <VRKit/Shared/Services/TrackMapService.h>
+#include <VRKit/Shared/Utils/SessionInfoHelpers.h>
 
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
   using namespace IRacingSDK::Utils;
-  using namespace IRacingTools::Shared::Logging;
-  using namespace IRacingTools::Shared::Services::Pipelines;
-  using namespace IRacingTools::Shared::Utils;
+  using namespace VRKit::Shared::Logging;
+  using namespace VRKit::Shared::Services::Pipelines;
+  using namespace VRKit::Shared::Utils;
   namespace {
     auto L = GetCategoryWithType<TrackMapService>();
 
@@ -147,4 +147,4 @@ namespace IRacingTools::Shared::Services {
         lt->track_layout_metadata().id());
     return tmFile;
   }
-} // namespace IRacingTools::Shared::Services
+} // namespace VRKit::Shared::Services

@@ -4,19 +4,19 @@
 
 #include <IRacingSDK/Utils/Singleton.h>
 
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
-#include <IRacingTools/Shared/Services/ServiceManager.h>
-#include <IRacingTools/Shared/Services/RPCServerService.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
+#include <VRKit/Shared/Services/ServiceManager.h>
+#include <VRKit/Shared/Services/RPCServerService.h>
 
 #include <napi.h>
-#include <IRacingTools/Shared/Services/IRacingIPCServer.h>
+#include <VRKit/Shared/Services/IRacingIPCServer.h>
 
-using namespace IRacingTools::Shared::Logging;
+using namespace VRKit::Shared::Logging;
 using namespace IRacingSDK;
 using namespace IRacingSDK::Utils;
-using namespace IRacingTools::Shared;
-using namespace IRacingTools::Models;
+using namespace VRKit::Shared;
+using namespace VRKit::Models;
 
 // #if defined(__cplusplus)
 // #define INITIALIZER(fn)                                                     \
@@ -34,7 +34,7 @@ using namespace IRacingTools::Models;
 // fn;
 // #endif
 
-namespace IRacingTools::App::Node {
+namespace VRKit::App::Node {
     using namespace Shared::Services;
 
     // using NativeSystemManager = ServiceManager<RPCServerService, TelemetryDataService, TrackMapService>;

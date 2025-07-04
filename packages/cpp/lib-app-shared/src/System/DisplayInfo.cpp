@@ -1,9 +1,9 @@
-#include <IRacingTools/Shared/System/DisplayInfo.h>
+#include <VRKit/Shared/System/DisplayInfo.h>
 
 #include <IRacingSDK/Utils/UnicodeHelpers.h>
-#include <IRacingTools/Shared/Macros.h>
+#include <VRKit/Shared/Macros.h>
 
-namespace IRacingTools::Shared::System {
+namespace VRKit::Shared::System {
     namespace {
         auto IsSizeIEqual = [](const Models::SizeI& s1, const Models::SizeI& s2) -> bool {
             return s1.width() == s2.width() && s1.height() == s2.height();

@@ -1,11 +1,11 @@
-#include <IRacingTools/Shared/IPC/NamedPipeHelpers.h>
+#include <VRKit/Shared/IPC/NamedPipeHelpers.h>
 
 #include <format>
 
 #define NAMED_PIPE_PREFIX "\\\\.\\pipe\\"
 #define NAMED_PIPE_FMT NAMED_PIPE_PREFIX "{}"
 
-namespace IRacingTools::Shared::IPC {
+namespace VRKit::Shared::IPC {
 
   namespace {
     auto L = Logging::GetCategoryWithName("NamedPipeHelpers");

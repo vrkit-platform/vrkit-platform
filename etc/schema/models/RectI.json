@@ -2,7 +2,41 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/RectI",
     "definitions": {
-        "IRacingTools.Models.PositionI": {
+        "RectI": {
+            "properties": {
+                "size": {
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "position": {
+                    "$ref": "#/definitions/VRKit.Models.PositionI",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Rect I"
+        },
+        "VRKit.Models.PositionI": {
             "properties": {
                 "x": {
                     "oneOf": [
@@ -36,7 +70,7 @@
             ],
             "title": "Position I"
         },
-        "IRacingTools.Models.SizeI": {
+        "VRKit.Models.SizeI": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -69,40 +103,6 @@
                 }
             ],
             "title": "Size I"
-        },
-        "RectI": {
-            "properties": {
-                "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "position": {
-                    "$ref": "#/definitions/IRacingTools.Models.PositionI",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Rect I"
         }
     }
 }

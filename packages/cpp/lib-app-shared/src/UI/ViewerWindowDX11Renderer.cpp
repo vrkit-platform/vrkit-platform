@@ -18,12 +18,12 @@
  * USA.
  */
 
-#include <IRacingTools/Shared/UI/ViewerWindowDX11Renderer.h>
+#include <VRKit/Shared/UI/ViewerWindowDX11Renderer.h>
 
 #include <directxtk/ScreenGrab.h>
 #include <IRacingSDK/Utils/Tracing.h>
 
-namespace IRacingTools::Shared::UI {
+namespace VRKit::Shared::UI {
 
 ViewerWindowD3D11Renderer::ViewerWindowD3D11Renderer(const winrt::com_ptr<ID3D11Device>& device) {
   d3dDevice_ = device.as<ID3D11Device1>();

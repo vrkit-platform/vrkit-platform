@@ -2,7 +2,51 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/SessionDataFrame",
     "definitions": {
-        "IRacingTools.Models.Session.SessionDataFrame.Value": {
+        "SessionDataFrame": {
+            "properties": {
+                "timing": {
+                    "$ref": "#/definitions/VRKit.Models.Session.SessionTiming",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "dataValues": {
+                    "additionalProperties": {
+                        "$ref": "#/definitions/VRKit.Models.Session.SessionDataFrame.VarValues",
+                        "additionalProperties": true,
+                        "oneOf": [
+                            {
+                                "type": "null"
+                            },
+                            {}
+                        ]
+                    },
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Session Data Frame"
+        },
+        "VRKit.Models.Session.SessionDataFrame.Value": {
             "properties": {
                 "charValue": {
                     "oneOf": [
@@ -76,7 +120,7 @@
             ],
             "title": "Value"
         },
-        "IRacingTools.Models.Session.SessionDataFrame.VarValues": {
+        "VRKit.Models.Session.SessionDataFrame.VarValues": {
             "properties": {
                 "index": {
                     "oneOf": [
@@ -133,7 +177,7 @@
                         },
                         {
                             "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.Session.SessionDataFrame.Value"
+                                "$ref": "#/definitions/VRKit.Models.Session.SessionDataFrame.Value"
                             },
                             "type": "array"
                         }
@@ -151,7 +195,7 @@
             ],
             "title": "Var Values"
         },
-        "IRacingTools.Models.Session.SessionTiming": {
+        "VRKit.Models.Session.SessionTiming": {
             "properties": {
                 "isLive": {
                     "oneOf": [
@@ -351,50 +395,6 @@
                 }
             ],
             "title": "Session Timing"
-        },
-        "SessionDataFrame": {
-            "properties": {
-                "timing": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionTiming",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "dataValues": {
-                    "additionalProperties": {
-                        "$ref": "#/definitions/IRacingTools.Models.Session.SessionDataFrame.VarValues",
-                        "additionalProperties": true,
-                        "oneOf": [
-                            {
-                                "type": "null"
-                            },
-                            {}
-                        ]
-                    },
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "object"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Session Data Frame"
         }
     }
 }

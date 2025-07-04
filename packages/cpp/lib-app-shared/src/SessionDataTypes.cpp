@@ -1,7 +1,7 @@
-#include <IRacingTools/Shared/SessionDataTypes.h>
+#include <VRKit/Shared/SessionDataTypes.h>
 
 
-namespace IRacingTools::Shared {
+namespace VRKit::Shared {
   std::array<std::string_view, 3> GetSessionSubTypes() {
     static std::array<std::string_view, 3> names{
       {

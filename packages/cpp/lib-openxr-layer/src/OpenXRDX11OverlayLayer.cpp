@@ -21,24 +21,24 @@
 
 #define XR_USE_GRAPHICS_API_D3D11
 
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
 #include <openxr/openxr_platform.h>
 
 #include <cstdio>
 #include <iostream>
 #include <utility>
 
-#include <IRacingTools/OpenXR/OpenXROverlayLayer.h>
-#include <IRacingTools/OpenXR/OpenXRNext.h>
-#include <IRacingTools/Shared/Tracing.h>
+#include <VRKit/OpenXR/OpenXROverlayLayer.h>
+#include <VRKit/OpenXR/OpenXRNext.h>
+#include <VRKit/Shared/Tracing.h>
 #include <spdlog/spdlog.h>
 
 #include "loader_interfaces.h"
 
 #include <IRacingSDK/Utils/Tracing.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
-namespace IRacingTools::OpenXR::DX11 {
+namespace VRKit::OpenXR::DX11 {
 using namespace DirectX::SimpleMath;
 
 namespace {

@@ -1,10 +1,10 @@
-#include <IRacingTools/Shared/Graphics/DXResources.h>
+#include <VRKit/Shared/Graphics/DXResources.h>
 #include <IRacingSDK/Utils/ScopeHelpers.h>
-#include <IRacingTools/Shared/Macros.h>
+#include <VRKit/Shared/Macros.h>
 
 #include <spdlog/spdlog.h>
 
-namespace IRacingTools::Shared::Graphics {
+namespace VRKit::Shared::Graphics {
 
   using namespace IRacingSDK::Utils;
 

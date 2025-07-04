@@ -11,7 +11,7 @@
                         },
                         {
                             "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.Session.SessionDataVarHeader"
+                                "$ref": "#/definitions/VRKit.Models.Session.SessionDataVarHeader"
                             },
                             "type": "array"
                         }
@@ -29,7 +29,7 @@
             ],
             "title": "I Racing IPC Session Data Var Headers"
         },
-        "IRacingTools.Models.Session.SessionDataVarHeader": {
+        "VRKit.Models.Session.SessionDataVarHeader": {
             "properties": {
                 "index": {
                     "oneOf": [

@@ -2,7 +2,246 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/SessionMetadata",
     "definitions": {
-        "IRacingTools.Models.FileInfo": {
+        "SessionMetadata": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sessionId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "type": {
+                    "enum": [
+                        "SESSION_TYPE_LIVE",
+                        0,
+                        "SESSION_TYPE_DISK",
+                        1
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Type"
+                },
+                "status": {
+                    "enum": [
+                        "SESSION_STATUS_CREATED",
+                        0,
+                        "SESSION_STATUS_READY",
+                        1,
+                        "SESSION_STATUS_PAUSED",
+                        2,
+                        "SESSION_STATUS_RUNNING",
+                        5,
+                        "SESSION_STATUS_ERROR",
+                        10
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Status"
+                },
+                "subCount": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "subId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "subNum": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "subType": {
+                    "enum": [
+                        "SESSION_SUB_TYPE_UNKNOWN",
+                        0,
+                        "SESSION_SUB_TYPE_PRACTICE",
+                        1,
+                        "SESSION_SUB_TYPE_QUALIFY",
+                        2,
+                        "SESSION_SUB_TYPE_RACE",
+                        3
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Sub Type",
+                    "description": "Enum representing the sub-types of a session. This distinguishes specific parts of a session, such as practice, qualifying, or race phases."
+                },
+                "timing": {
+                    "$ref": "#/definitions/VRKit.Models.Session.SessionTiming",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "trackLayoutMetadata": {
+                    "$ref": "#/definitions/VRKit.Models.TrackLayoutMetadata",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "fileInfo": {
+                    "$ref": "#/definitions/VRKit.Models.FileInfo",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "carStatus": {
+                    "enum": [
+                        "SESSION_CAR_STATUS_INVALID",
+                        0,
+                        "SESSION_CAR_STATUS_GET_IN_CAR",
+                        1,
+                        "SESSION_CAR_STATUS_WARMUP",
+                        3,
+                        "SESSION_CAR_STATUS_PARADE_LAPS",
+                        4,
+                        "SESSION_CAR_STATUS_RACE",
+                        5,
+                        "SESSION_CAR_STATUS_CHECKERED",
+                        6,
+                        "SESSION_CAR_STATUS_COOLDOWN",
+                        7
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Car Status"
+                },
+                "playbackState": {
+                    "enum": [
+                        "SESSION_PLAYBACK_STATE_UNKNOWN",
+                        0,
+                        "SESSION_PLAYBACK_STATE_PLAYING",
+                        1,
+                        "SESSION_PLAYBACK_STATE_PAUSED",
+                        2,
+                        "SESSION_PLAYBACK_STATE_STOPPED",
+                        3
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Playback State"
+                },
+                "sessionInfoJson": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sessionInfoYaml": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Session Metadata"
+        },
+        "VRKit.Models.FileInfo": {
             "properties": {
                 "file": {
                     "oneOf": [
@@ -64,7 +303,7 @@
             ],
             "title": "File Info"
         },
-        "IRacingTools.Models.Session.SessionTiming": {
+        "VRKit.Models.Session.SessionTiming": {
             "properties": {
                 "isLive": {
                     "oneOf": [
@@ -265,7 +504,7 @@
             ],
             "title": "Session Timing"
         },
-        "IRacingTools.Models.TrackLayoutMetadata": {
+        "VRKit.Models.TrackLayoutMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -288,7 +527,7 @@
                     ]
                 },
                 "trackMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackMetadata",
+                    "$ref": "#/definitions/VRKit.Models.TrackMetadata",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -309,7 +548,7 @@
             ],
             "title": "Track Layout Metadata"
         },
-        "IRacingTools.Models.TrackMetadata": {
+        "VRKit.Models.TrackMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -352,245 +591,6 @@
                 }
             ],
             "title": "Track Metadata"
-        },
-        "SessionMetadata": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sessionId": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "type": {
-                    "enum": [
-                        "SESSION_TYPE_LIVE",
-                        0,
-                        "SESSION_TYPE_DISK",
-                        1
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Session Type"
-                },
-                "status": {
-                    "enum": [
-                        "SESSION_STATUS_CREATED",
-                        0,
-                        "SESSION_STATUS_READY",
-                        1,
-                        "SESSION_STATUS_PAUSED",
-                        2,
-                        "SESSION_STATUS_RUNNING",
-                        5,
-                        "SESSION_STATUS_ERROR",
-                        10
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Session Status"
-                },
-                "subCount": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "subId": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "subNum": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "subType": {
-                    "enum": [
-                        "SESSION_SUB_TYPE_UNKNOWN",
-                        0,
-                        "SESSION_SUB_TYPE_PRACTICE",
-                        1,
-                        "SESSION_SUB_TYPE_QUALIFY",
-                        2,
-                        "SESSION_SUB_TYPE_RACE",
-                        3
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Session Sub Type",
-                    "description": "Enum representing the sub-types of a session. This distinguishes specific parts of a session, such as practice, qualifying, or race phases."
-                },
-                "timing": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionTiming",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "trackLayoutMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackLayoutMetadata",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "fileInfo": {
-                    "$ref": "#/definitions/IRacingTools.Models.FileInfo",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "carStatus": {
-                    "enum": [
-                        "SESSION_CAR_STATUS_INVALID",
-                        0,
-                        "SESSION_CAR_STATUS_GET_IN_CAR",
-                        1,
-                        "SESSION_CAR_STATUS_WARMUP",
-                        3,
-                        "SESSION_CAR_STATUS_PARADE_LAPS",
-                        4,
-                        "SESSION_CAR_STATUS_RACE",
-                        5,
-                        "SESSION_CAR_STATUS_CHECKERED",
-                        6,
-                        "SESSION_CAR_STATUS_COOLDOWN",
-                        7
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Session Car Status"
-                },
-                "playbackState": {
-                    "enum": [
-                        "SESSION_PLAYBACK_STATE_UNKNOWN",
-                        0,
-                        "SESSION_PLAYBACK_STATE_PLAYING",
-                        1,
-                        "SESSION_PLAYBACK_STATE_PAUSED",
-                        2,
-                        "SESSION_PLAYBACK_STATE_STOPPED",
-                        3
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Session Playback State"
-                },
-                "sessionInfoJson": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sessionInfoYaml": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Session Metadata"
         }
     }
 }

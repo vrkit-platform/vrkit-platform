@@ -2,11 +2,11 @@
 
 #include <chrono>
 
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
-#include <IRacingTools/Shared/Services/TrackMapService.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
+#include <VRKit/Shared/Services/TrackMapService.h>
 
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
 
   using GenerateResult =
       std::expected<std::shared_ptr<TrackMapFile>, GeneralError>;

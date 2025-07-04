@@ -1,8 +1,8 @@
-#include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Utils/SessionInfoHelpers.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
-namespace IRacingTools::Shared::Utils {
-  using namespace IRacingTools::Shared::Logging;
+namespace VRKit::Shared::Utils {
+  using namespace VRKit::Shared::Logging;
 
   namespace {
     auto L = LoggingManager::Get().getCategory(__FILE__);
@@ -92,4 +92,4 @@ namespace IRacingTools::Shared::Utils {
   }
 
 
-} // namespace IRacingTools::Shared::Utils
+} // namespace VRKit::Shared::Utils

@@ -5,16 +5,16 @@
 #include "SHMFeederArgCommand.h"
 
 #include <IRacingSDK/Types.h>
-#include <IRacingTools/Shared/Graphics/IPCOverlayCanvasRenderer.h>
-#include <IRacingTools/Shared/SHM/SHM.h>
-#include <IRacingTools/Shared/UI/ViewerWindow.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Graphics/IPCOverlayCanvasRenderer.h>
+#include <VRKit/Shared/SHM/SHM.h>
+#include <VRKit/Shared/UI/ViewerWindow.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
-namespace IRacingTools::App::Commands {
-  using namespace IRacingTools::Shared;
-  using namespace IRacingTools::Shared::UI;
+namespace VRKit::App::Commands {
+  using namespace VRKit::Shared;
+  using namespace VRKit::Shared::UI;
 
-  using namespace IRacingTools::Shared::SHM;
+  using namespace VRKit::Shared::SHM;
 
   using namespace IRacingSDK::Utils;
   using namespace IRacingSDK;

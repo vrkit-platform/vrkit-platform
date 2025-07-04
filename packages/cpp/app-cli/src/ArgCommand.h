@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
 
 #include <CLI/CLI.hpp>
 
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
   class ArgCommand;
   using ArgCommandPtr = std::shared_ptr<ArgCommand>;
   using ArgCommandList = std::vector<ArgCommandPtr>;
@@ -63,4 +63,4 @@ namespace IRacingTools::App::Commands {
   };
 
 
-}// namespace IRacingTools::App::Shared::Utils
+}// namespace VRKit::App::Shared::Utils

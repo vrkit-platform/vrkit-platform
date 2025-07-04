@@ -4,9 +4,9 @@
 
 #include <cstdio>
 
-#include <IRacingTools/Shared/SessionDataProvider.h>
+#include <VRKit/Shared/SessionDataProvider.h>
 
-namespace IRacingTools::Shared {
+namespace VRKit::Shared {
   using namespace std::chrono_literals;
   using namespace IRacingSDK;
 
@@ -22,4 +22,4 @@ namespace IRacingTools::Shared {
   std::size_t SessionDataProvider::sampleCount() {
     return 0;
   }
-}// namespace IRacingTools::Shared
+}// namespace VRKit::Shared

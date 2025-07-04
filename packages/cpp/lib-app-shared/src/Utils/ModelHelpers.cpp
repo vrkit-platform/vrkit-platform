@@ -1,8 +1,8 @@
-#include <IRacingTools/Shared/Utils/ModelHelpers.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Utils/ModelHelpers.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
-namespace IRacingTools::Shared::Utils {
-  using namespace IRacingTools::Shared::Logging;
+namespace VRKit::Shared::Utils {
+  using namespace VRKit::Shared::Logging;
 
   namespace {
     auto L = LoggingManager::Get().getCategory(__FILE__);

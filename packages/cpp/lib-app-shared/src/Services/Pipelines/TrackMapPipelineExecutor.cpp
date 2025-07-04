@@ -1,11 +1,11 @@
 #include <IRacingSDK/Utils/SDKMacros.h>
-#include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
-#include <IRacingTools/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
-#include <IRacingTools/Shared/Services/Pipelines/TrackMapPipelineExecutor.h>
-#include <IRacingTools/Shared/Services/TrackMapService.h>
-#include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
+#include <VRKit/Shared/Services/LapTrajectoryTool.h>
+#include <VRKit/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
+#include <VRKit/Shared/Services/Pipelines/TrackMapPipelineExecutor.h>
+#include <VRKit/Shared/Services/TrackMapService.h>
+#include <VRKit/Shared/Utils/SessionInfoHelpers.h>
 
-namespace IRacingTools::Shared::Services::Pipelines {
+namespace VRKit::Shared::Services::Pipelines {
   namespace {
     auto L = Logging::GetCategoryWithType<TrackMapPipelineExecutor>();
   }
@@ -72,4 +72,4 @@ namespace IRacingTools::Shared::Services::Pipelines {
   }
 
 
-} // namespace IRacingTools::Shared::Services::Pipelines
+} // namespace VRKit::Shared::Services::Pipelines

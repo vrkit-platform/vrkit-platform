@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package IRacingTools.Models;
+package VRKit.Models;
 
 enum SupportedGame {
   SUPPORTED_GAME_IRACING = 0;

@@ -5,22 +5,22 @@
 #include <IRacingSDK/Utils/CollectionHelpers.h>
 #include <IRacingSDK/Utils/RunnableThread.h>
 
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
 
 #include "TelemetryDataFileProcessor.h"
 
 #include <IRacingSDK/DiskClient.h>
-#include <IRacingTools/Shared/Utils/Base64.h>
-#include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
+#include <VRKit/Shared/Utils/Base64.h>
+#include <VRKit/Shared/Utils/SessionInfoHelpers.h>
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
   using namespace IRacingSDK::Utils;
-  using namespace IRacingTools::Shared::Utils;
-  using namespace IRacingTools::Shared::Logging;
-  using namespace IRacingTools::Shared::Services::Pipelines;
+  using namespace VRKit::Shared::Utils;
+  using namespace VRKit::Shared::Logging;
+  using namespace VRKit::Shared::Services::Pipelines;
   namespace {
     auto L = GetCategoryWithType<TelemetryDataService>();
 
@@ -51,7 +51,7 @@ namespace IRacingTools::Shared::Services {
   void TelemetryDataService::reset(bool skipPrepare) {
     auto onReadHandler =
         [&](const std::vector<std::shared_ptr<
-                IRacingTools::Models::TelemetryDataFile>> &dataFiles) {
+                VRKit::Models::TelemetryDataFile>> &dataFiles) {
           std::scoped_lock lock(stateMutex_);
           dataFiles_.clear();
           for (auto &dataFile: dataFiles) {
@@ -467,4 +467,4 @@ namespace IRacingTools::Shared::Services {
 
 
 
-} // namespace IRacingTools::Shared::Services
+} // namespace VRKit::Shared::Services

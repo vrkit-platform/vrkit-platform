@@ -1,7 +1,7 @@
 
-#include <IRacingTools/Shared/VRTypes.h>
+#include <VRKit/Shared/VRTypes.h>
 
-namespace IRacingTools::Shared::VR {
+namespace VRKit::Shared::VR {
 
   VRNativePose VRNativePose::getHorizontalMirror() const {
     auto ret = *this;

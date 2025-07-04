@@ -8,12 +8,12 @@
 
 #include "DashboardArgCommand.h"
 
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/OpenXR/OpenXRSetupHelpers.h>
-#include <IRacingTools/Shared/System/DisplayInfo.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/OpenXR/OpenXRSetupHelpers.h>
+#include <VRKit/Shared/System/DisplayInfo.h>
 
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
     using namespace Shared;
 
     namespace {

@@ -2,7 +2,105 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/SessionEventData",
     "definitions": {
-        "IRacingTools.Models.FileInfo": {
+        "SessionEventData": {
+            "properties": {
+                "type": {
+                    "enum": [
+                        "SESSION_EVENT_TYPE_UNKNOWN",
+                        0,
+                        "SESSION_EVENT_TYPE_SESSION_CHANGED",
+                        1,
+                        "SESSION_EVENT_TYPE_METADATA_CHANGED",
+                        2,
+                        "SESSION_EVENT_TYPE_DATA_FRAME",
+                        3
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Event Type"
+                },
+                "sessionId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sessionType": {
+                    "enum": [
+                        "SESSION_TYPE_LIVE",
+                        0,
+                        "SESSION_TYPE_DISK",
+                        1
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Session Type"
+                },
+                "sessionChangedEvent": {
+                    "$ref": "#/definitions/VRKit.Models.RPC.Events.SessionChangedEvent",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "sessionMetadata": {
+                    "$ref": "#/definitions/VRKit.Models.Session.SessionMetadata",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "sessionDataFrame": {
+                    "$ref": "#/definitions/VRKit.Models.Session.SessionDataFrame",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Session Event Data"
+        },
+        "VRKit.Models.FileInfo": {
             "properties": {
                 "file": {
                     "oneOf": [
@@ -64,7 +162,7 @@
             ],
             "title": "File Info"
         },
-        "IRacingTools.Models.RPC.Events.SessionChangedEvent": {
+        "VRKit.Models.RPC.Events.SessionChangedEvent": {
             "properties": {
                 "isAvailable": {
                     "oneOf": [
@@ -87,7 +185,7 @@
                     ]
                 },
                 "sessionMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionMetadata",
+                    "$ref": "#/definitions/VRKit.Models.Session.SessionMetadata",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -108,10 +206,10 @@
             ],
             "title": "Session Changed Event"
         },
-        "IRacingTools.Models.Session.SessionDataFrame": {
+        "VRKit.Models.Session.SessionDataFrame": {
             "properties": {
                 "timing": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionTiming",
+                    "$ref": "#/definitions/VRKit.Models.Session.SessionTiming",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -122,7 +220,7 @@
                 },
                 "dataValues": {
                     "additionalProperties": {
-                        "$ref": "#/definitions/IRacingTools.Models.Session.SessionDataFrame.VarValues",
+                        "$ref": "#/definitions/VRKit.Models.Session.SessionDataFrame.VarValues",
                         "additionalProperties": true,
                         "oneOf": [
                             {
@@ -152,7 +250,7 @@
             ],
             "title": "Session Data Frame"
         },
-        "IRacingTools.Models.Session.SessionDataFrame.Value": {
+        "VRKit.Models.Session.SessionDataFrame.Value": {
             "properties": {
                 "charValue": {
                     "oneOf": [
@@ -226,7 +324,7 @@
             ],
             "title": "Value"
         },
-        "IRacingTools.Models.Session.SessionDataFrame.VarValues": {
+        "VRKit.Models.Session.SessionDataFrame.VarValues": {
             "properties": {
                 "index": {
                     "oneOf": [
@@ -283,7 +381,7 @@
                         },
                         {
                             "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.Session.SessionDataFrame.Value"
+                                "$ref": "#/definitions/VRKit.Models.Session.SessionDataFrame.Value"
                             },
                             "type": "array"
                         }
@@ -301,7 +399,7 @@
             ],
             "title": "Var Values"
         },
-        "IRacingTools.Models.Session.SessionMetadata": {
+        "VRKit.Models.Session.SessionMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -425,7 +523,7 @@
                     "description": "Enum representing the sub-types of a session. This distinguishes specific parts of a session, such as practice, qualifying, or race phases."
                 },
                 "timing": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionTiming",
+                    "$ref": "#/definitions/VRKit.Models.Session.SessionTiming",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -435,7 +533,7 @@
                     ]
                 },
                 "trackLayoutMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackLayoutMetadata",
+                    "$ref": "#/definitions/VRKit.Models.TrackLayoutMetadata",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -445,7 +543,7 @@
                     ]
                 },
                 "fileInfo": {
-                    "$ref": "#/definitions/IRacingTools.Models.FileInfo",
+                    "$ref": "#/definitions/VRKit.Models.FileInfo",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -540,7 +638,7 @@
             ],
             "title": "Session Metadata"
         },
-        "IRacingTools.Models.Session.SessionTiming": {
+        "VRKit.Models.Session.SessionTiming": {
             "properties": {
                 "isLive": {
                     "oneOf": [
@@ -741,7 +839,7 @@
             ],
             "title": "Session Timing"
         },
-        "IRacingTools.Models.TrackLayoutMetadata": {
+        "VRKit.Models.TrackLayoutMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -764,7 +862,7 @@
                     ]
                 },
                 "trackMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackMetadata",
+                    "$ref": "#/definitions/VRKit.Models.TrackMetadata",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -785,7 +883,7 @@
             ],
             "title": "Track Layout Metadata"
         },
-        "IRacingTools.Models.TrackMetadata": {
+        "VRKit.Models.TrackMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -828,104 +926,6 @@
                 }
             ],
             "title": "Track Metadata"
-        },
-        "SessionEventData": {
-            "properties": {
-                "type": {
-                    "enum": [
-                        "SESSION_EVENT_TYPE_UNKNOWN",
-                        0,
-                        "SESSION_EVENT_TYPE_SESSION_CHANGED",
-                        1,
-                        "SESSION_EVENT_TYPE_METADATA_CHANGED",
-                        2,
-                        "SESSION_EVENT_TYPE_DATA_FRAME",
-                        3
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Session Event Type"
-                },
-                "sessionId": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "sessionType": {
-                    "enum": [
-                        "SESSION_TYPE_LIVE",
-                        0,
-                        "SESSION_TYPE_DISK",
-                        1
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Session Type"
-                },
-                "sessionChangedEvent": {
-                    "$ref": "#/definitions/IRacingTools.Models.RPC.Events.SessionChangedEvent",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "sessionMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionMetadata",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "sessionDataFrame": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionDataFrame",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Session Event Data"
         }
     }
 }

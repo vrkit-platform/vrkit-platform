@@ -8,25 +8,25 @@
 #include <IRacingSDK/Utils/Singleton.h>
 #include <IRacingSDK/Utils/Traits.h>
 
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
 
 #include <IRacingSDK/ClientManager.h>
 #include <IRacingSDK/DiskClient.h>
 #include <IRacingSDK/DiskClientDataFrameProcessor.h>
 #include <IRacingSDK/VarHolder.h>
-#include <IRacingTools/Shared/DiskSessionDataProvider.h>
+#include <VRKit/Shared/DiskSessionDataProvider.h>
 
 
 using namespace IRacingSDK;
 using namespace IRacingSDK::Utils;
-using namespace IRacingTools::Shared;
-using namespace IRacingTools::Shared::Logging;
+using namespace VRKit::Shared;
+using namespace VRKit::Shared::Logging;
 
 using namespace spdlog;
 using namespace std::chrono_literals;
 
-using namespace IRacingTools::Models::RPC::Events;
+using namespace VRKit::Models::RPC::Events;
 
 namespace fs = std::filesystem;
 
@@ -78,9 +78,9 @@ namespace {
         return client;
     }
 
-    std::shared_ptr<IRacingTools::Shared::DiskSessionDataProvider> CreateRaceRecordingDiskSessionDataProvider(const std::string& raceName) {
+    std::shared_ptr<VRKit::Shared::DiskSessionDataProvider> CreateRaceRecordingDiskSessionDataProvider(const std::string& raceName) {
         auto file = ToRaceRecordingTestFile(raceName);
-        return std::make_shared<IRacingTools::Shared::DiskSessionDataProvider>(file, file.string(),IRacingTools::Shared::DiskSessionDataProvider::Options{
+        return std::make_shared<VRKit::Shared::DiskSessionDataProvider>(file, file.string(),VRKit::Shared::DiskSessionDataProvider::Options{
             .disableRealtimePlayback = true
         });
     }

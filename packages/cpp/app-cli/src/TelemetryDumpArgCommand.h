@@ -10,7 +10,7 @@
 #include <optional>
 #include <yaml-cpp/yaml.h>
 
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
     using namespace std::literals;
     using namespace IRacingSDK::Utils;
     using namespace IRacingSDK;

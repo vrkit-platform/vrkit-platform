@@ -1,16 +1,16 @@
 #include <memory>
 
-#include <IRacingTools/Shared/UI/BaseWindow.h>
+#include <VRKit/Shared/UI/BaseWindow.h>
 
 #include <spdlog/spdlog.h>
 
-#include <IRacingTools/Shared/SHM/SHM.h>
+#include <VRKit/Shared/SHM/SHM.h>
 
 // #include "imgui.h"
 // #include "imgui_impl_win32.h"
 // #include "imgui_impl_dx11.h"
 
-namespace IRacingTools::Shared::UI {
+namespace VRKit::Shared::UI {
 
 
 

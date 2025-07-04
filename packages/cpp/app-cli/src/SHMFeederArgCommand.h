@@ -10,7 +10,7 @@
 #include <CLI/CLI.hpp>
 
 
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
   using namespace std::literals;
 
 

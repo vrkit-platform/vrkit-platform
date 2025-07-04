@@ -24,17 +24,17 @@
  * If done from the main process, the registry write will be app-specific.
  */
 
-#include <IRacingTools/Shared/OpenXR/OpenXRSetupHelpers.h>
+#include <VRKit/Shared/OpenXR/OpenXRSetupHelpers.h>
 #include <Windows.h>
 #include <shellapi.h>
 
 #include <functional>
 #include <filesystem>
 #include <string>
-#include <IRacingTools/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
 
 
-namespace IRacingTools::Shared::OpenXR {
+namespace VRKit::Shared::OpenXR {
   HKEY OpenOrCreateImplicitLayerRegistryKey(HKEY root) {
     HKEY openXRKey {0};
     const auto result = RegCreateKeyExW(

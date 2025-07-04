@@ -1,8 +1,8 @@
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 
 #include <IRacingSDK/Utils/Tracing.h>
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Common/UUIDHelpers.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Common/UUIDHelpers.h>
 
 #include "NativeGlobal.h"
 #include "NativeOverlayManager.h"
@@ -10,9 +10,9 @@
 #include "NativeSessionDataVariable.h"
 
 
-using namespace IRacingTools;
-using namespace IRacingTools::App::Node;
-using namespace IRacingTools::Models::RPC;
+using namespace VRKit;
+using namespace VRKit::App::Node;
+using namespace VRKit::Models::RPC;
 using namespace Napi;
 
 namespace {

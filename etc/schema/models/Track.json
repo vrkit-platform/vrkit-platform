@@ -2,93 +2,6 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/Track",
     "definitions": {
-        "IRacingTools.Models.Track.Layout": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ],
-                    "description": "`id` is a compound key that we generate when processing IBT files"
-                },
-                "trackId": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ],
-                    "description": "Reference to `Track::id`"
-                },
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ],
-                    "description": "`WeekendInfo::trackConfigName`"
-                },
-                "length": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "lengthOfficial": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "numTurns": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "direction": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Layout"
-        },
         "Track": {
             "properties": {
                 "id": {
@@ -234,7 +147,7 @@
                         },
                         {
                             "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.Track.Layout"
+                                "$ref": "#/definitions/VRKit.Models.Track.Layout"
                             },
                             "type": "array"
                         }
@@ -251,6 +164,93 @@
                 }
             ],
             "title": "Track"
+        },
+        "VRKit.Models.Track.Layout": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "`id` is a compound key that we generate when processing IBT files"
+                },
+                "trackId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ],
+                    "description": "Reference to `Track::id`"
+                },
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "`WeekendInfo::trackConfigName`"
+                },
+                "length": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "lengthOfficial": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "numTurns": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "direction": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Layout"
         }
     }
 }

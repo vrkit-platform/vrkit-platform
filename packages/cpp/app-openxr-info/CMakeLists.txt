@@ -44,7 +44,7 @@ ADD_DEPENDENCIES(${targetName} ${openxrLibTarget})
 SET_TARGET_PROPERTIES(
   ${targetName}
   PROPERTIES
-  VS_GLOBAL_RootNamespace IRacingTools
+  VS_GLOBAL_RootNamespace VRKit
   VS_GLOBAL_CppWinRTOptimized true
   VS_GLOBAL_CppWinRTRootNamespaceAutoMerge true
   VS_GLOBAL_WindowsPackageType None

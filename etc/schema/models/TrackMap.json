@@ -2,7 +2,84 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/TrackMap",
     "definitions": {
-        "IRacingTools.Models.LapCoordinate": {
+        "TrackMap": {
+            "properties": {
+                "trackLayoutMetadata": {
+                    "$ref": "#/definitions/VRKit.Models.TrackLayoutMetadata",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "totalDistance": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                },
+                "path": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "items": {
+                                "$ref": "#/definitions/VRKit.Models.LapCoordinate"
+                            },
+                            "type": "array"
+                        }
+                    ]
+                },
+                "size": {
+                    "$ref": "#/definitions/VRKit.Models.SizeF",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "scaledSize": {
+                    "$ref": "#/definitions/VRKit.Models.SizeF",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "scaledRatio": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "number"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Track Map"
+        },
+        "VRKit.Models.LapCoordinate": {
             "properties": {
                 "lapTime": {
                     "oneOf": [
@@ -116,7 +193,7 @@
             ],
             "title": "Lap Coordinate"
         },
-        "IRacingTools.Models.SizeF": {
+        "VRKit.Models.SizeF": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -150,7 +227,7 @@
             ],
             "title": "Size F"
         },
-        "IRacingTools.Models.TrackLayoutMetadata": {
+        "VRKit.Models.TrackLayoutMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -173,7 +250,7 @@
                     ]
                 },
                 "trackMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackMetadata",
+                    "$ref": "#/definitions/VRKit.Models.TrackMetadata",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -194,7 +271,7 @@
             ],
             "title": "Track Layout Metadata"
         },
-        "IRacingTools.Models.TrackMetadata": {
+        "VRKit.Models.TrackMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -237,83 +314,6 @@
                 }
             ],
             "title": "Track Metadata"
-        },
-        "TrackMap": {
-            "properties": {
-                "trackLayoutMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackLayoutMetadata",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "totalDistance": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "number"
-                        }
-                    ]
-                },
-                "path": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.LapCoordinate"
-                            },
-                            "type": "array"
-                        }
-                    ]
-                },
-                "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeF",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "scaledSize": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeF",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "scaledRatio": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "number"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Track Map"
         }
     }
 }

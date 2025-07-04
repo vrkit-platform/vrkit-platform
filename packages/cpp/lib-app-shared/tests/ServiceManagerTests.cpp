@@ -2,19 +2,19 @@
 #include <gtest/gtest.h>
 
 #include <IRacingSDK/Utils/ConsoleHelpers.h>
-#include <IRacingTools/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
 
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
-// #include <IRacingTools/Shared/TrackMapGeometry.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Services/ServiceManager.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
+// #include <VRKit/Shared/TrackMapGeometry.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Services/ServiceManager.h>
 
-using namespace IRacingTools::Shared::Logging;
+using namespace VRKit::Shared::Logging;
 using namespace IRacingSDK;
 using namespace IRacingSDK::Utils;
-using namespace IRacingTools::Shared;
+using namespace VRKit::Shared;
 //
-// using namespace IRacingTools::Shared::Services;
+// using namespace VRKit::Shared::Services;
 //
 // namespace fs = std::filesystem;
 //

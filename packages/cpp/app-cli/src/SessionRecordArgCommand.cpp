@@ -27,7 +27,7 @@
 
 // 16 ms timeout
 #define TIMEOUT 16
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
   namespace {
 
     using namespace IRacingSDK;

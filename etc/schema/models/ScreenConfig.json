@@ -2,7 +2,73 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/ScreenConfig",
     "definitions": {
-        "IRacingTools.Models.DisplayConfig": {
+        "ScreenConfig": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "* Must serve as a hash"
+                },
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "size": {
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "layoutDisplay": {
+                    "$ref": "#/definitions/VRKit.Models.DisplayLayoutConfig",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "layoutVr": {
+                    "$ref": "#/definitions/VRKit.Models.VRLayoutConfig",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Screen Config",
+            "description": "* Represents a complete screen"
+        },
+        "VRKit.Models.DisplayConfig": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -35,7 +101,7 @@
                     ]
                 },
                 "physicalSize": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -55,7 +121,7 @@
                     ]
                 },
                 "scaledSize": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -65,7 +131,7 @@
                     ]
                 },
                 "scaledRect": {
-                    "$ref": "#/definitions/IRacingTools.Models.RectI",
+                    "$ref": "#/definitions/VRKit.Models.RectI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -86,10 +152,10 @@
             ],
             "title": "Display Config"
         },
-        "IRacingTools.Models.DisplayLayoutConfig": {
+        "VRKit.Models.DisplayLayoutConfig": {
             "properties": {
                 "origin": {
-                    "$ref": "#/definitions/IRacingTools.Models.PositionI",
+                    "$ref": "#/definitions/VRKit.Models.PositionI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -99,7 +165,7 @@
                     ]
                 },
                 "originOffset": {
-                    "$ref": "#/definitions/IRacingTools.Models.PositionI",
+                    "$ref": "#/definitions/VRKit.Models.PositionI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -115,7 +181,7 @@
                         },
                         {
                             "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.DisplayConfig"
+                                "$ref": "#/definitions/VRKit.Models.DisplayConfig"
                             },
                             "type": "array"
                         }
@@ -133,7 +199,7 @@
             ],
             "title": "Display Layout Config"
         },
-        "IRacingTools.Models.PositionI": {
+        "VRKit.Models.PositionI": {
             "properties": {
                 "x": {
                     "oneOf": [
@@ -167,10 +233,10 @@
             ],
             "title": "Position I"
         },
-        "IRacingTools.Models.RectI": {
+        "VRKit.Models.RectI": {
             "properties": {
                 "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -180,7 +246,7 @@
                     ]
                 },
                 "position": {
-                    "$ref": "#/definitions/IRacingTools.Models.PositionI",
+                    "$ref": "#/definitions/VRKit.Models.PositionI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -201,7 +267,7 @@
             ],
             "title": "Rect I"
         },
-        "IRacingTools.Models.SizeI": {
+        "VRKit.Models.SizeI": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -235,7 +301,7 @@
             ],
             "title": "Size I"
         },
-        "IRacingTools.Models.VRLayoutConfig": {
+        "VRKit.Models.VRLayoutConfig": {
             "properties": {
                 "scale": {
                     "oneOf": [
@@ -248,7 +314,7 @@
                     ]
                 },
                 "scaledSize": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -268,72 +334,6 @@
                 }
             ],
             "title": "VR Layout Config"
-        },
-        "ScreenConfig": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ],
-                    "description": "* Must serve as a hash"
-                },
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "layoutDisplay": {
-                    "$ref": "#/definitions/IRacingTools.Models.DisplayLayoutConfig",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "layoutVr": {
-                    "$ref": "#/definitions/IRacingTools.Models.VRLayoutConfig",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Screen Config",
-            "description": "* Represents a complete screen"
         }
     }
 }

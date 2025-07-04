@@ -1,11 +1,11 @@
 #include <IRacingSDK/DiskClientDataFrameProcessor.h>
 #include <IRacingSDK/Utils/CollectionHelpers.h>
 #include <IRacingSDK/VarHolder.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Services/TelemetryFileHandler.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Services/TelemetryFileHandler.h>
 
 #include <fstream>
 #include <iostream>
@@ -14,9 +14,9 @@
 
 #include <google/protobuf/util/json_util.h>
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
   using namespace IRacingSDK;
-  using namespace IRacingTools::Shared::Logging;
+  using namespace VRKit::Shared::Logging;
   using namespace IRacingSDK::Utils;
 
   namespace {
@@ -186,4 +186,4 @@ namespace IRacingTools::Shared::Services {
   }
 
 
-} // namespace IRacingTools::Shared::Services
+} // namespace VRKit::Shared::Services

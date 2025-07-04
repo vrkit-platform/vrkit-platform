@@ -2,14 +2,14 @@
 #include <gtest/gtest.h>
 
 #include <IRacingSDK/Utils/ConsoleHelpers.h>
-#include <IRacingTools/Shared/Common/UUIDHelpers.h>
+#include <VRKit/Shared/Common/UUIDHelpers.h>
 
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
-using namespace IRacingTools::Shared::Logging;
+using namespace VRKit::Shared::Logging;
 using namespace IRacingSDK;
 using namespace IRacingSDK::Utils;
-using namespace IRacingTools::Shared;
+using namespace VRKit::Shared;
 
 /*
 namespace {

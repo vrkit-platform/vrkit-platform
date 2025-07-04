@@ -1,11 +1,11 @@
-#include <IRacingTools/Shared/IPC/NamedPipeServer.h>
-#include <IRacingTools/Shared/Utils/Win32Helpers.h>
+#include <VRKit/Shared/IPC/NamedPipeServer.h>
+#include <VRKit/Shared/Utils/Win32Helpers.h>
 
 #include <algorithm>
 #include <format>
 #include <ranges>
 
-namespace IRacingTools::Shared::IPC {
+namespace VRKit::Shared::IPC {
 namespace {
   auto L = Logging::GetCategoryWithType<NamedPipeServer>();
 }

@@ -4,18 +4,18 @@
 
 #include <IRacingSDK/Utils/CollectionHelpers.h>
 
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
-#include <IRacingTools/Shared/Services/SessionManagerService.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Services/Pipelines/PipelineExecutorRegistry.h>
+#include <VRKit/Shared/Services/SessionManagerService.h>
 
 #include "TelemetryDataFileProcessor.h"
 
-#include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
+#include <VRKit/Shared/Utils/SessionInfoHelpers.h>
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
   using namespace IRacingSDK::Utils;
-  using namespace IRacingTools::Shared::Logging;
-  using namespace IRacingTools::Shared::Services::Pipelines;
+  using namespace VRKit::Shared::Logging;
+  using namespace VRKit::Shared::Services::Pipelines;
   namespace {
     auto L = GetCategoryWithType<SessionManagerService>();
   } // namespace
@@ -90,4 +90,4 @@ namespace IRacingTools::Shared::Services {
   std::size_t SessionManagerService::size() {
     return dataProviders_.size();
   }
-} // namespace IRacingTools::Shared::Services
+} // namespace VRKit::Shared::Services

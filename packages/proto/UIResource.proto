@@ -2,7 +2,7 @@ syntax = "proto3";
 import "GraphicsTypes.proto";
 import "Geometry.proto";
 
-package IRacingTools.Models;
+package VRKit.Models;
 
 
 message UIImageResource {

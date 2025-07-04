@@ -1,12 +1,12 @@
-#include <IRacingTools/Shared/FileWatcher.h>
+#include <VRKit/Shared/FileWatcher.h>
 #include <windows.h>
 #include <format>
 #include <mutex>
 
 #include <IRacingSDK/Utils/UnicodeHelpers.h>
-#include <IRacingTools/Shared/Macros.h>
+#include <VRKit/Shared/Macros.h>
 
-namespace IRacingTools::Shared {
+namespace VRKit::Shared {
     using namespace IRacingSDK::Utils;
 
     FileSystem::FileWatcher::FileWatcher(std::wstring path, UnderpinningRegex pattern, Callback callback, bool autostart): path_(fs::absolute(path)),

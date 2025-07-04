@@ -1,7 +1,7 @@
 syntax = "proto3";
 import "Geometry.proto";
 
-package IRacingTools.Models;
+package VRKit.Models;
 
 enum ImageType {
   svg = 0;

@@ -22,9 +22,9 @@
 #include <format>
 #include <fstream>
 
-#include <IRacingTools/Shared/UI/ViewerSettings.h>
+#include <VRKit/Shared/UI/ViewerSettings.h>
 
-namespace IRacingTools::Shared::UI {
+namespace VRKit::Shared::UI {
     ViewerSettings ViewerSettings::Load() {
         ViewerSettings ret;
         //

@@ -10,17 +10,17 @@
 #include <IRacingSDK/Utils/CollectionHelpers.h>
 #include <IRacingSDK/Utils/RunnableThread.h>
 
-#include <IRacingTools/Shared/Chrono.h>
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Services/Pipelines/PipelineHelpers.h>
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
+#include <VRKit/Shared/Chrono.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Services/Pipelines/PipelineHelpers.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
 
 
-namespace IRacingTools::Shared::Services::Pipelines {
+namespace VRKit::Shared::Services::Pipelines {
   using namespace IRacingSDK::Utils;
-  using namespace IRacingTools::Shared::Logging;
-  using namespace IRacingTools::Shared::Services;
+  using namespace VRKit::Shared::Logging;
+  using namespace VRKit::Shared::Services;
   namespace {
     auto L = GetCategoryWithType<TelemetryDataService>();
   }
@@ -155,4 +155,4 @@ namespace IRacingTools::Shared::Services::Pipelines {
     return results;
   }
 
-} // namespace IRacingTools::Shared::Services
+} // namespace VRKit::Shared::Services

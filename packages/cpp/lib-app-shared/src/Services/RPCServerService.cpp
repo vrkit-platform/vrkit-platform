@@ -3,12 +3,12 @@
 #include <magic_enum/magic_enum.hpp>
 #include <regex>
 
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Services/RPCServerService.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Services/RPCServerService.h>
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
   using namespace IRacingSDK::Utils;
-  using namespace IRacingTools::Shared::Logging;
+  using namespace VRKit::Shared::Logging;
 
   namespace {
     auto L = GetCategoryWithType<RPCServerService>();
@@ -108,4 +108,4 @@ namespace IRacingTools::Shared::Services {
   }
 
 
-} // namespace IRacingTools::Shared::Services
+} // namespace VRKit::Shared::Services

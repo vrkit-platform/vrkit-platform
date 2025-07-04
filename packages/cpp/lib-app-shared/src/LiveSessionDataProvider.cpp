@@ -6,13 +6,13 @@
 
 #include <IRacingSDK/Utils/ChronoHelpers.h>
 #include <IRacingSDK/Utils/ThreadHelpers.h>
-#include <IRacingTools/Shared/Chrono.h>
-#include <IRacingTools/Shared/LiveSessionDataProvider.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Chrono.h>
+#include <VRKit/Shared/LiveSessionDataProvider.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
 
 
-namespace IRacingTools::Shared
+namespace VRKit::Shared
 {
   using namespace std::chrono_literals;
   using namespace IRacingSDK;
@@ -377,4 +377,4 @@ namespace IRacingTools::Shared
   {
     return false;
   }
-} // namespace IRacingTools::Shared
+} // namespace VRKit::Shared

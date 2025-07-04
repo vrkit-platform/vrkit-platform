@@ -2,7 +2,96 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/TelemetryDataFile",
     "definitions": {
-        "IRacingTools.Models.FileInfo": {
+        "TelemetryDataFile": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "alias": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "status": {
+                    "enum": [
+                        "STATUS_CREATED",
+                        0,
+                        "STATUS_AVAILABLE",
+                        5,
+                        "STATUS_INVALID",
+                        10,
+                        "STATUS_ERROR",
+                        20
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Status"
+                },
+                "trackLayoutMetadata": {
+                    "$ref": "#/definitions/VRKit.Models.TrackLayoutMetadata",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ],
+                    "description": "* Track Layout ID"
+                },
+                "fileInfo": {
+                    "$ref": "#/definitions/VRKit.Models.FileInfo",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "errorDetails": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Telemetry Data File"
+        },
+        "VRKit.Models.FileInfo": {
             "properties": {
                 "file": {
                     "oneOf": [
@@ -64,7 +153,7 @@
             ],
             "title": "File Info"
         },
-        "IRacingTools.Models.TrackLayoutMetadata": {
+        "VRKit.Models.TrackLayoutMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -87,7 +176,7 @@
                     ]
                 },
                 "trackMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackMetadata",
+                    "$ref": "#/definitions/VRKit.Models.TrackMetadata",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -108,7 +197,7 @@
             ],
             "title": "Track Layout Metadata"
         },
-        "IRacingTools.Models.TrackMetadata": {
+        "VRKit.Models.TrackMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -151,95 +240,6 @@
                 }
             ],
             "title": "Track Metadata"
-        },
-        "TelemetryDataFile": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "alias": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "status": {
-                    "enum": [
-                        "STATUS_CREATED",
-                        0,
-                        "STATUS_AVAILABLE",
-                        5,
-                        "STATUS_INVALID",
-                        10,
-                        "STATUS_ERROR",
-                        20
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Status"
-                },
-                "trackLayoutMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackLayoutMetadata",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ],
-                    "description": "* Track Layout ID"
-                },
-                "fileInfo": {
-                    "$ref": "#/definitions/IRacingTools.Models.FileInfo",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "errorDetails": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Telemetry Data File"
         }
     }
 }

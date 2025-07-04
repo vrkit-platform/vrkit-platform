@@ -15,7 +15,7 @@
 #include <IRacingSDK/DiskClient.h>
 #include <IRacingSDK/ClientManager.h>
 
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
 using namespace std::literals;
 using namespace IRacingSDK::Utils;
 using namespace IRacingSDK;

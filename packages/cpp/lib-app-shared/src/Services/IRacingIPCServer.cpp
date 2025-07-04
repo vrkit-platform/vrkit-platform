@@ -1,10 +1,10 @@
-#include <IRacingTools/Models/RPC/Messages/IRacingIPCMessages.pb.h>
-#include <IRacingTools/Shared/LiveSessionDataProvider.h>
-#include <IRacingTools/Shared/Services/IRacingIPCServer.h>
-#include <IRacingTools/Shared/Utils/ErrorHelpers.h>
-#include <IRacingTools/Shared/Utils/ModelHelpers.h>
+#include <VRKit/Models/RPC/Messages/IRacingIPCMessages.pb.h>
+#include <VRKit/Shared/LiveSessionDataProvider.h>
+#include <VRKit/Shared/Services/IRacingIPCServer.h>
+#include <VRKit/Shared/Utils/ErrorHelpers.h>
+#include <VRKit/Shared/Utils/ModelHelpers.h>
 
-namespace IRacingTools::Shared::Services {
+namespace VRKit::Shared::Services {
   using namespace Models::RPC::IR;
 
   namespace {
@@ -662,4 +662,4 @@ namespace IRacingTools::Shared::Services {
     return namedPipeServerName_;
   }
 
-} // namespace IRacingTools::Shared::Services
+} // namespace VRKit::Shared::Services

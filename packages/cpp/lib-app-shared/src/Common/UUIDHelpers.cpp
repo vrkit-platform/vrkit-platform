@@ -1,14 +1,14 @@
 
 
 
-#include <IRacingTools/Shared/Chrono.h>
-#include <IRacingTools/Shared/Common/UUIDHelpers.h>
+#include <VRKit/Shared/Chrono.h>
+#include <VRKit/Shared/Common/UUIDHelpers.h>
 //
 // #include <boost/uuid/uuid.hpp>
 // #include <boost/uuid/uuid_generators.hpp>
 // #include <boost/uuid/uuid_io.hpp>
 
-namespace IRacingTools::Shared::Common {
+namespace VRKit::Shared::Common {
 
     std::string NewUUID() {
       return std::to_string(TimeEpoch().count());

@@ -10,16 +10,16 @@
 #include <IRacingSDK/Utils/CollectionHelpers.h>
 #include <IRacingSDK/Utils/ThreadHelpers.h>
 
-#include <IRacingTools/Models/rpc/Events/SessionEvent.pb.h>
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
-#include <IRacingTools/Shared/Chrono.h>
-#include <IRacingTools/Shared/DiskSessionDataProvider.h>
-#include <IRacingTools/Shared/Macros.h>
-#include <IRacingTools/Shared/ProtoHelpers.h>
-#include <IRacingTools/Shared/Utils/SessionInfoHelpers.h>
+#include <VRKit/Models/rpc/Events/SessionEvent.pb.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/Chrono.h>
+#include <VRKit/Shared/DiskSessionDataProvider.h>
+#include <VRKit/Shared/Macros.h>
+#include <VRKit/Shared/ProtoHelpers.h>
+#include <VRKit/Shared/Utils/SessionInfoHelpers.h>
 #include <spdlog/spdlog.h>
 
-namespace IRacingTools::Shared {
+namespace VRKit::Shared {
   using namespace std::chrono_literals;
   using namespace IRacingSDK;
 
@@ -559,4 +559,4 @@ namespace IRacingTools::Shared {
         shared_from_this()
     );
   }
-} // namespace IRacingTools::Shared
+} // namespace VRKit::Shared

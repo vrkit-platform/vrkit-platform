@@ -2,7 +2,7 @@
 // Created by jglanz on 4/19/2024.
 //
 
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
 
 #include <conio.h>
 #include <csignal>
@@ -16,24 +16,24 @@
 
 #include "ProcessAllTelemetryArgCommand.h"
 
-#include <IRacingTools/Models/LapTrajectory.pb.h>
+#include <VRKit/Models/LapTrajectory.pb.h>
 #include <IRacingSDK/Utils/ConsoleHelpers.h>
-#include <IRacingTools/Shared/Chrono.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
-#include <IRacingTools/Shared/Utils/TypeIdHelpers.h>
+#include <VRKit/Shared/Chrono.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Services/LapTrajectoryTool.h>
+#include <VRKit/Shared/Utils/TypeIdHelpers.h>
 
-#include <IRacingTools/Shared/Services/ServiceManager.h>
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
-#include <IRacingTools/Shared/Services/TrackMapService.h>
+#include <VRKit/Shared/Services/ServiceManager.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
+#include <VRKit/Shared/Services/TrackMapService.h>
 
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
   using namespace IRacingSDK;
   using namespace IRacingSDK::Utils;
-  using namespace IRacingTools::Shared;
-  using namespace IRacingTools::Shared::Logging;
-  using namespace IRacingTools::Shared::Services;
-  using namespace IRacingTools::Shared::Utils;
+  using namespace VRKit::Shared;
+  using namespace VRKit::Shared::Logging;
+  using namespace VRKit::Shared::Services;
+  using namespace VRKit::Shared::Utils;
 
   namespace {
     auto L = GetCategoryWithType<ProcessAllTelemetryArgCommand>();
@@ -141,4 +141,4 @@ namespace IRacingTools::App::Commands {
 
     return 0;
   }
-} // namespace IRacingTools::App::Commands
+} // namespace VRKit::App::Commands

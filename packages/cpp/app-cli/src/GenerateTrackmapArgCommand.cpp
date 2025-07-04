@@ -14,7 +14,7 @@
 // #endif
 //
 // #pragma warning(disable : 4996)//_CRT_SECURE_NO_WARNINGS
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
 
 #include <conio.h>
 #include <csignal>
@@ -28,16 +28,16 @@
 
 #include "GenerateTrackmapArgCommand.h"
 
-#include <IRacingTools/Models/LapTrajectory.pb.h>
-#include <IRacingTools/Shared/Chrono.h>
-#include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Models/LapTrajectory.pb.h>
+#include <VRKit/Shared/Chrono.h>
+#include <VRKit/Shared/Services/LapTrajectoryTool.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
     using namespace IRacingSDK;
     using namespace IRacingSDK::Utils;
-    using namespace IRacingTools::Shared;
-    using namespace IRacingTools::Shared::Logging;    
+    using namespace VRKit::Shared;
+    using namespace VRKit::Shared::Logging;
     
     namespace {
         auto L = GetCategoryWithType<GenerateTrackmapArgCommand>();

@@ -18,11 +18,11 @@
  * USA.
  */
 
-#include <IRacingTools/Shared/Graphics/DX113D.h>
-#include <IRacingTools/Shared/Macros.h>
+#include <VRKit/Shared/Graphics/DX113D.h>
+#include <VRKit/Shared/Macros.h>
 #include <IRacingSDK/Utils/ScopeHelpers.h>
 
-namespace IRacingTools::Shared::Graphics {
+namespace VRKit::Shared::Graphics {
 
 struct SavedState::Impl {
   winrt::com_ptr<ID3D11DeviceContext1> context;

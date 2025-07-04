@@ -1,14 +1,14 @@
 #include <ctime>
 
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/FileWatcher.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/FileWatcher.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
 #include <gtest/gtest.h>
 
-using namespace IRacingTools::Shared::FileSystem;
-using namespace IRacingTools::Shared;
-using namespace IRacingTools::Shared::Logging;
+using namespace VRKit::Shared::FileSystem;
+using namespace VRKit::Shared;
+using namespace VRKit::Shared::Logging;
 using namespace IRacingSDK;
 
 using namespace  std::chrono_literals;

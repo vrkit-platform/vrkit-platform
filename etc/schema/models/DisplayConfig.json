@@ -35,7 +35,7 @@
                     ]
                 },
                 "physicalSize": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -55,7 +55,7 @@
                     ]
                 },
                 "scaledSize": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -65,7 +65,7 @@
                     ]
                 },
                 "scaledRect": {
-                    "$ref": "#/definitions/IRacingTools.Models.RectI",
+                    "$ref": "#/definitions/VRKit.Models.RectI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -86,7 +86,7 @@
             ],
             "title": "Display Config"
         },
-        "IRacingTools.Models.PositionI": {
+        "VRKit.Models.PositionI": {
             "properties": {
                 "x": {
                     "oneOf": [
@@ -120,10 +120,10 @@
             ],
             "title": "Position I"
         },
-        "IRacingTools.Models.RectI": {
+        "VRKit.Models.RectI": {
             "properties": {
                 "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -133,7 +133,7 @@
                     ]
                 },
                 "position": {
-                    "$ref": "#/definitions/IRacingTools.Models.PositionI",
+                    "$ref": "#/definitions/VRKit.Models.PositionI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -154,7 +154,7 @@
             ],
             "title": "Rect I"
         },
-        "IRacingTools.Models.SizeI": {
+        "VRKit.Models.SizeI": {
             "properties": {
                 "width": {
                     "oneOf": [

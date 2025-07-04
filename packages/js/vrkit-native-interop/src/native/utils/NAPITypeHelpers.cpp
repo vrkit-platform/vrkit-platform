@@ -5,12 +5,12 @@
 
 #include "NAPITypeHelpers.h"
 
-using namespace IRacingTools::App::Node;
-using namespace IRacingTools::Shared;
+using namespace VRKit::App::Node;
+using namespace VRKit::Shared;
 using namespace Napi;
 
 
-namespace IRacingTools::App::Node::Utils {
+namespace VRKit::App::Node::Utils {
   VR::VRNativeLayout VRLayoutObjectToNative(Napi::Env& env, const Napi::Object& o) {
     auto poseObj = o.Get("pose").As<Napi::Object>();
     VR::VRNativePose pose{

@@ -3,7 +3,7 @@ import "Geometry.proto";
 import "LapCoordinate.proto";
 import "TrackLayoutMetadata.proto";
 
-package IRacingTools.Models;
+package VRKit.Models;
 
 message TrackMap {
 

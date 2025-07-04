@@ -1,6 +1,6 @@
-#include <IRacingTools/Shared/Utils/Win32Helpers.h>
+#include <VRKit/Shared/Utils/Win32Helpers.h>
 
-namespace IRacingTools::Shared {
+namespace VRKit::Shared {
   std::string GetLastErrorAsString(DWORD err) {
 
     if (err == 0) {

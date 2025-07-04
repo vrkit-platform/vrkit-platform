@@ -1,23 +1,23 @@
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 
-#include <IRacingTools/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
 
 #include "NativeSessionDataVariable.h"
 #include "NativeSessionPlayer.h"
 
-using namespace IRacingTools::App::Node;
-using namespace IRacingTools::Models::RPC;
+using namespace VRKit::App::Node;
+using namespace VRKit::Models::RPC;
 using namespace Napi;
 
 
-namespace IRacingTools::App::Node {
+namespace VRKit::App::Node {
   namespace {
     /**
      * @brief The error message used for incorrect constructor calls
      */
     constexpr auto kCtorArgError =
       "SessionDataVariable constructor accepts a single signature, which must be a valid `new (jsPlayer: NativeSessionPlayer, varName: string)`";
-    auto L = GetCategoryWithType<IRacingTools::App::Node::NativeSessionDataVariable>();
+    auto L = GetCategoryWithType<VRKit::App::Node::NativeSessionDataVariable>();
   }
 
   void NativeSessionDataVariable::Init(Napi::Env env, Napi::Object exports) {

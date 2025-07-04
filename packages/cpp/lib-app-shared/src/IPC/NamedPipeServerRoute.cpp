@@ -1,6 +1,6 @@
-#include <IRacingTools/Shared/IPC/NamedPipeServerRoute.h>
+#include <VRKit/Shared/IPC/NamedPipeServerRoute.h>
 
-namespace IRacingTools::Shared::IPC {
+namespace VRKit::Shared::IPC {
   NamedPipeServerRoute::NamedPipeServerRoute(const std::string& matchExpression)
       : matchExpression_(matchExpression),
         matcher_(matchExpression.empty() ? ".*" : matchExpression) {

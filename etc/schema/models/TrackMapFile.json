@@ -2,7 +2,42 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/TrackMapFile",
     "definitions": {
-        "IRacingTools.Models.FileInfo": {
+        "TrackMapFile": {
+            "properties": {
+                "trackLayoutMetadata": {
+                    "$ref": "#/definitions/VRKit.Models.TrackLayoutMetadata",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ],
+                    "description": "* Track Layout ID"
+                },
+                "fileInfo": {
+                    "$ref": "#/definitions/VRKit.Models.FileInfo",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Track Map File"
+        },
+        "VRKit.Models.FileInfo": {
             "properties": {
                 "file": {
                     "oneOf": [
@@ -64,7 +99,7 @@
             ],
             "title": "File Info"
         },
-        "IRacingTools.Models.TrackLayoutMetadata": {
+        "VRKit.Models.TrackLayoutMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -87,7 +122,7 @@
                     ]
                 },
                 "trackMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackMetadata",
+                    "$ref": "#/definitions/VRKit.Models.TrackMetadata",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -108,7 +143,7 @@
             ],
             "title": "Track Layout Metadata"
         },
-        "IRacingTools.Models.TrackMetadata": {
+        "VRKit.Models.TrackMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -151,41 +186,6 @@
                 }
             ],
             "title": "Track Metadata"
-        },
-        "TrackMapFile": {
-            "properties": {
-                "trackLayoutMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackLayoutMetadata",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ],
-                    "description": "* Track Layout ID"
-                },
-                "fileInfo": {
-                    "$ref": "#/definitions/IRacingTools.Models.FileInfo",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Track Map File"
         }
     }
 }

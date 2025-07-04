@@ -3,18 +3,18 @@
 //
 
 
-#include <IRacingTools/Models/LapTrajectory.pb.h>
-#include <IRacingTools/Models/TrackMap.pb.h>
+#include <VRKit/Models/LapTrajectory.pb.h>
+#include <VRKit/Models/TrackMap.pb.h>
 #include <IRacingSDK/Utils/LockHelpers.h>
 #include <IRacingSDK/Utils/Tracing.h>
 #include <IRacingSDK/Utils/UnicodeHelpers.h>
-#include <IRacingTools/Shared/ProtoHelpers.h>
-#include <IRacingTools/Shared/SHM/SHM.h>
+#include <VRKit/Shared/ProtoHelpers.h>
+#include <VRKit/Shared/SHM/SHM.h>
 
 #include <spdlog/spdlog.h>
 
 
-namespace IRacingTools::Shared::SHM {
+namespace VRKit::Shared::SHM {
   using namespace VR;
 
   namespace {
@@ -756,4 +756,4 @@ namespace IRacingTools::Shared::SHM {
   IPCClientTexture::~IPCClientTexture() = default;
 
   IPCTextureCopier::~IPCTextureCopier() = default;
-} // namespace IRacingTools::Shared
+} // namespace VRKit::Shared

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package IRacingTools.Models;
+package VRKit.Models;
 enum TrackType {
   TRACK_TYPE_ROAD = 0;
   TRACK_TYPE_OVAL = 1;

@@ -2,7 +2,88 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/Pipeline",
     "definitions": {
-        "IRacingTools.Models.Pipeline.Attempt": {
+        "Pipeline": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "type": {
+                    "enum": [
+                        "PIPELINE_TYPE_TRACK_MAP",
+                        0
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Pipeline Type"
+                },
+                "status": {
+                    "enum": [
+                        "PIPELINE_STATUS_CREATED",
+                        0,
+                        "PIPELINE_STATUS_QUEUED",
+                        1,
+                        "PIPELINE_STATUS_PROCESSING",
+                        2,
+                        "PIPELINE_STATUS_COMPLETE",
+                        10,
+                        "PIPELINE_STATUS_ERROR",
+                        20
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Pipeline Status"
+                },
+                "attempts": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "items": {
+                                "$ref": "#/definitions/VRKit.Models.Pipeline.Attempt"
+                            },
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Pipeline"
+        },
+        "VRKit.Models.Pipeline.Attempt": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -67,7 +148,7 @@
                         },
                         {
                             "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.PipelineLog"
+                                "$ref": "#/definitions/VRKit.Models.PipelineLog"
                             },
                             "type": "array"
                         }
@@ -85,7 +166,7 @@
             ],
             "title": "Attempt"
         },
-        "IRacingTools.Models.PipelineLog": {
+        "VRKit.Models.PipelineLog": {
             "properties": {
                 "level": {
                     "enum": [
@@ -138,87 +219,6 @@
                 }
             ],
             "title": "Pipeline Log"
-        },
-        "Pipeline": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "type": {
-                    "enum": [
-                        "PIPELINE_TYPE_TRACK_MAP",
-                        0
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Pipeline Type"
-                },
-                "status": {
-                    "enum": [
-                        "PIPELINE_STATUS_CREATED",
-                        0,
-                        "PIPELINE_STATUS_QUEUED",
-                        1,
-                        "PIPELINE_STATUS_PROCESSING",
-                        2,
-                        "PIPELINE_STATUS_COMPLETE",
-                        10,
-                        "PIPELINE_STATUS_ERROR",
-                        20
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Pipeline Status"
-                },
-                "attempts": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.Pipeline.Attempt"
-                            },
-                            "type": "array"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Pipeline"
         }
     }
 }

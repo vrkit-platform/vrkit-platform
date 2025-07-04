@@ -1,10 +1,10 @@
 #include <IRacingSDK/Utils/UnicodeHelpers.h>
-#include <IRacingTools/Shared/Macros.h>
-#include <IRacingTools/Shared/Utils/Win32ProcessTool.h>
+#include <VRKit/Shared/Macros.h>
+#include <VRKit/Shared/Utils/Win32ProcessTool.h>
 
 #include "psapi.h"
 
-namespace IRacingTools::Shared::Utils {
+namespace VRKit::Shared::Utils {
 
   /**
    * @brief Sets current process to `HIGH_PRIORITY_CLASS` &

@@ -2,21 +2,21 @@
 
 #pragma once
 
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
 
-#include <IRacingTools/Shared/Graphics/IPCOverlayCanvasRenderer.h>
+#include <VRKit/Shared/Graphics/IPCOverlayCanvasRenderer.h>
 #include <napi.h>
-#include <IRacingTools/Shared/Graphics/ImageDataBuffer.h>
+#include <VRKit/Shared/Graphics/ImageDataBuffer.h>
 
 #include "NativeGlobal.h"
-using namespace IRacingTools::Shared::Logging;
+using namespace VRKit::Shared::Logging;
 using namespace IRacingSDK;
 using namespace IRacingSDK::Utils;
-using namespace IRacingTools::Shared;
-using namespace IRacingTools::Models;
+using namespace VRKit::Shared;
+using namespace VRKit::Models;
 
 
-namespace IRacingTools::App::Node {
+namespace VRKit::App::Node {
   using namespace Shared::Services;
 
   /**
@@ -160,4 +160,4 @@ namespace IRacingTools::App::Node {
     std::shared_ptr<Graphics::DXResources> dxr_;
     std::shared_ptr<Graphics::BGRAIPCOverlayCanvasRenderer> ipcDxRenderer_;
   };
-} // namespace IRacingTools::App::Node
+} // namespace VRKit::App::Node

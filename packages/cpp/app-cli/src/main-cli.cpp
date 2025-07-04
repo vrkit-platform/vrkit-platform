@@ -2,8 +2,8 @@
 // Created by jglanz on 1/4/2024.
 //
 #include <IRacingSDK/ClientManager.h>
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
-#include <IRacingTools/Shared/System/DisplayInfo.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/System/DisplayInfo.h>
 
 #include <CLI/CLI.hpp>
 #include <IRacingSDK/LogInstance.h>
@@ -23,8 +23,8 @@ using namespace std::literals;
 
 using namespace IRacingSDK::Utils;
 using namespace IRacingSDK;
-using namespace IRacingTools::Shared;
-using namespace IRacingTools::App::Commands;
+using namespace VRKit::Shared;
+using namespace VRKit::App::Commands;
 
 int main(int argc, char **argv)
 {

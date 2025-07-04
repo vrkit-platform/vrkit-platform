@@ -2,22 +2,22 @@
 
 
 #include "NativeOverlayManager.h"
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
 #include "Utils/NAPITypeHelpers.h"
 
-using namespace IRacingTools::App::Node;
-using namespace IRacingTools::Models::RPC;
+using namespace VRKit::App::Node;
+using namespace VRKit::Models::RPC;
 using namespace Napi;
 
 
-namespace IRacingTools::App::Node {
+namespace VRKit::App::Node {
   namespace {
     /**
      * @brief The error message used for incorrect constructor calls
      */
     constexpr auto kCtorArgError = "NativeOverlayManager constructor supports " "the following signature `()`";
-    auto L = GetCategoryWithType<IRacingTools::App::Node::NativeOverlayManager>();
+    auto L = GetCategoryWithType<VRKit::App::Node::NativeOverlayManager>();
   } // namespace
 
   Napi::Value NativeOverlayWindowResources::toNapiObject(Napi::Env env) {
@@ -357,4 +357,4 @@ namespace IRacingTools::App::Node {
     destroy();
     return info.Env().Undefined();
   }
-} // namespace IRacingTools::App::Node
+} // namespace VRKit::App::Node

@@ -2,7 +2,122 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/PluginUserSetting",
     "definitions": {
-        "IRacingTools.Models.PluginUserSettingChoice": {
+        "PluginUserSetting": {
+            "properties": {
+                "id": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "name": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "description": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "type": {
+                    "enum": [
+                        "PLUGIN_USER_SETTING_TYPE_INT",
+                        0,
+                        "PLUGIN_USER_SETTING_TYPE_DOUBLE",
+                        1,
+                        "PLUGIN_USER_SETTING_TYPE_STRING",
+                        2,
+                        "PLUGIN_USER_SETTING_TYPE_BOOLEAN",
+                        3,
+                        "PLUGIN_USER_SETTING_TYPE_COLOR",
+                        4,
+                        "PLUGIN_USER_SETTING_TYPE_CHOICE",
+                        5
+                    ],
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Plugin User Setting Type"
+                },
+                "defaultValue": {
+                    "$ref": "#/definitions/VRKit.Models.PluginUserSettingValue",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "userValue": {
+                    "$ref": "#/definitions/VRKit.Models.PluginUserSettingValue",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "choiceLimit": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "choices": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "items": {
+                                "$ref": "#/definitions/VRKit.Models.PluginUserSettingChoice"
+                            },
+                            "type": "array"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Plugin User Setting"
+        },
+        "VRKit.Models.PluginUserSettingChoice": {
             "properties": {
                 "value": {
                     "oneOf": [
@@ -46,7 +161,7 @@
             ],
             "title": "Plugin User Setting Choice"
         },
-        "IRacingTools.Models.PluginUserSettingValue": {
+        "VRKit.Models.PluginUserSettingValue": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -167,121 +282,6 @@
                 }
             ],
             "title": "Plugin User Setting Value"
-        },
-        "PluginUserSetting": {
-            "properties": {
-                "id": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "name": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "description": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "string"
-                        }
-                    ]
-                },
-                "type": {
-                    "enum": [
-                        "PLUGIN_USER_SETTING_TYPE_INT",
-                        0,
-                        "PLUGIN_USER_SETTING_TYPE_DOUBLE",
-                        1,
-                        "PLUGIN_USER_SETTING_TYPE_STRING",
-                        2,
-                        "PLUGIN_USER_SETTING_TYPE_BOOLEAN",
-                        3,
-                        "PLUGIN_USER_SETTING_TYPE_COLOR",
-                        4,
-                        "PLUGIN_USER_SETTING_TYPE_CHOICE",
-                        5
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "integer"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "Plugin User Setting Type"
-                },
-                "defaultValue": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingValue",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "userValue": {
-                    "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingValue",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "choiceLimit": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "choices": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "items": {
-                                "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingChoice"
-                            },
-                            "type": "array"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Plugin User Setting"
         }
     }
 }

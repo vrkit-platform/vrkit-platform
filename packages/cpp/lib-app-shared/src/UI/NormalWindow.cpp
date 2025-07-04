@@ -4,9 +4,9 @@
 
 #include <memory>
 
-#include <IRacingTools/Shared/UI/NormalWindow.h>
+#include <VRKit/Shared/UI/NormalWindow.h>
 
-namespace IRacingTools::Shared::UI
+namespace VRKit::Shared::UI
 {
 
 

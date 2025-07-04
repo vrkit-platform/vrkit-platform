@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package IRacingTools.Models;
+package VRKit.Models;
 
 enum PipelineType {
   PIPELINE_TYPE_TRACK_MAP = 0;

@@ -3,9 +3,9 @@
 #include <windows.h>
 
 #include <IRacingSDK/Utils/UnicodeHelpers.h>
-#include <IRacingTools/Shared/ProtoHelpers.h>
+#include <VRKit/Shared/ProtoHelpers.h>
 
-namespace IRacingTools::Shared::Utils {
+namespace VRKit::Shared::Utils {
   namespace {
     auto L = Logging::GetCategoryWithName(__FILE__);
   }
@@ -101,4 +101,4 @@ namespace IRacingTools::Shared::Utils {
 
     return std::nullopt;
   }
-} // namespace IRacingTools::Shared::Utils
+} // namespace VRKit::Shared::Utils

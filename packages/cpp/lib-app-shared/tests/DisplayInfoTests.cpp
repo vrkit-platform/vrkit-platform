@@ -1,7 +1,7 @@
-#include <IRacingTools/Shared/System/DisplayInfo.h>
+#include <VRKit/Shared/System/DisplayInfo.h>
 #include <gtest/gtest.h>
 
-using namespace IRacingTools::Shared::System;
+using namespace VRKit::Shared::System;
 
 class DisplayInfoTests : public testing::Test {
 protected:

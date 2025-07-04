@@ -2,7 +2,51 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/SessionChangedEvent",
     "definitions": {
-        "IRacingTools.Models.FileInfo": {
+        "SessionChangedEvent": {
+            "properties": {
+                "isAvailable": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "sessionId": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "sessionMetadata": {
+                    "$ref": "#/definitions/VRKit.Models.Session.SessionMetadata",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Session Changed Event"
+        },
+        "VRKit.Models.FileInfo": {
             "properties": {
                 "file": {
                     "oneOf": [
@@ -64,7 +108,7 @@
             ],
             "title": "File Info"
         },
-        "IRacingTools.Models.Session.SessionMetadata": {
+        "VRKit.Models.Session.SessionMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -188,7 +232,7 @@
                     "description": "Enum representing the sub-types of a session. This distinguishes specific parts of a session, such as practice, qualifying, or race phases."
                 },
                 "timing": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionTiming",
+                    "$ref": "#/definitions/VRKit.Models.Session.SessionTiming",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -198,7 +242,7 @@
                     ]
                 },
                 "trackLayoutMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackLayoutMetadata",
+                    "$ref": "#/definitions/VRKit.Models.TrackLayoutMetadata",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -208,7 +252,7 @@
                     ]
                 },
                 "fileInfo": {
-                    "$ref": "#/definitions/IRacingTools.Models.FileInfo",
+                    "$ref": "#/definitions/VRKit.Models.FileInfo",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -303,7 +347,7 @@
             ],
             "title": "Session Metadata"
         },
-        "IRacingTools.Models.Session.SessionTiming": {
+        "VRKit.Models.Session.SessionTiming": {
             "properties": {
                 "isLive": {
                     "oneOf": [
@@ -504,7 +548,7 @@
             ],
             "title": "Session Timing"
         },
-        "IRacingTools.Models.TrackLayoutMetadata": {
+        "VRKit.Models.TrackLayoutMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -527,7 +571,7 @@
                     ]
                 },
                 "trackMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.TrackMetadata",
+                    "$ref": "#/definitions/VRKit.Models.TrackMetadata",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -548,7 +592,7 @@
             ],
             "title": "Track Layout Metadata"
         },
-        "IRacingTools.Models.TrackMetadata": {
+        "VRKit.Models.TrackMetadata": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -591,50 +635,6 @@
                 }
             ],
             "title": "Track Metadata"
-        },
-        "SessionChangedEvent": {
-            "properties": {
-                "isAvailable": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "boolean"
-                        }
-                    ]
-                },
-                "sessionId": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "integer"
-                        }
-                    ]
-                },
-                "sessionMetadata": {
-                    "$ref": "#/definitions/IRacingTools.Models.Session.SessionMetadata",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Session Changed Event"
         }
     }
 }

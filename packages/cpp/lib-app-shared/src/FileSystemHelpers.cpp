@@ -1,12 +1,12 @@
-#include <IRacingTools/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
 #include <windows.h>
 #include <format>
 #include <mutex>
 
 #include <IRacingSDK/Utils/UnicodeHelpers.h>
-#include <IRacingTools/Shared/Macros.h>
+#include <VRKit/Shared/Macros.h>
 
-namespace IRacingTools::Shared {
+namespace VRKit::Shared {
     using namespace IRacingSDK::Utils;
 
     namespace {

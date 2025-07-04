@@ -1,14 +1,14 @@
 
 #include <IRacingSDK/LogInstance.h>
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Utils/TypeIdHelpers.h>
-#include <IRacingTools/Shared/Utils/Win32ProcessTool.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Utils/TypeIdHelpers.h>
+#include <VRKit/Shared/Utils/Win32ProcessTool.h>
 
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/wincolor_sink.h>
 
-namespace IRacingTools::Shared::Logging {
+namespace VRKit::Shared::Logging {
   
   namespace {
     
@@ -63,7 +63,7 @@ namespace IRacingTools::Shared::Logging {
       }
     }
 
-    auto res = Utils::GetPrettyTypeId(name, {"IRacingSDK::","IRacingTools::","VRK::","VRKit::","VRRK::","VRRKit::"});
+    auto res = Utils::GetPrettyTypeId(name, {"IRacingSDK::","VRKit::","VRK::","VRKit::","VRRK::","VRRKit::"});
     if (res) {
       auto &typeId = res.value();
       prettyName = typeId.fullname;
@@ -92,4 +92,4 @@ namespace IRacingTools::Shared::Logging {
     }
     return consoleLogger_;
   };
-}// namespace IRacingTools::Shared::Logging
+}// namespace VRKit::Shared::Logging

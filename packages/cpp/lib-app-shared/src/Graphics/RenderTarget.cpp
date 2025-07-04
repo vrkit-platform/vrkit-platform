@@ -18,11 +18,11 @@
  * USA.
  */
 
-#include <IRacingTools/Shared/Macros.h>
-#include <IRacingTools/Shared/Graphics/RenderTarget.h>
+#include <VRKit/Shared/Macros.h>
+#include <VRKit/Shared/Graphics/RenderTarget.h>
 #include <spdlog/spdlog.h>
 
-namespace IRacingTools::Shared::Graphics {
+namespace VRKit::Shared::Graphics {
 
 
   std::shared_ptr<RenderTarget> RenderTarget::Create(

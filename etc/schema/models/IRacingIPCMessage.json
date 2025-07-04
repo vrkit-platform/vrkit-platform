@@ -71,7 +71,7 @@
                     ]
                 },
                 "error": {
-                    "$ref": "#/definitions/IRacingTools.Models.RPC.IR.IRacingIPCError",
+                    "$ref": "#/definitions/VRKit.Models.RPC.IR.IRacingIPCError",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -131,7 +131,7 @@
             ],
             "title": "I Racing IPC Message"
         },
-        "IRacingTools.Models.RPC.IR.IRacingIPCError": {
+        "VRKit.Models.RPC.IR.IRacingIPCError": {
             "properties": {
                 "code": {
                     "oneOf": [

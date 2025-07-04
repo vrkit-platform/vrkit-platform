@@ -1,29 +1,29 @@
 // ReSharper disable once CppParameterMayBeConstPtrOrRef
 
 #include <IRacingSDK/SessionInfo/ModelParser.h>
-#include <IRacingTools/Shared/FileSystemHelpers.h>
-#include <IRacingTools/Shared/Common/UUIDHelpers.h>
+#include <VRKit/Shared/FileSystemHelpers.h>
+#include <VRKit/Shared/Common/UUIDHelpers.h>
 
 #include "Utils/NAPIProtobufHelpers.h"
 #include "NativeSessionPlayer.h"
 #include "NativeSessionDataVariable.h"
 
-#include <IRacingTools/Shared/DiskSessionDataProvider.h>
-#include <IRacingTools/Shared/LiveSessionDataProvider.h>
+#include <VRKit/Shared/DiskSessionDataProvider.h>
+#include <VRKit/Shared/LiveSessionDataProvider.h>
 
-using namespace IRacingTools::App::Node;
-using namespace IRacingTools::Models::RPC;
+using namespace VRKit::App::Node;
+using namespace VRKit::Models::RPC;
 using namespace Napi;
 
 
-namespace IRacingTools::App::Node {
+namespace VRKit::App::Node {
     namespace {
         /**
          * @brief The error message used for incorrect constructor calls
          */
         constexpr auto kCtorArgError =
             "SessionPlayer constructor supports the following signature `(onEvent:((...args)=> void), file?: string = null)`";
-        auto L = GetCategoryWithType<IRacingTools::App::Node::NativeSessionPlayer>();
+        auto L = GetCategoryWithType<VRKit::App::Node::NativeSessionPlayer>();
     }
 
     /**

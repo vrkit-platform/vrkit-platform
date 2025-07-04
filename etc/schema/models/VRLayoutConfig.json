@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/VRLayoutConfig",
     "definitions": {
-        "IRacingTools.Models.SizeI": {
+        "VRKit.Models.SizeI": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -49,7 +49,7 @@
                     ]
                 },
                 "scaledSize": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {

@@ -2,7 +2,41 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/UIResource",
     "definitions": {
-        "IRacingTools.Models.SizeI": {
+        "UIResource": {
+            "properties": {
+                "color": {
+                    "$ref": "#/definitions/VRKit.Models.UIColorResource",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "icon": {
+                    "$ref": "#/definitions/VRKit.Models.UIImageResource",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "UI Resource"
+        },
+        "VRKit.Models.SizeI": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -36,7 +70,7 @@
             ],
             "title": "Size I"
         },
-        "IRacingTools.Models.UIColorResource": {
+        "VRKit.Models.UIColorResource": {
             "properties": {
                 "format": {
                     "enum": [
@@ -114,7 +148,7 @@
             ],
             "title": "UI Color Resource"
         },
-        "IRacingTools.Models.UIImageResource": {
+        "VRKit.Models.UIImageResource": {
             "properties": {
                 "format": {
                     "enum": [
@@ -159,7 +193,7 @@
                     ]
                 },
                 "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -189,40 +223,6 @@
                 }
             ],
             "title": "UI Image Resource"
-        },
-        "UIResource": {
-            "properties": {
-                "color": {
-                    "$ref": "#/definitions/IRacingTools.Models.UIColorResource",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "icon": {
-                    "$ref": "#/definitions/IRacingTools.Models.UIImageResource",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "UI Resource"
         }
     }
 }

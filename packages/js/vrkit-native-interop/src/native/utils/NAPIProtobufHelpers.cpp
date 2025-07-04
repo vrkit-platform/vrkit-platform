@@ -4,10 +4,10 @@
 #include "NAPIProtobufHelpers.h"
 
 #include <google/protobuf/json/json.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
 
 
-namespace IRacingTools::App::Node::Utils {
+namespace VRKit::App::Node::Utils {
     namespace {
         auto L = Shared::Logging::GetCategoryWithName(__FILE__);
     }

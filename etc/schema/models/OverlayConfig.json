@@ -2,7 +2,51 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "$ref": "#/definitions/OverlayConfig",
     "definitions": {
-        "IRacingTools.Models.OverlayBaseSettings": {
+        "OverlayConfig": {
+            "properties": {
+                "overlay": {
+                    "$ref": "#/definitions/VRKit.Models.OverlayInfo",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "placement": {
+                    "$ref": "#/definitions/VRKit.Models.OverlayPlacement",
+                    "additionalProperties": true,
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {}
+                    ]
+                },
+                "isScreen": {
+                    "oneOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "boolean"
+                        }
+                    ]
+                }
+            },
+            "additionalProperties": true,
+            "oneOf": [
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "object"
+                }
+            ],
+            "title": "Overlay Config"
+        },
+        "VRKit.Models.OverlayBaseSettings": {
             "properties": {
                 "fps": {
                     "oneOf": [
@@ -26,7 +70,7 @@
             ],
             "title": "Overlay Base Settings"
         },
-        "IRacingTools.Models.OverlayInfo": {
+        "VRKit.Models.OverlayInfo": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -110,7 +154,7 @@
                 },
                 "userSettingValues": {
                     "additionalProperties": {
-                        "$ref": "#/definitions/IRacingTools.Models.PluginUserSettingValue",
+                        "$ref": "#/definitions/VRKit.Models.PluginUserSettingValue",
                         "additionalProperties": true,
                         "oneOf": [
                             {
@@ -130,7 +174,7 @@
                     "description": "repeated PluginUserSettingValue user_setting_values = 30;"
                 },
                 "settings": {
-                    "$ref": "#/definitions/IRacingTools.Models.OverlayBaseSettings",
+                    "$ref": "#/definitions/VRKit.Models.OverlayBaseSettings",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -151,7 +195,7 @@
             ],
             "title": "Overlay Info"
         },
-        "IRacingTools.Models.OverlayPlacement": {
+        "VRKit.Models.OverlayPlacement": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -174,7 +218,7 @@
                     ]
                 },
                 "screenRect": {
-                    "$ref": "#/definitions/IRacingTools.Models.RectI",
+                    "$ref": "#/definitions/VRKit.Models.RectI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -184,7 +228,7 @@
                     ]
                 },
                 "vrLayout": {
-                    "$ref": "#/definitions/IRacingTools.Models.VRLayout",
+                    "$ref": "#/definitions/VRKit.Models.VRLayout",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -205,7 +249,7 @@
             ],
             "title": "Overlay Placement"
         },
-        "IRacingTools.Models.PluginUserSettingValue": {
+        "VRKit.Models.PluginUserSettingValue": {
             "properties": {
                 "id": {
                     "oneOf": [
@@ -327,7 +371,7 @@
             ],
             "title": "Plugin User Setting Value"
         },
-        "IRacingTools.Models.PositionI": {
+        "VRKit.Models.PositionI": {
             "properties": {
                 "x": {
                     "oneOf": [
@@ -361,10 +405,10 @@
             ],
             "title": "Position I"
         },
-        "IRacingTools.Models.RectI": {
+        "VRKit.Models.RectI": {
             "properties": {
                 "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeI",
+                    "$ref": "#/definitions/VRKit.Models.SizeI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -374,7 +418,7 @@
                     ]
                 },
                 "position": {
-                    "$ref": "#/definitions/IRacingTools.Models.PositionI",
+                    "$ref": "#/definitions/VRKit.Models.PositionI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -395,7 +439,7 @@
             ],
             "title": "Rect I"
         },
-        "IRacingTools.Models.SizeF": {
+        "VRKit.Models.SizeF": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -429,7 +473,7 @@
             ],
             "title": "Size F"
         },
-        "IRacingTools.Models.SizeI": {
+        "VRKit.Models.SizeI": {
             "properties": {
                 "width": {
                     "oneOf": [
@@ -463,10 +507,10 @@
             ],
             "title": "Size I"
         },
-        "IRacingTools.Models.VRLayout": {
+        "VRKit.Models.VRLayout": {
             "properties": {
                 "pose": {
-                    "$ref": "#/definitions/IRacingTools.Models.VRPose",
+                    "$ref": "#/definitions/VRKit.Models.VRPose",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -476,7 +520,7 @@
                     ]
                 },
                 "size": {
-                    "$ref": "#/definitions/IRacingTools.Models.SizeF",
+                    "$ref": "#/definitions/VRKit.Models.SizeF",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -486,7 +530,7 @@
                     ]
                 },
                 "screenRect": {
-                    "$ref": "#/definitions/IRacingTools.Models.RectI",
+                    "$ref": "#/definitions/VRKit.Models.RectI",
                     "additionalProperties": true,
                     "oneOf": [
                         {
@@ -507,7 +551,7 @@
             ],
             "title": "VR Layout"
         },
-        "IRacingTools.Models.VRPose": {
+        "VRKit.Models.VRPose": {
             "properties": {
                 "x": {
                     "oneOf": [
@@ -550,50 +594,6 @@
                 }
             ],
             "title": "VR Pose"
-        },
-        "OverlayConfig": {
-            "properties": {
-                "overlay": {
-                    "$ref": "#/definitions/IRacingTools.Models.OverlayInfo",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "placement": {
-                    "$ref": "#/definitions/IRacingTools.Models.OverlayPlacement",
-                    "additionalProperties": true,
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {}
-                    ]
-                },
-                "isScreen": {
-                    "oneOf": [
-                        {
-                            "type": "null"
-                        },
-                        {
-                            "type": "boolean"
-                        }
-                    ]
-                }
-            },
-            "additionalProperties": true,
-            "oneOf": [
-                {
-                    "type": "null"
-                },
-                {
-                    "type": "object"
-                }
-            ],
-            "title": "Overlay Config"
         }
     }
 }

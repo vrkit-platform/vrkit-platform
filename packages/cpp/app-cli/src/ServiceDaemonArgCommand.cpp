@@ -14,7 +14,7 @@
 // #endif
 //
 // #pragma warning(disable : 4996)//_CRT_SECURE_NO_WARNINGS
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
 
 #include <conio.h>
 #include <csignal>
@@ -28,24 +28,24 @@
 
 #include "ServiceDaemonArgCommand.h"
 
-#include <IRacingTools/Models/LapTrajectory.pb.h>
-#include <IRacingTools/Shared/Chrono.h>
+#include <VRKit/Models/LapTrajectory.pb.h>
+#include <VRKit/Shared/Chrono.h>
 #include <IRacingSDK/Utils/ConsoleHelpers.h>
-#include <IRacingTools/Shared/Services/LapTrajectoryTool.h>
-#include <IRacingTools/Shared/Logging/LoggingManager.h>
-#include <IRacingTools/Shared/Utils/TypeIdHelpers.h>
+#include <VRKit/Shared/Services/LapTrajectoryTool.h>
+#include <VRKit/Shared/Logging/LoggingManager.h>
+#include <VRKit/Shared/Utils/TypeIdHelpers.h>
 
-#include <IRacingTools/Shared/Services/ServiceManager.h>
-#include <IRacingTools/Shared/Services/TelemetryDataService.h>
-#include <IRacingTools/Shared/Services/TrackMapService.h>
+#include <VRKit/Shared/Services/ServiceManager.h>
+#include <VRKit/Shared/Services/TelemetryDataService.h>
+#include <VRKit/Shared/Services/TrackMapService.h>
 
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
     using namespace IRacingSDK;
     using namespace IRacingSDK::Utils;
-    using namespace IRacingTools::Shared;
-    using namespace IRacingTools::Shared::Logging;    
-    using namespace IRacingTools::Shared::Services;
-    using namespace IRacingTools::Shared::Utils;
+    using namespace VRKit::Shared;
+    using namespace VRKit::Shared::Logging;
+    using namespace VRKit::Shared::Services;
+    using namespace VRKit::Shared::Utils;
     
     namespace {
         auto L = GetCategoryWithType<ServiceDaemonArgCommand>();
@@ -69,7 +69,7 @@ namespace IRacingTools::App::Commands {
     }
 
     int ServiceDaemonArgCommand::execute() {
-        std::string clazzName = IRacingTools::Shared::Utils::GetPrettyTypeId<ServiceDaemonArgCommand>().value().name;
+        std::string clazzName = VRKit::Shared::Utils::GetPrettyTypeId<ServiceDaemonArgCommand>().value().name;
         L->info("Starting " APP_NAME " Command >> {}", clazzName);
 
         auto & manager = gServiceManager = std::make_shared<ServiceManagerType>();

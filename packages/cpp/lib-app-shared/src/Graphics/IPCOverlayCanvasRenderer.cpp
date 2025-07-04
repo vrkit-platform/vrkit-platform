@@ -1,8 +1,8 @@
 #include <gsl/util>
-#include <IRacingTools/Shared/Graphics/IPCOverlayCanvasRenderer.h>
-#include <IRacingTools/Shared/Graphics/Spriting.h>
+#include <VRKit/Shared/Graphics/IPCOverlayCanvasRenderer.h>
+#include <VRKit/Shared/Graphics/Spriting.h>
 
-namespace IRacingTools::Shared::Graphics {
+namespace VRKit::Shared::Graphics {
 
 
 }

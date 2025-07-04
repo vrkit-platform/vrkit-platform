@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include <IRacingTools/Shared/SharedAppLibPCH.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
 
 #include "ArgCommand.h"
 
 #include <CLI/CLI.hpp>
 
-namespace IRacingTools::App::Commands {
+namespace VRKit::App::Commands {
   using namespace std::literals;
 
   class DashboardArgCommand : public ArgCommand {

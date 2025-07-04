@@ -3,7 +3,7 @@ import "AppInterfaceTypes.proto";
 import "Geometry.proto";
 import "UIResource.proto";
 
-package IRacingTools.Models;
+package VRKit.Models;
 
 enum PluginUserSettingType {
   PLUGIN_USER_SETTING_TYPE_INT = 0;

@@ -15,14 +15,14 @@
 #include <IRacingSDK/DiskClient.h>
 #include <IRacingSDK/DiskClientDataFrameProcessor.h>
 #include <IRacingSDK/VarHolder.h>
-#include <VRKit/Shared/DiskSessionDataProvider.h>
+#include <VRKit/Shared/Games/IRacing/DiskSessionDataProvider.h>
 
 
 using namespace IRacingSDK;
 using namespace IRacingSDK::Utils;
 using namespace VRKit::Shared;
 using namespace VRKit::Shared::Logging;
-
+using namespace VRKit::Shared::Games::IRacing;
 using namespace spdlog;
 using namespace std::chrono_literals;
 

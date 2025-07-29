@@ -13,13 +13,13 @@
 #include <VRKit/Models/rpc/Events/SessionEvent.pb.h>
 #include <VRKit/Shared/SharedAppLibPCH.h>
 #include <VRKit/Shared/Chrono.h>
-#include <VRKit/Shared/DiskSessionDataProvider.h>
+#include <VRKit/Shared/Games/IRacing/DiskSessionDataProvider.h>
 #include <VRKit/Shared/Macros.h>
 #include <VRKit/Shared/ProtoHelpers.h>
 #include <VRKit/Shared/Utils/SessionInfoHelpers.h>
 #include <spdlog/spdlog.h>
 
-namespace VRKit::Shared {
+namespace VRKit::Shared::Games::IRacing {
   using namespace std::chrono_literals;
   using namespace IRacingSDK;
 

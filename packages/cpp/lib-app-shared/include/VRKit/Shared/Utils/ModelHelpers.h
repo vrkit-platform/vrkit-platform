@@ -3,7 +3,7 @@
 #include <IRacingSDK/Types.h>
 
 #include <VRKit/Shared/SharedAppLibPCH.h>
-#include <VRKit/Shared/SessionDataTypes.h>
+#include <VRKit/Shared/Games/IRacing/SessionDataTypes.h>
 
 namespace VRKit::Shared::Utils {
 

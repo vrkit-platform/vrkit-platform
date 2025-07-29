@@ -11,14 +11,13 @@
 #include <VRKit/Models/rpc/Events/CommonEventTypes.pb.h>
 #include <VRKit/Models/rpc/Events/SessionEvent.pb.h>
 
-#include <VRKit/Shared/SessionDataProvider.h>
+#include <VRKit/Shared/Games/IRacing/SessionDataProvider.h>
 #include <VRKit/Shared/Services/TelemetryDataService.h>
 #include <VRKit/Shared/Services/TrackMapService.h>
 
 #include <VRKit/Shared/Services/ServiceManager.h>
 
 #include <VRKit/Shared/Logging/LoggingManager.h>
-#include <VRKit/Shared/Services/RPCServerService.h>
 
 #include <napi.h>
 
@@ -75,7 +74,7 @@ namespace VRKit::App::Node {
 
         Napi::Value jsDestroy(const Napi::CallbackInfo& info);
 
-        std::shared_ptr<SessionDataProvider> dataProvider_{nullptr};
+        std::shared_ptr<Games::IRacing::SessionDataProvider> dataProvider_{nullptr};
 
         std::unique_ptr<VarHolder> varHolder_{nullptr};
 

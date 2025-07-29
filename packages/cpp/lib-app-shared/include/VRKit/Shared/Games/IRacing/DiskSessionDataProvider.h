@@ -9,9 +9,9 @@
 #include <memory>
 #include <thread>
 #include <IRacingSDK/DiskClient.h>
-#include <VRKit/Shared/SessionDataProvider.h>
+#include "SessionDataProvider.h"
 
-namespace VRKit::Shared {
+namespace VRKit::Shared::Games::IRacing {
   class DiskSessionDataProvider : public SessionDataProvider, public std::enable_shared_from_this<DiskSessionDataProvider> {
   public:
 

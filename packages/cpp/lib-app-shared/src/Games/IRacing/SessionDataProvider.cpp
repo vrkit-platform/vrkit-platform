@@ -4,9 +4,9 @@
 
 #include <cstdio>
 
-#include <VRKit/Shared/SessionDataProvider.h>
+#include <VRKit/Shared/Games/IRacing/SessionDataProvider.h>
 
-namespace VRKit::Shared {
+namespace VRKit::Shared::Games::IRacing {
   using namespace std::chrono_literals;
   using namespace IRacingSDK;
 

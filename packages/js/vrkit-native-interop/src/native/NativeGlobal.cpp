@@ -23,25 +23,6 @@ namespace VRKit::App::Node {
 
     NativeGlobal::NativeGlobal(token)  {
         WindowsSetHighPriorityProcess();
-
-#if 0
-    // Testing only
-    auto pingRouteExecutor = [&](
-        const std::shared_ptr<Messages::Ping> &request,
-        const std::shared_ptr<RPC::Envelope> &envelope) -> std::expected<
-      std::shared_ptr<Messages::Pong>, GeneralError> {
-      L->info("Processing request path for ping: {}", envelope->request_path());
-      auto response = std::make_shared<Messages::Pong>();
-      response->set_ping_count(request->count());
-      return response;
-    };
-
-    auto pingRoute = RPCServerService::TypedRoute<
-      Messages::Ping, Messages::Pong>::Create(pingRouteExecutor, "/ping");
-
-    auto rpcService = serviceManager()->getService<RPCServerService>();
-    rpcService->addRoute(pingRoute);
-#endif
     }
 
     void VRKitShutdown() {

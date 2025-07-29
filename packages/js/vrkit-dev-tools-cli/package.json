@@ -33,7 +33,7 @@
     "@3fv/prelude-ts": "^0.8.37",
     "@vrkit-platform/models": "1.1.6",
     "@vrkit-platform/shared": "1.1.6",
-    "@protobuf-ts/runtime":  "^2.9.6",
+    "@protobuf-ts/runtime": "^2.11.1",
     "vrkit-native-interop": "1.1.6",
     "yargs": "^17.7.2",
     "@protobuf-ts/plugin":  "^2.9.6",

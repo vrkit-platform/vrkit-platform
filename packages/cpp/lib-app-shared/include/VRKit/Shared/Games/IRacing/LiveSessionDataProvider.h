@@ -10,9 +10,9 @@
 #include <thread>
 
 #include <VRKit/Shared/SharedAppLibPCH.h>
-#include <VRKit/Shared/SessionDataProvider.h>
+#include "SessionDataProvider.h"
 
-namespace VRKit::Shared {
+namespace VRKit::Shared::Games::IRacing {
 
   class LiveSessionDataProvider final : public SessionDataProvider,
                                         public std::enable_shared_from_this<LiveSessionDataProvider> {

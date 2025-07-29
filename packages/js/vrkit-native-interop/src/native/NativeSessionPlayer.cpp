@@ -8,8 +8,8 @@
 #include "NativeSessionPlayer.h"
 #include "NativeSessionDataVariable.h"
 
-#include <VRKit/Shared/DiskSessionDataProvider.h>
-#include <VRKit/Shared/LiveSessionDataProvider.h>
+#include <VRKit/Shared/Games/IRacing/DiskSessionDataProvider.h>
+#include <VRKit/Shared/Games/IRacing/LiveSessionDataProvider.h>
 
 using namespace VRKit::App::Node;
 using namespace VRKit::Models::RPC;
@@ -108,7 +108,7 @@ namespace VRKit::App::Node {
                 std::format("FileInfo is unavailable: {}", filePathStr)
             );
 
-            dataProvider_ = std::make_shared<DiskSessionDataProvider>(filePath, filePath.filename().string());
+            dataProvider_ = std::make_shared<Games::IRacing::DiskSessionDataProvider>(filePath, filePath.filename().string());
 
             if (fs::is_directory(filePath)) {
                 auto diskClient = std::static_pointer_cast<DiskClient>(dataProvider_->clientProvider()->getClient());
@@ -122,11 +122,11 @@ namespace VRKit::App::Node {
             sessionData_ = dataProvider_->getSessionMetadata();
         } else {
             // Live player
-            dataProvider_ = std::make_shared<LiveSessionDataProvider>();
+            dataProvider_ = std::make_shared<Games::IRacing::LiveSessionDataProvider>();
             sessionData_ = dataProvider_->getSessionMetadata();
         }
 
-        ipcServer_ = std::make_shared<IRacingIPCServer>(dataProvider_);
+        ipcServer_ = std::make_shared<Games::IRacing::IRacingIPCServer>(dataProvider_);
         if (auto res = ipcServer_->start(); !res.has_value() || !res.value()) {
             if (!res.has_value()) {
                 L->error("Unable to start IPC server for session player: {}", res.error().what());
@@ -150,11 +150,11 @@ namespace VRKit::App::Node {
             // Only one thread will use this initially
             context,
             [](
-            Napi::Env,
-            NativeSessionPlayerEventFinalizerDataType*,
-            // ReSharper disable once CppParameterMayBeConstPtrOrRef
-            NativeSessionPlayerEventContextType* ctx
-        ) {
+                Napi::Env,
+                NativeSessionPlayerEventFinalizerDataType*,
+                // ReSharper disable once CppParameterMayBeConstPtrOrRef
+                NativeSessionPlayerEventContextType* ctx
+            ) {
                 L->info("Finalizing jsDefaultEventFn_");
                 delete ctx;
             }
@@ -168,7 +168,7 @@ namespace VRKit::App::Node {
           }
 
           jsSessionPlayerEventFn_.NonBlockingCall(new NativeSessionPlayerJSEvent(type, data));
-                //jsSessionPlayerEventFn_.BlockingCall(new NativeSessionPlayerJSEvent(type, data));
+
         });
     }
 
@@ -212,7 +212,7 @@ namespace VRKit::App::Node {
         ObjectWrap::Finalize(napi_env);
     }
 
-    std::shared_ptr<SessionDataProvider> NativeSessionPlayer::dataProvider() {
+    std::shared_ptr<Games::IRacing::SessionDataProvider> NativeSessionPlayer::dataProvider() {
         return dataProvider_;
     }
 

@@ -1,11 +1,12 @@
 #include <VRKit/Models/RPC/Messages/IRacingIPCMessages.pb.h>
-#include <VRKit/Shared/LiveSessionDataProvider.h>
-#include <VRKit/Shared/Services/IRacingIPCServer.h>
+#include <VRKit/Shared/Games/IRacing/LiveSessionDataProvider.h>
+#include <VRKit/Shared/Games/IRacing/IRacingIPCServer.h>
 #include <VRKit/Shared/Utils/ErrorHelpers.h>
 #include <VRKit/Shared/Utils/ModelHelpers.h>
 
-namespace VRKit::Shared::Services {
+namespace VRKit::Shared::Games::IRacing {
   using namespace Models::RPC::IR;
+  using namespace Utils;
 
   namespace {
     auto L = Logging::GetCategoryWithType<IRacingIPCServer>();

@@ -24,14 +24,14 @@
   },
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@protobuf-ts/runtime": "^2.9.6"
+    "@protobuf-ts/runtime": "^2.11.1"
   },
   "peerDependencies": {
     "@3fv/logger-proxy": ">=1"
   },
   "devDependencies": {
     "@types/node": "^22",
-    "@protobuf-ts/plugin": "^2.9.6",
+    "@protobuf-ts/plugin": "^2.11.1",
     "@3fv/logger-proxy": "^1.0.71",
     "better-docs": "^2.7.3",
     "jsdoc": "^4.0.4",

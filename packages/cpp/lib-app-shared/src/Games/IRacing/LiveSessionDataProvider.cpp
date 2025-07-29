@@ -7,13 +7,12 @@
 #include <IRacingSDK/Utils/ChronoHelpers.h>
 #include <IRacingSDK/Utils/ThreadHelpers.h>
 #include <VRKit/Shared/Chrono.h>
-#include <VRKit/Shared/LiveSessionDataProvider.h>
+#include <VRKit/Shared/Games/IRacing/LiveSessionDataProvider.h>
 #include <VRKit/Shared/Logging/LoggingManager.h>
 
 
 
-namespace VRKit::Shared
-{
+namespace VRKit::Shared::Games::IRacing {
   using namespace std::chrono_literals;
   using namespace IRacingSDK;
   using namespace IRacingSDK::Utils;

@@ -10,7 +10,7 @@
 
 #include <VRKit/Shared/Common/TaskQueue.h>
 #include <VRKit/Shared/ProtoHelpers.h>
-#include <VRKit/Shared/SessionDataProvider.h>
+#include <VRKit/Shared/Games/IRacing/SessionDataProvider.h>
 #include <VRKit/Shared/IPC/NamedPipeServer.h>
 #include <VRKit/Shared/IPC/NamedPipeServerRoute.h>
 #include <VRKit/Shared/Services/Service.h>
@@ -19,8 +19,10 @@
 #define IRACING_IPC_SERVER_PIPE_NAME "vrkit_iracing_ipc_server"
 #endif
 
-namespace VRKit::Shared::Services {
+namespace VRKit::Shared::Games::IRacing {
   using namespace IRacingSDK;
+
+  using namespace VRKit::Shared;
   using namespace Models;
   using namespace Common;
 

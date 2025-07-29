@@ -11,15 +11,15 @@
 #include <IRacingSDK/DiskClient.h>
 #include <IRacingSDK/DiskClientDataFrameProcessor.h>
 #include <IRacingSDK/LiveConnection.h>
-#include <IRacingSDK/VarHolder.h>
+#include <IRacingSDK/Utils/ConsoleHelpers.h>
 
-#include <VRKit/Shared/SharedAppLibPCH.h>
+
 
 
 #include "LiveDataReplayArgCommand.h"
 
-#include <VRKit/Models/LapTrajectory.pb.h>
-#include <IRacingSDK/Utils/ConsoleHelpers.h>
+// #include <VRKit/Models/LapTrajectory.pb.h>
+#include <VRKit/Shared/SharedAppLibPCH.h>
 #include <VRKit/Shared/Chrono.h>
 #include <VRKit/Shared/Logging/LoggingManager.h>
 #include <VRKit/Shared/Services/LapTrajectoryTool.h>

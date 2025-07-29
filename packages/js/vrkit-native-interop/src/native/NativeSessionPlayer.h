@@ -2,26 +2,16 @@
 
 #pragma once
 
-#include <VRKit/Shared/SharedAppLibPCH.h>
-
-
-#include <VRKit/Models/rpc/Messages/SimpleMessages.pb.h>
-#include <VRKit/Models/rpc/Events/CommonEventTypes.pb.h>
-#include <VRKit/Models/rpc/Events/SessionEvent.pb.h>
+#include <napi.h>
 
 #include <IRacingSDK/Utils/Singleton.h>
 
-#include <VRKit/Shared/SessionDataProvider.h>
-#include <VRKit/Shared/Services/TelemetryDataService.h>
-#include <VRKit/Shared/Services/TrackMapService.h>
-
-#include <VRKit/Shared/Services/ServiceManager.h>
-
+#include <VRKit/Models/rpc/Events/SessionEvent.pb.h>
+#include <VRKit/Shared/Games/IRacing/SessionDataProvider.h>
 #include <VRKit/Shared/Logging/LoggingManager.h>
-#include <VRKit/Shared/Services/RPCServerService.h>
 
-#include <napi.h>
 #include "NativeGlobal.h"
+
 using namespace VRKit::Shared::Logging;
 using namespace IRacingSDK;
 using namespace IRacingSDK::Utils;
@@ -31,7 +21,7 @@ using namespace VRKit::Models;
 
 namespace VRKit::App::Node {
   using namespace Shared::Services;
-
+  // using namespace Games::IRacing;
 
   /**
  * @brief Holds JavaScript Event for ThreadSafeFunction callbacks
@@ -92,7 +82,7 @@ namespace VRKit::App::Node {
 
       virtual void Finalize(Napi::Env) override;
 
-      std::shared_ptr<SessionDataProvider> dataProvider();
+      std::shared_ptr<Games::IRacing::SessionDataProvider> dataProvider();
 
     private:
 
@@ -141,11 +131,11 @@ namespace VRKit::App::Node {
       std::optional<std::filesystem::path> filePath_{std::nullopt};
 
       std::shared_ptr<Models::Session::SessionMetadata> sessionData_{};
-      std::shared_ptr<SessionDataProvider> dataProvider_{};
+      std::shared_ptr<Games::IRacing::SessionDataProvider> dataProvider_{};
 
       // TODO: Add IPC server to the session player including start/stop functionality
       //  * also, expose the generated IPC server named pipe path to the JS side
-      std::shared_ptr<IRacingIPCServer> ipcServer_{};
+      std::shared_ptr<Games::IRacing::IRacingIPCServer> ipcServer_{};
       std::atomic_bool destroyed_{false};
 
       std::shared_ptr<NativeGlobal> system_;

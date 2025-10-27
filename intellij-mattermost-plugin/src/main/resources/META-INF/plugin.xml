@@ -1,0 +1,27 @@
+<idea-plugin>
+    <id>com.github.stefandotti.mattermost</id>
+    <name>Mattermost Integration</name>
+    <vendor email="stefandotti@example.com" url="https://github.com/stefandotti/intellij-mattermost-plugin">Stefan Dotti</vendor>
+    <description><![CDATA[
+        <p>Integrates IntelliJ-based IDEs with Mattermost. Configure a personal access token and send messages to channels directly from the IDE.</p>
+    ]]></description>
+    <version>1.2.0</version>
+    <idea-version since-build="252"/>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable parentId="tools" instance="com.github.stefandotti.mattermost.settings.MattermostConfigurable" id="preferences.mattermost" displayName="Mattermost"/>
+        <toolWindow id="Mattermost" anchor="right" icon="com/github/stefandotti/mattermost/icons/mattermost.svg" factoryClass="com.github.stefandotti.mattermost.toolwindow.MattermostToolWindowFactory"/>
+    </extensions>
+
+    <actions>
+        <action id="com.github.stefandotti.mattermost.SendToMattermost" class="com.github.stefandotti.mattermost.actions.SendToMattermostAction" text="Send to Mattermost" description="Send selected text to Mattermost">
+            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="Copy"/>
+        </action>
+    </actions>
+
+    <notifications>
+        <group id="Mattermost" displayType="BALLOON" isLogByDefault="true"/>
+    </notifications>
+</idea-plugin>
